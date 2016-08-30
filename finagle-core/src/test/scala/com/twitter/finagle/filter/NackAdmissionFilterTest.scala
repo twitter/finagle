@@ -15,7 +15,7 @@ import org.scalatest.junit.JUnitRunner
 class NackAdmissionFilterTest extends FunSuite {
   // NB: [[DefaultWindow]] and [[DefaultNackRateThreshold]] values are
   //     arbitrary.
-  val DefaultWindow: Duration = 1.second
+  val DefaultWindow: Duration = 3.seconds
   val DefaultNackRateThreshold: Double = 0.5
   val DefaultTimeout: Duration = 1.second
 
@@ -50,7 +50,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Used to ensure that the accept rate is safely above or below the
     // accept rate threshold.
-    val extraProbability: Double = 0.005
+    val extraProbability: Double = 0.01
 
     val filter: NackAdmissionFilter[Int, Int] = new NackAdmissionFilter[Int, Int](
       _window, _nackRateThreshold, random, statsReceiver)
@@ -133,7 +133,8 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(filter.emaValue < 1)
   }
 
-  test("doesn't drop requests prematurely") {
+  if (!sys.props.contains("SKIP_FLAKY"))
+    test("doesn't drop requests prematurely") {
     /**
      * lowRng is a pessimistic Rng which always fails requests once the accept
      * rate drops below the threshold.
@@ -178,7 +179,8 @@ class NackAdmissionFilterTest extends FunSuite {
     testDropsRequest()
   }
 
-  test("doesn't drop requests after accept rate drops below threshold") {
+  if (!sys.props.contains("SKIP_FLAKY"))
+    test("doesn't drop requests after accept rate drops below threshold") {
     /**
      * We change customRng so it will always drop or always send requests,
      * depending on whether we want the cluster to become unhealthy or recover.
@@ -244,7 +246,8 @@ class NackAdmissionFilterTest extends FunSuite {
     testDropsRequest()
   }
 
-  test("EMA below accept rate threshold is necessary to fail fast") {
+  if (!sys.props.contains("SKIP_FLAKY"))
+    test("EMA below accept rate threshold is necessary to fail fast") {
     val lowRng: CustomRng = new CustomRng(0)
     val ctx = new Ctx(lowRng)
     import ctx._
@@ -273,10 +276,10 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(filter.emaValue < originalEma)
   }
 
-  test("EMA value is affected only by responses in rolling window") {
+  if (!sys.props.contains("SKIP_FLAKY"))
+    test("EMA value is affected only by responses in rolling window") {
     val lowRng: CustomRng = new CustomRng(0)
     val ctx = new Ctx(lowRng, 100.milliseconds)
-    val extraEma = 0.05
     import ctx._
 
     // EMA decreases
@@ -287,7 +290,7 @@ class NackAdmissionFilterTest extends FunSuite {
     testGetSuccessfulResponse()
 
     // EMA should be very close to 1
-    assert(filter.emaValue > 1 - extraEma)
+    assert(filter.emaValue > 1 - (5 * extraProbability))
   }
 
   test("EMA value cannot start at 0 if first request is NACKed") {
