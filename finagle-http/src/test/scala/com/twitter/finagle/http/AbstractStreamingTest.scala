@@ -2,8 +2,9 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Http => FinagleHttp, _}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.ConstantService
+import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
@@ -11,13 +12,18 @@ import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.jboss.netty.channel.Channel
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Eventually
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class StreamingTest extends FunSuite with Eventually {
+abstract class AbstractStreamingTest extends FunSuite with Eventually {
+  sealed trait Feature
+  object ServerDisconnect extends Feature
+
+  def impl: FinagleHttp.param.HttpImpl
+  def featureImplemented(feature: Feature): Boolean
+  def testIfImplemented(feature: Feature)(name: String)(testFn: => Unit): Unit = {
+    if (!featureImplemented(feature)) ignore(name)(testFn) else test(name)(testFn)
+  }
 
   import StreamingTest._
 
@@ -121,7 +127,7 @@ class StreamingTest extends FunSuite with Eventually {
     await(server.close())
   }
 
-  test("client: client closes transport after server disconnects") {
+  testIfImplemented(ServerDisconnect)("client: client closes transport after server disconnects") {
     val serverClose, clientClosed = new Promise[Unit]
     val service = Service.mk[Request, Response] { req =>
       Future.value(Response())
@@ -345,6 +351,25 @@ class StreamingTest extends FunSuite with Eventually {
       server.close()
     }
   }
+
+  def startServer(service: Service[Request, Response], mod: Modifier): ListeningServer = {
+    val modifiedImpl = impl.copy(listener = modifiedListenerFn(mod, impl.listener))
+    FinagleHttp.server
+      .withAdmissionControl.concurrencyLimit(1, Int.MaxValue)
+      .withStreaming(true)
+      .configured(modifiedImpl)
+      .withLabel("server")
+      .serve(new InetSocketAddress(0), service)
+  }
+
+  def connect(addr: SocketAddress, mod: Modifier, name: String = "client"): Service[Request, Response] = {
+    val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
+    FinagleHttp.client
+      .withSessionPool.maxSize(1)
+      .withStreaming(true)
+      .configured(modifiedImpl)
+      .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
+  }
 }
 
 object StreamingTest {
@@ -370,29 +395,38 @@ object StreamingTest {
 
   type Modifier = Transport[Any, Any] => Transport[Any, Any]
 
-  // TODO We should also do this with the Http protocol object, which would
-  // require being able to pass in an arbitrary instance of the CodecFactory.
-  def startServer(service: Service[Request, Response], mod: Modifier) =
-    ServerBuilder()
-      .codec(new Custom(identity, mod))
-      .bindTo(new InetSocketAddress(0))
-      .maxConcurrentRequests(1)
-      .name("server")
-      .build(service)
+  def modifiedTransporterFn(
+    mod: Modifier,
+    fn: Stack.Params => Transporter[Any, Any]
+  ): Stack.Params => Transporter[Any, Any] = { params: Stack.Params =>
+    val underlying = fn(params)
+    new Transporter[Any, Any] {
+      def apply(addr: SocketAddress): Future[Transport[Any, Any]] = {
+        underlying(addr).map(mod)
+      }
+    }
+  }
 
-  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
-    ClientBuilder()
-      .codec(new Custom(mod, identity))
-      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
-      .hostConnectionLimit(1)
-      .name(name)
-      .build()
+  def modifiedListenerFn(
+    mod: Modifier,
+    fn: Stack.Params => Listener[Any, Any]
+  ): Stack.Params => Listener[Any, Any] = { params: Stack.Params =>
+    val underlying = fn(params)
+    new Listener[Any, Any] {
+      def listen(
+        addr: SocketAddress
+      )(
+        serveTransport: Transport[Any, Any] => Unit
+      ): ListeningServer = underlying.listen(addr)(mod.andThen(serveTransport))
+    }
+  }
 
-  def closingTransport(closed: Future[Unit]): Modifier =
+  def closingTransport(closed: Future[Unit]): Modifier = {
     (transport: Transport[Any, Any]) => {
       closed.ensure { transport.close() }
       transport
     }
+  }
 
   def closingOnceTransport(closed: Future[Unit]): Modifier = {
     val setFail = new AtomicBoolean(false)
