@@ -589,7 +589,7 @@ private[twitter] object Message {
     if (buf.length < 9)
       throw BadMessageException("short Tlease message")
     val br = BufReader(buf)
-    val unit: Byte = br.readByte().toByte
+    val unit: Byte = br.readByte()
     val howMuch: Long = br.readLongBE()
     Tlease(unit, howMuch)
   }
@@ -623,7 +623,7 @@ private[twitter] object Message {
       case Types.Rdiscarded => Rdiscarded(tag)
       case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(rest)
       case Types.Tlease => decodeTlease(rest)
-      case unknown => throw new BadMessageException(s"unknown message type: $unknown [tag=$tag]")
+      case unknown => throw new BadMessageException(unknownMessageDescription(unknown, tag, rest))
     }
   }
 
@@ -641,5 +641,12 @@ private[twitter] object Message {
       )
 
       Buf.ByteArray.Owned(head).concat(m.buf)
+  }
+
+  private def unknownMessageDescription(tpe: Byte, tag: Int, payload: Buf): String = {
+    val toWrite = payload.slice(0, 16) // Limit reporting to at most 16 bytes
+    val bytesStr = Buf.slowHexString(toWrite)
+    s"unknown message type: $tpe [tag=$tag]. Payload bytes: ${payload.length}. " +
+      s"First ${toWrite.length} bytes of the payload: '$bytesStr'"
   }
 }
