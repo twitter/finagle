@@ -11,7 +11,7 @@ import com.twitter.util.{Future, Promise}
 private[finagle] class ConnectionManager {
   private[this] var isKeepAlive = false
   private[this] var isIdle = true
-  private[this] var activeStreams, requestsObserved, responsesObserved = 0
+  private[this] var activeStreams, pendingResponses = 0
   private[this] val closeP = new Promise[Unit]
 
   def observeMessage(message: Message, onFinish: Future[Unit]): Unit = synchronized {
@@ -23,14 +23,14 @@ private[finagle] class ConnectionManager {
   }
 
   def observeRequest(request: Request, onFinish: Future[Unit]): Unit = synchronized {
-    requestsObserved += 1
+    pendingResponses += 1
     isIdle = false
     isKeepAlive = request.isKeepAlive
     handleIfStream(onFinish)
   }
 
   def observeResponse(response: Response, onFinish: Future[Unit]): Unit = synchronized {
-    responsesObserved += 1
+    pendingResponses -= 1
     if ((!response.isChunked && response.contentLength.isEmpty) || !response.isKeepAlive) isKeepAlive = false
 
     // If a response isn't chunked, then we're done with this request,
@@ -52,7 +52,7 @@ private[finagle] class ConnectionManager {
 
   private[this] def endStream(): Unit = synchronized {
     activeStreams -= 1
-    isIdle = activeStreams == 0 && requestsObserved == responsesObserved
+    isIdle = activeStreams == 0 && pendingResponses == 0
   }
 
   def shouldClose(): Boolean = synchronized { isIdle && !isKeepAlive }
