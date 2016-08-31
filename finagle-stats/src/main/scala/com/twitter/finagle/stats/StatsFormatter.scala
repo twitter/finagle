@@ -153,8 +153,8 @@ private[stats] object StatsFormatter {
 
     private[this] def inMegabytes(l: Number): Number = l.longValue() / 1048576L
     private[this] def inSeconds(l: Number): Number = l.longValue() / 1000L
-    private[this] val gcCycles: Regex = "^jvm_mem_(.*)_cycles$".r
-    private[this] val gcMsec: Regex = "^jvm_mem_(.*)_msec$".r
+    private[this] val gcCycles: Regex = "^jvm_gc_(.*)_cycles$".r
+    private[this] val gcMsec: Regex = "^jvm_gc_(.*)_msec$".r
 
     override def apply(values: SampledValues): Map[String, Number] = {
       val original = super.apply(values)
