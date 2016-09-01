@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sbtver=0.13.8
+sbtver=0.13.9
 sbtjar=sbt-launch.jar
-sbtsha128=57d0f04f4b48b11ef7e764f4cea58dee4e806ffd
+sbtsha128=1de48c2c412fffc4336e4d7dee224927a96d5abc
 
 sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
 
