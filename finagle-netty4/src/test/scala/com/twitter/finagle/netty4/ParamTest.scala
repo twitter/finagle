@@ -11,8 +11,8 @@ class ParamTest extends FunSuite {
     val params = Stack.Params.empty
     // make sure that we have referential equality across
     // param invocations.
-    val e0 = params[param.WorkerPool].executorService
-    val e1 = params[param.WorkerPool].executorService
+    val e0 = params[param.WorkerPool].eventLoopGroup
+    val e1 = params[param.WorkerPool].eventLoopGroup
     assert(e0 eq e1)
   }
 }

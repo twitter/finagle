@@ -4,7 +4,9 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.util.Awaitable
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
-import java.util.concurrent.{ExecutorService, Executors}
+import io.netty.channel.EventLoopGroup
+import io.netty.channel.nio.NioEventLoopGroup
+import java.util.concurrent.Executors
 
 /**
  * Package netty4 implements the bottom finagle primitives:
@@ -44,15 +46,15 @@ package object netty4 {
     }
 
     /**
-     * A class eligible for configuring the [[java.util.concurrent.ExecutorService]] used
-     * to execute I/O work for clients and servers. The default is global and shared
+     * A class eligible for configuring the [[io.netty.channel.EventLoopGroup]] used
+     * to execute I/O work for finagle clients and servers. The default is global and shared
      * among clients and servers such that we can inline work on the I/O threads. Modifying
      * the default has performance and instrumentation implications and should only be
      * done so with care. If there is particular work you would like to schedule off
      * the I/O threads, consider scheduling that work on a separate thread pool
      * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
      */
-    case class WorkerPool(executorService: ExecutorService)
+    case class WorkerPool(eventLoopGroup: EventLoopGroup)
     implicit object WorkerPool extends Stack.Param[WorkerPool] {
       override val default: WorkerPool = {
         val threadFactory = new ProxyThreadFactory(
@@ -62,7 +64,14 @@ package object netty4 {
             () => Awaitable.disableBlockingTimeTracking()
           )
         )
-        WorkerPool(Executors.newCachedThreadPool(threadFactory))
+        // Netty will create `numWorkers` children in the `NioEventLoopGroup` (which
+        // in this case are of type `NioEventLoop`). Each `NioEventLoop` will pin itself
+        // to a thread acquired from the `executor` and will multiplex over channels.
+        // Thus, with this configuration, we should not acquire more than `numWorkers`
+        // threads from the `executor`.
+        val executor = Executors.newCachedThreadPool(threadFactory)
+        val eventLoopGroup = new NioEventLoopGroup(numWorkers(), executor)
+        WorkerPool(eventLoopGroup)
       }
     }
   }
