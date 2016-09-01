@@ -7,6 +7,13 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-http: `HttpNackFilter` now handles both retryable and non-retryable nacks via a new
+    header: "finagle-http-nonretryable-nack". These are converted to non-retryable `c.t.f.Failures`
+    and counted by a new counter "nonretryable_nacks". ``RB_ID=865468``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -16,7 +23,6 @@ Breaking API Changes
 
   * finagle-core: `c.t.f.netty3.WorkerPool` is no longer visible outside of `c.t.f.netty3`.
     ``RB_ID=123567``
-
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

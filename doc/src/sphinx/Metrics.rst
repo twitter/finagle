@@ -191,6 +191,9 @@ These stats pertain to the HTTP protocol.
   A counter of the number of retryable HTTP 503 responses the Http server returns. Those
   responses are automatically retried by Finagle Http client.
 
+**nonretryable_nacks**
+  A counter of the number of non-retryable HTTP 503 responses the Http server returns. Those
+  responses are not automatically retried.
 
 Mux
 ---

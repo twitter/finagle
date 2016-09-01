@@ -10,7 +10,12 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 private[http] object HttpClientDispatcher {
-  val NackFailure = Failure.rejected("The request was nacked by the server")
+  val RetryableNackFailure = Failure.rejected("The request was nacked by the server")
+
+  val NonRetryableNackFailure =
+    Failure.rejected("The request was nacked by the server and should not be retried")
+      .unflagged(Failure.Restartable)
+
   private val log = Logger(getClass.getName)
 }
 
@@ -42,8 +47,12 @@ private[finagle] class HttpClientDispatcher(
       trans.write(req),
       // Drain the Transport into Response body.
       trans.read().flatMap {
-        case Multi(res, _) if HttpNackFilter.isNack(res)=>
-          p.updateIfEmpty(Throw(NackFailure))
+        case Multi(res, _) if HttpNackFilter.isRetryableNack(res) =>
+          p.updateIfEmpty(Throw(RetryableNackFailure))
+          Future.Done
+
+        case Multi(res, _) if HttpNackFilter.isNonRetryableNack(res) =>
+          p.updateIfEmpty(Throw(NonRetryableNackFailure))
           Future.Done
 
         case Multi(res, readFinished) =>
