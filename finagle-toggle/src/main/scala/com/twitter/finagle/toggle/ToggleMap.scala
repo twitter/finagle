@@ -317,12 +317,24 @@ object ToggleMap {
   }
 
   /**
-   * Create an empty [[Mutable]] instance.
+   * Create an empty [[Mutable]] instance with a default [[Metadata.source]]
+   * specified.
    */
-  def newMutable(): Mutable = new Mutable {
+  def newMutable(): Mutable =
+    newMutable(None)
 
-    override def toString: String =
-      s"ToggleMap.Mutable@${System.identityHashCode(this)}"
+  /**
+   * Create an empty [[Mutable]] instance with the given [[Metadata.source]].
+   */
+  def newMutable(source: String): Mutable =
+    newMutable(Some(source))
+
+  private[this] def newMutable(source: Option[String]): Mutable = new Mutable {
+
+    override def toString: String = source match {
+      case Some(src) => src
+      case None => s"ToggleMap.Mutable@${Integer.toHexString(hashCode())}"
+    }
 
     // There will be minimal updates, so we can use a low concurrency level,
     // which makes the footprint smaller.

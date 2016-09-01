@@ -80,7 +80,7 @@ object StandardToggleMap {
     apply(
       libraryName,
       statsReceiver,
-      ToggleMap.newMutable(),
+      ToggleMap.newMutable(s"Mutable($libraryName)"),
       ServerInfo(),
       libs)
 

@@ -48,6 +48,12 @@ class ToggleMapTest extends FunSuite
     assert(state2 == gauge())
   }
 
+  test("ToggleMap.newMutable toString") {
+    val src = "um well excuse me um"
+    val m = ToggleMap.newMutable(src)
+    assert(src == m.toString)
+  }
+
   test("ToggleMap.mutable") {
     val id = "com.toggle.hi"
     val m = ToggleMap.newMutable()
