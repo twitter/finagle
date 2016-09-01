@@ -11,7 +11,6 @@ import com.twitter.finagle.{Failure, Path, Dtab}
 import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Future, NonFatal, Try, Return, Promise, Throw, Updatable}
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import scala.collection.mutable
@@ -68,14 +67,8 @@ private[finagle] object ThriftEmulator {
       protocolFactory: TProtocolFactory,
       sr: StatsReceiver)
     extends TransportProxy[Buf, Buf](underlying) {
-      private[this] val downgradedConnectionCount = new AtomicInteger
-      private[this] val thriftMuxConnectionCount = new AtomicInteger
       private[this] val thriftmuxConnects = sr.counter("connects")
       private[this] val downgradedConnects = sr.counter("downgraded_connects")
-      private[this] val gauges = Seq(
-        sr.addGauge("downgraded_connections") { downgradedConnectionCount.get() },
-        sr.addGauge("connections") { thriftMuxConnectionCount.get() }
-      )
 
       // queues writes while we determine the type of session.
       private[this] val writeq = new AsyncQueue[Buf]
@@ -128,9 +121,6 @@ private[finagle] object ThriftEmulator {
                  Return(Message.Rerr(65540, _)) =>
 
               downgradedConnects.incr()
-              downgradedConnectionCount.incrementAndGet()
-              underlying.onClose.ensure { downgradedConnectionCount.decrementAndGet() }
-
               val trans = new Emulator(underlying, protocolFactory, buf)
               transportP.setValue(trans)
               trans.read()
@@ -139,8 +129,6 @@ private[finagle] object ThriftEmulator {
             // transport untouched.
             case Return(r) =>
               thriftmuxConnects.incr()
-              thriftMuxConnectionCount.incrementAndGet()
-              underlying.onClose.ensure { thriftMuxConnectionCount.decrementAndGet() }
               transportP.setValue(underlying)
               Future.value(buf)
 

@@ -17,6 +17,15 @@ Breaking API Changes
   * finagle-core: `c.t.f.netty3.WorkerPool` is no longer visible outside of `c.t.f.netty3`.
     ``RB_ID=123567``
 
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thriftmux: Removed "<server_label>/thriftmux/downgraded_connections" and
+    "<server_label>/thriftmux/connections" gauges. Counters are still available at
+    "<server_label>/thrifmux/connects" and "<server_label>thriftmux/downgraded_connects".
+    ``RB_ID=867459``
+
 6.37.0
 ------
 
