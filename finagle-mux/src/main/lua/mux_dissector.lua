@@ -77,10 +77,15 @@ local MIN_MUX_LEN = 8
 local TAG_MARKER = 0
 local TAG_PING = 1
 
+
+-- magic value defined in finagle/finagle-mux/src/main/scala/com/twitter/finagle/mux/Handshake.scala
+local CAN_TINIT_PAYLOAD = "tinit check"
+
 local MIN_TAG = TAG_PING
 local MAX_TAG = bit32.lshift(1, 23) - 1
 local MSB_TAG = bit32.lshift(1, 23)
 
+local MSG_TYPE_CAN_TINIT = 0
 local MSG_TYPE_TREQ = 1
 local MSG_TYPE_RREQ = 255 -- -1 & 0xff
 
@@ -94,6 +99,7 @@ local MSG_TYPE_TPING = 65
 local MSG_TYPE_RPING = 191 -- -65 & 0xff
 
 local MSG_TYPE_TDISCARDED = 66
+local MSG_TYPE_OLD_TDISCARDED = 194 -- -62 & 0xff
 local MSG_TYPE_RDISCARDED = 190 -- -66 & 0xff
 
 local MSG_TYPE_TLEASE = 67
@@ -106,6 +112,7 @@ local MSG_TYPE_RERR = 128 -- -128 & 0xff
 local MSG_TYPE_OLD_RERR = 127
 
 local MESSAGE_TYPES = {
+  [MSG_TYPE_CAN_TINIT] = "CanTInit",
   [MSG_TYPE_TREQ] = "Treq",
   [MSG_TYPE_RREQ] = "Rreq",
   [MSG_TYPE_TDISPATCH] = "Tdispatch",
@@ -115,12 +122,19 @@ local MESSAGE_TYPES = {
   [MSG_TYPE_TPING] = "Tping",
   [MSG_TYPE_RPING] = "Rping",
   [MSG_TYPE_TDISCARDED] = "Tdiscarded",
+  [MSG_TYPE_OLD_TDISCARDED] = "Tdiscarded",
   [MSG_TYPE_RDISCARDED] = "Rdiscarded",
   [MSG_TYPE_TLEASE] = "Tlease",
   [MSG_TYPE_TINIT] = "Tinit",
   [MSG_TYPE_RINIT] = "Rinit",
   [MSG_TYPE_RERR] = "Rerr",
-  [MSG_TYPE_OLD_RERR] = "OldRerr"
+  [MSG_TYPE_OLD_RERR] = "Rerr"
+}
+
+local MARKER_TYPES = {
+  [MSG_TYPE_TDISCARDED] = true,
+  [MSG_TYPE_OLD_TDISCARDED] = true,
+  [MSG_TYPE_TLEASE] = true
 }
 
 ----------------------------------------
@@ -133,6 +147,7 @@ local mux = Proto("mux","Mux Protocol")
 local pf_size = ProtoField.uint32("mux.size", "Size")
 local pf_type = ProtoField.uint8("mux.type", "Message type", base.DEC, MESSAGE_TYPES)
 local pf_tag = ProtoField.uint24("mux.tag", "Tag")
+local pf_discard_tag = ProtoField.uint24("mux.discard_tag", "Tag To Discard")
 local pf_contexts = ProtoField.bytes("mux.context", "Contexts")
 local pf_context_key = ProtoField.string("mux.context_key", "Context key")
 local pf_dest = ProtoField.string("mux.dest", "Destination")
@@ -148,6 +163,7 @@ mux.fields = {
   pf_context_key,
   pf_dest,
   pf_payload_len,
+  pf_discard_tag,
   pf_why,
   pf_trace_flags
 }
@@ -226,10 +242,18 @@ function mux.dissector(tvbuf,pktinfo,root)
 
     -- now let's add the type, which are all in the packet bytes at offset 4 of length 1
     -- instead of calling this again and again, let's just use a variable
-    tree:add(pf_type, tvbuf:range(4,1))
 
     local typeint = tvbuf:range(4,1):uint()
     local typestr = MESSAGE_TYPES[typeint]
+
+    -- special case the magic RErr message used in handshaking
+    if typeint == MSG_TYPE_OLD_RERR and size == 15 and tvbuf:range(8, 11):string() == CAN_TINIT_PAYLOAD then -- magic!
+      tree:add(pf_type, MSG_TYPE_CAN_TINIT)
+      local typestr = "CanTinit"
+    else
+      tree:add(pf_type, tvbuf:range(4,1))
+    end
+
     if not typestr then
       typestr = "unknown type (".. typeint .. ")"
     end
@@ -241,9 +265,14 @@ function mux.dissector(tvbuf,pktinfo,root)
     pktinfo.cols.info:prepend(typestr .." Tag=".. tag .." ")
 
     local pos = 8
-    if typeint == MSG_TYPE_RERR or typeint == MSG_TYPE_TDISCARDED then
+
+    if typeint == MSG_TYPE_RERR or typeint == MSG_TYPE_OLD_RERR then
       -- size remaining bytes are the message (-4 bytes for the type and tag)
       tree:add(pf_why, tvbuf(pos, size - 4))
+    elseif typeint == MSG_TYPE_OLD_TDISCARDED or typeint == MSG_TYPE_TDISCARDED then
+      tree:add(pf_discard_tag, tvbuf:range(pos, 3)) -- first three bytes after
+                                                    -- tag are the 'discard_tag'
+      tree:add(pf_why, tvbuf(pos + 3, size - 7)) -- remainder of body is 'why'
 
     elseif typeint == MSG_TYPE_TDISPATCH then
       -- 2 bytes for number of contexts
@@ -360,12 +389,19 @@ local function heur_dissect_mux(tvbuf,pktinfo,root)
         return false
       end
     else
-      if isFragment(tag) == true then
-        tag = bit.band(tag, bit.bnot(MSB_TAG))
-      end
-      if tag < MIN_TAG or tag > MAX_TAG then
-        dprint("heur_dissect_mux: invalid tag: ".. tag)
-        return false
+      if MARKER_TYPES[typeint] then
+        if tag ~= TAG_MARKER then
+          dprint(string.format("%s (%d) %s (%d)", "heur_dissect_mux: marker type", typeint, "with non-marker tag", tag))
+          return false
+        end
+      else
+        if isFragment(tag) == true then
+          tag = bit.band(tag, bit.bnot(MSB_TAG))
+        end
+        if tag < MIN_TAG or tag > MAX_TAG then
+          dprint("heur_dissect_mux: invalid tag: ".. tag)
+          return false
+        end
       end
     end
 

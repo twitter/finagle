@@ -115,19 +115,19 @@ package com.twitter.finagle
  * its peer; these should be responded to immediately with a Rping
  * message.
  *
- * ''size:4 Tdiscarded:1 tag:3 why:'' is a marker message
- * indicating that the Tdispatch with the given tag has been discarded by the
- * client. This can be used as a hint for early termination. Why is a
- * string describing why the request was discarded. Note that it does
- * *not* free the server from the obligation of replying to the original
- * Treq.
+ * ''size:4 Tdiscarded:1 tag:3 discard_tag:3 why:'' is a marker message and therefore
+ * has a tag value of 0. ''discard_tag'' indicates the tag of the Tdispatch to be
+ * discarded by the client. This can be used as a hint for early termination. Why is
+ * a string describing why the request was discarded. Note that it does *not* free
+ * the server from the obligation of replying to the original Treq.
  *
  * ''size:4 Tlease:1 tag:3 unit:1 howmuch:8'' is a marker message indicating that a
- * lease has been issued for ''howmuch'' units. Unit '0' is reserved for duration in
- * milliseconds. Whenever a lease has not been issued, a client can assume it holds
- * an indefinite lease. Adhering to the lease is optional, but the server may
- * reject requests or provide degraded service should the lease expire. This is
- * used by servers to implement features like garbage collection avoidance.
+ * lease has been issued for ''howmuch'' units. As a marker message, its tag value must
+ * be 0. Unit '0' is reserved for duration in milliseconds. Whenever a lease has not been
+ * issued, a client can assume it holds an indefinite lease. Adhering to the lease is
+ * optional, but the server may reject requests or provide degraded service should the
+ * lease expire. This is used by servers to implement features like garbage collection
+ * avoidance.
  *
  */
 package object mux
