@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.util
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.memcached.util.ParserUtilsBenchmark.Position
-import com.twitter.io.Charsets
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.openjdk.jmh.annotations.{State, Benchmark, Scope}
 import scala.util.Random
@@ -25,10 +25,10 @@ object ParserUtilsBenchmark {
   private val rnd = new Random(69230L) // just to give us consistent values
 
   private val numbers: Seq[ChannelBuffer] = Seq.fill(size) {
-    ChannelBuffers.copiedBuffer(rnd.nextInt().toString, Charsets.Utf8)
+    ChannelBuffers.copiedBuffer(rnd.nextInt().toString, UTF_8)
   }
   private val strings: Seq[ChannelBuffer] = Seq.fill(size) {
-    ChannelBuffers.copiedBuffer(rnd.nextString(5), Charsets.Utf8)
+    ChannelBuffers.copiedBuffer(rnd.nextString(5), UTF_8)
   }
 
   private val _inputs =

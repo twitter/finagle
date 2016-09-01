@@ -5,8 +5,8 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
-import com.twitter.io.Charsets
 import com.twitter.util.Future
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, SimpleChannelHandler}
 import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
 
@@ -24,8 +24,8 @@ private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
 private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
-    pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
-    pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
+    pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
+    pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
     pipeline.addLast("line", new DelimEncoder('\n'))
     pipeline
   }
@@ -34,8 +34,8 @@ private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
 private[finagle] object NoDelimStringPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
-    pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
-    pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
+    pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
+    pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
     pipeline
   }
 }

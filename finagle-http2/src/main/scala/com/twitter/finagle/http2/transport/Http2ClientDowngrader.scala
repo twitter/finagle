@@ -1,11 +1,11 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.io.Charsets
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.{Http2EventAdapter, HttpConversionUtil, Http2Headers,
   DefaultHttp2Headers, Http2Connection}
+import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * `Http2ClientDowngrader` wraps RSTs, GOAWAYs, HEADERS, and DATA in thin finagle wrappers.
@@ -151,7 +151,7 @@ private[http2] object Http2ClientDowngrader {
   // this is a magic string from the netty server implementation.  it's the debug
   // data it includes in the GOAWAY when the headers are too long.
   val HeaderTooLargeBytes =
-    Unpooled.copiedBuffer("Header size exceeded max allowed bytes", Charsets.Utf8)
+    Unpooled.copiedBuffer("Header size exceeded max allowed bytes", UTF_8)
 
   sealed trait StreamMessage
   case class Message(obj: HttpObject, streamId: Int) extends StreamMessage

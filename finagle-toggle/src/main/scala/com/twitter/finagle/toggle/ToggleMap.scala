@@ -2,8 +2,8 @@ package com.twitter.finagle.toggle
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle.Metadata
-import com.twitter.io.Charsets
 import com.twitter.logging.Logger
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.CRC32
@@ -118,7 +118,7 @@ object ToggleMap {
 
         // need a consistent ordering, forcing the sort before computation
         iterator.toIndexedSeq.sorted(MetadataOrdering).foreach { md =>
-          crc32.update(md.id.getBytes(Charsets.Utf8))
+          crc32.update(md.id.getBytes(UTF_8))
           // convert the md's fraction to a Long and then feed each
           // byte into the crc
           val f = java.lang.Double.doubleToLongBits(md.fraction)

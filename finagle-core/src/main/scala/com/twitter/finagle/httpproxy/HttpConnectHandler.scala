@@ -3,10 +3,10 @@ package com.twitter.finagle.httpproxy
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
-import com.twitter.io.Charsets
 import com.twitter.util.Base64StringEncoder
 
 import java.net.{InetSocketAddress, SocketAddress}
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.atomic.AtomicReference
 
 import org.jboss.netty.channel._
@@ -148,7 +148,7 @@ class HttpConnectHandler(
   }
 
   private[this] def proxyAuthorizationHeader(creds: Credentials) = {
-    val bytes = "%s:%s".format(creds.username, creds.password).getBytes(Charsets.Utf8)
+    val bytes = "%s:%s".format(creds.username, creds.password).getBytes(UTF_8)
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 }

@@ -8,13 +8,13 @@ import com.twitter.finagle.param.{Stats, Label}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, Status}
-import com.twitter.io.Charsets
 import com.twitter.util._
 import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel.{Channel, ChannelPipeline}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.codec.{Delimiters, DelimiterBasedFrameDecoder}
 import java.net.{SocketAddress, InetAddress, Socket, InetSocketAddress}
+import java.nio.charset.StandardCharsets.UTF_8
 import java.security.cert.Certificate
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -27,8 +27,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   object StringServerInit extends (ChannelPipeline => Unit) {
     def apply(pipeline: ChannelPipeline): Unit = {
       pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter(): _*))
-      pipeline.addLast("stringDecoder", new StringDecoder(Charsets.Utf8))
-      pipeline.addLast("stringEncoder", new StringEncoder(Charsets.Utf8))
+      pipeline.addLast("stringDecoder", new StringDecoder(UTF_8))
+      pipeline.addLast("stringEncoder", new StringEncoder(UTF_8))
     }
   }
 

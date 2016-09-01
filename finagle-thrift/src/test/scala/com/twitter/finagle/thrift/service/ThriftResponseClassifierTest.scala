@@ -5,8 +5,8 @@ import com.twitter.finagle.service.{ResponseClassifier, ResponseClass, ReqRep}
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.finagle.thrift.DeserializeCtx
 import com.twitter.finagle.thrift.thriftscala.{InvalidQueryException, Echo}
-import com.twitter.io.Charsets
 import com.twitter.util.{Return, Throw}
+import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -21,7 +21,7 @@ class ThriftResponseClassifierTest extends FunSuite {
   }
 
   private val deserializer = { bytes: Array[Byte] =>
-    val asString = new String(bytes, Charsets.Utf8)
+    val asString = new String(bytes, UTF_8)
     if (asString.startsWith("fail")) Throw(new InvalidQueryException(asString.length))
     else Return(asString)
   }
@@ -30,7 +30,7 @@ class ThriftResponseClassifierTest extends FunSuite {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
       val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = in.getBytes(Charsets.Utf8)
+        val rep = in.getBytes(UTF_8)
         assert(expectedClass == classifier(ReqRep(in, Return(rep))))
       }
     }
@@ -41,7 +41,7 @@ class ThriftResponseClassifierTest extends FunSuite {
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
       val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = in.getBytes(Charsets.Utf8)
+        val rep = in.getBytes(UTF_8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(expectedClass ==
           classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
@@ -60,7 +60,7 @@ class ThriftResponseClassifierTest extends FunSuite {
     val input = "throw"
     val ctx = new DeserializeCtx(Echo.Echo.Args(input), throwingDeser)
     Contexts.local.let(DeserializeCtx.Key, ctx) {
-      val rep = input.getBytes(Charsets.Utf8)
+      val rep = input.getBytes(UTF_8)
 
       assert(!classifier.isDefinedAt(ReqRep(input, Return(rep))))
       assert(Success ==
@@ -70,7 +70,7 @@ class ThriftResponseClassifierTest extends FunSuite {
 
   test("usingDeserializeCtx handles no DeserializationCtx") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val rep = in.getBytes(Charsets.Utf8)
+      val rep = in.getBytes(UTF_8)
       assert(expectedClass ==
         classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
     }
@@ -88,7 +88,7 @@ class ThriftResponseClassifierTest extends FunSuite {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
       val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = in.getBytes(Charsets.Utf8)
+        val rep = in.getBytes(UTF_8)
         assert(expectedClass == classifier(ReqRep(in, Return(rep))))
       }
     }
@@ -96,7 +96,7 @@ class ThriftResponseClassifierTest extends FunSuite {
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
       val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = in.getBytes(Charsets.Utf8)
+        val rep = in.getBytes(UTF_8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(expectedClass ==
           classifier.applyOrElse(
@@ -113,8 +113,8 @@ class ThriftResponseClassifierTest extends FunSuite {
     val in = "fail"
     val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
     Contexts.local.let(DeserializeCtx.Key, ctx) {
-      assert(deserializer(in.getBytes(Charsets.Utf8)).isThrow)
-      val rep = in.getBytes(Charsets.Utf8)
+      assert(deserializer(in.getBytes(UTF_8)).isThrow)
+      val rep = in.getBytes(UTF_8)
       val reqRep = ReqRep(in, Return(rep))
       assert(ThriftResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))
       assert(Success == ThriftResponseClassifier.DeserializeCtxOnly(reqRep))

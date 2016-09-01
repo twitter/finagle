@@ -9,9 +9,9 @@ import com.twitter.util.{Await, Future}
 import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
-import com.twitter.io.Charsets
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import java.net.{InetAddress, InetSocketAddress}
+import java.nio.charset.StandardCharsets.UTF_8
 import com.twitter.ostrich.stats.Stats
 
 @RunWith(classOf[JUnitRunner])
@@ -27,8 +27,8 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
           def getPipeline = {
             val pipeline = Channels.pipeline()
             pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-            pipeline.addLast("stringDecoder", new StringDecoder(Charsets.Utf8))
-            pipeline.addLast("stringEncoder", new StringEncoder(Charsets.Utf8))
+            pipeline.addLast("stringDecoder", new StringDecoder(UTF_8))
+            pipeline.addLast("stringEncoder", new StringEncoder(UTF_8))
             pipeline
           }
         }
@@ -40,8 +40,8 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
         def pipelineFactory = new ChannelPipelineFactory {
           def getPipeline = {
             val pipeline = Channels.pipeline()
-            pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
-            pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
+            pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
+            pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
             pipeline
           }
         }

@@ -4,11 +4,11 @@ import com.twitter.finagle.{ChannelClosedException, Failure, ConnectionFailedExc
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
-import com.twitter.io.Charsets
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import java.nio.charset.StandardCharsets.UTF_8
 import java.net.SocketAddress
 
 /**
@@ -48,7 +48,7 @@ private[netty4] class HttpProxyConnectHandler(
   private[this] var connectPromise: ChannelPromise = _
 
   private[this] def proxyAuthorizationHeader(c: Credentials): String = {
-    val bytes = "%s:%s".format(c.username, c.password).getBytes(Charsets.Utf8)
+    val bytes = "%s:%s".format(c.username, c.password).getBytes(UTF_8)
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 

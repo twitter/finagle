@@ -2,8 +2,8 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.io.Charsets
 import com.twitter.util.{Await, Future}
+import java.nio.charset.StandardCharsets.UTF_8
 import org.apache.thrift.protocol.{TMessage, TMessageType}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -21,7 +21,7 @@ class TTwitterServerFilterTest extends FunSuite {
       def apply(req: Array[Byte]) =
         Future.value(ClientId.current.map(_.name)
           .getOrElse("NOCLIENT")
-          .getBytes(Charsets.Utf8))
+          .getBytes(UTF_8))
     }
 
     val upgraded = {
@@ -56,7 +56,7 @@ class TTwitterServerFilterTest extends FunSuite {
     }
     assert(req.isDefined)
     val rep = Await.result(req)
-    val clientId = new String(rep, Charsets.Utf8)
+    val clientId = new String(rep, UTF_8)
     assert(clientId == "testclient")
   }
 }

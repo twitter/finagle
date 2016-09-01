@@ -3,8 +3,8 @@ package com.twitter.finagle.netty3.socks
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
 import com.twitter.finagle.socks.{AuthenticationSetting, Unauthenticated, UsernamePassAuthenticationSetting}
-import com.twitter.io.Charsets
 import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
+import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
@@ -125,7 +125,7 @@ class SocksConnectHandler(
 
       case _ => // unresolved host
         buf.writeByte(HostnameIndicator)
-        val hostnameBytes = addr.getHostName.getBytes(Charsets.UsAscii)
+        val hostnameBytes = addr.getHostName.getBytes(US_ASCII)
         buf.writeByte(hostnameBytes.length)
         buf.writeBytes(hostnameBytes)
     }
@@ -140,11 +140,11 @@ class SocksConnectHandler(
     buf.writeByte(Version1)
 
     // RFC does not specify an encoding. Assume UTF8
-    val usernameBytes = username.getBytes(Charsets.Utf8)
+    val usernameBytes = username.getBytes(UTF_8)
     buf.writeByte(usernameBytes.length.toByte)
     buf.writeBytes(usernameBytes)
 
-    val passBytes = pass.getBytes(Charsets.Utf8)
+    val passBytes = pass.getBytes(UTF_8)
     buf.writeByte(passBytes.length.toByte)
     buf.writeBytes(passBytes)
 

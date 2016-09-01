@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.util
 
 import collection.mutable.ArrayBuffer
 import com.google.common.base.Strings
-import com.twitter.io.Charsets
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ChannelBufferIndexFinder}
 import scala.language.implicitConversions
 
@@ -67,7 +67,7 @@ private[finagle] object ChannelBufferUtils {
       sum
     }
 
-    override def toString: String = buffer.toString(Charsets.Utf8)
+    override def toString: String = buffer.toString(UTF_8)
 
     def split: Seq[ChannelBuffer] =
       split(FIND_SPACE, 1)
@@ -111,14 +111,14 @@ private[finagle] object ChannelBufferUtils {
 
   implicit def stringToChannelBuffer(string: String): ChannelBuffer =
     if(Strings.isNullOrEmpty(string)) null else {
-      ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
+      ChannelBuffers.copiedBuffer(string, UTF_8)
     }
 
   implicit def seqOfStringToSeqOfChannelBuffer(strings: Seq[String]): Seq[ChannelBuffer] =
     if (strings == null) null else {
       strings.map { string =>
         if(Strings.isNullOrEmpty(string)) null else {
-          ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
+          ChannelBuffers.copiedBuffer(string, UTF_8)
         }
       }
     }
