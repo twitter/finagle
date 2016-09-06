@@ -50,13 +50,13 @@ object TlsConfig {
   /**
    * Client-side TLS config based on a given [[SSLContext]].
    */
-  final case class ClientSslContext(content: SSLContext) extends TlsConfig
+  final case class ClientSslContext(context: SSLContext) extends TlsConfig
 
   /**
    * Client-side TLS config based on a given [[SSLContext]] that also requires hostname verification
    * against the given `hostname`.
    */
-  final case class ClientSslContextAndHostname(content: SSLContext, hostname: String) extends TlsConfig
+  final case class ClientSslContextAndHostname(context: SSLContext, hostname: String) extends TlsConfig
 
   /**
    * Client-side TLS config that doesn't require certificate validation.

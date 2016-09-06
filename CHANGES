@@ -24,6 +24,10 @@ Breaking API Changes
   * finagle-core: `c.t.f.netty3.WorkerPool` is no longer visible outside of `c.t.f.netty3`.
     ``RB_ID=123567``
 
+  * finagle-core: The `content` parameter of the `ClientSslContext` and
+    `ClientSslContextAndHostname` `TlsConfig` options has been renamed to `context`.
+    ``RB_ID=868791``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
