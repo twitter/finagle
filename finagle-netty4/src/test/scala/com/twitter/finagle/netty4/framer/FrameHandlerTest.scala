@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.framer
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.framer.{Framer, FixedLengthFramer}
+import com.twitter.finagle.framer.Framer
 import com.twitter.io.Buf
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
@@ -14,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 @RunWith(classOf[JUnitRunner])
 class FrameHandlerTest extends FunSuite with MockitoSugar {
 
-  object TestFramer extends FixedLengthFramer(4)
+  object FixedFramer extends TestFramer(4)
 
   def toBuf(s: String): Buf = Buf.Utf8(s)
   def toStr(b: Buf): String = Buf.Utf8.unapply(b).get
@@ -33,7 +33,7 @@ class FrameHandlerTest extends FunSuite with MockitoSugar {
         super.channelRead(ctx, msg)
       }
     }
-    val ch = new EmbeddedChannel(new FrameHandler(TestFramer), readSnooper)
+    val ch = new EmbeddedChannel(new FrameHandler(FixedFramer), readSnooper)
     ch.pipeline.fireChannelActive
 
     ch.writeInbound(toBuf("hi"))

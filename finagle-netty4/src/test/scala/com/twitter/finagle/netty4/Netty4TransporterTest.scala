@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.{ReadTimedOutException, WriteTimedOutException, Failure}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.framer.FixedLengthFramer
+import com.twitter.finagle.netty4.framer.TestFramer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.io.Buf
@@ -25,7 +25,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   val defaultEnc = Buf.Utf8(_)
   val defaultDec = Buf.Utf8.unapply(_: Buf).getOrElse("???")
 
-  val framer = () => new FixedLengthFramer(frameSize)
+  val framer = () => new TestFramer(frameSize)
   def params = Params.empty
 
   private[this] class Ctx[A, B](

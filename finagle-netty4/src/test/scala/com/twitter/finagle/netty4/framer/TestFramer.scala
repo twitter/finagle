@@ -1,25 +1,14 @@
-package com.twitter.finagle.framer
+package com.twitter.finagle.netty4.framer
 
+import com.twitter.finagle.framer.Framer
 import com.twitter.io.Buf
 
-private[finagle] object FixedLengthFramer {
-  val NoFrames: IndexedSeq[Buf] = IndexedSeq.empty[Buf]
-}
-
 /**
- * A stateful fixed-length framer.
+ * A stateful fixed-length framer for testing purposes.
  *
  * @param frameSize number of bytes in a frame.
- *
- * @note this class provides no thread-safety and must be explicitly synchronized.
- *       This implies a use-case where a single thread exclusively processes a
- *       byte stream.
  */
-private[finagle] class FixedLengthFramer(frameSize: Int) extends Framer {
-  import FixedLengthFramer._
-
-  if (frameSize < 1)
-    throw new IllegalArgumentException(s"frameSize must be greater than zero, saw: $frameSize")
+private[finagle] class TestFramer(frameSize: Int) extends Framer {
 
   private[this] var accumulated: Buf = Buf.Empty
 
@@ -32,7 +21,7 @@ private[finagle] class FixedLengthFramer(frameSize: Int) extends Framer {
     val length = merged.length
     if (length < frameSize) {
       accumulated = merged
-      NoFrames
+      IndexedSeq.empty[Buf]
     } else {
       // length >= frameSize
       val result = new Array[Buf](length / frameSize)
