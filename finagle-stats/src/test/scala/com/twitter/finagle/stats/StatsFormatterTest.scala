@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
+import com.twitter.finagle.toggle.flag
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -69,7 +70,7 @@ class StatsFormatterTest extends FunSuite {
     assert(formatted("histo1_avg") == 50)
   }
 
-  test("includeEmptyHistograms") {
+  test("includeEmptyHistograms flag") {
     val metrics = Metrics.createDetached()
     val stats = new ImmediateMetricsStatsReceiver(metrics)
     stats.stat("empty_histo")
@@ -84,4 +85,28 @@ class StatsFormatterTest extends FunSuite {
       assert(Map("empty_histo.count" -> 0) == formatted)
     }
   }
+
+  test("shouldIncludeEmptyHistograms uses flag when set") {
+    flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 1.0) {
+      includeEmptyHistograms.let(false) {
+        assert(!StatsFormatter.shouldIncludeEmptyHistograms)
+      }
+      includeEmptyHistograms.let(true) {
+        assert(StatsFormatter.shouldIncludeEmptyHistograms)
+      }
+    }
+  }
+
+  test("shouldIncludeEmptyHistograms uses toggle when flag not set") {
+    includeEmptyHistograms.letClear {
+      flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 0.0) {
+        assert(!StatsFormatter.shouldIncludeEmptyHistograms)
+      }
+
+      flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 1.0) {
+        assert(StatsFormatter.shouldIncludeEmptyHistograms)
+      }
+    }
+  }
+
 }

@@ -1,6 +1,8 @@
 package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
+import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.toggle.Toggle
 import scala.collection.Map
 import scala.collection.mutable
 import scala.util.matching.Regex
@@ -35,7 +37,7 @@ private[stats] sealed trait StatsFormatter {
     results ++= values.gauges
     results ++= values.counters
 
-    val includeEmpty = includeEmptyHistograms()
+    val includeEmpty = StatsFormatter.shouldIncludeEmptyHistograms
     values.histograms.foreach { case (name, snapshot) =>
       val count = snapshot.count
       results += histoName(name, "count") -> count
@@ -77,6 +79,21 @@ private[stats] sealed trait StatsFormatter {
 }
 
 private[stats] object StatsFormatter {
+
+  val ExportEmptyHistogramToggleId: String =
+    "com.twitter.finagle.stats.exportEmptyHistograms"
+
+  private[this] val exportEmptyHistogramToggle: Toggle[Int] =
+    Stats.Toggles(ExportEmptyHistogramToggleId)
+
+  private[this] val ToggleInput = ServerInfo().id.hashCode
+
+  def shouldIncludeEmptyHistograms: Boolean = {
+    if (includeEmptyHistograms.isDefined)
+      includeEmptyHistograms()
+    else
+      exportEmptyHistogramToggle(ToggleInput)
+  }
 
   /**
    * Uses the global flag, [[format]], to select the formatter used.
