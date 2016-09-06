@@ -14,6 +14,8 @@ New Features
     header: "finagle-http-nonretryable-nack". These are converted to non-retryable `c.t.f.Failures`
     and counted by a new counter "nonretryable_nacks". ``RB_ID=865468``
 
+  * finagle-toggle: Is no longer considered experimental. ``RB_ID=868819``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
