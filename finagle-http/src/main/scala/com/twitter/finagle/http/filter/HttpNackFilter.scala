@@ -35,12 +35,15 @@ private[finagle] object HttpNackFilter {
 
   def module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module1[param.Stats,ServiceFactory[Request, Response]] {
-      val role = HttpNackFilter.role
+      val role: Stack.Role = HttpNackFilter.role
       val description = "Convert rejected requests to 503s, respecting retryability"
 
-      def make(_stats: param.Stats, next: ServiceFactory[Request, Response]) = {
+      def make(
+        _stats: param.Stats,
+        next: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] = {
         val param.Stats(stats) = _stats
-        (new HttpNackFilter(stats)).andThen(next)
+        new HttpNackFilter(stats).andThen(next)
       }
     }
 }

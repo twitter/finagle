@@ -1,7 +1,8 @@
 package com.twitter.finagle.http.service
 
+import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.service.{ResponseClass, ReqRep, ResponseClassifier}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.util.Return
 
 /**
@@ -15,10 +16,16 @@ object HttpResponseClassifier {
   /**
    * Categorizes responses with status codes in the 500s as
    * [[ResponseClass.NonRetryableFailure NonRetryableFailures]].
+   *
+   * @note that retryable nacks are categorized as a [[ResponseClass.RetryableFailure]].
    */
   val ServerErrorsAsFailures: ResponseClassifier =
     ResponseClassifier.named("ServerErrorsAsFailures") {
-      case ReqRep(_, Return(r: Response)) if is500(r) => ResponseClass.NonRetryableFailure
+      case ReqRep(_, Return(r: Response)) if is500(r) =>
+        if (HttpNackFilter.isRetryableNack(r))
+          ResponseClass.RetryableFailure
+        else
+          ResponseClass.NonRetryableFailure
     }
 
   /**

@@ -1,6 +1,7 @@
 package com.twitter.finagle.http.service
 
-import com.twitter.finagle.http.{Status, Request, Response}
+import com.twitter.finagle.http.filter.HttpNackFilter
+import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.util.{Return, Try}
 import org.junit.runner.RunWith
@@ -25,6 +26,14 @@ class HttpResponseClassifierTest extends FunSuite {
         ReqRep(req, rep(Status.InternalServerError)),
         ResponseClassifier.Default)
     )
+  }
+
+  test("ServerErrorsAsFailures for nacks") {
+    val classifier = HttpResponseClassifier.ServerErrorsAsFailures
+    val reply = Response(HttpNackFilter.ResponseStatus)
+    reply.headerMap.set(HttpNackFilter.RetryableNackHeader, "true")
+
+    assert(ResponseClass.RetryableFailure == classifier(ReqRep(req, Return(reply))))
   }
 
   test("apply") {
