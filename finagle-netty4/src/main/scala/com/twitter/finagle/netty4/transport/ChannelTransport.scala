@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
  */
 private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[In, Out] {
 
+  import ChannelTransport._
+
   private[this] val queue = new AsyncQueue[Out]
 
   private[this] val failed = new AtomicBoolean(false)
@@ -137,7 +139,7 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
 
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
-  ch.pipeline().addLast("finagleChannelTransport", new SimpleChannelInboundHandler[Out](false /* autoRelease */) {
+  ch.pipeline.addLast(HandlerName, new SimpleChannelInboundHandler[Out](false /* autoRelease */) {
 
     override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
       if (!ch.config.isAutoRead && msgsNeeded.get > 0) ch.read()
@@ -157,4 +159,8 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
       fail(ChannelException(e, remoteAddress))
     }
   })
+}
+
+private[finagle] object ChannelTransport {
+  val HandlerName: String = "finagleChannelTransport"
 }

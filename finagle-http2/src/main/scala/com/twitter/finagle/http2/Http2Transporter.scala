@@ -4,9 +4,9 @@ import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.{
+  RichHttpToHttp2ConnectionHandlerBuilder,
   Http2ClientDowngrader,
   Http2UpgradingTransport,
-  SchemifyingHandler,
   UpgradeRequestHandler
 }
 import com.twitter.finagle.netty4.Netty4Transporter
@@ -49,7 +49,7 @@ private[http2] object Http2Transporter {
         // adapts http2 to http 1.1
         new Http2ClientDowngrader(connection)
       )
-      val connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
+      val connectionHandler = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
         .connection(connection)
         .build()
@@ -64,11 +64,10 @@ private[http2] object Http2Transporter {
         maxChunkSize.inBytes.toInt
       )
       val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
-      val bufferedWrites = new UpgradeRequestHandler()
       val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
-
-      pipeline.addLast(sourceCodec, upgradeHandler, bufferedWrites)
-      pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+      pipeline.addLast("httpCodec", sourceCodec)
+      pipeline.addLast("httpUpgradeHandler", upgradeHandler)
+      pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
       initClient(params)(pipeline)
     }
 

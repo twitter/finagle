@@ -2,11 +2,11 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Time}
-import io.netty.handler.codec.http.{HttpObject, LastHttpContent, FullHttpRequest, HttpMessage}
-import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.STREAM_ID
+import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
@@ -24,7 +24,7 @@ import scala.collection.JavaConverters._
  * create a new Transport.
  */
 private[http2] class MultiplexedTransporter(
-    underlying: Transport[HttpObject, Http2ClientDowngrader.StreamMessage])
+    underlying: Transport[StreamMessage, StreamMessage])
   extends (() => Transport[HttpObject, HttpObject]) {
 
   private[this] val queues: ConcurrentHashMap[Int, AsyncQueue[HttpObject]] =
@@ -67,23 +67,14 @@ private[http2] class MultiplexedTransporter(
 
     private[this] val log = Logger.get(getClass.getName)
 
-    /** Utility for setting the HTTP/2 stream id on a HTTP/1 message. */
-    private[this] def setStreamId(msg: HttpMessage, id: Int): Unit =
-      msg.headers.setInt(STREAM_ID.text(), id)
+    def write(obj: HttpObject): Future[Unit] = child.synchronized {
+      val message = Message(obj, curId)
 
-    def write(obj: HttpObject): Future[Unit] = obj match {
-      case request: FullHttpRequest => child.synchronized {
-        setStreamId(request, curId)
-
-        if (obj.isInstanceOf[LastHttpContent]) {
-          finishedWriting = true
-          tryToIncrementStream()
-        }
-        underlying.write(obj)
+      if (obj.isInstanceOf[LastHttpContent]) {
+        finishedWriting = true
+        tryToIncrementStream()
       }
-      case _ =>
-        Future.exception(
-          new UnsupportedOperationException(s"we don't handle streaming requests right now: $obj"))
+      underlying.write(message)
     }
 
     private[this] def tryToIncrementStream(): Unit = child.synchronized {
@@ -133,7 +124,6 @@ private[http2] class MultiplexedTransporter(
     // if the response is read before the stream calls read) may be scheduled in
     // a different order, or on a different thread. it's unlikely, but racy.
 
-    import Http2ClientDowngrader._
     private[this] val handleRead: StreamMessage => Unit = {
       case Message(msg, streamId) => tryToInitializeQueue(streamId).offer(msg)
       case GoAway(response) => failEverything(response)
