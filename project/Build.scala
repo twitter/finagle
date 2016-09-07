@@ -310,7 +310,10 @@ object Finagle extends Build {
       util("stats")
     ),
     libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleHttp)
+  ).dependsOn(
+    finagleCore,
+    finagleHttp,
+    finagleToggle)
 
   lazy val finagleZipkinCore = Project(
     id = "finagle-zipkin-core",
