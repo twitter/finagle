@@ -505,7 +505,7 @@ object Finagle extends Build {
       "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
     ),
     libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleNetty4, finagleServersets)
+  ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
 
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",

@@ -8,6 +8,7 @@ import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, Std
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
@@ -21,6 +22,8 @@ import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{StatsReceiver, ExceptionStatsHandler}
+import com.twitter.finagle.server.ServerInfo
+import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
@@ -187,7 +190,20 @@ object Memcached extends finagle.Client[Command, Response]
         params => Netty4Transporter[Buf, Buf](Netty4ClientFramer, params),
         params => Netty4Listener[Buf, Buf](Netty4ServerFramer, params))
 
-      implicit val param = Stack.Param(Netty3)
+      private[this] val UseNetty4ToggleId: String =
+        "com.twitter.finagle.memcached.UseNetty4"
+
+      private[this] val useNetty4Toggle: Toggle[Int] =
+        Toggles(UseNetty4ToggleId)
+
+      private[this] def ToggleInput = ServerInfo().id.hashCode
+
+      private[this] def useNetty4: Boolean = useNetty4Toggle(ToggleInput)
+
+      // Use the `useNetty4Toggle` to determine whether or not to use Netty 4 by default.
+      implicit val param =
+        if (useNetty4) Stack.Param(Netty4)
+        else Stack.Param(Netty3)
     }
 
     case class NumReps(reps: Int) {

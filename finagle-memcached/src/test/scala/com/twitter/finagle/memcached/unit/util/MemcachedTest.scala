@@ -69,4 +69,11 @@ class MemcachedTest extends FunSuite
       assert(st.counters(Seq("memcache", "retries", "requeues")) > numberRequests)
     }
   }
+
+  test("Memcached is configured to use Netty3 by default") {
+    val client = Memcached.client
+    val params = client.params
+
+    assert(params[Memcached.param.MemcachedImpl] == Memcached.param.MemcachedImpl.Netty3)
+  }
 }
