@@ -75,7 +75,7 @@ Breaking API Changes
   * finagle-redis: Server-side support for Redis is removed. See this finaglers@ thread
     (https://groups.google.com/forum/#!topic/finaglers/dCyt60TJ7eM) for discussion.
     Note that constructors for Redis commands no longer accept raw byte arrays.
-     ``RB_ID=848815``
+    ``RB_ID=848815``
 
   * finagle-redis: Redis codec (i.e., `c.t.f.Codec`) is removed. Use `c.t.f.Redis.client`
     instead. ``RB_ID=848815``

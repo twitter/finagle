@@ -7,7 +7,7 @@ sbtsha128=1de48c2c412fffc4336e4d7dee224927a96d5abc
 sbtrepo=http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch
 
 if [ ! -f $sbtjar ]; then
-  echo "downloading $sbtjar" 1>&2
+  echo "downloading $PWD/$sbtjar" 1>&2
   if ! curl --location --silent --fail --remote-name $sbtrepo/$sbtver/$sbtjar; then
     exit 1
   fi
@@ -15,7 +15,7 @@ fi
 
 checksum=`openssl dgst -sha1 $sbtjar | awk '{ print $2 }'`
 if [ "$checksum" != $sbtsha128 ]; then
-  echo "bad $sbtjar.  delete $sbtjar and run $0 again."
+  echo "bad $PWD/$sbtjar.  delete $PWD/$sbtjar and run $0 again."
   exit 1
 fi
 

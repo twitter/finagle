@@ -13,12 +13,19 @@ and is being actively developed and maintained.
 
 ![Finagle logo](https://raw.github.com/twitter/finagle/master/doc/src/sphinx/_static/logo_small.png)
 
+## Releases
+
+[Releases](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle_2.11)
+are done on an approximately monthly schedule. While [semver](http://semver.org/)
+is not followed, the [changelogs](CHANGES) are detailed and include sections on
+public API breaks and changes in runtime behavior.
+
 ## Getting involved
 
 * Website: https://twitter.github.io/finagle/
 * Source: https://github.com/twitter/finagle/
 * Mailing List: [finaglers@googlegroups.com](https://groups.google.com/forum/#!forum/finaglers)
-* IRC: `#finagle` on Freenode
+* Chat: https://gitter.im/twitter/finagle
 
 Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and server APIs for
