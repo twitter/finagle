@@ -162,6 +162,30 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       Await.ready(client.close(), 5.seconds)
     }
 
+    test(name + ": HTTP/1.0") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response(request.version, Status.Ok))
+      }
+      val client = connect(service)
+      val request = Request(Method.Get, "/http/1.0")
+      request.version = Version.Http10
+      val response = Await.result(client(request), 5.seconds)
+      assert(response.status == Status.Ok)
+      Await.ready(client.close(), 5.seconds)
+    }
+
+    test(name + ": with 'Connection: close'") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request(Method.Get, "/connection-close")
+      request.headerMap("Connection") = "close"
+      val response = Await.result(client(request), 5.seconds)
+      assert(response.status == Status.Ok)
+      Await.ready(client.close(), 5.seconds)
+    }
+
     testIfImplemented(TooLongFixed)(name + ": return 413s for fixed-length requests with too large payloads") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
@@ -586,6 +610,18 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(statsRecv.stat("client", "response_payload_bytes")() == Nil)
       assert(statsRecv.stat("server", "request_payload_bytes")() == Nil)
       assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
+      Await.ready(client.close(), 5.seconds)
+    }
+
+    test(name + ": with 'Connection: close'") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request()
+      request.headerMap("Connection") = "close"
+      val response = Await.result(client(request), 5.seconds)
+      assert(response.status == Status.Ok)
       Await.ready(client.close(), 5.seconds)
     }
   }

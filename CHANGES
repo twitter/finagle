@@ -13,6 +13,13 @@ Runtime Behavior Changes
   * finagle-http: `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures` now
     classifies a retryable nack as a `ResponseClass.RetryableFailure`. ``RB_ID=869182``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-http: A connection for HTTP/1.0 or non-keep-alive requests is now closed
+    gracefully so that all requests that have been issued received responses.
+    ``RB_ID=868767``
+
 6.38.0
 ------
 
