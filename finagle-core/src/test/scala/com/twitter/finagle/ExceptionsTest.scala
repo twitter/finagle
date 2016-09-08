@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.thrift.ClientId
-import com.twitter.finagle.tracing.{Trace, SpanId, TraceId}
+import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.Duration
 import java.net.{InetSocketAddress, SocketAddress}
 

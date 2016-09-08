@@ -5,14 +5,10 @@ import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Deadline, Contexts}
-import com.twitter.finagle.tracing._
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{atLeastOnce, spy, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
-import scala.collection.JavaConverters._
 import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {

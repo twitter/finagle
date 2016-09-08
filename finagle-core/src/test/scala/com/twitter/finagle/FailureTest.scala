@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.junit.{JUnitRunner, AssertionsForJUnit}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks

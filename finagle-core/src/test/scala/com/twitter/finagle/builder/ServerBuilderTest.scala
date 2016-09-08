@@ -3,12 +3,11 @@ package com.twitter.finagle.builder
 import java.net.{InetSocketAddress, InetAddress}
 
 import com.twitter.finagle._
-import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
+import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.util._
-import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
-import org.jboss.netty.channel.ChannelPipelineFactory
+import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.when
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite

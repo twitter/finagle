@@ -3,7 +3,6 @@ package com.twitter.finagle
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 class StackTest extends FunSuite {

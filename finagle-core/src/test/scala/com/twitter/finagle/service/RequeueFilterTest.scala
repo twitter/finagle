@@ -6,7 +6,6 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{ServiceFactory, FailedFastException, Service}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

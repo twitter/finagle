@@ -3,8 +3,6 @@ package com.twitter.finagle.tracing
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch._
-import com.twitter.finagle.netty3._
 import com.twitter.finagle.server._
 import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._

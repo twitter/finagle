@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle._
-import com.twitter.util.{Activity, Await, Future, Promise, Time}
+import com.twitter.util.{Activity, Await, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

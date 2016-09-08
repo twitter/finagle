@@ -3,7 +3,6 @@ package com.twitter.finagle.naming
 import com.twitter.finagle._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util.{Activity, Var}
-import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite

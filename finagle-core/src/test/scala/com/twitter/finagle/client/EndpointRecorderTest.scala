@@ -2,7 +2,6 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.Namer.AddrWeightKey
-import com.twitter.finagle.param.Label
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

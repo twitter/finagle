@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import com.twitter.util.{Await, Future, Promise}
-import java.net.{SocketAddress, Socket, InetSocketAddress, InetAddress}
+import java.net.{Socket, InetSocketAddress, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite

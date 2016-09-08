@@ -3,17 +3,12 @@ package com.twitter.finagle.service
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.tracing._
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
 import org.junit.runner.RunWith
-import org.mockito.{ArgumentCaptor, Matchers}
-import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import scala.collection.JavaConverters._
-
 
 @RunWith(classOf[JUnitRunner])
 class DeadlineStatsFilterTest extends FunSuite with MockitoSugar {

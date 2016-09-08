@@ -7,7 +7,6 @@ import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Tag}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {

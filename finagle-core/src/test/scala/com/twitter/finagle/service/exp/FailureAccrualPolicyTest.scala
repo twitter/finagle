@@ -3,10 +3,7 @@ package com.twitter.finagle.service.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff
 import com.twitter.util._
-import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
-import org.mockito.Matchers
-import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar

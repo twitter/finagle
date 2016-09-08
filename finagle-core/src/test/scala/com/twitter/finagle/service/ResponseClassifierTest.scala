@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.{Failure, WriteException}
+import com.twitter.finagle.Failure
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.util.{Return, Throw}
 import org.junit.runner.RunWith

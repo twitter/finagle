@@ -7,7 +7,6 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EmaTest extends FunSuite {
-  import TripleEquals._
   import Tolerance._
 
   test("updates are time invariant") {

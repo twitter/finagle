@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, Stat, StatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{FailedFastException, Service, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{never, times, verify, when}
-import org.mockito.Matchers.{any, anyObject}
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Matchers.anyObject
 import org.scalatest.{BeforeAndAfter, FunSpec}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar

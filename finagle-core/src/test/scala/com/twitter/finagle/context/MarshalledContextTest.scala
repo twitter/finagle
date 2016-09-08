@@ -1,10 +1,10 @@
 package com.twitter.finagle.context
 
+import com.twitter.io.Buf
+import com.twitter.util.{Return, Throw}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import com.twitter.util.{Await, Future, Promise, Return, Throw}
-import com.twitter.io.Buf
 
 @RunWith(classOf[JUnitRunner])
 class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
