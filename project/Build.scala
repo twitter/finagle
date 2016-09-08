@@ -419,7 +419,9 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       guavaLib
     )
-  ).dependsOn(finagleCore)
+  ).dependsOn(
+    finagleCore,
+    finagleToggle)
 
   lazy val finagleNetty4Http = Project(
     id = "finagle-netty4-http",

@@ -8,23 +8,21 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
-import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter,
-  ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport,
-  Netty3HttpTransporter, Netty3HttpListener}
+import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _,
-  Tracer => _, _}
+import com.twitter.finagle.param.{ResponseClassifier => ResponseClassifierParam, ExceptionStatsHandler => _, Monitor => _, Tracer => _, _}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
+import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
 import java.net.SocketAddress
 
 /**
- * A rich client with a *very* basic URL fetcher. (It does not handle
+ * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
  * redirects, does not have a cookie jar, etc.)
  */
 trait HttpRichClient { self: Client[Request, Response] =>
@@ -43,7 +41,7 @@ trait HttpRichClient { self: Client[Request, Response] =>
 }
 
 /**
- * Http protocol support, including client and server.
+ * HTTP/1.1 protocol support, including client and server.
  */
 object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
@@ -56,7 +54,6 @@ object Http extends Client[Request, Response] with HttpRichClient
      * @param serverTransport server [[StreamTransport]] factory
      * @param transporter [[Transporter]] factory
      * @param listener [[Listener]] factory
-     * @param ioEngineName name of the underlying i/o multiplexer (ie; netty4)
      */
     case class HttpImpl(
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
@@ -133,6 +130,23 @@ object Http extends Client[Request, Response] with HttpRichClient
 
   }
 
+  private val protocolLibrary = ProtocolLibrary("http")
+
+  private[finagle] val ServerErrorsAsFailuresToggleId =
+    "com.twitter.finagle.http.serverErrorsAsFailures"
+
+  private[this] val serverErrorsAsFailuresToggle =
+    http.Toggles("com.twitter.finagle.http.serverErrorsAsFailures")
+
+  private[this] def treatServerErrorsAsFailures: Boolean =
+    serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
+
+  private def responseClassifierParam: ResponseClassifierParam =
+    if (treatServerErrorsAsFailures)
+      ResponseClassifierParam(HttpResponseClassifier.ServerErrorsAsFailures)
+    else
+      ResponseClassifierParam.param.default
+
   // Only record payload sizes when streaming is disabled.
   private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module2[param.Streaming, Stats, ServiceFactory[Request, Response]] {
@@ -160,12 +174,16 @@ object Http extends Client[Request, Response] with HttpRichClient
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         .prepend(nonChunkedPayloadSize)
-  }
 
+    private def params: Stack.Params =
+      StackClient.defaultParams +
+        protocolLibrary +
+        responseClassifierParam
+  }
 
   case class Client(
       stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
-      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("http"))
+      params: Stack.Params = Client.params)
     extends StdStackClient[Request, Response, Client]
     with WithSessionPool[Client]
     with WithDefaultLoadBalancer[Client] {
@@ -298,11 +316,16 @@ object Http extends Client[Request, Response] with HttpRichClient
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(nonChunkedPayloadSize)
         .prepend(ServerContextFilter.module)
+
+    private def params: Stack.Params =
+      StackServer.defaultParams +
+        protocolLibrary +
+        responseClassifierParam
   }
 
   case class Server(
       stack: Stack[ServiceFactory[Request, Response]] = Server.stack,
-      params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("http"))
+      params: Stack.Params = Server.params)
     extends StdStackServer[Request, Response, Server] {
 
     protected type In = Any
@@ -320,7 +343,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[Request, Response]
-    ) = {
+    ): HttpServerDispatcher = {
       val Stats(stats) = params[Stats]
       new HttpServerDispatcher(
         newStreamTransport(transport),

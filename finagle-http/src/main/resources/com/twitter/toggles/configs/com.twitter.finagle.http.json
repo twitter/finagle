@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.http.serverErrorsAsFailures",
+      "description": "Treat responses with status codes in the 500s as failures. See `com.twitter.finagle.http.service.HttpResponseClassifier.ServerErrorsAsFailures`.",
+      "fraction": 0.0
+    }
+  ]
+}

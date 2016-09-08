@@ -10,8 +10,16 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+
   * finagle-http: `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures` now
     classifies a retryable nack as a `ResponseClass.RetryableFailure`. ``RB_ID=869182``
+
+  * finagle-http: `c.t.f.Http.{Client,Server}` is moving towards treating HTTP
+    5xx status codes as failures via
+    `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures`. This can
+    be disabled by setting the toggle "com.twitter.finagle.http.serverErrorsAsFailures"
+    to `0.0` or explicitly setting it using `withResponseClassifier`.
+    ``RB_ID=869303``
 
 Bug Fixes
 ~~~~~~~~~
