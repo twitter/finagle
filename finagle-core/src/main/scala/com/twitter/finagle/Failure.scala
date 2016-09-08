@@ -158,8 +158,15 @@ object Failure {
    */
   private[finagle] val Naming: Long = 1L << 32
 
-  // Flags that are showable to a user.
-  private val ShowMask: Long = Interrupted
+  /**
+   * The mask of flags which are safe to show to users. As an example, showing
+   * [[Failure.Restartable]] could be dangerous when such failures are passed
+   * back to Finagle servers. While an individual client's request is
+   * restartable, the same is not automatically true of the server request on
+   * whose behalf the client is working - it may have performed some side
+   * effect before issuing the client call.
+   */
+  private val ShowMask: Long = Interrupted | Rejected
 
   /**
    * Create a new failure with the given cause and flags.
@@ -289,14 +296,8 @@ object Failure {
 
   /**
    * Process failures for external presentation. Specifically, this converts
-   * failures to their "showable" form. See [[Failure.show]].
-   *
-   * This filter strips out [[Failure.Restartable]] from being presented to users.
-   * This can be dangerous when such failures are passed back to Finagle
-   * servers: in this case, while an individual client's request is restartable,
-   * the same is not automatically true of the server request on whose behalf
-   * the client is working. (For example, it may have performed some side
-   * effect before issuing the client call.)
+   * failures to their "showable" form, unwrapping inner failures/throwables and
+   * masking off certain flags. See [[Failure.ShowMask]].
    */
   private[finagle] class ProcessFailures[Req, Rep] extends SimpleFilter[Req, Rep] {
     private[this] val Process: PartialFunction[Throwable, Future[Rep]] = {
@@ -310,7 +311,7 @@ object Failure {
   val role = Stack.Role("ProcessFailure")
 
   /**
-   * A module to strip out dangerous flags; more coming soon.
+   * A module to strip out dangerous flags.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {

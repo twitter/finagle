@@ -79,7 +79,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
   }
 
   test("Failure.show") {
-    assert(Failure("ok", Failure.Restartable|Failure.Interrupted).show == Failure("ok", Failure.Interrupted))
+    assert(Failure("ok", Failure.Rejected|Failure.Restartable|Failure.Interrupted).show == Failure("ok", Failure.Interrupted|Failure.Rejected))
     val inner = new Exception
     assert(Failure.wrap(inner).show == inner)
     assert(Failure.wrap(Failure.wrap(inner)).show == inner)
