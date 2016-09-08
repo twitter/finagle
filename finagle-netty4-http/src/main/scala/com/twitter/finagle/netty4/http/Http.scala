@@ -60,7 +60,6 @@ object exp {
     }
 
   private[finagle] def initServer(params: Stack.Params): ChannelPipeline => Unit = {
-    val maxChunkSize = params[httpparam.MaxChunkSize].size
     val maxRequestSize = params[httpparam.MaxRequestSize].size
     val decompressionEnabled = params[httpparam.Decompression].enabled
     val compressionLevel = params[httpparam.CompressionLevel].level

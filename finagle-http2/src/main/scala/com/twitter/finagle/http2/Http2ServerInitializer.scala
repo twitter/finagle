@@ -2,10 +2,11 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.Stack
+import com.twitter.finagle.netty4.http.exp.initServer
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{ChannelInitializer, Channel, ChannelHandlerContext}
-import io.netty.handler.codec.http.HttpServerUpgradeHandler.{UpgradeCodec, UpgradeCodecFactory}
-import io.netty.handler.codec.http.{HttpServerCodec, HttpServerUpgradeHandler, FullHttpRequest}
+import io.netty.handler.codec.http.HttpServerUpgradeHandler.{UpgradeCodec, UpgradeCodecFactory, SourceCodec}
+import io.netty.handler.codec.http.{HttpServerUpgradeHandler, FullHttpRequest}
 import io.netty.handler.codec.http2.{
   Http2ServerUpgradeCodec,
   Http2CodecUtil,
@@ -17,7 +18,10 @@ import io.netty.util.AsciiString
 /**
  * The handler will be added to all http2 child channels, and must be Sharable.
  */
-private[http2] class Http2ServerInitializer(init: ChannelInitializer[Channel], params: Stack.Params)
+private[http2] class Http2ServerInitializer(
+    init: ChannelInitializer[Channel],
+    params: Stack.Params,
+    codec: SourceCodec)
   extends ChannelInitializer[SocketChannel] {
 
   val upgradeCodecFactory: UpgradeCodecFactory = new UpgradeCodecFactory {
@@ -26,6 +30,7 @@ private[http2] class Http2ServerInitializer(init: ChannelInitializer[Channel], p
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
             ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
+            initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)
           }
         }
@@ -44,19 +49,10 @@ private[http2] class Http2ServerInitializer(init: ChannelInitializer[Channel], p
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()
 
-    val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
-    val maxHeaderSize = params[httpparam.MaxHeaderSize].size
     val maxRequestSize = params[httpparam.MaxRequestSize].size
+    p.addAfter("httpCodec", "upgradeHandler",
+      new HttpServerUpgradeHandler(codec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
 
-    val sourceCodec = new HttpServerCodec(
-      maxInitialLineSize.inBytes.toInt,
-      maxHeaderSize.inBytes.toInt,
-      maxRequestSize.inBytes.toInt
-    )
-
-    p.addLast(sourceCodec)
-    p.addLast(
-      new HttpServerUpgradeHandler(sourceCodec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
     p.addLast(init)
   }
 }

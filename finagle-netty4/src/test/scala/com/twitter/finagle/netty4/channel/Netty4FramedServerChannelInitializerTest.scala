@@ -16,19 +16,13 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class Netty4ServerChannelInitializerTest
+class Netty4FramedServerChannelInitializerTest
   extends FunSuite
   with Eventually
   with IntegrationPatience {
 
   val writeDiscardHandler = new ChannelOutboundHandlerAdapter {
     override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = ()
-  }
-
-  val nop = new ChannelHandler {
-    def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = ()
-    def handlerRemoved(ctx: ChannelHandlerContext): Unit = ()
-    def handlerAdded(ctx: ChannelHandlerContext): Unit = ()
   }
 
   trait Ctx {
@@ -40,17 +34,17 @@ class Netty4ServerChannelInitializerTest
   }
 
 
-  test("Netty4ServerChannelInitializer channel writes can time out") {
+  test("Netty4FramedServerChannelInitializer channel writes can time out") {
     new Ctx {
       val params = baseParams + Transport.Liveness(
         readTimeout = Duration.Top,
         writeTimeout = Duration.fromMilliseconds(1),
         keepAlive = None)
 
-      val init = new Netty4ServerChannelInitializer(_ => (), params, () => nop)
+      val init = new Netty4FramedServerChannelInitializer(params)
       init.initChannel(srv)
 
-      srv.pipeline.addBefore(Netty4ServerChannelInitializer.WriteTimeoutHandlerKey,
+      srv.pipeline.addBefore(Netty4FramedServerChannelInitializer.WriteTimeoutHandlerKey,
         "writeDiscardHandler", writeDiscardHandler)
 
       // WriteCompletionTimeoutHandler throws a WriteTimeOutException after the message is lost.
@@ -63,14 +57,14 @@ class Netty4ServerChannelInitializerTest
     }
   }
 
-  test("Netty4ServerChannelInitializer channel reads can time out") {
+  test("Netty4FramedServerChannelInitializer channel reads can time out") {
     new Ctx {
       val params = baseParams + Transport.Liveness(
         readTimeout = Duration.fromMilliseconds(1),
         writeTimeout = Duration.Top,
         keepAlive = None)
 
-      val init = new Netty4ServerChannelInitializer(_ => (), params, () => nop)
+      val init = new Netty4FramedServerChannelInitializer(params)
       init.initChannel(srv)
 
       srv.pipeline.fireChannelActive()
