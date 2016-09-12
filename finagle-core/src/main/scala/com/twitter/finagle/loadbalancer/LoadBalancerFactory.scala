@@ -4,18 +4,21 @@ import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
+import com.twitter.finagle.service.NilService
 import com.twitter.finagle.stats._
 import com.twitter.util.{Activity, Future, Time, Var}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 import java.util.logging.{Level, Logger}
 
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
+object perHostStats extends GlobalFlag[Boolean](false,
+  "enable/default per-host stats.\n" +
   "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
   "\tWhen disabled, the configured stats receiver will be used,\n" +
   "\tor the NullStatsReceiver if none given.")
 
 object LoadBalancerFactory {
-  val role = Stack.Role("LoadBalancer")
+  val role: Stack.Role = Stack.Role("LoadBalancer")
 
   /**
    * A class eligible for configuring a client's load balancer probation setting.
@@ -89,14 +92,7 @@ object LoadBalancerFactory {
     implicit val param = Stack.Param(Param(DefaultBalancerFactory))
   }
 
-  /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
-   * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
-   * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
-   * defined by the `LoadBalancerFactory.Param` parameter.
-   */
-  private[finagle] trait StackModule[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
-    val role = LoadBalancerFactory.role
+  private object StackModule {
     val parameters = Seq(
       implicitly[Stack.Param[ErrorLabel]],
       implicitly[Stack.Param[Dest]],
@@ -106,8 +102,22 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[param.Logger]],
       implicitly[Stack.Param[param.Monitor]],
       implicitly[Stack.Param[param.Reporter]])
+  }
 
-    def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+  /**
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
+   * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
+   * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
+   * defined by the `LoadBalancerFactory.Param` parameter.
+   */
+  private[finagle] trait StackModule[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
+    def role: Stack.Role = LoadBalancerFactory.role
+    def parameters: Seq[Stack.Param[_]] = StackModule.parameters
+
+    def make(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] = {
       val ErrorLabel(errorLabel) = params[ErrorLabel]
       val Dest(dest) = params[Dest]
       val Param(loadBalancerFactory) = params[Param]
@@ -148,7 +158,7 @@ object LoadBalancerFactory {
 
         val composite = {
           val ia = addr match {
-            case Address.Inet(ia, _) => Some(ia)
+            case Address.Inet(ad, _) => Some(ad)
             case _ => None
           }
           reporter(label, ia).andThen(monitor)
@@ -162,28 +172,54 @@ object LoadBalancerFactory {
         // cost across requests by moving endpoint stack creation into
         // service acquisition (apply method below).
         new ServiceFactory[Req, Rep] {
-          var underlying: ServiceFactory[Req, Rep] = null
-          var isClosed = false
+          private[this] val closedSvcFactory: ServiceFactory[Req, Rep] =
+           ServiceFactory.const(NilService)
+
+          // The state machine: Starts out `null`. After `apply` it will have
+          // a non-null value. After `close` (whether or not `apply` has been
+          // called) it will be `closedSvcFactory` where it will remain.
+          private[this] val underlying =
+            new AtomicReference[ServiceFactory[Req, Rep]](null)
+
+          // used to allow only 1 thread to call `next.make()`
+          private[this] val createPermit = new AtomicBoolean(false)
+
           def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-            synchronized {
-              if (isClosed) return Future.exception(new ServiceClosedException)
-              if (underlying == null) underlying = next.make(params +
+            var svcFac = underlying.get
+            if (svcFac eq closedSvcFactory)
+              return Future.exception(new ServiceClosedException)
+
+            if (svcFac == null) {
+              if (!createPermit.compareAndSet(false, true)) {
+                // only allow 1 create to happen, otherwise we could lose
+                // registry information from the `close` below.
+                return apply(conn)
+              }
+
+              val made = next.make(params +
                 Transporter.EndpointAddr(addr) +
                 param.Stats(stats) +
                 param.Monitor(composite))
+              if (underlying.compareAndSet(null, made)) {
+                svcFac = made
+              } else {
+                // we lost the race with a `close`. this ServiceFactory needs
+                // to be closed and we run `apply` again.
+                made.close()
+                return apply(conn)
+              }
             }
-            underlying(conn)
+            svcFac(conn)
           }
-          def close(deadline: Time): Future[Unit] = synchronized {
-            isClosed = true
-            if (underlying == null) Future.Done
-            else underlying.close(deadline)
+          def close(deadline: Time): Future[Unit] = {
+            val prev = underlying.getAndSet(closedSvcFactory)
+            if (prev == null) Future.Done
+            else prev.close(deadline)
           }
-          override def status: Status = synchronized {
-            if (underlying == null)
-              if (!isClosed) Status.Open
-              else Status.Closed
-            else underlying.status
+          override def status: Status = {
+            val svcFac = underlying.get
+            if (svcFac == null) Status.Open
+            else svcFac.status
           }
           override def toString: String = addr.toString
         }
@@ -262,10 +298,13 @@ object ConcurrentLoadBalancerFactory {
 
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new StackModule[Req, Rep] {
-      val description = "Balance requests across multiple connections on a single " +
+      val description: String = "Balance requests across multiple connections on a single " +
         "endpoint, used for pipelining protocols"
 
-      override def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+      override def make(
+        params: Stack.Params,
+        next: Stack[ServiceFactory[Req, Rep]]
+      ): Stack[ServiceFactory[Req, Rep]] = {
         val Param(numConnections) = params[Param]
         val Dest(dest) = params[Dest]
         val newDest = dest.map {
