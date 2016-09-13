@@ -66,15 +66,15 @@ before_script:
   - >
     if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
       # run conditionally because they don't pass with openjdks
-      ./sbt --error ++$TRAVIS_SCALA_VERSION finagle-native/update finagle-native/test
+      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update finagle-native/test
     fi
-  
+
   # don't test these projects because they don't pass on travis-ci
-  - ./sbt --error ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script:
   # run for all environments
-  - ./sbt --error ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
