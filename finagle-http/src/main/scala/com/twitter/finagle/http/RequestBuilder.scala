@@ -4,7 +4,7 @@ import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
-import java.net.URL
+import java.net.{URI, URL}
 import java.nio.charset.StandardCharsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
@@ -172,7 +172,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
   def url(u: URL): RequestBuilder[Yes, HasForm] = {
     require(SchemeWhitelist.contains(u.getProtocol), s"url must be http(s), was ${u.getProtocol}")
     val uri = u.toURI
-    val host = uri.getHost.toLowerCase
+    val host = hostString(uri, u)
     val hostValue =
       if (u.getPort == -1 || u.getDefaultPort == u.getPort)
         host
@@ -379,6 +379,29 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     }
 
     from(encodedReq)
+  }
+
+  /**
+   * Determine a host string from the given URI falling back to the URL
+   * if the URI returns a null. We ideally want the host formatted in the way
+   * URI formats the host string. However, if URI returns a null for the host
+   * we return the host defined in the original URL. Note: the URL should NOT
+   * be used for other operations, like equality which does a blocking DNS
+   * resolution on the hostname.
+   * @param uri - [[java.net.URI]] to use as a basis for determining the host
+   * @param url - [[java.net.URL]] to use as a fallback for when the URI.getHost returns a null.
+   * @see [[java.net.URI#getHost]]
+   * @see [[java.net.URL#getHost]]
+   *
+   * @return lowercase string representation of the host for the request.
+   */
+  private[this] def hostString(uri: URI, url: URL): String = {
+    (if (uri.getHost == null) {
+      // fallback to URL
+      url.getHost
+    } else {
+      uri.getHost
+    }).toLowerCase
   }
 
   // absoluteURI if proxied, otherwise relativeURI

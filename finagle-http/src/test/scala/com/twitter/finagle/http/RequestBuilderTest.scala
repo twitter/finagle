@@ -12,6 +12,7 @@ class RequestBuilderTest extends FunSuite {
   val URL0 = new URL("http://joe:blow@www.google.com:77/xxx?foo=bar#xxx")
   val URL1 = new URL("https://www.google.com/")
   val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
+  val URL3 = new URL("https://foo_bar_prod.www.address.com")
 
   val BODY0 = Buf.Utf8("blah")
   val FORM0 = Seq (
@@ -55,6 +56,21 @@ v3
     val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
     val expected = "www.google.com:77"
+    assert(get.headers.get(Fields.Host) == expected)
+    assert(head.headers.get(Fields.Host) == expected)
+    assert(delete.headers.get(Fields.Host) == expected)
+    assert(put.headers.get(Fields.Host) == expected)
+    assert(post.headers.get(Fields.Host) == expected)
+  }
+
+  test("set the HOST header when the HOST contains underscores") {
+    val get = RequestBuilder().url(URL3).buildGet
+    val head = RequestBuilder().url(URL3).buildHead
+    val delete = RequestBuilder().url(URL3).buildDelete
+    val put = RequestBuilder().url(URL3).buildPut(BODY0)
+    val post = RequestBuilder().url(URL3).buildPost(BODY0)
+
+    val expected = "foo_bar_prod.www.address.com"
     assert(get.headers.get(Fields.Host) == expected)
     assert(head.headers.get(Fields.Host) == expected)
     assert(delete.headers.get(Fields.Host) == expected)

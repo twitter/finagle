@@ -24,6 +24,8 @@ Runtime Behavior Changes
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-http: Fix issue in `c.t.finagle.http.RequestBuilder` when the URI host contains
+    underscores. ``RB_ID=870978``
   * finagle-http: A connection for HTTP/1.0 or non-keep-alive requests is now closed
     gracefully so that all requests that have been issued received responses.
     ``RB_ID=868767``
