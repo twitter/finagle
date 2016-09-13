@@ -57,6 +57,7 @@ private[finagle] object Netty4Transporter {
           .group(params[param.WorkerPool].eventLoopGroup)
           .channel(classOf[NioSocketChannel])
           .option(ChannelOption.ALLOCATOR, allocator)
+          .option(ChannelOption.RCVBUF_ALLOCATOR, ReceiveBufferPooledAllocator)
           .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
           .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
           .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket

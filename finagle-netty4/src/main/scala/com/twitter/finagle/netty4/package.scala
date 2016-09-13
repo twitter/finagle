@@ -1,9 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.netty4.channel.RecvByteBufAllocatorProxy
 import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.util.Awaitable
-import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
+import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
@@ -36,6 +37,11 @@ package object netty4 {
     /* preferDirect */ false,
     /* disableLeakDetector */ true
   )
+
+  // Since we always copy onto the heap (see `DirectToHeapInboundHandler`), the receive
+  // buffers never leave the pipeline hence can safely be pooled.
+  private[netty4] val ReceiveBufferPooledAllocator =
+    new RecvByteBufAllocatorProxy(PooledByteBufAllocator.DEFAULT)
 
   object param {
 
