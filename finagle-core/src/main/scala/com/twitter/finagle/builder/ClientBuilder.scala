@@ -637,6 +637,16 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Apply TCP keepAlive (`SO_KEEPALIVE` socket option).
+   *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.transport.Transport.Liveness
+   *
+   * val client = Http.client
+   * client.configured(client.params[Transport.Liveness].copy(keepAlive = Some(value)))
+   * }}}
    */
   def keepAlive(value: Boolean): This =
     configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
