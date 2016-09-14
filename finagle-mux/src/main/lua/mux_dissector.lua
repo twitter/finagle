@@ -11,13 +11,18 @@
 --
 -- There is an example pcap file in finagle-mux/src/test/resources/end-to-end.pcap
 -- created by capturing the output of finagle-thriftmux's EndToEndTest.
---
+
+
+----------------------------------------
+-- creates a Proto object, but doesn't register it yet
+local mux = Proto("mux","Mux Protocol")
 
 local debug_level = {
     DISABLED = 0,
     LEVEL_1  = 1,
     LEVEL_2  = 2
 }
+
 
 -- set this DEBUG to debug_level.LEVEL_1 to enable printing debug_level info
 -- set it to debug_level.LEVEL_2 to enable really verbose printing
@@ -28,7 +33,7 @@ local default_settings =
 {
     debug_level  = DEBUG,
     port         = 9990,
-    heur_enabled = true
+    heur_enabled = true,
 }
 
 local dprint = function() end
@@ -53,13 +58,11 @@ dprint2("Wireshark version = ".. get_version())
 dprint2("Lua version = ".. _VERSION)
 
 ----------------------------------------
--- Unfortunately, the older Wireshark/Tshark versions have bugs, and part of the point
--- of this script is to test those bugs are now fixed.  So we need to check the version
--- end error out if it's too old.
+-- the lua api for tcp segment reassembly was introduced in 1.99.2
 local major, minor, micro = get_version():match("(%d+)%.(%d+)%.(%d+)")
-if major and tonumber(major) <= 1 and ((tonumber(minor) <= 10) or (tonumber(minor) == 11 and tonumber(micro) < 3)) then
-        error(  "Sorry, but your Wireshark/Tshark version ("..get_version()..") is too old for this script!\n"..
-                "This script needs Wireshark/Tshark version 1.11.3 or higher.\n" )
+if major and tonumber(major) <= 1 and ((tonumber(minor) <= 98) or (tonumber(minor) == 99 and tonumber(micro) < 2)) then
+  error(  "Sorry, but your Wireshark/Tshark version ("..get_version()..") is too old for this script!\n"..
+          "This script needs Wireshark/Tshark version 1.99.2 or higher.\n" )
 end
 
 -- more sanity checking
@@ -73,7 +76,6 @@ assert(ProtoExpert.new, "Wireshark does not have the ProtoExpert class, so it's 
 -- the min header size
 -- 4 bytes for size, 1 for type, 3 for tag number
 local MIN_MUX_LEN = 8
-
 local TAG_MARKER = 0
 local TAG_PING = 1
 
@@ -137,9 +139,6 @@ local MARKER_TYPES = {
   [MSG_TYPE_TLEASE] = true
 }
 
-----------------------------------------
--- creates a Proto object, but doesn't register it yet
-local mux = Proto("mux","Mux Protocol")
 
 ----------------------------------------
 -- multiple ways to do the same thing: create a protocol field (but not register it yet)
@@ -151,7 +150,8 @@ local pf_discard_tag = ProtoField.uint24("mux.discard_tag", "Tag To Discard")
 local pf_contexts = ProtoField.bytes("mux.context", "Contexts")
 local pf_context_key = ProtoField.string("mux.context_key", "Context key")
 local pf_dest = ProtoField.string("mux.dest", "Destination")
-local pf_payload_len = ProtoField.string("mux.payload", "Payload Length")
+local pf_payload_len = ProtoField.uint32("mux.payload", "Payload Length")
+local pf_mux_overhead = ProtoField.uint32("mux.overhead", "Mux Overhead") -- the size of framing + contexts + dtabs + size field
 local pf_why = ProtoField.string("mux.msg", "Why")
 local pf_trace_flags = ProtoField.uint64("mux.ctx.trace.flags", "Flags", base.HEX)
 
@@ -163,6 +163,7 @@ mux.fields = {
   pf_context_key,
   pf_dest,
   pf_payload_len,
+  pf_mux_overhead,
   pf_discard_tag,
   pf_why,
   pf_trace_flags
@@ -212,13 +213,86 @@ function decodeCtx(ctx_tree, key, value)
   end
 end
 
+function mux.dissector(tvbuf, pktinfo, root)
+  -- heur_dissect_mux says it looks like ours, 
+  -- call tcp desegmenter with our full dissector
+  dprint("mux.dissector CALLED")
+  return dissect_tcp_pdus(tvbuf, root, MIN_MUX_LEN, heur_get_mux_length, mux_dissector_impl, true)
+end
+
+function looks_like_mux(tvbuf,pktinfo,root)
+  dprint2("looks_like_mux called")
+
+  -- if our preferences tell us not to do this, return false
+  if not default_settings.heur_enabled then
+    dprint("looks_like_mux: heur_dissect_mux disabled")
+    return false
+  end
+
+  if tvbuf:len() < MIN_MUX_LEN then
+    dprint("looks_like_mux: tvb shorter than MIN_MUX_LEN of: ".. MIN_MUX_LEN)
+    return false
+  end
+
+  -- the first 4 bytes are the size of the mux message
+  local size = tvbuf:range(0, 4):uint()
+
+  -- the next byte is the type which we need to verify is valid
+  local typeint = tvbuf:range(4,1):uint()
+  local typestr = MESSAGE_TYPES[typeint]
+  if not typestr then
+    dprint("looks_like_mux: invalid type: ".. typeint)
+    return false
+  end
+
+  -- examine the tag
+  local tag = tvbuf:range(5,3):uint()
+  if typeint == MSG_TYPE_TPING or typeint == MSG_TYPE_RPING then
+    if tag ~= TAG_PING then
+      dprint("looks_like_mux: invalid ping tag: ".. tag)
+      return false
+    end
+  else
+    if MARKER_TYPES[typeint] then
+      if tag ~= TAG_MARKER then
+        dprint(string.format("%s (%d) %s (%d)", "heur_dissect_mux: marker type", typeint, "with non-marker tag", tag))
+        return false
+      end
+    else
+      if isFragment(tag) == true then
+        tag = bit.band(tag, bit.bnot(MSB_TAG))
+      end
+      if tag < MIN_TAG or tag > MAX_TAG then
+        dprint("looks_like_mux: invalid tag: ".. tag)
+        return false
+      end
+    end
+  end
+
+  return true
+end
+
+local function heur_dissect_mux(tvbuf,pktinfo,root)
+  if looks_like_mux(tvbuf, pktinfo, root) then
+    dissect_tcp_pdus(tvbuf, root, MIN_MUX_LEN, heur_get_mux_length, mux_dissector_impl, true)
+    return true
+  else
+    return false
+  end
+end
+
 ----------------------------------------
 -- The following creates the callback function for the dissector.
 -- The 'tvbuf' is a Tvb object, 'pktinfo' is a Pinfo object, and 'root' is a TreeItem object.
 -- Whenever Wireshark dissects a packet that our Proto is hooked into, it will call
 -- this function and pass it these arguments for the packet it's dissecting.
-function mux.dissector(tvbuf,pktinfo,root)
-    dprint2("mux.dissector called")
+function mux_dissector_impl(tvbuf, pktinfo, root)
+    dprint("mux_dissector_impl called")
+    if looks_like_mux(tvbuf, pktinfo,root) == false then
+      dprint("looks_like_mux returned false, bailing out")
+      return 0
+    end
+
 
     -- set the protocol column to show our protocol name
     pktinfo.cols.protocol:set("MUX")
@@ -238,7 +312,7 @@ function mux.dissector(tvbuf,pktinfo,root)
     tree:add(pf_size, tvbuf:range(0,4))
 
     -- size represents the number of bytes remaining in the frame.
-    local size = tvbuf:range(0,4):int()
+    local size = tvbuf:range(0,4):uint()
 
     -- now let's add the type, which are all in the packet bytes at offset 4 of length 1
     -- instead of calling this again and again, let's just use a variable
@@ -247,7 +321,7 @@ function mux.dissector(tvbuf,pktinfo,root)
     local typestr = MESSAGE_TYPES[typeint]
 
     -- special case the magic RErr message used in handshaking
-    if typeint == MSG_TYPE_OLD_RERR and size == 15 and tvbuf:range(8, 11):string() == CAN_TINIT_PAYLOAD then -- magic!
+    if pktlen == 19 and typeint == MSG_TYPE_OLD_RERR and size == 15 and tvbuf:range(8, 11):string() == CAN_TINIT_PAYLOAD then -- magic!
       tree:add(pf_type, MSG_TYPE_CAN_TINIT)
       local typestr = "CanTinit"
     else
@@ -334,13 +408,21 @@ function mux.dissector(tvbuf,pktinfo,root)
 
     local remaining = size - pos + 4 -- add back the 4 bytes for the size field
     tree:add(pf_payload_len, remaining)
+    tree:add(pf_mux_overhead, size - remaining + 4) -- the size of framing + contexts + dtabs + size field
     pos = pos + remaining
 
-    dprint2("mux.dissector returning ".. pos)
 
     -- tell wireshark how much of tvbuf we dissected
     return pos
 end
+
+----------------------------------------
+-- the following function is used for the new dissect_tcp_pdus method
+-- this returns the length of the full message
+function heur_get_mux_length(tvbuf, pktinfo, offset)
+    return tvbuf:range(offset,4):uint() + 4
+end
+
 
 ----------------------------------------
 -- we also want to add the heuristic dissector, for any tcp protocol
@@ -352,82 +434,11 @@ end
 -- we need to try as hard as possible, or else we'll think it's for us when it's
 -- not and block other heuristic dissectors from getting their chance
 --
-local function heur_dissect_mux(tvbuf,pktinfo,root)
-    dprint2("heur_dissect_mux called")
-
-    -- if our preferences tell us not to do this, return false
-    if not default_settings.heur_enabled then
-        dprint2("heur_dissect_mux disabled")
-        return false
-    end
-
-    if tvbuf:len() < MIN_MUX_LEN then
-        dprint("heur_dissect_mux: tvb shorter than MIN_MUX_LEN of: ".. MIN_MUX_LEN)
-        return false
-    end
-
-    -- the first 4 bytes are size id, validate that it is the right size
-    local size = tvbuf:range(0, 4):int()
-    if size + 4 ~= tvbuf:len() then
-      dprint("heur_dissect_mux: size did not match buf length: ".. size .." != ".. tvbuf:len())
-      return false
-    end
-
-    -- the next byte is the type which we need to verify is valid
-    local typeint = tvbuf:range(4,1):uint()
-    local typestr = MESSAGE_TYPES[typeint]
-    if not typestr then
-      dprint("heur_dissect_mux: invalid type: ".. typeint)
-      return false
-    end
-
-    -- examine the tag
-    local tag = tvbuf:range(5,3):uint()
-    if typeint == MSG_TYPE_TPING or typeint == MSG_TYPE_RPING then
-      if tag ~= TAG_PING then
-        dprint("heur_dissect_mux: invalid ping tag: ".. tag)
-        return false
-      end
-    else
-      if MARKER_TYPES[typeint] then
-        if tag ~= TAG_MARKER then
-          dprint(string.format("%s (%d) %s (%d)", "heur_dissect_mux: marker type", typeint, "with non-marker tag", tag))
-          return false
-        end
-      else
-        if isFragment(tag) == true then
-          tag = bit.band(tag, bit.bnot(MSB_TAG))
-        end
-        if tag < MIN_TAG or tag > MAX_TAG then
-          dprint("heur_dissect_mux: invalid tag: ".. tag)
-          return false
-        end
-      end
-    end
-
-    dprint2("heur_dissect_mux: everything looks good calling the real dissector")
-
-
-    -- ok, looks like it's ours, so go dissect it
-    -- note: calling the dissector directly like this is new in 1.11.3
-    -- also note that calling a Dissector object, as this does, means we don't
-    -- get back the return value of the dissector function we created previously
-    -- so it might be better to just call the function directly instead of doing
-    -- this, but this script is used for testing and this tests the call() function
-    mux.dissector(tvbuf,pktinfo,root)
-
-    return true
-end
 
 ----------------------------------------
 -- we want to have our protocol dissection invoked for a specific tcp port,
 -- so get the tcp dissector table and add our protocol to it
 DissectorTable.get("tcp.port"):add(default_settings.port, mux)
 
--- now register that heuristic dissector into the tcp heuristic list
-mux:register_heuristic("tcp",heur_dissect_mux)
-
--- We're done!
--- our protocol (Proto) gets automatically registered after this script finishes loading
-----------------------------------------
-
+-- register the heuristic dissector.
+mux:register_heuristic("tcp", heur_dissect_mux)
