@@ -97,9 +97,6 @@ private[finagle] case class Netty4Listener[In, Out](
       bootstrap.option(ChannelOption.ALLOCATOR, allocator)
       bootstrap.childOption(ChannelOption.ALLOCATOR, allocator)
 
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, ReceiveBufferPooledAllocator)
-      bootstrap.childOption(ChannelOption.RCVBUF_ALLOCATOR, ReceiveBufferPooledAllocator)
-
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))
