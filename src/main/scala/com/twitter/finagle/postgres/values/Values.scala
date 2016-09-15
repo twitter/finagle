@@ -278,7 +278,7 @@ object ValueEncoder extends LowPriorityEncoder {
 
   implicit val bytea: ValueEncoder[Array[Byte]] = instance(
     "bytea",
-    bytes => "\\x" + bytes.map(Integer.toHexString(_)).mkString,
+    bytes => "\\x" + bytes.map("%02x".format(_)).mkString,
     (b, c) => Some(ChannelBuffers.copiedBuffer(b))
   )
   implicit val int2: ValueEncoder[Short] = instance("int2", _.toString, (i, c) => Some(buffer(2)(_.writeShort(i))))
