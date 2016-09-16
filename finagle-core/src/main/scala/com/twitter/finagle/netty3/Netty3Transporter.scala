@@ -2,17 +2,20 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.netty3.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+import com.twitter.finagle.netty3.channel.{
+  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.SslConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
-import com.twitter.finagle.socks.{SocksProxyFlags, Unauthenticated, UsernamePassAuthenticationSetting}
+import com.twitter.finagle.netty3.Netty3Transporter.{ChannelFactory, TransportFactory}
+import com.twitter.finagle.param.{Label, Logger}
+import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.{SessionVerifier, Engine}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, WriteException, CancelledConnectionException}
-import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
+import com.twitter.util.{Future, Promise, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
 import java.util.IdentityHashMap
@@ -28,10 +31,10 @@ import scala.collection.mutable
 
 /** Bridges a netty3 channel with a transport */
 private[netty3] class ChannelConnector[In, Out](
-  newChannel: () => Channel,
-  newTransport: Channel => Transport[In, Out],
-  statsReceiver: StatsReceiver
-) extends (SocketAddress => Future[Transport[In, Out]]) {
+    newChannel: () => Channel,
+    newTransport: Channel => Transport[In, Out],
+    statsReceiver: StatsReceiver)
+  extends (SocketAddress => Future[Transport[In, Out]]) {
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
@@ -119,60 +122,6 @@ object Netty3Transporter {
   }
 
   /**
-   * Constructs a `Netty3Transporter` given a netty3 `ChannelPipelineFactory`
-   * `Stack.Params`.
-   */
-  private[netty3] def make[In, Out](
-    pipelineFactory: ChannelPipelineFactory,
-    params: Stack.Params
-  ): Netty3Transporter[In, Out] = {
-    val Label(label) = params[Label]
-    val Logger(logger) = params[Logger]
-    // transport and transporter params
-    val ChannelFactory(cf) = params[ChannelFactory]
-    val TransportFactory(newTransport) = params[TransportFactory]
-    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
-    val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
-    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
-    val Transporter.HttpProxy(httpProxy, httpProxyCredentials) = params[Transporter.HttpProxy]
-    val Transporter.SocksProxy(socksProxy, socksCredentials) = params[Transporter.SocksProxy]
-    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
-    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
-    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
-    val snooper = params[Transport.Verbose] match {
-      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
-      case _ => None
-    }
-    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
-
-    val opts = new mutable.HashMap[String, Object]()
-    opts += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
-    opts += "tcpNoDelay" -> (noDelay: java.lang.Boolean)
-    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
-    for (v <- keepAlive) opts += "keepAlive" -> (v: java.lang.Boolean)
-    for (s <- sendBufSize) opts += "sendBufferSize" -> (s: java.lang.Integer)
-    for (s <- recvBufSize) opts += "receiveBufferSize" -> (s: java.lang.Integer)
-    for (v <- params[Transporter.TrafficClass].value)
-      opts += "trafficClass" -> (v: java.lang.Integer)
-
-    Netty3Transporter[In, Out](
-      label,
-      pipelineFactory,
-      newChannel = cf.newChannel(_),
-      newTransport = (ch: Channel) => Transport.cast[In, Out](newTransport(ch)),
-      tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
-      httpProxy = httpProxy,
-      httpProxyCredentials = httpProxyCredentials,
-      socksProxy = socksProxy,
-      socksUsernameAndPassword = socksCredentials,
-      channelReaderTimeout = readerTimeout,
-      channelWriterTimeout = writerTimeout,
-      channelSnooper = snooper,
-      channelOptions = opts.toMap
-    )
-  }
-
-  /**
    * Constructs a `Transporter[In, Out]` given a netty3 `ChannelPipelineFactory`
    * responsible for framing a `Transport` stream. The `Transporter` is configured
    * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
@@ -186,7 +135,7 @@ object Netty3Transporter {
     params: Stack.Params
   ): Transporter[In, Out] = {
     val Stats(stats) = params[Stats]
-    val transporter = make[In, Out](pipelineFactory, params)
+    val transporter = new Netty3Transporter[In, Out](pipelineFactory, params)
 
     new Transporter[In, Out] {
       def apply(sa: SocketAddress): Future[Transport[In, Out]] =
@@ -206,7 +155,8 @@ object Netty3Transporter {
  * against the given value.
  */
 case class Netty3TransporterTLSConfig(
-  newEngine: SocketAddress => Engine, verifyHost: Option[String])
+    newEngine: SocketAddress => Engine,
+    verifyHost: Option[String])
 
 /**
  * A [[ChannelFutureListener]] instance that fires "channelClosed" upstream event to the
@@ -225,7 +175,7 @@ private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
       case channel =>
         Channels.fireChannelClosedLater(channel)
     }
- }
+  }
 }
 
 /**
@@ -243,43 +193,23 @@ private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
  * the ''Codec'': it must input (downstream) ''In'' objects,
  * and output (upstream) ''Out'' objects.
  *
- * @param newChannel A function used to create a new netty3 channel,
- * given a pipeline.
+ * @param params a collection of `Stack.Param` values used to
+ * configure the transporter.
  *
- * @param newTransport Create a new transport, given a channel.
- *
- * @param tlsConfig If defined, use SSL with the given configuration
- *
- * @param channelReaderTimeout The amount of time for which a channel
- * may be read-idle.
- *
- * @param channelWriterTimeout The amount of time for which a channel
- * may be write-idle.
- *
- * @param channelSnooper If defined, install the given snooper on
- * each channel. Used for debugging.
- *
- * @param channelOptions These netty channel options are applied to
- * the channel prior to establishing a new connection.
  */
-case class Netty3Transporter[In, Out](
-  name: String,
-  pipelineFactory: ChannelPipelineFactory,
-  newChannel: ChannelPipeline => Channel =
-    Netty3Transporter.channelFactory.newChannel,
-  newTransport: Channel => Transport[In, Out] =
-    (ch: Channel) => Transport.cast[In, Out](new ChannelTransport[Any, Any](ch)),
-  tlsConfig: Option[Netty3TransporterTLSConfig] = None,
-  httpProxy: Option[SocketAddress] = None,
-  socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,
-  socksUsernameAndPassword: Option[(String,String)] = SocksProxyFlags.socksUsernameAndPassword,
-  channelReaderTimeout: Duration = Duration.Top,
-  channelWriterTimeout: Duration = Duration.Top,
-  channelSnooper: Option[ChannelSnooper] = None,
-  channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions,
-  httpProxyCredentials: Option[Transporter.Credentials] = None
-) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
+class Netty3Transporter[In, Out](
+    val pipelineFactory: ChannelPipelineFactory,
+    val params: Stack.Params = Stack.Params.empty)
+  extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
+  private[this] val newTransport = makeNewTransport(params)
+
+  // Accessible for testing
+  private[netty3] val channelOptions = makeChannelOptions(params)
+  private[netty3] val newChannel = makeNewChannel(params)
+
+  // name is public for compatibility
+  val Label(name) = params[Label]
 
   def channelStatsHandler(statsReceiver: StatsReceiver): ChannelHandler = synchronized {
     if (!(statsHandlers containsKey statsReceiver)) {
@@ -289,16 +219,64 @@ case class Netty3Transporter[In, Out](
     statsHandlers.get(statsReceiver)
   }
 
-  private[netty3] def newPipeline(
-    addr: SocketAddress,
-    statsReceiver: StatsReceiver
-  ): ChannelPipeline = {
-    val pipeline = pipelineFactory.getPipeline()
+  private[netty3] def makeChannelOptions(params: Stack.Params): Map[String, Object] = {
+    val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
+    val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
+    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
 
+    val opts = new mutable.HashMap[String, Object]()
+    opts += "connectTimeoutMillis" ->
+      ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
+    opts += "tcpNoDelay" -> (noDelay: java.lang.Boolean)
+    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
+    for (v <- keepAlive) opts += "keepAlive" -> (v: java.lang.Boolean)
+    for (s <- sendBufSize) opts += "sendBufferSize" -> (s: java.lang.Integer)
+    for (s <- recvBufSize) opts += "receiveBufferSize" -> (s: java.lang.Integer)
+    for (v <- params[Transporter.TrafficClass].value)
+      opts += "trafficClass" -> (v: java.lang.Integer)
+
+    opts.toMap
+  }
+
+  private[this] def makeChannelSnooper(params: Stack.Params): Option[ChannelSnooper] = {
+    val Label(label) = params[Label]
+    val Logger(logger) = params[Logger]
+
+    params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+      case _ => None
+    }
+  }
+
+  private[this] def makeNewChannel(params: Stack.Params): ChannelPipeline => Channel = {
+    val ChannelFactory(cf) = params[ChannelFactory]
+    (pipeline: ChannelPipeline) => cf.newChannel(pipeline)
+  }
+
+  private[this] def makeNewTransport(params: Stack.Params): Channel => Transport[In, Out] = {
+    val TransportFactory(newTransport) = params[TransportFactory]
+    (ch: Channel) => Transport.cast[In, Out](newTransport(ch))
+  }
+
+  private[this] def addFirstStatsHandlers(
+    pipeline: ChannelPipeline,
+    statsReceiver: StatsReceiver
+  ): Unit = {
     pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
     pipeline.addFirst("channelRequestStatsHandler",
       new ChannelRequestStatsHandler(statsReceiver)
     )
+  }
+
+  private[this] def addFirstIdleHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    statsReceiver: StatsReceiver
+  ): Unit = {
+    val Transport.Liveness(channelReaderTimeout, channelWriterTimeout, keepAlive) =
+      params[Transport.Liveness]
 
     if (channelReaderTimeout.isFinite || channelWriterTimeout.isFinite) {
       val rms =
@@ -316,6 +294,17 @@ case class Netty3Transporter[In, Out](
       pipeline.addFirst("idleDetector",
         new IdleStateHandler(DefaultTimer.netty, rms, wms, 0, TimeUnit.MILLISECONDS))
     }
+  }
+
+  private[this] def addFirstTlsHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    addr: SocketAddress
+  ): Unit = {
+    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
+    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
+    val tlsConfig: Option[Netty3TransporterTLSConfig] =
+      tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) }
 
     for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {
       import org.jboss.netty.handler.ssl._
@@ -346,6 +335,15 @@ case class Netty3Transporter[In, Out](
       // [2]: https://github.com/netty/netty/blob/3.10/src/main/java/org/jboss/netty/handler/ssl/SslHandler.java#L119
       sslHandler.getSSLEngineInboundCloseFuture.addListener(FireChannelClosedLater)
     }
+  }
+
+  private[this] def addFirstSocksProxyHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    addr: SocketAddress
+  ): Unit = {
+    val Transporter.SocksProxy(socksProxy, socksUsernameAndPassword) =
+      params[Transporter.SocksProxy]
 
     (socksProxy, addr) match {
       case (Some(proxyAddr), inetSockAddr: InetSocketAddress) if !inetSockAddr.isUnresolved =>
@@ -360,15 +358,40 @@ case class Netty3Transporter[In, Out](
         }
       case _ =>
     }
+  }
+
+  private[this] def addFirstHttpProxyHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    addr: SocketAddress
+  ): Unit = {
+    val Transporter.HttpProxy(httpProxy, httpProxyCredentials) = params[Transporter.HttpProxy]
 
     (httpProxy, addr) match {
       case (Some(proxyAddr), inetAddr: InetSocketAddress) if !inetAddr.isUnresolved =>
         HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline, httpProxyCredentials)
       case _ =>
     }
+  }
 
+  private[this] def addFirstSnooperHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+    val channelSnooper = makeChannelSnooper(params)
     for (snooper <- channelSnooper)
       pipeline.addFirst("channelSnooper", snooper)
+  }
+
+  private[netty3] def newPipeline(
+    addr: SocketAddress,
+    statsReceiver: StatsReceiver
+  ): ChannelPipeline = {
+    val pipeline = pipelineFactory.getPipeline()
+
+    addFirstStatsHandlers(pipeline, statsReceiver)
+    addFirstIdleHandlers(pipeline, params, statsReceiver)
+    addFirstTlsHandlers(pipeline, params, addr)
+    addFirstSocksProxyHandlers(pipeline, params, addr)
+    addFirstHttpProxyHandlers(pipeline, params, addr)
+    addFirstSnooperHandlers(pipeline, params)
 
     pipeline
   }

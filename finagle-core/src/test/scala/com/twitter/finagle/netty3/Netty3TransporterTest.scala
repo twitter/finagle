@@ -57,8 +57,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
   ): ChannelPipeline = {
     val pipeline = Channels.pipeline()
     val pipelineFactory = Channels.pipelineFactory(pipeline)
-    val transporter = Netty3Transporter.make(pipelineFactory, params)
-
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
     transporter.newPipeline(addr, statsReceiver)
   }
 
@@ -78,26 +77,15 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
         Transport.Verbose(true)
 
     val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
-    val transporter = Netty3Transporter.make(pipelineFactory, inputParams)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, inputParams)
     assert(transporter.name == inputParams[Label].label)
     assert(transporter.pipelineFactory == pipelineFactory)
-    assert(
-      transporter.tlsConfig ==
-        inputParams[Transport.TLSClientEngine].e.map(
-          Netty3TransporterTLSConfig(_, inputParams[Transporter.TLSHostname].hostname)))
-    assert(transporter.httpProxy == inputParams[Transporter.HttpProxy].sa)
-    assert(transporter.httpProxyCredentials == inputParams[Transporter.HttpProxy].credentials)
-    assert(transporter.socksProxy == inputParams[Transporter.SocksProxy].sa)
-    assert(transporter.socksUsernameAndPassword == inputParams[Transporter.SocksProxy].credentials)
-    assert(transporter.channelReaderTimeout == inputParams[Transport.Liveness].readTimeout)
-    assert(transporter.channelWriterTimeout == inputParams[Transport.Liveness].writeTimeout)
     assert(transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send)
     assert(transporter.channelOptions.get("receiveBufferSize") == inputParams[Transport.BufferSizes].recv)
     assert(transporter.channelOptions.get("keepAlive") == inputParams[Transport.Liveness].keepAlive)
     assert(transporter.channelOptions.get("connectTimeoutMillis").get ==
       inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds +
       inputParams[LatencyCompensation.Compensation].howlong.inMilliseconds)
-    assert(transporter.channelSnooper.nonEmpty == inputParams[Transport.Verbose].enabled)
   }
 
   test("newPipeline handles unresolved InetSocketAddresses") {
@@ -109,7 +97,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     val params = Stack.Params.empty + Label("name") +
       Transporter.SocksProxy(Some(InetSocketAddress.createUnresolved("anAddr", 0)), None)
 
-    val transporter = Netty3Transporter.make(pipelineFactory, params)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
     val pl = transporter.newPipeline(unresolvedAddr, NullStatsReceiver)
     assert(pl == pipeline) // mainly just checking that we don't NPE anymore
   }
@@ -156,7 +144,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     val pipelineFactory = new ChannelPipelineFactory {
       override def getPipeline(): ChannelPipeline = firstPipeline
     }
-    val transporter = Netty3Transporter.make(pipelineFactory,
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory,
       Stack.Params.empty + Label("name"))
 
     val firstHandler = transporter.channelStatsHandler(sr.scope("first"))
@@ -350,7 +338,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
       Transporter.TLSHostname(Some("localhost"))
 
     val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
-    val transporter = Netty3Transporter.make(pipelineFactory, params)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
 
     // 21 - alert message, 3 - SSL3 major version,
     // 0 - SSL3 minor version, 0 1 - package length, 0 - close_notify

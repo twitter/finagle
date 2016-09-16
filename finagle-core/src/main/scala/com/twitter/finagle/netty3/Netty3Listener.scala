@@ -2,15 +2,16 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
 import com.twitter.finagle.netty3.channel._
+import com.twitter.finagle.netty3.param.Netty3Timer
 import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
+import com.twitter.finagle.param.{Label, Logger, Stats, Timer}
 import com.twitter.finagle.server.{Listener, ServerRegistry}
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.logging.HasLogLevel
-import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
+import com.twitter.util.{CloseAwaitably, Duration, Future, Promise, Time}
 import java.net.SocketAddress
 import java.util.IdentityHashMap
 import java.util.logging.Level
@@ -31,8 +32,6 @@ import scala.collection.mutable
 case class Netty3ListenerTLSConfig(newEngine: () => Engine)
 
 object Netty3Listener {
-  import com.twitter.finagle.param._
-  import param._
 
   /**
    * Class Closer implements channel tracking and semi-graceful closing
@@ -159,55 +158,7 @@ object Netty3Listener {
   def apply[In, Out](
     pipeline: ChannelPipelineFactory,
     params: Stack.Params
-  ): Listener[In, Out] = {
-    val Label(label) = params[Label]
-    val Logger(logger) = params[Logger]
-    val Monitor(monitor) = params[Monitor]
-    val Stats(stats) = params[Stats]
-    val Timer(timer) = params[Timer]
-
-    // transport and listener params
-    val ChannelFactory(cf) = params[ChannelFactory]
-    val Netty3Timer(nettyTimer) = params[Netty3Timer]
-    val Listener.Backlog(backlog) = params[Listener.Backlog]
-    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
-    val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
-    val Transport.TLSServerEngine(engine) = params[Transport.TLSServerEngine]
-    val snooper = params[Transport.Verbose] match {
-      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
-      case _ => None
-    }
-    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
-
-    val opts = new mutable.HashMap[String, Object]()
-    opts += "soLinger" -> (0: java.lang.Integer)
-    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
-    opts += "child.tcpNoDelay" -> (noDelay: java.lang.Boolean)
-    for (v <- backlog) opts += "backlog" -> (v: java.lang.Integer)
-    for (v <- sendBufSize) opts += "child.sendBufferSize" -> (v: java.lang.Integer)
-    for (v <- recvBufSize) opts += "child.receiveBufferSize" -> (v: java.lang.Integer)
-    for (v <- keepAlive) opts += "child.keepAlive" -> (v: java.lang.Boolean)
-    for (v <- params[Listener.TrafficClass].value) {
-      opts += "trafficClass" -> (v: java.lang.Integer)
-      opts += "child.trafficClass" -> (v: java.lang.Integer)
-    }
-
-    Netty3Listener[In, Out](
-      label,
-      pipeline,
-      snooper,
-      cf,
-      bootstrapOptions = opts.toMap,
-      channelReadTimeout = readTimeout,
-      channelWriteCompletionTimeout = writeTimeout,
-      tlsConfig = engine.map(Netty3ListenerTLSConfig),
-      timer = timer,
-      nettyTimer = nettyTimer,
-      statsReceiver = stats,
-      monitor = monitor,
-      logger = logger
-    )
-  }
+  ): Listener[In, Out] = new Netty3Listener[In, Out](pipeline, params)
 }
 
 /**
@@ -222,47 +173,27 @@ object Netty3Listener {
  * @param pipelineFactory The pipeline factory for encoding input
  * messages and decoding output messages.
  *
- * @param channelSnooper Use the given `ChannelSnooper` to log low
- * level channel activity.
- *
- * @param channelFactory A netty3 `ChannelFactory` used to bootstrap
- * the server's listening channel.
- *
- * @param bootstrapOptions Additional options for Netty's
- * `ServerBootstrap`
- *
- * @param channelReadTimeout Channels are given this much time to
- * read a request.
- *
- * @param channelWriteCompletionTimeout Channels are given this much
- * time to complete a write.
- *
- * @param tlsConfig When present, SSL is used to provide session security.
- *
- * @param monitor Currently unused. Maintained for API compatibility.
+ * @param params A collection of `Stack.Param` values used to
+ * configure the listener.
  */
-case class Netty3Listener[In, Out](
-  name: String,
-  pipelineFactory: ChannelPipelineFactory,
-  channelSnooper: Option[ChannelSnooper] = None,
-  channelFactory: ServerChannelFactory = Netty3Listener.channelFactory,
-  bootstrapOptions: Map[String, Object] = Map(
-    "soLinger" -> (0: java.lang.Integer),
-    "reuseAddress" -> java.lang.Boolean.TRUE,
-    "child.tcpNoDelay" -> java.lang.Boolean.TRUE
-  ),
-  channelReadTimeout: Duration = Duration.Top,
-  channelWriteCompletionTimeout: Duration = Duration.Top,
-  tlsConfig: Option[Netty3ListenerTLSConfig] = None,
-  timer: com.twitter.util.Timer = DefaultTimer.twitter,
-  nettyTimer: org.jboss.netty.util.Timer = DefaultTimer.netty,
-  statsReceiver: StatsReceiver = ServerStatsReceiver,
-  monitor: com.twitter.util.Monitor = NullMonitor,
-  logger: java.util.logging.Logger = DefaultLogger
-) extends Listener[In, Out] {
+class Netty3Listener[In, Out](
+    pipelineFactory: ChannelPipelineFactory,
+    params: Stack.Params)
+  extends Listener[In, Out] {
   import Netty3Listener._
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
+  private[this] val bootstrapOptions = makeBootstrapOptions(params)
+
+  // Parameters used throughout the listener
+  private[this] val Logger(logger) = params[Logger]
+  private[this] val Timer(timer) = params[Timer]
+  private[this] val ChannelFactory(channelFactory) = params[ChannelFactory]
+  // Named paramStatsReceiver to clarify which StatsReceiver is used where.
+  private[this] val Stats(paramStatsReceiver) = params[Stats]
+
+  // name is public for compatibility
+  val Label(name) = params[Label]
 
   def channelStatsHandler(statsReceiver: StatsReceiver) = synchronized {
     if (!(statsHandlers containsKey statsReceiver)) {
@@ -272,43 +203,119 @@ case class Netty3Listener[In, Out](
     statsHandlers.get(statsReceiver)
   }
 
+  // Accessible for testing
+  private[this] def makeBootstrapOptions(params: Stack.Params): Map[String, Object] = {
+    val Listener.Backlog(backlog) = params[Listener.Backlog]
+    val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+    val Transport.Liveness(readTimeout, writeTimeout, keepAlive) = params[Transport.Liveness]
+    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
+
+    val opts = new mutable.HashMap[String, Object]()
+    opts += "soLinger" -> (0: java.lang.Integer)
+    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
+    opts += "child.tcpNoDelay" -> (noDelay: java.lang.Boolean)
+    for (v <- backlog) opts += "backlog" -> (v: java.lang.Integer)
+    for (v <- sendBufSize) opts += "child.sendBufferSize" -> (v: java.lang.Integer)
+    for (v <- recvBufSize) opts += "child.receiveBufferSize" -> (v: java.lang.Integer)
+    for (v <- keepAlive) opts += "child.keepAlive" -> (v: java.lang.Boolean)
+    for (v <- params[Listener.TrafficClass].value) {
+      opts += "trafficClass" -> (v: java.lang.Integer)
+      opts += "child.trafficClass" -> (v: java.lang.Integer)
+    }
+    opts.toMap
+  }
+
+  private[this] def makeChannelSnooper(params: Stack.Params): Option[ChannelSnooper] = {
+    val Label(label) = params[Label]
+    val Logger(logger) = params[Logger]
+
+    params[Transport.Verbose] match {
+      case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
+      case _ => None
+    }
+  }
+
+  private[this] def addFirstSnooperHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+    val channelSnooper = makeChannelSnooper(params)
+    for (channelSnooper <- channelSnooper)
+      pipeline.addFirst("channelLogger", channelSnooper)
+  }
+
+  private[this] def addFirstStatsHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    statsReceiver: StatsReceiver
+  ): Unit = {
+    if (!statsReceiver.isNull)
+      pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
+  }
+
+  private[this] def addLastTimeoutHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+    val Netty3Timer(nettyTimer) = params[Netty3Timer]
+    val Transport.Liveness(channelReadTimeout, channelWriteCompletionTimeout, keepAlive) =
+      params[Transport.Liveness]
+
+    // Apply read timeouts *after* request decoding, preventing
+    // death from clients trying to DoS by slowly trickling in
+    // bytes to our (accumulating) codec.
+    if (channelReadTimeout < Duration.Top) {
+      val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
+      pipeline.addLast(
+        "readTimeout",
+        new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
+    }
+
+    if (channelWriteCompletionTimeout < Duration.Top) {
+      pipeline.addLast(
+        "writeCompletionTimeout",
+        new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
+    }
+  }
+
+  private[this] def addFirstTlsHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
+    val Transport.TLSServerEngine(engine) = params[Transport.TLSServerEngine]
+    val tlsConfig = engine.map(Netty3ListenerTLSConfig)
+
+    for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
+      addTlsToPipeline(pipeline, newEngine)
+  }
+
+  private[this] def addLastRequestStatsHandlers(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    statsReceiver: StatsReceiver
+  ): Unit = {
+    if (!statsReceiver.isNull) {
+      pipeline.addLast(
+        "channelRequestStatsHandler",
+        new ChannelRequestStatsHandler(statsReceiver))
+    }
+  }
+
+  private[this] def addLastFinagleBridge(
+    pipeline: ChannelPipeline,
+    params: Stack.Params,
+    newBridge: () => ChannelHandler
+  ): Unit = {
+    pipeline.addLast("finagleBridge", newBridge())
+  }
+
   def newServerPipelineFactory(statsReceiver: StatsReceiver, newBridge: () => ChannelHandler) =
     new ChannelPipelineFactory {
       def getPipeline() = {
+
+        // The pipeline returned from the pipelineFactory already starts
+        // with protocol support. We are carefully adding handlers around
+        // the protocol support so that we do not break it.
         val pipeline = pipelineFactory.getPipeline()
 
-        for (channelSnooper <- channelSnooper)
-          pipeline.addFirst("channelLogger", channelSnooper)
+        addFirstSnooperHandlers(pipeline, params)
+        addFirstStatsHandlers(pipeline, params, statsReceiver)
+        addLastTimeoutHandlers(pipeline, params)
+        addFirstTlsHandlers(pipeline, params)
+        addLastRequestStatsHandlers(pipeline, params, statsReceiver)
+        addLastFinagleBridge(pipeline, params, newBridge)
 
-        if (!statsReceiver.isNull)
-          pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
-
-        // Apply read timeouts *after* request decoding, preventing
-        // death from clients trying to DoS by slowly trickling in
-        // bytes to our (accumulating) codec.
-        if (channelReadTimeout < Duration.Top) {
-          val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
-          pipeline.addLast(
-            "readTimeout",
-            new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
-        }
-
-        if (channelWriteCompletionTimeout < Duration.Top) {
-          pipeline.addLast(
-            "writeCompletionTimeout",
-            new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
-        }
-
-        for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
-          addTlsToPipeline(pipeline, newEngine)
-
-        if (!statsReceiver.isNull) {
-          pipeline.addLast(
-            "channelRequestStatsHandler",
-            new ChannelRequestStatsHandler(statsReceiver))
-        }
-
-        pipeline.addLast("finagleBridge", newBridge())
         pipeline
       }
     }
@@ -316,9 +323,9 @@ case class Netty3Listener[In, Out](
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val serverLabel = ServerRegistry.nameOf(addr) getOrElse name
-      val scopedStatsReceiver = statsReceiver match {
+      val scopedStatsReceiver = paramStatsReceiver match {
         case ServerStatsReceiver if serverLabel.nonEmpty =>
-          statsReceiver.scope(serverLabel)
+          paramStatsReceiver.scope(serverLabel)
         case sr => sr
       }
 
@@ -359,11 +366,11 @@ private[netty3] object ServerBridge {
  * installed as the last handler.
  */
 private[netty3] class ServerBridge[In, Out](
-  serveTransport: Transport[In, Out] => Unit,
-  log: java.util.logging.Logger,
-  statsReceiver: StatsReceiver,
-  channels: ChannelGroup
-) extends SimpleChannelHandler {
+    serveTransport: Transport[In, Out] => Unit,
+    log: java.util.logging.Logger,
+    statsReceiver: StatsReceiver,
+    channels: ChannelGroup)
+  extends SimpleChannelHandler {
   import ServerBridge.FinestIOExceptionMessages
 
   private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
