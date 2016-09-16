@@ -1,35 +1,27 @@
 package com.twitter.finagle.http2
 
-import com.twitter.conversions.time._
 import com.twitter.finagle
-import com.twitter.finagle.Service
-import com.twitter.finagle.http.{AbstractEndToEndTest, Request, Response}
-import com.twitter.util.{Future, Await}
+import com.twitter.finagle.http.AbstractEndToEndTest
+import com.twitter.finagle.http2.param.PriorKnowledge
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends AbstractEndToEndTest {
+class PriorKnowledgeTest extends AbstractEndToEndTest {
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .configured(Http2)
+      .configured(PriorKnowledge(true))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
       .configured(Http2)
+      .configured(PriorKnowledge(true))
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresHttp2DoesNotSupport = Set[Feature](
     HandlesExpect
   )
-  override def initClient(client: HttpService): Unit = {
-    val request = Request("/")
-    Await.result(client(request), 5.seconds)
-  }
-
-  override def initService: HttpService = Service.mk { req: Request =>
-    Future.value(Response())
-  }
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresToBeImplemented = featuresHttp2DoesNotSupport ++ Set[Feature](

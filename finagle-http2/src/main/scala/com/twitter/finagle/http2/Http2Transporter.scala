@@ -1,20 +1,22 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Http.{param => httpparam}
-import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http2.transport.{
-  RichHttpToHttp2ConnectionHandlerBuilder,
-  Http2ClientDowngrader,
-  Http2UpgradingTransport,
-  UpgradeRequestHandler
-}
+import com.twitter.finagle.http2.param.PriorKnowledge
+import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Throw, Return, Promise}
-import io.netty.channel.ChannelPipeline
+import io.netty.channel.{
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelPipeline,
+  ChannelPromise
+}
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
@@ -31,9 +33,46 @@ private[http2] object Http2Transporter {
       params + Netty4Transporter.Backpressure(false)
     )
 
-    val underlyingHttp11 = Netty4HttpTransporter(params)
+    val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
 
-    new Http2Transporter(underlying, underlyingHttp11)
+    if (priorKnowledge) {
+      new PriorKnowledgeTransporter(underlying)
+    } else {
+      val underlyingHttp11 = Netty4HttpTransporter(params)
+
+      new Http2Transporter(underlying, underlyingHttp11)
+    }
+  }
+
+  /**
+   * Buffers until `channelActive` so we can ensure the connection preface is
+   * the first message we send.
+   */
+  class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler { self =>
+    override def channelActive(ctx: ChannelHandlerContext): Unit = {
+      ctx.fireChannelActive()
+      // removing a BufferingChannelOutboundHandler writes and flushes too.
+      ctx.pipeline.remove(self)
+    }
+
+    def bind(ctx: ChannelHandlerContext, addr: SocketAddress, promise: ChannelPromise): Unit = {
+      ctx.bind(addr, promise)
+    }
+    def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
+      ctx.close(promise)
+    }
+    def connect(ctx: ChannelHandlerContext, local: SocketAddress, remote: SocketAddress, promise: ChannelPromise): Unit = {
+      ctx.connect(local, remote, promise)
+    }
+    def deregister(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
+      ctx.deregister(promise)
+    }
+    def disconnect(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
+      ctx.disconnect(promise)
+    }
+    def read(ctx: ChannelHandlerContext): Unit = {
+      ctx.read()
+    }
   }
 
   // constructing an http2 cleartext transport
@@ -54,21 +93,31 @@ private[http2] object Http2Transporter {
         .connection(connection)
         .build()
 
-      val maxChunkSize = params[httpparam.MaxChunkSize].size
-      val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-      val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
+      val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
+      if (priorKnowledge) {
+        pipeline.addLast("httpCodec", connectionHandler)
+        pipeline.addLast("buffer", new BufferingHandler())
+        pipeline.addLast("aggregate", new AdapterProxyChannelHandler({ pipeline =>
+          pipeline.addLast("schemifier", new SchemifyingHandler("http"))
+          initClient(params)(pipeline)
+        }))
+      } else {
+        val maxChunkSize = params[httpparam.MaxChunkSize].size
+        val maxHeaderSize = params[httpparam.MaxHeaderSize].size
+        val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
 
-      val sourceCodec = new HttpClientCodec(
-        maxInitialLineSize.inBytes.toInt,
-        maxHeaderSize.inBytes.toInt,
-        maxChunkSize.inBytes.toInt
-      )
-      val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
-      val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
-      pipeline.addLast("httpCodec", sourceCodec)
-      pipeline.addLast("httpUpgradeHandler", upgradeHandler)
-      pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
-      initClient(params)(pipeline)
+        val sourceCodec = new HttpClientCodec(
+          maxInitialLineSize.inBytes.toInt,
+          maxHeaderSize.inBytes.toInt,
+          maxChunkSize.inBytes.toInt
+        )
+        val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
+        val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
+        pipeline.addLast("httpCodec", sourceCodec)
+        pipeline.addLast("httpUpgradeHandler", upgradeHandler)
+        pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
+        initClient(params)(pipeline)
+      }
     }
 
   def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =

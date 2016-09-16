@@ -45,6 +45,8 @@ private[http2] class MultiplexedTransporter(
   def apply(): Transport[HttpObject, HttpObject] =
     new ChildTransport()
 
+  def onClose: Future[Throwable] = underlying.onClose
+
   /**
    * ChildTransport represents a single http/2 stream at a time.  Once the stream
    * has finished, the transport can be used again for a different stream.

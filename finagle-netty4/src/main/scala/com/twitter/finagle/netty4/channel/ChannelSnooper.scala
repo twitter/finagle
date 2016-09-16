@@ -177,8 +177,29 @@ private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnoo
 }
 
 private[netty4] object ChannelSnooper {
+  /**
+   * Makes a ChannelSnooper that will log however you want, printing out the
+   * objects.
+   *
+   * @param thePrinter: Handles printing the snooped objects.  When not logging
+   *        an exception, the `Throwable` argument will be null
+   */
   def apply(name: String)(thePrinter: (String, Throwable) => Unit): ChannelSnooper = {
     new SimpleChannelSnooper(name) {
+      override def printer(message: String, exc: Throwable = null): Unit =
+        thePrinter(message, exc)
+    }
+  }
+
+  /**
+   * Makes a ChannelSnooper that will log however you want, printing out the
+   * bytes in utf8.
+   *
+   * @param thePrinter: Handles printing the snooped bytes.  When not logging an
+   *        exception, the `Throwable` argument will be null
+   */
+  def byteSnooper(name: String)(thePrinter: (String, Throwable) => Unit): ChannelSnooper = {
+    new ByteBufSnooper(name) {
       override def printer(message: String, exc: Throwable = null): Unit =
         thePrinter(message, exc)
     }

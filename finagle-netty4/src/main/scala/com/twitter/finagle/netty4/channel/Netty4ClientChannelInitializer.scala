@@ -6,13 +6,14 @@ import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.framer.FrameHandler
 import com.twitter.finagle.netty4.proxy.{Netty4ProxyConnectHandler, HttpProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.Netty4SslHandler
-import com.twitter.finagle.param.{Stats, Logger}
+import com.twitter.finagle.param.{Stats, Logger, Label}
 import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import io.netty.channel._
 import io.netty.handler.proxy.{Socks5ProxyHandler, HttpProxyHandler}
 import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
+import java.util.logging.Level
 
 private[netty4] object Netty4ClientChannelInitializer {
   val BufCodecKey = "buf codec"
@@ -22,6 +23,7 @@ private[netty4] object Netty4ClientChannelInitializer {
   val ConnectionHandlerKey = "connection handler"
   val ChannelStatsHandlerKey = "channel stats"
   val ChannelRequestStatsHandlerKey = "channel request stats"
+  val ChannelLoggerHandlerKey = "channel logger"
 }
 
 /**
@@ -67,6 +69,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
 
   private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
   private[this] val Logger(logger) = params[Logger]
+  private[this] val Label(label) = params[Label]
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transporter.HttpProxyTo(httpHostAndCredentials) =
     params[Transporter.HttpProxyTo]
@@ -74,6 +77,12 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
     params[Transporter.SocksProxy]
   private[this] val Transporter.HttpProxy(httpAddress, httpCredentials) =
     params[Transporter.HttpProxy]
+
+  private[this] val channelSnooper =
+    if (params[Transport.Verbose].enabled)
+      Some(ChannelSnooper.byteSnooper(label)(logger.log(Level.INFO, _, _)))
+    else
+      None
 
   private[this] val (channelRequestStatsHandler, channelStatsHandler) =
     if (!stats.isNull)
@@ -95,6 +104,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
     val pipe = ch.pipeline
 
     channelStatsHandler.foreach(pipe.addFirst(ChannelStatsHandlerKey, _))
+    channelSnooper.foreach(pipe.addFirst(ChannelLoggerHandlerKey, _))
     channelRequestStatsHandler.foreach(pipe.addLast(ChannelRequestStatsHandlerKey, _))
 
     if (readTimeout.isFinite && readTimeout > Duration.Zero) {

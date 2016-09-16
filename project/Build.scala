@@ -446,6 +446,7 @@ object Finagle extends Build {
     name := "finagle-http2",
     libraryDependencies ++= Seq(
       netty4Http2,
+      util("cache"),
       util("core"),
       util("logging"),
       nettyLib
