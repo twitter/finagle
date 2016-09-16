@@ -11,8 +11,9 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory, ServiceFactoryRef}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Await, Closable, Future, JavaTimer, Promise, Return, Throw, Time}
+import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -376,12 +377,13 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       Await.ready(client.close(), 5.seconds)
     }
 
-    test(name + ": stream via ResponseProxy") {
+    test(name + ": stream via ResponseProxy filter") {
       class ResponseProxyFilter extends SimpleFilter[Request, Response] {
         override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
           service(request).map { responseOriginal =>
             new ResponseProxy {
-              override def response: Response = responseOriginal
+              override val response = responseOriginal
+              override def reader = responseOriginal.reader
             }
           }
         }
@@ -406,6 +408,36 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val response = Await.result(client(Request()), 5.seconds)
       val Buf.Utf8(actual) = Await.result(Reader.readAll(response.reader), 5.seconds)
       assert(actual == "goodbyeworld")
+      Await.ready(client.close(), 5.seconds)
+    }
+
+    test(name + ": stream via ResponseProxy class") {
+      case class EnrichedResponse(resp: Response) extends ResponseProxy {
+        override val response = resp
+      }
+
+      // Test streaming partial data separated in time
+      def service = new HttpService {
+        def apply(request: Request) = {
+          val response = EnrichedResponse(Response(Version.Http11, Status.Ok))
+          response.setChunked(true)
+
+          response.writer.write(Buf.Utf8("hello")) before {
+            Future.sleep(Duration.fromSeconds(3))(HashedWheelTimer.Default) before {
+              response.writer.write(Buf.Utf8("world")) ensure {
+                response.close()
+              }
+            }
+          }
+
+          Future.value(response)
+        }
+      }
+
+      val client = connect(service)
+      val response = Await.result(client(Request()), 5.seconds)
+      val Buf.Utf8(actual) = Await.result(Reader.readAll(response.reader), 5.seconds)
+      assert(actual == "helloworld")
       Await.ready(client.close(), 5.seconds)
     }
 
