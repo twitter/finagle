@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.http.{Response, Request, Status}
+import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.service.RetryPolicy
 import com.twitter.io.Buf
@@ -55,23 +55,34 @@ private[finagle] class HttpNackFilter(statsReceiver: StatsReceiver)
   private[this] val nackCounts = statsReceiver.counter("nacks")
   private[this] val nonretryableNackCounts = statsReceiver.counter("nonretryable_nacks")
 
-  private[this] val handler: PartialFunction[Throwable, Response] = {
+  private[this] val standardHandler = makeHandler(true)
+  private[this] val bodylessHandler = makeHandler(false)
+
+  private[this] def makeHandler(includeBody: Boolean): PartialFunction[Throwable, Response] = {
     case RetryPolicy.RetryableWriteException(_) =>
       nackCounts.incr()
       val rep = Response(ResponseStatus)
       rep.headerMap.set(RetryableNackHeader, "true")
-      rep.content = RetryableNackBody
+      if (includeBody) {
+        rep.content = RetryableNackBody
+      }
       rep
 
     case f: Failure if f.isFlagged(Failure.Rejected) && !f.isFlagged(Failure.Restartable) =>
       nonretryableNackCounts.incr()
       val rep = Response(ResponseStatus)
       rep.headerMap.set(NonRetryableNackHeader, "true")
-      rep.content = NonretryableNackBody
+      if (includeBody) {
+        rep.content = NonretryableNackBody
+      }
       rep
   }
 
   def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+    val handler =
+      if (request.method == Method.Head) bodylessHandler
+      else standardHandler
+
     service(request).handle(handler)
   }
 }
