@@ -3,19 +3,21 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
-import com.twitter.finagle.mux.transport.Message
+import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Promise, Duration, Closable, Time}
+import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
-import java.net.{Socket, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
@@ -359,6 +361,87 @@ EOF
     assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
 
     Await.ready(Closable.all(server, client).close())
+  }
+
+  test("Default client stack will add RemoteInfo on BadMessageException") {
+
+    class Server {
+      private lazy val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+      private lazy val server = new ServerSocket()
+      @volatile private var client: Socket = _
+
+      private val serverThread = new Thread(new Runnable {
+        override def run(): Unit = {
+          client = server.accept()
+          // Length of 4 bytes, header of 0x00 00 00 04 (illegal: message type 0x00)
+          val message = Array[Byte](0, 0, 0, 4, 0, 0, 0, 4)
+
+          // write the message twice: once for handshaking and once for the failure
+          client.getOutputStream.write(message ++ message)
+          client.getOutputStream.flush()
+        }
+      })
+
+      def port = server.getLocalPort
+
+      def start(): Unit = {
+        server.bind(address)
+        serverThread.start()
+      }
+
+      def close(): Unit = {
+        serverThread.join()
+        Option(client).foreach(_.close())
+        server.close()
+      }
+    }
+
+    val server = new Server
+    val serviceName = "mux-client"
+
+    val monitor = new Monitor {
+      @volatile var exc: Throwable = _
+      override def handle(exc: Throwable): Boolean = {
+        this.exc = exc
+        true
+      }
+    }
+
+    try {
+      server.start()
+      val sr = new InMemoryStatsReceiver
+      val client = Mux.client
+        .withLabel(serviceName)
+        .withStatsReceiver(sr)
+        .withMonitor(monitor)
+        .newService(s"${InetAddress.getLoopbackAddress.getHostAddress}:${server.port}")
+
+      val result = Await.result(client(Request.empty).liftToTry, 5.seconds)
+      server.close()
+
+      // The Monitor should have intercepted the Failure
+      assert(monitor.exc.isInstanceOf[Failure])
+      val failure = monitor.exc.asInstanceOf[Failure]
+
+      // The client should have yielded a BadMessageException
+      // because the Failure.module should have stripped the Failure
+      assert(result.isThrow)
+      assert(result.throwable.isInstanceOf[BadMessageException])
+      val exc = result.throwable.asInstanceOf[BadMessageException]
+
+      assert(failure.cause == Some(exc))
+
+      // RemoteInfo should have been added by the client stack
+      failure.getSource(Failure.Source.RemoteInfo) match {
+        case Some(a: RemoteInfo.Available) =>
+          assert(a.downstreamId == Some(ClientId(serviceName)))
+          assert(a.downstreamAddr.isDefined)
+
+        case other => fail(s"Unexpected remote info: $other")
+      }
+    } finally {
+      server.close()
+    }
   }
 
   test("various netty implementations") {

@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.{Path, tracing, Dtab, Dentry}
+import com.twitter.finagle.{Dentry, Dtab, Failure, Path, tracing}
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
@@ -114,27 +114,27 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
   }
 
   test("not encode invalid messages") {
-    assert(intercept[BadMessageException] {
+    assert(intercept[Failure] {
       encode(Treq(-1, Some(tracing.Trace.nextId), body))
-    } == BadMessageException("invalid tag number -1"))
-    assert(intercept[BadMessageException] {
+    } == Failure.wrap(BadMessageException("invalid tag number -1")))
+    assert(intercept[Failure] {
       encode(Treq(1 << 24, Some(tracing.Trace.nextId), body))
-    } == BadMessageException("invalid tag number 16777216"))
+    } == Failure.wrap(BadMessageException("invalid tag number 16777216")))
   }
 
   test("not decode invalid messages") {
-    assert(intercept[BadMessageException] {
+    assert(intercept[Failure] {
       decode(Buf.Empty)
-    } == BadMessageException("short message"))
-    assert(intercept[BadMessageException] {
+    } == Failure.wrap(BadMessageException("short message")))
+    assert(intercept[Failure] {
       decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1)))
-    } == BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 0. First 0 bytes of the payload: ''"))
-    assert(intercept[BadMessageException] {
+    } == Failure.wrap(BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 0. First 0 bytes of the payload: ''")))
+    assert(intercept[Failure] {
       decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1, 0x01, 0x02, 0x0e, 0x0f)))
-    } == BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 4. First 4 bytes of the payload: '01020e0f'"))
-    assert(intercept[BadMessageException] {
+    } == Failure.wrap(BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 4. First 4 bytes of the payload: '01020e0f'")))
+    assert(intercept[Failure] {
       decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1) ++ Seq.fill(32)(1.toByte).toArray[Byte]))
-    } == BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 32. First 16 bytes of the payload: '01010101010101010101010101010101'"))
+    } == Failure.wrap(BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 32. First 16 bytes of the payload: '01010101010101010101010101010101'")))
   }
 
   test("decode fragments") {

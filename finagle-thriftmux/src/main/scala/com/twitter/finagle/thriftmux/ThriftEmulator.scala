@@ -116,7 +116,7 @@ private[finagle] object ThriftEmulator {
             // Rerr corresponds to (tag=0x010001).
             //
             // The hazards of protocol multiplexing.
-            case Throw(_: BadMessageException) |
+            case Throw(Failure(Some(_: BadMessageException))) |
                  Return(Message.Rerr(65537, _)) |
                  Return(Message.Rerr(65540, _)) =>
 
