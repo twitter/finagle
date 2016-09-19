@@ -9,6 +9,7 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.WriteException
 import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
@@ -74,6 +75,13 @@ class MemcachedTest extends FunSuite
     val client = Memcached.client
     val params = client.params
 
-    assert(params[Memcached.param.MemcachedImpl] == Memcached.param.MemcachedImpl.Netty3)
+    assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty3Transporter")
+  }
+
+  test("Memcached can be toggled to Netty4") {
+    flag.overrides.let("com.twitter.finagle.memcached.UseNetty4", 1.0) {
+      val params = Memcached.client.params
+      assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty4Transporter")
+    }
   }
 }

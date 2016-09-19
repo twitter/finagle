@@ -193,17 +193,19 @@ object Memcached extends finagle.Client[Command, Response]
       private[this] val UseNetty4ToggleId: String =
         "com.twitter.finagle.memcached.UseNetty4"
 
-      private[this] val useNetty4Toggle: Toggle[Int] =
-        Toggles(UseNetty4ToggleId)
+      private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
+      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
-      private[this] def ToggleInput = ServerInfo().id.hashCode
+      private[this] val ToggledTransport: MemcachedImpl = MemcachedImpl ({ params =>
+        if (useNetty4) Netty4.transporter(params)
+        else Netty3.transporter(params)
+      },
+      { params =>
+        if (useNetty4) Netty4.listener(params)
+        else Netty3.listener(params)
+      })
 
-      private[this] def useNetty4: Boolean = useNetty4Toggle(ToggleInput)
-
-      // Use the `useNetty4Toggle` to determine whether or not to use Netty 4 by default.
-      implicit val param =
-        if (useNetty4) Stack.Param(Netty4)
-        else Stack.Param(Netty3)
+      implicit val param: Stack.Param[MemcachedImpl] = Stack.Param(ToggledTransport)
     }
 
     case class NumReps(reps: Int) {
