@@ -17,7 +17,6 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-
   * finagle-http: `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures` now
     classifies a retryable nack as a `ResponseClass.RetryableFailure`. ``RB_ID=869182``
 
@@ -33,9 +32,13 @@ Bug Fixes
 
   * finagle-http: Fix issue in `c.t.finagle.http.RequestBuilder` when the URI host contains
     underscores. ``RB_ID=870978``
+
   * finagle-http: A connection for HTTP/1.0 or non-keep-alive requests is now closed
     gracefully so that all requests that have been issued received responses.
     ``RB_ID=868767``
+
+  * finagle-netty4: `ChannelTransport` now drains messages before reading more data off the 
+    transport which should reduce memory pressure in streaming protocols. ``RB_ID=872639``
 
 6.38.0
 ------

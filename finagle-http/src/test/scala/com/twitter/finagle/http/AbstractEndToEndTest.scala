@@ -22,17 +22,19 @@ import scala.language.reflectiveCalls
 abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
 
   sealed trait Feature
+  object BasicFunctionality extends Feature
   object ClientAbort extends Feature
-  object TooLongStream extends Feature
-  object TooLongFixed extends Feature
+  object CompressedContent extends Feature
   object HandlesExpect extends Feature
   object InitialLineLength extends Feature
-  object TooBigHeaders extends Feature
-  object MeasurePayload extends Feature
   object MaxHeaderSize extends Feature
+  object MeasurePayload extends Feature
+  object ResponseClassifier extends Feature
   object SetContentLength extends Feature
-  object CompressedContent extends Feature
   object StreamedContentString extends Feature
+  object TooBigHeaders extends Feature
+  object TooLongFixed extends Feature
+  object TooLongStream extends Feature
 
   var saveBase: Dtab = Dtab.empty
   private val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -119,7 +121,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       Await.ready(client.close(), 5.seconds)
     }
 
-    test(name + ": with default client-side ResponseClassifier") {
+    testIfImplemented(ResponseClassifier)(name + ": with default client-side ResponseClassifier") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -137,7 +139,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       Await.ready(client.close(), 5.seconds)
     }
 
-    test(name + ": with default server-side ResponseClassifier") {
+    testIfImplemented(ResponseClassifier)(name + ": with default server-side ResponseClassifier") {
       val client = connect(statusCodeSvc)
 
       Await.ready(client(requestWith(Status.Ok)), 1.second)
@@ -786,7 +788,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
   private val failureAccrualFailures = 19
 
   def status(name: String)(connect: (HttpService, StatsReceiver, String) => (HttpService)): Unit = {
-    test(name + ": Status.busy propagates along the Stack") {
+    testIfImplemented(BasicFunctionality)(name + ": Status.busy propagates along the Stack") {
       val st = new InMemoryStatsReceiver
       val clientName = "http"
       val failService = new HttpService {
@@ -841,7 +843,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  test("Client-side ResponseClassifier based on status code") {
+  testIfImplemented(ResponseClassifier)("Client-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
       case (_, r: Response) if r.status == Status.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
@@ -869,7 +871,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     Await.ready(server.close(), 5.seconds)
   }
 
-  test("server-side ResponseClassifier based on status code") {
+  testIfImplemented(ResponseClassifier)("server-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
       case (_, r: Response) if r.status == Status.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure

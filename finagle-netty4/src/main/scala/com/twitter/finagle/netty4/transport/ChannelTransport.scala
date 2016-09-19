@@ -89,10 +89,11 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   }
 
   def read(): Future[Out] = {
-    if (!ch.config.isAutoRead) {
-      msgsNeeded.incrementAndGet()
-      ch.read()
-    }
+    // Negative `msgsNeeded` means we're buffering data in our offer queue
+    // which hasn't been processed by the application yet, so rather than read
+    // off the channel we drain the offer queue. This also applies back-pressure
+    // at the tcp level.
+    if (!ch.config.isAutoRead && msgsNeeded.incrementAndGet() > 0) ch.read()
 
     // This is fine, but we should consider being a little more fine-grained
     // here. For example, if a read behind another read interrupts, perhaps the

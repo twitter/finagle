@@ -3,13 +3,14 @@ package com.twitter.finagle.netty4.transport
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.util.{Throw, Return, Await, Future}
-import io.netty.channel.{ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
+import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
+import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
@@ -191,5 +192,32 @@ class ChannelTransportTest extends FunSuite
     val tr = new ChannelTransport[String, String](ch)
 
     assert(tr.peerCertificate == Some(cert))
+  }
+
+
+  test("ChannelTransport drains the offer queue before reading from the channel") {
+    val channel = spy(new EmbeddedChannel())
+
+    val noAuto = new DefaultChannelConfig(channel)
+    noAuto.setAutoRead(false)
+    when(channel.config()).thenReturn(noAuto)
+
+    val trans = new ChannelTransport[String, String](channel)
+
+    // buffer data in the underlying channel
+    channel.writeInbound("one")
+    channel.writeInbound("two")
+    channel.writeInbound("three")
+    assert("one" == Await.result(trans.read(), 5.seconds))
+    assert("two" == Await.result(trans.read(), 5.seconds))
+    assert("three" == Await.result(trans.read(), 5.seconds))
+
+    // no reads from the channel yet
+    verify(channel, never).read()
+
+
+    // the offer q is drained, so the underlying channel is finally read
+    trans.read()
+    eventually { verify(channel, times(1)).read() }
   }
 }

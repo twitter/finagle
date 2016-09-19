@@ -13,5 +13,7 @@ class ClientFailUpgradeTest extends AbstractEndToEndTest {
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
 
-  def featureImplemented(feature: Feature): Boolean = feature != TooLongStream
+  lazy val unsupported: Set[Feature] = Set(BasicFunctionality, ResponseClassifier, TooLongStream)
+
+  def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)
 }
