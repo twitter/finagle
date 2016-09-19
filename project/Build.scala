@@ -572,7 +572,7 @@ object Finagle extends Build {
       name := "finagle-mysql",
       libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
-    ).dependsOn(finagleCore, finagleNetty4)
+    ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
   lazy val finagleExp = Project(
     id = "finagle-exp",
