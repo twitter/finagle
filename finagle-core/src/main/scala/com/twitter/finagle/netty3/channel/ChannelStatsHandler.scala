@@ -38,7 +38,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     elapsed = Stopwatch.start()
-    ctx.setAttachment(new AtomicLong(0), new AtomicLong(0))
+    ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
 

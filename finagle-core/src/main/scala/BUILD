@@ -19,6 +19,6 @@ scala_library(name='scala',
     'util/util-stats',
     'util/util-core/src/main/scala:scala',
   ],
-  strict_deps=True,
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

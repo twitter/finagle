@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing.{Trace, Record, BufferingTracer, Annotation}
 import com.twitter.jvm.{Jvm, Gc}
-import com.twitter.util.{TimeControl, Future, Promise, Time, Duration}
+import com.twitter.util.{TimeControl, Promise, Time, Duration}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.{verify, when}

@@ -86,7 +86,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     verify(service, times(0)).close(any)
 
     var didRun = false
-    val f2 = factory flatMap { _ =>
+    val f2 = factory flatMap { _: Any =>
       didRun = true
       Future.exception(exc)
     }

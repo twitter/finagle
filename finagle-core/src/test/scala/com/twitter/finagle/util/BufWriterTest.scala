@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
+final class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import BufWriter.OverflowException
 
   def testWriteByte(name: String, bwFactory: () => BufWriter, overflowOK: Boolean): Unit =

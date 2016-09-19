@@ -55,10 +55,10 @@ class StatusTest
     @volatile var status: Status = Status.Busy
     val open = Status.whenOpen(status)
 
-    assert(!open.isDone)
+    assert(!open.isDefined)
 
     status = Status.Open
-    eventually { assert(open.isDone) }
+    eventually { assert(open.isDefined) }
     Await.result(open)  // no exceptions
   }
 
@@ -66,7 +66,7 @@ class StatusTest
     @volatile var status: Status = Status.Busy
     val open = Status.whenOpen(status)
 
-    assert(!open.isDone)
+    assert(!open.isDefined)
 
     status = Status.Closed
     eventually { assert(open.isDefined) }

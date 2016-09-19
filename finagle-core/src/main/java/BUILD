@@ -4,11 +4,11 @@ java_library(name='java',
     name = 'finagle-core-java',
     repo = artifactory,
   ),
-  fatal_warnings=False,
   sources=rglobs('*.java'),
   dependencies=[
     'finagle/finagle-core/src/main/scala',
     'util/util-core/src/main/scala'
   ],
+  fatal_warnings=True,
   strict_deps=True,
 )

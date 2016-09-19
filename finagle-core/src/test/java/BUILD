@@ -8,4 +8,5 @@ junit_tests(name='java',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
+  fatal_warnings=True,
 )

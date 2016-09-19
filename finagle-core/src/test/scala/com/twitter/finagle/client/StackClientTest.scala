@@ -120,7 +120,7 @@ class StackClientTest extends FunSuite
       val description = "lool"
 
       def make(next: ServiceFactory[String, String]) =
-        ServiceFactory.apply(() => Future.exception(ex))
+        ServiceFactory.apply[String, String](() => Future.exception(ex))
     }
 
     val alwaysFailStack = new StackBuilder(stack.nilStack[String, String])

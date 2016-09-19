@@ -154,7 +154,7 @@ object ClientConfig {
 }
 
 @implicitNotFound("Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}")
-private[builder] trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
 
 private[builder] object ClientConfigEvidence {
   implicit object FullyConfigured extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
