@@ -19,6 +19,11 @@ class TraceIdTest < Test::Unit::TestCase
     id2 = Trace::SpanId.from_value(id.to_s)
     assert_equal id.to_i, id2.to_i
   end
+
+  def test_span_id_128
+    from_hex_128 = Trace::SpanId.from_value('463ac35c9f6413ad48485a3953bb6124')
+    assert_equal from_hex_128.to_s, '48485a3953bb6124'
+  end
 end
 
 class TraceTest < Test::Unit::TestCase
