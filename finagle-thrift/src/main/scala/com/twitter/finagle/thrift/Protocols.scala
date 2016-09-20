@@ -5,7 +5,7 @@ import com.twitter.finagle.stats.{Counter, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.logging.Logger
 import com.twitter.util.NonFatal
 import java.nio.{ByteBuffer, CharBuffer}
-import java.nio.charset.{CoderResult, CharsetEncoder}
+import java.nio.charset.{CharsetEncoder, CoderResult, CodingErrorAction}
 import java.security.{PrivilegedExceptionAction, AccessController}
 import org.apache.thrift.protocol.{TProtocol, TProtocolFactory, TBinaryProtocol}
 import org.apache.thrift.transport.TTransport
@@ -59,12 +59,11 @@ object Protocols {
     } else {
       // Factories are created rarely while the creation of their TProtocol's
       // is a common event. Minimize counter creation to just once per Factory.
-      val fastEncodeFailed = statsReceiver.counter("fast_encode_failed")
       val largerThanTlOutBuffer = statsReceiver.counter("larger_than_threadlocal_out_buffer")
       new TProtocolFactory {
         override def getProtocol(trans: TTransport): TProtocol = {
           val proto = new TFinagleBinaryProtocol(
-            trans, fastEncodeFailed, largerThanTlOutBuffer, strictRead, strictWrite)
+            trans, largerThanTlOutBuffer, strictRead, strictWrite)
           if (readLength != 0) {
             proto.setReadLength(readLength)
           }
@@ -83,8 +82,9 @@ object Protocols {
     // zero-length strings are written to the wire as an i32 of its length, which is 0
     private val EmptyStringInBytes = Array[Byte](0, 0, 0, 0)
 
-    // assume that most of our strings are mostly single byte utf8
-    private val MultiByteMultiplierEstimate = 1.3f
+    // sun.nio.cs.UTF_8.Encoder.maxBytesPerChar because
+    // ArrayEncoder.encode does not check for overflow
+    private val MultiByteMultiplierEstimate = 3.0f
 
     /** Only valid if unsafe is defined */
     private val StringValueOffset: Long = unsafe.map {
@@ -116,11 +116,14 @@ object Protocols {
     }.getOrElse(Long.MinValue)
 
     private val charsetEncoder = new ThreadLocal[CharsetEncoder] {
-      override def initialValue() = Charsets.UTF_8.newEncoder()
+      override def initialValue() =
+        Charsets.UTF_8.newEncoder()
+          .onMalformedInput(CodingErrorAction.REPLACE)
+          .onUnmappableCharacter(CodingErrorAction.REPLACE)
     }
 
     // Visible for testing purposes
-    private[thrift] val OutBufferSize = 4096
+    private[thrift] val OutBufferSize = 16384
 
     private val outByteBuffer = new ThreadLocal[ByteBuffer] {
       override def initialValue() = ByteBuffer.allocate(OutBufferSize)
@@ -138,7 +141,6 @@ object Protocols {
    */
   private[thrift] class TFinagleBinaryProtocol(
       trans: TTransport,
-      fastEncodeFailed: Counter,
       largerThanTlOutBuffer: Counter,
       strictRead: Boolean = false,
       strictWrite: Boolean = true)
@@ -166,7 +168,6 @@ object Protocols {
       val count = if (CountValueOffset == Long.MinValue) chars.length else {
         u.getInt(str, CountValueOffset)
       }
-      val charBuffer = CharBuffer.wrap(chars, offset, count)
 
       val out = if (count * MultiByteMultiplierEstimate <= OutBufferSize) {
         val o = outByteBuffer.get()
@@ -180,14 +181,17 @@ object Protocols {
       val csEncoder = charsetEncoder.get()
       csEncoder.reset()
 
-      val result = csEncoder.encode(charBuffer, out, true)
-      if (result != CoderResult.UNDERFLOW) {
-        fastEncodeFailed.incr()
-        super.writeString(str)
-      } else {
-        writeI32(out.position())
-        trans.write(out.array(), 0, out.position())
+      csEncoder match {
+        case arrayEncoder: sun.nio.cs.ArrayEncoder =>
+          val blen = arrayEncoder.encode(chars, offset, count, out.array())
+          out.position(blen)
+        case _ =>
+          val charBuffer = CharBuffer.wrap(chars, offset, count)
+          csEncoder.encode(charBuffer, out, true /* endOfInput */) != CoderResult.UNDERFLOW
       }
+
+      writeI32(out.position())
+      trans.write(out.array(), 0, out.position())
     }
 
     // Note: libthrift 0.5.0 has a bug when operating on ByteBuffer's with a non-zero arrayOffset.
