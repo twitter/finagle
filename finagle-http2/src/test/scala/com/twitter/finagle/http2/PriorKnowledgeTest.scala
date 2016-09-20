@@ -8,6 +8,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class PriorKnowledgeTest extends AbstractEndToEndTest {
+  def implName: String = "prior knowledge http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .configured(Http2)
@@ -28,8 +29,11 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
     InitialLineLength,
     ClientAbort,
     MaxHeaderSize,
-    CompressedContent // these tests pass but only because the server ignores
-                      // the compression param and doesn't compress content.
+    CompressedContent, // these tests pass but only because the server ignores
+                       // the compression param and doesn't compress content.
+    Streaming,
+    CloseStream,
+    BasicFunctionality
   )
   def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
 }

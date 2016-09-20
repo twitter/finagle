@@ -7,11 +7,13 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ServerFailUpgradeTest extends AbstractEndToEndTest {
+  def implName: String = "http/1.1 client, http/2 server"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server.configured(Http2)
 
-  def featureImplemented(feature: Feature): Boolean = feature != ClientAbort
+  def featureImplemented(feature: Feature): Boolean =
+    !Set(ClientAbort, Streaming, CloseStream)(feature)
 }

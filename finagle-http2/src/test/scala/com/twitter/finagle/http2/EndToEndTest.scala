@@ -10,6 +10,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends AbstractEndToEndTest {
+  def implName: String = "netty4 http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
       .configured(Http2)
@@ -36,8 +37,10 @@ class EndToEndTest extends AbstractEndToEndTest {
     InitialLineLength,
     ClientAbort,
     MaxHeaderSize,
-    CompressedContent // these tests pass but only because the server ignores
-                      // the compression param and doesn't compress content.
+    CompressedContent, // these tests pass but only because the server ignores
+                       // the compression param and doesn't compress content.
+    Streaming,
+    CloseStream
   )
   def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
 }
