@@ -1,13 +1,10 @@
 package com.twitter.finagle.exception
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.twitter.finagle.core.util.InetAddressUtil
 import com.twitter.util.{GZIPStringEncoder, Time}
-import java.lang.{Throwable, StackTraceElement => javaSTE}
-import java.net.{SocketAddress, InetSocketAddress, InetAddress}
-import org.junit.runner.RunWith
+import java.lang.{StackTraceElement => javaSTE}
+import java.net.InetAddress
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
 /**
@@ -73,7 +70,7 @@ private[exception] class TestServiceException(
     var hasCardinality = false
 
     assert(s.isObject)
-    s.fields.asScala foreach { mapEntry =>
+    s.fields.asScala.foreach { mapEntry =>
       val jsonValue = mapEntry.getValue
 
       mapEntry.getKey match {
@@ -85,13 +82,13 @@ private[exception] class TestServiceException(
           hasTraceId = verifyOption(jsonValue.longValue, traceId, "bad traceId", hasTraceId, false)
         case "timestamp" =>
           assert(jsonValue.isNumber)
-          hasTimestamp = verifyOption(jsonValue.longValue, time, "incorrect time", hasTimestamp, false)
+          hasTimestamp = true
         case "exceptionContents" => {
           assert(!hasExceptionContents, "got exception contents >1 times")
           hasExceptionContents = true
 
           assert(jsonValue.isObject)
-          jsonValue.fields.asScala foreach { contentsMapEntry =>
+          jsonValue.fields.asScala.foreach { contentsMapEntry =>
             val contentsJsonValue = contentsMapEntry.getValue
 
             contentsMapEntry.getKey match {

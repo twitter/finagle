@@ -117,7 +117,8 @@ class ThresholdFailureDetectorTest extends FunSuite
     latch.flip() // rtt = 10, maxPing = 10
 
     eventually {
-      assert(until.isDone)
+      assert(until.isDefined)
+      assert(Await.result(until.liftToTry, 5.seconds) == Return.Unit)
     }
 
     assert(d.status == Status.Open)

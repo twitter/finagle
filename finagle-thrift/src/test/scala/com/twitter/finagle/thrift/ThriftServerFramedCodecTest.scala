@@ -5,7 +5,6 @@ import com.twitter.util.Future
 import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
-import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.when

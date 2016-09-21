@@ -181,7 +181,7 @@ private[twitter] object ThriftUtil {
     def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] =
       for {
         baseName   <- findRootWithSuffix(iface.getName, "$ServiceIface")
-        serviceCls <- findClass[BinaryService](baseName + "$Service")
+        serviceCls <- findClass[BinaryService](baseName + s"$$Service")
         cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
 

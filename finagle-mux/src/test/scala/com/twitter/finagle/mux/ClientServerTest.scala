@@ -133,10 +133,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     for (i <- 0 until 5) {
       assert(nping.get == i)
       val pinged = session.ping()
-      assert(!pinged.isDone)
+      assert(!pinged.isDefined)
       pingRep.flip()
       Await.result(pinged, 30.seconds)
-      assert(pinged.isDone)
+      assert(Await.result(pinged.liftToTry, 5.seconds) == Return.Unit)
       assert(nping.get == i+1)
     }
   }

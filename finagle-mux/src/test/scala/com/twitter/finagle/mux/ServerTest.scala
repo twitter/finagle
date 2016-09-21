@@ -10,7 +10,7 @@ import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.{Dtab, Failure, Path, Service}
 import com.twitter.io.Buf.Utf8
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.security.cert.X509Certificate
 import java.net.SocketAddress

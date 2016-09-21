@@ -1,7 +1,7 @@
 package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.ThriftMux
-import com.twitter.util.{Future, Try}
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}

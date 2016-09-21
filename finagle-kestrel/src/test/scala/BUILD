@@ -11,5 +11,6 @@ junit_tests(name='scala',
     'finagle/finagle-thrift/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  fatal_warnings=True,
 )

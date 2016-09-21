@@ -3,7 +3,7 @@ package com.twitter.finagle.thrift
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 

@@ -1,6 +1,5 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.Service
 import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith

@@ -4,6 +4,6 @@ junit_tests(name='java',
     'util/util-core',
     'finagle/finagle-core/src/main/scala:scala',
   ],
-  fatal_warnings=False,
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

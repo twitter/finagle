@@ -4,7 +4,6 @@ import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import com.twitter.conversions.time._
 import com.twitter.util.{Time, Duration}
 import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean}
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 import org.junit.runner.RunWith
 import org.mockito.Mockito.when

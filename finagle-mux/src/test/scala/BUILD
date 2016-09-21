@@ -13,5 +13,6 @@ junit_tests(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-mux/src/test/resources'
-  ]
+  ],
+  fatal_warnings=True,
 )
