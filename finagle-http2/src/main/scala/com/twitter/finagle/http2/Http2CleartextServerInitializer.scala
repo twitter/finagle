@@ -13,12 +13,13 @@ import io.netty.handler.codec.http2.{
   Http2Codec,
   Http2ServerDowngrader
 }
+
 import io.netty.util.AsciiString
 
 /**
- * The handler will be added to all http2 child channels, and must be Sharable.
+ * This handler sets us up for a cleartext upgrade
  */
-private[http2] class Http2ServerInitializer(
+private[http2] class Http2CleartextServerInitializer(
     init: ChannelInitializer[Channel],
     params: Stack.Params,
     codec: SourceCodec)
@@ -48,7 +49,6 @@ private[http2] class Http2ServerInitializer(
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()
-
     val maxRequestSize = params[httpparam.MaxRequestSize].size
     p.addAfter("httpCodec", "upgradeHandler",
       new HttpServerUpgradeHandler(codec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))

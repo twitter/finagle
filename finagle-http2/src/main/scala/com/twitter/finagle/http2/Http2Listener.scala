@@ -6,6 +6,7 @@ import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.exp.initServer
 import com.twitter.finagle.server.Listener
+import com.twitter.finagle.transport.{TlsConfig, Transport}
 import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelDuplexHandler}
 import io.netty.handler.codec.http.HttpServerCodec
 import io.netty.handler.codec.http2.{Http2Codec, Http2ServerDowngrader}
@@ -41,33 +42,54 @@ private[http2] object Http2Listener {
       }
     )
 
-  private[this] def upgradingListener[In, Out](params: Stack.Params): Listener[In, Out] = {
+
+  private[this] def sourceCodec(params: Stack.Params) = {
     val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
     val maxHeaderSize = params[httpparam.MaxHeaderSize].size
     val maxRequestSize = params[httpparam.MaxRequestSize].size
 
-    val sourceCodec = new HttpServerCodec(
+    new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
       maxHeaderSize.inBytes.toInt,
       maxRequestSize.inBytes.toInt
     )
+  }
 
+  private[this] def cleartextListener[In, Out](params: Stack.Params): Listener[In, Out] = {
+    val source = sourceCodec(params)
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast("httpCodec", sourceCodec)
+        pipeline.addLast("httpCodec", source)
         initServer(params)(pipeline)
       },
       params = params,
-      setupMarshalling = { init: ChannelInitializer[Channel] =>
-        new Http2ServerInitializer(init, params, sourceCodec)
+      setupMarshalling = {
+        init: ChannelInitializer[Channel] =>
+          new Http2CleartextServerInitializer(init, params, source)
+      }
+    )
+  }
+
+  private[this] def tlsListener[In, Out](params: Stack.Params): Listener[In, Out] = {
+    Netty4Listener(
+      pipelineInit = { pipeline: ChannelPipeline =>
+        pipeline.addLast("httpCodec", sourceCodec(params))
+        initServer(params)(pipeline)
+      },
+      params = params,
+      setupMarshalling = {
+        init: ChannelInitializer[Channel] => new Http2TlsServerInitializer(init, params)
       }
     )
   }
 
   def apply[In, Out](params: Stack.Params): Listener[In, Out] = {
     val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
+    val Transport.Tls(tlsConfig) = params[Transport.Tls]
 
-    if (priorKnowledge) priorKnowledgeListener(params)
-    else upgradingListener(params)
+
+    if (tlsConfig != TlsConfig.Disabled) tlsListener(params)
+    else if (priorKnowledge) priorKnowledgeListener(params)
+    else cleartextListener(params)
   }
 }

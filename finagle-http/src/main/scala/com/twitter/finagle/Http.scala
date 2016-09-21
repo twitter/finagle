@@ -59,8 +59,11 @@ object Http extends Client[Request, Response] with HttpRichClient
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
       serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
       transporter: Stack.Params => Transporter[Any, Any],
-      listener: Stack.Params => Listener[Any, Any]
-    )
+      listener: Stack.Params => Listener[Any, Any]) {
+
+      def mk(): (HttpImpl, Stack.Param[HttpImpl]) =
+        (this, HttpImpl)
+    }
 
     implicit object HttpImpl extends Stack.Param[HttpImpl] {
       val default = Netty3Impl
