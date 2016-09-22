@@ -268,6 +268,13 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
 
+
+    /**
+     * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
+     */
+    def enableHttpStats(): Client =
+      withStack(http.filter.StatsFilter.module +: stack)
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withSessionPool: SessionPoolingParams[Client] =
@@ -403,6 +410,12 @@ object Http extends Client[Request, Response] with HttpRichClient
      */
     def withMaxInitialLineSize(size: StorageUnit): Server =
       configured(param.MaxInitialLineSize(size))
+
+    /**
+     * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
+     */
+    def enableHttpStats(): Server =
+      withStack(http.filter.StatsFilter.module +: stack)
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

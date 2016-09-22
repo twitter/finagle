@@ -1,9 +1,29 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle._
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util._
+
+object StatsFilter {
+  val role = Stack.Role("HttpStatsFilter")
+
+  def module[Req <: Request]: Stackable[ServiceFactory[Req, Response]] =
+    new Stack.Module1[param.Stats, ServiceFactory[Req, Response]] {
+      val role = StatsFilter.role
+      val description = "Register HTTP Stats"
+
+      override def make(statsParam: param.Stats,
+                        next: ServiceFactory[Req, Response]): ServiceFactory[Req, Response] = {
+        if (statsParam.statsReceiver.isNull) {
+          next
+        } else {
+          new StatsFilter[Req](statsParam.statsReceiver).andThen(next)
+        }
+      }
+    }
+
+}
 
 /**
  * Statistic filter.
@@ -29,7 +49,7 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
     future respond {
       case Return(response) =>
         count(elapsed(), response)
-      case Throw(_) =>
+      case Throw(_)         =>
         // Treat exceptions as empty 500 errors
         val response = Response(request.version, Status.InternalServerError)
         count(elapsed(), response)
