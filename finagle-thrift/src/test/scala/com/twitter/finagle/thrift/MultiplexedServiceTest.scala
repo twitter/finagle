@@ -28,7 +28,7 @@ class MultiplexedServiceTest extends FunSuite {
     )
 
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = Thrift.server.serveIfaces(address, serviceMap)
+    val server = Thrift.server.serveIfaces(address, serviceMap, Some("extendedEcho"))
 
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val client = Thrift.client.multiplex(name, "client") { client =>
@@ -40,5 +40,8 @@ class MultiplexedServiceTest extends FunSuite {
 
     assert(Await.result(client.echo.echo("hello")) == "hello")
     assert(Await.result(client.extendedEcho.getStatus(ExtendedEcho.GetStatus.Args())) == ExtendedEcho.GetStatus.Result(Some("OK")))
+
+    val classicClient = Thrift.client.newIface[ExtendedEcho.FutureIface](name, "classic-client")
+    assert(Await.result(classicClient.getStatus()) == "OK")
   }
 }

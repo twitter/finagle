@@ -242,6 +242,7 @@ private[twitter] object ThriftUtil {
    */
   def serverFromIfaces(
     ifaces: Map[String, AnyRef],
+    defaultService: Option[String],
     protocolFactory: TProtocolFactory,
     stats: StatsReceiver,
     maxThriftBufferSize: Int,
@@ -250,7 +251,7 @@ private[twitter] object ThriftUtil {
     val services = ifaces.map { case (serviceName, impl) =>
       serviceName -> serverFromIface(impl, protocolFactory, stats, maxThriftBufferSize, serviceName)
     }
-    new MultiplexedFinagleService(services, protocolFactory, maxThriftBufferSize)
+    new MultiplexedFinagleService(services, defaultService, protocolFactory, maxThriftBufferSize)
   }
 
   /**
@@ -568,6 +569,28 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
  * }}}
  *
  * @define serverExampleObject ThriftMuxRichServer
+ *
+ * @define serveIfaces
+ *
+ * Serve multiple interfaces:
+ *
+ * {{{
+ * val serviceMap = Map(
+ * "echo" -> new EchoService(),
+ * "extendedEcho" -> new ExtendedEchoService()
+ * )
+ *
+ * val server = Thrift.server.serveIfaces(address, serviceMap)
+ * }}}
+ *
+ * A default service name can be specified, so we can upgrade an
+ * existing non-multiplexed server to a multiplexed one without
+ * breaking the old clients:
+ *
+ * {{{
+ * val server = Thrift.server.serveIfaces(
+ *   address, serviceMap, defaultService = Some("extendedEcho"))
+ * }}}
  */
 trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   import ThriftUtil._
@@ -595,14 +618,14 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
     serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 
   /**
-   * $serveIface
+   * $serveIfaces
    */
-  def serveIfaces(addr: String, ifaces: Map[String, AnyRef]): ListeningServer =
-    serve(addr, serverFromIfaces(ifaces, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+  def serveIfaces(addr: String, ifaces: Map[String, AnyRef], defaultService: Option[String] = None): ListeningServer =
+    serve(addr, serverFromIfaces(ifaces, defaultService, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 
   /**
-   * $serveIface
+   * $serveIfaces
    */
-  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef]): ListeningServer =
-    serve(addr, serverFromIfaces(ifaces, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef], defaultService: Option[String] = None): ListeningServer =
+    serve(addr, serverFromIfaces(ifaces, defaultService, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 }

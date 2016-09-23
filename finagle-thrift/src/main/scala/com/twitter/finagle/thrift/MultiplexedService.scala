@@ -13,6 +13,7 @@ import scala.util.control.NonFatal
 
 private[finagle] class MultiplexedFinagleService(
     services: Map[String, Service[Array[Byte], Array[Byte]]],
+    defaultService: Option[String],
     protocolFactory: TProtocolFactory,
     maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize)
   extends Service[Array[Byte], Array[Byte]] {
@@ -65,11 +66,11 @@ private[finagle] class MultiplexedFinagleService(
     try {
       val msg = iprot.readMessageBegin()
       val index = msg.name.indexOf(TMultiplexedProtocol.SEPARATOR)
-      if (index == -1) {
+      if (index == -1 && defaultService.isEmpty) {
         exception(msg.name, msg.seqid, TApplicationException.PROTOCOL_ERROR,
           s"This is a multiplexed service, with available service names: [${serviceMap.keys.mkString(", ")}]")
       } else {
-        val serviceName = msg.name.substring(0, index)
+        val serviceName = if (index == -1) defaultService.get else msg.name.substring(0, index)
         val functionName = msg.name.substring(index + 1)
         val functionMap = serviceMap.get(serviceName)
         val func = functionMap.flatMap(_.get(functionName))
