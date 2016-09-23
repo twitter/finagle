@@ -139,6 +139,20 @@ object ThriftMux
     def withProtocolFactory(pf: TProtocolFactory): Client =
       configured(Thrift.param.ProtocolFactory(pf))
 
+    def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Client =
+      this.copy(muxer = muxer.withStack(stack))
+
+    /**
+     * Prepends `filter` to the top of the client. That is, after materializing
+     * the client (newClient/newService) `filter` will be the first element which
+     * requests flow through. This is a familiar chaining combinator for filters.
+     */
+    def filtered(filter: Filter[mux.Request, mux.Response, mux.Request, mux.Response]): Client = {
+      val role = Stack.Role(filter.getClass.getSimpleName)
+      val stackable = Filter.canStackFromFac.toStackable(role, filter)
+      withStack(stackable +: stack)
+    }
+
     private[this] val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
 
     private[this] object ThriftMuxToMux extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {

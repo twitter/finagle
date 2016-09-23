@@ -7,6 +7,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-thriftmux: Allow ThriftMux.Clients to be filtered. This is supported
+    in the the StdStackClient but ThriftMux.Client is a StackBasedClient. ``RB_ID=874560``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

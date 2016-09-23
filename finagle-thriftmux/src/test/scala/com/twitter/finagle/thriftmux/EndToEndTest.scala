@@ -791,6 +791,30 @@ class EndToEndTest extends FunSuite
     }
   }
 
+  test("ThriftMux clients are filtered") {
+    val filter = new SimpleFilter[mux.Request, mux.Response] {
+      override def apply(request: mux.Request, service: Service[mux.Request, mux.Response]): Future[mux.Response] = {
+        ClientId.let(ClientId("filtered.foo.bar")) {
+          service(request)
+        }
+      }
+    }
+
+    val server = ThriftMux.server.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.FutureIface {
+        def query(x: String) = {
+          Future.value(ClientId.current.map(_.name).getOrElse(""))
+        }
+      })
+
+    val client = ThriftMux.client.withClientId(ClientId("foo.bar")).filtered(filter)
+      .newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    assert(await(client.query("ok")) == "filtered.foo.bar")
+    await(server.close())
+  }
+
   test("downgraded pipelines are properly scoped") {
     val sr = new InMemoryStatsReceiver
 
