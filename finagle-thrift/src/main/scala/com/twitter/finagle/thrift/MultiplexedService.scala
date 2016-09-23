@@ -9,12 +9,13 @@ import org.apache.thrift.protocol._
 import org.apache.thrift.transport.TMemoryInputTransport
 import scala.collection.JavaConverters._
 import scala.util.Try
+import scala.util.control.NonFatal
 
-class MultiplexedFinagleService(
-  services: Map[String, Service[Array[Byte], Array[Byte]]],
-  protocolFactory: TProtocolFactory,
-  maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize)
-    extends Service[Array[Byte], Array[Byte]] {
+private[finagle] class MultiplexedFinagleService(
+    services: Map[String, Service[Array[Byte], Array[Byte]]],
+    protocolFactory: TProtocolFactory,
+    maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize)
+  extends Service[Array[Byte], Array[Byte]] {
 
   private val serviceMap = services.mapValues(getFunctionMap)
 
@@ -23,9 +24,16 @@ class MultiplexedFinagleService(
   ): collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]] = {
     Try(scroogeFinagleServiceFunctionMap(service))
       .orElse(Try(thriftFinagleServiceFunctionMap(service)))
-      .getOrElse(throw new IllegalArgumentException("%s cannot be multiplexed".format(service.getClass.getName)))
+      .recover {
+        case NonFatal(e) =>
+          throw new IllegalArgumentException("%s cannot be multiplexed".format(service.getClass.getName), e)
+      }
+      .get
   }
 
+  /**
+   * Get the function map from scrooge generated scala services.
+   */
   def scroogeFinagleServiceFunctionMap[T](target: AnyRef) = {
     val m = target.getClass.getMethod("functionMap")
     val accessible = m.isAccessible
@@ -36,6 +44,9 @@ class MultiplexedFinagleService(
     result
   }
 
+  /**
+   * Get the function map from scrooge generated java services.
+   */
   def thriftFinagleServiceFunctionMap(target: AnyRef) = {
     val f = target.getClass.getDeclaredField("functionMap")
     val accessible = f.isAccessible
@@ -76,7 +87,7 @@ class MultiplexedFinagleService(
         }
       }
     } catch {
-      case e: Throwable => Future.exception(e)
+      case NonFatal(e) => Future.exception(e)
     }
   }
 
@@ -95,7 +106,7 @@ class MultiplexedFinagleService(
         resetBuffer(memoryBuffer)
       }
     } catch {
-      case e: Exception => Future.exception(e)
+      case NonFatal(e) => Future.exception(e)
     }
   }
 

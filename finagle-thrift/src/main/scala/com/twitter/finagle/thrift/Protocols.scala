@@ -78,10 +78,7 @@ object Protocols {
     binaryFactory(statsReceiver = statsReceiver)
   }
 
-  /**
-   * Multiplex the protocolFactory with the serviceName.
-   */
-  def multiplex(serviceName: String, protocolFactory: TProtocolFactory) = {
+  def multiplex(serviceName: String, protocolFactory: TProtocolFactory): TProtocolFactory = {
     new TProtocolFactory {
       def getProtocol(transport: TTransport) = {
         new TMultiplexedProtocol(protocolFactory.getProtocol(transport), serviceName)

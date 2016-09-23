@@ -325,6 +325,23 @@ private[twitter] object ThriftUtil {
  * to the request, and every subsequent request is dispatched with an
  * envelope carrying trace metadata. The envelope itself is also a
  * Thrift struct described [[https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift here]].
+ *
+ * @define buildMultiplexClient
+ *
+ * Build client interfaces for multiplexed thrift serivces.
+ *
+ * E.g.
+ * {{{
+ *   val client = Thrift.client.multiplex(address, "client") { client =>
+ *     new {
+ *       val echo = client.newIface[Echo.FutureIface]("echo")
+ *       val extendedEcho = client.newServiceIface[ExtendedEcho.ServiceIface]("extendedEcho")
+ *     }
+ *   }
+ *
+ *   client.echo.echo("hello")
+ *   client.extendedEcho.getStatus(ExtendedEcho.GetStatus.Args())
+ * }}}
  */
 trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   import ThriftUtil._
@@ -407,7 +424,8 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     label: String,
     cls: Class[_],
     protocolFactory: TProtocolFactory,
-    service: Service[ThriftClientRequest, Array[Byte]]): Iface = {
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Iface = {
     val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1
@@ -474,22 +492,23 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     implicit builder: MethodIfaceBuilder[ServiceIface, FutureIface]
   ): FutureIface = builder.newMethodIface(serviceIface)
 
+  /**
+   * $buildMultiplexClient
+   */
   def multiplex[T](dest: Name, label: String)(build: MultiplexedThriftClient => T): T = {
     build(new MultiplexedThriftClient(dest, label))
   }
 
+  /**
+   * $buildMultiplexClient
+   */
   def multiplex[T](dest: String, label: String)(build: MultiplexedThriftClient => T): T = {
     multiplex(Resolver.eval(dest), label)(build)
   }
 
-  def multiplex[T](dest: String)(build: MultiplexedThriftClient => T): T = {
-    val (n, l) = Resolver.evalLabeled(dest)
-    multiplex(n, l)(build)
-  }
-
   class MultiplexedThriftClient(dest: Name, label: String) {
 
-    val service = newService(dest, label)
+    private[this] val service = newService(dest, label)
 
     def newIface[Iface: ClassTag](serviceName: String): Iface = {
       val cls = implicitly[ClassTag[Iface]].runtimeClass
