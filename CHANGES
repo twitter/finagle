@@ -13,6 +13,11 @@ New Features
   * finagle-thriftmux: Allow ThriftMux.Clients to be filtered. This is supported
     in the the StdStackClient but ThriftMux.Client is a StackBasedClient. ``RB_ID=874560``
 
+  * finagle-netty4: Add boolean flag `com.twitter.finagle.netty4.poolReceiveBuffers` that
+    enables/disables pooling of receive buffers (disabled by default). When enabled, lowers
+    the CPU usage and allocation rate (GC pressure) with the cost of increased memory
+    footprint at the startup. ``RB_ID=872940``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

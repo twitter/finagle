@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.util.Awaitable
-import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
+import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
@@ -18,6 +18,37 @@ package object netty4 {
   // this forces netty to use a "cleaner" for direct byte buffers
   // which we need as long as we don't release them.
   System.setProperty("io.netty.maxDirectMemory", "0")
+
+  // We allocate one arena per a worker thread to reduce contention. By default
+  // this will be equal to the number of logical cores * 2.
+  //
+  // NOTE: Before overriding it, we check whether or not it was set before. This way users
+  // will have a chance to tune it.
+  //
+  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers`).
+  if (System.getProperty("io.netty.allocator.numDirectArenas") == null) {
+    System.setProperty("io.netty.allocator.numDirectArenas", numWorkers().toString)
+  }
+
+  // This determines the size of the memory chunks we allocate in arenas. Netty's default
+  // is 16mb, we shrink it to 2mb.
+  //
+  // We make the trade-off between an initial memory footprint and the max buffer size
+  // that can still be pooled (assuming that 2mb is big enough to cover nearly all
+  // inbound messages sent over TCP). Every allocation that exceeds 2mb will fall back
+  // to an unpooled allocator.
+  //
+  // The `io.netty.allocator.maxOrder` (default: 8) determines the number of left binary
+  // shifts we need to apply to the `io.netty.allocator.pageSize` (default: 8192):
+  // 8192 << 8 = 2mb.
+  //
+  // NOTE: Before overriding it, we check whether or not it was set before. This way users
+  // will have a chance to tune it.
+  //
+  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers`).
+  if (System.getProperty("io.netty.allocator.maxOrder") == null) {
+    System.setProperty("io.netty.allocator.maxOrder", "8")
+  }
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
   //     because we need to disable the leak-detector and
@@ -34,6 +65,8 @@ package object netty4 {
     private[netty4] case class Allocator(allocator: ByteBufAllocator)
     private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
       // TODO investigate pooled allocator CSL-2089
+      // While we already pool receive buffers, this ticket is about end-to-end pooling
+      // (everything in the pipeline should be pooled).
       override val default: Allocator = Allocator(UnpooledAllocator)
     }
 
