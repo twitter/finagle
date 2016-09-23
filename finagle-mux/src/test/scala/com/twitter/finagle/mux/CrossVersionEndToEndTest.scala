@@ -36,4 +36,22 @@ class CrossVersionEndToEndTest extends FunSuite {
       Await.result(clnt.close(), 5.seconds)
     }
   }
+
+  test("Mux object respects netty transport toggle") {
+    val clientParams = Mux.client.params
+    val serverParams = Mux.server.params
+
+    def assertImpl(prefix: String) = {
+      assert(clientParams[Mux.param.MuxImpl].transporter(Stack.Params.empty).toString ==
+        s"${prefix}Transporter")
+      assert(serverParams[Mux.param.MuxImpl].listener(Stack.Params.empty).toString ==
+        s"${prefix}Listener")
+    }
+
+    assertImpl("Netty3")
+
+    toggle.flag.overrides.let("com.twitter.finagle.mux.UseNetty4", 1.0) {
+      assertImpl("Netty4")
+    }
+  }
 }

@@ -1,5 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
  * Package mux implements a generic RPC multiplexer with a rich protocol.
  * Mux is itself encoding independent, so it is meant to use as the
@@ -130,4 +133,16 @@ package com.twitter.finagle
  * avoidance.
  *
  */
-package object mux
+package object mux {
+  /**
+   * The name of the finagle-mux [[ToggleMap]].
+   */
+  private val LibraryName: String =
+    "com.twitter.finagle.mux"
+
+  /**
+   * The [[ToggleMap]] used for finagle-mux.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
+}
