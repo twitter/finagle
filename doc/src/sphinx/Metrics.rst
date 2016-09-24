@@ -195,6 +195,21 @@ These stats pertain to the HTTP protocol.
   A counter of the number of non-retryable HTTP 503 responses the Http server returns. Those
   responses are not automatically retried.
 
+**status/<statusCode>**
+  A counter of the number of responses received, or returned for servers, that had this
+  statusCode.
+
+**status/<statusClass>**
+  Same as **status/statusCode** but aggregated per category, e.g. all 500 range responses
+  count as 5XX for this counter.
+
+**time/<statusCode>**
+  Metric on duration per Http status code.
+
+**time/<statusCategory>**
+  Metric on duration per Http status code category.
+
+
 Mux
 ---
 
