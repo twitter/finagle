@@ -455,6 +455,11 @@ object Stack {
       Node(this, (prms, next) => Leaf(this, make(next.make(prms))), next)
   }
 
+  class NoOpModule[T](val role: Role, val description: String) extends Module0[T] {
+    override def make(next: T): T =
+      next
+  }
+
   /** A module of 1 parameter. */
   abstract class Module1[P1: Param, T] extends Stackable[T] {
     final val parameters: Seq[Stack.Param[_]] =

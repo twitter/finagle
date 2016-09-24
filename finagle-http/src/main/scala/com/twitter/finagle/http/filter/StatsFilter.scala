@@ -6,20 +6,20 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util._
 
 object StatsFilter {
-  val role = Stack.Role("HttpStatsFilter")
+  val role: Stack.Role = Stack.Role("HttpStatsFilter")
+  val description: String = "HTTP Stats"
 
   def module[Req <: Request]: Stackable[ServiceFactory[Req, Response]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Response]] {
       val role = StatsFilter.role
-      val description = "Register HTTP Stats"
+      val description = StatsFilter.description
 
-      override def make(statsParam: param.Stats,
-                        next: ServiceFactory[Req, Response]): ServiceFactory[Req, Response] = {
-        if (statsParam.statsReceiver.isNull) {
+      def make(statsParam: param.Stats,
+               next: ServiceFactory[Req, Response]): ServiceFactory[Req, Response] = {
+        if (statsParam.statsReceiver.isNull)
           next
-        } else {
+        else
           new StatsFilter[Req](statsParam.statsReceiver).andThen(next)
-        }
       }
     }
 
@@ -49,7 +49,7 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
     future respond {
       case Return(response) =>
         count(elapsed(), response)
-      case Throw(_)         =>
+      case Throw(_) =>
         // Treat exceptions as empty 500 errors
         val response = Response(request.version, Status.InternalServerError)
         count(elapsed(), response)
