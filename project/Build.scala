@@ -548,7 +548,10 @@ object Finagle extends Build {
       util("logging"),
       util("stats"),
       "com.twitter.common" % "stats-util" % "0.0.58")
-  ).dependsOn(finagleCore, finagleNetty4)
+  ).dependsOn(
+    finagleCore,
+    finagleNetty4,
+    finagleToggle)
 
   lazy val finagleThriftMux = Project(
     id = "finagle-thriftmux",
