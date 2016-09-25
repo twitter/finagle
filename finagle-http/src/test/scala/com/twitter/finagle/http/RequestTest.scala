@@ -65,6 +65,18 @@ class RequestTest extends FunSuite {
     assert(actual == expected)
   }
 
+  test("Default Host header for HTTP_1.1") {
+    Seq(Request(),
+      Request(Version.Http11, Method.Get, "/"),
+      Request(Method.Get, "/"),
+      Request("/"),
+      Request("/", "the_best_framework" -> "finagle"),
+      Request("the_best_framework" -> "finagle")
+    ).foreach { request =>
+      assert(request.headers.get("Host") == "")
+    }
+  }
+
   test("decode") {
     val request = Request.decodeString(
       "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n")
