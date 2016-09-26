@@ -18,6 +18,12 @@ class SpanIdTest extends FunSuite {
     assert(SpanId.fromString("7b").get.toLong == 123L)
   }
 
+  test("create a span from a 128bit hex string by dropping high bits") {
+    val hex128Bits = "463ac35c9f6413ad48485a3953bb6124"
+    val lower64Bits = "48485a3953bb6124"
+    assert(SpanId.fromString(hex128Bits).get == SpanId.fromString(lower64Bits).get)
+  }
+
   test("return None if string is not valid hex") {
     assert(SpanId.fromString("rofl") == None)
   }

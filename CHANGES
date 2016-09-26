@@ -28,6 +28,9 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Tolerate TraceIds that are greater than 64 bits in preparation of
+    moving to 128 bit ids. ``RB_ID=874365``
+
   * finagle-http: `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures` now
     classifies a retryable nack as a `ResponseClass.RetryableFailure`. ``RB_ID=869182``
 
