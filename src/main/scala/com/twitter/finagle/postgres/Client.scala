@@ -7,7 +7,7 @@ import scala.collection.immutable.Queue
 import scala.util.Random
 
 import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.postgres.codec.{ClientError, Errors, PgCodec, ServerError}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
@@ -432,6 +432,9 @@ object Client {
     database: String,
     useSsl: Boolean = false,
     hostConnectionLimit: Int = 1,
+    retryPolicy: RetryPolicy[Try[Nothing]] = RetryPolicy.backoff(
+      Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5)))(
+      RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly),
     customTypes: Boolean = false,
     customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
     binaryResults: Boolean = false,
@@ -447,23 +450,44 @@ object Client {
       case ReqRep(a, Throw(ClientError(_))) => ResponseClass.Success
     }
 
-    // Retry policy - exponential backoff from 50ms
-    val retryPolicy = RetryPolicy.backoff(
-      Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5))
-    )(RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly)
+    withBuilder(
+      host,
+      username,
+      password,
+      database,
+      useSsl,
+      customTypes,
+      customReceiveFunctions,
+      binaryResults,
+      binaryParams) {
+      cb =>
+        cb.hostConnectionLimit(hostConnectionLimit)
+          .responseClassifier(classifier)
+          .retryPolicy(retryPolicy)
+    }
+  }
 
-    val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
-      .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
-      .hosts(host)
-      .hostConnectionLimit(hostConnectionLimit)
-      .retryPolicy(retryPolicy)
-      .responseClassifier(classifier)
-      .failFast(enabled = true)
-      .keepAlive(true)
-      .buildFactory()
-
+  def withBuilder(
+    host: String,
+    username: String,
+    password: Option[String],
+    database: String,
+    useSsl: Boolean = false,
+    customTypes: Boolean = false,
+    customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
+    binaryResults: Boolean = false,
+    binaryParams: Boolean = false)(
+    builderF: ClientBuilder[PgRequest, PgResponse, ClientConfig.Yes, ClientConfig.Yes, Nothing] =>
+      ClientBuilder[PgRequest, PgResponse, ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
+  ) = {
+    val id = Random.alphanumeric.take(28).mkString
+    val builder = builderF(
+      ClientBuilder()
+        .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
+        .hosts(host)
+    )
     val types = if(!customTypes) Some(defaultTypes) else None
-    new Client(factory, id, types, customReceiveFunctions, binaryResults, binaryParams)
+    new Client(builder.buildFactory(), id, types, customReceiveFunctions, binaryResults, binaryParams)
   }
 }
 
