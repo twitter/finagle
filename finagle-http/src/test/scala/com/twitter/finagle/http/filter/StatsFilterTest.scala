@@ -7,12 +7,13 @@ import com.twitter.util.{Await, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.mockito.Mockito.{spy,verify,times}
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
 
   test("increment stats") {
-    val receiver = new InMemoryStatsReceiver
+    val receiver = spy(new InMemoryStatsReceiver)
 
     val filter = new StatsFilter(receiver) andThen new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {
@@ -25,13 +26,20 @@ class StatsFilterTest extends FunSuite {
 
     Time.withCurrentTimeFrozen { _ =>
       Await.result(filter(Request()))
+      Await.result(filter(Request()))
     }
 
-    assert(receiver.counters(Seq("status", "404")) == 1)
-    assert(receiver.counters(Seq("status", "4XX")) == 1)
-    // TODO: until we can mock stopwatches
-    //      receiver.stats(Seq("time", "404"))      must_== Seq(0.0)
-    //      receiver.stats(Seq("time", "4XX"))      must_== Seq(0.0)
-    assert(receiver.stats(Seq("response_size")) == Seq(5.0))
+    // Verify that the counters and stats were only created once
+    verify(receiver, times(1)).counter("status", "404")
+    verify(receiver, times(1)).counter("status", "4XX")
+    verify(receiver, times(1)).stat("time", "404")
+    verify(receiver, times(1)).stat("time", "4XX")
+    verify(receiver, times(1)).stat("response_size")
+
+    assert(receiver.counters(Seq("status", "404")) === 2)
+    assert(receiver.counters(Seq("status", "4XX")) === 2)
+    assert(receiver.stats(Seq("time", "404")) === Seq(0.0, 0.0))
+    assert(receiver.stats(Seq("time", "4XX")) === Seq(0.0, 0.0))
+    assert(receiver.stats(Seq("response_size")) === Seq(5.0, 5.0))
   }
 }

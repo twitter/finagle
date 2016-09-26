@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.stats.{Counter, Stat, StatsReceiver}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
+import com.twitter.util.{Duration, Memoize, Future, Return, Stopwatch, Throw}
 
 /**
  * Statistic filter.
@@ -23,11 +23,11 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
   private[this] val timeReceiver = stats.scope("time")
   private[this] val responseSizeStat = stats.stat("response_size")
 
-  private[this] val counterCache: Map[String, Counter] =
-    Map.empty.withDefault(statusReceiver.counter(_))
+  private[this] val counterCache: String => Counter =
+    Memoize(statusReceiver.counter(_))
 
-  private[this] val statCache: Map[String, Stat] =
-    Map.empty.withDefault(timeReceiver.stat(_))
+  private[this] val statCache: String => Stat =
+    Memoize(timeReceiver.stat(_))
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
     val elapsed = Stopwatch.start()
