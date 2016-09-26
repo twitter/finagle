@@ -8,14 +8,15 @@ import scala.util.Random
 
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.postgres.codec.{Errors, PgCodec}
+import com.twitter.finagle.postgres.codec.{ClientError, Errors, PgCodec, ServerError}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Return, Throw, Try}
 import org.jboss.netty.buffer.ChannelBuffer
-
 import scala.language.implicitConversions
+
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 
 
 /*
@@ -439,12 +440,22 @@ object Client {
   ): Client = {
     val id = Random.alphanumeric.take(28).mkString
 
+    // Classify responses appropriately - a ServerError with SQLState or ClientError does not mean that the client is
+    // down.
+    val classifier: ResponseClassifier = {
+      case ReqRep(a, Return(_)) => ResponseClass.Success
+      case ReqRep(a, Throw(ServerError(_, _, _, Some(_), _, _, _))) => ResponseClass.Success
+      case ReqRep(a, Throw(ClientError(_))) => ResponseClass.Success
+    }
+
     val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
       .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
       .hosts(host)
       .hostConnectionLimit(hostConnectionLimit)
       .retries(numRetries)
+      .responseClassifier(classifier)
       .failFast(enabled = true)
+      .keepAlive(true)
       .buildFactory()
 
     val types = if(!customTypes) Some(defaultTypes) else None
