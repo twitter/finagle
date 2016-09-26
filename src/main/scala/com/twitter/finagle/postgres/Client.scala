@@ -440,8 +440,6 @@ object Client {
     binaryResults: Boolean = false,
     binaryParams: Boolean = false
   ): Client = {
-    val id = Random.alphanumeric.take(28).mkString
-
     // Classify responses appropriately - a ServerError with SQLState or ClientError does not mean that the client is
     // down.
     val classifier: ResponseClassifier = {
