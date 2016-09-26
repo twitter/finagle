@@ -456,7 +456,7 @@ object Stack {
   }
 
   class NoOpModule[T](val role: Role, val description: String) extends Module0[T] {
-    override def make(next: T): T =
+    def make(next: T): T =
       next
   }
 

@@ -195,6 +195,10 @@ These stats pertain to the HTTP protocol.
   A counter of the number of non-retryable HTTP 503 responses the Http server returns. Those
   responses are not automatically retried.
 
+These metrics are added by
+:src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
+using `.withHttpStats` on `Http.Client` and `Http.Server`.
+
 **status/<statusCode>**
   A counter of the number of responses received, or returned for servers, that had this
   statusCode.
@@ -204,10 +208,10 @@ These stats pertain to the HTTP protocol.
   count as 5XX for this counter.
 
 **time/<statusCode>**
-  Metric on duration per Http status code.
+  A histogram on duration per Http status code.
 
 **time/<statusCategory>**
-  Metric on duration per Http status code category.
+  A histogram on duration per Http status code category.
 
 
 Mux
