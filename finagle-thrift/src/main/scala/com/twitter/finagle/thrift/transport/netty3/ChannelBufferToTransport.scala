@@ -1,4 +1,4 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
 import org.apache.thrift.transport.TTransport
 import org.jboss.netty.buffer.ChannelBuffer
@@ -10,9 +10,9 @@ import org.jboss.netty.buffer.ChannelBuffer
  *
  */
 private[thrift] class ChannelBufferToTransport(underlying: ChannelBuffer) extends TTransport {
-  override def isOpen = true
-  override def open() {}
-  override def close() {}
+  override def isOpen: Boolean = true
+  override def open(): Unit = {}
+  override def close(): Unit = {}
 
   override def read(buffer: Array[Byte], offset: Int, length: Int): Int = {
     val bytesToRead = math.min(length, underlying.readableBytes)
@@ -20,7 +20,7 @@ private[thrift] class ChannelBufferToTransport(underlying: ChannelBuffer) extend
     bytesToRead
   }
 
-  override def write(buffer: Array[Byte], offset: Int, length: Int) {
+  override def write(buffer: Array[Byte], offset: Int, length: Int): Unit = {
     underlying.writeBytes(buffer, offset, length)
   }
 }
@@ -33,18 +33,18 @@ private[thrift] class ChannelBufferToTransport(underlying: ChannelBuffer) extend
  *
  */
 private[thrift] class DuplexChannelBufferTransport(input: ChannelBuffer, output: ChannelBuffer) extends TTransport {
-  override def isOpen = true
-  override def open() {}
-  override def close() {}
+  override def isOpen: Boolean = true
+  override def open(): Unit = {}
+  override def close(): Unit = {}
 
-  override def read(buffer: Array[Byte], offset: Int, length: Int) = {
+  override def read(buffer: Array[Byte], offset: Int, length: Int): Int = {
     val readableBytes = input.readableBytes()
     val bytesToRead = math.min(length, readableBytes)
     input.readBytes(buffer, offset, bytesToRead)
     bytesToRead
   }
 
-  override def write(buffer: Array[Byte], offset: Int, length: Int) {
+  override def write(buffer: Array[Byte], offset: Int, length: Int): Unit = {
     output.writeBytes(buffer, offset, length)
   }
 

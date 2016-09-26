@@ -2,6 +2,8 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.thrift.thrift.ConnectionOptions
+import com.twitter.finagle.thrift.transport.netty3.{ThriftChannelBufferDecoder, ThriftFrameCodec}
 import com.twitter.util.{Future, Stopwatch}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
@@ -19,10 +21,10 @@ object ThriftClientFramedCodec {
    * Passing a ClientId will propagate that information to the server iff the server is a finagle
    * server.
    */
-  def apply(clientId: Option[ClientId] = None) =
+  def apply(clientId: Option[ClientId] = None): ThriftClientFramedCodecFactory =
     new ThriftClientFramedCodecFactory(clientId)
 
-  def get() = apply()
+  def get(): ThriftClientFramedCodecFactory = apply()
 }
 
 class ThriftClientFramedCodecFactory(
@@ -42,14 +44,14 @@ class ThriftClientFramedCodecFactory(
   /**
    * Use the given protocolFactory in stead of the default `TBinaryProtocol.Factory`
    */
-  def protocolFactory(pf: TProtocolFactory) =
+  def protocolFactory(pf: TProtocolFactory): ThriftClientFramedCodecFactory =
     new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf)
 
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
-  def apply(config: ClientCodecConfig) =
+  def apply(config: ClientCodecConfig): ThriftClientFramedCodec =
     new ThriftClientFramedCodec(_protocolFactory, config, clientId, _useCallerSeqIds)
 }
 
@@ -70,7 +72,7 @@ class ThriftClientFramedCodec(
   override def prepareConnFactory(
     underlying: ServiceFactory[ThriftClientRequest, Array[Byte]],
     params: Stack.Params
-  ) = preparer.prepare(underlying, params)
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = preparer.prepare(underlying, params)
 
   override val protocolLibraryName: String = "thrift"
 }
@@ -84,7 +86,7 @@ class ThriftClientFramedCodec(
 private[thrift] class ThriftClientChannelBufferEncoder
   extends SimpleChannelDownstreamHandler
 {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) =
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     e.getMessage match {
       case request: ThriftClientRequest =>
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
@@ -105,6 +107,7 @@ private[thrift] class ThriftClientChannelBufferEncoder
       case _ =>
         throw new IllegalArgumentException("No ThriftClientRequest on the wire")
     }
+  }
 }
 
 /**
@@ -174,7 +177,7 @@ private[finagle] case class ThriftClientPreparer(
     buffer().writeMessageBegin(
       new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.CALL, 0))
 
-    val options = new thrift.ConnectionOptions
+    val options = new ConnectionOptions
     options.write(buffer())
 
     buffer().writeMessageEnd()
@@ -206,7 +209,7 @@ private[finagle] case class ThriftClientPreparer(
   */
 private[finagle]
 object ThriftClientFramedPipelineFactory extends ChannelPipelineFactory {
-  def getPipeline() = {
+  def getPipeline(): ChannelPipeline = {
     val pipeline = Channels.pipeline()
     pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
     pipeline.addLast("byteEncoder",      new ThriftClientChannelBufferEncoder)

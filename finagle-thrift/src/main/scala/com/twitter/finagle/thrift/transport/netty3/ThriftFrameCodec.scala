@@ -1,6 +1,6 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
-import org.jboss.netty.channel.{SimpleChannelHandler, ChannelEvent, ChannelHandlerContext}
+import org.jboss.netty.channel.{ChannelEvent, ChannelHandlerContext, SimpleChannelHandler}
 import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
 /**
@@ -9,13 +9,13 @@ import org.jboss.netty.handler.codec.frame.{LengthFieldBasedFrameDecoder, Length
  * is prefixed with a 4-byte, big-endian integer indicating the size
  * of the message that follows.
  */
-private class ThriftFrameCodec extends SimpleChannelHandler {
+private[thrift] class ThriftFrameCodec extends SimpleChannelHandler {
   private[this] val decoder = new LengthFieldBasedFrameDecoder(0x7FFFFFFF, 0, 4, 0, 4)
   private[this] val encoder = new LengthFieldPrepender(4)
 
-  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) =
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit =
     decoder.handleUpstream(ctx, e)
 
-  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) =
+  override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit =
     encoder.handleDownstream(ctx, e)
 }

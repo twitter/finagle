@@ -1,7 +1,7 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
+import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

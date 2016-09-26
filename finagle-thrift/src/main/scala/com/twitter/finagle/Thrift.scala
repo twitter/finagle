@@ -1,14 +1,14 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
+import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
-import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
-import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
+import com.twitter.finagle.thrift.transport.netty3.Netty3Transport
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Monitor}
@@ -59,6 +59,20 @@ import org.apache.thrift.protocol.TProtocolFactory
  */
 object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
+
+  case class ThriftImpl(
+      transporter: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]],
+      listener: Stack.Params => Listener[Array[Byte], Array[Byte]]) {
+    def mk(): (ThriftImpl, Stack.Param[ThriftImpl]) = (this, ThriftImpl.param)
+
+  }
+
+  object ThriftImpl {
+    val Netty3 = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
+
+    // TODO: make this a toggle so we can toggle on netty4
+    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(Netty3)
+  }
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
@@ -140,16 +154,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
-    val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
-    protected def newTransporter(): Transporter[In, Out] = {
-      val pipeline =
-        if (framed) ThriftClientFramedPipelineFactory
-        else ThriftClientBufferedPipelineFactory(protocolFactory)
-      Netty3Transporter(pipeline, params)
-    }
+    protected def newTransporter(): Transporter[In, Out] = params[ThriftImpl].transporter(params)
 
     protected def newDispatcher(
       transport: Transport[ThriftClientRequest, Array[Byte]]
@@ -270,7 +278,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
         def make(params: Stack.Params, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
           val Label(label) = params[Label]
           val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
-          val preparer = new thrift.ThriftServerPreparer(pf, label)
+          val preparer = new ThriftServerPreparer(pf, label)
           preparer.prepare(next, params)
         }
     }
@@ -307,20 +315,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     protected type In = Array[Byte]
     protected type Out = Array[Byte]
 
-    val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
 
     override val Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
       params[Server.param.MaxReusableBufferSize]
 
-    protected def newListener(): Listener[In, Out] = {
-      val pipeline =
-        if (framed) thrift.ThriftServerFramedPipelineFactory
-        else thrift.ThriftServerBufferedPipelineFactory(protocolFactory)
-
-      Netty3Listener(pipeline,
-        if (params.contains[Label]) params else params + Label("thrift"))
-    }
+    protected def newListener(): Listener[In, Out] = params[ThriftImpl].listener(params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],

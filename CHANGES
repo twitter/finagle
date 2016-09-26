@@ -25,6 +25,10 @@ Breaking API Changes
     `c.t.f.netty3.Netty3Transporter` now take `Stack.Params` instead of
     individual parameters. ``RB_ID=871251``
 
+  * finagle-thrift: The c.t.f.thrift.legacy package has been removed which included
+    the public types `ThriftCall`, `ThriftReply`, and `ThriftCallFactory`.
+    ``RB_ID=873982``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

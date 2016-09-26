@@ -1,7 +1,7 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
-import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 
 /**
@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
  * ChannelBuffers (which have been deframed) into byte arrays.
  */
 private[thrift] class ThriftChannelBufferDecoder extends OneToOneDecoder {
-  def decode(ctx: ChannelHandlerContext, ch: Channel, message: Object) = {
+  def decode(ctx: ChannelHandlerContext, ch: Channel, message: Object): Array[Byte] = {
     message match {
       case buffer: ChannelBuffer if buffer.hasArray
           && buffer.arrayOffset == 0 && buffer.readerIndex == 0

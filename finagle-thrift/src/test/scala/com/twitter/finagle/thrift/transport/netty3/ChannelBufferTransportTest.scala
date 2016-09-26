@@ -1,11 +1,11 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ChannelBufferTransportTest extends FunSuite with MockitoSugar {

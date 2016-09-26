@@ -10,9 +10,8 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
-
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])

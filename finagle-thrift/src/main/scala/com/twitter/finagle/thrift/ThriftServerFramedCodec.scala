@@ -3,6 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle._
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.thrift.transport.netty3.{ThriftChannelBufferDecoder, ThriftFrameCodec}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -10,11 +11,11 @@ import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.{TApplicationException, TException}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
-  SimpleChannelDownstreamHandler}
+  ChannelHandlerContext, ChannelPipeline, ChannelPipelineFactory,
+  Channels, MessageEvent, SimpleChannelDownstreamHandler}
 
 private[finagle] object ThriftServerFramedPipelineFactory  extends ChannelPipelineFactory {
-  def getPipeline() = {
+  def getPipeline(): ChannelPipeline = {
     val pipeline = Channels.pipeline()
     pipeline.addLast("thriftFrameCodec", new ThriftFrameCodec)
     pipeline.addLast("byteEncoder", new ThriftServerChannelBufferEncoder)
@@ -24,13 +25,13 @@ private[finagle] object ThriftServerFramedPipelineFactory  extends ChannelPipeli
 }
 
 object ThriftServerFramedCodec {
-  def apply(statsReceiver: StatsReceiver = NullStatsReceiver) =
+  def apply(statsReceiver: StatsReceiver = NullStatsReceiver): ThriftServerFramedCodecFactory =
     new ThriftServerFramedCodecFactory(statsReceiver)
 
-  def apply(protocolFactory: TProtocolFactory) =
+  def apply(protocolFactory: TProtocolFactory): ThriftServerFramedCodecFactory =
     new ThriftServerFramedCodecFactory(protocolFactory)
 
-  def get() = apply()
+  def get(): ThriftServerFramedCodecFactory = apply()
 }
 
 class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
@@ -41,7 +42,7 @@ class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
 
   def this() = this(NullStatsReceiver)
 
-  def apply(config: ServerCodecConfig) =
+  def apply(config: ServerCodecConfig): ThriftServerFramedCodec =
     new ThriftServerFramedCodec(config, protocolFactory)
 }
 
@@ -57,7 +58,7 @@ class ThriftServerFramedCodec(
   override def prepareConnFactory(
     factory: ServiceFactory[Array[Byte],
     Array[Byte]], params: Stack.Params
-  ) = preparer.prepare(factory, params)
+  ): ServiceFactory[Array[Byte], Array[Byte]] = preparer.prepare(factory, params)
 
   override def newTraceInitializer = TraceInitializerFilter.serverModule[Array[Byte], Array[Byte]]
 
@@ -86,7 +87,7 @@ private[finagle] case class ThriftServerPreparer(
 private[thrift] class ThriftServerChannelBufferEncoder
   extends SimpleChannelDownstreamHandler
 {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) = {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit = {
     e.getMessage match {
       // An empty array indicates a oneway reply.
       case array: Array[Byte] if (!array.isEmpty) =>

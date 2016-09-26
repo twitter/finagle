@@ -1,14 +1,15 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
-import org.jboss.netty.channel.ChannelPipelineFactory
+import com.twitter.finagle.thrift.{Protocols, ThriftServerFramedCodec, ThriftServerFramedPipelineFactory}
 import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
 import org.apache.thrift.protocol.TProtocolFactory
+import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
 
 private[finagle]
 case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory)
     extends ChannelPipelineFactory {
 
-  def getPipeline() = {
+  def getPipeline(): ChannelPipeline = {
     val pipeline = ThriftServerFramedPipelineFactory.getPipeline()
     pipeline.replace(
       "thriftFrameCodec", "thriftBufferDecoder",
@@ -23,16 +24,16 @@ case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory
 object ThriftServerBufferedCodec {
   /**
    * Create a
-   * [[com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory]],
+   * [[com.twitter.finagle.thrift.transport.netty3.ThriftServerBufferedCodecFactory]],
    * using the binary protocol factory.
    */
-  def apply() = new ThriftServerBufferedCodecFactory
+  def apply(): ThriftServerBufferedCodecFactory = new ThriftServerBufferedCodecFactory
 
   /**
-   * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory]]
+   * Create a [[com.twitter.finagle.thrift.transport.netty3.ThriftServerBufferedCodecFactory]]
    * using the protocol factory.
    */
-  def apply(protocolFactory: TProtocolFactory) =
+  def apply(protocolFactory: TProtocolFactory): ThriftServerBufferedCodecFactory =
     new ThriftServerBufferedCodecFactory(protocolFactory)
 }
 
@@ -41,10 +42,10 @@ class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
 {
   def this() = this(Protocols.binaryFactory())
   /**
-   * Create a [[com.twitter.finagle.thrift.ThriftServerBufferedCodec]]
+   * Create a [[com.twitter.finagle.thrift.transport.netty3.ThriftServerBufferedCodec]]
    * with a default TBinaryProtocol.
    */
-  def apply(config: ServerCodecConfig) = {
+  def apply(config: ServerCodecConfig): ThriftServerBufferedCodec = {
     new ThriftServerBufferedCodec(protocolFactory, config)
   }
 }

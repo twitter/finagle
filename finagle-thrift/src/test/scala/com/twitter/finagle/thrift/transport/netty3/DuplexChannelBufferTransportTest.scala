@@ -1,4 +1,4 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith

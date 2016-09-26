@@ -1,5 +1,6 @@
-package com.twitter.finagle.thrift
+package com.twitter.finagle.thrift.transport.netty3
 
+import com.twitter.finagle.thrift.ThriftClientFramedPipelineFactory
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
 

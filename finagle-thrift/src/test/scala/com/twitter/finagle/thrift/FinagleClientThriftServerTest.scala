@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.loadbalancer.defaultBalancer
 import com.twitter.test.{AnException, B, SomeStruct}
 import com.twitter.util.{Await, Promise, Return}
-import java.net.{ServerSocket, InetSocketAddress, InetAddress}
+import java.net.{InetAddress, InetSocketAddress, ServerSocket}
 import java.util.concurrent.CyclicBarrier
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
