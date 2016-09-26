@@ -626,6 +626,12 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
   /**
    * $serveIfaces
    */
-  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef], defaultService: Option[String] = None): ListeningServer =
+  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef]): ListeningServer =
+    serve(addr, serverFromIfaces(ifaces, None, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+
+  /**
+   * $serveIfaces
+   */
+  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef], defaultService: Option[String]): ListeningServer =
     serve(addr, serverFromIfaces(ifaces, defaultService, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 }
