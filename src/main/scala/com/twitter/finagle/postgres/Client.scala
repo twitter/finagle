@@ -12,11 +12,11 @@ import com.twitter.finagle.postgres.codec.{ClientError, Errors, PgCodec, ServerE
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Return, Throw, Try}
+import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.language.implicitConversions
 
-import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+import com.twitter.finagle.service._
 
 
 /*
@@ -432,7 +432,6 @@ object Client {
     database: String,
     useSsl: Boolean = false,
     hostConnectionLimit: Int = 1,
-    numRetries: Int = 4,
     customTypes: Boolean = false,
     customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
     binaryResults: Boolean = false,
@@ -448,11 +447,16 @@ object Client {
       case ReqRep(a, Throw(ClientError(_))) => ResponseClass.Success
     }
 
+    // Retry policy - exponential backoff from 50ms
+    val retryPolicy = RetryPolicy.backoff(
+      Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5))
+    )(RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly)
+
     val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
       .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
       .hosts(host)
       .hostConnectionLimit(hostConnectionLimit)
-      .retries(numRetries)
+      .retryPolicy(retryPolicy)
       .responseClassifier(classifier)
       .failFast(enabled = true)
       .keepAlive(true)
