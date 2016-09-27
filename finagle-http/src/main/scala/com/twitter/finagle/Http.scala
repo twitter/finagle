@@ -14,7 +14,7 @@ import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{ResponseClassifier => ResponseClassifierParam, ExceptionStatsHandler => _, Monitor => _, Tracer => _, _}
 import com.twitter.finagle.server._
-import com.twitter.finagle.service.RetryBudget
+import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -144,11 +144,16 @@ object Http extends Client[Request, Response] with HttpRichClient
   private[this] def treatServerErrorsAsFailures: Boolean =
     serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
 
-  private def responseClassifierParam: ResponseClassifierParam =
-    if (treatServerErrorsAsFailures)
-      ResponseClassifierParam(HttpResponseClassifier.ServerErrorsAsFailures)
-    else
-      ResponseClassifierParam.param.default
+  private val responseClassifierParam: ResponseClassifierParam = {
+    val rc: ResponseClassifier =
+      ResponseClassifier.named("ToggledServerErrorsAsFailures") { case reqRep =>
+        if (treatServerErrorsAsFailures)
+          HttpResponseClassifier.ServerErrorsAsFailures(reqRep)
+        else
+          ResponseClassifier.Default(reqRep)
+      }
+    ResponseClassifierParam(rc)
+  }
 
   // Only record payload sizes when streaming is disabled.
   private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =

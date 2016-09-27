@@ -1,24 +1,31 @@
 package com.twitter.finagle.http
 
+import com.google.common.util.concurrent.AtomicDouble
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
+import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory, ServiceFactoryRef}
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.service.{ConstantService, FailureAccrualFactory, ResponseClass, ServiceFactoryRef}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, ReadableCounter}
+import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.language.reflectiveCalls
 
-abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
+abstract class AbstractEndToEndTest extends FunSuite
+  with BeforeAndAfter
+  with Eventually
+  with IntegrationPatience {
+
   sealed trait Feature
   object BasicFunctionality extends Feature
   object ClientAbort extends Feature
@@ -673,12 +680,12 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
     val server = serverImpl()
       .withLabel("server")
-      .configured(Stats(statsRecv))
+      .withStatsReceiver(statsRecv)
       .withMaxRequestSize(100.bytes)
       .serve("localhost:*", ref)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
-      .configured(Stats(statsRecv))
+      .withStatsReceiver(statsRecv)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     val ret = new ServiceProxy(client) {
@@ -701,7 +708,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
       .withStreaming(true)
-      .configured(Stats(statsRecv))
+      .withStatsReceiver(statsRecv)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     initClient(client)
@@ -749,7 +756,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
-      .configured(param.Stats(statsRecv))
+      .withStatsReceiver(statsRecv)
       .withResponseClassifier(classifier)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
@@ -880,4 +887,99 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     Await.ready(client.close(), 5.seconds)
     Await.ready(server.close(), 5.seconds)
   }
+
+  testIfImplemented(ResponseClassifier)(implName + ": ResponseClassifier respects toggle") {
+    import com.twitter.finagle.{Http => ctfHttp}
+
+    val serverFraction = new AtomicDouble(-1.0)
+    val serverToggleFilter = new SimpleFilter[Request, Response] {
+      def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+        val frac = serverFraction.get()
+        if (frac < 0.0) {
+          service(request)
+        } else {
+          var rep: Future[Response] = Future.exception(new RuntimeException("not init"))
+          flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, frac) {
+            rep = service(request)
+          }
+          rep
+        }
+      }
+    }
+    val module = new Stack.Module0[ServiceFactory[Request, Response]] {
+      val role: Stack.Role = Stack.Role("server response classifier")
+      val description: String = role.toString
+      def make(next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] =
+        serverToggleFilter.andThen(next)
+    }
+
+    val srvImpl = serverImpl()
+      .withLabel("server")
+      .withStatsReceiver(statsRecv)
+    val svc500s = new ConstantService[Request, Response](
+      Future.value(Response(Status.InternalServerError)))
+
+    val server = srvImpl
+      // we need to inject a filter that'll set the fraction properly
+      // for the server's flag's Local value
+      .withStack(srvImpl.stack.insertBefore(MonitorFilter.role, module))
+      .serve("localhost:*", svc500s)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(statsRecv)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val clientSuccesses: ReadableCounter = statsRecv.counter("client", "success")
+    val clientFailures: ReadableCounter = statsRecv.counter("client", "failures")
+    val serverSuccesses: ReadableCounter = statsRecv.counter("server", "success")
+    val serverFailures: ReadableCounter = statsRecv.counter("server", "failures")
+
+    def issueRequest(fraction: Option[Double]) = {
+      val res = fraction match {
+        case None =>
+          serverFraction.set(-1.0)
+          client(Request("/"))
+        case Some(f) =>
+          serverFraction.set(f)
+          var r: Future[Response] = Future.exception(new RuntimeException("never init"))
+          flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, f) {
+            r = client(Request("/"))
+          }
+          r
+      }
+      assert(Status.InternalServerError == Await.result(res, 5.seconds).status)
+    }
+
+    // as tested above, the default is that 500s are successful
+    issueRequest(None)
+    eventually {
+      assert(1 == clientSuccesses())
+      assert(0 == clientFailures())
+      assert(1 == serverSuccesses())
+      assert(0 == serverFailures())
+    }
+
+    // switch to 500s as failures
+    issueRequest(Some(1.0))
+    eventually {
+      assert(1 == clientSuccesses())
+      assert(1 == clientFailures())
+      assert(1 == serverSuccesses())
+      assert(1 == serverFailures())
+    }
+
+    // switch it back to 500s are ok
+    issueRequest(Some(0.0))
+    eventually {
+      assert(2 == clientSuccesses())
+      assert(1 == clientFailures())
+      assert(2 == serverSuccesses())
+      assert(1 == serverFailures())
+    }
+
+    Await.ready(server.close(), 5.seconds)
+    Await.ready(client.close(), 5.seconds)
+  }
+
 }

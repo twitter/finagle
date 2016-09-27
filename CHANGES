@@ -43,7 +43,7 @@ Runtime Behavior Changes
     `c.t.f.http.service.HttpResponseClassifier.ServerErrorsAsFailures`. This can
     be disabled by setting the toggle "com.twitter.finagle.http.serverErrorsAsFailures"
     to `0.0` or explicitly setting it using `withResponseClassifier`.
-    ``RB_ID=869303``
+    ``RB_ID=869303``, ``RB_ID=875367``
 
 Bug Fixes
 ~~~~~~~~~
