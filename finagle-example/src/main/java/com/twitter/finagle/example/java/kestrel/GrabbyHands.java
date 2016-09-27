@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.twitter.finagle.Kestrel;
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.kestrel.MultiReader;
@@ -12,7 +13,6 @@ import com.twitter.finagle.kestrel.ReadHandle;
 import com.twitter.finagle.kestrel.ReadMessage;
 import com.twitter.finagle.kestrel.java.Client;
 import com.twitter.finagle.kestrel.protocol.Command;
-import com.twitter.finagle.kestrel.protocol.Kestrel;
 import com.twitter.finagle.kestrel.protocol.Response;
 import com.twitter.finagle.service.Backoff;
 import com.twitter.io.Bufs;
@@ -52,7 +52,7 @@ public final class GrabbyHands {
       for (int i = 1; i < args.length; i++) {
         ServiceFactory<Command, Response> factory =
             ClientBuilder.safeBuildFactory(ClientBuilder.get()
-                .codec(Kestrel.get())
+                .stack(Kestrel.client())
                 .hosts(args[i])
                 .hostConnectionLimit(1));
         System.out.println("k " + args[i]);

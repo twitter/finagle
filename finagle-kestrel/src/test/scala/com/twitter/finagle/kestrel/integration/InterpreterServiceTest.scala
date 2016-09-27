@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Kestrel, Service}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Server
 import com.twitter.finagle.kestrel.protocol._
@@ -22,7 +22,7 @@ class InterpreterServiceTest extends FunSuite {
     val address: InetSocketAddress = server.start().boundAddress.asInstanceOf[InetSocketAddress]
     val client: Service[Command, Response] = ClientBuilder()
       .hosts(address)
-      .codec(Kestrel())
+      .stack(Kestrel.client)
       .hostConnectionLimit(1)
       .build()
 

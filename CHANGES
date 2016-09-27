@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-kestrel: Deprecate `c.t.f.kestrel.protocol.Kestrel()`,
+  `c.t.f.kestrel.protocol.Kestrel(failFast)`, and `c.t.f.kestrel.protocol.Kestrel.get()`.
+  To create a Kestrel client using ClientBuilder, use `.stack(c.t.f.Kestrel.client)`.
+  ``RB_ID=870686``
+
 New Features
 ~~~~~~~~~~~~
 
@@ -17,6 +25,7 @@ New Features
     enables/disables pooling of receive buffers (disabled by default). When enabled, lowers
     the CPU usage and allocation rate (GC pressure) with the cost of increased memory
     footprint at the startup. ``RB_ID=872940``
+>>>>>>> master
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +64,7 @@ Bug Fixes
     gracefully so that all requests that have been issued received responses.
     ``RB_ID=868767``
 
-  * finagle-netty4: `ChannelTransport` now drains messages before reading more data off the 
+  * finagle-netty4: `ChannelTransport` now drains messages before reading more data off the
     transport which should reduce memory pressure in streaming protocols. ``RB_ID=872639``
 
 6.38.0

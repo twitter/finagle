@@ -66,11 +66,17 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
 }
 
 object Kestrel {
+
+  @deprecated("Use the com.twitter.finagle.Kestrel object to build a client", "2016-09-12")
   def apply(): CodecFactory[Command, Response] = apply(false)
+
   /**
    * NOTE: If you're using the codec to build a client connected to a single host, don't set this
    * to true. See CSL-288
    */
+  @deprecated("Use the com.twitter.finagle.Kestrel object to build a client", "2016-09-12")
   def apply(failFast: Boolean): CodecFactory[Command, Response] = new Kestrel(failFast)
+
+  @deprecated("Use the com.twitter.finagle.Kestrel object to build a client", "2016-09-12")
   def get() = apply()
 }

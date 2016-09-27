@@ -1,8 +1,8 @@
 package com.twitter.finagle.example.kestrel
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Kestrel
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.kestrel.{ReadHandle, Client}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.JavaTimer
@@ -30,7 +30,7 @@ object KestrelClient {
 
     val clients: Seq[Client] = hosts map { host =>
       Client(ClientBuilder()
-        .codec(Kestrel())
+        .stack(Kestrel.client)
         .hosts(host)
         .hostConnectionLimit(1) // process at most 1 item per connection concurrently
         .buildFactory())
@@ -53,7 +53,7 @@ object KestrelClient {
     // Attach an async message handler that prints the messages to stdout
     readHandle.messages foreach { msg =>
       try {
-        val Buf.Utf8(str) = msg.bytes 
+        val Buf.Utf8(str) = msg.bytes
         println(str)
       } finally {
         msg.ack.sync() // if we don't do this, no more msgs will come to us
