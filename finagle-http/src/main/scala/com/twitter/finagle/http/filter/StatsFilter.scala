@@ -9,17 +9,17 @@ object StatsFilter {
   val role: Stack.Role = Stack.Role("HttpStatsFilter")
   val description: String = "HTTP Stats"
 
-  def module[Req <: Request]: Stackable[ServiceFactory[Req, Response]] =
-    new Stack.Module1[param.Stats, ServiceFactory[Req, Response]] {
+  def module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module1[param.Stats, ServiceFactory[Request, Response]] {
       val role = StatsFilter.role
       val description = StatsFilter.description
 
       def make(statsParam: param.Stats,
-               next: ServiceFactory[Req, Response]): ServiceFactory[Req, Response] = {
+               next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] = {
         if (statsParam.statsReceiver.isNull)
           next
         else
-          new StatsFilter[Req](statsParam.statsReceiver).andThen(next)
+          new StatsFilter[Request](statsParam.statsReceiver.scope("http")).andThen(next)
       }
     }
 

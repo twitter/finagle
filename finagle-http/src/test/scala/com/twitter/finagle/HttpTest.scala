@@ -7,7 +7,7 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.service.{ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Duration, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -71,15 +71,15 @@ class HttpTest extends FunSuite {
         .withStatsReceiver(clientReceiver)
         .newService("localhost:" + server.boundAddress.asInstanceOf[InetSocketAddress].getPort, "stats_test_client")
 
-    Await.result(client(Request()))
+    Await.result(client(Request()), Duration.fromSeconds(5))
 
-    assert(serverReceiver.counters(Seq("stats_test_server", "status", "404")) == 1)
-    assert(serverReceiver.counters(Seq("stats_test_server", "status", "4XX")) == 1)
-    assert(serverReceiver.stats(Seq("stats_test_server", "response_size")) == Seq(5.0))
+    assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "404")) == 1)
+    assert(serverReceiver.counters(Seq("stats_test_server", "http", "status", "4XX")) == 1)
+    assert(serverReceiver.stats(Seq("stats_test_server", "http", "response_size")) == Seq(5.0))
 
-    assert(clientReceiver.counters(Seq("stats_test_client", "status", "404")) == 1)
-    assert(clientReceiver.counters(Seq("stats_test_client", "status", "4XX")) == 1)
-    assert(clientReceiver.stats(Seq("stats_test_client", "response_size")) == Seq(5.0))
+    assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "404")) == 1)
+    assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
+    assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
   }
 
   test("server uses default response classifier when toggle disabled") {

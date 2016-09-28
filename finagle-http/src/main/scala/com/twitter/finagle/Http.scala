@@ -274,7 +274,7 @@ object Http extends Client[Request, Response] with HttpRichClient
      * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
      */
     def withHttpStats: Client =
-      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module[Request]))
+      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
@@ -417,7 +417,7 @@ object Http extends Client[Request, Response] with HttpRichClient
      * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
      */
     def withHttpStats: Server =
-      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module[Request]))
+      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

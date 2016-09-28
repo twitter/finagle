@@ -189,10 +189,10 @@ These stats pertain to the HTTP protocol.
 
 **nacks**
   A counter of the number of retryable HTTP 503 responses the Http server returns. Those
-  responses are automatically retried by Finagle Http client.
+  responses are automatically retried by Finagle HTTP client.
 
 **nonretryable_nacks**
-  A counter of the number of non-retryable HTTP 503 responses the Http server returns. Those
+  A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
   responses are not automatically retried.
 
 These metrics are added by
@@ -208,10 +208,10 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
   count as 5XX for this counter.
 
 **time/<statusCode>**
-  A histogram on duration per Http status code.
+  A histogram on duration in milliseconds per HTTP status code.
 
 **time/<statusCategory>**
-  A histogram on duration per Http status code category.
+  A histogram on duration in milliseconds per HTTP status code category.
 
 
 Mux
