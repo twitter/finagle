@@ -3,7 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.{Await, Duration, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -24,7 +24,7 @@ class StatsFilterTest extends FunSuite {
     }
 
     Time.withCurrentTimeFrozen { _ =>
-      Await.result(filter(Request()))
+      Await.result(filter(Request()), Duration.fromSeconds(5))
     }
 
     assert(receiver.counters(Seq("status", "404")) == 1)
