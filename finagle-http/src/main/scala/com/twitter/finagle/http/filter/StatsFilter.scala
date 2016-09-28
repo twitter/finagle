@@ -1,9 +1,9 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{Counter, Stat, StatsReceiver}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
+import com.twitter.util.{Duration, Memoize, Future, Return, Stopwatch, Throw}
 
 /**
  * Statistic filter.
@@ -23,6 +23,12 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
   private[this] val timeReceiver = stats.scope("time")
   private[this] val responseSizeStat = stats.stat("response_size")
 
+  private[this] val counterCache: String => Counter =
+    Memoize(statusReceiver.counter(_))
+
+  private[this] val statCache: String => Stat =
+    Memoize(timeReceiver.stat(_))
+
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] = {
     val elapsed = Stopwatch.start()
     val future = service(request)
@@ -41,12 +47,11 @@ class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
     val statusCode = response.statusCode.toString
     val statusClass = (response.statusCode / 100).toString + "XX"
 
-    // TODO: Memoize on status code/class.
-    statusReceiver.counter(statusCode).incr()
-    statusReceiver.counter(statusClass).incr()
+    counterCache(statusCode).incr()
+    counterCache(statusClass).incr()
 
-    timeReceiver.stat(statusCode).add(duration.inMilliseconds)
-    timeReceiver.stat(statusClass).add(duration.inMilliseconds)
+    statCache(statusCode).add(duration.inMilliseconds)
+    statCache(statusClass).add(duration.inMilliseconds)
 
     responseSizeStat.add(response.length)
   }
