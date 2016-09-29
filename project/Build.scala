@@ -518,7 +518,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-kestrel",
     libraryDependencies ++= scroogeLibs :+ caffeineLib
-  ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
+  ).dependsOn(finagleCore, finagleMemcached, finagleNetty4, finagleThrift)
 
   lazy val finagleRedis = Project(
     id = "finagle-redis",

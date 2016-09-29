@@ -82,6 +82,12 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-kestrel: `c.t.f.kestrel.protocol.ResponseToEncoding` is now private[finagle].
+    ``RB_ID=866612``
+
+  * finagle-memcached: `c.t.f.memcached.protocol.text.{CommandToEncoding, ResponseToEncoding}`,
+    `c.t.f.memcached.protocol.text.client.{AbstractDecodingToResponse, ClientTransport, DecodingToResponse}` are now private[finagle]. ``RB_ID=866612``
+
   * finagle-netty4: Move `numWorkers` flag out of the package object so it gets a
     user friendly name: `c.t.f.netty4.numWorkers` instead of `c.t.f.netty4$.package$.numWorkers`.
     ``RB_ID=123567``

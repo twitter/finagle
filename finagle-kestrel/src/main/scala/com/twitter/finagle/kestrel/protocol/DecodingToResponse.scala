@@ -4,7 +4,7 @@ import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
 import com.twitter.finagle.memcached.protocol.text.client.AbstractDecodingToResponse
 import com.twitter.io.Buf
 
-private[kestrel] class DecodingToResponse extends AbstractDecodingToResponse[Response] {
+private[finagle] class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
 
   def parseResponse(tokens: Seq[Buf]) = {

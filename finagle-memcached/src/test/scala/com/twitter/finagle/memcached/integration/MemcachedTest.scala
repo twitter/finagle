@@ -59,10 +59,10 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       val clnt = client.newRichClient(
         Name.bound(Address(srv.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-      Await.result(clnt.delete("foo"))
+      Await.result(clnt.delete("foo"), 5.seconds)
       assert(Await.result(clnt.get("foo"), 5.seconds) == None)
-      Await.result(clnt.set("foo", Buf.Utf8("bar")))
-      assert(Await.result(clnt.get("foo"), 5.seconds).get == Buf.Utf8("bar"))
+      Await.result(clnt.set("foo", Buf.Utf8("bar")), 5.seconds)
+      assert(Await.result(clnt.get("foo"), 5.seconds).get == Buf.Utf8("bar"), 5.seconds)
     }
   }
 

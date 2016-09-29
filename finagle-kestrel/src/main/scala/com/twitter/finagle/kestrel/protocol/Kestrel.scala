@@ -24,7 +24,7 @@ private[finagle] object KestrelClientPipelineFactory extends ChannelPipelineFact
   }
 }
 
-class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
+private[finagle] class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
   private[this] val storageCommands = immutable.Set[Buf](Buf.Utf8("set"))
 
   def this() = this(false)

@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text.client
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.protocol.text._
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
@@ -12,11 +11,13 @@ import java.security.cert.Certificate
 /**
  * A Transport that handles encoding Commands to Bufs and decoding framed Bufs to Responses.
  */
-private[finagle] class ClientTransport(underlying: Transport[Buf, Buf]) extends Transport[Command, Response] {
+private[finagle] class ClientTransport[Command <: AnyRef, Response <: AnyRef](
+    commandToEncoding: AbstractCommandToEncoding[Command],
+    decodingToResponse: AbstractDecodingToResponse[Response],
+    underlying: Transport[Buf, Buf])
+  extends Transport[Command, Response] {
 
   private[this] val decoder = new ClientDecoder
-  private[this] val commandToEncoding = new CommandToEncoding
-  private[this] val decodingToResponse = new DecodingToResponse
   private[this] val encoder = new Encoder
 
   // Decoding must be in a read loop because read() must return a response,
@@ -25,7 +26,7 @@ private[finagle] class ClientTransport(underlying: Transport[Buf, Buf]) extends 
   private[this] val decode: Buf => Future[Response] = buf => {
     val decoding: Decoding = decoder.decode(buf)
     if (decoding != null) {
-      Future.value(decodingToResponse.decode(null, null, decoding))
+      Future.value(decodingToResponse.decode(decoding))
     } else {
       readLoop()
     }
@@ -36,7 +37,7 @@ private[finagle] class ClientTransport(underlying: Transport[Buf, Buf]) extends 
   def read(): Future[Response] = readLoop()
 
   def write(command: Command): Future[Unit] = {
-    val decoding: Decoding = commandToEncoding.encode(null, null, command)
+    val decoding: Decoding = commandToEncoding.encode(command)
     val buf: Buf = encoder.encode(null, null, decoding)
     underlying.write(buf)
   }
