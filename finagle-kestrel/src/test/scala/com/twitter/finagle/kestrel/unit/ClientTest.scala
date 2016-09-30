@@ -6,6 +6,7 @@ import com.twitter.finagle.Kestrel
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.protocol.{Command, Kestrel => _, _}
+import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -30,8 +31,10 @@ class MockClient extends Client {
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite with MockitoSugar {
+
   trait GlobalHelper {
     def buf(i: Int) = Buf.Utf8(i.toString)
+
     def msg(i: Int) = {
       val m = mock[ReadMessage]
       when(m.bytes) thenReturn buf(i)
@@ -191,7 +194,7 @@ class ClientTest extends FunSuite with MockitoSugar {
     val client = Kestrel.client
     val params = client.params
 
-    assert(params[Kestrel.param.KestrelImpl] == Kestrel.param.KestrelImpl.Netty3)
+    assert(params[Kestrel.param.KestrelImpl].transporter(params).toString == "Netty3Transporter")
   }
 
   test("Client configured to use Netty4 has Netty param") {
@@ -199,5 +202,12 @@ class ClientTest extends FunSuite with MockitoSugar {
     val params = client.params
 
     assert(params[Kestrel.param.KestrelImpl] == Kestrel.param.KestrelImpl.Netty4)
+  }
+
+  test("Client can be toggled to Netty4") {
+    flag.overrides.let("com.twitter.finagle.kestrel.UseNetty4", 1.0) {
+      val params = Kestrel.client.params
+      assert(params[Kestrel.param.KestrelImpl].transporter(params).toString == "Netty4Transporter")
+    }
   }
 }
