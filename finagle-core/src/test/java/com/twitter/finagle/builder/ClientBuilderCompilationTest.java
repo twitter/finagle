@@ -7,6 +7,7 @@ import com.twitter.finagle.AbstractCodec;
 import com.twitter.finagle.ClientCodecConfig;
 import com.twitter.finagle.Codec;
 import com.twitter.finagle.ServiceFactory;
+import com.twitter.finagle.param.ProtocolLibrary;
 import com.twitter.util.Function;
 
 public class ClientBuilderCompilationTest {
@@ -28,4 +29,11 @@ public class ClientBuilderCompilationTest {
       ClientBuilder.stackClientOfCodec(clientCodecFactory)
         .newClient("/s/foo/bar");
   }
+
+  @Test
+  public void testConfigured() {
+    ProtocolLibrary lib = ProtocolLibrary.apply("omg");
+    ClientBuilder.get().configured(lib.mk());
+  }
+
 }

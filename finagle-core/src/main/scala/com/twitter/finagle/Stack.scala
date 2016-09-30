@@ -45,7 +45,7 @@ sealed trait Stack[T] {
    */
   def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
-      case Node(head, mk, next) => Node(head, mk, next.transform(fn))
+      case Node(hd, mk, next) => Node(hd, mk, next.transform(fn))
       case leaf@Leaf(_, _) => leaf
     }
 
@@ -56,10 +56,10 @@ sealed trait Stack[T] {
     */
   def insertBefore(target: Role, insertion: Stackable[T]): Stack[T] =
     this match {
-      case Node(head, mk, next) if head.role == target =>
-        insertion +: Node(head, mk, next.insertBefore(target, insertion))
-      case Node(head, mk, next) =>
-        Node(head, mk, next.insertBefore(target, insertion))
+      case Node(hd, mk, next) if hd.role == target =>
+        insertion +: Node(hd, mk, next.insertBefore(target, insertion))
+      case Node(hd, mk, next) =>
+        Node(hd, mk, next.insertBefore(target, insertion))
       case leaf@Leaf(_, _) => leaf
     }
 
@@ -78,8 +78,8 @@ sealed trait Stack[T] {
    * unmodified stack is returned.
    */
   def insertAfter(target: Role, insertion: Stackable[T]): Stack[T] = transform {
-    case Node(head, mk, next) if head.role == target =>
-      Node(head, mk, insertion +: next)
+    case Node(hd, mk, next) if hd.role == target =>
+      Node(hd, mk, insertion +: next)
     case stk => stk
   }
 
@@ -98,9 +98,9 @@ sealed trait Stack[T] {
    */
   def remove(target: Role): Stack[T] =
     this match {
-      case Node(head, mk, next) =>
-        if (head.role == target) next.remove(target)
-        else Node(head, mk, next.remove(target))
+      case Node(hd, mk, next) =>
+        if (hd.role == target) next.remove(target)
+        else Node(hd, mk, next.remove(target))
       case leaf@Leaf(_, _) => leaf
     }
 
@@ -110,7 +110,7 @@ sealed trait Stack[T] {
    * unmodified stack is returned.
    */
   def replace(target: Role, replacement: Stackable[T]): Stack[T] = transform {
-    case n@Node(head, _, next) if head.role == target =>
+    case n@Node(hd, _, next) if hd.role == target =>
       replacement +: next
     case stk => stk
   }
@@ -177,7 +177,7 @@ sealed trait Stack[T] {
    * `this`.
    */
   def ++(right: Stack[T]): Stack[T] = this match {
-    case Node(head, mk, left) => Node(head, mk, left++right)
+    case Node(hd, mk, left) => Node(hd, mk, left ++ right)
     case Leaf(_, _) => right
   }
 
@@ -195,12 +195,12 @@ sealed trait Stack[T] {
   def +:(stk: Stackable[T]): Stack[T] =
     stk.toStack(this)
 
-  override def toString = {
+  override def toString: String = {
     val elems = tails map {
-      case Node(head, mk, _) => s"Node(role = ${head.role}, description = ${head.description})"
-      case Leaf(head, t) => s"Leaf(role = ${head.role}, description = ${head.description})"
+      case Node(hd, mk, _) => s"Node(role = ${hd.role}, description = ${hd.description})"
+      case Leaf(hd, t) => s"Leaf(role = ${hd.role}, description = ${hd.description})"
     }
-    elems mkString "\n"
+    elems.mkString("\n")
   }
 }
 
@@ -219,7 +219,7 @@ object Stack {
   case class Role(name: String) {
     // Override `toString` to return the flat, lowercase object name for use in stats.
     private[this] lazy val _toString = name.toLowerCase
-    override def toString = _toString
+    override def toString: String = _toString
   }
 
   /**
@@ -251,7 +251,7 @@ object Stack {
   case class Node[T](head: Stack.Head, mk: (Params, Stack[T]) => Stack[T], next: Stack[T])
     extends Stack[T]
   {
-    def make(params: Params) = mk(params, next).make(params)
+    def make(params: Params): T = mk(params, next).make(params)
   }
 
   object Node {
@@ -266,7 +266,7 @@ object Stack {
    * A static stack element; necessarily the last.
    */
   case class Leaf[T](head: Stack.Head, t: T) extends Stack[T] {
-    def make(params: Params) = t
+    def make(params: Params): T = t
   }
 
   object Leaf {
@@ -276,8 +276,8 @@ object Stack {
      */
     def apply[T](_role: Stack.Role, t: T): Leaf[T] = {
       val head = new Stack.Head {
-        val role = _role
-        val description = _role.toString
+        val role: Stack.Role = _role
+        val description: String = _role.toString
         val parameters = Nil
       }
       Leaf(head, t)
@@ -310,7 +310,7 @@ object Stack {
     def apply[T](t: => T): Param[T] = new Param[T] {
       // Note, this is lazy to avoid potential failures during
       // static initialization.
-      lazy val default = t
+      lazy val default: T = t
     }
   }
 
@@ -387,9 +387,22 @@ object Stack {
   trait Parameterized[+T] {
     def params: Stack.Params
 
-    def configured[P: Stack.Param](p: P): T =
+    /**
+     * Add the parameter, `p`, to the current [[Params]].
+     *
+     * Java users may find it easier to use the `Tuple2` version below.
+     */
+    def configured[P](p: P)(implicit sp: Stack.Param[P]): T =
       withParams(params+p)
 
+    /**
+     * Java friendly API for `configured`.
+     *
+     * The `Tuple2` can often be created by calls to a `mk(): (P, Stack.Param[P])`
+     * method on parameters (see
+     * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()]]
+     * as an example).
+     */
     def configured[P](psp: (P, Stack.Param[P])): T = {
       val (p, sp) = psp
       configured(p)(sp)
@@ -469,7 +482,7 @@ object Stack {
     final val parameters: Seq[Stack.Param[_]] =
       Seq(implicitly[Param[P1]], implicitly[Param[P2]])
     def make(p1: P1, p2: P2, next: T): T
-    def toStack(next: Stack[T]) =
+    def toStack(next: Stack[T]): Stack[T] =
       Node(this, (prms, next) => Leaf(this,
         make(prms[P1], prms[P2], next.make(prms))), next)
   }
@@ -552,9 +565,9 @@ object CanStackFrom {
     new CanStackFrom[T=>T, T] {
       def toStackable(r: Stack.Role, fn: T => T): Stackable[T] = {
         new Stack.Module0[T] {
-          val role = r
-          val description = r.name
-          def make(next: T) = fn(next)
+          def role: Stack.Role = r
+          def description: String = r.name
+          def make(next: T): T = fn(next)
         }
       }
     }
@@ -601,5 +614,5 @@ class StackBuilder[T](init: Stack[T]) {
    */
   def make(params: Stack.Params): T = result.make(params)
 
-  override def toString = s"Builder($stack)"
+  override def toString: String = s"Builder($stack)"
 }

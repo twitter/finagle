@@ -91,12 +91,12 @@ object ClientConfig {
   val DefaultName = "client"
 
   private case class NilClient[Req, Rep](
-    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-    params: Stack.Params = DefaultParams
-  ) extends StackBasedClient[Req, Rep] {
+      stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+      params: Stack.Params = DefaultParams)
+    extends StackBasedClient[Req, Rep] {
 
-    def withParams(ps: Stack.Params) = copy(params = ps)
-    def transformed(t: Stack.Transformer) = copy(stack = t(stack))
+    def withParams(ps: Stack.Params): StackBasedClient[Req, Rep] = copy(params = ps)
+    def transformed(t: Stack.Transformer): StackBasedClient[Req, Rep] = copy(stack = t(stack))
 
     def newService(dest: Name, label: String): Service[Req, Rep] =
       newClient(dest, label).toService
@@ -253,8 +253,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-  client: StackBasedClient[Req, Rep]
-) {
+    client: StackBasedClient[Req, Rep]) {
   import ClientConfig._
   import com.twitter.finagle.param._
 
@@ -272,16 +271,40 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     new ClientBuilder(client)
 
-  private def configured[P: Stack.Param, HasCluster1, HasCodec1, HasHostConnectionLimit1](
+  private def _configured[P, HasCluster1, HasCodec1, HasHostConnectionLimit1](
     param: P
+  )(
+    implicit stackParam: Stack.Param[P]
   ): ClientBuilder[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     copy(client.configured(param))
+
+  /**
+   * Configure the underlying [[Stack.Param Params]].
+   *
+   * Java users may find it easier to use the `Tuple2` version below.
+   */
+  def configured[P](param: P)(implicit stackParam: Stack.Param[P]): This =
+    copy(client.configured(param))
+
+  /**
+   * Java friendly API for configuring the underlying [[Stack.Param Params]].
+   *
+   * The `Tuple2` can often be created by calls to a `mk(): (P, Stack.Param[P])`
+   * method on parameters (see
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()]]
+   * as an example).
+   */
+  def configured[P](paramAndStackParam: (P, Stack.Param[P])): This =
+    copy(client.configured(paramAndStackParam._1)(paramAndStackParam._2))
+
+  /**
+   * The underlying [[Stack.Param Params]] used for configuration.
+   */
+  def params: Stack.Params = client.params
 
   // Used in deprecated KetamaClientBuilder, remove when we drop it in
   // favor of the finagle.Memcached protocol object.
   private[finagle] def underlying: StackBasedClient[Req, Rep] = client
-
-  def params: Stack.Params = client.params
 
   /**
    * Specify the set of hosts to connect this client to.  Requests
@@ -419,7 +442,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def dest(
     name: Name
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    configured(DestName(name))
+    _configured(DestName(name))
 
   /**
    * The base [[com.twitter.finagle.Dtab]] used to interpret logical
@@ -748,7 +771,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
-    configured(params[DefaultPool.Param].copy(high = value))
+    _configured(params[DefaultPool.Param].copy(high = value))
 
   /**
    * The core size of the connection pool: the pool is not shrinked below this limit.
@@ -1055,10 +1078,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(hostname: String): This = {
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
       case _ => Ssl.client()
-    }))))
+    }))
       .configured(Transporter.TLSHostname(Some(hostname)))
   }
 
@@ -1076,10 +1099,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(sslContext: SSLContext): This =
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostName, inet.getPort)
       case _ => Ssl.client(sslContext)
-    }))))
+    }))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -1087,10 +1110,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostName), inet.getPort)
       case _ => Ssl.client(sslContext)
-    }))))
+    }))
       .configured(Transporter.TLSHostname(hostname))
 
   /**
@@ -1389,18 +1412,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
  * filters historically included in `ClientBuilder` clients.
  */
 private case class ClientBuilderClient[Req, Rep](
-  client: StackClient[Req, Rep]
-) extends StackClient[Req, Rep] {
+    client: StackClient[Req, Rep])
+  extends StackClient[Req, Rep] {
 
   def params: Stack.Params = client.params
-  def withParams(ps: Stack.Params) = copy(client.withParams(ps))
+  def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(client.withParams(ps))
   def stack: Stack[ServiceFactory[Req, Rep]] = client.stack
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(client.withStack(stack))
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(client.withStack(stack))
 
-  def newClient(dest: Name, label: String) =
+  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
     ClientBuilderClient.newClient(client, dest, label)
 
-  def newService(dest: Name, label: String) =
+  def newService(dest: Name, label: String): Service[Req, Rep] =
     ClientBuilderClient.newService(client, dest, label)
 }
 
@@ -1410,15 +1433,15 @@ private object ClientBuilderClient {
 
   private class StatsFilterModule[Req, Rep]
       extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder StatsFilter")
+    val role: Stack.Role = Stack.Role("ClientBuilder StatsFilter")
     val description: String =
       "Record request stats scoped to 'tries', measured after any retries have occurred"
 
-    override def make(
+    def make(
       statsP: Stats,
       exceptionStatsHandlerP: ExceptionStatsHandler,
       next: ServiceFactory[Req, Rep]
-    ) = {
+    ): ServiceFactory[Req, Rep] = {
       val Stats(statsReceiver) = statsP
       val ExceptionStatsHandler(categorizer) = exceptionStatsHandlerP
 
@@ -1429,14 +1452,14 @@ private object ClientBuilderClient {
 
   private class GlobalTimeoutModule[Req, Rep]
       extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder GlobalTimeoutFilter")
+    val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
     val description: String = "Application-configured global timeout"
 
-    override def make(
+    def make(
       globalTimeoutP: GlobalTimeout,
       timerP: Timer,
       next: ServiceFactory[Req, Rep]
-    ) = {
+    ): ServiceFactory[Req, Rep] = {
       val GlobalTimeout(timeout) = globalTimeoutP
       val Timer(timer) = timerP
 
@@ -1451,13 +1474,13 @@ private object ClientBuilderClient {
 
   private class ExceptionSourceFilterModule[Req, Rep]
       extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder ExceptionSourceFilter")
+    val role: Stack.Role = Stack.Role("ClientBuilder ExceptionSourceFilter")
     val description: String = "Exception source filter"
 
-    override def make(
+    def make(
       labelP: Label,
       next: ServiceFactory[Req, Rep]
-    ) = {
+    ): ServiceFactory[Req, Rep] = {
       val Label(label) = labelP
 
       val exceptionSource = new ExceptionSourceFilter[Req, Rep](label)
@@ -1536,14 +1559,14 @@ private object ClientBuilderClient {
  * [[com.twitter.finagle.Codec]].
  */
 private case class CodecClient[Req, Rep](
-  codecFactory: CodecFactory[Req, Rep]#Client,
-  stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-  params: Stack.Params = ClientConfig.DefaultParams
-) extends StackClient[Req, Rep] {
+    codecFactory: CodecFactory[Req, Rep]#Client,
+    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+    params: Stack.Params = ClientConfig.DefaultParams)
+  extends StackClient[Req, Rep] {
   import com.twitter.finagle.param._
 
-  def withParams(ps: Stack.Params) = copy(params = ps)
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(stack = stack)
+  def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(params = ps)
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(stack = stack)
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
     val codec = codecFactory(ClientCodecConfig(label))
@@ -1552,12 +1575,12 @@ private case class CodecClient[Req, Rep](
       def parameters: Seq[Stack.Param[_]] = Nil
       val role: Stack.Role = StackClient.Role.prepConn
       val description = "Connection preparation phase as defined by a Codec"
-      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val Stats(stats) = ps[Stats]
         val underlying = codec.prepareConnFactory(next, ps)
         new ServiceFactoryProxy(underlying) {
-          val stat = stats.stat("codec_connection_preparation_latency_ms")
-          override def apply(conn: ClientConnection) = {
+          private val stat = stats.stat("codec_connection_preparation_latency_ms")
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             val begin = Time.now
             super.apply(conn) ensure {
               stat.add((Time.now - begin).inMilliseconds)
@@ -1598,7 +1621,7 @@ private case class CodecClient[Req, Rep](
           params + Netty3Transporter.TransportFactory(newTransport))
       }
 
-      protected def newDispatcher(transport: Transport[In, Out]) =
+      protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep] =
         codec.newClientDispatcher(transport, params)
     }
 
