@@ -17,14 +17,6 @@ object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
 object dnsCacheSize extends GlobalFlag(16000L, "Maximum size of DNS resolution cache")
 
-private[serverset2] object eprintf {
-  def apply(fmt: String, xs: Any*) = System.err.print(fmt.format(xs: _*))
-}
-
-private[serverset2] object eprintln {
-  def apply(l: String) = System.err.println(l)
-}
-
 private[serverset2] object Zk2Resolver {
   /**
    * A representation of an Addr accompanied by its total size and the number of
@@ -124,7 +116,7 @@ class Zk2Resolver(
     val value = discoverers(key)
 
     if (chatty()) {
-      eprintf("ServiceDiscoverer(%s->%s)\n", hosts, value)
+      logger.info("ServiceDiscoverer(%s->%s)\n", hosts, value)
     }
 
     value
@@ -135,8 +127,8 @@ class Zk2Resolver(
       case (discoverer, path) => discoverer(path).run
     }
 
-  private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String]), Var[Addr]] {
-    case (discoverer, path, endpointOption) =>
+  private[this] val addrOf_ = Memoize[(ServiceDiscoverer, String, Option[String], Option[Int]), Var[Addr]] {
+    case (discoverer, path, endpointOption, shardOption) =>
       val scoped = {
         val sr =
           path.split("/").filter(_.nonEmpty).foldLeft(discoverer.statsReceiver) {
@@ -154,27 +146,29 @@ class Zk2Resolver(
       scoped.provideGauge("size") { size }
 
       // First, convert the Op-based serverset address to a
-      // Var[Addr], filtering out only the endpoints we are
-      // interested in.
+      // Var[Addr], then select only endpoints that are alive
+      // and match any specified endpoint name and shard ID.
       val va: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
-        case Activity.Ok(eps) =>
+        case Activity.Ok(weightedEntries) =>
           val endpoint = endpointOption.getOrElse(null)
-          val subseq = eps collect {
+          val hosts: Seq[(String, Int, Addr.Metadata)] = weightedEntries.collect {
             case (Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _), weight)
-                if names.contains(endpoint) && host != null =>
+                if names.contains(endpoint) &&
+                   host != null &&
+                   shardOption.forall { s => s == shardId && shardId != Int.MinValue } =>
               val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
               val metadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt))
               (host, port, metadata + (WeightedAddress.weightKey -> weight))
           }
 
           if (chatty()) {
-            eprintf("Received new serverset vector: %s\n", subseq mkString ",")
+            logger.info("Received new serverset vector: %s\n", hosts mkString ",")
           }
 
-          if (subseq.isEmpty) Var.value(Addr.Neg)
-          else inetResolver.bindHostPortsToAddr(subseq)
+          if (hosts.isEmpty) Var.value(Addr.Neg)
+          else inetResolver.bindHostPortsToAddr(hosts)
       }
 
       // The stabilizer ensures that we qualify changes by putting
@@ -203,7 +197,7 @@ class Zk2Resolver(
           val (clientHealth, state) = tuple
 
           if (chatty()) {
-            eprintf("New state for %s!%s: %s\n",
+            logger.info("New state for %s!%s: %s\n",
               path, endpointOption getOrElse "default", state)
           }
 
@@ -252,9 +246,20 @@ class Zk2Resolver(
 
   /**
    * Construct a Var[Addr] from the components of a ServerSet path.
+   * 
+   * Note: the shard ID parameter is not exposed in the Resolver argument
+   * string, but it may be passed by callers that reference this object
+   * directly (e.g. ServerSet Namers).
    */
+  private[twitter] def addrOf(
+    hosts: String,
+    path: String,
+    endpoint: Option[String],
+    shardId: Option[Int]
+  ): Var[Addr] = addrOf_((mkDiscoverer(hosts), path, endpoint, shardId))
+
   private[twitter] def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
-    addrOf_((mkDiscoverer(hosts), path, endpoint))
+    addrOf(hosts, path, endpoint, None)
 
   /**
    * Bind a string into a variable address using the zk2 scheme.
