@@ -4,14 +4,15 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.framer.Framer
 import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.framer.FrameHandler
-import com.twitter.finagle.netty4.proxy.{Netty4ProxyConnectHandler, HttpProxyConnectHandler}
+import com.twitter.finagle.netty4.poolReceiveBuffers
+import com.twitter.finagle.netty4.proxy.{HttpProxyConnectHandler, Netty4ProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.Netty4SslHandler
-import com.twitter.finagle.param.{Stats, Logger, Label}
+import com.twitter.finagle.param.{Label, Logger, Stats}
 import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import io.netty.channel._
-import io.netty.handler.proxy.{Socks5ProxyHandler, HttpProxyHandler}
+import io.netty.handler.proxy.{HttpProxyHandler, Socks5ProxyHandler}
 import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 import java.util.logging.Level
 
@@ -150,6 +151,12 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
 
     // Copy direct byte buffers onto heap before doing anything else.
     pipe.addFirst("direct to heap", DirectToHeapInboundHandler)
+
+    // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` is enabled).
+    if (poolReceiveBuffers()) {
+      pipe.addFirst("receive buffers size tracker",
+        new RecvBufferSizeStatsHandler(stats.scope("transport")))
+    }
   }
 }
 

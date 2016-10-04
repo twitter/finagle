@@ -25,7 +25,9 @@ New Features
     enables/disables pooling of receive buffers (disabled by default). When enabled, lowers
     the CPU usage and allocation rate (GC pressure) with the cost of increased memory
     footprint at the startup. ``RB_ID=872940``
->>>>>>> master
+
+  * finagle-netty4: Add new histogram `receive_buffer_bytes` (only enabled with pooling)
+    to keep track of the receive buffer sizes (useful for tuning pooling). ``RB_ID=877080``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

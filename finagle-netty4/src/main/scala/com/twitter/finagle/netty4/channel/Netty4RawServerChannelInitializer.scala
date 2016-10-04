@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
+import com.twitter.finagle.netty4.poolReceiveBuffers
 import com.twitter.finagle.netty4.ssl.Netty4SslHandler
 import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
@@ -55,5 +56,11 @@ private[netty4] class Netty4RawServerChannelInitializer(
 
     // Copy direct byte buffers onto heap before doing anything else.
     pipeline.addFirst("direct to heap", DirectToHeapInboundHandler)
+
+    // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` are enabled).
+    if (poolReceiveBuffers()) {
+      pipeline.addFirst("receive buffers size tracker",
+        new RecvBufferSizeStatsHandler(stats.scope("transport")))
+    }
   }
 }
