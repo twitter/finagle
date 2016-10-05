@@ -100,7 +100,8 @@ case class ThriftMethodStats(
  * Service interfaces can be modified and composed with Finagle [[Filter Filters]].
  */
 object ThriftServiceIface {
-  private val resetCounter = ClientStatsReceiver.scope("thrift_service_iface").counter("reusable_buffer_resets")
+  private val resetCounter =
+    ClientStatsReceiver.scope("thrift_service_iface").counter("reusable_buffer_resets")
 
   /**
    * Build a Service from a given Thrift method.
@@ -111,9 +112,9 @@ object ThriftServiceIface {
     pf: TProtocolFactory,
     stats: StatsReceiver
   ): Service[method.Args, method.Result] = {
-    statsFilter(method, stats) andThen
-      thriftCodecFilter(method, pf) andThen
-      thriftService
+    statsFilter(method, stats)
+      .andThen(thriftCodecFilter(method, pf))
+      .andThen(thriftService)
   }
 
   /**
@@ -126,21 +127,25 @@ object ThriftServiceIface {
   ): SimpleFilter[method.Args, method.Result] = {
     val methodStats = ThriftMethodStats(stats.scope(method.serviceName).scope(method.name))
     new SimpleFilter[method.Args, method.Result] {
+      private[this] val onSuccessFn: method.Result => Unit = { result =>
+        if (result.successField.isDefined) {
+          methodStats.successCounter.incr()
+        } else {
+          result.firstException() match {
+            case Some(ex) =>
+              methodStats.failuresCounter.incr()
+              methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
+            case None =>
+          }
+        }
+      }
+
       def apply(
         args: method.Args,
         service: Service[method.Args, method.Result]
       ): Future[method.Result] = {
         methodStats.requestsCounter.incr()
-        service(args).onSuccess { result =>
-          if (result.successField.isDefined) {
-            methodStats.successCounter.incr()
-          } else {
-            result.firstException.map { ex =>
-              methodStats.failuresCounter.incr()
-              methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
-            }
-          }
-        }
+        service(args).onSuccess(onSuccessFn)
       }
     }
   }
@@ -154,14 +159,15 @@ object ThriftServiceIface {
     pf: TProtocolFactory
   ): Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] =
     new Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] {
-      override def apply(
+      private[this] val decodeRepFn: Array[Byte] => method.Result =
+        bytes => decodeResponse(bytes, method.responseCodec, pf)
+
+      def apply(
         args: method.Args,
         service: Service[ThriftClientRequest, Array[Byte]]
       ): Future[method.Result] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
-        service(request).map { bytes =>
-          decodeResponse(bytes, method.responseCodec, pf)
-        }
+        service(request).map(decodeRepFn)
       }
     }
 
@@ -169,32 +175,33 @@ object ThriftServiceIface {
     method: ThriftMethod
   ): Filter[method.Args, method.SuccessType, method.Args, method.Result] =
     new Filter[method.Args, method.SuccessType, method.Args, method.Result] {
+      private[this] val responseFn: method.Result => Future[method.SuccessType] = { response =>
+        response.firstException() match {
+          case Some(exception) =>
+            setServiceName(exception, method.serviceName)
+            Future.exception(exception)
+          case None =>
+            response.successField match {
+              case Some(result) =>
+                Future.value(result)
+              case None =>
+                Future.exception(new TApplicationException(
+                  TApplicationException.MISSING_RESULT,
+                  s"Thrift method '${method.name}' failed: missing result"
+                ))
+            }
+        }
+      }
+
       def apply(
         args: method.Args,
         service: Service[method.Args, method.Result]
-      ): Future[method.SuccessType] = {
-        service(args).flatMap { response: method.Result =>
-          response.firstException() match {
-            case Some(exception) =>
-              setServiceName(exception, method.serviceName)
-              Future.exception(exception)
-            case None =>
-              response.successField match {
-                case Some(result) =>
-                  Future.value(result)
-                case None =>
-                  Future.exception(new TApplicationException(
-                    TApplicationException.MISSING_RESULT,
-                    s"Thrift method '${method.name}' failed: missing result"
-                  ))
-              }
-          }
-        }
-      }
+      ): Future[method.SuccessType] =
+        service(args).flatMap(responseFn)
     }
 
   private[this] val tlReusableBuffer = new ThreadLocal[TReusableMemoryTransport] {
-    override def initialValue() = TReusableMemoryTransport(512)
+    override def initialValue(): TReusableMemoryTransport = TReusableMemoryTransport(512)
   }
 
   private[this] def getReusableBuffer(): TReusableMemoryTransport = {
