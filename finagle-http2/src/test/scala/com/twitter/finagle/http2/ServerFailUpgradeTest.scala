@@ -15,5 +15,5 @@ class ServerFailUpgradeTest extends AbstractEndToEndTest {
     finagle.Http.server.configured(Http2)
 
   def featureImplemented(feature: Feature): Boolean =
-    !Set(ClientAbort, Streaming, CloseStream)(feature)
+    !Set(ClientAbort, Streaming, TooLongStream, CloseStream)(feature)
 }

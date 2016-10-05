@@ -16,7 +16,7 @@ class ClientFailUpgradeTest extends AbstractEndToEndTest {
 
   // must be lazy for initialization order reasons
   private[this] lazy val unsupported: Set[Feature] =
-    Set(BasicFunctionality, ResponseClassifier, TooLongStream, Streaming, CloseStream, StreamFixed)
+    Set(BasicFunctionality, ClientAbort, ResponseClassifier, TooLongStream, Streaming, CloseStream, StreamFixed)
 
   def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)
 }

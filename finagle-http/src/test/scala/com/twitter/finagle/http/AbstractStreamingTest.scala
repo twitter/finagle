@@ -338,12 +338,12 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     val client = FinagleHttp.client.withStreaming(true).newService(s"/$$/inet/127.1/$port")
     try {
       val req0 = Request("/0")
-      val rep0 = Await.result(client(req0), 2.seconds)
+      val rep0 = await(client(req0))
       assert(rep0.status == Status.Ok)
       assert(rep0.isChunked)
 
       val req1 = Request("/1")
-      val rep1 = Await.result(client(req1), 2.seconds)
+      val rep1 = await(client(req1))
       assert(rep1.status == Status.Ok)
       assert(rep1.isChunked)
     } finally {
@@ -374,7 +374,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
 
 object StreamingTest {
 
-  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+  def await[A](f: Future[A]): A = Await.result(f, 30.seconds)
 
   val echo = new Service[Request, Response] {
     def apply(req: Request) = Future.value(ok(req.reader))
