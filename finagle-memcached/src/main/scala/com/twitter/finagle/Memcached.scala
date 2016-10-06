@@ -322,7 +322,9 @@ object Memcached extends finagle.Client[Command, Response]
       val param.KeyHasher(hasher) = params[param.KeyHasher]
       val param.NumReps(numReps) = params[param.NumReps]
 
-      registerClient(label, hasher.toString, isPipelining = true)
+      val label0 = if (label == "") params[Label].label else label
+
+      registerClient(label0, hasher.toString, isPipelining = true)
 
       val healthBroker = new Broker[NodeHealth]
 
@@ -330,11 +332,11 @@ object Memcached extends finagle.Client[Command, Response]
         val key = KetamaClientKey.fromCacheNode(node)
         val stk = stack.replace(FailureAccrualFactory.role,
           KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
-        withStack(stk).newService(mkDestination(node.host, node.port), label)
+        withStack(stk).newService(mkDestination(node.host, node.port), label0)
       }
 
       val group = CacheNodeGroup.fromVarAddr(va)
-      val scopedSr = sr.scope(label)
+      val scopedSr = sr.scope(label0)
       new KetamaPartitionedClient(group, newService, healthBroker, scopedSr, hasher, numReps)
         with TwemcachePartitionedClient
     }
