@@ -7,14 +7,6 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
-Deprecations
-~~~~~~~~~~~~
-
-* finagle-kestrel: Deprecate `c.t.f.kestrel.protocol.Kestrel()`,
-  `c.t.f.kestrel.protocol.Kestrel(failFast)`, and `c.t.f.kestrel.protocol.Kestrel.get()`.
-  To create a Kestrel client using ClientBuilder, use `.stack(c.t.f.Kestrel.client)`.
-  ``RB_ID=870686``
-
 New Features
 ~~~~~~~~~~~~
 
@@ -28,6 +20,25 @@ New Features
 
   * finagle-netty4: Add new histogram `receive_buffer_bytes` (only enabled with pooling)
     to keep track of the receive buffer sizes (useful for tuning pooling). ``RB_ID=877080``
+
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.builder.ClientBuilder` deprecate some seldom used methods.
+  The same functionality is available through the Stack-based APIs or
+  `ClientBuilder.configured`. ``RB_ID=878009``
+
+  - `readerIdleTimeout`
+  - `writerIdleTimeout`
+  - `recvBufferSize`
+  - `sendBufferSize`
+  - `channelFactory`
+  - `expHostConnectionBufferSize`
+
+* finagle-kestrel: Deprecate `c.t.f.kestrel.protocol.Kestrel()`,
+  `c.t.f.kestrel.protocol.Kestrel(failFast)`, and `c.t.f.kestrel.protocol.Kestrel.get()`.
+  To create a Kestrel client using ClientBuilder, use `.stack(c.t.f.Kestrel.client)`.
+  ``RB_ID=870686``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

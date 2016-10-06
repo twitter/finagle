@@ -243,11 +243,8 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `keepAlive`: Unspecified, in which case the
  *    [[http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE Java default]]
  *    of `false` is used
- *  - `readerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
- *  - `writerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
- *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
  *
  * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs insead.
@@ -685,6 +682,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.readTimeout(duration)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.readTimeout`",
+    "2016-10-05")
   def readerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(readTimeout = duration))
 
@@ -699,6 +699,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.writeTimeout(duration)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.writeTimeout`",
+    "2016-10-05")
   def writerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = duration))
 
@@ -864,6 +867,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated("Use `configured`", "2016-10-05")
   def expHostConnectionBufferSize(size: Int): This =
     configured(params[DefaultPool.Param].copy(bufferSize = size))
 
@@ -1039,6 +1043,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.sendBufferSize(value)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.sendBufferSize`",
+    "2016-10-05")
   def sendBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
@@ -1053,6 +1060,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.receiveBufferSize(value)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.receiveBufferSize`",
+    "2016-10-05")
   def recvBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(recv = Some(value)))
 
@@ -1062,6 +1072,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * meaningfully reference count factory usage, and so the caller is
    * responsible for calling `releaseExternalResources()`.
    */
+  @deprecated("Use `configured`", "2016-10-05")
   def channelFactory(cf: ChannelFactory): This =
     configured(Netty3Transporter.ChannelFactory(cf))
 
