@@ -182,6 +182,7 @@ object Http extends Client[Request, Response] with HttpRichClient
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         .prepend(nonChunkedPayloadSize)
+        .prepend(new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description))
 
     private def params: Stack.Params =
       StackClient.defaultParams +
@@ -276,6 +277,13 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
 
+
+    /**
+     * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
+     */
+    def withHttpStats: Client =
+      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withSessionPool: SessionPoolingParams[Client] =
@@ -324,6 +332,7 @@ object Http extends Client[Request, Response] with HttpRichClient
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(nonChunkedPayloadSize)
         .prepend(ServerContextFilter.module)
+        .prepend(new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description))
 
     private def params: Stack.Params =
       StackServer.defaultParams +
@@ -411,6 +420,12 @@ object Http extends Client[Request, Response] with HttpRichClient
      */
     def withMaxInitialLineSize(size: StorageUnit): Server =
       configured(param.MaxInitialLineSize(size))
+
+    /**
+     * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
+     */
+    def withHttpStats: Server =
+      withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

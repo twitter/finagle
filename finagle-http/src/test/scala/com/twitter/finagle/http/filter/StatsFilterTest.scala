@@ -27,7 +27,7 @@ class StatsFilterTest extends FunSuite {
     val filter = new StatsFilter(receiver) andThen service
 
     Time.withCurrentTimeFrozen { _ =>
-      Await.result(filter(Request()))
+      Await.result(filter(Request()), Duration.fromSeconds(5))
     }
 
     assert(receiver.counters(Seq("status", "404")) == 1)

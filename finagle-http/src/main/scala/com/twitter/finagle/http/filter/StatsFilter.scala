@@ -1,9 +1,29 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.stats.{Counter, Stat, StatsReceiver}
+import com.twitter.finagle._
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.util.{Duration, Memoize, Future, Return, Stopwatch, Throw}
+import com.twitter.finagle.stats.{Counter, Stat, StatsReceiver}
+import com.twitter.util._
+
+object StatsFilter {
+  val role: Stack.Role = Stack.Role("HttpStatsFilter")
+  val description: String = "HTTP Stats"
+
+  def module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module1[param.Stats, ServiceFactory[Request, Response]] {
+      val role = StatsFilter.role
+      val description = StatsFilter.description
+
+      def make(statsParam: param.Stats,
+               next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] = {
+        if (statsParam.statsReceiver.isNull)
+          next
+        else
+          new StatsFilter[Request](statsParam.statsReceiver.scope("http")).andThen(next)
+      }
+    }
+
+}
 
 /**
  * Statistic filter.
