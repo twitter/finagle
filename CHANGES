@@ -67,6 +67,10 @@ Runtime Behavior Changes
     to `0.0` or explicitly setting it using `withResponseClassifier`.
     ``RB_ID=869303``, ``RB_ID=875367``
 
+  * finagle-thrift: Also track response failures in the
+    `c.t.finagle.thrift.ThriftServiceIface#statsFilter` in addition to successful
+    responses that encode an Error or Exception. ``RB_ID=879075``
+
 Bug Fixes
 ~~~~~~~~~
 

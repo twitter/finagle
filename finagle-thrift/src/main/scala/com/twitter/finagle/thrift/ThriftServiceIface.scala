@@ -119,7 +119,7 @@ object ThriftServiceIface {
 
   /**
    * A [[Filter]] that updates success and failure stats for a thrift method.
-   * Thrift exceptions are counted as failures here.
+   * Failed responses and thrift exceptions are counted as failures here.
    */
   private def statsFilter(
     method: ThriftMethod,
@@ -127,17 +127,24 @@ object ThriftServiceIface {
   ): SimpleFilter[method.Args, method.Result] = {
     val methodStats = ThriftMethodStats(stats.scope(method.serviceName).scope(method.name))
     new SimpleFilter[method.Args, method.Result] {
-      private[this] val onSuccessFn: method.Result => Unit = { result =>
-        if (result.successField.isDefined) {
-          methodStats.successCounter.incr()
-        } else {
-          result.firstException() match {
-            case Some(ex) =>
-              methodStats.failuresCounter.incr()
-              methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
-            case None =>
+      private[this] val respondFn: Try[method.Result] => Unit = {
+        case Return(result) =>
+          if (result.successField.isDefined) {
+            methodStats.successCounter.incr()
+          } else {
+            result.firstException() match {
+              case Some(ex) =>
+                onFailureFn(ex)
+              case None =>
+            }
           }
-        }
+        case Throw(throwable) =>
+          onFailureFn(throwable)
+      }
+
+      private[this] val onFailureFn: Throwable => Unit = { throwable =>
+        methodStats.failuresCounter.incr()
+        methodStats.failuresScope.counter(Throwables.mkString(throwable): _*).incr()
       }
 
       def apply(
@@ -145,7 +152,7 @@ object ThriftServiceIface {
         service: Service[method.Args, method.Result]
       ): Future[method.Result] = {
         methodStats.requestsCounter.incr()
-        service(args).onSuccess(onSuccessFn)
+        service(args).respond(respondFn)
       }
     }
   }
