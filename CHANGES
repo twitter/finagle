@@ -21,6 +21,9 @@ New Features
   * finagle-netty4: Add new histogram `receive_buffer_bytes` (only enabled with pooling)
     to keep track of the receive buffer sizes (useful for tuning pooling). ``RB_ID=877080``
 
+  * finagle: Most libraries (excluding finagle-thrift{,mux}) no longer need to
+    add an additional resolver that points to maven.twttr.com. ``RB_ID=878967``
+
 Deprecations
 ~~~~~~~~~~~~
 

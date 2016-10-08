@@ -63,7 +63,6 @@ object Finagle extends Build {
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
-    resolvers += "twitter-repo" at "https://maven.twttr.com",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
     ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
@@ -210,7 +209,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-integration",
-    libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
+    libraryDependencies ++= Seq(util("core")) ++ scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(
     finagleCore,
     finagleHttp,
@@ -300,7 +300,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.37",
+      "com.twitter.common" % "metrics" % "0.0.38",
       util("app"),
       util("core"),
       util("events"),
@@ -326,7 +326,8 @@ object Finagle extends Build {
       util("codec"),
       util("events"),
       util("core"),
-      util("stats")) ++ scroogeLibs ++ jacksonLibs
+      util("stats")) ++ scroogeLibs ++ jacksonLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleZipkin = Project(
@@ -336,7 +337,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= scroogeLibs
+    libraryDependencies ++= scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
   lazy val finagleException = Project(
@@ -349,7 +351,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec")
     ) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs
+    libraryDependencies ++= jacksonLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -360,7 +363,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-commons-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "stats" % "0.0.114",
+      "com.twitter.common" % "stats" % "0.0.115",
       util("registry"),
       util("stats")
     )
@@ -379,28 +382,24 @@ object Finagle extends Build {
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
+      "com.twitter.common" % "io-json" % "0.0.54",
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.111" excludeAll(
+        ExclusionRule("com.twitter", "finagle-core-java"),
+        ExclusionRule("com.twitter", "finagle-core_2.11"),
+        ExclusionRule("com.twitter", "util-core-java"),
+        ExclusionRule("com.twitter", "util-core_2.11"),
+        ExclusionRule("com.twitter.common", "service-thrift"),
+        ExclusionRule("org.apache.thrift", "libthrift"),
+        ExclusionRule("org.apache.zookeeper", "zookeeper"),
+        ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
+        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
+      ),
+      "com.twitter.common" % "service-thrift" % "1.0.54",
       guavaLib
     ),
 
     libraryDependencies ++= jacksonLibs,
-    excludeFilter in unmanagedSources := "ZkTest.scala",
-    ivyXML :=
-      <dependencies>
-        <dependency org="com.twitter.common.zookeeper" name="server-set" rev="1.0.103">
-          <exclude org="com.google.guava" name="guava"/>
-          <exclude org="com.twitter" name="finagle-core"/>
-          <exclude org="com.twitter" name="finagle-thrift"/>
-          <exclude org="com.twitter" name="util-core"/>
-          <exclude org="com.twitter" name="util-logging"/>
-          <exclude org="com.twitter.common" name="jdk-logging"/>
-          <exclude org="com.twitter.common" name="stats"/>
-          <exclude org="com.twitter.common" name="util-executor-service-shutdown"/>
-          <exclude org="io.netty" name="netty"/>
-          <exclude org="javax.activation" name="activation"/>
-          <exclude org="javax.mail" name="mail"/>
-        </dependency>
-      </dependencies>
+    excludeFilter in unmanagedSources := "ZkTest.scala"
   ).dependsOn(finagleCore)
 
   // Protocol support
@@ -490,7 +489,8 @@ object Finagle extends Build {
     libraryDependencies ++=
       Seq(
         "silly" % "silly-thrift" % "0.5.0" % "test",
-        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
+        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore)
 
   lazy val finagleMemcached = Project(
@@ -505,7 +505,21 @@ object Finagle extends Build {
       util("zk-test") % "test",
       guavaLib,
       "com.twitter" %% "bijection-core" % "0.9.2",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
+      "com.twitter.common" % "io-json" % "0.0.54",
+      "com.twitter.common" % "zookeeper-testing" % "0.0.56" % "test" excludeAll(
+        ExclusionRule("com.twitter", "finagle-core-java"),
+        ExclusionRule("com.twitter", "finagle-core_2.11"),
+        ExclusionRule("com.twitter", "finagle-http-java"),
+        ExclusionRule("com.twitter", "util-core-java"),
+        ExclusionRule("com.twitter", "util-core_2.11"),
+        ExclusionRule("com.twitter", "twitter-server_2.11"),
+        ExclusionRule("com.twitter.common", "service-thrift"),
+        ExclusionRule("org.apache.thrift", "libthrift"),
+        ExclusionRule("org.apache.zookeeper", "zookeeper"),
+        ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
+        ExclusionRule("org.apache.zookeeper", "zookeeper-server"),
+        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
+      )
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
@@ -517,7 +531,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-kestrel",
-    libraryDependencies ++= scroogeLibs :+ caffeineLib
+    libraryDependencies ++= scroogeLibs :+ caffeineLib,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleMemcached, finagleNetty4, finagleThrift, finagleToggle)
 
   lazy val finagleRedis = Project(
@@ -547,7 +562,7 @@ object Finagle extends Build {
       util("core"),
       util("logging"),
       util("stats"),
-      "com.twitter.common" % "stats-util" % "0.0.58")
+      "com.twitter.common" % "stats-util" % "0.0.59")
   ).dependsOn(
     finagleCore,
     finagleNetty4,
@@ -563,7 +578,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("core"),
       util("logging"),
-      util("stats")) ++ scroogeLibs
+      util("stats")) ++ scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
   lazy val finagleMySQL = Project(
@@ -608,7 +624,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"),
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
-    ) ++ scroogeLibs
+    ) ++ scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(
     finagleCore,
     finagleHttp,
@@ -626,7 +643,8 @@ object Finagle extends Build {
     settings = Defaults.coreDefaultSettings ++
       sharedSettings
   ).settings(
-    libraryDependencies ++= scroogeLibs
+    libraryDependencies ++= scroogeLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleThrift)
 
   lazy val finagleBenchmark = Project(
@@ -640,7 +658,7 @@ object Finagle extends Build {
     name := "finagle-benchmark",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "metrics-data-sample" % "0.0.1",
+      "com.twitter.common" % "metrics-data-sample" % "0.0.2",
       "org.apache.curator" % "curator-test" % "2.8.0",
       "org.apache.curator" % "curator-framework" % "2.8.0"
     ),
