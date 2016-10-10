@@ -397,8 +397,8 @@ object Finagle extends Build {
       "com.twitter.common" % "service-thrift" % "1.0.54",
       guavaLib
     ),
-
     libraryDependencies ++= jacksonLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com",
     excludeFilter in unmanagedSources := "ZkTest.scala"
   ).dependsOn(finagleCore)
 
@@ -521,7 +521,8 @@ object Finagle extends Build {
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
       )
     ),
-    libraryDependencies ++= jacksonLibs
+    libraryDependencies ++= jacksonLibs,
+    resolvers += "twitter-repo" at "https://maven.twttr.com"
   ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
 
   lazy val finagleKestrel = Project(
