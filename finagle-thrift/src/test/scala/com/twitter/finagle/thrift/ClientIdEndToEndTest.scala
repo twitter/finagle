@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
@@ -33,13 +34,13 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
 
   testThrift("end-to-end ClientId propagation", Some(ClientId(clientId))) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
-    val result = Await.result(client.complex_return("")).arg_two
+    val result = Await.result(client.complex_return(""), 10.seconds).arg_two
     assert(result == clientId)
   }
 
   testThrift("end-to-end empty ClientId propagation", None) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
-    val result = Await.result(client.complex_return("")).arg_two
+    val result = Await.result(client.complex_return(""), 10.seconds).arg_two
     assert(result == "")
   }
 

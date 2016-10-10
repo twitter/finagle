@@ -1,11 +1,11 @@
 package com.twitter.finagle.thrift.transport.netty3
 
-import com.twitter.finagle.thrift.{Protocols, ThriftServerFramedCodec, ThriftServerFramedPipelineFactory}
+import com.twitter.finagle.thrift.{Protocols, ThriftServerFramedCodec}
 import com.twitter.finagle.{CodecFactory, ServerCodecConfig}
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory}
 
-private[finagle]
+private[netty3]
 case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory)
     extends ChannelPipelineFactory {
 
@@ -13,7 +13,7 @@ case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory
     val pipeline = ThriftServerFramedPipelineFactory.getPipeline()
     pipeline.replace(
       "thriftFrameCodec", "thriftBufferDecoder",
-      new ThriftBufferDecoder(protocolFactory))
+      new ThriftBufferedTransportDecoder(protocolFactory))
     pipeline
   }
 }

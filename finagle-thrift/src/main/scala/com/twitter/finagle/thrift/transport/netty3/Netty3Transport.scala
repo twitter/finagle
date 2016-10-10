@@ -5,7 +5,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.thrift.{ThriftClientFramedPipelineFactory, ThriftClientRequest, ThriftServerFramedPipelineFactory}
+import com.twitter.finagle.thrift.ThriftClientRequest
 
 /**
  * Netty3 [[Transporter]] and [[Listener]] builder implementations
@@ -30,9 +30,8 @@ private[finagle] object Netty3Transport {
     val Thrift.param.Framed(framed) = params[Thrift.param.Framed]
 
     val pipeline =
-      if (framed) {
-        ThriftServerFramedPipelineFactory
-      } else {
+      if (framed) ThriftServerFramedPipelineFactory
+      else {
         val Thrift.param.ProtocolFactory(protocolFactory) = params[Thrift.param.ProtocolFactory]
         ThriftServerBufferedPipelineFactory(protocolFactory)
       }

@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.replay.{ReplayingDecoder, VoidEnum}
 /**
  * A codec for the buffered (unframed) thrift transport.
  */
-private[netty3] class ThriftBufferDecoder(protocolFactory: TProtocolFactory)
+private[netty3] class ThriftBufferedTransportDecoder(protocolFactory: TProtocolFactory)
   extends ReplayingDecoder[VoidEnum]
 {
   override def decode(

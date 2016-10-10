@@ -1,14 +1,16 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
+import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty3.Netty3Transport
+import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Monitor}
@@ -60,15 +62,27 @@ import org.apache.thrift.protocol.TProtocolFactory
 object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
+  /**
+   * The vanilla Thrift `Transporter` and `Listener` factories deviate from other protocols in
+   * the result of the netty pipeline: most other protocols expect to receive a framed `Buf`
+   * while vanilla thrift produces an `Array[Byte]`. This has two related motivations. First, the
+   * end result needed by the thrift implementations is an `Array[Byte]`, which is relatively
+   * trivial to deal with and is a JVM native type so it's unnecessary to go through a `Buf`.
+   * By avoiding an indirection through `Buf` we can avoid an unnecessary copy in the netty4
+   * pipeline that would be required to ensure that the bytes were on the heap before
+   * entering the Finagle transport types.
+   */
   case class ThriftImpl(
       transporter: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]],
       listener: Stack.Params => Listener[Array[Byte], Array[Byte]]) {
+
     def mk(): (ThriftImpl, Stack.Param[ThriftImpl]) = (this, ThriftImpl.param)
 
   }
 
   object ThriftImpl {
     val Netty3 = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
+    val Netty4 = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)
 
     // TODO: make this a toggle so we can toggle on netty4
     implicit val param: Stack.Param[ThriftImpl] = Stack.Param(Netty3)
@@ -162,7 +176,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     protected def newDispatcher(
       transport: Transport[ThriftClientRequest, Array[Byte]]
     ): Service[ThriftClientRequest, Array[Byte]] =
-      new SerialClientDispatcher(
+      new ThriftSerialClientDispatcher(
         transport,
         params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
@@ -325,8 +339,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[Array[Byte], Array[Byte]]
-    ) =
-      new SerialServerDispatcher(transport, service)
+    ) = new ThriftSerialServerDispatcher(transport, service)
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
       configured(param.ProtocolFactory(protocolFactory))

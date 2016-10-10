@@ -83,7 +83,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
   test("handle one-way calls") {
     assert(somewayPromise.isDefined == false)
     client.someway()                  // just returns(!)
-    assert(Await.result(somewayPromise.liftToTry) == Return.Unit)
+    assert(Await.result(somewayPromise.liftToTry, 10.seconds) == Return.Unit)
   }
 
   test("handle wrong interface") {
@@ -112,7 +112,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
         .build()
 
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
-      assert(Await.result(client.multiply(4,2)) == 2)
+      assert(Await.result(client.multiply(4,2), 10.seconds) == 2)
 
       val key = Seq(name, "codec_connection_preparation_latency_ms")
       assert(statsReceiver.repr.stats.contains(key) == true)

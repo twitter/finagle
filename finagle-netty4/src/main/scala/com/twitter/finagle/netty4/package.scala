@@ -60,6 +60,8 @@ package object netty4 {
     /* disableLeakDetector */ true
   )
 
+  private[finagle] val DirectToHeapInboundHandlerName = "direct to heap"
+
   object param {
 
     private[netty4] case class Allocator(allocator: ByteBufAllocator)

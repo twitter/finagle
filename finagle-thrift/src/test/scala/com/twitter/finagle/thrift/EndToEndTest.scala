@@ -137,9 +137,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         val resp = clientIface.show_me_your_dtab()
         clientId match {
           case Some(cId) =>
-            assert(cId.name == Await.result(resp))
+            assert(cId.name == Await.result(resp, 10.seconds))
           case None =>
-            val ex = intercept[TApplicationException] { Await.result(resp) }
+            val ex = intercept[TApplicationException] { Await.result(resp, 10.seconds) }
             assert(ex.getMessage.contains(missingClientIdEx.toString))
         }
         clientClosable.close()
@@ -165,7 +165,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client.newIface[B.ServiceIface](server)
 
     intercept[org.apache.thrift.TApplicationException] {
-      Await.result(client.add(1, 2))
+      Await.result(client.add(1, 2), 10.seconds)
     }
 
     assert(sr.counters(Seq("requests")) == 1)
@@ -176,13 +176,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   testThrift("unique trace ID") { (client, tracer) =>
     val f1 = client.add(1, 2)
-    intercept[AnException] { Await.result(f1, Duration.fromSeconds(15)) }
+    intercept[AnException] { Await.result(f1, 15.seconds) }
     val idSet1 = (tracer map (_.traceId.traceId)).toSet
 
     tracer.clear()
 
     val f2 = client.add(2, 3)
-    intercept[AnException] { Await.result(f2, Duration.fromSeconds(15)) }
+    intercept[AnException] { Await.result(f2, 15.seconds) }
     val idSet2 = (tracer map (_.traceId.traceId)).toSet
 
     assert(idSet1.nonEmpty)
@@ -194,13 +194,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   skipTestThrift("propagate Dtab") { (client, tracer) =>
     Dtab.unwind {
       Dtab.local = Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
-      val clientDtab = Await.result(client.show_me_your_dtab())
+      val clientDtab = Await.result(client.show_me_your_dtab(), 10.seconds)
       assert(clientDtab == "Dtab(2)\n\t/a => /b\n\t/b => /$/inet/google.com/80\n")
     }
   }
 
   testThrift("(don't) propagate Dtab") { (client, tracer) =>
-    val dtabSize = Await.result(client.show_me_your_dtab_size())
+    val dtabSize = Await.result(client.show_me_your_dtab_size(), 10.seconds)
     assert(dtabSize == 0)
   }
 
@@ -238,7 +238,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   testThrift("end-to-end tracing potpourri") { (client, tracer) =>
     val id = Trace.nextId
     Trace.letId(id) {
-      assert(Await.result(client.multiply(10, 30)) == 300)
+      assert(Await.result(client.multiply(10, 30), 10.seconds) == 300)
 
       assert(tracer.nonEmpty)
       val idSet = tracer.map(_.traceId).toSet
@@ -275,13 +275,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       assert(traces.collect { case Record(_, _, Annotation.ClientRecv(), _) => () }.size == 1)
 
 
-      assert(Await.result(client.complex_return("a string")).arg_two
+      assert(Await.result(client.complex_return("a string"), 10.seconds).arg_two
         == "%s".format(Trace.id.spanId.toString))
 
-      intercept[AnException] { Await.result(client.add(1, 2)) }
-      Await.result(client.add_one(1, 2))     // don't block!
+      intercept[AnException] { Await.result(client.add(1, 2), 10.seconds) }
+      Await.result(client.add_one(1, 2), 10.seconds)     // don't block!
 
-      assert(Await.result(client.someway()) == null)  // don't block!
+      assert(Await.result(client.someway(), 10.seconds) == null)  // don't block!
     }
   }
 
@@ -317,7 +317,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val server = mkThriftTlsServer(sr)
     val client = mkThriftTlsClient(server)
 
-    Await.result(client.multiply(1, 42), Duration.fromSeconds(15))
+    Await.result(client.multiply(1, 42), 15.seconds)
 
     assert(sr.counters(Seq("success")) == 1)
 
@@ -337,8 +337,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     )
     val client1 = Thrift.client.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-    assert(Await.result(client1.echo("asdf")) == "asdf")
-    assert(Await.result(client1.getStatus()) == "OK")
+    assert(Await.result(client1.echo("asdf"), 10.seconds) == "asdf")
+    assert(Await.result(client1.getStatus(), 10.seconds) == "OK")
 
     // 2. Server extends X[Future].
     class ExtendedEchoService2 extends ExtendedEcho[Future] {
@@ -351,8 +351,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     )
     val client2 = Thrift.client.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-    assert(Await.result(client2.echo("asdf")) == "asdf")
-    assert(Await.result(client2.getStatus()) == "OK")
+    assert(Await.result(client2.echo("asdf"), 10.seconds) == "asdf")
+    assert(Await.result(client2.getStatus(), 10.seconds) == "OK")
   }
 
   runThriftTests()
@@ -414,7 +414,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     // this query produces a `Throw` response produced on the client side and
     // we want to ensure that we can translate it to a `Success`.
     intercept[RequestTimeoutException] {
-      Await.result(client.echo("slow"))
+      Await.result(client.echo("slow"), 10.seconds)
     }
     assert(sr.counters(Seq("client", "requests")) == 4)
     assert(sr.counters(Seq("client", "success")) == 2)
@@ -439,7 +439,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("client", "success")) == 1)
 
     // test that we can mark a successfully deserialized result as a failure
-    assert("safe" == Await.result(client.echo("safe")))
+    assert("safe" == Await.result(client.echo("safe"), 10.seconds))
     assert(sr.counters(Seq("client", "requests")) == 3)
     assert(sr.counters(Seq("client", "success")) == 1)
   }
@@ -521,7 +521,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters.get(Seq("client", "success")) == None)
 
     // test that we can mark a successfully deserialized result as a failure
-    assert("safe" == Await.result(client.echo("safe")))
+    assert("safe" == Await.result(client.echo("safe"), 10.seconds))
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
     server.close()
@@ -543,7 +543,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters.get(Seq("client", "success")) == None)
 
     // test that we can mark a successfully deserialized result as a failure
-    assert("safe" == Await.result(client.echo("safe")))
+    assert("safe" == Await.result(client.echo("safe"), 10.seconds))
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
     server.close()

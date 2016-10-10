@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.{Await, Future}
@@ -35,7 +36,7 @@ class TTwitterServerFilterTest extends FunSuite {
       filter(buffer.toArray, service)
     }
     assert(upgraded.isDefined)
-    Await.result(upgraded)
+    Await.result(upgraded, 10.seconds)
 
     val req = {
       val buffer = new OutputBuffer(protocolFactory)
@@ -55,7 +56,7 @@ class TTwitterServerFilterTest extends FunSuite {
       }
     }
     assert(req.isDefined)
-    val rep = Await.result(req)
+    val rep = Await.result(req, 10.seconds)
     val clientId = new String(rep, UTF_8)
     assert(clientId == "testclient")
   }
