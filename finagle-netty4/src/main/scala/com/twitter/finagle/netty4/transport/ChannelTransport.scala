@@ -5,12 +5,12 @@ import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import io.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelFutureListener, ChannelFuture, SimpleChannelInboundHandler
-}
+  Channel, ChannelFuture, ChannelFutureListener,
+  ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 
 /**
  * A [[Transport]] implementation based on Netty's [[Channel]].
@@ -28,9 +28,6 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
 
-  // tracks the number of reads that need to be satisfied when the channel
-  // transport is configured with auto-reading off.
-  private[this] val msgsNeeded = new AtomicInteger(0)
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -40,6 +37,38 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   }
 
   val onClose: Future[Throwable] = closed
+
+
+  private[this] object ReadManager {
+    // Negative `msgsNeeded` means we're buffering data in our offer queue
+    // which hasn't been processed by the application yet, so rather than read
+    // off the channel we drain the offer queue. This also applies back-pressure
+    // at the tcp level. In order to proactively detect socket close events we
+    // buffer up to 1 message because the TCP implementation only notifies the
+    // channel of a close event when attempting to perform operations.
+    private[this] val msgsNeeded = new AtomicInteger(0)
+
+    // Tell the channel that we want to read if we don't have offers already queued
+    def readIfNeeded(): Unit = {
+      if (!ch.config.isAutoRead) {
+        if (msgsNeeded.get >= 0) ch.read()
+      }
+    }
+
+    // Increment our needed messages by 1 and ask the channel to read if necessary
+    def incrementAndReadIfNeeded(): Unit = {
+      if (!ch.config.isAutoRead) {
+        if (msgsNeeded.incrementAndGet() >= 0) ch.read()
+      }
+    }
+
+    // Called when we have received a message from the channel pipeline
+    def decrementIfNeeded(): Unit = {
+      if (!ch.config.isAutoRead) {
+        msgsNeeded.decrementAndGet()
+      }
+    }
+  }
 
   private[this] def fail(exc: Throwable): Unit = {
     if (!failed.compareAndSet(false, true))
@@ -89,11 +118,10 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   }
 
   def read(): Future[Out] = {
-    // Negative `msgsNeeded` means we're buffering data in our offer queue
-    // which hasn't been processed by the application yet, so rather than read
-    // off the channel we drain the offer queue. This also applies back-pressure
-    // at the tcp level.
-    if (!ch.config.isAutoRead && msgsNeeded.incrementAndGet() > 0) ch.read()
+    // We are going take one message from the queue so we increment our need by
+    // one and potentially ask the channel to read based on the number of
+    // buffered messages or pending read requests.
+    ReadManager.incrementAndReadIfNeeded()
 
     // This is fine, but we should consider being a little more fine-grained
     // here. For example, if a read behind another read interrupts, perhaps the
@@ -105,7 +133,6 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
     // listeners of two promises, which continue to share state via Linked and
     // is a gain in space-efficiency.
     p.become(queue.poll())
-
 
     // Note: We don't raise on queue.poll's future, because it doesn't set an
     // interrupt handler, but perhaps we should; and perhaps we should always
@@ -142,13 +169,22 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
 
   ch.pipeline.addLast(HandlerName, new SimpleChannelInboundHandler[Out](false /* autoRelease */) {
 
+    override def channelActive(ctx: ChannelHandlerContext): Unit = {
+      // Upon startup we immediately begin the process of buffering at most one inbound
+      // message in order to detect channel close events. Otherwise we would have
+      // different buffering behavior before and after the first `Transport.read()` event.
+      ReadManager.readIfNeeded()
+      super.channelActive(ctx)
+    }
+
     override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
-      if (!ch.config.isAutoRead && msgsNeeded.get > 0) ch.read()
+      // Check to see if we need more data
+      ReadManager.readIfNeeded()
       super.channelReadComplete(ctx)
     }
 
     override def channelRead0(ctx: ChannelHandlerContext, msg: Out): Unit = {
-      if (!ch.config.isAutoRead) msgsNeeded.decrementAndGet()
+      ReadManager.decrementIfNeeded()
       queue.offer(msg)
     }
 
