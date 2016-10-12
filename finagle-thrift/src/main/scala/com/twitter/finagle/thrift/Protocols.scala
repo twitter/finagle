@@ -7,7 +7,7 @@ import com.twitter.util.NonFatal
 import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.charset.{CharsetEncoder, CoderResult, CodingErrorAction}
 import java.security.{PrivilegedExceptionAction, AccessController}
-import org.apache.thrift.protocol.{TProtocol, TProtocolFactory, TBinaryProtocol}
+import org.apache.thrift.protocol.{TMultiplexedProtocol, TProtocol, TProtocolFactory, TBinaryProtocol}
 import org.apache.thrift.transport.TTransport
 
 object Protocols {
@@ -75,6 +75,14 @@ object Protocols {
 
   def factory(statsReceiver: StatsReceiver = DefaultStatsReceiver): TProtocolFactory = {
     binaryFactory(statsReceiver = statsReceiver)
+  }
+
+  def multiplex(serviceName: String, protocolFactory: TProtocolFactory): TProtocolFactory = {
+    new TProtocolFactory {
+      def getProtocol(transport: TTransport) = {
+        new TMultiplexedProtocol(protocolFactory.getProtocol(transport), serviceName)
+      }
+    }
   }
 
   // Visible for testing purposes.
