@@ -121,7 +121,7 @@ the netty4 event loop.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="package$$numWorkers$.html"><span class="name">numWorkers</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+        <a href="numWorkers$.html"><span class="name">numWorkers</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.netty4.package@numWorkers" title="Permalink" target="_top">
@@ -146,6 +146,28 @@ the netty4 event loop.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.netty4.poolReceiveBuffers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="poolReceiveBuffers"></a>
+      <a id="poolReceiveBuffers:poolReceiveBuffers"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="poolReceiveBuffers$.html"><span class="name">poolReceiveBuffers</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty4.package@poolReceiveBuffers" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An experimental option that enables pooling for receive buffers.</p><div class="fullcomment"><div class="comment cmt"><p>An experimental option that enables pooling for receive buffers.</p><p>Since we always copy onto the heap (see <code>DirectToHeapInboundHandler</code>), the receive
+buffers never leave the pipeline hence can safely be pooled.
+In its current form, this will preallocate at least N * 2 mb (chunk size) of
+direct memory at the application startup, where N is the number of worker threads
+Finagle uses.</p><p>Example:</p><p>On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 2mb = 64mb.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This will likely be a default for finagle-netty4.</p></span></dd></dl></div>
     </li></ol>
             </div>
 

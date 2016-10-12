@@ -58,7 +58,7 @@
           <div class="superTypes hiddenContent"><a href="StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>], <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]], <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="../Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="../Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></div>
+            <div class="subClasses hiddenContent"><a href="../Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="../Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></div>
           </div></div>
         
 
@@ -315,9 +315,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+      <p class="shortcomment cmt">Java friendly API for <code>configured</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly API for <code>configured</code>.</p><p>The <code>Tuple2</code> can often be created by calls to a <code>mk(): (P, Stack.Param[P])</code>
+method on parameters (see
+<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()">com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()</span>
+as an example).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](p:P)(implicitevidence$4:com.twitter.finagle.Stack.Param[P]):T"></a>
+      <a id="configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T"></a>
       <a id="configured[P](P)(Param[P]):StackClient[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -325,14 +329,15 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]</span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="sp">sp: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.client.StackClient@configured[P](p:P)(implicitevidence$4:com.twitter.finagle.Stack.Param[P]):T" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.client.StackClient@configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+      <p class="shortcomment cmt">Add the parameter, <code>p</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Add the parameter, <code>p</code>, to the current <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><p>Java users may find it easier to use the <code>Tuple2</code> version below.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

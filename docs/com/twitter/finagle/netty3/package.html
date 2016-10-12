@@ -196,18 +196,18 @@ reflected in slices.</p></span></dd></dl></div>
     </span>
       <p class="shortcomment cmt">Log events on channels</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3Listener[In,Out]extendsListener[In,Out]withProductwithSerializable"></a>
+      <a id="Netty3Listener[In,Out]extendsListener[In,Out]"></a>
       <a id="Netty3Listener[In,Out]:Netty3Listener[In,Out]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Listener.html"><span class="name">Netty3Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelFactory">channelFactory: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span> = <span class="symbol"><span class="name"><a href="Netty3Listener$.html">Netty3Listener.channelFactory</a></span></span></span>, <span name="bootstrapOptions">bootstrapOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name="Map(<br/>    &quot;soLinger&quot; -&gt; (0: java.lang.Integer),<br/>    &quot;reuseAddress&quot; -&gt; java.lang.Boolean.TRUE,<br/>    &quot;child.tcpNoDelay&quot; -&gt; java.lang.Boolean.TRUE<br/>  )">...</span></span>, <span name="channelReadTimeout">channelReadTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriteCompletionTimeout">channelWriteCompletionTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3ListenerTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig">Netty3ListenerTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="nettyTimer">nettyTimer: <span class="extype" name="org.jboss.netty.util.Timer">Timer</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.netty</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">ServerStatsReceiver</a></span></span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullMonitor</a></span></span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultLogger</a></span></span></span>)</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Netty3Listener.html"><span class="name">Netty3Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Listener[In,Out]extendsListener[In,Out]withProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Listener[In,Out]extendsListener[In,Out]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -216,13 +216,7 @@ that yields <code><code>Out</code></code>-typed upstream messages and accepts
 <code><code>In</code></code>-typed downstream messages.</p><div class="fullcomment"><div class="comment cmt"><p>A listener using Netty3 which is given a ChannelPipelineFactory
 that yields <code><code>Out</code></code>-typed upstream messages and accepts
 <code><code>In</code></code>-typed downstream messages.
-</p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd><dt class="param">pipelineFactory</dt><dd class="cmt"><p>The pipeline factory for encoding input
-messages and decoding output messages.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>Use the given <code>ChannelSnooper</code> to log low
-level channel activity.</p></dd><dt class="param">channelFactory</dt><dd class="cmt"><p>A netty3 <code>ChannelFactory</code> used to bootstrap
-the server's listening channel.</p></dd><dt class="param">bootstrapOptions</dt><dd class="cmt"><p>Additional options for Netty's
-<code>ServerBootstrap</code></p></dd><dt class="param">channelReadTimeout</dt><dd class="cmt"><p>Channels are given this much time to
-read a request.</p></dd><dt class="param">channelWriteCompletionTimeout</dt><dd class="cmt"><p>Channels are given this much
-time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>When present, SSL is used to provide session security.</p></dd><dt class="param">monitor</dt><dd class="cmt"><p>Currently unused. Maintained for API compatibility.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Netty3ListenerTLSConfigextendsProductwithSerializable"></a>
       <a id="Netty3ListenerTLSConfig:Netty3ListenerTLSConfig"></a>
@@ -242,18 +236,18 @@ time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt
       <p class="shortcomment cmt">Netty3 TLS configuration.</p><div class="fullcomment"><div class="comment cmt"><p>Netty3 TLS configuration.
 </p></div><dl class="paramcmts block"><dt class="param">newEngine</dt><dd class="cmt"><p>Creates a new SSL engine</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]withProductwithSerializable"></a>
+      <a id="Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a>
       <a id="Netty3Transporter[In,Out]:Netty3Transporter[In,Out]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Transporter.html"><span class="name">Netty3Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="newChannel">newChannel: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span> = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.channelFactory.newChannel</a></span>'>...</span></span>, <span name="newTransport">newTransport: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>] = <span class="defval" name='<span class="name"><a href="../../../package.html">(ch: Channel) =&gt; Transport.cast[In, Out](new ChannelTransport[Any, Any](ch))</a></span>'>...</span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="httpProxy">httpProxy: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol">None</span></span>, <span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol"><span class="name"><a href="../../../package.html">SocksProxyFlags.socksProxy</a></span></span></span>, <span name="socksUsernameAndPassword">socksUsernameAndPassword: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)] = <span class="defval" name='<span class="name"><a href="../../../package.html">SocksProxyFlags.socksUsernameAndPassword</a></span>'>...</span></span>, <span name="channelReaderTimeout">channelReaderTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriterTimeout">channelWriterTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelOptions">channelOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.defaultChannelOptions</a></span>'>...</span></span>, <span name="httpProxyCredentials">httpProxyCredentials: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Netty3Transporter.html"><span class="name">Netty3Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]withProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -264,14 +258,7 @@ address), provides a typed transport for communicating with this
 endpoint.
 </p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of requests. The given pipeline must consume
 <code>Req</code>-typed objects</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of replies. The given pipeline must produce
-objects of this type.</p></dd><dt class="param">pipelineFactory</dt><dd class="cmt"><p>the pipeline factory that implements the
-the <i>Codec</i>: it must input (downstream) <i>In</i> objects,
-and output (upstream) <i>Out</i> objects.</p></dd><dt class="param">newChannel</dt><dd class="cmt"><p>A function used to create a new netty3 channel,
-given a pipeline.</p></dd><dt class="param">newTransport</dt><dd class="cmt"><p>Create a new transport, given a channel.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>If defined, use SSL with the given configuration</p></dd><dt class="param">channelReaderTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be read-idle.</p></dd><dt class="param">channelWriterTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be write-idle.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>If defined, install the given snooper on
-each channel. Used for debugging.</p></dd><dt class="param">channelOptions</dt><dd class="cmt"><p>These netty channel options are applied to
-the channel prior to establishing a new connection.</p></dd></dl></div>
+objects of this type.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Netty3TransporterTLSConfigextendsProductwithSerializable"></a>
       <a id="Netty3TransporterTLSConfig:Netty3TransporterTLSConfig"></a>
@@ -431,7 +418,7 @@ performed.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Listener$.html"><span class="name">Netty3Listener</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Netty3Listener$.html"><span class="name">Netty3Listener</span></a>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Listener" title="Permalink" target="_top">
@@ -448,27 +435,10 @@ performed.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Netty3Transporter$.html"><span class="name">Netty3Transporter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Netty3Transporter$.html"><span class="name">Netty3Transporter</span></a>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Transporter" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.netty3.WorkerPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="WorkerPool"></a>
-      <a id="WorkerPool:WorkerPool"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="WorkerPool$.html"><span class="name">WorkerPool</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.socket.nio.NioWorkerPool">NioWorkerPool</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.package@WorkerPool" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

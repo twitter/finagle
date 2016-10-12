@@ -223,9 +223,13 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+      <p class="shortcomment cmt">Java friendly API for <code>configured</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly API for <code>configured</code>.</p><p>The <code>Tuple2</code> can often be created by calls to a <code>mk(): (P, Stack.Param[P])</code>
+method on parameters (see
+<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()">com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()</span>
+as an example).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](p:P)(implicitevidence$4:com.twitter.finagle.Stack.Param[P]):T"></a>
+      <a id="configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T"></a>
       <a id="configured[P](P)(Param[P]):Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -233,14 +237,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a></span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="sp">sp: <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ThriftMux$$Client@configured[P](p:P)(implicitevidence$4:com.twitter.finagle.Stack.Param[P]):T" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.ThriftMux$$Client@configured[P](p:P)(implicitsp:com.twitter.finagle.Stack.Param[P]):T" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+      <p class="shortcomment cmt">Add the parameter, <code>p</code>, to the current <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Add the parameter, <code>p</code>, to the current <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>.</p><p>Java users may find it easier to use the <code>Tuple2</code> version below.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Client#defaultClientName" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="defaultClientName:String"></a>
       <a id="defaultClientName:String"></a>
@@ -275,6 +280,26 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.Client#filtered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.ThriftMux.Client"></a>
+      <a id="filtered(Filter[Request,Response,Request,Response]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.ThriftMux$$Client@filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.ThriftMux.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Prepends <code>filter</code> to the top of the client.</p><div class="fullcomment"><div class="comment cmt"><p>Prepends <code>filter</code> to the top of the client. That is, after materializing
+the client (newClient/newService) <code>filter</code> will be the first element which
+requests flow through. This is a familiar chaining combinator for filters.
+</p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -1149,6 +1174,23 @@ retries that can be made by this client.
 (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session qualifiers
 (e.g. circuit breakers).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a> → <a href="param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.Client#withStack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]):com.twitter.finagle.ThriftMux.Client"></a>
+      <a id="withStack(Stack[ServiceFactory[Request,Response]]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.ThriftMux$$Client@withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]):com.twitter.finagle.ThriftMux.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.ThriftMux.Client#withStatsReceiver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.ThriftMux.Client"></a>
       <a id="withStatsReceiver(StatsReceiver):Client"></a>

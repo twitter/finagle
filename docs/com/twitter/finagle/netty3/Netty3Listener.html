@@ -44,25 +44,19 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelFactory">channelFactory: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span> = <span class="symbol"><span class="name"><a href="Netty3Listener$.html">Netty3Listener.channelFactory</a></span></span></span>, <span name="bootstrapOptions">bootstrapOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name="Map(<br/>    &quot;soLinger&quot; -&gt; (0: java.lang.Integer),<br/>    &quot;reuseAddress&quot; -&gt; java.lang.Boolean.TRUE,<br/>    &quot;child.tcpNoDelay&quot; -&gt; java.lang.Boolean.TRUE<br/>  )">...</span></span>, <span name="channelReadTimeout">channelReadTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriteCompletionTimeout">channelWriteCompletionTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3ListenerTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig">Netty3ListenerTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="nettyTimer">nettyTimer: <span class="extype" name="org.jboss.netty.util.Timer">Timer</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.netty</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">ServerStatsReceiver</a></span></span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullMonitor</a></span></span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultLogger</a></span></span></span>)</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Netty3Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A listener using Netty3 which is given a ChannelPipelineFactory
 that yields <code><code>Out</code></code>-typed upstream messages and accepts
 <code><code>In</code></code>-typed downstream messages.
-</p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd><dt class="param">pipelineFactory</dt><dd class="cmt"><p>The pipeline factory for encoding input
-messages and decoding output messages.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>Use the given <code>ChannelSnooper</code> to log low
-level channel activity.</p></dd><dt class="param">channelFactory</dt><dd class="cmt"><p>A netty3 <code>ChannelFactory</code> used to bootstrap
-the server's listening channel.</p></dd><dt class="param">bootstrapOptions</dt><dd class="cmt"><p>Additional options for Netty's
-<code>ServerBootstrap</code></p></dd><dt class="param">channelReadTimeout</dt><dd class="cmt"><p>Channels are given this much time to
-read a request.</p></dd><dt class="param">channelWriteCompletionTimeout</dt><dd class="cmt"><p>Channels are given this much
-time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>When present, SSL is used to provide session security.</p></dd><dt class="param">monitor</dt><dd class="cmt"><p>Currently unused. Maintained for API compatibility.</p></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -80,7 +74,7 @@ time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.netty3.Netty3Listener"><span>Netty3Listener</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.server.Listener"><span>Listener</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.netty3.Netty3Listener"><span>Netty3Listener</span></li><li class="in" name="com.twitter.finagle.server.Listener"><span>Listener</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -100,7 +94,7 @@ time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.netty3.Netty3Listener#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(name:String,pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper],channelFactory:org.jboss.netty.channel.ServerChannelFactory,bootstrapOptions:Map[String,Object],channelReadTimeout:com.twitter.util.Duration,channelWriteCompletionTimeout:com.twitter.util.Duration,tlsConfig:Option[com.twitter.finagle.netty3.Netty3ListenerTLSConfig],timer:com.twitter.util.Timer,nettyTimer:org.jboss.netty.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,monitor:com.twitter.util.Monitor,logger:java.util.logging.Logger):com.twitter.finagle.netty3.Netty3Listener[In,Out]"></a>
+      <a id="&lt;init&gt;(pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.netty3.Netty3Listener[In,Out]"></a>
       <a id="&lt;init&gt;:Netty3Listener[In,Out]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -108,20 +102,16 @@ time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Listener</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelFactory">channelFactory: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span> = <span class="symbol"><span class="name"><a href="Netty3Listener$.html">Netty3Listener.channelFactory</a></span></span></span>, <span name="bootstrapOptions">bootstrapOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name="Map(<br/>    &quot;soLinger&quot; -&gt; (0: java.lang.Integer),<br/>    &quot;reuseAddress&quot; -&gt; java.lang.Boolean.TRUE,<br/>    &quot;child.tcpNoDelay&quot; -&gt; java.lang.Boolean.TRUE<br/>  )">...</span></span>, <span name="channelReadTimeout">channelReadTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriteCompletionTimeout">channelWriteCompletionTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3ListenerTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig">Netty3ListenerTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="nettyTimer">nettyTimer: <span class="extype" name="org.jboss.netty.util.Timer">Timer</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.netty</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">ServerStatsReceiver</a></span></span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullMonitor</a></span></span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultLogger</a></span></span></span>)</span>
+        <span class="name">Netty3Listener</span><span class="params">(<span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@&lt;init&gt;(name:String,pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper],channelFactory:org.jboss.netty.channel.ServerChannelFactory,bootstrapOptions:Map[String,Object],channelReadTimeout:com.twitter.util.Duration,channelWriteCompletionTimeout:com.twitter.util.Duration,tlsConfig:Option[com.twitter.finagle.netty3.Netty3ListenerTLSConfig],timer:com.twitter.util.Timer,nettyTimer:org.jboss.netty.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,monitor:com.twitter.util.Monitor,logger:java.util.logging.Logger):com.twitter.finagle.netty3.Netty3Listener[In,Out]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@&lt;init&gt;(pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.netty3.Netty3Listener[In,Out]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pipelineFactory</dt><dd class="cmt"><p>The pipeline factory for encoding input
-messages and decoding output messages.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>Use the given <code>ChannelSnooper</code> to log low
-level channel activity.</p></dd><dt class="param">channelFactory</dt><dd class="cmt"><p>A netty3 <code>ChannelFactory</code> used to bootstrap
-the server's listening channel.</p></dd><dt class="param">bootstrapOptions</dt><dd class="cmt"><p>Additional options for Netty's
-<code>ServerBootstrap</code></p></dd><dt class="param">channelReadTimeout</dt><dd class="cmt"><p>Channels are given this much time to
-read a request.</p></dd><dt class="param">channelWriteCompletionTimeout</dt><dd class="cmt"><p>Channels are given this much
-time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>When present, SSL is used to provide session security.</p></dd><dt class="param">monitor</dt><dd class="cmt"><p>Currently unused. Maintained for API compatibility.</p></dd></dl></div>
+messages and decoding output messages.</p></dd><dt class="param">params</dt><dd class="cmt"><p>A collection of <code>Stack.Param</code> values used to
+configure the listener.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -199,78 +189,6 @@ time to complete a write.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#bootstrapOptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bootstrapOptions:Map[String,Object]"></a>
-      <a id="bootstrapOptions:Map[String,AnyRef]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bootstrapOptions</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@bootstrapOptions:Map[String,Object]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Additional options for Netty's
-<code>ServerBootstrap</code></p>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#channelFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="channelFactory:org.jboss.netty.channel.ServerChannelFactory"></a>
-      <a id="channelFactory:ServerChannelFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelFactory</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@channelFactory:org.jboss.netty.channel.ServerChannelFactory" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A netty3 <code>ChannelFactory</code> used to bootstrap
-the server's listening channel.</p>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#channelReadTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="channelReadTimeout:com.twitter.util.Duration"></a>
-      <a id="channelReadTimeout:Duration"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelReadTimeout</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@channelReadTimeout:com.twitter.util.Duration" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Channels are given this much time to
-read a request.</p>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#channelSnooper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper]"></a>
-      <a id="channelSnooper:Option[ChannelSnooper]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelSnooper</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Use the given <code>ChannelSnooper</code> to log low
-level channel activity.</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#channelStatsHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="channelStatsHandler(statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.jboss.netty.channel.ChannelHandler"></a>
       <a id="channelStatsHandler(StatsReceiver):ChannelHandler"></a>
@@ -288,24 +206,6 @@ level channel activity.</p>
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#channelWriteCompletionTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="channelWriteCompletionTimeout:com.twitter.util.Duration"></a>
-      <a id="channelWriteCompletionTimeout:Duration"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelWriteCompletionTimeout</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@channelWriteCompletionTimeout:com.twitter.util.Duration" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Channels are given this much
-time to complete a write.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -346,6 +246,23 @@ time to complete a write.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -386,6 +303,23 @@ time to complete a write.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -420,40 +354,6 @@ time to complete a write.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.Netty3Listener">Netty3Listener</a> → <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#logger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="logger:java.util.logging.Logger"></a>
-      <a id="logger:Logger"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">logger</span><span class="result">: <span class="extype" name="java.util.logging.Logger">Logger</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@logger:java.util.logging.Logger" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#monitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="monitor:com.twitter.util.Monitor"></a>
-      <a id="monitor:Monitor"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">monitor</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@monitor:com.twitter.util.Monitor" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Currently unused.</p><div class="fullcomment"><div class="comment cmt"><p>Currently unused. Maintained for API compatibility.</p></div></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#name" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="name:String"></a>
       <a id="name:String"></a>
@@ -488,23 +388,6 @@ time to complete a write.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#nettyTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="nettyTimer:org.jboss.netty.util.Timer"></a>
-      <a id="nettyTimer:Timer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">nettyTimer</span><span class="result">: <span class="extype" name="org.jboss.netty.util.Timer">Timer</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@nettyTimer:org.jboss.netty.util.Timer" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#newServerPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newServerPipelineFactory(statsReceiver:com.twitter.finagle.stats.StatsReceiver,newBridge:()=&gt;org.jboss.netty.channel.ChannelHandler):org.jboss.netty.channel.ChannelPipelineFactory"></a>
       <a id="newServerPipelineFactory(StatsReceiver,()⇒ChannelHandler):ChannelPipelineFactory"></a>
@@ -556,41 +439,6 @@ time to complete a write.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#pipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory"></a>
-      <a id="pipelineFactory:ChannelPipelineFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pipelineFactory</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The pipeline factory for encoding input
-messages and decoding output messages.</p>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#statsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="statsReceiver:com.twitter.finagle.stats.StatsReceiver"></a>
-      <a id="statsReceiver:StatsReceiver"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">statsReceiver</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@statsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -608,40 +456,6 @@ messages and decoding output messages.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#timer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="timer:com.twitter.util.Timer"></a>
-      <a id="timer:Timer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">timer</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@timer:com.twitter.util.Timer" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.netty3.Netty3Listener#tlsConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="tlsConfig:Option[com.twitter.finagle.netty3.Netty3ListenerTLSConfig]"></a>
-      <a id="tlsConfig:Option[Netty3ListenerTLSConfig]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">tlsConfig</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3ListenerTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig">Netty3ListenerTLSConfig</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Listener@tlsConfig:Option[com.twitter.finagle.netty3.Netty3ListenerTLSConfig]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">When present, SSL is used to provide session security.</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -737,15 +551,7 @@ messages and decoding output messages.</p>
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.server.Listener">
+        <div class="parent" name="com.twitter.finagle.server.Listener">
               <h3>Inherited from <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>

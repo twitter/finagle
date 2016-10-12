@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.37.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.37.0',
+        VERSION:     '6.39.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.37.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -124,10 +124,10 @@ failures include additional information on what service caused the failure.</dd>
 <h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils" id="service-factory-failures">
 <dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
 creation has failed with this specific exception.</dd>
 <dt><strong>failures</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
 creation has failed.</dd>
 <dt><strong>service_acquisition_latency_ms</strong></dt>
 <dd>A stat of the latency, in milliseconds, to acquire a service.
@@ -386,7 +386,7 @@ reactivated after the penalty period has elapsed.</dd>
 <div class="section" id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
 <p id="idle-apoptosis-stats">These client stats keep track of how frequently
-<a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Services</span></a> are closed due to prolonged idleness.</p>
+<a class="reference internal" href="ServicesAndFilters.html"><em>Services</em></a> are closed due to prolonged idleness.</p>
 <div class="section" id="expiringservice">
 <h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -643,13 +643,24 @@ param to set the max buffer size to the size of a typical thrift response for
 your server.</dd>
 </dl>
 </div>
+<div class="section" id="recvbuffersizestatshandler-when-netty-4-pooling-is-enabled">
+<h3>RecvBufferSizeStatsHandler (when Netty 4 pooling is enabled)<a class="headerlink" href="#recvbuffersizestatshandler-when-netty-4-pooling-is-enabled" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>transport/receive_buffer_bytes</strong></dt>
+<dd>A histogram of the receive buffer size in bytes. This metric is useful when
+it comes to tuning pooling of receive buffers in <code class="docutils literal"><span class="pre">finagle-netty4</span></code> (can be enabled
+with a flag: <cite>-com.twitter.finagle.netty.poolReceiveBuffers</cite>). For maximum throughput,
+pool&#8217;s chunk size should be bigger than <code class="docutils literal"><span class="pre">receive_buffer_bytes.max</span></code> of any client/server
+running on a given JVM.</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
 <p id="id4">These metrics track the state of name resolution and service discovery.</p>
 <div class="section" id="id5">
 <h3>Name Resolution<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
+<p>Finagle clients resolve <a class="reference internal" href="Names.html"><em>names</em></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Dtab.scala">Dtabs</a>,
@@ -787,7 +798,7 @@ operations).</dd>
 </div>
 <div class="section" id="toggles">
 <h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
-<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span class="std std-ref">feature toggles</span></a>.</p>
+<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span>feature toggles</span></a>.</p>
 <dl class="docutils">
 <dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt>
 <dd>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
@@ -800,12 +811,30 @@ for comparing state across a cluster or over time.</dd>
 <dl class="docutils">
 <dt><strong>nacks</strong></dt>
 <dd>A counter of the number of retryable HTTP 503 responses the Http server returns. Those
-responses are automatically retried by Finagle Http client.</dd>
+responses are automatically retried by Finagle HTTP client.</dd>
+<dt><strong>nonretryable_nacks</strong></dt>
+<dd>A counter of the number of non-retryable HTTP 503 responses the HTTP server returns. Those
+responses are not automatically retried.</dd>
+</dl>
+<p>These metrics are added by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/http/filter/StatsFilter.scala">StatsFilter</a> and can be enabled by
+using <cite>.withHttpStats</cite> on <cite>Http.Client</cite> and <cite>Http.Server</cite>.</p>
+<dl class="docutils">
+<dt><strong>status/&lt;statusCode&gt;</strong></dt>
+<dd>A counter of the number of responses received, or returned for servers, that had this
+statusCode.</dd>
+<dt><strong>status/&lt;statusClass&gt;</strong></dt>
+<dd>Same as <strong>status/statusCode</strong> but aggregated per category, e.g. all 500 range responses
+count as 5XX for this counter.</dd>
+<dt><strong>time/&lt;statusCode&gt;</strong></dt>
+<dd>A histogram on duration in milliseconds per HTTP status code.</dd>
+<dt><strong>time/&lt;statusCategory&gt;</strong></dt>
+<dd>A histogram on duration in milliseconds per HTTP status code category.</dd>
 </dl>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
-<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a> protocol.</p>
+<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span>Mux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>A counter of the number of times the server has initiated session draining.</dd>
@@ -853,7 +882,7 @@ This includes exceptions in handshaking, thrift downgrading (for servers), etc.<
 </div>
 <div class="section" id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
-<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span class="std std-ref">ThriftMux</span></a> protocol.</p>
+<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span>ThriftMux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/thriftmux/connects</strong></dt>
 <dd>A counter of the number of times the server has created a ThriftMux
@@ -861,13 +890,6 @@ connection. This does not include downgraded Thrift connections.</dd>
 <dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connects</strong></dt>
 <dd>A counter of the number of times the server has created a downgraded
 connection for &#8220;plain&#8221; Thrift.</dd>
-<dt><strong>&lt;server_label&gt;/thriftmux/connections</strong></dt>
-<dd>A gauge of the number of active ThriftMux connections. This does not
-include downgraded Thrift connections.</dd>
-<dt><strong>&lt;server_label&gt;/thriftmux/downgraded_connections</strong></dt>
-<dd>A gauge of the number of active downgraded Thrift connections. These
-are clients that are speaking Thrift, and not ThriftMux, to a
-ThriftMux server.</dd>
 </dl>
 </div>
 </div>
@@ -959,6 +981,7 @@ ThriftMux server.</dd>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
 <li><a class="reference internal" href="#thrift">Thrift</a></li>
+<li><a class="reference internal" href="#recvbuffersizestatshandler-when-netty-4-pooling-is-enabled">RecvBufferSizeStatsHandler (when Netty 4 pooling is enabled)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>

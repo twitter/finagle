@@ -84,7 +84,7 @@ carefully so as to work well for most use cases.</p><p>Commonly-configured optio
 affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
-   of <code>false</code> is used</li><li><code>readerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>writerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value
+   of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span>
 </li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
@@ -314,7 +314,7 @@ Http.client.configured(BindingFactory.BaseDtab(baseDtab))</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">build</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
+        <span class="name">build</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <a href="ClientConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@build()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
@@ -334,7 +334,7 @@ Http.client.newService(destination)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">buildFactory</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
+        <span class="name">buildFactory</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <a href="ClientConfigEvidence.html" class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@buildFactory()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
@@ -346,27 +346,6 @@ Http.client.newService(destination)</pre></div></div>
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client.newClient(destination)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#channelFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This"></a>
-      <a id="channelFactory(ChannelFactory):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ChannelFactory">ChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Use the given channel factory instead of the default.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given channel factory instead of the default. Note that
-when using a non-default ChannelFactory, finagle can't
-meaningfully reference count factory usage, and so the caller is
-responsible for calling <code>releaseExternalResources()</code>.
-</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -475,6 +454,45 @@ type variables. One of the codec variations is required.</p><p>To migrate to the
 instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 ClientBuilder().stack(Http.client)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configured[P](paramAndStackParam:(P,com.twitter.finagle.Stack.Param[P])):ClientBuilder.this.This"></a>
+      <a id="configured[P]((P,Param[P])):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="paramAndStackParam">paramAndStackParam: (<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.configured.P">P</span>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.configured.P">P</span>])</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@configured[P](paramAndStackParam:(P,com.twitter.finagle.Stack.Param[P])):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Java friendly API for configuring the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly API for configuring the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.</p><p>The <code>Tuple2</code> can often be created by calls to a <code>mk(): (P, Stack.Param[P])</code>
+method on parameters (see
+<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()">com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()</span>
+as an example).
+</p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configured[P](param:P)(implicitstackParam:com.twitter.finagle.Stack.Param[P]):ClientBuilder.this.This"></a>
+      <a id="configured[P](P)(Param[P]):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="param">param: <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="stackParam">stackParam: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.configured.P">P</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@configured[P](param:P)(implicitstackParam:com.twitter.finagle.Stack.Param[P]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configure the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configure the underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a>.</p><p>Java users may find it easier to use the <code>Tuple2</code> version below.
+</p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#connectTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="connectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="connectTimeout(Duration):This"></a>
@@ -631,32 +649,6 @@ considers only valid non cancelled requests.</p><p>To migrate to the Stack-based
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#expHostConnectionBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expHostConnectionBufferSize(size:Int):ClientBuilder.this.This"></a>
-      <a id="expHostConnectionBufferSize(Int):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">expHostConnectionBufferSize</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expHostConnectionBufferSize(size:Int):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Experimental option to buffer <code>size</code> connections from the pool.</p><div class="fullcomment"><div class="comment cmt"><p>Experimental option to buffer <code>size</code> connections from the pool.
-The buffer is fast and lock-free, reducing contention for
-services with very high requests rates. The buffer size should
-be sized roughly to the expected concurrency. Buffers sized by
-power-of-twos may be faster due to the use of modular
-arithmetic.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
-      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
-      <code>com.twitter.finagle.Memcached</code>.</p></span>, <span class="cmt"><p>This will be integrated into the mainline pool, at
-which time the experimental option will go away.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#expHttpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="expHttpProxy(hostName:String,port:Int):ClientBuilder.this.This"></a>
       <a id="expHttpProxy(String,Int):This"></a>
@@ -1097,7 +1089,7 @@ If this is defined concurrently with socksProxy, the order in which they are app
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#keepAlive" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#keepAlive" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="keepAlive(value:Boolean):ClientBuilder.this.This"></a>
       <a id="keepAlive(Boolean):This"></a>
       <h4 class="signature">
@@ -1113,7 +1105,12 @@ If this is defined concurrently with socksProxy, the order in which they are app
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p>
+      <p class="shortcomment cmt">Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p><div class="fullcomment"><div class="comment cmt"><p>Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.transport.Transport.Liveness
+
+<span class="kw">val</span> client = Http.client
+client.configured(client.params[Transport.Liveness].copy(keepAlive = <span class="std">Some</span>(value)))</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="loadBalancer(loadBalancer:com.twitter.finagle.loadbalancer.LoadBalancerFactory):ClientBuilder.this.This"></a>
       <a id="loadBalancer(LoadBalancerFactory):This"></a>
@@ -1285,47 +1282,7 @@ Http.client.withSessionQualifier.noFailureAccrual</pre></div></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="readerIdleTimeout(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">readerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The maximum time a connection may have received no data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may have received no data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withTransport.readTimeout(duration)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="recvBufferSize(value:Int):ClientBuilder.this.This"></a>
-      <a id="recvBufferSize(Int):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">recvBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@recvBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Sets the TCP recv buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP recv buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.receiveBufferSize</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withTransport.receiveBufferSize(value)</pre></div></div>
+      <p class="shortcomment cmt">The underlying <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Params</a> used for configuration.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#reportHostStats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This"></a>
       <a id="reportHostStats(StatsReceiver):This"></a>
@@ -1561,26 +1518,6 @@ ClientBuilder()
       codecs that include exceptions, such as <code>Thrift</code>.
       This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
 eligible for retries.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sendBufferSize(value:Int):ClientBuilder.this.This"></a>
-      <a id="sendBufferSize(Int):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sendBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@sendBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Sets the TCP send buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP send buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.sendBufferSize</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withTransport.sendBufferSize(value)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This"></a>
       <a id="socksProxy(Option[SocketAddress]):This"></a>
@@ -1957,26 +1894,6 @@ completeness.</p>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="writerIdleTimeout(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">writerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may not have sent any data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withTransport.writeTimeout(duration)</pre></div></div>
     </li></ol>
             </div>
 
@@ -1984,7 +1901,129 @@ Http.client.withTransport.writeTimeout(duration)</pre></div></div>
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.builder.ClientBuilder#channelFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This"></a>
+      <a id="channelFactory(ChannelFactory):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ChannelFactory">ChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Use the given channel factory instead of the default.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given channel factory instead of the default. Note that
+when using a non-default ChannelFactory, finagle can't
+meaningfully reference count factory usage, and so the caller is
+responsible for calling <code>releaseExternalResources()</code>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#expHostConnectionBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expHostConnectionBufferSize(size:Int):ClientBuilder.this.This"></a>
+      <a id="expHostConnectionBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured">expHostConnectionBufferSize</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expHostConnectionBufferSize(size:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Experimental option to buffer <code>size</code> connections from the pool.</p><div class="fullcomment"><div class="comment cmt"><p>Experimental option to buffer <code>size</code> connections from the pool.
+The buffer is fast and lock-free, reducing contention for
+services with very high requests rates. The buffer size should
+be sized roughly to the expected concurrency. Buffers sized by
+power-of-twos may be faster due to the use of modular
+arithmetic.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code></p></dd><dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
+      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
+      <code>com.twitter.finagle.Memcached</code>.</p></span>, <span class="cmt"><p>This will be integrated into the mainline pool, at
+which time the experimental option will go away.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
+      <a id="readerIdleTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured or the Stack-based API TransportParams.readTimeout">readerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The maximum time a connection may have received no data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may have received no data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.readTimeout(duration)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code> or the Stack-based API <code>TransportParams.readTimeout</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="recvBufferSize(value:Int):ClientBuilder.this.This"></a>
+      <a id="recvBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured or the Stack-based API TransportParams.receiveBufferSize">recvBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@recvBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Sets the TCP recv buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP recv buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.receiveBufferSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.receiveBufferSize(value)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code> or the Stack-based API <code>TransportParams.receiveBufferSize</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sendBufferSize(value:Int):ClientBuilder.this.This"></a>
+      <a id="sendBufferSize(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured or the Stack-based API TransportParams.sendBufferSize">sendBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@sendBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Sets the TCP send buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP send buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.sendBufferSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.sendBufferSize(value)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code> or the Stack-based API <code>TransportParams.sendBufferSize</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ClientBuilder.this.This"></a>
       <a id="tracerFactory(Factory):This"></a>
       <h4 class="signature">
@@ -2006,6 +2045,29 @@ See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.t
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
+      <a id="writerIdleTimeout(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-05) Use configured or the Stack-based API TransportParams.writeTimeout">writerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may not have sent any data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.writeTimeout(duration)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-05)</i> Use <code>configured</code> or the Stack-based API <code>TransportParams.writeTimeout</code></p></dd></dl></div>
     </li></ol>
             </div>
         </div>

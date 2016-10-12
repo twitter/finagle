@@ -99,21 +99,21 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="package$$param$$WorkerPool.html"><span class="name">WorkerPool</span></a><span class="params">(<span name="executorService">executorService: <span class="extype" name="java.util.concurrent.ExecutorService">ExecutorService</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="package$$param$$WorkerPool.html"><span class="name">WorkerPool</span></a><span class="params">(<span name="eventLoopGroup">eventLoopGroup: <span class="extype" name="io.netty.channel.EventLoopGroup">EventLoopGroup</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.netty4.package$$param$@WorkerPoolextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A class eligible for configuring the <span class="extype" name="java.util.concurrent.ExecutorService">java.util.concurrent.ExecutorService</span> used
-to execute I/O work for clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring the <span class="extype" name="java.util.concurrent.ExecutorService">java.util.concurrent.ExecutorService</span> used
-to execute I/O work for clients and servers. The default is global and shared
+      <p class="shortcomment cmt">A class eligible for configuring the <span class="extype" name="io.netty.channel.EventLoopGroup">io.netty.channel.EventLoopGroup</span> used
+to execute I/O work for finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring the <span class="extype" name="io.netty.channel.EventLoopGroup">io.netty.channel.EventLoopGroup</span> used
+to execute I/O work for finagle clients and servers. The default is global and shared
 among clients and servers such that we can inline work on the I/O threads. Modifying
 the default has performance and instrumentation implications and should only be
 done so with care. If there is particular work you would like to schedule off
 the I/O threads, consider scheduling that work on a separate thread pool
-more granularly (e.g. <span class="extype" name="FuturePool">FuturePool</span> is a good tool for this).
+more granularly (e.g. <span class="extype" name="com.twitter.util.FuturePool">com.twitter.util.FuturePool</span> is a good tool for this).
 </p></div></div>
     </li></ol>
             </div>

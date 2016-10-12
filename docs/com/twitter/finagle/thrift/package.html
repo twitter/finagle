@@ -332,44 +332,6 @@ on the corresponding request.</p>
       <p class="shortcomment cmt">Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
 Scrooge generates implementations of this builder.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.ThriftCall" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftCall[A&lt;:org.apache.thrift.TBase[_,_],R&lt;:org.apache.thrift.TBase[_,_]]extendsAnyRef"></a>
-      <a id="ThriftCall[A&lt;:TBase[_,_],R&lt;:TBase[_,_]]:ThriftCall[A,R]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftCall.html"><span class="name">ThriftCall</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftCall[A&lt;:org.apache.thrift.TBase[_,_],R&lt;:org.apache.thrift.TBase[_,_]]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The ThriftCall object represents a thrift dispatch on the
-channel.</p><div class="fullcomment"><div class="comment cmt"><p>The ThriftCall object represents a thrift dispatch on the
-channel. The method name &amp; argument thrift structure (POJO) is
-given.
-</p></div></div>
-    </li><li name="com.twitter.finagle.thrift.ThriftCallFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftCallFactory[A&lt;:org.apache.thrift.TBase[_,_],R&lt;:org.apache.thrift.TBase[_,_]]extendsAnyRef"></a>
-      <a id="ThriftCallFactory[A&lt;:TBase[_,_],R&lt;:TBase[_,_]]:ThriftCallFactory[A,R]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftCallFactory.html"><span class="name">ThriftCallFactory</span></a><span class="tparams">[<span name="A">A &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>, <span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftCallFactory[A&lt;:org.apache.thrift.TBase[_,_],R&lt;:org.apache.thrift.TBase[_,_]]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.thrift.ThriftClientFramedCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftClientFramedCodecextendsCodec[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]"></a>
       <a id="ThriftClientFramedCodec:ThriftClientFramedCodec"></a>
@@ -456,57 +418,6 @@ given.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftMethodStatsextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.thrift.ThriftReply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftReply[R&lt;:org.apache.thrift.TBase[_,_]]extendsProductwithSerializable"></a>
-      <a id="ThriftReply[R&lt;:TBase[_,_]]:ThriftReply[R]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftReply.html"><span class="name">ThriftReply</span></a><span class="tparams">[<span name="R">R &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]</span>]</span><span class="params">(<span name="response">response: <span class="extype" name="com.twitter.finagle.thrift.ThriftReply.R">R</span></span>, <span name="call">call: <a href="ThriftCall.html" class="extype" name="com.twitter.finagle.thrift.ThriftCall">ThriftCall</a>[_ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _], _ &lt;: <span class="extype" name="org.apache.thrift.TBase">TBase</span>[_, _]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftReply[R&lt;:org.apache.thrift.TBase[_,_]]extendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Encapsulates the result of a call to a Thrift service.</p>
-    </li><li name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerBufferedCodecextendsThriftServerFramedCodec"></a>
-      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftServerBufferedCodec.html"><span class="name">ThriftServerBufferedCodec</span></a><span class="result"> extends <a href="ThriftServerFramedCodec.html" class="extype" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">ThriftServerFramedCodec</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftServerBufferedCodecextendsThriftServerFramedCodec" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.thrift.ThriftServerBufferedCodecFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerBufferedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]"></a>
-      <a id="ThriftServerBufferedCodecFactory:ThriftServerBufferedCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftServerBufferedCodecFactory.html"><span class="name">ThriftServerBufferedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftServerBufferedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -734,23 +645,6 @@ requests.</p>
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.thrift.ThriftServerBufferedCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerBufferedCodec"></a>
-      <a id="ThriftServerBufferedCodec:ThriftServerBufferedCodec"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftServerBufferedCodec$.html"><span class="name">ThriftServerBufferedCodec</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftServerBufferedCodec" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">ThriftServerBufferedCodec implements a buffered thrift transport.</p>
     </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftServerFramedCodec"></a>
       <a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
@@ -794,25 +688,6 @@ requests.</p>
   <span class="kw">def</span> log(message: <span class="std">String</span>, logLevel: <span class="std">Int</span>): Future[<span class="std">String</span>]
   <span class="kw">def</span> getLogSize(): Future[<span class="std">Int</span>]
 }</pre><p>Service interfaces can be modified and composed with Finagle <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filters</a>.
-</p></div></div>
-    </li><li name="com.twitter.finagle.thrift.ThriftTypes" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftTypes"></a>
-      <a id="ThriftTypes:ThriftTypes"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftTypes$.html"><span class="name">ThriftTypes</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.mutable.HashMap" class="extype" target="_top">HashMap</a>[<span class="extype" name="scala.Predef.String">String</span>, <a href="ThriftCallFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftCallFactory">ThriftCallFactory</a>[_, _]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftTypes" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A registry for Thrift types.</p><div class="fullcomment"><div class="comment cmt"><p>A registry for Thrift types. Register ThriftCallFactory instances encapsulating
-the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Server and client codecs will use these types for marshalling.
 </p></div></div>
     </li><li name="com.twitter.finagle.thrift.maxReusableBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="maxReusableBufferSize"></a>
@@ -878,6 +753,23 @@ the types to be decoded by the ThriftServerCodec with this singleton.</p><p>Serv
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@thriftscala" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.thrift.transport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="transport"></a>
+      <a id="transport:transport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="transport/package.html"><span class="name">transport</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.package@transport" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

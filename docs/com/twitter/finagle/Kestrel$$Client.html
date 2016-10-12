@@ -113,7 +113,7 @@
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.Kestrel.Client.In" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="In=com.twitter.finagle.kestrel.protocol.Command"></a>
+      <a id="In=com.twitter.io.Buf"></a>
       <a id="In:In"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -121,17 +121,17 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">In</span><span class="result"> = <a href="kestrel/protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a></span>
+        <span class="name">In</span><span class="result"> = <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@In=com.twitter.finagle.kestrel.protocol.Command" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@In=com.twitter.io.Buf" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Kestrel.Client.Out" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Out=com.twitter.finagle.kestrel.protocol.Response"></a>
+      <a id="Out=com.twitter.io.Buf"></a>
       <a id="Out:Out"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -139,10 +139,10 @@
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Out</span><span class="result"> = <a href="kestrel/protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a></span>
+        <span class="name">Out</span><span class="result"> = <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@Out=com.twitter.finagle.kestrel.protocol.Response" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@Out=com.twitter.io.Buf" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -498,7 +498,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.finagle.kestrel.protocol.Command" class="extmbr" name="com.twitter.finagle.Kestrel.Client.In">In</a>, <a href="#Out=com.twitter.finagle.kestrel.protocol.Response" class="extmbr" name="com.twitter.finagle.Kestrel.Client.Out">Out</a>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="kestrel/protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="kestrel/protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Kestrel.Client.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Kestrel.Client.Out">Out</a>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="kestrel/protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="kestrel/protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@newDispatcher(transport:com.twitter.finagle.transport.Transport[Client.this.In,Client.this.Out]):com.twitter.finagle.Service[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]" title="Permalink" target="_top">
@@ -574,7 +574,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newTransporter</span><span class="params">()</span><span class="result">: <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In=com.twitter.finagle.kestrel.protocol.Command" class="extmbr" name="com.twitter.finagle.Kestrel.Client.In">In</a>, <a href="#Out=com.twitter.finagle.kestrel.protocol.Response" class="extmbr" name="com.twitter.finagle.Kestrel.Client.Out">Out</a>]</span>
+        <span class="name">newTransporter</span><span class="params">()</span><span class="result">: <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Kestrel.Client.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.Kestrel.Client.Out">Out</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Kestrel$$Client@newTransporter():com.twitter.finagle.client.Transporter[Client.this.In,Client.this.Out]" title="Permalink" target="_top">

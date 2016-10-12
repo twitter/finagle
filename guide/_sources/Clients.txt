@@ -804,8 +804,8 @@ and then slowly decays, based on the TTL.
 .. [#p2c] Michael Mitzenmacher. 2001. The Power of Two Choices in Randomized Load Balancing.
    IEEE Trans. Parallel Distrib. Syst. 12, 10 (October 2001), 1094-1104.
 
-.. [#p2c_bounds] The maximum load on any server is roughly bound by `ln(ln(n))` where n is
-   the number of requests.
+.. [#p2c_bounds] The maximum load variance between any two servers is bound by `ln(ln(n))`
+   where n is the number of servers in the cluster.
 
 .. [#p2c_jmh] Our micro benchmark exposes the stark differences:
 

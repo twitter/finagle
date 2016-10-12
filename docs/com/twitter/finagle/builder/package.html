@@ -115,9 +115,32 @@ carefully so as to work well for most use cases.</p><p>Commonly-configured optio
 affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
-   of <code>false</code> is used</li><li><code>readerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>writerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value
+   of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span>
 </li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientConfigEvidence" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]extendsAnyRef"></a>
+      <a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]:ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ClientConfigEvidence.html"><span class="name">ClientConfigEvidence</span></a><span class="tparams">[<span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.package@ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@implicitNotFound</span><span class="args">(<span>
+      
+      <span class="defval" name="&quot;Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.builder.IncompleteSpecification" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="IncompleteSpecificationextendsException"></a>
       <a id="IncompleteSpecification:IncompleteSpecification"></a>

@@ -147,7 +147,7 @@ request/responses which are <a href="../Request.html" class="extype" name="com.t
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.service.HttpResponseClassifier#ServerErrorsAsFailures" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.service.HttpResponseClassifier#ServerErrorsAsFailures" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerErrorsAsFailures:com.twitter.finagle.service.ResponseClassifier"></a>
       <a id="ServerErrorsAsFailures:ResponseClassifier"></a>
       <h4 class="signature">
@@ -164,7 +164,9 @@ request/responses which are <a href="../Request.html" class="extype" name="com.t
       </a>
     </span>
       <p class="shortcomment cmt">Categorizes responses with status codes in the 500s as
-<span class="extype" name="ResponseClass.NonRetryableFailure">NonRetryableFailures</span>.</p>
+<span class="extype" name="ResponseClass.NonRetryableFailure">NonRetryableFailures</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Categorizes responses with status codes in the 500s as
+<span class="extype" name="ResponseClass.NonRetryableFailure">NonRetryableFailures</span>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>that retryable nacks are categorized as a <span class="extype" name="ResponseClass.RetryableFailure">ResponseClass.RetryableFailure</span>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.service.HttpResponseClassifier#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(underlying:PartialFunction[(com.twitter.finagle.http.Request,com.twitter.finagle.http.Response),com.twitter.finagle.service.ResponseClass]):com.twitter.finagle.service.ResponseClassifier"></a>
       <a id="apply(PartialFunction[(Request,Response),ResponseClass]):ResponseClassifier"></a>

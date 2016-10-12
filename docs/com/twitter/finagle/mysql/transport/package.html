@@ -256,8 +256,8 @@ traffic in terms of mysql logical packets.</p>
     </span>
       <p class="shortcomment cmt">Responsible for the transport layer plumbing required to produce
 a Transporter[Packet, Packet].</p><div class="fullcomment"><div class="comment cmt"><p>Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]. The current default is Netty3
-TODO(jparker): Convert this to Transporter[Buf, Buf] and adjust accordingly.
+a Transporter[Packet, Packet]. The current default is toggled from netty3
+to netty4 by the &quot;com.twitter.finagle.mysql.UseNetty4&quot; toggle.</p><p>TODO(jparker): Convert this to Transporter[Buf, Buf] and adjust accordingly.
 </p></div></div>
     </li></ol>
             </div>
