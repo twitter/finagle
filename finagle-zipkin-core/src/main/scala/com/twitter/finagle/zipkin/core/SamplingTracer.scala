@@ -20,7 +20,7 @@ private object Json {
   // If we use a Map, somewhere in Jackson's type resolution the type of
   // Annotation is forgotten, and it is passed into the type resolver as an
   // Object. Defining this Envelope preserves the type information.
-  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonInclude(JsonInclude.Include.NON_ABSENT)
   case class Envelope(
       id: String,
       when: Long,
