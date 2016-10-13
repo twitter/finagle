@@ -13,7 +13,7 @@ import com.twitter.finagle.thrift.transport.netty3.Netty3Transport
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Monitor}
+import com.twitter.util.{Closable, Duration, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -48,19 +48,72 @@ import org.apache.thrift.protocol.TProtocolFactory
  *
  * == Clients ==
  *
- * $clientExample
+ * Clients can be created directly from an interface generated from
+ * a Thrift IDL:
  *
- * $thriftUpgrade
+ * For example, this IDL:
+ *
+ * {{{
+ * service TestService {
+ *   string query(1: string x)
+ * }
+ * }}}
+ *
+ * compiled with Scrooge, generates the interface
+ * `TestService.FutureIface`. This is then passed
+ * into `Thrift.Client.newIface`:
+ *
+ * {{{
+ * Thrift.client.newIface[TestService.FutureIface](
+ *   addr, classOf[TestService.FutureIface])
+ * }}}
+ *
+ * However note that the Scala compiler can insert the latter
+ * `Class` for us, for which another variant of `newIface` is
+ * provided:
+ *
+ * {{{
+ * Thrift.client.newIface[TestService.FutureIface](addr)
+ * }}}
+ *
+ * In Java, we need to provide the class object:
+ *
+ * {{{
+ * TestService.FutureIface client =
+ *   Thrift.client.newIface(addr, TestService.FutureIface.class);
+ * }}}
+ *
+ * The client uses the standard thrift protocols, with support for
+ * both framed and buffered transports. Finagle attempts to upgrade
+ * the protocol in order to ship an extra envelope carrying trace IDs
+ * and client IDs associated with the request. These are used by
+ * Finagle's tracing facilities and may be collected via aggregators
+ * like [[http://twitter.github.com/zipkin/ Zipkin]].
+ *
+ * The negotiation is simple: on connection establishment, an
+ * improbably-named method is dispatched on the server. If that
+ * method isn't found, we are dealing with a legacy thrift server,
+ * and the standard protocol is used. If the remote server is also a
+ * finagle server (or any other supporting this extension), we reply
+ * to the request, and every subsequent request is dispatched with an
+ * envelope carrying trace metadata. The envelope itself is also a
+ * Thrift struct described [[https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift here]].
  *
  * == Servers ==
  *
- * $serverExample
+ * `TestService.FutureIface` must be implemented and passed
+ * into `serveIface`:
  *
- * @define clientExampleObject Thrift
- * @define serverExampleObject Thrift
+ * {{{
+ * // An echo service
+ * ThriftMux.server.serveIface(":*", new TestService.FutureIface {
+ *   def query(x: String): Future[String] = Future.value(x)
+ * })
+ * }}}
  */
-object Thrift extends Client[ThriftClientRequest, Array[Byte]]
-    with Server[Array[Byte], Array[Byte]] {
+object Thrift
+  extends Client[ThriftClientRequest, Array[Byte]]
+  with Server[Array[Byte], Array[Byte]] {
 
   /**
    * The vanilla Thrift `Transporter` and `Listener` factories deviate from other protocols in
@@ -131,16 +184,16 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
       new Stack.ModuleParams[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
         override def parameters: Seq[Stack.Param[_]] = Nil
-        override val role = StackClient.Role.prepConn
+        override val role: Stack.Role = StackClient.Role.prepConn
         override val description = "Prepare TTwitter thrift connection"
         def make(
           params: Stack.Params,
           next: ServiceFactory[ThriftClientRequest, Array[Byte]]
-        ) = {
+        ): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
           val Label(label) = params[Label]
           val param.ClientId(clientId) = params[param.ClientId]
           val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
-          val preparer = new ThriftClientPreparer(pf, label, clientId)
+          val preparer = ThriftClientPreparer(pf, label, clientId)
           preparer.prepare(next, params)
         }
       }
@@ -150,10 +203,17 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
       .replace(StackClient.Role.prepConn, preparer)
   }
 
+  /**
+   * A ThriftMux `com.twitter.finagle.Client`.
+   *
+   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   */
   case class Client(
-    stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift")
-  ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
+      stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
+      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift"))
+    extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
     with WithSessionPool[Client]
     with WithDefaultLoadBalancer[Client]
     with ThriftRichClient {
@@ -287,12 +347,15 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     private val preparer =
       new Stack.ModuleParams[ServiceFactory[Array[Byte], Array[Byte]]] {
         override def parameters: Seq[Stack.Param[_]] = Nil
-        override val role = StackClient.Role.prepConn
+        override val role: Stack.Role = StackClient.Role.prepConn
         override val description = "Prepare TTwitter thrift connection"
-        def make(params: Stack.Params, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
+        def make(
+          params: Stack.Params,
+          next: ServiceFactory[Array[Byte], Array[Byte]]
+        ): ServiceFactory[Array[Byte], Array[Byte]] = {
           val Label(label) = params[Label]
           val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
-          val preparer = new ThriftServerPreparer(pf, label)
+          val preparer = ThriftServerPreparer(pf, label)
           preparer.prepare(next, params)
         }
     }
@@ -317,6 +380,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
       .replace(StackServer.Role.preparer, preparer)
   }
 
+  /**
+   * A ThriftMux `com.twitter.finagle.Server`.
+   *
+   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   */
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
     params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift")
@@ -339,7 +408,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[Array[Byte], Array[Byte]]
-    ) = new ThriftSerialServerDispatcher(transport, service)
+    ): Closable = new ThriftSerialServerDispatcher(transport, service)
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
       configured(param.ProtocolFactory(protocolFactory))

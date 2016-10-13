@@ -19,7 +19,7 @@ object SeqIdFilter {
 }
 
 /**
- * A [[com.twitter.finagle.Filter]] that overrides Thrift request sequence IDs,
+ * A `Filter` that overrides Thrift request sequence IDs,
  * replacing them with our own randomly-assigned i32s. Upon response receipt,
  * this filter ensures that responses have the correct corresponding sequence ID,
  * failing any requests that do not.

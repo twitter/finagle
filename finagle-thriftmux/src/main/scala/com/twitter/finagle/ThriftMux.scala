@@ -18,30 +18,69 @@ import org.apache.thrift.TException
 import org.apache.thrift.transport.TMemoryInputTransport
 
 /**
- * The `ThriftMux` object is both a [[com.twitter.finagle.Client]] and a
- * [[com.twitter.finagle.Server]] for the Thrift protocol served over
+ * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a
+ * `com.twitter.finagle.Server` for the Thrift protocol served over
  * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
  * generated from a [[http://thrift.apache.org/docs/idl/ Thrift IDL]] by
  * [[http://twitter.github.io/scrooge/ Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
  *
+ * == Clients ==
+ *
  * Clients can be created directly from an interface generated from
  * a Thrift IDL:
  *
- * $clientExample
+ * For example, this IDL:
+ *
+ * {{{
+ * service TestService {
+ *   string query(1: string x)
+ * }
+ * }}}
+ *
+ * compiled with Scrooge, generates the interface
+ * `TestService.FutureIface`. This is then passed
+ * into `ThriftMux.Client.newIface`:
+ *
+ * {{{
+ * ThriftMux.client.newIface[TestService.FutureIface](
+ *   addr, classOf[TestService.FutureIface])
+ * }}}
+ *
+ * However note that the Scala compiler can insert the latter
+ * `Class` for us, for which another variant of `newIface` is
+ * provided:
+ *
+ * {{{
+ * ThriftMux.client.newIface[TestService.FutureIface](addr)
+ * }}}
+ *
+ * In Java, we need to provide the class object:
+ *
+ * {{{
+ * TestService.FutureIface client =
+ *   ThriftMux.client.newIface(addr, TestService.FutureIface.class);
+ * }}}
+ *
+ * == Servers ==
  *
  * Servers are also simple to expose:
  *
- * $serverExample
+ * `TestService.FutureIface` must be implemented and passed
+ * into `serveIface`:
+ *
+ * {{{
+ * // An echo service
+ * ThriftMux.server.serveIface(":*", new TestService.FutureIface {
+ *   def query(x: String): Future[String] = Future.value(x)
+ * })
+ * }}}
  *
  * This object does not expose any configuration options. Both clients and servers
  * are instantiated with sane defaults. Clients are labeled with the "clnt/thrift"
  * prefix and servers with "srv/thrift". If you'd like more configuration, see the
- * [[com.twitter.finagle.ThriftMux.Server]] and [[com.twitter.finagle.ThriftMux.Client]]
- * classes.
- *
- * @define clientExampleObject ThriftMux
- * @define serverExampleObject ThriftMux
+ * [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers
+ * configuration documentation]].
  */
 object ThriftMux
   extends Client[ThriftClientRequest, Array[Byte]]
@@ -88,10 +127,19 @@ object ThriftMux
       }
     }
 
-    override def make(next: ServiceFactory[mux.Request, mux.Response]) =
-      rpcTracer andThen super.make(next)
+    override def make(
+      next: ServiceFactory[mux.Request, mux.Response]
+    ): ServiceFactory[mux.Request, mux.Response] =
+      rpcTracer.andThen(super.make(next))
   }
 
+  /**
+   * A ThriftMux `com.twitter.finagle.Client`.
+   *
+   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   */
   case class Client(
       muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
         .configured(ProtocolLibrary("thriftmux")))
@@ -288,7 +336,7 @@ object ThriftMux
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
       params: Stack.Params = this.params
-    ) = copy(stack, params)
+    ): ServerMuxer = copy(stack, params)
 
     protected def newListener(): Listener[In, Out] =
       params[Mux.param.MuxImpl].listener(params)
@@ -367,7 +415,7 @@ object ThriftMux
       def make(
         _pf: Thrift.param.ProtocolFactory,
         next: ServiceFactory[mux.Request, mux.Response]
-      ) = {
+      ): ServiceFactory[mux.Request, mux.Response] = {
         val Thrift.param.ProtocolFactory(pf) = _pf
         val exnFilter = new ExnFilter(pf)
         exnFilter.andThen(next)
@@ -375,6 +423,13 @@ object ThriftMux
     }
   }
 
+  /**
+   * A ThriftMux `com.twitter.finagle.Server`.
+   *
+   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   */
   case class Server(
       muxer: StackServer[mux.Request, mux.Response] = serverMuxer)
     extends StackBasedServer[Array[Byte], Array[Byte]]
@@ -403,7 +458,7 @@ object ThriftMux
       params[Thrift.Server.param.MaxReusableBufferSize]
 
     /**
-     * Produce a [[com.twitter.finagle.Thrift.Server]] using the provided
+     * Produce a `com.twitter.finagle.Thrift.Server` using the provided
      * `TProtocolFactory`.
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =

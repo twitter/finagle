@@ -69,9 +69,9 @@ case class ThriftMethodStats(
  *
  * There are two ways to use a Scrooge-generated thrift service with Finagle:
  *
- * 1. Using a Service interface, i.e. a collection of finagle [[Service Services]].
+ * 1. Using a Service interface, i.e. a collection of finagle `Services`.
  *
- * 2. Using a method interface, i.e. a collection of methods returning [[Future Futures]].
+ * 2. Using a method interface, i.e. a collection of methods returning `Futures`.
  *
  * Example: for a thrift service
  * {{{
@@ -97,7 +97,7 @@ case class ThriftMethodStats(
  * }
  * }}}
  *
- * Service interfaces can be modified and composed with Finagle [[Filter Filters]].
+ * Service interfaces can be modified and composed with Finagle `Filters`.
  */
 object ThriftServiceIface {
   private val resetCounter =
