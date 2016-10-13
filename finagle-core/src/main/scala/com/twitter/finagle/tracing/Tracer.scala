@@ -110,10 +110,11 @@ trait Tracer {
 
 class NullTracer extends Tracer {
   val factory: Tracer.Factory = () => this
-  def record(record: Record): Unit = {/*ignore*/}
+  def record(record: Record): Unit = ()
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
   override def isNull: Boolean = true
   override def isActivelyTracing(traceId: TraceId): Boolean = false
+  override def toString: String = "NullTracer"
 }
 
 object NullTracer extends NullTracer

@@ -318,7 +318,10 @@ object BindingFactory {
     implicit val param = Stack.Param(Dest(Name.Path(Path.read("/$/fail"))))
   }
 
-  private[finagle] val DefaultBaseDtab = () => Dtab.base
+  private[finagle] val DefaultBaseDtab = new Function0[Dtab] {
+    def apply(): Dtab = Dtab.base
+    override def toString: String = "() => com.twitter.finagle.Dtab.base"
+  }
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]

@@ -89,6 +89,9 @@ object RetryBudget {
 
     def balance: Long =
       tokenBucket.count / withdrawalAmount
+
+    override def toString: String =
+      s"TokenRetryBudget(deposit=$depositAmount, withdraw=$withdrawalAmount, balance=$balance)"
   }
 
   private[this] val DefaultTtl = 10.seconds
