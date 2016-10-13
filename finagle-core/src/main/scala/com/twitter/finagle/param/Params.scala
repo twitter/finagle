@@ -1,9 +1,8 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.StatsFilter
-import com.twitter.finagle.util.DefaultMonitor
-import com.twitter.finagle.{stats, tracing, util, Stack}
-import com.twitter.util.JavaTimer
+import com.twitter.finagle.{Stack, stats, tracing, util}
+import com.twitter.util.{JavaTimer, NullMonitor}
 
 /**
  * A class eligible for configuring a label used to identify finagle
@@ -114,7 +113,7 @@ case class Monitor(monitor: com.twitter.util.Monitor) {
     (this, Monitor.param)
 }
 object Monitor {
-  implicit val param = Stack.Param(Monitor(DefaultMonitor))
+  implicit val param = Stack.Param(Monitor(NullMonitor))
 }
 
 /**

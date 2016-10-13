@@ -7,6 +7,26 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `Monitor` logging is improved in Finagle. ``RB_ID=878890``
+
+    - All exceptions caught in the stack are now logged by Finagle's `DefaultMonitor`
+      (previously Util's `RootMonitor`) such that Twitter's logging
+      framework is used instead of JDK logging.
+
+    - `DefaultMonitor` is now installed implicitly such that it will be composed
+      (via `orElse`) with the monitor passed by a user through the stack param.
+      The logic behind this compostion is quite straightforward: exceptions that
+      are't handled by a user-defined monitor propagated to the default monitor.
+
+    - `DefaultMonitor` now logs upstream socket address, downstream socket address,
+      and a client/server label if those are available.
+
+    - `RootMonitor` is still used to handle fatal exceptions from pending side-effect-only
+      closures (i.e., `onFailure`, `onSuccess`) on a service future/promise.
+
 6.39.0
 ------
 

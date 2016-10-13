@@ -167,7 +167,7 @@ object StackClient {
      * client sessions. There is no specific position constraint but higher in the
      * stack is preferable so it can wrap more application logic.
      */
-    stk.push(MonitorFilter.module)
+    stk.push(MonitorFilter.clientModule)
 
     /**
      * `ExceptionSourceFilter` is the exception handler of last resort. It recovers

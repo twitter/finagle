@@ -91,7 +91,7 @@ object StackServer {
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
     stk.push(TraceInitializerFilter.serverModule)
-    stk.push(MonitorFilter.module)
+    stk.push(MonitorFilter.serverModule)
     stk.result
   }
 
