@@ -659,7 +659,7 @@ object Finagle extends Build {
     name := "finagle-benchmark",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "metrics-data-sample" % "0.0.2",
+      "com.twitter.common" % "metrics-data-sample" % "0.0.1",
       "org.apache.curator" % "curator-test" % "2.8.0",
       "org.apache.curator" % "curator-framework" % "2.8.0"
     ),
