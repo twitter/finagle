@@ -194,10 +194,36 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   ): ServerBuilder[Req1, Rep1, HasCodec1, HasBindTo1, HasName1] =
     new ServerBuilder(ps, newServer)
 
-  protected def configured[P: Stack.Param, HasCodec1, HasBindTo1, HasName1](
+  private def _configured[P, HasCodec1, HasBindTo1, HasName1](
     param: P
+  )(
+    implicit stackParam: Stack.Param[P]
   ): ServerBuilder[Req, Rep, HasCodec1, HasBindTo1, HasName1] =
     copy(params + param, mk)
+
+  /**
+   * Configure the underlying [[Stack.Param Params]].
+   *
+   * @param param   Configures the server with a given `param`
+   *
+   * Java users may find it easier to use the `Tuple2` version below.
+   */
+  def configured[P](param: P)(implicit stackParam: Stack.Param[P]): This =
+    copy(params + param, mk)
+
+  /**
+   * Java friendly API for configuring the underlying [[Stack.Param Params]].
+   *
+   * @param paramAndStackParam  Configures the server with a given param represented
+   *                            as the tuple `(param value, stack param instance)`
+   *
+   * The `Tuple2` can often be created by calls to a `mk(): (P, Stack.Param[P])`
+   * method on parameters (see
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()]]
+   * as an example).
+   */
+  def configured[P](paramAndStackParam: (P, Stack.Param[P])): This =
+    copy(params.+(paramAndStackParam._1)(paramAndStackParam._2), mk)
 
   /**
    * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
@@ -212,7 +238,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     codec: Codec[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec((_: ServerCodecConfig) => codec)
-      .configured(ProtocolLibrary(codec.protocolLibraryName))
+      ._configured(ProtocolLibrary(codec.protocolLibraryName))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
@@ -227,7 +253,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     codecFactory: CodecFactory[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec(codecFactory.server)
-      .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
+      ._configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
@@ -328,7 +354,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def reportTo(receiver: StatsReceiver): This =
-    configured(Stats(receiver))
+    _configured(Stats(receiver))
 
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withLabel`.
@@ -340,7 +366,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def name(value: String): ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes] =
-    configured(Label(value))
+    _configured(Label(value))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerTransportParams.sendBufferSize`.
@@ -352,7 +378,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
  def sendBufferSize(value: Int): This =
-   configured(params[Transport.BufferSizes].copy(send = Some(value)))
+   _configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerTransportParams.receiveBufferSize`.
@@ -364,10 +390,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def recvBufferSize(value: Int): This =
-    configured(params[Transport.BufferSizes].copy(recv = Some(value)))
+    _configured(params[Transport.BufferSizes].copy(recv = Some(value)))
 
   def backlog(value: Int): This =
-    configured(Listener.Backlog(Some(value)))
+    _configured(Listener.Backlog(Some(value)))
 
   /**
    * To migrate to the Stack-based APIs, use `Server.serve`.
@@ -381,11 +407,11 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
-    configured(BindTo(address))
+    _configured(BindTo(address))
 
   @deprecated("use com.twitter.finagle.netty3.numWorkers flag instead", "2015-11-18")
   def channelFactory(cf: ServerChannelFactory): This =
-    configured(Netty3Listener.ChannelFactory(cf))
+    _configured(Netty3Listener.ChannelFactory(cf))
 
   /**
    * To migrate to the Stack-based APIs, use `configured`.
@@ -398,7 +424,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def logger(logger: java.util.logging.Logger): This =
-    configured(Logger(logger))
+    _configured(Logger(logger))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerTransportParams.verbose`.
@@ -410,7 +436,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def logChannelActivity(v: Boolean): This =
-    configured(Transport.Verbose(v))
+    _configured(Transport.Verbose(v))
 
   /**
    * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
@@ -432,7 +458,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    configured(Transport.TLSServerEngine(Some(v)))
+    _configured(Transport.TLSServerEngine(Some(v)))
 
   /**
    * Configures the maximum concurrent requests that are admitted
@@ -456,7 +482,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       if (max == Int.MaxValue) None
       else Some(new AsyncSemaphore(max, 0))
 
-    configured(RequestSemaphoreFilter.Param(sem))
+    _configured(RequestSemaphoreFilter.Param(sem))
   }
 
   /**
@@ -474,7 +500,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * @see [[com.twitter.finagle.filter.ServerAdmissionControl]]
    */
   def enableAdmissionControl(enable: Boolean): This =
-    configured(ServerAdmissionControl.Param(enable))
+    _configured(ServerAdmissionControl.Param(enable))
 
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withRequestTimeout`.
@@ -489,10 +515,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    *       in progress will be interrupted via [[Future.raise]].
    */
   def requestTimeout(howlong: Duration): This =
-    configured(TimeoutFilter.Param(howlong))
+    _configured(TimeoutFilter.Param(howlong))
 
   def keepAlive(value: Boolean): This =
-    configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
+    _configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
 
   /**
    * To migrate to the Stack-based APIs, use `TransportParams.readTimeout`.
@@ -504,7 +530,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def readTimeout(howlong: Duration): This =
-    configured(params[Transport.Liveness].copy(readTimeout = howlong))
+    _configured(params[Transport.Liveness].copy(readTimeout = howlong))
 
   /**
    * To migrate to the Stack-based APIs, use `TransportParams.writeTimeout`.
@@ -516,7 +542,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def writeCompletionTimeout(howlong: Duration): This =
-    configured(params[Transport.Liveness].copy(writeTimeout = howlong))
+    _configured(params[Transport.Liveness].copy(writeTimeout = howlong))
 
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withMonitor`.
@@ -530,7 +556,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
-    configured(MonitorFactory(mFactory))
+    _configured(MonitorFactory(mFactory))
 
   @deprecated("Use tracer() instead", "7.0.0")
   def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
@@ -551,7 +577,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * }}}
    */
   def tracer(t: com.twitter.finagle.tracing.Tracer): This =
-    configured(Tracer(t))
+    _configured(Tracer(t))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.
@@ -571,14 +597,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def cancelOnHangup(yesOrNo: Boolean): This = {
     // Note: We invert `yesOrNo` as the param here because the filter's
     // cancellation-masking is the inverse operation of cancelling on hangup.
-    configured(MaskCancelFilter.Param(!yesOrNo))
+    _configured(MaskCancelFilter.Param(!yesOrNo))
   }
 
   def hostConnectionMaxIdleTime(howlong: Duration): This =
-    configured(params[ExpiringService.Param].copy(idleTime = howlong))
+    _configured(params[ExpiringService.Param].copy(idleTime = howlong))
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
-    configured(params[ExpiringService.Param].copy(lifeTime = howlong))
+    _configured(params[ExpiringService.Param].copy(lifeTime = howlong))
 
   /**
    * Configures the traffic class.
@@ -595,7 +621,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * @see [[Listener.TrafficClass]]
    */
   def trafficClass(value: Option[Int]): This =
-    configured(Listener.TrafficClass(value))
+    _configured(Listener.TrafficClass(value))
 
   /**
    * When true, the server is daemonized. As with java threads, a
@@ -606,7 +632,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * be daemonized.
    */
   def daemon(daemonize: Boolean): This =
-    configured(Daemonize(daemonize))
+    _configured(Daemonize(daemonize))
 
   /**
    * Configure a [[com.twitter.finagle.service.ResponseClassifier]]
@@ -646,7 +672,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * which is a total function fully covering the input domain.
    */
   def responseClassifier(classifier: com.twitter.finagle.service.ResponseClassifier): This =
-    configured(param.ResponseClassifier(classifier))
+    _configured(param.ResponseClassifier(classifier))
 
   /**
    * The currently configured [[com.twitter.finagle.service.ResponseClassifier]].
@@ -674,7 +700,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * @param exceptionStatsHandler function to record failure details.
    */
   def exceptionCategorizer(exceptionStatsHandler: stats.ExceptionStatsHandler): This =
-    configured(ExceptionStatsHandler(exceptionStatsHandler))
+    _configured(ExceptionStatsHandler(exceptionStatsHandler))
 
   /* Builder methods follow */
 
