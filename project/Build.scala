@@ -394,11 +394,10 @@ object Finagle extends Build {
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
       ),
-      "com.twitter.common" % "service-thrift" % "1.0.54",
+      "com.twitter.common" % "service-thrift" % "1.0.55",
       guavaLib
     ),
     libraryDependencies ++= jacksonLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com",
     excludeFilter in unmanagedSources := "ZkTest.scala"
   ).dependsOn(finagleCore)
 
@@ -521,8 +520,7 @@ object Finagle extends Build {
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
       )
     ),
-    libraryDependencies ++= jacksonLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
 
   lazy val finagleKestrel = Project(
