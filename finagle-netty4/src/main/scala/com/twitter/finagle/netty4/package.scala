@@ -1,7 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.ProxyThreadFactory
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap, Toggle}
 import com.twitter.util.Awaitable
 import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
@@ -14,6 +17,35 @@ import java.util.concurrent.Executors
  * the netty4 event loop.
  */
 package object netty4 {
+
+  /**
+   * The [[ToggleMap]] used for finagle-netty4.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap("com.twitter.finagle.netty4", DefaultStatsReceiver)
+
+  /**
+   * An experimental option that enables pooling for receive buffers.
+   *
+   * Since we always copy onto the heap (see `DirectToHeapInboundHandler`), the receive
+   * buffers never leave the pipeline hence can safely be pooled.
+   * In its current form, this will preallocate at least N * 2 mb (chunk size) of
+   * direct memory at the application startup, where N is the number of worker threads
+   * Finagle uses.
+   *
+   * Example:
+   *
+   * On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 2mb = 64mb.
+   */
+  private[netty4] object poolReceiveBuffers {
+    private[this] val underlying: Toggle[Int] =
+      Toggles("com.twitter.finagle.netty4.poolReceiveBuffers")
+
+    /**
+     * Checks (via a toggle) if pooling of receive buffers is enabled on this instanace.
+     */
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
 
   // this forces netty to use a "cleaner" for direct byte buffers
   // which we need as long as we don't release them.

@@ -276,7 +276,7 @@ object Finagle extends Build {
       util("stats"),
       netty4Http
     ) ++ netty4Libs
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleToggle)
 
   lazy val finagleOstrich4 = Project(
     id = "finagle-ostrich4",
