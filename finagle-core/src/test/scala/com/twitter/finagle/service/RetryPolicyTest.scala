@@ -42,6 +42,7 @@ class RetryPolicyTest extends FunSpec {
       // interrupted futures should never be retried.
       assert(weo(Throw(Failure(new Exception, Failure.Interrupted|Failure.Restartable))) == false)
       assert(weo(Throw(Failure(new Exception, Failure.Restartable))) == true)
+      assert(weo(Throw(Failure(new Exception, Failure.Rejected|Failure.NonRetryable))) == false)
       assert(weo(Throw(timeoutExc)) == false)
     }
 
@@ -59,7 +60,8 @@ class RetryPolicyTest extends FunSpec {
     it("RetryableWriteException matches retryable exception") {
       val retryable = Seq(Failure.rejected("test"), WriteException(new Exception))
       val nonRetryable =
-        Seq(Failure("test", Failure.Interrupted), new Exception, new ChannelClosedException)
+        Seq(Failure("test", Failure.Interrupted), new Exception, new ChannelClosedException,
+          Failure("boo", Failure.NonRetryable))
 
       retryable.foreach {
         case RetryPolicy.RetryableWriteException(_) =>

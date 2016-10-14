@@ -21,10 +21,15 @@ class HttpNackFilterTest extends FunSuite {
     var response = Failure.rejected("unhappy")
     val flakyService = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
-        if (n.get == -2) Future.exception(new Exception)
-        else if (n.get == -1) Future.exception(response.unflagged(Failure.Restartable))
-        else if (n.getAndIncrement == 0) Future.exception(response)
-        else Future.value(Response(Status.Ok))
+        if (n.get == -2) {
+          Future.exception(new Exception)
+        } else if (n.get == -1) {
+          Future.exception(response.unflagged(Failure.Restartable).flagged(Failure.NonRetryable))
+        } else if (n.getAndIncrement == 0) {
+          Future.exception(response)
+        } else {
+          Future.value(Response(Status.Ok))
+        }
       }
     }
     val request = Request("/")
@@ -59,7 +64,7 @@ class HttpNackFilterTest extends FunSuite {
     }
   }
 
-  test("converts non-restartable Failures") {
+  test("converts non-restartable/non-retryable Failures") {
     new ClientCtx {
       val server =
         Http.server
@@ -73,7 +78,7 @@ class HttpNackFilterTest extends FunSuite {
 
       n.set(-1)
       Await.result(client(request).liftToTry, timeout) match {
-        case Throw(f: Failure) => assert(!f.isFlagged(Failure.Restartable))
+        case Throw(f: Failure) => assert(f.isFlagged(Failure.Rejected) && f.isFlagged(Failure.NonRetryable))
         case _ => fail("Response was not a non-restartable failure")
       }
 

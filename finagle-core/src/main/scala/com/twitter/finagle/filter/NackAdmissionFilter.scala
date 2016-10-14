@@ -8,7 +8,7 @@ import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 
 private[finagle] object NackAdmissionFilter {
-  private val overloadFailure = Future.exception(Failure("failed fast because service is overloaded"))
+  private val OverloadFailure = Future.exception(Failure("Failed fast because service is overloaded", Failure.Rejected|Failure.NonRetryable))
   private val logger = Logger.get(getClass)
   private val role = new Stack.Role("NackAdmissionFilter")
 
@@ -157,7 +157,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   // Increase the EMA if the response is a success or a non-retryable failure
   // (that is, not a nack). Decrease the EMA if the response is a nack.
   private[this] val afterSend: Try[Rep] => Unit = {
-    case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
+    case Throw(f: Failure) if f.isFlagged(Failure.Rejected) =>
       updateAcceptLikelihood(0)
     case _ =>
       updateAcceptLikelihood(1)
@@ -183,7 +183,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
         if (logger.isLoggable(Level.DEBUG)) {
           logger.debug(s"""Dropping request\tacceptLikelihood=${acceptProbability.last}\tacceptProduct=$acceptProduct""")
         }
-        overloadFailure
+        OverloadFailure
       }
     } else {
       sendRequest(req, service)

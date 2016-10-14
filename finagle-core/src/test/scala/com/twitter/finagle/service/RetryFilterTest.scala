@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{FailedFastException, Service, WriteException}
+import com.twitter.finagle.{Failure, FailedFastException, Service, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
@@ -291,6 +291,20 @@ class RetryFilterTest extends FunSpec
         val timer = new MockTimer()
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future.exception(new Exception("WTF!"))
+          val e = intercept[Exception] {
+            Await.result(retryingService(123))
+          }
+          assert(e.getMessage == "WTF!")
+          verify(service)(123)
+          assert(timer.tasks.isEmpty == true)
+          assert(retriesStat == Seq(0))
+        }
+      }
+
+      it("when failed with a Non-Retryable failure, fail immediately") {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
+          when(service(123)) thenReturn Future.exception(Failure("WTF!", Failure.NonRetryable))
           val e = intercept[Exception] {
             Await.result(retryingService(123))
           }

@@ -21,6 +21,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     Failure.Wrapped,
     Failure.Rejected,
     Failure.Naming)
+    // Failure.NonRetryable - Conflicts with Restartable, so omitted here.
 
   val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
 
@@ -38,7 +39,6 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
       Failure(e1, f) == Failure(e1, f) &&
       Failure(e1, f) != Failure(e2, f) &&
-      Failure(e1, f) != Failure(e1, ~f) &&
       Failure(e1, f).hashCode == Failure(e1, f).hashCode
     }
   }
@@ -91,6 +91,12 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     }
   }
 
+  test("Invalid flag combinations") {
+    intercept[IllegalArgumentException] {
+      Failure("eh", Failure.NonRetryable|Failure.Restartable)
+    }
+  }
+
   test("Failure.rejected sets correct flags") {
     val flags = Failure.Restartable | Failure.Rejected
     assert(Failure.rejected(":(").isFlagged(flags))
@@ -108,10 +114,10 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     }
 
     assertFail(Failure("ok", Failure.Restartable), Failure("ok"))
-
     assertFail(Failure("ok"), Failure("ok"))
     assertFail(Failure("ok", Failure.Interrupted), Failure("ok", Failure.Interrupted))
     assertFail(Failure("ok", Failure.Interrupted|Failure.Restartable), Failure("ok", Failure.Interrupted))
+    assertFail(Failure("ok", Failure.Rejected|Failure.NonRetryable), Failure("ok", Failure.Rejected|Failure.NonRetryable))
 
     val inner = new Exception
     assertFail(Failure.wrap(inner), inner)
@@ -120,11 +126,13 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
   test("Failure.flagsOf") {
     val failures = Seq(
       Failure("abc", new Exception, Failure.Interrupted|Failure.Restartable|Failure.Naming|Failure.Rejected|Failure.Wrapped),
+      Failure("abc", Failure.NonRetryable),
       Failure("abc"),
       new Exception
     )
     val categories = Seq(
       Set("interrupted", "restartable", "wrapped", "rejected", "naming"),
+      Set("nonretryable"),
       Set(),
       Set()
     )

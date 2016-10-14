@@ -78,7 +78,7 @@ class NackAdmissionFilterTest extends FunSuite {
      * know that the nack rate is below the failure threshold.
      */
     def testDropsRequest(): Unit = {
-      failedResponse("failed fast because service is overloaded")
+      failedResponse("Failed fast because service is overloaded")
     }
 
     /**

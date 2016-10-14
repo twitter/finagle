@@ -33,6 +33,10 @@ Runtime Behavior Changes
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: `com.twitter.finagle.Failure` has a new flag, `NonRetryable`,
+    which signifies that a request should not be retried. The flag is respected by
+    all of Finagle's retry mechanisms. ``RB_ID=878766``
+
   * finagle-thriftmux: Allow ThriftMux.Clients to be filtered. This is supported
     in the the StdStackClient but ThriftMux.Client is a StackBasedClient. ``RB_ID=874560``
 

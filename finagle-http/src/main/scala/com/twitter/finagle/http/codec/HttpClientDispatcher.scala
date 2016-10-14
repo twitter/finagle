@@ -13,8 +13,7 @@ private[http] object HttpClientDispatcher {
   val RetryableNackFailure = Failure.rejected("The request was nacked by the server")
 
   val NonRetryableNackFailure =
-    Failure.rejected("The request was nacked by the server and should not be retried")
-      .unflagged(Failure.Restartable)
+    Failure("The request was nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
 
   private val log = Logger(getClass.getName)
 }

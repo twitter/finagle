@@ -41,19 +41,19 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
     case _ =>
       fail(s"Expected ${ops.headOption}; got read()")
   }
-  
+
   def write(in: In) = ops match {
 
     case Write(accept, res) :: rest =>
       if (!accept(in))
         fail(s"Did not accept write $in")
-      
+
       ops = rest
       res
     case _ =>
       fail(s"Expected ${ops.headOption}; got write($in)")
   }
-  
+
   def close(deadline: Time) = ops match {
     case Close(res) :: rest =>
       ops = rest
@@ -219,7 +219,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("upstream interrupt: during req stream (read)") {
     import OpTransport._
-    
+
     val readp = new Promise[Nothing]
     val transport = OpTransport[Any, Any](
       // Read the response
@@ -241,16 +241,16 @@ class HttpClientDispatcherTest extends FunSuite {
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)
     readp.setException(new Exception)
-    
+
     // The reader is now discarded
-    intercept[Reader.ReaderDiscarded] { 
+    intercept[Reader.ReaderDiscarded] {
       Await.result(req.writer.write(Buf.Utf8(".")), timeout)
     }
   }
-  
+
   test("upstream interrupt: during req stream (write)") {
     import OpTransport._
-    
+
     val chunkp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
       // Read the response
@@ -277,9 +277,9 @@ class HttpClientDispatcherTest extends FunSuite {
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)
     chunkp.setException(new Exception)
-    
+
     // The reader is now discarded
-    intercept[Reader.ReaderDiscarded] { 
+    intercept[Reader.ReaderDiscarded] {
       Await.result(req.writer.write(Buf.Utf8(".")), timeout)
     }
   }

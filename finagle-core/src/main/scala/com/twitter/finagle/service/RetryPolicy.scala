@@ -141,9 +141,10 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 object RetryPolicy extends JavaSingleton {
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
-      // We don't retry interruptions by default since they
-      // indicate that the request was discarded.
+      // We don't retry interruptions by default since they indicate that the
+      // request was discarded.
       case f: Failure if f.isFlagged(Failure.Interrupted) => None
+      case f: Failure if f.isFlagged(Failure.NonRetryable) => None
       case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
       case WriteException(exc) => Some(exc)
       case _ => None
