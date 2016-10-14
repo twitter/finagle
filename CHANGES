@@ -27,6 +27,12 @@ Runtime Behavior Changes
     - `RootMonitor` is still used to handle fatal exceptions from pending side-effect-only
       closures (i.e., `onFailure`, `onSuccess`) on a service future/promise.
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thriftmux: Removed deprecated classes `ThriftMuxClient`, `ThriftMuxClientLike`,
+    `ThriftMuxServer`, and `ThriftMuxServerLike`. ``RB_ID=880924``
+
 6.39.0
 ------
 

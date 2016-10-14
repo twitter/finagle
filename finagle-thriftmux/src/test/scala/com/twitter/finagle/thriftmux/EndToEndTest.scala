@@ -127,15 +127,7 @@ class EndToEndTest extends FunSuite
         .name("ThriftMuxServer")
         .bindTo(new InetSocketAddress(0))
         .build(pfSvc)
-      val builderOld = ServerBuilder()
-        .stack(ThriftMuxServer.withProtocolFactory(pf))
-        .name("ThriftMuxServer")
-        .bindTo(new InetSocketAddress(0))
-        .build(pfSvc)
       val protoNew = ThriftMux.server
-        .withProtocolFactory(pf)
-        .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
-      val protoOld = ThriftMuxServer
         .withProtocolFactory(pf)
         .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
       val netty4 = ThriftMux.server
@@ -148,10 +140,7 @@ class EndToEndTest extends FunSuite
         socketAddr.asInstanceOf[InetSocketAddress].getPort
 
       Seq(
-        ("ServerBuilder deprecated", builderOld, port(builderOld.boundAddress)),
         ("ServerBuilder", builder, port(builder.boundAddress)),
-        ("ThriftMux proto deprecated", protoOld, port(protoOld.boundAddress)),
-        ("ThriftMux proto", protoOld, port(protoNew.boundAddress)),
         ("ThriftMux with Netty4", netty4, port(netty4.boundAddress))
       )
     }
@@ -163,10 +152,6 @@ class EndToEndTest extends FunSuite
       val dest = s"localhost:$port"
       val builder = ClientBuilder()
         .stack(ThriftMux.client.withClientId(clientId).withProtocolFactory(pf))
-        .dest(dest)
-        .build()
-      val oldBuilder = ClientBuilder()
-        .stack(ThriftMuxClient.withClientId(clientId).withProtocolFactory(pf))
         .dest(dest)
         .build()
       val thriftBuilder = ClientBuilder()
@@ -182,10 +167,6 @@ class EndToEndTest extends FunSuite
         .withClientId(clientId)
         .withProtocolFactory(pf)
         .newService(dest)
-      val oldProto = ThriftMuxClient
-        .withClientId(clientId)
-        .withProtocolFactory(pf)
-        .newService(dest)
       val netty4 = ThriftMux.client
         .withClientId(clientId)
         .withProtocolFactory(pf)
@@ -197,10 +178,8 @@ class EndToEndTest extends FunSuite
 
       Seq(
         ("ThriftMux via ClientBuilder", toIface(builder), builder),
-        ("ThriftMux via deprecated ClientBuilder", toIface(oldBuilder), oldBuilder),
         ("Thrift via ClientBuilder", toIface(thriftBuilder), thriftBuilder),
         ("Thrift via proto", toIface(thriftProto), thriftProto),
-        ("ThriftMux proto deprecated", toIface(oldProto), oldProto),
         ("ThriftMux proto", toIface(newProto), newProto),
         ("ThriftMux with Netty4", toIface(netty4), netty4)
       )
@@ -852,22 +831,6 @@ class EndToEndTest extends FunSuite
     await(server.close())
   }
 
-  test("ThriftMuxServer with TCompactProtocol") {
-    val pf = new TCompactProtocol.Factory
-    val server = ThriftMuxServer.withProtocolFactory(pf).serveIface(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
-        def query(x: String) = Future.value(x+x)
-      })
-
-    val dst = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
-      .newIface[TestService.FutureIface](dst, "client")
-    assert(await(tcompactClient.query("ok")) == "okok")
-
-    await(server.close())
-  }
-
   test("ThriftMux.server with TCompactProtocol: binary fails") {
     val server = ThriftMux.server.withProtocolFactory(new TCompactProtocol.Factory).serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
@@ -882,20 +845,6 @@ class EndToEndTest extends FunSuite
     }
 
     await(server.close())
-  }
-
-  test("ThriftMuxServer with TCompactProtocol: binary fails") {
-    val server = ThriftMuxServer.withProtocolFactory(new TCompactProtocol.Factory).serveIface(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new TestService.FutureIface {
-        def query(x: String) = Future.value(x+x)
-      })
-
-    val dst = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val tbinaryClient = ThriftMux.client.newIface[TestService.FutureIface](dst, "client")
-    intercept[com.twitter.finagle.mux.ServerApplicationError] {
-      await(tbinaryClient.query("ok"))
-    }
   }
 
   // This test uses excessive memory so skip on SBT builds
