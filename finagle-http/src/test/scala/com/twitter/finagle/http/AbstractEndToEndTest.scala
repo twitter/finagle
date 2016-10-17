@@ -30,8 +30,6 @@ abstract class AbstractEndToEndTest extends FunSuite
   object BasicFunctionality extends Feature
   object ClientAbort extends Feature
   object CompressedContent extends Feature
-  object HandlesExpect extends Feature
-  object InitialLineLength extends Feature
   object MaxHeaderSize extends Feature
   object ResponseClassifier extends Feature
   object CloseStream extends Feature
@@ -40,7 +38,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   object TooLongStream extends Feature
 
   var saveBase: Dtab = Dtab.empty
-  private val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
+  val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
   before {
     saveBase = Dtab.base
@@ -99,22 +97,63 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
+  /**
+   * Run the tests using the supplied connection generation function
+   */
   def run(tests: HttpTest*)(connect: HttpService => HttpService): Unit = {
     tests.foreach(t => t(connect))
   }
 
-  def standardErrors(connect: HttpService => HttpService): Unit = {
-    testIfImplemented(InitialLineLength)(implName + ": request uri too long") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
-      val request = Request("/" + "a" * 4096)
-      val response = await(client(request))
-      assert(response.status == Status.RequestURITooLong)
-      await(client.close())
-    }
+  /**
+   * Create a new non-streaming HTTP client/server pair and attach the service to the client
+   */
+  def nonStreamingConnect(service: HttpService): HttpService = {
+    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
+    val server = serverImpl()
+      .withLabel("server")
+      .withStatsReceiver(statsRecv)
+      .withMaxRequestSize(100.bytes)
+      .serve("localhost:*", ref)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(statsRecv)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
+    val ret = new ServiceProxy(client) {
+      override def close(deadline: Time) =
+        Closable.all(client, server).close(deadline)
+    }
+    initClient(client)
+    ref() = ServiceFactory.const(service)
+    ret
+  }
+
+  /**
+   * Create a new streaming HTTP client/server pair and attach the service to the client
+   */
+  def streamingConnect(service: HttpService): HttpService = {
+    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
+    val server = serverImpl()
+      .withStreaming(true)
+      .withLabel("server")
+      .withStatsReceiver(statsRecv)
+      .serve("localhost:*", ref)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStreaming(true)
+      .withStatsReceiver(statsRecv)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    initClient(client)
+    ref() = ServiceFactory.const(service)
+    new ServiceProxy(client) {
+      override def close(deadline: Time) =
+        Closable.all(client, server).close(deadline)
+    }
+  }
+
+  def standardErrors(connect: HttpService => HttpService): Unit = {
     test(implName + ": request header fields too large") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
@@ -168,30 +207,6 @@ abstract class AbstractEndToEndTest extends FunSuite
       val client = connect(service)
       val response = await(client(Request("/")))
       assert(response.status == Status.InternalServerError)
-      await(client.close())
-    }
-
-    test(implName + ": HTTP/1.0") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response(request.version, Status.Ok))
-      }
-      val client = connect(service)
-      val request = Request(Method.Get, "/http/1.0")
-      request.version = Version.Http10
-      val response = await(client(request))
-      assert(response.status == Status.Ok)
-      await(client.close())
-    }
-
-    test(implName + ": with 'Connection: close'") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
-      val request = Request(Method.Get, "/connection-close")
-      request.headerMap("Connection") = "close"
-      val response = await(client(request))
-      assert(response.status == Status.Ok)
       await(client.close())
     }
 
@@ -628,18 +643,6 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
       await(client.close())
     }
-
-    test(s"$implName (streaming)" + ": with 'Connection: close'") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
-      val request = Request()
-      request.headerMap("Connection") = "close"
-      val response = await(client(request))
-      assert(response.status == Status.Ok)
-      await(client.close())
-    }
   }
 
   def tracing(connect: HttpService => HttpService) {
@@ -678,48 +681,9 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
-  run(standardErrors, standardBehaviour, tracing) { service =>
-    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
-    val server = serverImpl()
-      .withLabel("server")
-      .withStatsReceiver(statsRecv)
-      .withMaxRequestSize(100.bytes)
-      .serve("localhost:*", ref)
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .withStatsReceiver(statsRecv)
-      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+  run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
 
-    val ret = new ServiceProxy(client) {
-      override def close(deadline: Time) =
-        Closable.all(client, server).close(deadline)
-    }
-    initClient(client)
-    ref() = ServiceFactory.const(service)
-    statsRecv.clear()
-    ret
-  }
-
-  run(streaming) { service =>
-    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
-    val server = serverImpl()
-      .withStreaming(true)
-      .withLabel("server")
-      .serve("localhost:*", ref)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .withStreaming(true)
-      .withStatsReceiver(statsRecv)
-      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-    initClient(client)
-    ref() = ServiceFactory.const(service)
-    new ServiceProxy(client) {
-      override def close(deadline: Time) =
-        Closable.all(client, server).close(deadline)
-    }
-  }
+  run(streaming)(streamingConnect(_))
 
   // use 1 less than the requeue limit so that we trigger failure accrual
   // before we run into the requeue limit.
@@ -812,37 +776,6 @@ abstract class AbstractEndToEndTest extends FunSuite
     intercept[IllegalArgumentException] {
       clientImpl().withMaxResponseSize(3000.megabytes)
     }
-  }
-
-  testIfImplemented(HandlesExpect)("server handles expect continue header") {
-    val expectP = new Promise[Boolean]
-
-    val svc = new HttpService {
-      def apply(request: Request) = {
-        expectP.setValue(request.headerMap.contains("expect"))
-        val response = Response()
-        Future.value(response)
-      }
-    }
-    val server = serverImpl()
-      .withStatsReceiver(NullStatsReceiver)
-      .withStreaming(true)
-      .serve("localhost:*", svc)
-
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = clientImpl()
-      .withStatsReceiver(statsRecv)
-      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-    val req = Request("/streaming")
-    req.setChunked(false)
-    req.headerMap.set("expect", "100-continue")
-
-    val res = client(req)
-    assert(await(res).status == Status.Continue)
-    assert(await(expectP) == false)
-    await(client.close())
-    await(server.close())
   }
 
   testIfImplemented(CompressedContent)("non-streaming clients can decompress content") {

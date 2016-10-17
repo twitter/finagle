@@ -5,7 +5,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends AbstractEndToEndTest {
+class EndToEndTest extends AbstractHttp1EndToEndTest {
   def implName: String = "netty3"
   def clientImpl(): finagle.Http.Client = finagle.Http.client
   def serverImpl(): finagle.Http.Server = finagle.Http.server

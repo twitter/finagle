@@ -19,14 +19,9 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
       .configured(Http2)
       .configured(PriorKnowledge(true))
 
-  // must be lazy for initialization order reasons
-  private[this] lazy val featuresHttp2DoesNotSupport = Set[Feature](
-    HandlesExpect
-  )
 
   // must be lazy for initialization order reasons
-  private[this] lazy val featuresToBeImplemented = featuresHttp2DoesNotSupport ++ Set[Feature](
-    InitialLineLength,
+  private[this] lazy val featuresToBeImplemented = Set[Feature](
     ClientAbort,
     MaxHeaderSize,
     CompressedContent, // these tests pass but only because the server ignores

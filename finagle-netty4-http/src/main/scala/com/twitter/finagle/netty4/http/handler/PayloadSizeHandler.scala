@@ -1,14 +1,19 @@
 package com.twitter.finagle.netty4.http.handler
 
+import com.twitter.finagle.http.Fields
 import com.twitter.util.StorageUnit
 import io.netty.buffer.ByteBufHolder
-import io.netty.channel.{ChannelInboundHandlerAdapter, ChannelFutureListener, ChannelHandlerContext}
+import io.netty.channel.{ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http._
 import java.util.logging.{Level, Logger}
 
 private object PayloadSizeHandler {
-  def mk413(v: HttpVersion): FullHttpResponse =
-    new DefaultFullHttpResponse(v, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+  def mk413(v: HttpVersion): FullHttpResponse = {
+    val resp = new DefaultFullHttpResponse(v, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+    resp.headers().set(Fields.Connection, "close")
+    resp.headers().set(Fields.ContentLength, "0")
+    resp
+  }
 }
 
 /**
