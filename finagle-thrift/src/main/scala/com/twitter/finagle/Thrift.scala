@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId => _, _}
@@ -11,6 +11,7 @@ import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty3.Netty3Transport
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
+import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Duration, Monitor}
@@ -134,11 +135,23 @@ object Thrift
   }
 
   object ThriftImpl {
-    val Netty3 = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
-    val Netty4 = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)
+    private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.thrift.UseNetty4"
+    private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
+    private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
-    // TODO: make this a toggle so we can toggle on netty4
-    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(Netty3)
+    val Netty3: ThriftImpl = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
+    val Netty4: ThriftImpl = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)
+
+    private[this] val ToggledTransport: ThriftImpl = ThriftImpl ({ params =>
+      if (useNetty4) Netty4.transporter(params)
+      else Netty3.transporter(params)
+    },
+      { params =>
+        if (useNetty4) Netty4.listener(params)
+        else Netty3.listener(params)
+      })
+
+    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(ToggledTransport)
   }
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()

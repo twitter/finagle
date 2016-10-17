@@ -490,7 +490,7 @@ object Finagle extends Build {
         "silly" % "silly-thrift" % "0.5.0" % "test",
         "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs,
     resolvers += "twitter-repo" at "https://maven.twttr.com"
-  ).dependsOn(finagleCore, finagleNetty4)
+  ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
   lazy val finagleMemcached = Project(
     id = "finagle-memcached",
