@@ -33,6 +33,13 @@ Breaking API Changes
   * finagle-thriftmux: Removed deprecated classes `ThriftMuxClient`, `ThriftMuxClientLike`,
     `ThriftMuxServer`, and `ThriftMuxServerLike`. ``RB_ID=880924``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: The `withTlsWithoutValidation` and `tlsWithoutValidation`
+    APIs have been fixed for an issue on Java 8 where certificate validation
+    was being attempted instead of bypassed. ``RB_ID=881660``
+
 6.39.0
 ------
 
