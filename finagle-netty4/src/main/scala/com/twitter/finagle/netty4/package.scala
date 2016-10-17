@@ -29,13 +29,13 @@ package object netty4 {
    *
    * Since we always copy onto the heap (see `DirectToHeapInboundHandler`), the receive
    * buffers never leave the pipeline hence can safely be pooled.
-   * In its current form, this will preallocate at least N * 2 mb (chunk size) of
+   * In its current form, this will preallocate at least N * 128kb (chunk size) of
    * direct memory at the application startup, where N is the number of worker threads
    * Finagle uses.
    *
    * Example:
    *
-   * On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 2mb = 64mb.
+   * On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 128kb = 4mb.
    */
   private[netty4] object poolReceiveBuffers {
     private[this] val underlying: Toggle[Int] =
@@ -63,23 +63,23 @@ package object netty4 {
   }
 
   // This determines the size of the memory chunks we allocate in arenas. Netty's default
-  // is 16mb, we shrink it to 2mb.
+  // is 16mb, we shrink it to 128kb.
   //
   // We make the trade-off between an initial memory footprint and the max buffer size
-  // that can still be pooled (assuming that 2mb is big enough to cover nearly all
-  // inbound messages sent over TCP). Every allocation that exceeds 2mb will fall back
+  // that can still be pooled (assuming that 128kb is big enough to cover nearly all
+  // inbound messages sent over TCP). Every allocation that exceeds 128kb will fall back
   // to an unpooled allocator.
   //
-  // The `io.netty.allocator.maxOrder` (default: 8) determines the number of left binary
+  // The `io.netty.allocator.maxOrder` (default: 4) determines the number of left binary
   // shifts we need to apply to the `io.netty.allocator.pageSize` (default: 8192):
-  // 8192 << 8 = 2mb.
+  // 8192 << 4 = 128kb.
   //
   // NOTE: Before overriding it, we check whether or not it was set before. This way users
   // will have a chance to tune it.
   //
   // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers`).
   if (System.getProperty("io.netty.allocator.maxOrder") == null) {
-    System.setProperty("io.netty.allocator.maxOrder", "8")
+    System.setProperty("io.netty.allocator.maxOrder", "4")
   }
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
