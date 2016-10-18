@@ -43,6 +43,18 @@ Bug Fixes
     APIs have been fixed for an issue on Java 8 where certificate validation
     was being attempted instead of bypassed. ``RB_ID=881660``
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.builder.ClientBuilder` deprecate some seldom used methods.
+  The same functionality is available through the Stack-based APIs or
+  `ClientBuilder.configured`. ``RB_ID=881612``
+
+  - `hostConnectionIdleTime`
+  - `hostConnectionMaxIdleTime`
+  - `hostConnectionMaxLifeTime`
+  - `hostConnectionMaxWaiters`
+
 6.39.0
 ------
 

@@ -803,6 +803,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionIdleTime(timeout: Duration): This =
     configured(params[DefaultPool.Param].copy(idleTime = timeout))
 
@@ -821,6 +822,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated(
+    "Use `configured` or or the Stack-based API `SessionPoolingParams.maxWaiters`",
+    "2016-10-18")
   def hostConnectionMaxWaiters(nWaiters: Int): This =
     configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
 
@@ -835,6 +839,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withSession.maxIdleTime(timeout)
    * }}}
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionMaxIdleTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(idleTime = timeout))
 
@@ -849,6 +854,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withSession.maxLifeTime(timeout)
    * }}}
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionMaxLifeTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(lifeTime = timeout))
 
