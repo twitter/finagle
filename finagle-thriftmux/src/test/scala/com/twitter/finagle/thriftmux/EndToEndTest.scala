@@ -1,6 +1,7 @@
 package com.twitter.finagle.thriftmux
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Stack.Transformer
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.StackClient
@@ -970,6 +971,45 @@ class EndToEndTest extends FunSuite
 
       await(server.close())
     }
+  }
+
+  test("thriftmux server + thriftmux client: pass mux-supported c.t.f.Failure flags") {
+
+    var failure: Failure = null
+
+    val server = ThriftMux.server.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new TestService.FutureIface {
+        def query(s: String) = Future.exception(failure)
+      }
+    )
+
+    // Don't strip failure flags, as we're testing to ensure they traverse
+    val removeFailure = new Transformer {
+      def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
+        stack.remove(Failure.role)
+    }
+
+    val client = ThriftMux.client
+      .transformed(removeFailure)
+      .newIface[TestService.FutureIface](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client"
+      )
+
+    def check(f: Failure) = {
+      failure = f
+      await(client.query(":(").liftToTry) match {
+        case Throw(res: Failure) => assert(res.flags == f.flags)
+        case other => fail(s"Unexpected response: $other")
+      }
+    }
+
+    val failures = Seq(
+      Failure.rejected("Rejection!")
+      // TODO(jparker) Add other Failure flags after Mux supports them
+    )
+    failures.foreach(check _)
+    await(server.close())
   }
 
   test("thriftmux server + thrift client: does not support Nack") {
