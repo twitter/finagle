@@ -659,12 +659,9 @@ object Finagle extends Build {
     name := "finagle-benchmark",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.twitter.common" % "metrics-data-sample" % "0.0.1",
       "org.apache.curator" % "curator-test" % "2.8.0",
       "org.apache.curator" % "curator-framework" % "2.8.0"
-    ),
-    // we need the resolver because metrics-data-sample has disappeared from commons
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    )
   ).dependsOn(
     finagleBenchmarkThrift,
     finagleCommonsStats,

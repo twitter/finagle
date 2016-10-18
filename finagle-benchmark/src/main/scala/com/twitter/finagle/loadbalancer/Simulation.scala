@@ -159,7 +159,7 @@ private[finagle] object Simulation extends com.twitter.app.App {
     val noBrokers = new NoBrokersAvailableException
     val newFactory = new LatencyFactory(stats)
 
-    val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
+    val data = getClass.getClassLoader.getResource("real_latencies.data")
     val dist = LatencyProfile.fromFile(data)
     val stable: Set[ServiceFactory[Unit, Unit]] =
       Seq.tabulate(nstable())(i => newFactory(i, dist)).toSet
