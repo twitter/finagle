@@ -43,14 +43,11 @@ private[finagle] class HttpServerDispatcher(
         case _ =>
           Response(badReq.version, Status.BadRequest)
       }
-      // The connection is unusable so we close it here.
-      // Note that state != Idle while inside dispatch
-      // so state will be set to Closed but trans.close
-      // will not be called. Instead, isClosing will be
-      // set to true, keep-alive headers set correctly
-      // in handle, and trans.close will be called in
-      // the respond statement of loop().
-      close()
+
+      // A bad request will most likely result in a corrupt connection, so signal
+      // close with a 'Connection: close' header. Closing the transport will then
+      // be performed by the ConnectionManager
+      resp.headerMap.set(Fields.Connection, "close")
       Future.value(resp)
 
     case req: Request =>
@@ -100,20 +97,27 @@ private[finagle] class HttpServerDispatcher(
     }
   }
 
-  protected def setKeepAlive(rep: Response, keepAlive: Boolean): Unit = {
-    rep.version match {
-      case Version.Http10 =>
-        if (keepAlive) {
-          rep.headers.set(Fields.Connection, "keep-alive")
-        } else {
-          rep.headers.remove(Fields.Connection)
-        }
-      case Version.Http11 =>
-        if (keepAlive) {
-          rep.headers.remove(Fields.Connection)
-        } else {
-          rep.headers.set(Fields.Connection, "close")
-        }
+  /**
+   * Set the Connection header as appropriate. This will NOT clobber a 'Connection: close' header,
+   * allowing services to gracefully close the connection through the Connection header mechanism.
+   */
+  private def setKeepAlive(rep: Response, keepAlive: Boolean): Unit = {
+    val connectionHeader = rep.headerMap.get(Fields.Connection)
+    if (connectionHeader.isEmpty || !"close".equalsIgnoreCase(connectionHeader.get)) {
+      rep.version match {
+        case Version.Http10 =>
+          if (keepAlive) {
+            rep.headerMap.set(Fields.Connection, "keep-alive")
+          } else {
+            rep.headerMap.remove(Fields.Connection)
+          }
+        case Version.Http11 =>
+          if (keepAlive) {
+            rep.headerMap.remove(Fields.Connection)
+          } else {
+            rep.headerMap.set(Fields.Connection, "close")
+          }
+      }
     }
   }
 }

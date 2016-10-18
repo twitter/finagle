@@ -112,7 +112,7 @@ Runtime Behavior Changes
     be disabled by setting the toggle "com.twitter.finagle.http.serverErrorsAsFailures"
     to `0.0` or explicitly setting it using `withResponseClassifier`.
     ``RB_ID=869303``, ``RB_ID=875367``
-
+ 
   * finagle-thrift: Also track response failures in the
     `c.t.finagle.thrift.ThriftServiceIface#statsFilter` in addition to successful
     responses that encode an Error or Exception. ``RB_ID=879075``
@@ -126,6 +126,10 @@ Bug Fixes
   * finagle-http: A connection for HTTP/1.0 or non-keep-alive requests is now closed
     gracefully so that all requests that have been issued received responses.
     ``RB_ID=868767``
+
+  * finagle-http: The HTTP/1.x server dispatcher no longer clobbers 'Connection: close'
+    headers set by a service, resulting in the graceful shutdown of the connection.
+    ``RB_ID=880007``
 
   * finagle-netty4: `ChannelTransport` now drains messages before reading more data off the
     transport which should reduce memory pressure in streaming protocols. ``RB_ID=872639``
