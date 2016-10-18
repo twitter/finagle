@@ -30,6 +30,9 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Removed the protected and unused method `read(permit: Permit): Future[Rep]`
+    from `SerialClientDispatcher`. ``RB_ID=881978``
+
   * finagle-thriftmux: Removed deprecated classes `ThriftMuxClient`, `ThriftMuxClientLike`,
     `ThriftMuxServer`, and `ThriftMuxServerLike`. ``RB_ID=880924``
 
