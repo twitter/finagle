@@ -24,16 +24,18 @@ private[netty4] class Netty4ProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] val socksCodecKey: String = "socks codec"
+  private[this] val proxyCodecKey: String = "proxy codec"
   private[proxy] var connectPromise: NettyFuture[Channel] = _ // exposed for testing
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     connectPromise = proxyHandler.connectFuture()
-    ctx.pipeline().addBefore(ctx.name(), socksCodecKey, proxyHandler)
+    ctx.pipeline().addBefore(ctx.name(), proxyCodecKey, proxyHandler)
+    super.handlerAdded(ctx)
   }
 
   override def handlerRemoved(ctx: ChannelHandlerContext): Unit = {
-    ctx.pipeline().remove(socksCodecKey)
+    ctx.pipeline().remove(proxyCodecKey)
+    super.handlerRemoved(ctx)
   }
 
   override def connect(
@@ -61,8 +63,8 @@ private[netty4] class Netty4ProxyConnectHandler(
             ctx.pipeline().remove(self) // drains pending writes when removed
           }
         } else {
-          // SOCKS handshake promise is failed so given `ProxyHandler` is going to close the
-          // channel we only  need to fail pending writes and the connect promise.
+          // SOCKS/HTTP proxy handshake promise is failed so given `ProxyHandler` is going to
+          // close the channel, we only need to fail pending writes and the connect promise.
           promise.tryFailure(future.cause())
           failPendingWrites(ctx, future.cause())
         }
