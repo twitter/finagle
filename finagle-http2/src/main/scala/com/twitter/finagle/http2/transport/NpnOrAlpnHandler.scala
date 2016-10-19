@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.exp._
-import io.netty.channel.{Channel, ChannelInitializer, ChannelHandlerContext}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
 import io.netty.handler.codec.http2.{Http2Codec, Http2ServerDowngrader}
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
@@ -24,7 +24,11 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         }
 
         ctx.channel.config.setAutoRead(true)
-        ctx.pipeline().replace("httpCodec", "http2Codec", new Http2Codec(true /* server */ , initializer))
+        ctx.pipeline().replace(
+          HttpCodecName,
+          "http2Codec",
+          new Http2Codec(true /* server */ , initializer))
+
       case ApplicationProtocolNames.HTTP_1_1 =>
       // The Http codec is already in the pipeline, so we are good!
       case _ =>

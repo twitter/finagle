@@ -2,18 +2,15 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.http.exp.initServer
+import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
+import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.{ChannelInitializer, Channel, ChannelHandlerContext}
-import io.netty.handler.codec.http.HttpServerUpgradeHandler.{UpgradeCodec, UpgradeCodecFactory, SourceCodec}
-import io.netty.handler.codec.http.{HttpServerUpgradeHandler, FullHttpRequest}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
+  SourceCodec, UpgradeCodec, UpgradeCodecFactory}
+import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2.{
-  Http2ServerUpgradeCodec,
-  Http2CodecUtil,
-  Http2Codec,
-  Http2ServerDowngrader
-}
-
+  Http2Codec, Http2CodecUtil, Http2ServerDowngrader, Http2ServerUpgradeCodec}
 import io.netty.util.AsciiString
 
 /**
@@ -21,8 +18,7 @@ import io.netty.util.AsciiString
  */
 private[http2] class Http2CleartextServerInitializer(
     init: ChannelInitializer[Channel],
-    params: Stack.Params,
-    codec: SourceCodec)
+    params: Stack.Params)
   extends ChannelInitializer[SocketChannel] {
 
   val upgradeCodecFactory: UpgradeCodecFactory = new UpgradeCodecFactory {
@@ -50,8 +46,18 @@ private[http2] class Http2CleartextServerInitializer(
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()
     val maxRequestSize = params[httpparam.MaxRequestSize].size
-    p.addAfter("httpCodec", "upgradeHandler",
-      new HttpServerUpgradeHandler(codec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
+    val httpCodec = p.get(HttpCodecName) match {
+      case codec: SourceCodec => codec
+      case other => // This is very unexpected. Abort and log very loudly
+        p.close()
+        val msg = s"Unexpected codec found: ${other.getClass.getSimpleName}. " +
+          "Aborting channel initialization"
+        val ex = new IllegalStateException(msg)
+        Logger.get(this.getClass).error(ex, msg)
+        throw ex
+    }
+    p.addAfter(HttpCodecName, "upgradeHandler",
+      new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
 
     p.addLast(init)
   }

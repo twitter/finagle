@@ -1,6 +1,7 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.netty4.http.exp.HttpCodecName
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.{SslHandler, SslHandshakeCompletionEvent, ApplicationProtocolNames}
@@ -37,20 +38,20 @@ class NpnOrAlpnHandlerTest extends FunSuite with BeforeAndAfter with MockitoSuga
     pipeline.addLast(handler)
 
     val dummyHttp11Codec = new ChannelHandlerAdapter() {}
-    pipeline.addLast("httpCodec", dummyHttp11Codec)
+    pipeline.addLast(HttpCodecName, dummyHttp11Codec)
   }
 
   test("Replaces http codec with http/2 codec when h2 negotiated") {
     when(sslHandler.applicationProtocol()).thenReturn(http2)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
-    assert(!pipeline.names().contains("httpCodec"))
+    assert(!pipeline.names().contains(HttpCodecName))
     assert(pipeline.names().contains("Http2FrameCodec#0"))
   }
 
   test("Leaves http codec in place when http/1.1 is negotiated") {
     when(sslHandler.applicationProtocol()).thenReturn(http11)
     pipeline.fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS)
-    assert(pipeline.names().contains("httpCodec"))
+    assert(pipeline.names().contains(HttpCodecName))
     assert(!pipeline.names().contains("http2Codec"))
   }
 }

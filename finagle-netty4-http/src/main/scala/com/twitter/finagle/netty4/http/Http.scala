@@ -18,6 +18,11 @@ import io.netty.handler.codec.{http => NettyHttp}
  */
 object exp {
 
+  /**
+   * The name assigned to a `HttpServerCodec` instance in a netty `ChannelPipeline`
+   */
+  private[finagle] val HttpCodecName = "httpCodec"
+
   private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = {
     val maxChunkSize = params[httpparam.MaxChunkSize].size
     val maxResponseSize = params[httpparam.MaxResponseSize].size
@@ -53,7 +58,7 @@ object exp {
           maxChunkSize.inBytes.toInt
         )
 
-        pipeline.addLast("httpCodec", codec)
+        pipeline.addLast(HttpCodecName, codec)
 
         initClient(params)(pipeline)
       }, params)
@@ -113,7 +118,7 @@ object exp {
             maxRequestSize.inBytes.toInt
           )
 
-          pipeline.addLast("httpCodec", codec)
+          pipeline.addLast(HttpCodecName, codec)
 
           initServer(params)(pipeline)
         }

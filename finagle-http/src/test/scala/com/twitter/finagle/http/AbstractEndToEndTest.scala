@@ -916,5 +916,4 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
     await(client.close())
   }
-
 }

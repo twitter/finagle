@@ -4,7 +4,7 @@ import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.netty4.http.exp.initServer
+import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{TlsConfig, Transport}
 import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelDuplexHandler}
@@ -56,16 +56,16 @@ private[http2] object Http2Listener {
   }
 
   private[this] def cleartextListener[In, Out](params: Stack.Params): Listener[In, Out] = {
-    val source = sourceCodec(params)
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast("httpCodec", source)
+        val source = sourceCodec(params)
+        pipeline.addLast(HttpCodecName, source)
         initServer(params)(pipeline)
       },
       params = params,
       setupMarshalling = {
         init: ChannelInitializer[Channel] =>
-          new Http2CleartextServerInitializer(init, params, source)
+          new Http2CleartextServerInitializer(init, params)
       }
     )
   }
@@ -73,7 +73,7 @@ private[http2] object Http2Listener {
   private[this] def tlsListener[In, Out](params: Stack.Params): Listener[In, Out] = {
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast("httpCodec", sourceCodec(params))
+        pipeline.addLast(HttpCodecName, sourceCodec(params))
         initServer(params)(pipeline)
       },
       params = params,

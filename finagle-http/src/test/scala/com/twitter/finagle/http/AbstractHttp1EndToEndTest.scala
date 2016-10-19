@@ -67,8 +67,8 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
       assert(response.headerMap.get(Fields.Connection) == Some("close"))
 
       // connections must be closed
-      assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f)
-      assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f)
+      eventually { assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f) }
+      eventually { assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f) }
 
       await(client.close())
     }
@@ -87,8 +87,8 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
       assert(response.headerMap.get(Fields.Connection) == Some("close"))
 
       // connections must be closed
-      assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f)
-      assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f)
+      eventually { assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f) }
+      eventually { assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f) }
 
       await(client.close())
     }
@@ -111,8 +111,8 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     val response = await(client(request))
     assert(response.status == Status.Ok)
     assert(response.headerMap.get(Fields.Connection) == Some("close"))
-    assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f)
-    assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f)
+    eventually { assert(statsRecv.gauges(Seq("client", "connections"))() == 0.0f) }
+    eventually { assert(statsRecv.gauges(Seq("server", "connections"))() == 0.0f) }
     await(client.close())
   }
 
@@ -145,5 +145,30 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     assert(await(expectP) == false)
     await(client.close())
     await(server.close())
+  }
+
+  run(multiplePipelines(implName, _))(nonStreamingConnect)
+  run(multiplePipelines(implName + "(streaming)", _))(streamingConnect)
+
+  def multiplePipelines(prefix: String, connect: HttpService => HttpService): Unit = {
+    test(prefix + ": Can initialize multiple pipelines") {
+      val srvc = Service.mk { req: Request =>
+        val resp = Response()
+        resp.headerMap.set(Fields.Connection, "close")
+        Future.value(resp)
+      }
+
+      val client = connect(srvc)
+
+      val resp1 = await(client(Request(uri = "/close")))
+      assert(resp1.headerMap.get(Fields.Connection) == Some("close"))
+
+      // The previous request should have terminated the connection so this
+      // second request will open a new one.
+      val resp2 = await(client(Request(uri = "/stayopen")))
+      assert(resp2.headerMap.get(Fields.Connection) == Some("close"))
+
+      await(client.close())
+    }
   }
 }
