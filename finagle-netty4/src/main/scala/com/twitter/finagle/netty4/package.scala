@@ -4,7 +4,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.stats.DefaultStatsReceiver
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.ProxyThreadFactory
-import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap, Toggle}
+import com.twitter.finagle.toggle.{StandardToggleMap, Toggle, ToggleMap}
 import com.twitter.util.Awaitable
 import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
@@ -91,6 +91,9 @@ package object netty4 {
     /* preferDirect */ false,
     /* disableLeakDetector */ true
   )
+
+  // Exports N4-related metrics under `finagle/netty4`.
+  exportNetty4Metrics()
 
   private[finagle] val DirectToHeapInboundHandlerName = "direct to heap"
 
