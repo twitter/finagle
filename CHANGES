@@ -27,6 +27,10 @@ Runtime Behavior Changes
     - `RootMonitor` is still used to handle fatal exceptions from pending side-effect-only
       closures (i.e., `onFailure`, `onSuccess`) on a service future/promise.
 
+  * finagle-stats: Changed the default behavior of empty histograms to only export
+    the count. Thus the `com.twitter.finagle.stats.exportEmptyHistograms` toggle
+    now defaults to `0.0`. ``RB_ID=882522``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
