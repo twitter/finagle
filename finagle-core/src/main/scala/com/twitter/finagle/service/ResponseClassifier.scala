@@ -7,6 +7,9 @@ object ResponseClassifier {
 
   /**
    * Create a [[ResponseClassifier]] with the given name for its `toString`.
+   *
+   * @note be careful when `underlying` composes other `ResponseClassifiers`
+   *       which are not total.
    */
   def named(name: String)(underlying: ResponseClassifier): ResponseClassifier =
     new ResponseClassifier {

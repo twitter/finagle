@@ -43,6 +43,10 @@ Bug Fixes
     APIs have been fixed for an issue on Java 8 where certificate validation
     was being attempted instead of bypassed. ``RB_ID=881660``
 
+  * finagle-http: The toggle implementation for `com.twitter.finagle.http.serverErrorsAsFailures`
+     had a bug when toggled on. That toggle is no longer used and is superseded by
+    `com.twitter.finagle.http.serverErrorsAsFailuresV2`. ``RB_ID=882151``
+
 Deprecations
 ~~~~~~~~~~~~
 

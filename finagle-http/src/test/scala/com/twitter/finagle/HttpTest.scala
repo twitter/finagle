@@ -1,10 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.service.{ResponseClass, ResponseClassifier}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
-import com.twitter.util.{Await, Duration, Future}
+import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -25,6 +25,52 @@ class HttpTest extends FunSuite {
       val client = new Http.Client().withResponseClassifier(customRc)
       val rc = classifier(client.params)
       assert(rc == customRc)
+    }
+  }
+
+  test("responseClassifierParam toggled off") {
+    import com.twitter.finagle.http.{Status => HStatus}
+
+    def rep(code: HStatus): Response = Response(code)
+    def reqRep(rep: Response): ReqRep = ReqRep(Request("/index.cgi"), Return(rep))
+
+    val rc = Http.responseClassifierParam.responseClassifier
+
+    def repClass(rep: Response): ResponseClass =
+      rc.applyOrElse(reqRep(rep), ResponseClassifier.Default)
+
+    // using the default classifier
+    flag.overrides.let(Http.ServerErrorsAsFailuresToggleId, 0.0) {
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.Ok))))
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.BadRequest))))
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.ServiceUnavailable))))
+
+      assert(ResponseClass.Success == repClass(rep(HStatus.Ok)))
+      assert(ResponseClass.Success == repClass(rep(HStatus.BadRequest)))
+      assert(ResponseClass.Success == repClass(rep(HStatus.ServiceUnavailable)))
+    }
+  }
+
+  test("responseClassifierParam toggled on") {
+    import com.twitter.finagle.http.{Status => HStatus}
+
+    def rep(code: HStatus): Response = Response(code)
+    def reqRep(rep: Response): ReqRep = ReqRep(Request("/index.cgi"), Return(rep))
+
+    val rc = Http.responseClassifierParam.responseClassifier
+
+    def repClass(rep: Response): ResponseClass =
+      rc.applyOrElse(reqRep(rep), ResponseClassifier.Default)
+
+    // uses the ServerErrorsAsFailures classifier for 500s
+    flag.overrides.let(Http.ServerErrorsAsFailuresToggleId, 1.0) {
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.Ok))))
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.BadRequest))))
+      assert(rc.isDefinedAt(reqRep(rep(HStatus.ServiceUnavailable))))
+
+      assert(ResponseClass.Success == repClass(rep(HStatus.Ok)))
+      assert(ResponseClass.Success == repClass(rep(HStatus.BadRequest)))
+      assert(ResponseClass.NonRetryableFailure == repClass(rep(HStatus.ServiceUnavailable)))
     }
   }
 

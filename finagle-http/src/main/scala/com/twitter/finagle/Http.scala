@@ -135,23 +135,34 @@ object Http extends Client[Request, Response] with HttpRichClient
 
   private val protocolLibrary = ProtocolLibrary("http")
 
+  /** exposed for testing */
   private[finagle] val ServerErrorsAsFailuresToggleId =
-    "com.twitter.finagle.http.serverErrorsAsFailures"
+    "com.twitter.finagle.http.serverErrorsAsFailuresV2"
 
   private[this] val serverErrorsAsFailuresToggle =
-    http.Toggles("com.twitter.finagle.http.serverErrorsAsFailures")
+    http.Toggles(ServerErrorsAsFailuresToggleId)
 
   private[this] def treatServerErrorsAsFailures: Boolean =
     serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
 
-  private val responseClassifierParam: ResponseClassifierParam = {
-    val rc: ResponseClassifier =
-      ResponseClassifier.named("ToggledServerErrorsAsFailures") { case reqRep =>
-        if (treatServerErrorsAsFailures)
-          HttpResponseClassifier.ServerErrorsAsFailures(reqRep)
-        else
-          ResponseClassifier.Default(reqRep)
-      }
+  /** exposed for testing */
+  private[finagle] val responseClassifierParam: ResponseClassifierParam = {
+    def filtered[A, B](
+      predicate: () => Boolean,
+      pf: PartialFunction[A, B]
+    ): PartialFunction[A, B] = new PartialFunction[A, B] {
+      def isDefinedAt(a: A): Boolean = predicate() && pf.isDefinedAt(a)
+      def apply(a: A): B = pf(a)
+    }
+
+    val srvErrsAsFailures = filtered(
+      () => treatServerErrorsAsFailures,
+      HttpResponseClassifier.ServerErrorsAsFailures)
+
+    val rc = ResponseClassifier.named("ToggledServerErrorsAsFailures") {
+      srvErrsAsFailures.orElse(ResponseClassifier.Default)
+    }
+
     ResponseClassifierParam(rc)
   }
 
