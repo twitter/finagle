@@ -42,7 +42,15 @@ object Protocols {
 
   private val unsafe: Option[sun.misc.Unsafe] = Option(getUnsafe)
 
-  private[this] def optimizedBinarySupported: Boolean = unsafe.isDefined
+  // JDK9 Strings are no longer backed by Array[Char] - http://openjdk.java.net/jeps/254
+  private val StringsBackedByCharArray = try {
+    // Versioning changes between 8 and 9 - http://openjdk.java.net/jeps/223
+    System.getProperty("java.specification.version").replace("1.", "").toInt < 9
+  } catch {
+    case _: Throwable => false
+  }
+
+  private[this] def optimizedBinarySupported: Boolean = unsafe.isDefined && StringsBackedByCharArray
 
   /**
    * Returns a `TProtocolFactory` that creates `TProtocol`s that
