@@ -135,11 +135,13 @@ class NoBrokersAvailableException(
   val name: String,
   val baseDtab: Dtab,
   val localDtab: Dtab
-) extends RequestException {
+) extends RequestException with SourcedException {
   def this(name: String = "unknown") = this(name, Dtab.empty, Dtab.empty)
 
   override def exceptionMessage =
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
+
+  serviceName = name
 }
 
 /**
