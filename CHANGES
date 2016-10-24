@@ -132,7 +132,14 @@ Runtime Behavior Changes
     be disabled by setting the toggle "com.twitter.finagle.http.serverErrorsAsFailures"
     to `0.0` or explicitly setting it using `withResponseClassifier`.
     ``RB_ID=869303``, ``RB_ID=875367``
- 
+
+  * finagle-http: `c.t.f.http.HttpServerDispatcher` now removes the bodies from responses
+    to HEAD requests in order to avoid a HTTP protocol error and logs the event at level
+    error. Associated with this, the `c.t.f.http.filter.HeadFilter` will now strip the body
+    from a chunked response, but in these cases the `Writer` associated with the response
+    will receive a `ReaderDiscarded` exception if a write is attempted after the filter has
+    run. ``RB_ID=872106``
+
   * finagle-thrift: Also track response failures in the
     `c.t.finagle.thrift.ThriftServiceIface#statsFilter` in addition to successful
     responses that encode an Error or Exception. ``RB_ID=879075``

@@ -12,7 +12,8 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.Reader
 import com.twitter.util.{Await, Future, Promise}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{
+  DefaultHttpChunk, HttpChunk, HttpResponse, HttpResponseStatus, HttpVersion}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

@@ -25,4 +25,8 @@ class ServerFailUpgradeTest extends AbstractHttp1EndToEndTest {
   )
 
   def featureImplemented(feature: Feature): Boolean = !featuresNotImplemented(feature)
+
+  test("Can create and server a couple connections") {
+
+  }
 }

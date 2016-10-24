@@ -19,13 +19,16 @@ private[http] object HttpServerDispatcher {
 
 private[finagle] class HttpServerDispatcher(
     trans: StreamTransport[Response, Request],
-    service: Service[Request, Response],
+    underlying: Service[Request, Response],
     stats: StatsReceiver)
   extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
   import HttpServerDispatcher._
 
   private[this] val failureReceiver =
     new RollupStatsReceiver(stats.scope("stream")).scope("failures")
+
+  // Response conformance (length headers, etc) is performed by the `ResponseConformanceFilter`
+  private[this] val service = ResponseConformanceFilter.andThen(underlying)
 
   trans.onClose.ensure {
     service.close()
@@ -44,34 +47,30 @@ private[finagle] class HttpServerDispatcher(
           Response(badReq.version, Status.BadRequest)
       }
 
+      // We need to set the content-length here because we
+      // won't be going through the service which in typically
+      // responsible for this aspect.
+      resp.contentLength = 0
+
       // A bad request will most likely result in a corrupt connection, so signal
       // close with a 'Connection: close' header. Closing the transport will then
       // be performed by the ConnectionManager
       resp.headerMap.set(Fields.Connection, "close")
+
       Future.value(resp)
 
-    case req: Request =>
+    case req =>
       val handleFn = req.version match {
         case Version.Http10 => handleHttp10
         case _ => handleHttp11
       }
       service(req).handle(handleFn)
-
-    case invalid =>
-      Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
   protected def handle(rep: Response): Future[Unit] = {
     setKeepAlive(rep, !isClosing)
-    if (rep.isChunked) {
-      // We remove content length here in case the content is later
-      // compressed. This is a pretty bad violation of modularity;
-      // this is likely an issue with the Netty content
-      // compressors, which (should?) adjust headers regardless of
-      // transfer encoding.
-      rep.headerMap.remove(Fields.ContentLength)
-      rep.headerMap.set(Fields.TransferEncoding, "chunked")
 
+    if (rep.isChunked) {
       val p = new Promise[Unit]
       val f = trans.write(rep)
       f.proxyTo(p)
@@ -89,10 +88,6 @@ private[finagle] class HttpServerDispatcher(
       }
       p
     } else {
-      // Ensure Content-Length is set if not chunked
-      if (!rep.contentLength.isDefined)
-        rep.contentLength = rep.content.length
-
       trans.write(rep)
     }
   }

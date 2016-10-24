@@ -17,8 +17,8 @@ import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
 
 abstract class AbstractEndToEndTest extends FunSuite

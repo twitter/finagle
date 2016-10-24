@@ -15,7 +15,7 @@ class HeadFilterTest extends FunSuite {
    def apply(request: Request) = {
      assert(request.method == Method.Get)
 
-     val response = request.response
+     val response = Response(request)
      response.status = Status.Ok
      response.write(Body)
      Future.value(response)
