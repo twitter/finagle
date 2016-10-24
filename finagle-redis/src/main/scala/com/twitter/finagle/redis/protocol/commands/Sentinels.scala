@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 
 case class SentinelMaster(name: String) extends Sentinel("MASTER", Seq(name))
 
@@ -34,8 +34,8 @@ case class SentinelSet(name: String, option: String, value: String)
   extends Sentinel("SET", Seq(name, option, value))
 
 abstract class Sentinel(sub: String, args: Seq[String]) extends Command {
-  def command = Commands.SENTINEL
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(
-      Seq(CommandBytes.SENTINEL, StringToChannelBuffer(sub)) ++
-        args.map(StringToChannelBuffer(_)))
+  def command: String = Commands.SENTINEL
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(
+    Seq(CommandBytes.SENTINEL, Buf.Utf8(sub)) ++ args.map(Buf.Utf8.apply)
+  )
 }

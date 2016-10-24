@@ -1,46 +1,51 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.redis.exp.SubscribeHandler
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
 abstract class SubscribeCommand extends Command {
   def handler: SubscribeHandler
 }
 
 case class PSubscribe(
-  patterns: Seq[Buf],
-  handler: SubscribeHandler)
-    extends SubscribeCommand {
-  def command = Commands.PSUBSCRIBE
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.PSUBSCRIBE +: patterns)
+    patterns: Seq[Buf],
+    handler: SubscribeHandler)
+  extends SubscribeCommand {
+
+  def command: String = Commands.PSUBSCRIBE
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.PSUBSCRIBE +: patterns)
 }
 
-case class PUnsubscribe(patterns: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
-  def command = Commands.PUNSUBSCRIBE
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.PUNSUBSCRIBE +: patterns)
+case class PUnsubscribe(
+    patterns: Seq[Buf],
+    handler: SubscribeHandler)
+  extends SubscribeCommand {
+
+  def command: String = Commands.PUNSUBSCRIBE
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.PUNSUBSCRIBE +: patterns)
 }
 
 case class Subscribe(
-  channels: Seq[Buf],
-  handler: SubscribeHandler)
-    extends SubscribeCommand {
-  def command = Commands.SUBSCRIBE
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.SUBSCRIBE +: channels)
+    channels: Seq[Buf],
+    handler: SubscribeHandler)
+  extends SubscribeCommand {
+
+  def command: String = Commands.SUBSCRIBE
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.SUBSCRIBE +: channels)
 }
 
-case class Unsubscribe(channels: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
-  def command = Commands.UNSUBSCRIBE
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.UNSUBSCRIBE +: channels)
+case class Unsubscribe(
+    channels: Seq[Buf],
+    handler: SubscribeHandler)
+  extends SubscribeCommand {
+
+  def command: String = Commands.UNSUBSCRIBE
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.UNSUBSCRIBE +: channels)
 }
 
-case class Publish(keyBuf: Buf, message: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command = Commands.PUBLISH
-  def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PUBLISH, keyBuf, message))
+case class Publish(key: Buf, message: Buf) extends StrictKeyCommand {
+  def command: String = Commands.PUBLISH
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PUBLISH, key, message))
 }
 
 case class PubSubChannels(pattern: Option[Buf]) extends PubSub(Buf.Utf8("CHANNELS"), pattern.toSeq)
@@ -50,6 +55,6 @@ case class PubSubNumSub(channels: Seq[Buf]) extends PubSub(Buf.Utf8("NUMSUB"), c
 case object PubSubNumPat extends PubSub(Buf.Utf8("NUMPAT"), Seq.empty)
 
 abstract class PubSub(sub: Buf, args: Seq[Buf]) extends Command {
-  def command = Commands.PUBSUB
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PUBSUB, sub) ++ args)
+  def command: String = Commands.PUBSUB
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PUBSUB, sub) ++ args)
 }

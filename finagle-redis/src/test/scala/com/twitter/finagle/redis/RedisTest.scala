@@ -97,7 +97,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
   implicit val arbitraryAgregate: Arbitrary[Aggregate] = Arbitrary(genAgregate)
 
   def encode(c: Command): Seq[String] = {
-    val strings = CBToString(c.toChannelBuffer).split("\r\n")
+    val strings = BufToString(c.toBuf).split("\r\n")
 
     val length = strings.head.toList match {
       case '*' :: rest => rest.mkString.toInt

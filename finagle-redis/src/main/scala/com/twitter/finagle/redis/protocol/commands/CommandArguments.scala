@@ -1,16 +1,13 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.breakOut
 import java.lang.{Long => JLong}
 
 trait CommandArgument extends Command {
-  override def toChannelBuffer: ChannelBuffer = BufChannelBuffer(encoded.reduce(_ concat _))
-
+  override def toBuf: Buf = encoded.reduce(_ concat _)
   private[redis] def encoded: Seq[Buf]
 }
 

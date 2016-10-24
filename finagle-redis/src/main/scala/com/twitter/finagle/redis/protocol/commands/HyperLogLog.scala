@@ -1,33 +1,21 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
-case class PFAdd(keyBuf: Buf, elements: Seq[Buf]) extends StrictKeyCommand {
-  val command = Commands.PFADD
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
+case class PFAdd(key: Buf, elements: Seq[Buf]) extends StrictKeyCommand {
+  def command: String = Commands.PFADD
   RequireClientProtocol(elements.nonEmpty, "elements must not be empty")
-
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PFADD, keyBuf) ++ elements)
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PFADD, key) ++ elements)
 }
 
-case class PFCount(keysBuf: Seq[Buf]) extends StrictKeysCommand {
-  override def keys: Seq[ChannelBuffer] = keysBuf.map(BufChannelBuffer.apply)
-
-  val command = Commands.PFCOUNT
-
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.PFCOUNT +: keysBuf)
+case class PFCount(keys: Seq[Buf]) extends StrictKeysCommand {
+  def command: String = Commands.PFCOUNT
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.PFCOUNT +: keys)
 }
 
 case class PFMerge(destKey: Buf, srcKeys: Seq[Buf]) extends Command {
-  val command = Commands.PFMERGE
-
+  def command: String = Commands.PFMERGE
   RequireClientProtocol(srcKeys.nonEmpty, "srcKeys must not be empty")
-
-  def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PFMERGE, destKey) ++ srcKeys)
+  def toBuf: Buf =
+    RedisCodec.toUnifiedBuf(Seq(CommandBytes.PFMERGE, destKey) ++ srcKeys)
 }

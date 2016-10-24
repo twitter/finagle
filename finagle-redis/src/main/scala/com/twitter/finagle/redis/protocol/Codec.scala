@@ -86,7 +86,4 @@ private[redis] object RedisCodec {
   }
 }
 
-abstract class RedisMessage {
-  def toChannelBuffer: ChannelBuffer
-  def toByteArray: Array[Byte] = toChannelBuffer.array
-}
+abstract class RedisMessage

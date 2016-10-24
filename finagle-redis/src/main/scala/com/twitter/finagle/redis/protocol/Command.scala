@@ -10,6 +10,7 @@ object RequireClientProtocol extends ErrorConversion {
 
 abstract class Command extends RedisMessage {
   def command: String
+  def toBuf: Buf
 }
 
 object Commands {
@@ -252,16 +253,16 @@ object CommandBytes {
   val TOPOLOGYDELETE   = StringToBuf("TOPOLOGYDELETE")
 
   // Miscellaneous
-  val PING              = StringToChannelBuffer("PING")
-  val FLUSHALL          = StringToChannelBuffer("FLUSHALL")
-  val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
-  val SELECT            = StringToChannelBuffer("SELECT")
-  val AUTH              = StringToChannelBuffer("AUTH")
-  val INFO              = StringToChannelBuffer("INFO")
-  val QUIT              = StringToChannelBuffer("QUIT")
+  val PING              = StringToBuf("PING")
+  val FLUSHALL          = StringToBuf("FLUSHALL")
+  val FLUSHDB           = StringToBuf("FLUSHDB")
+  val SELECT            = StringToBuf("SELECT")
+  val AUTH              = StringToBuf("AUTH")
+  val INFO              = StringToBuf("INFO")
+  val QUIT              = StringToBuf("QUIT")
   val SLAVEOF           = StringToBuf("SLAVEOF")
-  val CONFIG            = StringToChannelBuffer("CONFIG")
-  val SENTINEL          = StringToChannelBuffer("SENTINEL")
+  val CONFIG            = StringToBuf("CONFIG")
+  val SENTINEL          = StringToBuf("SENTINEL")
 
   // Hash Sets
   val HDEL              = StringToBuf("HDEL")
@@ -302,10 +303,10 @@ object CommandBytes {
   val SINTER            = StringToBuf("SINTER")
 
   // Transactions
-  val DISCARD           = StringToChannelBuffer("DISCARD")
-  val EXEC              = StringToChannelBuffer("EXEC")
-  val MULTI             = StringToChannelBuffer("MULTI")
-  val UNWATCH           = StringToChannelBuffer("UNWATCH")
+  val DISCARD           = StringToBuf("DISCARD")
+  val EXEC              = StringToBuf("EXEC")
+  val MULTI             = StringToBuf("MULTI")
+  val UNWATCH           = StringToBuf("UNWATCH")
   val WATCH             = StringToBuf("WATCH")
 
   // HyperLogLogs
@@ -340,13 +341,4 @@ object CommandBytes {
   val AGGREGATE         = StringToBuf("AGGREGATE")
   val COUNT             = StringToBuf("COUNT")
   val PATTERN           = StringToBuf("PATTERN")
-}
-
-
-class CommandCodec extends UnifiedProtocolCodec {
-  import com.twitter.finagle.redis.naggati.Encoder
-
-  val encode = new Encoder[Command] {
-    def encode(obj: Command) = Some(obj.toChannelBuffer)
-  }
 }

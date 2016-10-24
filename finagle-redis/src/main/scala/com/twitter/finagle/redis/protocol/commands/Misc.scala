@@ -1,67 +1,64 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
 case object FlushAll extends Command {
-  def command = Commands.FLUSHALL
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.FLUSHALL))
+  def command: String = Commands.FLUSHALL
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.FLUSHALL))
 }
 
 case object FlushDB extends Command {
-  def command = Commands.FLUSHDB
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.FLUSHDB))
+  def command: String = Commands.FLUSHDB
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.FLUSHDB))
 }
 
 case class Select(index: Int) extends Command {
-  def command = Commands.SELECT
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.SELECT,
-    StringToChannelBuffer(index.toString)))
+  def command: String = Commands.SELECT
+  def toBuf: Buf =
+    RedisCodec.toUnifiedBuf(Seq(CommandBytes.SELECT, StringToBuf(index.toString)))
 }
 
 case class Auth(code: Buf) extends Command {
-  def command = Commands.AUTH
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.AUTH, ChannelBufferBuf.Owned.extract(code)))
+  def command: String = Commands.AUTH
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.AUTH, code))
 }
 
 case class Info(section: Buf) extends Command {
-  def command = Commands.INFO
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(
+  def command: String = Commands.INFO
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(
     section match {
       case Buf.Empty => Seq(CommandBytes.INFO)
-      case _ => Seq(CommandBytes.INFO, ChannelBufferBuf.Owned.extract(section))
+      case _ => Seq(CommandBytes.INFO, section)
     }
   )
 }
 
 case object Ping extends Command {
-  def command = Commands.PING
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PING))
+  def command: String = Commands.PING
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PING))
 }
 
 case object Quit extends Command {
-  def command = Commands.QUIT
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.QUIT))
+  def command: String = Commands.QUIT
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.QUIT))
 }
 
 case class ConfigSet(
-    param: ChannelBuffer,
-    value: ChannelBuffer)
-  extends Config(StringToChannelBuffer("SET"), Seq(param, value))
+    param: Buf,
+    value: Buf)
+  extends Config(StringToBuf("SET"), Seq(param, value))
 
-case class ConfigGet(param: ChannelBuffer) extends Config(StringToChannelBuffer("GET"), Seq(param))
+case class ConfigGet(param: Buf) extends Config(StringToBuf("GET"), Seq(param))
 
-case class ConfigResetStat() extends Config(StringToChannelBuffer("RESETSTAT"), Seq.empty)
+case class ConfigResetStat() extends Config(StringToBuf("RESETSTAT"), Seq.empty)
 
-abstract class Config(sub: ChannelBuffer, args: Seq[ChannelBuffer]) extends Command {
-  def command = Commands.CONFIG
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.CONFIG, sub) ++ args)
+abstract class Config(sub: Buf, args: Seq[Buf]) extends Command {
+  def command: String = Commands.CONFIG
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.CONFIG, sub) ++ args)
 }
 
 case class SlaveOf(host: Buf, port: Buf) extends Command {
-  def command = Commands.SLAVEOF
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SLAVEOF, host, port))
+  def command: String = Commands.SLAVEOF
+  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.SLAVEOF, host, port))
 }
