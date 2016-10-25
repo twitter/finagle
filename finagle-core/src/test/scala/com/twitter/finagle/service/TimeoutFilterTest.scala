@@ -1,13 +1,14 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle._
+import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
-import com.twitter.finagle._
-import com.twitter.finagle.context.{Deadline, Contexts}
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
@@ -32,7 +33,9 @@ private object TimeoutFilterTest {
 }
 
 @RunWith(classOf[JUnitRunner])
-class TimeoutFilterTest extends FunSuite with MockitoSugar {
+class TimeoutFilterTest extends FunSuite
+  with Matchers
+  with MockitoSugar {
 
   import TimeoutFilterTest.TimeoutFilterHelper
 
@@ -46,7 +49,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     assert(Await.result(res) == "1")
   }
 
-  test("TimeoutFilter should times out a request that is not successful, cancels underlying") {
+  test("TimeoutFilter should time out a request that is not successful, cancels underlying") {
     val h = new TimeoutFilterHelper
     import h._
 
@@ -162,5 +165,74 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
   test("filter added or not to serverModule based on duration") {
     verifyFilterAddedOrNot(TimeoutFilter.serverModule[Int, Int])
+  }
+
+  test("variable timeouts") {
+    val timer = new MockTimer()
+    val atomicTimeout = new AtomicReference[Duration](Duration.Top)
+    val filter = new TimeoutFilter[String, String](
+      () => atomicTimeout.get,
+      timeout => new IndividualRequestTimeoutException(timeout),
+      timer,
+      NullStatsReceiver)
+
+    val h = new TimeoutFilterHelper()
+    val svc = filter.andThen(h.service)
+
+    Time.withCurrentTimeFrozen { tc =>
+      atomicTimeout.set(5.seconds)
+      val res = svc("hello")
+      assert(!res.isDefined)
+
+      // not yet at the timeout
+      tc.advance(4.seconds)
+      timer.tick()
+      assert(!res.isDefined)
+
+      // go past the timeout
+      tc.advance(2.seconds)
+      timer.tick()
+      val ex = intercept[IndividualRequestTimeoutException] {
+        Await.result(res, 1.second)
+      }
+      ex.getMessage should include(atomicTimeout.get.toString)
+
+      // change the timeout
+      atomicTimeout.set(3.seconds)
+      val res2 = svc("hello")
+      assert(!res2.isDefined)
+
+      // this time, 4 seconds pushes us past
+      tc.advance(4.seconds)
+      timer.tick()
+      val ex2 = intercept[IndividualRequestTimeoutException] {
+        Await.result(res2, 1.second)
+      }
+      ex2.getMessage should include(atomicTimeout.get.toString)
+    }
+  }
+
+  test("variable timeout when timeout is not finite") {
+    val timer = new MockTimer()
+    val atomicTimeout = new AtomicReference[Duration]()
+    val filter = new TimeoutFilter[String, String](
+      () => atomicTimeout.get,
+      timeout => new IndividualRequestTimeoutException(timeout),
+      timer,
+      NullStatsReceiver)
+
+    val h = new TimeoutFilterHelper()
+    val svc = filter.andThen(h.service)
+
+    Time.withCurrentTimeFrozen { tc =>
+      atomicTimeout.set(Duration.Undefined)
+      val res = svc("hello")
+      assert(!res.isDefined)
+
+      tc.advance(200.seconds)
+      timer.tick()
+
+      assert(!res.isDefined)
+    }
   }
 }
