@@ -2,7 +2,8 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.util.{BufWriter, BufReader}
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
+import java.nio.charset.StandardCharsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.openjdk.jmh.annotations._
 import scala.collection.mutable.ArrayBuffer
@@ -30,13 +31,13 @@ class BufCodecBenchmark extends StdBenchAnnotations {
     val values = List.fill(size)("value")
 
     bufs = values.map { case v =>
-      Buf.ByteArray.Owned(v.getBytes(Charsets.Utf8))
+      Buf.ByteArray.Owned(v.getBytes(StandardCharsets.UTF_8))
     }
 
     encodedBuf = TwitterBuf.encode(bufs)
 
     cbs = values.map { case v =>
-      ChannelBuffers.wrappedBuffer(v.getBytes(Charsets.Utf8))
+      ChannelBuffers.wrappedBuffer(v.getBytes(StandardCharsets.UTF_8))
     }
 
     encodedCB = NettyChannelBuffer.encode(cbs)

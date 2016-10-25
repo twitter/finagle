@@ -32,15 +32,15 @@ scala_library(name='scala',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-benchmark/src/main/resources'
-  ],
 )
 
 jvm_binary(
-  name='p2csim',
+  name='lbsim',
   main='com.twitter.finagle.loadbalancer.Simulation',
-  dependencies=[':scala']
+  dependencies=[':scala'],
+  resources=[
+    'finagle/finagle-benchmark/src/main/resources'
+  ],
 )
 
 jvm_binary(
