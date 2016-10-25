@@ -38,27 +38,4 @@ class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
   }
 
-  test("iterate over the mapping") {
-    forAll { set: TagSet =>
-      val range = set.range
-      val ints = TagMap[java.lang.Integer](set)
-
-      for (i <- range) assert(ints.map(-i) == Some(i))
-
-      assert(ints.sameElements(range.map { i => (i, -i) }))
-
-      ints.unmap(3+range.start)
-      ints.unmap(8+range.start)
-      assert(ints.sameElements(range.collect {
-        case i if i != 3+range.start && i != 8+range.start => (i, -i)
-      }))
-
-      // Works in the presence of sharing the underlying
-      // TagSet.
-      assert(set.acquire() == Some(3+range.start))
-      assert(ints.sameElements(range.collect {
-        case i if i != 3+range.start && i != 8+range.start => (i, -i)
-      }))
-    }
-  }
 }
