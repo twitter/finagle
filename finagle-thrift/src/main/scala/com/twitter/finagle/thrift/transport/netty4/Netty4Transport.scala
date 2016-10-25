@@ -60,7 +60,7 @@ private[finagle] object Netty4Transport {
     // the `Array[Byte]` codecs
     try pipeline.remove(DirectToHeapInboundHandlerName)
     catch { case _: NoSuchElementException =>
-      logger.info("Expected DirectToHeapInboundHandler in the netty4 channel pipeline, " +
+      logger.debug("Expected DirectToHeapInboundHandler in the netty4 channel pipeline, " +
         "but it didn't exist.")
     }
   }
