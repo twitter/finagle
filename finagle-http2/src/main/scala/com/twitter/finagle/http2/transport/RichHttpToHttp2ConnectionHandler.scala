@@ -3,8 +3,8 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
 import com.twitter.logging.Logger
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
-import io.netty.handler.codec.http.{HttpRequest, FullHttpRequest, HttpContent, LastHttpContent, HttpObject}
-import io.netty.handler.codec.http2.{Http2ConnectionDecoder, Http2ConnectionEncoder, Http2Settings, HttpConversionUtil, HttpToHttp2ConnectionHandler}
+import io.netty.handler.codec.http.{HttpRequest, FullHttpRequest, HttpContent, LastHttpContent, HttpObject, DefaultFullHttpResponse, HttpVersion, HttpResponseStatus}
+import io.netty.handler.codec.http2.{Http2ConnectionDecoder, Http2ConnectionEncoder, Http2Settings, HttpConversionUtil, HttpToHttp2ConnectionHandler, Http2Exception}
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
 
@@ -39,6 +39,10 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           val p = ctx.newPromise()
           combiner.add(p)
           encoder.writeHeaders(ctx, streamId, headers, 0, endStream, p)
+          // client can decide if a request is unhealthy immediately
+          if (p.isDone && !p.isSuccess) {
+            throw p.cause
+          }
         case _ => // nop
       }
       msg match {
@@ -53,6 +57,15 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         case _ => // nop
       }
     } catch {
+      case e: Http2Exception =>
+        val status = if (e.getMessage.startsWith("Header list size octets"))
+          HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
+        else HttpResponseStatus.BAD_REQUEST
+        val rep = new DefaultFullHttpResponse(
+          HttpVersion.HTTP_1_1,
+          status
+        )
+        ctx.fireChannelRead(Http2ClientDowngrader.Message(rep, streamId))
       case NonFatal(e) =>
         val p = ctx.newPromise()
         p.setFailure(e)
