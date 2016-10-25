@@ -37,6 +37,9 @@ Breaking API Changes
   * finagle-core: Removed the protected and unused method `read(permit: Permit): Future[Rep]`
     from `SerialClientDispatcher`. ``RB_ID=881978``
 
+  * finagle-core: Removed a gauge, `idle`, from `c.t.f.factory.ServiceFactoryCache`.
+    ``RB_ID=884210``
+
   * finagle-redis: A couple of methods had to be renamed (and return type changed) to
     unblock Netty 4 adoption. ``RB_ID=882622``
 
