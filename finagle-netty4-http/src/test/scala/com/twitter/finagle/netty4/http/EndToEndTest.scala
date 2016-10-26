@@ -12,6 +12,5 @@ class EndToEndTest extends AbstractEndToEndTest {
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.configured(exp.Netty4Impl)
 
-  def featureImplemented(feature: Feature): Boolean =
-    !Set(ClientAbort, TooLongStream, CloseStream)(feature)
+  def featureImplemented(feature: Feature): Boolean = true
 }
