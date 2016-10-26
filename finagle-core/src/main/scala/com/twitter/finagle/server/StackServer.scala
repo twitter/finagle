@@ -62,8 +62,7 @@ object StackServer {
    * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
-    val stk = new StackBuilder[ServiceFactory[Req, Rep]](
-      stack.nilStack[Req, Rep])
+    val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
     // We want to start expiring services as close to their instantiation
     // as possible. By installing `ExpiringService` here, we are guaranteed
