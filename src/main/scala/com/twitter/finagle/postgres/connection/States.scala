@@ -7,7 +7,11 @@ import scala.collection.mutable.ListBuffer
 /*
  * Connection states.
  */
-trait State
+sealed trait State
+
+
+
+case object SimpleQuery extends State
 
 case object RequestingSsl extends State
 
@@ -23,22 +27,23 @@ case class AggregatingAuthData(statuses: Map[String, String], processId: Int, se
 
 case object Connected extends State
 
-case object Parsing extends State
-
-case object Binding extends State
-
-case object SimpleQuery extends State
-
-case object ExecutePreparedStatement extends State
-
 case object Syncing extends State
 
-case object AwaitParamsDescription extends State
+// All of the extended query states - Sync can be issued while in these states
+sealed trait ExtendedQueryState extends State
 
-case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends State
+case object Parsing extends ExtendedQueryState
 
-case class AggregateRowsWithoutFields(buff: ListBuffer[DataRow] = ListBuffer()) extends State
+case object Binding extends ExtendedQueryState
 
-case class AwaitRowDescription(types: IndexedSeq[Int]) extends State
+case object ExecutePreparedStatement extends ExtendedQueryState
 
-case class EmitOnReadyForQuery[R <: PgResponse](emit: R) extends State
+case object AwaitParamsDescription extends ExtendedQueryState
+
+case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends ExtendedQueryState
+
+case class AggregateRowsWithoutFields(buff: ListBuffer[DataRow] = ListBuffer()) extends ExtendedQueryState
+
+case class AwaitRowDescription(types: IndexedSeq[Int]) extends ExtendedQueryState
+
+case class EmitOnReadyForQuery[R <: PgResponse](emit: R) extends ExtendedQueryState

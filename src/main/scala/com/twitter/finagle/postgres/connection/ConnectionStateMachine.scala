@@ -52,6 +52,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (Describe(_, _), Connected) => (None, AwaitParamsDescription)
     case (Execute(_, _), Connected) => (None, ExecutePreparedStatement)
     case (Sync, Connected) => (None, Syncing)
+    case (Sync, state: ExtendedQueryState) => (None, Syncing)
     case (ErrorResponse(details), Connected) => (Some(Error(details)), Connected)
   }
 
