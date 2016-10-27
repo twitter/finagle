@@ -5,7 +5,7 @@ import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.{Packet, TransportImpl}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Monitor}
@@ -15,20 +15,23 @@ import com.twitter.util.{Duration, Monitor}
  * builder methods for constructing a mysql client.
  */
 trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
+
+  def richClientStatsReceiver: StatsReceiver = NullStatsReceiver
+
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest` with the assigned
    * `label`. The `label` is used to scope client stats.
    */
-  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions =
-    mysql.Client(newClient(dest, label))
+  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+    mysql.Client(newClient(dest, label), richClientStatsReceiver)
 
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
    */
-  def newRichClient(dest: String): mysql.Client with mysql.Transactions =
-    mysql.Client(newClient(dest))
+  def newRichClient(dest: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+    mysql.Client(newClient(dest), richClientStatsReceiver)
 }
 
 object MySqlClientTracingFilter {
@@ -181,6 +184,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Request, Result, Request, Result]): Client =
       super.filtered(filter)
+
+    override def richClientStatsReceiver: StatsReceiver = params[Stats].statsReceiver
   }
 
   val client = Client()

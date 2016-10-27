@@ -106,5 +106,19 @@ class ClientTest extends FunSuite with IntegrationClient {
         assert(row("numRecords").get == expectedRes)
       }
     }
+
+    test("cursored statement") {
+      val query = "select * from `finagle-mysql-test` where `event` = ?"
+
+      val cursoredStatement = c.cursor(query)
+
+      val cursorResult = Await.result(cursoredStatement(1, "50 m freestyle")(r => r))
+
+      val rows = Await.result(cursorResult.stream.toSeq())
+
+      assert(rows.size == 1)
+
+      assert(rows(0)("event").get == StringValue("50 m freestyle"))
+    }
   }
 }

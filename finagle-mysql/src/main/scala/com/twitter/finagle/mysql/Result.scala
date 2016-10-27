@@ -2,7 +2,9 @@ package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.io.Buf
-import com.twitter.util.Try
+import com.twitter.util.{Return, Try}
+
+import scala.collection.immutable.IndexedSeq
 
 sealed trait Result
 
@@ -125,11 +127,11 @@ object EOF extends Decoder[EOF] {
   def decode(packet: Packet) = {
     val br = MysqlBuf.reader(packet.body)
     br.skip(1)
-    EOF(br.readShortLE(), br.readShortLE())
+    EOF(br.readShortLE(), ServerStatus(br.readShortLE()))
   }
 }
 
-case class EOF(warnings: Short, serverStatus: Short) extends Result
+case class EOF(warnings: Short, serverStatus: ServerStatus) extends Result
 
 /**
  * Represents the column meta-data associated with a query.
@@ -241,9 +243,13 @@ object ResultSet {
     rowPackets: Seq[Packet]
   ): Try[ResultSet] = Try(decode(isBinaryEncoded)(header, fieldPackets, rowPackets))
 
-  def decode(isBinaryEncoded: Boolean)(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]) = {
+  def decode(isBinaryEncoded: Boolean)(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]): ResultSet = {
     val fields = fieldPackets.map(Field.decode).toIndexedSeq
 
+    decodeRows(isBinaryEncoded, rowPackets, fields)
+  }
+
+  def decodeRows(isBinaryEncoded: Boolean, rowPackets: Seq[Packet], fields: IndexedSeq[Field]): ResultSet = {
     // A name -> index map used to allow quick lookups for rows based on name.
     val indexMap = fields.map(_.id).zipWithIndex.toMap
 
@@ -265,4 +271,26 @@ object ResultSet {
 
 case class ResultSet(fields: Seq[Field], rows: Seq[Row]) extends Result {
   override def toString = s"ResultSet(${fields.size}, ${rows.size})"
+}
+
+object FetchResult {
+  def apply(
+    rowPackets: Seq[Packet],
+    eofPacket: EOF
+  ): Try[FetchResult] = {
+    Try {
+      val containsLastRow: Boolean = eofPacket.serverStatus.has(ServerStatus.LastRowSent)
+      FetchResult(rowPackets, containsLastRow)
+    }
+  }
+
+  def apply(
+    err: Error
+  ): Try[FetchResult] = {
+    Return(FetchResult(Seq(), containsLastRow = true))
+  }
+}
+
+case class FetchResult(rowPackets: Seq[Packet], containsLastRow: Boolean) extends Result {
+  override def toString: String = s"FetchResult(rows=${rowPackets.size}, containsLastRow=$containsLastRow)"
 }
