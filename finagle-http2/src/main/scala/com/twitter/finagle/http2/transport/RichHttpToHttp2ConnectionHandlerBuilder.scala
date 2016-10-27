@@ -60,6 +60,12 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     super.encoderEnforceMaxConcurrentStreams(encoderEnforceMaxConcurrentStreams)
   }
 
+  override def encoderIgnoreMaxHeaderListSize(
+    ignoreMaxHeaderListSize: Boolean
+  ): RichHttpToHttp2ConnectionHandlerBuilder = {
+    super.encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
+  }
+
   override def headerSensitivityDetector(
     headerSensitivityDetector: SensitivityDetector
   ): RichHttpToHttp2ConnectionHandlerBuilder = {
