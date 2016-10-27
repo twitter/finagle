@@ -6,8 +6,10 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.util.{Duration, Future, Promise, Time}
+import java.net.SocketAddress
+import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import java.util.concurrent.locks.StampedLock
 import java.util.logging.{Level, Logger}
 
 /**
@@ -46,8 +48,7 @@ import java.util.logging.{Level, Logger}
  *
  * @param name The identifier for the session, used when logging.
  *
- * @param sr The [[com.twitter.finagle.StatsReceiver]] which the session uses to
- * export internal stats.
+ * @param sr The `StatsReceiver` which the session uses to export internal stats.
  */
 private[twitter] class ClientSession(
     trans: Transport[Message, Message],
@@ -57,13 +58,10 @@ private[twitter] class ClientSession(
   extends Transport[Message, Message] {
   import ClientSession._
 
-  // Maintain the sessions's state, whose access is mediated
-  // by the readLk and writeLk.
+  // Maintain the sessions's state, whose access is mediated by `lock`
   @volatile private[this] var state: State = Dispatching
-  private[this] val (readLk, writeLk) = {
-    val lk = new ReentrantReadWriteLock
-    (lk.readLock, lk.writeLock)
-  }
+
+  private[this] val lock = new StampedLock()
 
   // keeps track of outstanding Rmessages.
   private[this] val outstanding = new AtomicInteger()
@@ -98,7 +96,7 @@ private[twitter] class ClientSession(
         safeLog(s"Started draining a connection to $name", Level.FINE)
       drainingCounter.incr()
 
-      writeLk.lockInterruptibly()
+      val writeStamp = lock.writeLockInterruptibly()
       try {
         state = if (outstanding.get() > 0) Draining else {
           if (log.isLoggable(Level.FINE))
@@ -107,10 +105,10 @@ private[twitter] class ClientSession(
           Drained
         }
         trans.write(Message.Rdrain(tag))
-      } finally writeLk.unlock()
+      } finally lock.unlockWrite(writeStamp)
 
     case Message.Tlease(Message.Tlease.MillisDuration, millis) =>
-      writeLk.lock()
+      val writeStamp = lock.writeLock()
       try state match {
         case Leasing(_) | Dispatching =>
           state = Leasing(Time.now + millis.milliseconds)
@@ -120,7 +118,7 @@ private[twitter] class ClientSession(
         case Draining | Drained =>
           // Ignore the lease if we're closed, since these are anyway
           // a irrecoverable states.
-      } finally writeLk.unlock()
+      } finally lock.unlockWrite(writeStamp)
 
     case Message.Tping(tag) => trans.write(Message.Rping(tag))
 
@@ -139,18 +137,21 @@ private[twitter] class ClientSession(
     // Move the session to `Drained`, effectively closing the session,
     // if we were `Draining` our session.
     case Message.Rmessage(_) =>
-      readLk.lock()
+      val readStamp = lock.readLock()
       if (outstanding.decrementAndGet() == 0 && state == Draining) {
-        readLk.unlock()
-        writeLk.lock()
+        var writeStamp = lock.tryConvertToWriteLock(readStamp)
+        if (writeStamp == 0L) {
+          lock.unlockRead(readStamp)
+          writeStamp = lock.writeLock()
+        }
         try {
           drainedCounter.incr()
           if (log.isLoggable(Level.FINE))
             safeLog(s"Finished draining a connection to $name", Level.FINE)
           state = Drained
-        } finally writeLk.unlock()
+        } finally lock.unlockWrite(writeStamp)
       } else {
-        readLk.unlock()
+        lock.unlockRead(readStamp)
       }
 
     case _ => // do nothing.
@@ -178,11 +179,11 @@ private[twitter] class ClientSession(
    * otherwise return a nack.
    */
   def write(msg: Message): Future[Unit] = {
-    readLk.lock()
+    val readStamp = lock.readLock()
     try state match {
       case Dispatching | Leasing(_) => processAndWrite(msg)
       case Draining | Drained => FutureNackException
-    } finally readLk.unlock()
+    } finally lock.unlockRead(readStamp)
   }
 
   def read(): Future[Message] = trans.read().onSuccess(processRead)
@@ -209,20 +210,20 @@ private[twitter] class ClientSession(
         case Status.Closed => Status.Closed
         case Status.Busy => Status.Busy
         case Status.Open =>
-          readLk.lock()
+          val readStamp = lock.readLock()
           try state match {
             case Draining => Status.Busy
             case Drained => Status.Closed
             case leased@Leasing(_) if leased.expired => Status.Busy
             case Leasing(_) | Dispatching => Status.Open
-          } finally readLk.unlock()
+          } finally lock.unlockRead(readStamp)
       }
     )
 
-  val onClose = trans.onClose
-  def localAddress = trans.localAddress
-  def remoteAddress = trans.remoteAddress
-  def peerCertificate = trans.peerCertificate
+  val onClose: Future[Throwable] = trans.onClose
+  def localAddress: SocketAddress = trans.localAddress
+  def remoteAddress: SocketAddress = trans.remoteAddress
+  def peerCertificate: Option[Certificate] = trans.peerCertificate
 
   def close(deadline: Time): Future[Unit] = {
     leaseGauge.remove()
@@ -231,10 +232,10 @@ private[twitter] class ClientSession(
 }
 
 private object ClientSession {
-  val FutureNackException = Future.exception(
+  val FutureNackException: Future[Nothing] = Future.exception(
     Failure.rejected("The request was Nacked by the server"))
 
-  val FuturePingNack = Future.exception(Failure(
+  val FuturePingNack: Future[Nothing] = Future.exception(Failure(
     "A ping is already outstanding on this session."))
 
   sealed trait State
