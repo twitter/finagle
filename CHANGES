@@ -62,6 +62,11 @@ Bug Fixes
      had a bug when toggled on. That toggle is no longer used and is superseded by
     `com.twitter.finagle.http.serverErrorsAsFailuresV2`. ``RB_ID=882151``
 
+  * finagle-http: To conform to the RFC, a message body is NO LONGER sent when 1xx, 204
+    and 304 responses are returned. Additionally, a Content-Length header field is NOT
+    sent for 1xx and 204 responses. Both rules are enforced even though users intentionally
+    add body data or the header field for these responses.
+
 Deprecations
 ~~~~~~~~~~~~
 

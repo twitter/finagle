@@ -1,9 +1,12 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.http._
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
+import com.twitter.finagle.http.Status._
 import com.twitter.logging.Logger
 import com.twitter.util.Future
+
+import org.jboss.netty.buffer.ChannelBuffers
 
 /**
  * Ensure that the `Response` is a legal response for the request that generated it
@@ -36,11 +39,55 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
   private[this] def validate(req: Request, rep: Response): Unit = {
     if (req.method == Method.Head) {
       handleHeadResponse(req, rep)
+    } else if (mustNotIncludeMessageBody(rep.status)) {
+      handleNoMessageResponse(rep)
     } else if (rep.isChunked) {
       handleChunkedResponse(rep)
     } else {
       handleFullyBufferedResponse(rep)
     }
+  }
+
+  /**
+   * 1. To conform to the RFC, a message body is removed if a status code is either 1xx, 204 or 304.
+   *
+   * RFC7230 section-3.3: (https://tools.ietf.org/html/rfc7230#section-3.3)
+   * "All 1xx (Informational), 204 (No Content), and 304 (Not Modified) responses do not include a message body."
+   *
+   * 2. Additionally, a Content-Length header field is dropped for 1xx and 204 responses as described in RFC7230
+   * section-3.3.2. It, however, is allowed to send a Content-Length header field in a 304 response. To follow
+   * the section, we don't remove the header field from a 304 response but its value is not checked nor corrected.
+   *
+   * RFC7230 section-3.3.2: (https://tools.ietf.org/html/rfc7230#section-3.3.2)
+   * "A server MUST NOT send a Content-Length header field in any response with a status code of 1xx (Informational)
+   * or 204 (No Content)."
+   *
+   * "A server MAY send a Content-Length header field in a 304 (Not Modified) response to a conditional GET request
+   * (Section 4.1 of [RFC7232]); a server MUST NOT send Content-Length in such a response unless its field-value equals
+   * the decimal number of octets that would have been sent in the payload body of a 200 (OK) response to the same
+   * request."
+   */
+  private[this] def handleNoMessageResponse(rep: Response): Unit = {
+      if (rep.getContent() != ChannelBuffers.EMPTY_BUFFER) {
+        rep.clearContent()
+        logger.error(
+          "Response with a status code of %d must not have a body-message thus the content has been removed.",
+          rep.statusCode)
+      }
+
+      rep.status match {
+        case Continue | SwitchingProtocols | Processing | NoContent if rep.contentLength.isDefined =>
+          rep.headerMap.remove(Fields.ContentLength)
+          logger.error(
+            "Response with a status code of %d must not have a Content-Length header field thus the field has been removed.",
+            rep.statusCode)
+        case _ =>
+      }
+  }
+
+  private def mustNotIncludeMessageBody(status: Status): Boolean = status match {
+    case Continue | SwitchingProtocols | Processing | NoContent | NotModified => true
+    case _ => false
   }
 
   private[this] def handleFullyBufferedResponse(rep: Response): Unit = {
