@@ -1,7 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.storage._
-import com.twitter.finagle.Http.param.HttpImpl
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
@@ -9,10 +7,12 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{
+  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport
+}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.{ResponseClassifier => ResponseClassifierParam, ExceptionStatsHandler => _, Monitor => _, Tracer => _, _}
+import com.twitter.finagle.param.{Tracer => _, _}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -46,94 +46,32 @@ trait HttpRichClient { self: Client[Request, Response] =>
 object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
-  object param {
-    /**
-     * configure alternative http 1.1 implementations
-     *
-     * @param clientTransport client [[StreamTransport]] factory
-     * @param serverTransport server [[StreamTransport]] factory
-     * @param transporter [[Transporter]] factory
-     * @param listener [[Listener]] factory
-     */
-    case class HttpImpl(
-      clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
-      serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-      transporter: Stack.Params => Transporter[Any, Any],
-      listener: Stack.Params => Listener[Any, Any]) {
-
-      def mk(): (HttpImpl, Stack.Param[HttpImpl]) =
-        (this, HttpImpl)
-    }
-
-    implicit object HttpImpl extends Stack.Param[HttpImpl] {
-      val default = Netty3Impl
-    }
-
-    private[finagle] val Netty3Impl: HttpImpl = HttpImpl(
-      new Netty3ClientStreamTransport(_),
-      new Netty3ServerStreamTransport(_),
-      Netty3HttpTransporter,
-      Netty3HttpListener
-    )
-
-    /**
-     * when streaming, the maximum size of http chunks.
-     */
-    case class MaxChunkSize(size: StorageUnit)
-    implicit object MaxChunkSize extends Stack.Param[MaxChunkSize] {
-      val default = MaxChunkSize(8.kilobytes)
-    }
-
-    /**
-     * the maximum size of all headers.
-     */
-    case class MaxHeaderSize(size: StorageUnit)
-    implicit object MaxHeaderSize extends Stack.Param[MaxHeaderSize] {
-      val default = MaxHeaderSize(8.kilobytes)
-    }
-
-    /**
-     * the maximum size of the initial line.
-     */
-    case class MaxInitialLineSize(size: StorageUnit)
-    implicit object MaxInitialLineSize extends Stack.Param[MaxInitialLineSize] {
-      val default = MaxInitialLineSize(4.kilobytes)
-    }
-
-    case class MaxRequestSize(size: StorageUnit) {
-      require(size < 2.gigabytes,
-        s"MaxRequestSize should be less than 2 Gb, but was $size")
-    }
-    implicit object MaxRequestSize extends Stack.Param[MaxRequestSize] {
-      val default = MaxRequestSize(5.megabytes)
-    }
-
-    case class MaxResponseSize(size: StorageUnit) {
-      require(size < 2.gigabytes,
-        s"MaxResponseSize should be less than 2 Gb, but was $size")
-    }
-    implicit object MaxResponseSize extends Stack.Param[MaxResponseSize] {
-      val default = MaxResponseSize(5.megabytes)
-    }
-
-    case class Streaming(enabled: Boolean)
-    implicit object Streaming extends Stack.Param[Streaming] {
-      val default = Streaming(false)
-    }
-
-    case class Decompression(enabled: Boolean)
-    implicit object Decompression extends Stack.Param[Decompression] {
-      val default = Decompression(enabled = true)
-    }
-
-    case class CompressionLevel(level: Int)
-    implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
-      val default = CompressionLevel(-1)
-    }
-
+  /**
+   * configure alternative http 1.1 implementations
+   *
+   * @param clientTransport client [[StreamTransport]] factory
+   * @param serverTransport server [[StreamTransport]] factory
+   * @param transporter [[Transporter]] factory
+   * @param listener [[Listener]] factory
+   */
+  case class HttpImpl(
+    clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
+    serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
+    transporter: Stack.Params => Transporter[Any, Any],
+    listener: Stack.Params => Listener[Any, Any]) {
+  }
+  object HttpImpl {
+    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty3Impl)
   }
 
-  private val protocolLibrary = ProtocolLibrary("http")
+  private[finagle] val Netty3Impl: HttpImpl = HttpImpl(
+    new Netty3ClientStreamTransport(_),
+    new Netty3ServerStreamTransport(_),
+    Netty3HttpTransporter,
+    Netty3HttpListener
+  )
+
+  private val protocolLibrary = param.ProtocolLibrary("http")
 
   /** exposed for testing */
   private[finagle] val ServerErrorsAsFailuresToggleId =
@@ -146,7 +84,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
 
   /** exposed for testing */
-  private[finagle] val responseClassifierParam: ResponseClassifierParam = {
+  private[finagle] val responseClassifierParam: param.ResponseClassifier= {
     def filtered[A, B](
       predicate: () => Boolean,
       pf: PartialFunction[A, B]
@@ -163,18 +101,18 @@ object Http extends Client[Request, Response] with HttpRichClient
       srvErrsAsFailures.orElse(ResponseClassifier.Default)
     }
 
-    ResponseClassifierParam(rc)
+    param.ResponseClassifier(rc)
   }
 
   // Only record payload sizes when streaming is disabled.
   private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
-    new Stack.Module2[param.Streaming, Stats, ServiceFactory[Request, Response]] {
+    new Stack.Module2[http.param.Streaming, param.Stats, ServiceFactory[Request, Response]] {
       override def role: Stack.Role = PayloadSizeFilter.Role
       override def description: String = PayloadSizeFilter.Description
 
       override def make(
-        streaming: param.Streaming,
-        stats: Stats,
+        streaming: http.param.Streaming,
+        stats: param.Stats,
         next: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] = {
         if (!streaming.enabled)
@@ -217,7 +155,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       new HttpTransport(params[HttpImpl].clientTransport(transport))
 
     protected def newTransporter(): Transporter[Any, Any] = {
-      params[param.HttpImpl].transporter(params)
+      params[HttpImpl].transporter(params)
     }
 
     protected def copy1(
@@ -228,7 +166,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
       new HttpClientDispatcher(
         newStreamTransport(transport),
-        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
@@ -240,26 +178,26 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
 
     def withMaxHeaderSize(size: StorageUnit): Client =
-      configured(param.MaxHeaderSize(size))
+      configured(http.param.MaxHeaderSize(size))
 
     /**
      * Configures the maximum initial line length the client can
      * receive from a server.
      */
     def withMaxInitialLineSize(size: StorageUnit): Client =
-      configured(param.MaxInitialLineSize(size))
+      configured(http.param.MaxInitialLineSize(size))
 
     /**
      * Configures the maximum request size that the client can send.
      */
     def withMaxRequestSize(size: StorageUnit): Client =
-      configured(param.MaxRequestSize(size))
+      configured(http.param.MaxRequestSize(size))
 
     /**
      * Configures the maximum response size that client can receive.
      */
     def withMaxResponseSize(size: StorageUnit): Client =
-      configured(param.MaxResponseSize(size))
+      configured(http.param.MaxResponseSize(size))
 
     /**
      * Streaming allows applications to work with HTTP messages that have large
@@ -269,13 +207,13 @@ object Http extends Client[Request, Response] with HttpRichClient
      * into a [[com.twitter.io.Buf]].
      */
     def withStreaming(enabled: Boolean): Client =
-      configured(param.Streaming(enabled))
+      configured(http.param.Streaming(enabled))
 
     /**
      * Enables decompression of http content bodies.
      */
     def withDecompression(enabled: Boolean): Client =
-      configured(param.Decompression(enabled))
+      configured(http.param.Decompression(enabled))
 
     /**
      * The compression level to use. If passed the default value (-1) then it will use
@@ -286,7 +224,7 @@ object Http extends Client[Request, Response] with HttpRichClient
      */
 
     def withCompressionLevel(level: Int): Client =
-      configured(param.CompressionLevel(level))
+      configured(http.param.CompressionLevel(level))
 
 
     /**
@@ -360,7 +298,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type Out = Any
 
     protected def newListener(): Listener[Any, Any] = {
-      params[param.HttpImpl].listener(params)
+      params[HttpImpl].listener(params)
     }
 
     protected def newStreamTransport(
@@ -391,13 +329,13 @@ object Http extends Client[Request, Response] with HttpRichClient
      * Configures the maximum request size this server can receive.
      */
     def withMaxRequestSize(size: StorageUnit): Server =
-      configured(param.MaxRequestSize(size))
+      configured(http.param.MaxRequestSize(size))
 
     /**
      * Configures the maximum response size this server can send.
      */
     def withMaxResponseSize(size: StorageUnit): Server =
-      configured(param.MaxResponseSize(size))
+      configured(http.param.MaxResponseSize(size))
 
     /**
      * Streaming allows applications to work with HTTP messages that have large
@@ -407,13 +345,13 @@ object Http extends Client[Request, Response] with HttpRichClient
      * into a [[com.twitter.io.Buf]].
      */
     def withStreaming(enabled: Boolean): Server =
-      configured(param.Streaming(enabled))
+      configured(http.param.Streaming(enabled))
 
     /**
      * Enables decompression of http content bodies.
      */
     def withDecompression(enabled: Boolean): Server =
-      configured(param.Decompression(enabled))
+      configured(http.param.Decompression(enabled))
 
     /**
      * The compression level to use. If passed the default value (-1) then it will use
@@ -423,14 +361,14 @@ object Http extends Client[Request, Response] with HttpRichClient
      * for all content-types with specified compression level.
      */
     def withCompressionLevel(level: Int): Server =
-      configured(param.CompressionLevel(level))
+      configured(http.param.CompressionLevel(level))
 
     /**
      * Configures the maximum initial http line length the server is
      * willing to accept.
      */
     def withMaxInitialLineSize(size: StorageUnit): Server =
-      configured(param.MaxInitialLineSize(size))
+      configured(http.param.MaxInitialLineSize(size))
 
     /**
      * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].

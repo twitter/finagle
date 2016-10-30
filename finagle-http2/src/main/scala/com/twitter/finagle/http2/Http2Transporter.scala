@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.Http.{param => httpparam}
+import com.twitter.finagle.http
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
@@ -98,7 +98,7 @@ private[http2] object Http2Transporter {
     { pipeline: ChannelPipeline =>
       val connection = new DefaultHttp2Connection(false /*server*/)
 
-      val maxResponseSize = params[httpparam.MaxResponseSize].size
+      val maxResponseSize = params[http.param.MaxResponseSize].size
 
       // decompresses data frames according to the content-encoding header
       val adapter = new DelegatingDecompressorFrameListener(
@@ -126,9 +126,9 @@ private[http2] object Http2Transporter {
           initClient(params)(pipeline)
         }))
       } else {
-        val maxChunkSize = params[httpparam.MaxChunkSize].size
-        val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-        val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
+        val maxChunkSize = params[http.param.MaxChunkSize].size
+        val maxHeaderSize = params[http.param.MaxHeaderSize].size
+        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
 
         val sourceCodec = new HttpClientCodec(
           maxInitialLineSize.inBytes.toInt,

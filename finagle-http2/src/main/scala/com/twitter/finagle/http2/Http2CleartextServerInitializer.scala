@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.Http.{param => httpparam}
+import com.twitter.finagle.http
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.logging.Logger
@@ -45,7 +45,7 @@ private[http2] class Http2CleartextServerInitializer(
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()
-    val maxRequestSize = params[httpparam.MaxRequestSize].size
+    val maxRequestSize = params[http.param.MaxRequestSize].size
     val httpCodec = p.get(HttpCodecName) match {
       case codec: SourceCodec => codec
       case other => // This is very unexpected. Abort and log very loudly

@@ -19,7 +19,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
   sealed trait Feature
   object ServerDisconnect extends Feature
 
-  def impl: FinagleHttp.param.HttpImpl
+  def impl: FinagleHttp.HttpImpl
   def featureImplemented(feature: Feature): Boolean
   def testIfImplemented(feature: Feature)(name: String)(testFn: => Unit): Unit = {
     if (!featureImplemented(feature)) ignore(name)(testFn) else test(name)(testFn)

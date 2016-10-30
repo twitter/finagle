@@ -1,18 +1,21 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
+import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{NonFatal, Closable, StorageUnit, Try}
+import com.twitter.util.{Closable, NonFatal, StorageUnit, Try}
 import java.net.InetSocketAddress
-import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
+import org.jboss.netty.channel.{
+  Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent
+}
 import org.jboss.netty.handler.codec.http._
 
 private[finagle] case class BadHttpRequest(
@@ -251,7 +254,7 @@ case class Http(
               .andThen(new DtabFilter.Injector)
               .andThenIf(!_streaming ->
                 new PayloadSizeFilter[Request, Response](
-                  params[param.Stats].statsReceiver, _.content.length, _.content.length
+                  params[finagle.param.Stats].statsReceiver, _.content.length, _.content.length
                 )
               )
 
@@ -264,7 +267,7 @@ case class Http(
       override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
         new HttpClientDispatcher(
           new HttpTransport(new Netty3ClientStreamTransport(transport)),
-          params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+          params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
         )
 
       override def newTraceInitializer =
@@ -330,7 +333,7 @@ case class Http(
         underlying: ServiceFactory[Request, Response],
         params: Stack.Params
       ): ServiceFactory[Request, Response] = {
-        val param.Stats(stats) = params[param.Stats]
+        val finagle.param.Stats(stats) = params[finagle.param.Stats]
         new HttpNackFilter(stats)
           .andThen(new DtabFilter.Extractor)
           .andThen(new ServerContextFilter[Request, Response])
@@ -465,34 +468,34 @@ private object TraceInfo {
 }
 
 private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]
-  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+  extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Initialize the tracing system with trace info from the incoming request"
 
-  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
-    val param.Tracer(tracer) = _tracer
+  def make(_tracer: finagle.param.Tracer, next: ServiceFactory[Req, Rep]) = {
+    val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracer(tracer) {
         TraceInfo.letTraceIdFromRequestHeaders(req) { svc(req) }
       }
     }
-    traceInitializer andThen next
+    traceInitializer.andThen(next)
   }
 }
 
 private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
-  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+  extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
   val role = TraceInitializerFilter.role
   val description = "Sets the next TraceId and attaches trace information to the outgoing request"
-  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
-    val param.Tracer(tracer) = _tracer
+  def make(_tracer: finagle.param.Tracer, next: ServiceFactory[Req, Rep]) = {
+    val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracerAndNextId(tracer) {
         TraceInfo.setClientRequestHeaders(req)
         svc(req)
       }
     }
-    traceInitializer andThen next
+    traceInitializer.andThen(next)
   }
 }
 

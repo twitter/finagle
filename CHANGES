@@ -51,6 +51,10 @@ Breaking API Changes
     - Both `Command.key` and `Command.value` now implemented in terms of `Buf`s
       (no `ChannelBuffer`s).
 
+  * finagle-http: As part of the first step towards restructuring Finagle HTTP modules
+    required for Netty 4 adoption, HTTP params are moved from the inner object `c.t.f.Http.param`
+    into their own package `c.t.f.http.param`.  ``RB_ID=885155``
+
   * finagle-thriftmux: Removed deprecated classes `ThriftMuxClient`, `ThriftMuxClientLike`,
     `ThriftMuxServer`, and `ThriftMuxServerLike`. ``RB_ID=880924``
 

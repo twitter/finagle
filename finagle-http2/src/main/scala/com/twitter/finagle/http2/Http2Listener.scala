@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.Http.{param => httpparam}
+import com.twitter.finagle.http
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.netty4.Netty4Listener
@@ -44,9 +44,9 @@ private[http2] object Http2Listener {
 
 
   private[this] def sourceCodec(params: Stack.Params) = {
-    val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
-    val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-    val maxRequestSize = params[httpparam.MaxRequestSize].size
+    val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
+    val maxHeaderSize = params[http.param.MaxHeaderSize].size
+    val maxRequestSize = params[http.param.MaxRequestSize].size
 
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,

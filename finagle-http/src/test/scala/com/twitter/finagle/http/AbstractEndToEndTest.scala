@@ -718,7 +718,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     val server = serverImpl()
-      .configured(param.Stats(NullStatsReceiver))
+      .withStatsReceiver(NullStatsReceiver)
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
