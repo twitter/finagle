@@ -201,7 +201,7 @@ class HttpNackFilterTest extends FunSuite {
     }
   }
 
-  test("HttpNackFilter returns a body when rejecting a request that isnt a HEAD request") {
+  test("HttpNackFilter returns a body when rejecting a request that isn't a HEAD request") {
     val stats = new NullStatsReceiver
     val service = new HttpNackFilter(stats) andThen Service.mk { _: Request => Future.exception(Failure.rejected("sadface")) }
 
