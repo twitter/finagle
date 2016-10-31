@@ -25,7 +25,8 @@ class ClientFailUpgradeTest extends AbstractHttp1EndToEndTest {
     TooLongStream,
     Streaming,
     CloseStream,
-    StreamFixed
+    StreamFixed,
+    NoBodyMessage
   )
 
   def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)

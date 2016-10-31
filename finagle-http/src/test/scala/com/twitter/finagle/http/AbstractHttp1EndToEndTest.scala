@@ -5,9 +5,6 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.io.Reader.ReaderDiscarded
 import com.twitter.util.{Future, Promise, Return, Throw}
-
-import org.jboss.netty.buffer.ChannelBuffers
-
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -152,128 +149,6 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     assert(await(expectP) == false)
     await(client.close())
     await(server.close())
-  }
-
-  test("response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field") {
-    def check(resStatus: Status): Unit = {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response(Version.Http11, resStatus)
-
-          Future.value(response)
-        }
-      }
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      val res = await(client(Request(Method.Get, "/")))
-      assert(res.status == resStatus)
-      assert(!res.httpMessage.isChunked)
-      assert(res.httpMessage.getContent == ChannelBuffers.EMPTY_BUFFER)
-      assert(res.contentLength.isEmpty)
-      await(client.close())
-      await(server.close())
-    }
-
-    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
-      check(_)
-    }
-  }
-
-  test("response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field when non-empty body is returned") {
-    def check(resStatus: Status): Unit = {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val body = Buf.Utf8("some data")
-          val response = Response(Version.Http11, resStatus)
-          response.content = body
-
-          Future.value(response)
-        }
-      }
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      val res = await(client(Request(Method.Get, "/")))
-      assert(res.status == resStatus)
-      assert(!res.httpMessage.isChunked)
-      assert(res.httpMessage.getContent == ChannelBuffers.EMPTY_BUFFER)
-      assert(res.contentLength.isEmpty)
-      await(client.close())
-      await(server.close())
-    }
-
-    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
-      check(_)
-    }
-  }
-
-  test("response with status code {1xx and 204} must not have a message body nor Content-Length header field when non-empty body with explicit Content-Length is returned") {
-    def check(resStatus: Status): Unit = {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val body = Buf.Utf8("some data")
-          val response = Response(Version.Http11, resStatus)
-          response.content = body
-          response.headerMap.set(Fields.ContentLength, body.length.toString)
-
-          Future.value(response)
-        }
-      }
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      val res = await(client(Request(Method.Get, "/")))
-      assert(res.status == resStatus)
-      assert(!res.httpMessage.isChunked)
-      assert(res.httpMessage.getContent == ChannelBuffers.EMPTY_BUFFER)
-      assert(res.contentLength.isEmpty)
-      await(client.close())
-      await(server.close())
-    }
-
-    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent).foreach {
-      check(_)
-    }
-  }
-
-  test("response with status code 304 must not have a message body *BUT* Content-Length header field when non-empty body with explicit Content-Length is returned") {
-    val body = Buf.Utf8("some data")
-    val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response(Version.Http11, Status.NotModified)
-          response.content = body
-          response.headerMap.set(Fields.ContentLength, body.length.toString)
-
-          Future.value(response)
-        }
-      }
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      val res = await(client(Request(Method.Get, "/")))
-      assert(res.status == Status.NotModified)
-      assert(!res.httpMessage.isChunked)
-      assert(res.httpMessage.getContent == ChannelBuffers.EMPTY_BUFFER)
-      assert(res.contentLength.contains(body.length.toLong))
-      await(client.close())
-      await(server.close())
   }
 
   // HEAD related tests
