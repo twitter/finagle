@@ -78,6 +78,12 @@ private[twitter] object Message {
     def setMsb(tag: Int): Int = tag | TagMSB
   }
 
+  private object ReplyStatus {
+    val Ok: Byte = 0
+    val Error: Byte = 1
+    val Nack: Byte = 2
+  }
+
   private def mkByte(b: Byte) = Buf.ByteArray.Owned(Array(b))
 
   private val bufOfChar = Array[Buf](mkByte(0), mkByte(1), mkByte(2))
@@ -202,9 +208,9 @@ private[twitter] object Message {
     lazy val buf: Buf = bufOfChar(rreqType).concat(body)
   }
 
-  case class RreqOk(tag: Int, reply: Buf) extends Rreq(0, reply)
-  case class RreqError(tag: Int, error: String) extends Rreq(1, encodeString(error))
-  case class RreqNack(tag: Int) extends Rreq(2, Buf.Empty)
+  case class RreqOk(tag: Int, reply: Buf) extends Rreq(ReplyStatus.Ok, reply)
+  case class RreqError(tag: Int, error: String) extends Rreq(ReplyStatus.Error, encodeString(error))
+  case class RreqNack(tag: Int) extends Rreq(ReplyStatus.Nack, Buf.Empty)
 
   private[this] val noBytes = Array.empty[Byte]
 
@@ -318,18 +324,18 @@ private[twitter] object Message {
       tag: Int,
       contexts: Seq[(Buf, Buf)],
       reply: Buf)
-    extends Rdispatch(0, contexts, reply)
+    extends Rdispatch(ReplyStatus.Ok, contexts, reply)
 
   case class RdispatchError(
       tag: Int,
       contexts: Seq[(Buf, Buf)],
       error: String)
-    extends Rdispatch(1, contexts, encodeString(error))
+    extends Rdispatch(ReplyStatus.Error, contexts, encodeString(error))
 
   case class RdispatchNack(
       tag: Int,
       contexts: Seq[(Buf, Buf)])
-    extends Rdispatch(2, contexts, Buf.Empty)
+    extends Rdispatch(ReplyStatus.Nack, contexts, Buf.Empty)
 
   /**
    * A fragment, as defined by the mux spec, is a message with its tag MSB
@@ -554,9 +560,9 @@ private[twitter] object Message {
     val contexts = decodeContexts(br)
     val rest = br.readAll()
     status match {
-      case 0 => RdispatchOk(tag, contexts, rest)
-      case 1 => RdispatchError(tag, contexts, decodeUtf8(rest))
-      case 2 => RdispatchNack(tag, contexts)
+      case ReplyStatus.Ok => RdispatchOk(tag, contexts, rest)
+      case ReplyStatus.Error => RdispatchError(tag, contexts, decodeUtf8(rest))
+      case ReplyStatus.Nack => RdispatchNack(tag, contexts)
       case _ => throwBadMessageException("invalid Rdispatch status")
     }
   }
@@ -568,9 +574,9 @@ private[twitter] object Message {
     val status = br.readByte()
     val rest = br.readAll()
     status match {
-      case 0 => RreqOk(tag, rest)
-      case 1 => RreqError(tag, decodeUtf8(rest))
-      case 2 => RreqNack(tag)
+      case ReplyStatus.Ok => RreqOk(tag, rest)
+      case ReplyStatus.Error => RreqError(tag, decodeUtf8(rest))
+      case ReplyStatus.Nack => RreqNack(tag)
       case _ => throwBadMessageException("invalid Rreq status")
     }
   }

@@ -25,13 +25,13 @@ private class ClientSessionTest extends FunSuite {
     val session = new ClientSession(transport, FailureDetector.NullConfig, "test", stats)
 
     def send(msg: Message) = {
-      Await.result(session.write(msg))
-      Await.result(clientToServer.poll())
+      Await.result(session.write(msg), 10.seconds)
+      Await.result(clientToServer.poll(), 10.seconds)
     }
 
     def recv(msg: Message) = {
       serverToClient.offer(msg)
-      Await.result(session.read())
+      Await.result(session.read(), 10.seconds)
     }
   }
 
@@ -67,7 +67,7 @@ private class ClientSessionTest extends FunSuite {
 
       val tag = 5
       recv(Message.Tdrain(tag))
-      assert(Await.result(clientToServer.poll()) == Message.Rdrain(tag))
+      assert(Await.result(clientToServer.poll(), 10.seconds) == Message.Rdrain(tag))
       assert(session.status == Status.Busy)
 
       session.write(req).poll match {

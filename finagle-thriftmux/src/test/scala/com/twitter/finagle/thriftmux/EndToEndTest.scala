@@ -1005,8 +1005,10 @@ class EndToEndTest extends FunSuite
     }
 
     val failures = Seq(
-      Failure.rejected("Rejection!")
-      // TODO(jparker) Add other Failure flags after Mux supports them
+      Failure("Rejected", Failure.Rejected),
+      Failure("Restartable", Failure.Restartable),
+      Failure("NonRetryable", Failure.NonRetryable),
+      Failure.rejected("Rejected/Retryable")
     )
     failures.foreach(check _)
     await(server.close())

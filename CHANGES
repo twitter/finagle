@@ -27,6 +27,12 @@ Runtime Behavior Changes
     - `RootMonitor` is still used to handle fatal exceptions from pending side-effect-only
       closures (i.e., `onFailure`, `onSuccess`) on a service future/promise.
 
+  * finagle-mux: `com.twitter.finagle.Failures` are now sent over the wire with
+    their flags intact via `com.twitter.finagle.mux.transport.MuxFailure` in the
+    previously unused Rdispatch context. This allows for greater signaling along
+    a chain of services. See the "MuxFailure Flags" section of the mux protocol
+    spec in finagle-mux/src/main/scala/c/t/f/mux/package.scala ``RB_ID=882431``
+
   * finagle-stats: Changed the default behavior of empty histograms to only export
     the count. Thus the `com.twitter.finagle.stats.exportEmptyHistograms` toggle
     now defaults to `0.0`. ``RB_ID=882522``

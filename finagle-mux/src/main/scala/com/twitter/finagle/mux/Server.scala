@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
-import com.twitter.finagle.mux.transport.Message
+import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
@@ -397,11 +397,17 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
         case Return(rep) =>
           Future.value(RdispatchOk(tdispatch.tag, Nil, rep.body))
 
+        // Previously, all Restartable failures were sent as RdispatchNack
+        // messages. In order to keep backwards compatibility with clients that
+        // do not look for MuxFailures, this behavior is left alone. additional
+        // MuxFailure flags are still sent.
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RdispatchNack(tdispatch.tag, Nil))
+          val mFail = MuxFailure.fromThrow(f)
+          Future.value(RdispatchNack(tdispatch.tag, mFail.contexts))
 
         case Throw(exc) =>
-          Future.value(RdispatchError(tdispatch.tag, Nil, exc.toString))
+          val mFail = MuxFailure.fromThrow(exc)
+          Future.value(RdispatchError(tdispatch.tag, mFail.contexts, exc.toString))
       }
     }
   }

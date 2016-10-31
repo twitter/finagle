@@ -168,6 +168,37 @@ abstract class AbstractEndToEndTest extends FunSuite
     Await.result(client.close(), 30.seconds)
   }
 
+  test(s"$implName: propagate c.t.f.Failures") {
+    var respondWith: Failure = null
+    val service = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        Future.exception(respondWith)
+      }
+    }
+
+    val server = Mux.serve("localhost:*", service)
+    val address = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val client = Mux.client.transformed(_.remove(Failure.role)) // Masks most failures
+        .newService(address, "client")
+
+    def check(f: Failure): Unit = {
+      respondWith = f
+      Await.result(client(Request.empty).liftToTry, 5.seconds) match {
+        case Throw(rep: Failure) =>
+          assert(rep.isFlagged(f.flags))
+        case x =>
+          fail(s"Expected Failure, got $x")
+      }
+    }
+
+    check(Failure("Nah", Failure.Rejected))
+    check(Failure("Nope", Failure.NonRetryable))
+    check(Failure("", Failure.Restartable))
+
+    Await.result(server.close(), 30.seconds)
+    Await.result(client.close(), 30.seconds)
+  }
+
   test(s"$implName: gracefully reject sessions") {
     val factory = new ServiceFactory[Request, Response] {
       def apply(conn: ClientConnection): Future[Service[Request, Response]] =
@@ -180,7 +211,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     val client = Mux.client.configured(clientImpl).newService(server)
 
     // This will try until it exhausts its budget. That's o.k.
-    val failure = intercept[Failure] { Await.result(client(Request.empty)) }
+    val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
 
     // Failure.Restartable is stripped.
     assert(!failure.isFlagged(Failure.Restartable))

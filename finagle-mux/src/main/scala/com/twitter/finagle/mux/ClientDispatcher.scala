@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux.transport.Message
+import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.finagle.mux.util.{TagMap, TagSet}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
@@ -146,10 +146,22 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
       case Return(Message.RdispatchOk(_, _, rep)) =>
         Future.value(Response(rep))
 
-     case Return(Message.RdispatchError(_, _, error)) =>
-        Future.exception(ServerApplicationError(error))
+      case Return(Message.RdispatchError(_, contexts, error)) =>
+        val appError = ServerApplicationError(error)
+        val exn = MuxFailure.fromContexts(contexts) match {
+          case Some(f) => Failure(appError, f.finagleFlags)
+          case None => appError
+        }
+        Future.exception(exn)
 
-      case Return(Message.RreqNack(_)) | Return(Message.RdispatchNack(_, _))  =>
+      case Return(Message.RdispatchNack(_, contexts)) =>
+        val exn = MuxFailure.fromContexts(contexts) match {
+          case Some(f) => Failure(NackedException.why, f.finagleFlags)
+          case None => NackedException
+        }
+        Future.exception(exn)
+
+      case Return(Message.RreqNack(_)) =>
         FutureNackedException
 
       case t@Throw(_) => Future.const(t.cast[Response])
@@ -188,8 +200,8 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
 }
 
 private object ReqRepFilter {
-  val FutureNackedException = Future.exception(
-    Failure.rejected("The request was Nacked by the server"))
+  val NackedException = Failure.rejected("The request was Nacked by the server")
+  val FutureNackedException = Future.exception(NackedException)
 
   /** Indicates if our peer can accept `Tdispatch` messages. */
   object CanDispatch extends Enumeration {
