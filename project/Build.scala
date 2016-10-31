@@ -22,7 +22,7 @@ object Finagle extends Build {
   val netty4Version = "4.1.6.Final"
 
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
-  val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.0"
+  val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.3"
   val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
