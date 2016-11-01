@@ -18,7 +18,8 @@ object Finagle extends Build {
   val ostrichVersion = "9.22.0" + suffix
   val scroogeVersion = "4.11.0" + suffix
 
-  val libthriftVersion = "0.5.0-1"
+  val libthriftVersion = "0.5.0-7"
+
   val netty4Version = "4.1.6.Final"
 
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
@@ -41,7 +42,7 @@ object Finagle extends Build {
     guavaLib
   )
   val thriftLibs = Seq(
-    "org.apache.thrift" % "libthrift" % libthriftVersion intransitive(),
+    "com.twitter" % "libthrift" % libthriftVersion intransitive(),
     "org.slf4j" % "slf4j-api" % "1.7.7" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
@@ -133,7 +134,7 @@ object Finagle extends Build {
     // Prevent eviction warnings
     dependencyOverrides <++= scalaVersion { vsn =>
       Set(
-        "org.apache.thrift" % "libthrift" % libthriftVersion
+        "com.twitter" % "libthrift" % libthriftVersion
       )
     },
 
@@ -209,8 +210,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-integration",
-    libraryDependencies ++= Seq(util("core")) ++ scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
   ).dependsOn(
     finagleCore,
     finagleHttp,
@@ -326,8 +326,7 @@ object Finagle extends Build {
       util("codec"),
       util("events"),
       util("core"),
-      util("stats")) ++ scroogeLibs ++ jacksonLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+      util("stats")) ++ scroogeLibs ++ jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleZipkin = Project(
@@ -337,8 +336,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
   lazy val finagleException = Project(
@@ -351,8 +349,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec")
     ) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleCommonsStats = Project(
@@ -389,7 +386,7 @@ object Finagle extends Build {
         ExclusionRule("com.twitter", "util-core-java"),
         ExclusionRule("com.twitter", "util-core_2.11"),
         ExclusionRule("com.twitter.common", "service-thrift"),
-        ExclusionRule("org.apache.thrift", "libthrift"),
+        ExclusionRule("com.twitter", "libthrift"),
         ExclusionRule("org.apache.zookeeper", "zookeeper"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
@@ -488,8 +485,7 @@ object Finagle extends Build {
     libraryDependencies ++=
       Seq(
         "silly" % "silly-thrift" % "0.5.0" % "test",
-        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
   lazy val finagleMemcached = Project(
@@ -515,7 +511,7 @@ object Finagle extends Build {
         ExclusionRule("com.twitter", "twitter-server_2.11"),
         ExclusionRule("com.twitter.common", "metrics"),
         ExclusionRule("com.twitter.common", "service-thrift"),
-        ExclusionRule("org.apache.thrift", "libthrift"),
+        ExclusionRule("com.twitter", "libthrift"),
         ExclusionRule("org.apache.zookeeper", "zookeeper"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-server"),
@@ -532,8 +528,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-kestrel",
-    libraryDependencies ++= scroogeLibs :+ caffeineLib,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= scroogeLibs :+ caffeineLib
   ).dependsOn(finagleCore, finagleMemcached, finagleNetty4, finagleThrift, finagleToggle)
 
   lazy val finagleRedis = Project(
@@ -579,8 +574,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("core"),
       util("logging"),
-      util("stats")) ++ scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+      util("stats")) ++ scroogeLibs
   ).dependsOn(finagleCore, finagleMux, finagleThrift)
 
   lazy val finagleMySQL = Project(
@@ -625,8 +619,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"),
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
-    ) ++ scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    ) ++ scroogeLibs
   ).dependsOn(
     finagleCore,
     finagleHttp,
@@ -644,8 +637,7 @@ object Finagle extends Build {
     settings = Defaults.coreDefaultSettings ++
       sharedSettings
   ).settings(
-    libraryDependencies ++= scroogeLibs,
-    resolvers += "twitter-repo" at "https://maven.twttr.com"
+    libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleThrift)
 
   lazy val finagleBenchmark = Project(
