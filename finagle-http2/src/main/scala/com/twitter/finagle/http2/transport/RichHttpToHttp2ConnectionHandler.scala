@@ -4,7 +4,7 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
 import com.twitter.logging.Logger
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http.{HttpRequest, FullHttpRequest, HttpContent, LastHttpContent, HttpObject, DefaultFullHttpResponse, HttpVersion, HttpResponseStatus}
-import io.netty.handler.codec.http2.{Http2ConnectionDecoder, Http2ConnectionEncoder, Http2Settings, HttpConversionUtil, HttpToHttp2ConnectionHandler, Http2Exception}
+import io.netty.handler.codec.http2._
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
 
@@ -38,7 +38,17 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           }
           val p = ctx.newPromise()
           combiner.add(p)
-          encoder.writeHeaders(ctx, streamId, headers, 0, endStream, p)
+
+          val http1Headers = req.headers
+          val dependencyId = http1Headers.getInt(
+            HttpConversionUtil.ExtensionHeaderNames.STREAM_DEPENDENCY_ID.text, 0)
+
+          val weight = http1Headers.getShort(
+            HttpConversionUtil.ExtensionHeaderNames.STREAM_WEIGHT.text,
+            Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT)
+
+          encoder.writeHeaders(
+            ctx, streamId, headers, dependencyId, weight, false /* exclusive */, 0, endStream, p)
           // client can decide if a request is unhealthy immediately
           if (p.isDone && !p.isSuccess) {
             throw p.cause
