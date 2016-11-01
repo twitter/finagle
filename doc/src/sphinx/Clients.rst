@@ -172,6 +172,14 @@ These retries come out of a ``RetryBudget`` that allows for approximately 20% of
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.
 
+Some failures may also be known as unsafe to retry. If a :src:`Failure <com/twitter/finagle/Failure.scala>`
+is flagged ``NonRetryable``, the `Retries` module will not make any attempts to retry the request and
+pass along the failure as is. A `NonRetryable` failure may be used in situations where a client
+determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
+be skipped. Additionally, a service may reject a request that is malformed and thus pointless to retry.
+While Finagle respects the `NonRetryable` flag internally, users should also take care to respect it
+when creating retry filters of their own.
+
 The `Retries` module is configured with two parameters:
 
 1. ``RetryBudget`` - determines whether there is available budget to retry a request
