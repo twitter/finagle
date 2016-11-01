@@ -5,14 +5,14 @@ import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.factory.BindingFactory.Dest
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.param.{Label, ProtocolLibrary, Stats}
+import com.twitter.finagle.param._
 import com.twitter.finagle.postgres.codec._
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Return, Throw}
+import com.twitter.util.{Duration, Return, Throw, Try}
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 object Postgres {
@@ -48,6 +48,7 @@ object Postgres {
 
   private def defaultStack = StackClient.newStack[PgRequest, PgResponse]
     .replace(StackClient.Role.prepConn, PrepConnection)
+    .replace(Retries.Role, Retries.moduleWithRetryPolicy[PgRequest, PgResponse])
 
   private def pipelineFactory(params: Stack.Params) = {
     val Transport.TLSClientEngine(ssl) = params[Transport.TLSClientEngine]
@@ -74,7 +75,8 @@ object Postgres {
   case class Client(
     stack: Stack[ServiceFactory[PgRequest, PgResponse]] = defaultStack,
     params: Stack.Params = defaultParams
-  ) extends StdStackClient[PgRequest, PgResponse, Client] {
+  ) extends StdStackClient[PgRequest, PgResponse, Client]
+    with WithSessionPool[Client] with WithDefaultLoadBalancer[Client] {
     type In = PgRequest
     type Out = PgResponse
 
@@ -123,6 +125,8 @@ object Postgres {
     def withCredentials(user: String, password: String): Client =
       withCredentials(user, Some(password))
     def withCredentials(user: String): Client = withCredentials(user, None)
+
+    def withRetryPolicy(policy: RetryPolicy[Try[Nothing]]) = configured(Retries.Policy(policy))
 
     def conditionally(bool: Boolean, conf: Client => Client) = if(bool) conf(this) else this
 
