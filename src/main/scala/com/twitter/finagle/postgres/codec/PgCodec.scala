@@ -1,5 +1,7 @@
 package com.twitter.finagle.postgres.codec
 
+import java.net.{InetSocketAddress, SocketAddress}
+
 import com.twitter.finagle._
 import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl}
@@ -7,55 +9,17 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
 import com.twitter.logging.Logger
 import com.twitter.util.Future
-
-import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.{SSLContext, SSLEngine, TrustManagerFactory}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 import org.jboss.netty.handler.ssl.util.InsecureTrustManagerFactory
-import org.jboss.netty.handler.ssl.{SslHandler, SslContext}
-
+import org.jboss.netty.handler.ssl.{SslContext, SslHandler}
 import scala.collection.mutable
 
-/*
- * Postgres codec implementation.
- *
- * Used by client to encode requests and parse responses.
- */
-class PgCodec(
-    user: String,
-    password: Option[String],
-    database: String,
-    id: String,
-    useSsl: Boolean,
-    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE
-) extends CodecFactory[PgRequest, PgResponse] {
-
-  def server = throw new UnsupportedOperationException("client only")
-
-  val sslContext: SslContext = SslContext.newClientContext(trustManagerFactory)
-
-  def client = Function.const {
-    new Codec[PgRequest, PgResponse] {
-      def pipelineFactory = new ChannelPipelineFactory {
-        def getPipeline = {
-          val pipeline = Channels.pipeline()
-
-          pipeline.addLast("binary_to_packet", new PacketDecoder(useSsl))
-          pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-          pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslContext, useSsl))
-          pipeline
-        }
-      }
-
-      override def prepareConnFactory(underlying: ServiceFactory[PgRequest, PgResponse], params: Stack.Params) = {
-        val errorHandling = new HandleErrorsProxy(underlying)
-        new AuthenticationProxy(errorHandling, user, password, database, useSsl)
-      }
-    }
-  }
-}
+import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.transport.{TlsConfig, Transport}
 
 /*
  * Filter that converts exceptions into ServerErrors.
@@ -71,9 +35,10 @@ class HandleErrorsProxy(
 
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
     def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) = {
-      service.apply(request).flatMap {
+      service.apply(request).onFailure {
+        case err: ChannelClosedException => service.close()
+      }.flatMap {
         case Error(msg, severity, sqlState, detail, hint, position) =>
-
           Future.exception(Errors.server(msg.getOrElse("unknown failure"), Some(request), severity, sqlState, detail, hint, position))
         case r => Future.value(r)
       }
@@ -213,7 +178,10 @@ class PacketDecoder(@volatile var inSslNegotation: Boolean) extends FrameDecoder
 /*
  * Map PgRequest to PgResponse.
  */
-class PgClientChannelHandler(val sslContext: SslContext, val useSsl: Boolean) extends SimpleChannelHandler {
+class PgClientChannelHandler(
+  sslEngineFactory: Option[SocketAddress => ssl.Engine],
+  val useSsl: Boolean
+) extends SimpleChannelHandler {
   private[this] val logger = Logger(getClass.getName)
   private[this] val connection = {
     if (useSsl) {
@@ -237,7 +205,17 @@ class PgClientChannelHandler(val sslContext: SslContext, val useSsl: Boolean) ex
         logger.ifDebug("Got switchToSSL message; adding ssl handler into pipeline")
 
         val pipeline = ctx.getPipeline
-        val engine = sslContext.newEngine()
+
+        val addr = ctx.getChannel.getRemoteAddress
+        val inetAddr = addr match {
+          case i: InetSocketAddress => Some(i)
+          case _ => None
+        }
+
+        val engine = sslEngineFactory.map(_.apply(addr))
+          .orElse(inetAddr.map(inet => Ssl.client(inet.getHostString, inet.getPort)))
+          .getOrElse(Ssl.client())
+          .self
 
         engine.setUseClientMode(true)
 

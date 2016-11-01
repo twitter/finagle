@@ -5,7 +5,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres.{Client, OK, Row, Spec}
-import com.twitter.finagle.postgres.Param
+import com.twitter.finagle.Postgres
 import com.twitter.util.{Await, Duration}
 
 object IntegrationSpec {
@@ -38,13 +38,11 @@ class IntegrationSpec extends Spec {
     val queryTimeout = Duration.fromSeconds(2)
 
     def getClient = {
-      Client(
-        hostPort,
-        user,
-        password,
-        dbname,
-        useSsl = useSsl
-      )
+      Postgres.Client()
+        .withCredentials(user, password)
+        .database(dbname)
+        .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+        .newRichClient(hostPort)
     }
 
     def cleanDb(client: Client): Unit = {

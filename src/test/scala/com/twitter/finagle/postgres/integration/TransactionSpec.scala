@@ -1,5 +1,6 @@
 package com.twitter.finagle.postgres.integration
 
+import com.twitter.finagle.Postgres
 import com.twitter.finagle.postgres.{Client, Spec}
 import com.twitter.util.{Await, Future}
 
@@ -12,7 +13,12 @@ class TransactionSpec extends Spec {
     useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
   } yield {
 
-    val client = Client(hostPort, user, password, dbname, useSsl)
+    val client = Postgres.Client()
+      .withCredentials(user, password)
+      .database(dbname)
+      .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+      .newRichClient(hostPort)
+
     Await.result(client.query(
       """
         |DROP TABLE IF EXISTS transaction_test;

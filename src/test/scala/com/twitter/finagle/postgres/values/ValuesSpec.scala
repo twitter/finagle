@@ -3,7 +3,9 @@ package com.twitter.finagle.postgres.values
 import java.time._
 import java.time.temporal.{ChronoField, JulianFields}
 
-import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}, Generators._
+import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
+import Generators._
+import com.twitter.finagle.Postgres
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
@@ -45,7 +47,12 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
     dbname <- sys.env.get("PG_DBNAME")
     useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
   } yield {
-    implicit val client = Client(hostPort, user, password, dbname, useSsl)
+    implicit val client = Postgres.Client()
+      .database(dbname)
+      .withCredentials(user, password)
+      .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+      .newRichClient(hostPort)
+
     "ValueDecoders" should {
       "parse varchars" in test(ValueDecoder.String)("varcharsend", "varchar")
       "parse text" in test(ValueDecoder.String)("textsend", "text")

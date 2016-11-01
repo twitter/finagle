@@ -3,6 +3,7 @@ package com.twitter.finagle.postgres.integration
 import java.time.ZoneId
 import java.time.temporal.ChronoField
 
+import com.twitter.finagle.Postgres
 import com.twitter.finagle.postgres.values.{ValueDecoder, ValueEncoder}
 import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
 import com.twitter.util.Await
@@ -48,15 +49,14 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
     useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
   } yield {
 
-    implicit val client = Client(
-      hostPort,
-      user,
-      password,
-      dbname,
-      useSsl,
-      customTypes = true,
-      binaryResults = binaryResults,
-      binaryParams = binaryParams)
+    implicit val client = Postgres.Client()
+      .database(dbname)
+      .withCredentials(user, password)
+      .withBinaryParams(binaryParams)
+      .withBinaryResults(binaryResults)
+      .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+      .newRichClient(hostPort)
+
 
     val mode = if(binaryResults) "binary mode" else "text mode"
     val paramsMode = if(binaryParams)

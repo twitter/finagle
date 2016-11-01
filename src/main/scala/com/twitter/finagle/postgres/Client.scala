@@ -4,19 +4,16 @@ import java.nio.charset.{Charset, StandardCharsets}
 import java.util.concurrent.atomic.AtomicInteger
 
 import scala.collection.immutable.Queue
+import scala.language.implicitConversions
 import scala.util.Random
 
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
-import com.twitter.finagle.postgres.codec.{ClientError, Errors, PgCodec, ServerError}
+import com.twitter.finagle.postgres.codec.Errors
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
+import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.logging.Logger
 import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
-import scala.language.implicitConversions
-
-import com.twitter.finagle.service._
 
 
 /*
@@ -377,7 +374,7 @@ object Client {
 
   case class TypeSpecifier(receiveFunction: String, typeName: String, elemOid: Long = 0)
 
-  private[postgres] val defaultTypes = Map(
+  private[finagle] val defaultTypes = Map(
     Type.BOOL -> TypeSpecifier("boolrecv", "bool"),
     Type.BYTE_A -> TypeSpecifier("bytearecv", "bytea"),
     Type.CHAR -> TypeSpecifier("charrecv", "char"),
@@ -425,68 +422,6 @@ object Client {
     Type.UUID -> TypeSpecifier("uuid_recv", "uuid")
   )
 
-  def apply(
-    host: String,
-    username: String,
-    password: Option[String],
-    database: String,
-    useSsl: Boolean = false,
-    hostConnectionLimit: Int = 1,
-    retryPolicy: RetryPolicy[Try[Nothing]] = RetryPolicy.backoff(
-      Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5)))(
-      RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly),
-    customTypes: Boolean = false,
-    customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
-    binaryResults: Boolean = false,
-    binaryParams: Boolean = false
-  ): Client = {
-    // Classify responses appropriately - a ServerError with SQLState or ClientError does not mean that the client is
-    // down.
-    val classifier: ResponseClassifier = {
-      case ReqRep(a, Return(_)) => ResponseClass.Success
-      case ReqRep(a, Throw(ServerError(_, _, _, Some(_), _, _, _))) => ResponseClass.Success
-      case ReqRep(a, Throw(ClientError(_))) => ResponseClass.Success
-    }
-
-    withBuilder(
-      host,
-      username,
-      password,
-      database,
-      useSsl,
-      customTypes,
-      customReceiveFunctions,
-      binaryResults,
-      binaryParams) {
-      cb =>
-        cb.hostConnectionLimit(hostConnectionLimit)
-          .responseClassifier(classifier)
-          .retryPolicy(retryPolicy)
-    }
-  }
-
-  def withBuilder(
-    host: String,
-    username: String,
-    password: Option[String],
-    database: String,
-    useSsl: Boolean = false,
-    customTypes: Boolean = false,
-    customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
-    binaryResults: Boolean = false,
-    binaryParams: Boolean = false)(
-    builderF: ClientBuilder[PgRequest, PgResponse, ClientConfig.Yes, ClientConfig.Yes, Nothing] =>
-      ClientBuilder[PgRequest, PgResponse, ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
-  ) = {
-    val id = Random.alphanumeric.take(28).mkString
-    val builder = builderF(
-      ClientBuilder()
-        .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
-        .hosts(host)
-    )
-    val types = if(!customTypes) Some(defaultTypes) else None
-    new Client(builder.buildFactory(), id, types, customReceiveFunctions, binaryResults, binaryParams)
-  }
 }
 
 /*
