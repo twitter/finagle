@@ -35,12 +35,13 @@ class HandleErrorsProxy(
 
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
     def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) = {
-      service.apply(request).onFailure {
-        case err: ChannelClosedException => service.close()
-      }.flatMap {
+      service.apply(request).flatMap {
         case Error(msg, severity, sqlState, detail, hint, position) =>
           Future.exception(Errors.server(msg.getOrElse("unknown failure"), Some(request), severity, sqlState, detail, hint, position))
         case r => Future.value(r)
+      }.onFailure {
+        case err: ChannelClosedException => service.close()
+        case _ =>
       }
     }
   }
