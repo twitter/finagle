@@ -55,11 +55,14 @@ object Http extends Client[Request, Response] with HttpRichClient
    * @param listener [[Listener]] factory
    */
   case class HttpImpl(
-    clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
-    serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-    transporter: Stack.Params => Transporter[Any, Any],
-    listener: Stack.Params => Listener[Any, Any]) {
+      clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
+      serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
+      transporter: Stack.Params => Transporter[Any, Any],
+      listener: Stack.Params => Listener[Any, Any]) {
+
+    def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
   }
+
   object HttpImpl {
     implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty3Impl)
   }
