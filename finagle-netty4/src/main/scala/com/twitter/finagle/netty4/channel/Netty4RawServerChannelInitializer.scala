@@ -54,9 +54,6 @@ private[netty4] class Netty4RawServerChannelInitializer(
     // Add SslHandler to the pipeline.
     pipeline.addFirst("tls init", new Netty4SslHandler(params))
 
-    // Copy direct byte buffers onto heap before doing anything else.
-    pipeline.addFirst("direct to heap", DirectToHeapInboundHandler)
-
     // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` are enabled).
     if (poolReceiveBuffers()) {
       pipeline.addFirst("receive buffers size tracker",

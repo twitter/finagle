@@ -45,6 +45,10 @@ Runtime Behavior Changes
     a chain of services. See the "MuxFailure Flags" section of the mux protocol
     spec in finagle-mux/src/main/scala/c/t/f/mux/package.scala ``RB_ID=882431``
 
+  * finagle-netty4: The netty4 listener + transporter no longer manage direct byte 
+    buffers by default. c.t.f.netty4.channel.DirectToHeapInboundHandler is introduced 
+    to help protocol builders manage them. ``RB_ID=881648``
+
   * finagle-stats: Changed the default behavior of empty histograms to only export
     the count. Thus the `com.twitter.finagle.stats.exportEmptyHistograms` toggle
     now defaults to `0.0`. ``RB_ID=882522``

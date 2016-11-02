@@ -52,6 +52,7 @@ private[netty4] class Netty4ClientChannelInitializer(
 
     val pipe = ch.pipeline
 
+    pipe.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
     pipe.addLast(BufCodecKey, new BufCodec)
 
     framerFactory.foreach { newFramer =>
@@ -149,9 +150,6 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
       case (host, credentials) => pipe.addFirst("http proxy connect",
         new HttpProxyConnectHandler(host, credentials))
     }
-
-    // Copy direct byte buffers onto heap before doing anything else.
-    pipe.addFirst(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
 
     // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` is enabled).
     if (poolReceiveBuffers()) {
