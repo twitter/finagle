@@ -217,6 +217,7 @@ object Finagle extends Build {
     finagleMySQL,
     finagleMemcached,
     finagleMux,
+    finagleNetty4Http,
     finagleThrift,
     finagleThriftMux % "test->compile;test->test"
   )
@@ -379,6 +380,7 @@ object Finagle extends Build {
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
+      "com.twitter" % "libthrift" % libthriftVersion,
       "com.twitter.common" % "io-json" % "0.0.54",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.111" excludeAll(
         ExclusionRule("com.twitter", "finagle-core-java"),
@@ -386,12 +388,14 @@ object Finagle extends Build {
         ExclusionRule("com.twitter", "util-core-java"),
         ExclusionRule("com.twitter", "util-core_2.11"),
         ExclusionRule("com.twitter.common", "service-thrift"),
-        ExclusionRule("com.twitter", "libthrift"),
+        ExclusionRule("org.apache.thrift", "libthrift"),
         ExclusionRule("org.apache.zookeeper", "zookeeper"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
       ),
-      "com.twitter.common" % "service-thrift" % "1.0.55",
+      "com.twitter.common" % "service-thrift" % "1.0.55" excludeAll(
+        ExclusionRule("org.apache.thrift", "libthrift")
+      ),
       guavaLib
     ),
     libraryDependencies ++= jacksonLibs,
@@ -511,12 +515,13 @@ object Finagle extends Build {
         ExclusionRule("com.twitter", "twitter-server_2.11"),
         ExclusionRule("com.twitter.common", "metrics"),
         ExclusionRule("com.twitter.common", "service-thrift"),
-        ExclusionRule("com.twitter", "libthrift"),
+        ExclusionRule("org.apache.thrift", "libthrift"),
         ExclusionRule("org.apache.zookeeper", "zookeeper"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-server"),
         ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
-      )
+      ),
+      "com.twitter" % "libthrift" % libthriftVersion
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
