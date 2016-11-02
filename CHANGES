@@ -58,6 +58,8 @@ Breaking API Changes
   * finagle-core: Removed a gauge, `idle`, from `c.t.f.factory.ServiceFactoryCache`.
     ``RB_ID=884210``
 
+  * finagle-core: `ServiceTimeoutException` now extends `NoStackTrace`. ``RB_ID=886809``
+
   * finagle-redis: A couple of methods had to be renamed (and return type changed) to
     unblock Netty 4 adoption. ``RB_ID=882622``
 
