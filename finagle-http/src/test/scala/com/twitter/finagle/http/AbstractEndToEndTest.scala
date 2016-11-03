@@ -8,7 +8,12 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.service.{ConstantService, FailureAccrualFactory, ResponseClass, ServiceFactoryRef}
+import com.twitter.finagle.service.{
+  ConstantService,
+  FailureAccrualFactory,
+  ResponseClass,
+  ServiceFactoryRef
+}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, ReadableCounter}
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Trace
@@ -17,24 +22,20 @@ import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
 
 abstract class AbstractEndToEndTest extends FunSuite
   with BeforeAndAfter
   with Eventually
-  with IntegrationPatience {
+  with IntegrationPatience
+  with OneInstancePerTest {
 
   sealed trait Feature
-  object BasicFunctionality extends Feature
-  object ClientAbort extends Feature
-  object CompressedContent extends Feature
   object MaxHeaderSize extends Feature
-  object ResponseClassifier extends Feature
-  object CloseStream extends Feature
   object Streaming extends Feature
-  object StreamFixed extends Feature
+  object FirstResponseStream extends Feature
   object TooLongStream extends Feature
 
   var saveBase: Dtab = Dtab.empty
@@ -166,7 +167,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    testIfImplemented(ResponseClassifier)(implName + ": with default client-side ResponseClassifier") {
+    test(implName + ": with default client-side ResponseClassifier") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -184,7 +185,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    testIfImplemented(ResponseClassifier)(implName + ": with default server-side ResponseClassifier") {
+    test(implName + ": with default server-side ResponseClassifier") {
       val client = connect(statusCodeSvc)
 
       await(client(requestWith(Status.Ok)))
@@ -227,7 +228,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    testIfImplemented(TooLongStream)(implName + ": return 413s for chunked requests which stream too much data") {
+    testIfImplemented(TooLongStream)(implName +
+      ": return 413s for chunked requests which stream too much data") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -370,7 +372,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
-    testIfImplemented(ClientAbort)(implName + ": client abort") {
+    test(implName + ": client abort") {
       import com.twitter.conversions.time._
       val timer = new JavaTimer
       val promise = new Promise[Response]
@@ -425,7 +427,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
-    testIfImplemented(CloseStream)(s"$implName (streaming)" + ": stream") {
+    testIfImplemented(FirstResponseStream)(s"$implName (streaming)" + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val reader = await(client(Request())).reader
@@ -438,7 +440,10 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
       class ResponseProxyFilter extends SimpleFilter[Request, Response] {
-        override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+        override def apply(
+          request: Request,
+          service: Service[Request, Response]
+        ): Future[Response] = {
           service(request).map { responseOriginal =>
             new ResponseProxy {
               override val response = responseOriginal
@@ -500,7 +505,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    testIfImplemented(CompressedContent)(s"$implName (streaming)" + ": streaming clients can decompress content") {
+    test(s"$implName (streaming)" + ": streaming clients can decompress content") {
       val svc = new Service[Request, Response] {
         def apply(request: Request) = {
           val response = Response()
@@ -537,9 +542,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(res.contentString == "hello")
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming)" +
-      ": transport closure propagates to request stream reader") {
-
+    test(s"$implName (streaming): transport closure propagates to request stream reader") {
       val p = new Promise[Buf]
       val s = Service.mk[Request, Response] { req =>
         p.become(Reader.readAll(req.reader))
@@ -553,7 +556,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[ChannelClosedException] { await(p) }
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming)" + ": transport closure propagates to request stream producer") {
+    testIfImplemented(Streaming)(s"$implName (streaming)" +
+      ": transport closure propagates to request stream producer") {
       val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
       val client = connect(s)
       val req = Request()
@@ -563,9 +567,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming)" +
-      ": request discard terminates remote stream producer") {
-
+    testIfImplemented(Streaming)(s"$implName (streaming): " +
+      "request discard terminates remote stream producer") {
       val s = Service.mk[Request, Response] { req =>
         val res = Response()
         res.setChunked(true)
@@ -594,9 +597,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming)" +
-      ": client discard terminates stream and frees up the connection") {
-
+    testIfImplemented(FirstResponseStream)(s"$implName (streaming): " +
+      "client discard terminates stream and frees up the connection") {
       val s = new Service[Request, Response] {
         var rep: Response = null
 
@@ -624,7 +626,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(s.rep != null)
     }
 
-    testIfImplemented(StreamFixed)(s"$implName (streaming)" + ": two fixed-length requests") {
+    test(s"$implName (streaming)" + ": two fixed-length requests") {
       val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
       val client = connect(svc)
       await(client(Request()))
@@ -689,7 +691,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   // before we run into the requeue limit.
   private val failureAccrualFailures = 19
 
-  testIfImplemented(BasicFunctionality)(implName + ": Status.busy propagates along the Stack") {
+  test(implName + ": Status.busy propagates along the Stack") {
     val st = new InMemoryStatsReceiver
     val failService = new HttpService {
       def apply(req: Request): Future[Response] =
@@ -701,7 +703,10 @@ abstract class AbstractEndToEndTest extends FunSuite
     val client = clientImpl()
       .withStatsReceiver(st)
       .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-      .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), clientName)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        clientName
+      )
 
     val e = intercept[Exception](await(client(Request("/"))))
 
@@ -711,7 +716,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(Closable.all(client, server).close())
   }
 
-  testIfImplemented(ResponseClassifier)("Client-side ResponseClassifier based on status code") {
+  test("Client-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
       case (_, r: Response) if r.status == Status.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
@@ -739,7 +744,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
   }
 
-  testIfImplemented(ResponseClassifier)("server-side ResponseClassifier based on status code") {
+  test("server-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
       case (_, r: Response) if r.status == Status.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
@@ -778,7 +783,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
-  testIfImplemented(CompressedContent)("non-streaming clients can decompress content") {
+  test("non-streaming clients can decompress content") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {
         val response = Response()
@@ -823,7 +828,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
   }
 
-  testIfImplemented(ResponseClassifier)(implName + ": ResponseClassifier respects toggle") {
+  test(implName + ": ResponseClassifier respects toggle") {
     import com.twitter.finagle.{Http => ctfHttp}
 
     val serverFraction = new AtomicDouble(-1.0)

@@ -8,9 +8,10 @@ import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.{TlsConfig, Transport}
-import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelDuplexHandler}
+import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline,
+  ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http.HttpServerCodec
-import io.netty.handler.codec.http2.{Http2Codec, Http2ServerDowngrader}
+import io.netty.handler.codec.http2.{Http2Codec, Http2ServerDowngrader, Http2ResetFrame}
 
 /**
  * Please note that the listener cannot be used for TLS yet.
@@ -24,7 +25,7 @@ private[http2] object Http2Listener {
         pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
         // we inject a dummy handler so we can replace it with the real stuff
         // after we get `init` in the setupMarshalling phase.
-        pipeline.addLast(PlaceholderName, new ChannelDuplexHandler(){})
+        pipeline.addLast(PlaceholderName, new ChannelInboundHandlerAdapter(){})
       },
       params = params + Netty4Listener.BackPressure(false),
       setupMarshalling = { init: ChannelInitializer[Channel] =>
@@ -32,6 +33,15 @@ private[http2] object Http2Listener {
           def initChannel(ch: Channel): Unit = {
             // downgrade from http/2 to http/1.1 types
             ch.pipeline.addLast(new Http2ServerDowngrader(false /* validateHeaders */))
+            // TODO: send an interrupt instead of dropping the reset frame
+            // we want to drop reset frames because the Http2ServerDowngrader doesn't know what to
+            // do with them, and our dispatchers expect to only get http/1.1 message types.
+            ch.pipeline.addLast(new ChannelInboundHandlerAdapter() {
+              override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
+                if (!msg.isInstanceOf[Http2ResetFrame])
+                  super.channelRead(ctx, msg)
+              }
+            })
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)
           }

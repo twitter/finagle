@@ -49,7 +49,10 @@ private[http2] object Http2Transporter {
    * Buffers until `channelActive` so we can ensure the connection preface is
    * the first message we send.
    */
-  class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler { self =>
+  class BufferingHandler
+    extends ChannelInboundHandlerAdapter
+    with BufferingChannelOutboundHandler { self =>
+
     override def channelActive(ctx: ChannelHandlerContext): Unit = {
       ctx.fireChannelActive()
       // removing a BufferingChannelOutboundHandler writes and flushes too.
@@ -62,7 +65,12 @@ private[http2] object Http2Transporter {
     def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
       ctx.close(promise)
     }
-    def connect(ctx: ChannelHandlerContext, local: SocketAddress, remote: SocketAddress, promise: ChannelPromise): Unit = {
+    def connect(
+      ctx: ChannelHandlerContext,
+      local: SocketAddress,
+      remote: SocketAddress,
+      promise: ChannelPromise
+    ): Unit = {
       ctx.connect(local, remote, promise)
     }
     def deregister(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
@@ -238,16 +246,17 @@ private[http2] class Http2Transporter(
     } else apply(addr)
   }
 
-  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] = Option(transporterCache.get(addr)) match {
-    case Some(f) =>
-      if (f.isDefined) {
-        onUpgradeFinished(f, addr)
-      } else {
-        // fall back to http/1.1 while upgrading
-        val conn = underlyingHttp11(addr)
-        conn.map(onUpgradeInProgress(f))
-      }
-    case None =>
-      upgrade(addr)
-  }
+  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] =
+    Option(transporterCache.get(addr)) match {
+      case Some(f) =>
+        if (f.isDefined) {
+          onUpgradeFinished(f, addr)
+        } else {
+          // fall back to http/1.1 while upgrading
+          val conn = underlyingHttp11(addr)
+          conn.map(onUpgradeInProgress(f))
+        }
+      case None =>
+        upgrade(addr)
+    }
 }

@@ -31,7 +31,7 @@ private[http2] class Http2UpgradingTransport(
     case _@UpgradeEvent.UPGRADE_SUCCESSFUL =>
       val casted =
         Transport.cast[Http2ClientDowngrader.StreamMessage, Http2ClientDowngrader.StreamMessage](t)
-      val multiplexed = new MultiplexedTransporter(casted)
+      val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress)
       p.setValue(Some(multiplexed))
       ref.update { _ =>
         unsafeCast(multiplexed.first())

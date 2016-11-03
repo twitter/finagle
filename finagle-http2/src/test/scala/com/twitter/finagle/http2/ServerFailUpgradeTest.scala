@@ -17,16 +17,5 @@ class ServerFailUpgradeTest extends AbstractHttp1EndToEndTest {
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server.configured(Http2)
 
-  private[this] lazy val featuresNotImplemented = Set(
-    ClientAbort,
-    Streaming,
-    TooLongStream,
-    CloseStream
-  )
-
-  def featureImplemented(feature: Feature): Boolean = !featuresNotImplemented(feature)
-
-  test("Can create and server a couple connections") {
-
-  }
+  def featureImplemented(feature: Feature): Boolean = true
 }

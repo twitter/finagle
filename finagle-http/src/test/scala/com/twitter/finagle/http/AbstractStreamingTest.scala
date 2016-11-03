@@ -3,27 +3,20 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.server.Listener
+import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
-import org.jboss.netty.channel.Channel
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
 
-abstract class AbstractStreamingTest extends FunSuite with Eventually {
-  sealed trait Feature
-  object ServerDisconnect extends Feature
+abstract class AbstractStreamingTest extends FunSuite {
 
   def impl: FinagleHttp.HttpImpl
-  def featureImplemented(feature: Feature): Boolean
-  def testIfImplemented(feature: Feature)(name: String)(testFn: => Unit): Unit = {
-    if (!featureImplemented(feature)) ignore(name)(testFn) else test(name)(testFn)
-  }
+  def configureClient: FinagleHttp.Client => FinagleHttp.Client = identity
+  def configureServer: FinagleHttp.Server => FinagleHttp.Server = identity
 
   import StreamingTest._
 
@@ -94,7 +87,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
 
     intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
     // We call read for the collating function to notice transport failure.
-    intercept[ChannelClosedException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read(1)) }
 
     assertSecondRequestOk()
   })
@@ -108,7 +101,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     failure.setDone()
 
     // Assert reading state suspension is interrupted by transport closure.
-    intercept[ChannelClosedException] { await(f) }
+    intercept[ChannelException] { await(f) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
 
     assertSecondRequestOk()
@@ -121,13 +114,13 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
 
     val resF = client(get("/"))
     failure.setDone()
-    intercept[ChannelClosedException] { await(resF) }
+    intercept[ChannelException] { await(resF) }
 
     await(client.close())
     await(server.close())
   }
 
-  testIfImplemented(ServerDisconnect)("client: client closes transport after server disconnects") {
+  test("client: client closes transport after server disconnects") {
     val serverClose, clientClosed = new Promise[Unit]
     val service = Service.mk[Request, Response] { req =>
       Future.value(Response())
@@ -195,7 +188,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     intercept[ChannelClosedException] { await(readp) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(writer, buf)) }
 
-    intercept[ChannelClosedException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -243,7 +236,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     // This really should be ChannelClosedException, perhaps we're too
     // indiscriminatory by calling discard on any error in the dispatcher.
     intercept[Reader.ReaderDiscarded] { await(readp) }
-    intercept[ChannelClosedException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -281,7 +274,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     val res = await(f1)
 
     failure.setDone()
-    intercept[ChannelClosedException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -320,7 +313,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
     val res = await(f1)
 
     failure.setDone()
-    intercept[ChannelClosedException] { await(res.reader.read(1)) }
+    intercept[ChannelException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
     val res2 = await(f2)
@@ -333,9 +326,9 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
       val writable = Reader.writable() // never gets closed
       Future.value(Response(req.version, Status.Ok, writable))
     }
-    val server = FinagleHttp.server.withStreaming(true).serve(":*", service)
-    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
-    val client = FinagleHttp.client.withStreaming(true).newService(s"/$$/inet/127.1/$port")
+    val server = startServer(service, identity)
+    val addr = server.boundAddress
+    val client = connect(addr, identity)
     try {
       val req0 = Request("/0")
       val rep0 = await(client(req0))
@@ -354,8 +347,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
 
   def startServer(service: Service[Request, Response], mod: Modifier): ListeningServer = {
     val modifiedImpl = impl.copy(listener = modifiedListenerFn(mod, impl.listener))
-    FinagleHttp.server
-      .withAdmissionControl.concurrencyLimit(1, Int.MaxValue)
+    configureServer(FinagleHttp.server)
       .withStreaming(true)
       .configured(modifiedImpl)
       .withLabel("server")
@@ -364,8 +356,7 @@ abstract class AbstractStreamingTest extends FunSuite with Eventually {
 
   def connect(addr: SocketAddress, mod: Modifier, name: String = "client"): Service[Request, Response] = {
     val modifiedImpl = impl.copy(transporter = modifiedTransporterFn(mod, impl.transporter))
-    FinagleHttp.client
-      .withSessionPool.maxSize(1)
+    configureClient(FinagleHttp.client)
       .withStreaming(true)
       .configured(modifiedImpl)
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
@@ -435,33 +426,5 @@ object StreamingTest {
       if (!setFail.getAndSet(true)) closed.ensure { transport.close() }
       transport
     }
-  }
-
-  class Custom(cmod: Modifier, smod: Modifier)
-    extends CodecFactory[Request, Response] {
-
-    def customize(codec: Codec[Request, Response]) =
-      new Codec[Request, Response] {
-        val pipelineFactory = codec.pipelineFactory
-        override def prepareServiceFactory(sf: ServiceFactory[Request, Response]) =
-          codec.prepareServiceFactory(sf)
-        override def prepareConnFactory(sf: ServiceFactory[Request, Response], ps: Stack.Params) =
-          codec.prepareConnFactory(sf)
-        override def newClientTransport(ch: Channel, sr: StatsReceiver) =
-          codec.newClientTransport(ch, sr)
-        override def newTraceInitializer = codec.newTraceInitializer
-
-        // Modified Transports
-        override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
-          codec.newClientDispatcher(cmod(transport), params)
-        override def newServerDispatcher(
-          transport: Transport[Any, Any],
-          service: Service[Request, Response]
-        ) = codec.newServerDispatcher(smod(transport), service)
-      }
-
-    val factory = Http().streaming(true)
-    val client: Client = config => customize(factory.client(config))
-    val server: Server = config => customize(factory.server(config))
   }
 }

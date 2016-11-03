@@ -1,9 +1,9 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst}
 import com.twitter.logging.Logger
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
-import io.netty.handler.codec.http.{HttpRequest, FullHttpRequest, HttpContent, LastHttpContent, HttpObject, DefaultFullHttpResponse, HttpVersion, HttpResponseStatus}
+import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2._
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
@@ -58,8 +58,8 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       msg match {
         case content: HttpContent =>
           val data = content.content
-          if (data.isReadable) {
-            val endStream = content.isInstanceOf[LastHttpContent]
+          val endStream = content.isInstanceOf[LastHttpContent]
+          if (data.isReadable || (endStream && !content.isInstanceOf[HttpRequest])) {
             val p = ctx.newPromise()
             combiner.add(p)
             encoder.writeData(ctx, streamId, data, 0, endStream, p)
@@ -89,6 +89,8 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     msg match {
       case Message(obj, streamId) =>
         handleMessage(ctx, promise, obj, streamId)
+      case Rst(streamId, errorCode) =>
+        encoder.writeRstStream(ctx, streamId, errorCode, promise)
       // TODO we need to add support for writing RSTs and GOAWAYs
       case _ =>
         val wrongType = new IllegalArgumentException(

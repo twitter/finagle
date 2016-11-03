@@ -5,12 +5,13 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer,
+  ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   SourceCodec, UpgradeCodec, UpgradeCodecFactory}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2.{
-  Http2Codec, Http2CodecUtil, Http2ServerDowngrader, Http2ServerUpgradeCodec}
+  Http2Codec, Http2CodecUtil, Http2ServerDowngrader, Http2ServerUpgradeCodec, Http2ResetFrame}
 import io.netty.util.AsciiString
 
 /**
@@ -27,6 +28,15 @@ private[http2] class Http2CleartextServerInitializer(
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
             ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
+
+            // we want to drop reset frames because the Http2ServerDowngrader doesn't know what to
+            // do with them, and our dispatchers expect to only get http/1.1 message types.
+            ch.pipeline.addLast(new ChannelInboundHandlerAdapter() {
+              override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
+                if (!msg.isInstanceOf[Http2ResetFrame])
+                  super.channelRead(ctx, msg)
+              }
+            })
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)
           }

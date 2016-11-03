@@ -22,13 +22,9 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresToBeImplemented = Set[Feature](
-    ClientAbort,
     MaxHeaderSize,
-    CompressedContent, // these tests pass but only because the server ignores
-                       // the compression param and doesn't compress content.
-    Streaming,
-    CloseStream,
-    BasicFunctionality
+    Streaming
   )
+
   def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
 }

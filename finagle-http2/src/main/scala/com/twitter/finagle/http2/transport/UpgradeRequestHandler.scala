@@ -11,7 +11,10 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
  * Takes the upgrade result and marks it as something read off the wire to
  * expose it to finagle, and manipulates the pipeline to be fit for http/2.
  */
-private[http2] class UpgradeRequestHandler(params: Stack.Params) extends ChannelInboundHandlerAdapter {
+private[http2] class UpgradeRequestHandler(
+    params: Stack.Params)
+  extends ChannelInboundHandlerAdapter {
+
   override def userEventTriggered(ctx: ChannelHandlerContext, event: Any): Unit = {
     event match {
       case rejected@UpgradeEvent.UPGRADE_REJECTED =>

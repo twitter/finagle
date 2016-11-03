@@ -9,5 +9,4 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Netty4StreamingTest extends AbstractStreamingTest {
   def impl: Http.HttpImpl = Netty4Impl
-  def featureImplemented(feature: Feature): Boolean = feature != ServerDisconnect
 }

@@ -287,6 +287,17 @@ class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress
 }
 
 /**
+ * Indicates that a given stream was closed, for instance if the stream
+ * was reset by a peer or a proxy.
+ */
+class StreamClosedException(remoteAddress: SocketAddress, streamId: String)
+  extends ChannelException(null, remoteAddress) with NoStackTrace {
+  override def exceptionMessage: String = {
+    s"Stream: $streamId was closed at remote address: ${remoteAddress.toString}"
+  }
+}
+
+/**
  * Indicates that a write to a given `remoteAddress` timed out.
  */
 class WriteTimedOutException(

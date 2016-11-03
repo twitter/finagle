@@ -76,7 +76,7 @@ class Http2TransporterTest extends FunSuite {
     assert(!transporter.cached(addr))
   }
 
-  test("Http2Transporter uses the http11 Transporter for the second outstanding transport preupgrade") {
+  test("Http2Transporter uses http11 for the second outstanding transport preupgrade") {
     val (t1, t2) = (new TestTransporter(), new TestTransporter())
     val transporter = new Http2Transporter(t1, t2)
     val addr = new InetSocketAddress("127.1", 14400)
@@ -95,16 +95,19 @@ class Http2TransporterTest extends FunSuite {
       addr: SocketAddress)
     extends TransportProxy[Any, Any](new TestTransport(addr)) {
 
-    var first = true
+    @volatile var count = 0
     def write(msg: Any): Future[Unit] = Future.Done
-    def read(): Future[Any] = if (first) {
-      first = false
+    def read(): Future[Any] = if (count == 0) {
+      count += 1
       Future.value(upgradeRep)
     } else {
-      if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
+      if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL && count == 1) {
         val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
         val message = Http2ClientDowngrader.Message(rep, 1)
+        count += 1
         Future.value(message)
+      } else if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
+        Future.never
       } else {
         val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
         Future.value(rep)

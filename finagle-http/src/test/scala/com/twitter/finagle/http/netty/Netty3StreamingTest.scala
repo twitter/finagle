@@ -8,5 +8,4 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Netty3StreamingTest extends AbstractStreamingTest {
   def impl: Http.HttpImpl = Http.Netty3Impl
-  def featureImplemented(feature: Feature): Boolean = true
 }

@@ -19,13 +19,7 @@ class ClientFailUpgradeTest extends AbstractHttp1EndToEndTest {
 
   // must be lazy for initialization order reasons
   private[this] lazy val unsupported: Set[Feature] = Set(
-    BasicFunctionality,
-    ClientAbort,
-    ResponseClassifier,
-    TooLongStream,
-    Streaming,
-    CloseStream,
-    StreamFixed
+    FirstResponseStream // blocked by https://github.com/netty/netty/issues/5954
   )
 
   def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)
