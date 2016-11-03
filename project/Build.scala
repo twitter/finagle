@@ -215,6 +215,7 @@ object Finagle extends Build {
   ).dependsOn(
     finagleCore,
     finagleHttp,
+    finagleHttp2,
     finagleMySQL,
     finagleMemcached,
     finagleMux,

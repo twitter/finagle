@@ -18,6 +18,9 @@ New Features
     HTTP implementations. Netty 3 is still a default transport used in Finagle's
     `Http.client` and `Http.server`. ```RB_ID=884614``
 
+  * finagle-core: Introduce the `c.t.f.client.DynamicTimeout` module allowing clients
+    to specify call-site specific timeouts. ``RB_ID=885005``
+
   * finagle-thrift: We now depend on a fork of libthrift hosted in the Central Repository.
     The new package lives in the 'com.twitter' organization. This removes the necessity of
     depending on maven.twttr.com. This also means that eviction will not be automatic and
