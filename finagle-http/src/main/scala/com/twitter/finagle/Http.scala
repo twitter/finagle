@@ -3,16 +3,15 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.http._
+import com.twitter.finagle.http.{DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{
-  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport
-}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.{Tracer => _, _}
+import com.twitter.finagle.netty4.http.exp.{Netty4HttpTransporter, Netty4HttpListener}
+import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -74,6 +73,14 @@ object Http extends Client[Request, Response] with HttpRichClient
     Netty3HttpListener
   )
 
+  val Netty4Impl: Http.HttpImpl =
+    Http.HttpImpl(
+      new Netty4ClientStreamTransport(_),
+      new Netty4ServerStreamTransport(_),
+      Netty4HttpTransporter,
+      Netty4HttpListener)
+
+
   private val protocolLibrary = param.ProtocolLibrary("http")
 
   /** exposed for testing */
@@ -87,7 +94,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
 
   /** exposed for testing */
-  private[finagle] val responseClassifierParam: param.ResponseClassifier= {
+  private[finagle] val responseClassifierParam: param.ResponseClassifier = {
     def filtered[A, B](
       predicate: () => Boolean,
       pf: PartialFunction[A, B]
@@ -146,8 +153,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
       params: Stack.Params = Client.params)
     extends StdStackClient[Request, Response, Client]
-    with WithSessionPool[Client]
-    with WithDefaultLoadBalancer[Client] {
+    with param.WithSessionPool[Client]
+    with param.WithDefaultLoadBalancer[Client] {
 
     protected type In = Any
     protected type Out = Any
@@ -238,18 +245,18 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
-    override val withSessionPool: SessionPoolingParams[Client] =
-      new SessionPoolingParams(this)
-    override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
-      new DefaultLoadBalancingParams(this)
-    override val withSessionQualifier: SessionQualificationParams[Client] =
-      new SessionQualificationParams(this)
-    override val withAdmissionControl: ClientAdmissionControlParams[Client] =
-      new ClientAdmissionControlParams(this)
-    override val withSession: ClientSessionParams[Client] =
-      new ClientSessionParams(this)
-    override val withTransport: ClientTransportParams[Client] =
-      new ClientTransportParams(this)
+    override val withSessionPool: param.SessionPoolingParams[Client] =
+      new param.SessionPoolingParams(this)
+    override val withLoadBalancer: param.DefaultLoadBalancingParams[Client] =
+      new param.DefaultLoadBalancingParams(this)
+    override val withSessionQualifier: param.SessionQualificationParams[Client] =
+      new param.SessionQualificationParams(this)
+    override val withAdmissionControl: param.ClientAdmissionControlParams[Client] =
+      new param.ClientAdmissionControlParams(this)
+    override val withSession: param.ClientSessionParams[Client] =
+      new param.ClientSessionParams(this)
+    override val withTransport: param.ClientTransportParams[Client] =
+      new param.ClientTransportParams(this)
 
     override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Client =
      super.withResponseClassifier(responseClassifier)
@@ -313,7 +320,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       transport: Transport[In, Out],
       service: Service[Request, Response]
     ): HttpServerDispatcher = {
-      val Stats(stats) = params[Stats]
+      val param.Stats(stats) = params[param.Stats]
       new HttpServerDispatcher(
         newStreamTransport(transport),
         service,
@@ -381,12 +388,12 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
-    override val withAdmissionControl: ServerAdmissionControlParams[Server] =
-      new ServerAdmissionControlParams(this)
-    override val withTransport: ServerTransportParams[Server] =
-      new ServerTransportParams[Server](this)
-    override val withSession: SessionParams[Server] =
-      new SessionParams(this)
+    override val withAdmissionControl: param.ServerAdmissionControlParams[Server] =
+      new param.ServerAdmissionControlParams(this)
+    override val withTransport: param.ServerTransportParams[Server] =
+      new param.ServerTransportParams[Server](this)
+    override val withSession: param.SessionParams[Server] =
+      new param.SessionParams(this)
 
     override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Server =
       super.withResponseClassifier(responseClassifier)

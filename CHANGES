@@ -13,6 +13,11 @@ New Features
   * finagle: Most libraries (excluding finagle-thrift{,mux}) no longer need to
     add an additional resolver that points to maven.twttr.com. ``RB_ID=878967``
 
+  * finagle: Introducing a new Finagle module `finagle-base-http` that provides
+    a common ground for both Netty 3 (`finagle-http`) and Netty 4 (`finagle-netty4-http`)
+    HTTP implementations. Netty 3 is still a default transport used in Finagle's
+    `Http.client` and `Http.server`. ```RB_ID=884614``
+
   * finagle-thrift: We now depend on a fork of libthrift hosted in the Central Repository.
     The new package lives in the 'com.twitter' organization. This removes the necessity of
     depending on maven.twttr.com. This also means that eviction will not be automatic and

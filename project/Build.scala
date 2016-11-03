@@ -177,6 +177,7 @@ object Finagle extends Build {
 
     // Protocols
     finagleHttp,
+    finagleBaseHttp,
     finagleHttp2,
     finagleHttpCompat,
     finagleStream,
@@ -418,9 +419,21 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       guavaLib
     )
-  ).dependsOn(
-    finagleCore,
-    finagleToggle)
+  ).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleToggle)
+
+  lazy val finagleBaseHttp = Project(
+    id = "finagle-base-http",
+    base = file("finagle-base-http"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-base-http",
+    libraryDependencies ++= Seq(
+      util("collection"),
+      util("logging"),
+      "commons-lang" % "commons-lang" % "2.6"
+    )
+  ).dependsOn(finagleCore)
 
   lazy val finagleNetty4Http = Project(
     id = "finagle-netty4-http",
@@ -434,7 +447,7 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       netty4Http
     )
-  ).dependsOn(finagleCore, finagleNetty4, finagleHttp % "test->test;compile->compile")
+  ).dependsOn(finagleNetty4, finagleBaseHttp)
 
   lazy val finagleHttp2 = Project(
     id = "finagle-http2",

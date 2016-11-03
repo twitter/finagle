@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.{Http, http}
+import com.twitter.finagle.http
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
@@ -135,11 +135,4 @@ object exp {
         pipelineInit = ServerPipelineInit(params)
       )
     }
-
-  val Netty4Impl: Http.HttpImpl =
-    Http.HttpImpl(
-      new Netty4ClientStreamTransport(_),
-      new Netty4ServerStreamTransport(_),
-      Netty4HttpTransporter,
-      Netty4HttpListener)
 }

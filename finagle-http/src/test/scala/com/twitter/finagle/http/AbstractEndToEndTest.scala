@@ -59,7 +59,6 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf = Buf.Utf8(msg)
-
   def implName: String
   def clientImpl(): finagle.Http.Client
   def serverImpl(): finagle.Http.Server
