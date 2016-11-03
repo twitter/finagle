@@ -3,9 +3,9 @@ package com.twitter.finagle.redis.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.RedisClientTest
-import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
-import com.twitter.finagle.redis.util.StringToBuf
-import com.twitter.util.{Return, Await}
+import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
+import com.twitter.io.Buf
+import com.twitter.util.{Await, Return}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -16,11 +16,11 @@ final class TopologyClientIntegrationSuite extends RedisClientTest {
 
   val TIMEOUT = 10.seconds
 
-  protected val bufKey = StringToBuf("1234")
-  protected val bufVal = StringToBuf("5")
-  protected val bufKeyNonNumeric = StringToBuf("asdf")
-  protected val bufValNonNumeric = StringToBuf("g")
-  protected val bufValLarge = StringToBuf("99999")  // a value >= #databases (configured in redis)
+  protected val bufKey = Buf.Utf8("1234")
+  protected val bufVal = Buf.Utf8("5")
+  protected val bufKeyNonNumeric = Buf.Utf8("asdf")
+  protected val bufValNonNumeric = Buf.Utf8("g")
+  protected val bufValLarge = Buf.Utf8("99999")  // a value >= #databases (configured in redis)
 
   test("Correctly perform TOPOLOGYADD", RedisTest, ClientTest) {
     withRedisClient { client =>

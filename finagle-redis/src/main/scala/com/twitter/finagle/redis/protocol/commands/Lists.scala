@@ -1,17 +1,14 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
-import com.twitter.finagle.redis.util._
 
 case class LLen(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.LLEN
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.LLEN, key))
+  def name: Buf = Command.LLEN
 }
 
 case class LIndex(key: Buf, index: Long) extends StrictKeyCommand {
-  def command: String = Commands.LINDEX
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.LINDEX, key, StringToBuf(index.toString)))
+  def name: Buf = Command.LINDEX
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString))
 }
 
 case class LInsert(
@@ -22,67 +19,56 @@ case class LInsert(
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def command: String = Commands.LINSERT
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(
-    Seq(CommandBytes.LINSERT, key, StringToBuf(relativePosition), pivot, value)
-  )
+  def name: Buf = Command.LINSERT
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(relativePosition), pivot, value)
 }
 
 case class LPop(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.LPOP
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.LPOP, key))
+  def name: Buf = Command.LPOP
 }
 
 case class LPush(key: Buf, values: Seq[Buf]) extends StrictKeyCommand {
   RequireClientProtocol(values.nonEmpty, "values must not be empty")
-  def command: String = Commands.LPUSH
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.LPUSH, key) ++ values)
+  def name: Buf = Command.LPUSH
+  override def body: Seq[Buf] = key +: values
 }
 
 case class LRem(key: Buf, count: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def command: String = Commands.LREM
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.LREM, key, StringToBuf(count.toString), value))
+  def name: Buf = Command.LREM
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(count.toString), value)
 }
 
 case class LSet(key: Buf, index: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def command: String = Commands.LSET
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.LSET, key, StringToBuf(index.toString), value))
+  def name: Buf = Command.LSET
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString), value)
 }
 
 case class LRange(key: Buf, start: Long, end: Long) extends ListRangeCommand {
-  def command: String = Commands.LRANGE
+  def name: Buf = Command.LRANGE
 }
 
 case class RPop(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.RPOP
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.RPOP, key))
+  def name: Buf = Command.RPOP
 }
 
 case class RPush(key: Buf, values: List[Buf]) extends StrictKeyCommand {
-  def command: String = Commands.RPUSH
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.RPUSH, key) ++ values)
+  def name: Buf = Command.RPUSH
+  override def body: Seq[Buf] = key +: values
 }
 
 case class LTrim(key: Buf, start: Long, end: Long) extends ListRangeCommand {
-  def command: String = Commands.LTRIM
+  def name: Buf = Command.LTRIM
 }
 
 trait ListRangeCommand extends StrictKeyCommand {
   def start: Long
   def end: Long
 
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(
-    StringToBuf(command),
-    key,
-    StringToBuf(start.toString),
-    StringToBuf(end.toString)
-  ))
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(start.toString), Buf.Utf8(end.toString))
 }

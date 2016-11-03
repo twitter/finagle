@@ -75,6 +75,13 @@ Breaking API Changes
     - Both `Command.key` and `Command.value` now implemented in terms of `Buf`s
       (no `ChannelBuffer`s).
 
+  * finagle-redis: An API around `c.t.f.redis.protocol.Command` was modernized as part of
+    major restructuring required for the Netty 4 adoption. ``RB_ID=885811``
+
+    - `RedisMessage` (a common parent for both `Command` and `Reply`) has been removed.
+
+    - The encoding machinery was restructured to eliminate duplicated and dead code.
+
   * finagle-http: As part of the first step towards restructuring Finagle HTTP modules
     required for Netty 4 adoption, HTTP params are moved from the inner object `c.t.f.Http.param`
     into their own package `c.t.f.http.param`.  ``RB_ID=885155``

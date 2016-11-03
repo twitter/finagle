@@ -9,8 +9,7 @@ object RequireServerProtocol extends ErrorConversion {
   override def getException(msg: String) = new ServerError(msg)
 }
 
-sealed abstract class Reply extends RedisMessage
-
+sealed abstract class Reply
 sealed abstract class SingleLineReply extends Reply // starts with +,-, or :
 sealed abstract class MultiLineReply extends Reply
 

@@ -1,46 +1,41 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.io.{Charsets, Buf}
+import com.twitter.io.Buf
 
 case class Eval(script: Buf, keys: Seq[Buf], argv: Seq[Buf])
   extends ScriptCommand
   with KeysCommand {
 
-  def command: String = Commands.EVAL
-  def toBuf: Buf = {
-    val nKeys = Buf.Utf8(keys.length.toString)
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.EVAL, script, nKeys) ++ keys ++ argv)
-  }
+  def name: Buf = Command.EVAL
+  override def body: Seq[Buf] = Seq(script, Buf.Utf8(keys.length.toString)) ++ keys ++ argv
 }
 
 case class EvalSha(sha: Buf, keys: Seq[Buf], argv: Seq[Buf])
   extends ScriptDigestCommand
   with KeysCommand {
 
-  def command: String = Commands.EVALSHA
-  def toBuf: Buf = {
-    val nKeys = Buf.Utf8(keys.length.toString)
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.EVALSHA, sha, nKeys) ++ keys ++ argv)
-  }
+  def name: Buf = Command.EVALSHA
+  override def body: Seq[Buf] = Seq(sha, Buf.Utf8(keys.length.toString)) ++ keys ++ argv
 }
 
 case class ScriptExists(digests: Seq[Buf]) extends Command {
-  def command: String = Commands.SCRIPTEXISTS
-  def toBuf: Buf =
+  def name: Buf = Command.SCRIPT
+  override def body: Seq[Buf] =
     // "SCRIPT EXISTS" is actually a subcommand, so we have to send "SCRIPT" and "EXISTS" separately
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.SCRIPT, CommandBytes.EXISTS) ++ digests)
+    Buf.Utf8("EXISTS") +: digests
 }
 
 object ScriptFlush extends Command {
-  def command: String = Commands.SCRIPTFLUSH
-  def toBuf: Buf =
+  def name: Buf = Command.SCRIPT
+  override def body: Seq[Buf] =
     // "SCRIPT FLUSH" is actually a subcommand, so we have to send "SCRIPT" and "EXISTS" separately
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.SCRIPT, CommandBytes.FLUSH))
+    Seq(Buf.Utf8("FLUSH"))
+
 }
 
 case class ScriptLoad(script: Buf) extends ScriptCommand {
-  def command: String = Commands.SCRIPTLOAD
-  def toBuf: Buf =
+  def name: Buf = Command.SCRIPT
+  override def body: Seq[Buf] =
     // "SCRIPT LOAD" is actually a subcommand, so we have to send "SCRIPT" and "EXISTS" separately
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.SCRIPT, CommandBytes.LOAD, script))
+    Seq(Buf.Utf8("LOAD"), script)
 }

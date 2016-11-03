@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{StringToBuf, BufToString}
+import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Futures, NonFatal, Throw, Timer}
@@ -14,12 +14,12 @@ import scala.collection.JavaConverters._
 object SubscribeCommands {
 
   object MessageBytes {
-    val SUBSCRIBE = StringToBuf("subscribe")
-    val UNSUBSCRIBE = StringToBuf("unsubscribe")
-    val PSUBSCRIBE = StringToBuf("psubscribe")
-    val PUNSUBSCRIBE = StringToBuf("punsubscribe")
-    val MESSAGE = StringToBuf("message")
-    val PMESSAGE = StringToBuf("pmessage")
+    val SUBSCRIBE: Buf = Buf.Utf8("subscribe")
+    val UNSUBSCRIBE: Buf = Buf.Utf8("unsubscribe")
+    val PSUBSCRIBE: Buf = Buf.Utf8("psubscribe")
+    val PUNSUBSCRIBE: Buf = Buf.Utf8("punsubscribe")
+    val MESSAGE: Buf = Buf.Utf8("message")
+    val PMESSAGE: Buf = Buf.Utf8("pmessage")
   }
 }
 

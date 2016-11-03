@@ -19,12 +19,12 @@ trait RedisTest extends FunSuite {
 
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
 
-  protected val bufFoo = StringToBuf("foo")
-  protected val bufBar = StringToBuf("bar")
-  protected val bufBaz = StringToBuf("baz")
-  protected val bufBoo = StringToBuf("boo")
-  protected val bufMoo = StringToBuf("moo")
-  protected val bufNum = StringToBuf("num")
+  protected val bufFoo = Buf.Utf8("foo")
+  protected val bufBar = Buf.Utf8("bar")
+  protected val bufBaz = Buf.Utf8("baz")
+  protected val bufBoo = Buf.Utf8("boo")
+  protected val bufMoo = Buf.Utf8("moo")
+  protected val bufNum = Buf.Utf8("num")
 
   def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second): T =
     Await.result(awaitable, timeout)
@@ -94,10 +94,10 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
 
   def genAgregate: Gen[Aggregate] = Gen.oneOf(Aggregate.Max, Aggregate.Min, Aggregate.Sum)
 
-  implicit val arbitraryAgregate: Arbitrary[Aggregate] = Arbitrary(genAgregate)
+  implicit val arbitraryAggregate: Arbitrary[Aggregate] = Arbitrary(genAgregate)
 
   def encode(c: Command): Seq[String] = {
-    val strings = BufToString(c.toBuf).split("\r\n")
+    val strings = BufToString(Command.encode(c)).split("\r\n")
 
     val length = strings.head.toList match {
       case '*' :: rest => rest.mkString.toInt
@@ -195,7 +195,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
-  implicit def s2b(s: String): Buf = StringToBuf(s)
+  implicit def s2b(s: String): Buf = Buf.Utf8(s)
   implicit def b2s(b: Buf): String = BufToString(b)
 
   override def beforeAll(): Unit = RedisCluster.start()

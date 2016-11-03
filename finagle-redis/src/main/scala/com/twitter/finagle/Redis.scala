@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty3.{ChannelBufferBuf, Netty3Transporter}
+import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
@@ -71,7 +71,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(
-        transport.map(_.toBuf, identity),
+        transport.map(Command.encode, identity),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 

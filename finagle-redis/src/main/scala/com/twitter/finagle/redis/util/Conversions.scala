@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis.util
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.io.{Buf, Charsets}
 import java.nio.charset.Charset
@@ -44,6 +43,7 @@ object StringToBytes {
       arg.getBytes(charset)
     }
 }
+
 object StringToChannelBuffer {
   def apply(string: String, charset: Charset = Charsets.Utf8) = {
     ChannelBuffers.wrappedBuffer(string.getBytes(charset))
@@ -117,16 +117,13 @@ object ReplyFormat {
     }
   }
 
-  def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] =
-    toBuf(items).map(ChannelBufferBuf.Owned.extract(_))
-
   def toBuf(items: List[Reply]): List[Buf] = {
     items flatMap {
       case BulkReply(message)   => List(message)
       case EmptyBulkReply       => EmptyBulkReplyChannelBuffer
       case IntegerReply(id)     => List(Buf.ByteArray.Owned(Array(id.toByte)))
-      case StatusReply(message) => List(StringToBuf(message))
-      case ErrorReply(message)  => List(StringToBuf(message))
+      case StatusReply(message) => List(Buf.Utf8(message))
+      case ErrorReply(message)  => List(Buf.Utf8(message))
       case MBulkReply(messages) => ReplyFormat.toBuf(messages)
       case EmptyMBulkReply      => EmptyBulkReplyChannelBuffer
       case _                    => Nil

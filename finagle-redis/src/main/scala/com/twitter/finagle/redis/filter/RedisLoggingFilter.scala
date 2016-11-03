@@ -2,6 +2,7 @@ package com.twitter.finagle.redis.filter
 
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.util.BufToString
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Future
 
@@ -18,9 +19,9 @@ private[redis] class RedisLoggingFilter(stats: StatsReceiver) extends SimpleFilt
            | EmptyBulkReply
            | MBulkReply(_)
            | NilMBulkReply
-           | EmptyMBulkReply   => succ.counter(command.command).incr()
-      case ErrorReply(message) => error.counter(command.command).incr()
-      case _                   => error.counter(command.command).incr()
+           | EmptyMBulkReply   => succ.counter(BufToString(command.name)).incr()
+      case ErrorReply(message) => error.counter(BufToString(command.name)).incr()
+      case _                   => error.counter(BufToString(command.name)).incr()
     }
   }
 }
