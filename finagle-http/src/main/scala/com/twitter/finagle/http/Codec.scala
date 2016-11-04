@@ -11,10 +11,10 @@ import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3Server
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{NonFatal, Closable, StorageUnit, Try}
+import com.twitter.util.{Closable, NonFatal, StorageUnit}
+import java.lang.{Long => JLong}
 import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
-
 
 /**
  * a HttpChunkAggregator which recovers decode failures into 4xx http responses
@@ -294,6 +294,10 @@ object HttpTracing {
 
     val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
+
+    /** exposed for testing */
+    private[http] def hasAllRequired(headers: HeaderMap): Boolean =
+      headers.contains(Header.TraceId) && headers.contains(Header.SpanId)
   }
 
   /** Java compatibility API for [[Header]]. */
@@ -313,39 +317,57 @@ object HttpTracing {
 private object TraceInfo {
   import HttpTracing._
 
+  private[this] def removeAllHeaders(headers: HeaderMap): Unit = {
+    val iter = Header.All.iterator
+    while (iter.hasNext)
+      headers -= iter.next()
+  }
+
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
-    val id = if (Header.Required.forall { request.headers.contains(_) }) {
-      val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
+    val id =
+      if (Header.hasAllRequired(request.headerMap)) {
+        val spanId = SpanId.fromString(request.headerMap(Header.SpanId))
 
-      spanId map { sid =>
-        val traceId = SpanId.fromString(request.headers.get(Header.TraceId))
-        val parentSpanId = SpanId.fromString(request.headers.get(Header.ParentSpanId))
+        spanId match {
+          case None => None
+          case Some(sid) =>
+            val traceId = SpanId.fromString(request.headerMap(Header.TraceId))
+            val parentSpanId =
+              if (request.headerMap.contains(Header.ParentSpanId))
+                SpanId.fromString(request.headerMap(Header.ParentSpanId))
+              else
+                None
 
-        val sampled = Option(request.headers.get(Header.Sampled)) flatMap { sampled =>
-          Try(sampled.toBoolean).toOption
+            val sampled = if (!request.headerMap.contains(Header.Sampled)) {
+              None
+            } else {
+              try Some(request.headerMap(Header.Sampled).toBoolean)
+              catch { case _: IllegalArgumentException =>
+                None
+              }
+            }
+
+            val flags = getFlags(request)
+            Some(TraceId(traceId, parentSpanId, sid, sampled, flags))
         }
-
-        val flags = getFlags(request)
-        TraceId(traceId, parentSpanId, sid, sampled, flags)
+      } else if (request.headerMap.contains(Header.Flags)) {
+        // even if there are no id headers we want to get the debug flag
+        // this is to allow developers to just set the debug flag to ensure their
+        // trace is collected
+        Some(Trace.nextId.copy(flags = getFlags(request)))
+      } else {
+        Some(Trace.nextId)
       }
-    } else if (request.headers.contains(Header.Flags)) {
-      // even if there are no id headers we want to get the debug flag
-      // this is to allow developers to just set the debug flag to ensure their
-      // trace is collected
-      Some(Trace.nextId.copy(flags = getFlags(request)))
-    } else {
-      Some(Trace.nextId)
-    }
 
     // remove so the header is not visible to users
-    Header.All foreach { request.headers.remove(_) }
+    removeAllHeaders(request.headerMap)
 
     id match {
-      case Some(id) =>
-        Trace.letId(id) {
-    traceRpc(request)
+      case Some(tid) =>
+        Trace.letId(tid) {
+          traceRpc(request)
           f
-  }
+        }
       case None =>
         traceRpc(request)
         f
@@ -353,27 +375,31 @@ private object TraceInfo {
   }
 
   def setClientRequestHeaders(request: Request): Unit = {
-    Header.All.foreach { request.headers.remove(_) }
+    removeAllHeaders(request.headerMap)
 
     val traceId = Trace.id
-    request.headers.add(Header.TraceId, traceId.traceId.toString)
-    request.headers.add(Header.SpanId, traceId.spanId.toString)
+    request.headerMap.add(Header.TraceId, traceId.traceId.toString)
+    request.headerMap.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
-    traceId._parentId.foreach { id =>
-      request.headers.add(Header.ParentSpanId, id.toString)
+    traceId._parentId match {
+      case Some(id) =>
+        request.headerMap.add(Header.ParentSpanId, id.toString)
+      case None => ()
     }
     // three states of sampled, yes, no or none (let the server decide)
-    traceId.sampled.foreach { sampled =>
-      request.headers.add(Header.Sampled, sampled.toString)
+    traceId.sampled match {
+      case Some(sampled) =>
+        request.headerMap.add(Header.Sampled, sampled.toString)
+      case None => ()
     }
-    request.headers.add(Header.Flags, traceId.flags.toLong)
+    request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
     traceRpc(request)
   }
 
   def traceRpc(request: Request): Unit = {
     if (Trace.isActivelyTracing) {
-      Trace.recordRpc(request.getMethod.getName)
-      Trace.recordBinary("http.uri", stripParameters(request.getUri))
+      Trace.recordRpc(request.method.toString)
+      Trace.recordBinary("http.uri", stripParameters(request.uri))
     }
   }
 
@@ -381,20 +407,27 @@ private object TraceInfo {
    * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
    */
   def getFlags(request: Request): Flags = {
-    try {
-      Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
-    } catch {
-      case _: Throwable => Flags()
+    if (!request.headerMap.contains(Header.Flags)) {
+      Flags()
+    } else {
+      try Flags(JLong.parseLong(request.headerMap(Header.Flags)))
+      catch {
+        case _: NumberFormatException => Flags()
+      }
     }
   }
 }
 
 private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]
   extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
-  val role = TraceInitializerFilter.role
-  val description = "Initialize the tracing system with trace info from the incoming request"
+  val role: Stack.Role = TraceInitializerFilter.role
+  val description: String =
+    "Initialize the tracing system with trace info from the incoming request"
 
-  def make(_tracer: finagle.param.Tracer, next: ServiceFactory[Req, Rep]) = {
+  def make(
+    _tracer: finagle.param.Tracer,
+    next: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = {
     val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracer(tracer) {
@@ -407,9 +440,13 @@ private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]
 
 private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
   extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
-  val role = TraceInitializerFilter.role
-  val description = "Sets the next TraceId and attaches trace information to the outgoing request"
-  def make(_tracer: finagle.param.Tracer, next: ServiceFactory[Req, Rep]) = {
+  val role: Stack.Role = TraceInitializerFilter.role
+  val description: String =
+    "Sets the next TraceId and attaches trace information to the outgoing request"
+  def make(
+    _tracer: finagle.param.Tracer,
+    next: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = {
     val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracerAndNextId(tracer) {
@@ -418,31 +455,5 @@ private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
       }
     }
     traceInitializer.andThen(next)
-  }
-}
-
-/**
- * Pass along headers with the required tracing information.
- */
-private[finagle] class HttpClientTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
-
-  def apply(request: Req, service: Service[Req, Res]) = {
-    TraceInfo.setClientRequestHeaders(request)
-    service(request)
-  }
-}
-
-/**
- * Adds tracing annotations for each http request we receive.
- * Including uri, when request was sent and when it was received.
- */
-private[finagle] class HttpServerTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
-  def apply(request: Req, service: Service[Req, Res]) =
-    TraceInfo.letTraceIdFromRequestHeaders(request) {
-    service(request)
   }
 }
