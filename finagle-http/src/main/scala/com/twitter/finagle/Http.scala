@@ -3,11 +3,16 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.http.{DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
+import com.twitter.finagle.http.{
+  DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request,
+  Response, Toggles
+}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{
+  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport
+}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpTransporter, Netty4HttpListener}
@@ -15,6 +20,7 @@ import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4Serve
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
@@ -45,6 +51,12 @@ trait HttpRichClient { self: Client[Request, Response] =>
 object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
+  // Toggles transport implementation to Netty 4.
+  private[this] object useNetty4 {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseNetty4")
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
+
   /**
    * configure alternative http 1.1 implementations
    *
@@ -63,7 +75,9 @@ object Http extends Client[Request, Response] with HttpRichClient
   }
 
   object HttpImpl {
-    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty3Impl)
+    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(
+      if (useNetty4()) Netty4Impl else Netty3Impl
+    )
   }
 
   private[finagle] val Netty3Impl: HttpImpl = HttpImpl(
@@ -79,7 +93,6 @@ object Http extends Client[Request, Response] with HttpRichClient
       new Netty4ServerStreamTransport(_),
       Netty4HttpTransporter,
       Netty4HttpListener)
-
 
   private val protocolLibrary = param.ProtocolLibrary("http")
 
