@@ -1,4 +1,4 @@
-java_thrift_library(name='thrift',
+java_thrift_library(
   provides = artifact(
     org = 'com.twitter',
     name = 'finagle-thrift-thrift',

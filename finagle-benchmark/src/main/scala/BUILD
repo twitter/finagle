@@ -1,4 +1,4 @@
-scala_library(name='scala',
+scala_library(
   dependencies=[
     '3rdparty/jvm/org/apache/curator:curator-framework',
     '3rdparty/jvm/org/apache/curator:curator-test',

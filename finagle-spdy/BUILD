@@ -1,4 +1,4 @@
-target(name='finagle-spdy',
+target(
   dependencies=[
     'finagle/finagle-spdy/src/main/scala'
   ]

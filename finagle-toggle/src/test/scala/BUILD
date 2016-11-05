@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations',
     '3rdparty/jvm/junit',

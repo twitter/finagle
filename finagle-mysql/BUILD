@@ -1,4 +1,4 @@
-target(name='finagle-mysql',
+target(
   dependencies=[
     'finagle/finagle-mysql/src/main/scala'
   ]

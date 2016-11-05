@@ -1,4 +1,4 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     'finagle/finagle-mux',
     'util/util-core',

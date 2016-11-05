@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     ':silly-thrift-dep',
     '3rdparty/jvm/com/google/guava:guava',

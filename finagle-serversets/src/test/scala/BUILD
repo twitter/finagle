@@ -1,4 +1,4 @@
-target(name='scala',
+target(
   dependencies=[
     ':client',
     ':defaultloader',

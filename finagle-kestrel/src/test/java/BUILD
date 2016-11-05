@@ -1,4 +1,4 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/org/scala-lang:scala-library',
     '3rdparty/jvm/junit',

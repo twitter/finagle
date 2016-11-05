@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/com/google/guava',

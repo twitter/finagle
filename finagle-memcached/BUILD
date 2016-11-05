@@ -1,4 +1,4 @@
-target(name='finagle-memcached',
+target(
   dependencies=[
     'finagle/finagle-memcached/src/main/java',
     'finagle/finagle-memcached/src/main/scala'

@@ -1,4 +1,4 @@
-target(name='finagle-ostrich4',
+target(
   dependencies=[
     'finagle/finagle-ostrich4/src/main/scala'
   ]
