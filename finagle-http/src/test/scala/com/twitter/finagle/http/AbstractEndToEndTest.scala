@@ -37,6 +37,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   object Streaming extends Feature
   object FirstResponseStream extends Feature
   object TooLongStream extends Feature
+  object TooLargePayloads extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -210,7 +211,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    test(implName + ": return 413s for fixed-length requests with too large payloads") {
+    testIfImplemented(TooLargePayloads)(implName + ": return 413s for fixed-length requests with too large payloads") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
