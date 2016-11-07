@@ -101,7 +101,7 @@ case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] 
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+      case Some(pattern) => withCount ++ Seq(CommandBytes.MATCH, pattern)
       case None          => withCount
     }
     RedisCodec.toUnifiedBuf(withPattern)
@@ -117,3 +117,4 @@ case class Type(key: Buf) extends StrictKeyCommand {
   def command: String = Commands.TYPE
   def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.TYPE, key))
 }
+

@@ -139,12 +139,13 @@ object Count {
 }
 
 
-object Pattern {
+object Match {
   def apply(args: Seq[String]): Option[String] = {
     RequireClientProtocol(
       args != null && !args.isEmpty,
       "AGGREGATE can not be specified with empty list")
     args.head.toUpperCase match {
+      case Commands.MATCH => Some(args(1))
       case Commands.AGGREGATE => Some(args(1))
       case _ => None
     }

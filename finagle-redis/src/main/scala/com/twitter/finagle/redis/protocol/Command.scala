@@ -174,7 +174,7 @@ object Commands {
   val WEIGHTS           = "WEIGHTS"
   val AGGREGATE         = "AGGREGATE"
   val COUNT             = "COUNT"
-  val PATTERN           = "PATTERN"
+  val MATCH             = "MATCH"
 }
 
 object CommandBytes {
@@ -340,5 +340,5 @@ object CommandBytes {
   val WEIGHTS           = StringToBuf("WEIGHTS")
   val AGGREGATE         = StringToBuf("AGGREGATE")
   val COUNT             = StringToBuf("COUNT")
-  val PATTERN           = StringToBuf("PATTERN")
+  val MATCH             = StringToBuf("MATCH")
 }
