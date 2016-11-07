@@ -47,10 +47,6 @@ package object netty4 {
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
-  // this forces netty to use a "cleaner" for direct byte buffers
-  // which we need as long as we don't release them.
-  System.setProperty("io.netty.maxDirectMemory", "0")
-
   // We allocate one arena per a worker thread to reduce contention. By default
   // this will be equal to the number of logical cores * 2.
   //
