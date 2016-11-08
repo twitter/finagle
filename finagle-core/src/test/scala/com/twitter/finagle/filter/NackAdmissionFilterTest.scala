@@ -248,7 +248,7 @@ class NackAdmissionFilterTest extends FunSuite {
     }
 
     // Should be very high now.
-    assert(filter.emaValue > 0.9999)
+    assert(filter.emaValue > 0.9)
     testGetSuccessfulResponse()
   }
 
