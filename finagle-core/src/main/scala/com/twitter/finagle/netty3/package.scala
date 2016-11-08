@@ -33,5 +33,5 @@ package object netty3 {
     Executors.newCachedThreadPool(threadFactory)
   }
 
-  private[netty3] val WorkerPool: NioWorkerPool = new NioWorkerPool(Executor, numWorkers())
+  val WorkerPool: NioWorkerPool = new NioWorkerPool(Executor, numWorkers())
 }
