@@ -1,6 +1,5 @@
 junit_tests(
   dependencies=[
-    ':silly-thrift-dep',
     '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
@@ -23,10 +22,4 @@ junit_tests(
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
-)
-
-jar_library(name='silly-thrift-dep',
-  jars=[
-    jar(org='silly', name='silly-thrift', rev='0.5.0'),
-  ],
 )

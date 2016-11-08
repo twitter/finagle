@@ -502,7 +502,6 @@ object Finagle extends Build {
     name := "finagle-thrift",
     libraryDependencies ++=
       Seq(
-        "silly" % "silly-thrift" % "0.5.0" % "test",
         "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore, finagleNetty4, finagleToggle)
 
