@@ -19,6 +19,12 @@ class HostMetricsExporter(val registry: Metrics)
 {
   def this() = this(MetricsStatsReceiver.defaultHostRegistry)
   val pattern = "/admin/per_host_metrics.json"
+  override def route: Route = Route(
+    pattern = this.pattern,
+    handler = this,
+    index = Some(RouteIndex(
+      alias = "Per Host Metrics",
+      group = "Metrics")))
 
   override def apply(request: Request): Future[Response] = {
     if (perHostStats()) {
