@@ -4,19 +4,12 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.util.{Future, Time, Await}
 import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, Tag}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
-
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
-    super.test(testName, testTags:_*) {
-      factories = Map.empty
-      news = Map.empty
-    }
-  }
 
   var factories: Map[Int, Int] = Map.empty
   var news: Map[Int, Int] = Map.empty
@@ -48,7 +41,6 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
 
   test("cache, evict") (Time.withCurrentTimeFrozen { tc  =>
-
     val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
     val cache = new ServiceFactoryCache[Int, String, String](newFactory, maxCacheSize=2)
 

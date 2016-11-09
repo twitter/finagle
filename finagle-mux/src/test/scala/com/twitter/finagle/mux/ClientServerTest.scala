@@ -18,6 +18,7 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.mockito.stubbing.Answer
+import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
@@ -86,7 +87,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   // Push a tracer for the client.
-  override def test(testName: String, testTags: Tag*)(f: => Unit): Unit =
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit =
     super.test(testName, testTags:_*) {
       Trace.letTracer(tracer)(f)
     }

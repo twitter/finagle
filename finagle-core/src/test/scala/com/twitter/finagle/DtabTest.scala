@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Assertion}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
@@ -10,10 +10,8 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
   def pathTree(t: String) =
     NameTree.read(t).map(Name(_))
 
-  def assertEquiv[T: Equiv](left: T, right: T) = assert(
-    if (Equiv[T].equiv(left, right)) None
-    else Some(left + "!=" + right)
-  )
+  def assertEquiv[T: Equiv](left: T, right: T): Assertion =
+    assert(Equiv[T].equiv(left, right), left + "!=" + right)
 
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")

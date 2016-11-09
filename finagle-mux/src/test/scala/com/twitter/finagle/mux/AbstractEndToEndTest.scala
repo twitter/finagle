@@ -16,6 +16,7 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
+import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
@@ -44,7 +45,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
     super.test(testName, testTags:_*) {
       mux.sessionFailureDetector.let("none") { f }
     }
