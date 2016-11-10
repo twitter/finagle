@@ -26,6 +26,10 @@ object Generators {
     usec <- Gen.choose(0L, 24L * 60 * 60 * 1000000 - 1)
   } yield LocalTime.ofNanoOfDay(usec * 1000))
 
+  implicit val arbInstant = Arbitrary[Instant](for {
+    milli <- Gen.posNum[Long]
+  } yield Instant.ofEpochMilli(milli))
+
   implicit val arbTimestamp = Arbitrary[LocalDateTime](for {
     milli <- Gen.posNum[Long]
   } yield LocalDateTime.ofInstant(Instant.ofEpochMilli(milli), ZoneId.systemDefault()))

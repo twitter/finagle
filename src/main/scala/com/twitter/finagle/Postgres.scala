@@ -13,9 +13,22 @@ import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Return, Throw, Try}
+import com.twitter.logging.Logger
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 object Postgres {
+
+  object PostgresDefaultMonitor extends com.twitter.util.Monitor {
+    val log = Logger(getClass)
+    def handle(exc: Throwable): Boolean = exc match {
+      case ServerError(_, _, _, Some(sqlState), _, _, _) if !(sqlState startsWith "XX") =>
+        // typically, a ServerError isn't critical and is often expected
+        // it will be logged in the Debug level for visibility without too much noise in production
+        log.debug(exc, "ServerError acknowledged by PostgresDefaultMonitor")
+        true
+      case _ => false
+    }
+  }
 
   abstract class RequiredParam[T](name: String) extends Param[T] {
     def default = throw new IllegalArgumentException(s"$name must be defined")
@@ -43,8 +56,12 @@ object Postgres {
   object BinaryParams { implicit val param = Param(BinaryParams(false)) }
 
   private def defaultParams = StackClient.defaultParams +
-    ProtocolLibrary("postgresql") + Label("postgres") + FailFast(false) + param.ResponseClassifier(responseClassifier) +
-    Retries.Policy(retryPolicy)
+    ProtocolLibrary("postgresql") +
+    Label("postgres") +
+    FailFast(false) +
+    param.ResponseClassifier(defaultResponseClassifier) +
+    Retries.Policy(defaultRetryPolicy) +
+    Monitor(PostgresDefaultMonitor)
 
   private def defaultStack = StackClient.newStack[PgRequest, PgResponse]
     .replace(StackClient.Role.prepConn, PrepConnection)
@@ -158,14 +175,49 @@ object Postgres {
     }
   }
 
-  private val responseClassifier: service.ResponseClassifier = {
+  private object SqlState {
+    def unapply(err: Throwable): Option[String] = err match {
+      case ServerError(_, _, _, sqlState, _, _, _) => sqlState
+      case _ => None
+    }
+  }
+
+  private object Retryable {
+    def unapply(err: Throwable): Option[Throwable] = err match {
+      // Class 53 - Insufficient resources (can be retried)
+      case SqlState(sqlState) if sqlState startsWith "53" => Some(err)
+      // Class 08 - Connection exception (can be retried)
+      case SqlState(sqlState) if sqlState startsWith "08" => Some(err)
+      case _ => None
+    }
+  }
+
+  // The response classifier is used by FailureAccrual; any error that doesn't indicate bad health of the
+  // endpoint must be classified as a success or it will cause the endpoint to be marked as dead.
+  // Connection problems and resource errors (which are retryable) are considered failures, along with
+  // errors indicating the server is in a bad state. Other ServerErrors are considered successful, even though they
+  // are failures - this is to prevent them from improperly triggering FailureAccrual to mark the endpoint as dead.
+  private val defaultResponseClassifier: service.ResponseClassifier = {
     case ReqRep(a, Return(_)) => ResponseClass.Success
-    case ReqRep(a, Throw(ServerError(_, _, _, Some(_), _, _, _))) => ResponseClass.Success
+
+    // Retryable ServerErrors - these should be retryable, but currently we can't actually retry anything
+    // this is because an individual protocol message can't be retried - the entire message flow since the last
+    // sync() would have to be captured and retried.
+    // TODO: track this in the prepared statement
+    case ReqRep(a, Throw(Retryable(_))) => ResponseClass.NonRetryableFailure
+    // Critical errors in the server
+    case ReqRep(a, Throw(SqlState(sqlState))) if sqlState startsWith "XX" => ResponseClass.NonRetryableFailure
+    case ReqRep(a, Throw(SqlState(sqlState))) if sqlState startsWith "58" => ResponseClass.NonRetryableFailure
+    // Operator intervention - these should be failures as well
+    case ReqRep(a, Throw(SqlState(sqlState))) if sqlState startsWith "57" => ResponseClass.NonRetryableFailure
+    case ReqRep(a, Throw(SqlState(_)))    => ResponseClass.Success
     case ReqRep(a, Throw(ClientError(_))) => ResponseClass.Success
   }
 
-  private val retryPolicy = RetryPolicy.backoff(
-    Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5)))(
-    RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly)
+  private val defaultBackoff = Backoff.exponential(Duration.fromMilliseconds(50), 2, Duration.fromSeconds(5))
+
+  private val defaultRetryPolicy = RetryPolicy.backoff(defaultBackoff) {
+    RetryPolicy.TimeoutAndWriteExceptionsOnly orElse RetryPolicy.ChannelClosedExceptionsOnly
+  }
 
 }

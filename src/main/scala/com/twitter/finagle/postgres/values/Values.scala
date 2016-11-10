@@ -2,6 +2,7 @@ package com.twitter.finagle.postgres.values
 
 import java.net.InetAddress
 import java.nio.charset.{Charset, StandardCharsets}
+import java.sql.Timestamp
 import java.time._
 import java.time.temporal.JulianFields
 import java.util.UUID
@@ -130,6 +131,23 @@ object ValueDecoder {
     },
     (b, c) => Try(DateTimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
   )
+  implicit val Instant: ValueDecoder[Instant] = instance(
+    s => Try {
+      val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
+        case Some(m) => m.group(1) -> (m.group(2) match {
+          case "-" => -1 * m.group(3).toInt
+          case "+" => m.group(3).toInt
+        })
+        case None => throw new DateTimeException("TimestampTZ string could not be parsed")
+      }
+      val zone = ZoneId.ofOffset("", ZoneOffset.ofHours(zoneOffs))
+      LocalDateTime.ofInstant(
+        java.sql.Timestamp.valueOf(str).toInstant,
+        zone).atZone(zone).toInstant
+    },
+    (b, c) => Try(DateTimeUtils.readTimestamp(b))
+  )
+
   implicit val Interval: ValueDecoder[Interval] = instance(
     s => Try(com.twitter.finagle.postgres.values.Interval.parse(s)),
     (b, c) => Try(DateTimeUtils.readInterval(b))
@@ -295,9 +313,17 @@ object ValueEncoder extends LowPriorityEncoder {
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestamp(ts))
   )
   implicit val timestampTz: ValueEncoder[ZonedDateTime] = instance(
-    "timestamptz",
-    t => t.toOffsetDateTime.toString,
+    "timestamptz", { t =>
+      val offs = t.toOffsetDateTime
+      val hours = (offs.getOffset.getTotalSeconds / 3600).formatted("%+03d")
+      Timestamp.from(t.toInstant).toString + hours
+    },
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestampTz(ts))
+  )
+  implicit val instant: ValueEncoder[Instant] = instance(
+    "timestamptz",
+    i => Timestamp.from(i).toString + "+00",
+    (ts, c) => Option(ts).map(ts => DateTimeUtils.writeInstant(ts))
   )
   implicit val time: ValueEncoder[LocalTime] = instance(
     "time",
