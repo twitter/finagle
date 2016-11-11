@@ -11,10 +11,20 @@ import java.lang.{Double => JDouble, Float => JFloat}
  * implementations are not thread safe.
  */
 private[finagle] trait BufReader {
+
   /**
    * The remainder of bytes that the reader is capable of reading.
    */
   def remaining: Int
+
+  /**
+   * The remainder of bytes until the first occurrence of `byte` (exclusive).
+   * Returns `-1` when `byte` is not found on the underlying [[Buf]].
+   *
+   * @note Depending on the implementation, this may copy (usually partially) the
+   *       underlying direct buffer onto the heap.
+   */
+  def remainingUntil(byte: Byte): Int
 
   /**
    * Extract 8 bits and interpret as a signed integer, advancing the byte cursor by 1.
@@ -116,14 +126,12 @@ private[finagle] trait BufReader {
    */
   def readDoubleLE(): Double
 
-
   /**
    * Returns a new buffer representing a slice of this buffer, delimited
    * by the indices `[cursor, remaining)`. Out of bounds indices are truncated.
    * Negative indices are not accepted.
    */
   def readBytes(n: Int): Buf
-
 
   /**
    * Skip over the next `n` bytes.
@@ -144,6 +152,8 @@ private[finagle] trait ProxyBufReader extends BufReader {
   protected def reader: BufReader
 
   def remaining: Int = reader.remaining
+
+  def remainingUntil(byte: Byte): Int = reader.remainingUntil(byte)
 
   def readByte(): Byte = reader.readByte()
 
@@ -221,6 +231,35 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   private[this] val nums = new Array[Byte](8)
 
   def remaining: Int = buf.length
+
+  // Time - O(n), Memory - O(1)
+  def remainingUntil(byte: Byte): Int =
+    if (buf.isEmpty) -1
+    else {
+      val maxChunkLength = 1024
+      val chunk = new Array[Byte](math.min(maxChunkLength, remaining))
+      var i = 0
+      var found = false
+
+      while (i < remaining && !found) {
+        val chunkLength = math.min(maxChunkLength, remaining - i)
+        buf.slice(i, chunkLength).write(chunk, 0)
+
+        var j = 0
+        while (j < chunkLength && chunk(j) != byte) { j += 1 }
+
+        if (j == chunkLength) {
+          // We reached the end of the chunk and found nothing.
+          // Trying the next chunk.
+          i += chunkLength
+        } else {
+          i += j
+          found = true
+        }
+      }
+
+      if (found) i else -1
+    }
 
   def readByte(): Byte = {
     if (remaining < 1) {
