@@ -104,7 +104,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       try {
         //not sure why this test doesn't pass in Travis
         Await.result(client.query("CREATE EXTENSION IF NOT EXISTS hstore"))
-        "parse hstore maps" ignore test(ValueDecoder.hstoreMap)("hstore")
+        "parse hstore maps" in test(ValueDecoder.hstoreMap)("hstore")
       } catch {
         case err: Throwable => // can't run this one because we're not superuser
       }

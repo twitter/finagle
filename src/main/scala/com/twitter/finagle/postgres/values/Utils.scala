@@ -23,7 +23,7 @@ object Buffers {
       if (buffer.readByte() == 0)
 =======
       if (!buffer.readable) {
-        throw new IndexOutOfBoundsException("buffer ended, but '\0' was not found")
+        throw new IndexOutOfBoundsException("buffer ended, but '\\0' was not found")
       } else if (buffer.readByte() == 0) {
 >>>>>>> Misc. cleanups of finagle postgres library:src/main/scala/com/twitter/finagle/postgres/values/Utils.scala
         count

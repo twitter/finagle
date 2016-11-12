@@ -9,21 +9,21 @@ class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
   "Buffers.readCString" should {
     def newBuffer(): (ChannelBuffer, String, String) = {
       val str = "Some string"
-      val cStr = str + '\0'
+      val cStr = str + '\u0000'
       val buffer = ChannelBuffers.copiedBuffer(cStr, Charsets.Utf8)
 
       (buffer, str, cStr)
     }
 
     "fully read a string" in {
-      val (buffer, str, cStr) = newBuffer
+      val (buffer, str, cStr) = newBuffer()
 
       val actualStr = Buffers.readCString(buffer)
       actualStr must equal(str)
     }
 
     "set reader index to the right value after reading" in {
-      val (buffer, str, cStr) = newBuffer
+      val (buffer, str, cStr) = newBuffer()
 
       Buffers.readCString(buffer)
 
@@ -31,7 +31,7 @@ class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
     }
 
     "respect the initial reader index" in {
-      val (buffer, str, cStr) = newBuffer
+      val (buffer, str, cStr) = newBuffer()
       buffer.readChar()
 
       Buffers.readCString(buffer)
