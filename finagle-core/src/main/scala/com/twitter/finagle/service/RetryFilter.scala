@@ -64,7 +64,7 @@ class RetryFilter[Req, Rep](
   )
 
   // Respect non-retryablity regardless of which filter is used
-  private[this] val filteredPolicy: RetryPolicy[(Req, Try[Rep])] = retryPolicy.filter {
+  private[this] val filteredPolicy: RetryPolicy[(Req, Try[Rep])] = retryPolicy.filterEach {
     case (_, Throw(f: Failure)) if f.isFlagged(Failure.NonRetryable) => false
     case _ => true
   }
