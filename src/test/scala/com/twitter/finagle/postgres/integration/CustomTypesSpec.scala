@@ -22,21 +22,24 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
     manifest: Manifest[T],
     binaryParams: Boolean,
     valueEncoder: ValueEncoder[T]
-  ) = forAll {
-    (t: T) =>
-      val m = manifest
-      val encoder = valueEncoder
-      val query = if(binaryParams)
-        client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
-          row => row.get(0).value.asInstanceOf[T]
-        }
-      else
-        client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
-          row => row.get(0).value.asInstanceOf[T]
-        }
-      val result = Await.result(query).head
-      if(!tester(t, result))
-        fail(s"$t does not match $result")
+  ) = {
+    implicit val dec = decoder
+    forAll {
+      (t: T) =>
+        val m = manifest
+        val encoder = valueEncoder
+        val query = if(binaryParams)
+          client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
+            row => row.get[T](0)
+          }
+        else
+          client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
+            row => row.get[T](0)
+          }
+        val result = Await.result(query).head
+        if(!tester(t, result))
+          fail(s"$t does not match $result")
+    }
   }
 
   for {
@@ -75,33 +78,33 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
     }
 
     s"Retrieved type map decoders for $mode client with $paramsMode params" must {
-      "parse varchars" in test(ValueDecoder.String)("varchar")
-      "parse text" in test(ValueDecoder.String)("text")
-      "parse booleans" in test(ValueDecoder.Boolean)("boolean")
-      "parse shorts" in test(ValueDecoder.Int2)("int2")
-      "parse ints" in test(ValueDecoder.Int4)("int4")
-      "parse longs" in test(ValueDecoder.Int8)("int8")
+      "parse varchars" in test(ValueDecoder.string)("varchar")
+      "parse text" in test(ValueDecoder.string)("text")
+      "parse booleans" in test(ValueDecoder.boolean)("boolean")
+      "parse shorts" in test(ValueDecoder.int2)("int2")
+      "parse ints" in test(ValueDecoder.int4)("int4")
+      "parse longs" in test(ValueDecoder.int8)("int8")
       //precision seems to be an issue when postgres parses text floats
-      "parse floats" in test(ValueDecoder.Float4)("numeric::float4")
-      "parse doubles" in test(ValueDecoder.Float8)("numeric::float8")
-      "parse numerics" in test(ValueDecoder.Numeric)("numeric")
-      "parse timestamps" in test(ValueDecoder.Timestamp)(
+      "parse floats" in test(ValueDecoder.float4)("numeric::float4")
+      "parse doubles" in test(ValueDecoder.float8)("numeric::float8")
+      "parse numerics" in test(ValueDecoder.bigDecimal)("numeric")
+      "parse timestamps" in test(ValueDecoder.localDateTime)(
         "timestamp",
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
-      "parse timestamps with time zone" in test(ValueDecoder.TimestampTZ)(
+      "parse timestamps with time zone" in test(ValueDecoder.zonedDateTime)(
         "timestamptz",
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
-      "parse times" in test(ValueDecoder.Time)("time")
-      "parse times with timezone" in test(ValueDecoder.TimeTz)("timetz")
-      "parse intervals" in test(ValueDecoder.Interval)("interval")
-      "parse uuids" in test(ValueDecoder.Uuid)("uuid")
+      "parse times" in test(ValueDecoder.localTime)("time")
+      "parse times with timezone" in test(ValueDecoder.offsetTime)("timetz")
+      "parse intervals" in test(ValueDecoder.interval)("interval")
+      "parse uuids" in test(ValueDecoder.uuid)("uuid")
 
       try {
         //not sure why this test doesn't pass in Travis
         Await.result(client.query("CREATE EXTENSION IF NOT EXISTS hstore"))
-        "parse hstore maps" ignore test(ValueDecoder.HStore)("hstore")
+        "parse hstore maps" ignore test(ValueDecoder.hstoreMap)("hstore")
       } catch {
         case err: Throwable => // can't run this one because we're not superuser
       }

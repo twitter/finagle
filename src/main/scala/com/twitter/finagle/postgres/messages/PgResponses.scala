@@ -36,14 +36,16 @@ case class AuthenticatedResponse(params: Map[String, String], processId: Int, se
 
 case class Rows(rows: List[DataRow], completed: Boolean) extends PgResponse
 
-case class Field(name: String, format: Int, dataType: Int)
+case class Field(name: String, format: Short, dataType: Int)
 
-case class RowDescriptions(fields: IndexedSeq[Field]) extends PgResponse
+case class RowDescriptions(fields: Array[Field]) extends PgResponse
 
-case class Descriptions(params: IndexedSeq[Int], fields: IndexedSeq[Field]) extends PgResponse
+case class Descriptions(params: Array[Int], fields: Array[Field]) extends PgResponse
 
-case class ParamsResponse(types: IndexedSeq[Int]) extends PgResponse
+case class ParamsResponse(types: Array[Int]) extends PgResponse
 
-case class SelectResult(fields: IndexedSeq[Field], rows: List[DataRow]) extends PgResponse
+case class SelectResult(fields: Array[Field], rows: List[DataRow]) extends PgResponse
 
 case class CommandCompleteResponse(affectedRows: Int) extends PgResponse
+
+case object Terminated extends PgResponse

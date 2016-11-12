@@ -2,43 +2,102 @@ package com.twitter.finagle.postgres
 
 import java.nio.charset.Charset
 
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
 import com.twitter.finagle.postgres.messages.{DataRow, Field}
-import com.twitter.finagle.postgres.values.Value
+import com.twitter.finagle.postgres.values.{Value, ValueDecoder}
 import com.twitter.util.Try
+import Try._
+import com.twitter.finagle.postgres.Client.TypeSpecifier
+import com.twitter.finagle.postgres.codec.NullValue
 import org.jboss.netty.buffer.ChannelBuffer
+
+import scala.language.existentials
+
+// capture all common format data for a set of rows to reduce repeated references
+case class RowFormat(
+  indexMap: Map[String, Int],
+  formats: Array[Short],
+  oids: Array[Int],
+  dataTypes: Map[Int, TypeSpecifier],
+  receives: PartialFunction[String, ValueDecoder[T] forSome {type T}],
+  charset: Charset
+) {
+  @inline final def recv(index: Int) = dataTypes(oids(index)).receiveFunction
+  @inline final def defaultDecoder(index: Int) = receives.applyOrElse(recv(index), (_: String) => ValueDecoder.never)
+}
 
 /*
  * Convenience wrapper around a set of row values. Supports lookup by name.
  */
-class Row(val fields: IndexedSeq[String], val vals: IndexedSeq[Value[Any]]) {
-  private[this] val indexMap = fields.zipWithIndex.toMap
+case class Row(
+  values: Array[Option[ChannelBuffer]],
+  rowFormat: RowFormat
+) {
 
-  def getOption[A](name: String)(implicit mf: Manifest[A]): Option[A] = {
-    indexMap.get(name).map(vals(_)) match {
-      case Some(Value(x)) => Some(x.asInstanceOf[A])
-      case _ => None
-    }
-  }
+  final def getOption[T](name: String)(implicit decoder: ValueDecoder[T]): Option[T] =
+    rowFormat.indexMap.get(name).flatMap(i => getOption[T](i))
 
-  def get[A](name: String)(implicit mf:Manifest[A]):A = {
-    getOption[A](name) match {
-      case Some(x) => x
-      case _ => throw new IllegalStateException("Expected type " + mf.toString)
-    }
-  }
 
-  def getOrElse[A](name: String, default: => A)(implicit mf:Manifest[A]):A = {
-    getOption[A](name) match {
-      case Some(x) => x
-      case _ => default
-    }
-  }
+  final def getOption[T](index: Int)(implicit decoder: ValueDecoder[T]): Option[T] = for {
+    buffer <- values(index)
+    format =  rowFormat.formats(index)
+    value  <- if(format == 0)
+                decoder.decodeText(rowFormat.recv(index), buffer.toString(rowFormat.charset)).toOption
+              else
+                decoder.decodeBinary(rowFormat.recv(index), buffer.duplicate(), rowFormat.charset).toOption
+  } yield value
 
-  def get(index: Int): Value[Any] = vals(index)
+  /**
+    * Danger zone! See get[T](Int) below
+    */
+  final def get[T](name: String)(implicit decoder: ValueDecoder[T]): T =
+    get(rowFormat.indexMap(name))
 
-  def values(): IndexedSeq[Value[Any]] = vals
+  /**
+    * Danger zone! If [[T]] is primitive, and the column is NULL, we explicitly cast null to [[T]] which will result
+    * in unexpected results:
+    *
+    * null.asInstanceOf[Int]     // 0
+    * null.asInstanceOf[Boolean] // false
+    *
+    * And so forth. Therefore, use of `get` is discouraged, with `getOption` or `getTry` preferred.
+    */
+  final def get[T](index: Int)(implicit decoder: ValueDecoder[T]): T = getOption[T](index).getOrElse(null.asInstanceOf[T])
 
-  override def toString = "{ fields='" + fields.toString + "', rows='" + vals.toString + "'}"
+  final def getTry[T](name: String)(implicit decoder: ValueDecoder[T]): Try[T] =
+    rowFormat.indexMap.get(name).orThrow(new NoSuchElementException(name)).flatMap(getTry[T])
+
+  final def getTry[T](index: Int)(implicit decoder: ValueDecoder[T]): Try[T] = for {
+    bufferOpt  <- Try(values(index))
+    buffer     <- bufferOpt orThrow NullValue
+    format     <- Try(rowFormat.formats(index))
+    recv       <- Try(rowFormat.recv(index))
+    value      <- if(format == 0)
+                    decoder.decodeText(recv, buffer.toString(rowFormat.charset))
+                  else
+                    decoder.decodeBinary(recv, buffer.duplicate(), rowFormat.charset)
+  } yield value
+
+  final def getOrElse[T](index: Int, default: => T)(implicit decoder: ValueDecoder[T]): T =
+    getTry[T](index).getOrElse(default)
+
+  final def getOrElse[T](name: String, default: => T)(implicit decoder: ValueDecoder[T]): T =
+    getTry[T](name).getOrElse(default)
+
+  final def getAnyOption(index: Int): Option[Any] = for {
+    buffer  <- values(index)
+    format  =  rowFormat.formats(index)
+    decoder =  rowFormat.defaultDecoder(index)
+    value  <- if(format == 0)
+      decoder.decodeText(rowFormat.recv(index), buffer.toString(rowFormat.charset)).toOption
+    else
+      decoder.decodeBinary(rowFormat.recv(index), buffer.duplicate(), rowFormat.charset).toOption
+  } yield value
+
+  final def getAnyOption(name: String): Option[Any] =
+    rowFormat.indexMap.get(name).flatMap(i => getAnyOption(i))
 }
 
 /*
@@ -63,7 +122,7 @@ trait RowReader[A] { self =>
  * A reader that reads a name-specified field from a row.
  */
 object RequiredField {
-  def apply[A](name: String)(implicit mf: Manifest[A]) = new RowReader[A] {
+  def apply[A : ValueDecoder](name: String) = new RowReader[A] {
     def apply(row: Row): A = row.get[A](name)
   }
 }
@@ -72,7 +131,7 @@ object RequiredField {
  * A reader that reads an optional, name-specified field from a row.
  */
 object OptionalField {
-  def apply[A](name: String)(implicit mf: Manifest[A]) = new RowReader[Option[A]] {
+  def apply[A : ValueDecoder](name: String) = new RowReader[Option[A]] {
     def apply(row: Row): Option[A] = row.getOption[A](name)
   }
 }
@@ -88,17 +147,37 @@ case class ResultSet(rows: List[Row]) extends QueryResponse
  */
 object ResultSet {
   def apply(
-      fieldNames: IndexedSeq[String],
-      charset: Charset,
-      fieldParsers: IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[Any]]],
-      rows: List[DataRow]) = {
-    new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
-      case (d, p) =>
-        if (d == null)
-          null
-        else
-          p(d, charset)
-            .getOrElse(null)
-    }))))
+    fields: Array[Field],
+    charset: Charset,
+    dataRows: List[DataRow],
+    types: Map[Int, TypeSpecifier],
+    receives: PartialFunction[String, ValueDecoder[T] forSome { type T }]
+  ): ResultSet = {
+    val (indexMap, formats, oids) = {
+      val l = fields.length
+      val stringIndex = new Array[(String, Int)](l)
+      val formats = new Array[Short](l)
+      val oids = new Array[Int](l)
+      var i = 0
+      while(i < l) {
+        val Field(name, format, dataType) = fields(i)
+        stringIndex(i) = (name, i)
+        formats(i) = format
+        oids(i) = dataType
+        i += 1
+      }
+      (stringIndex.toMap, formats, oids)
+    }
+
+    val rowFormat = RowFormat(indexMap, formats, oids, types, receives, charset)
+
+    val rows = dataRows.map {
+      dataRow => Row(
+        values = dataRow.data,
+        rowFormat = rowFormat
+      )
+    }
+
+    ResultSet(rows)
   }
 }

@@ -12,9 +12,10 @@ class ConnectionQuerySpec extends Spec {
 
       connection.send(Query(""))
       connection.receive(EmptyQueryResponse)
-      val response = connection.receive(ReadyForQuery('I'))
+      val SelectResult(fields, rows) = connection.receive(ReadyForQuery('I')).get
 
-      response must equal(Some(SelectResult(IndexedSeq(), List())))
+      fields.length mustEqual 0
+      rows mustEqual List()
     }
 
     "handle a create table query" in {
@@ -63,28 +64,29 @@ class ConnectionQuerySpec extends Spec {
       val connection = new Connection(Connected)
 
       connection.send(Query("select * from emails"))
-      connection.receive(RowDescription(IndexedSeq(FieldDescription("email",16728,2,1043,-1,-1,0))))
+      connection.receive(RowDescription(Array(FieldDescription("email",16728,2,1043,-1,-1,0))))
       connection.receive(CommandComplete(Select(0)))
-      val response = connection.receive(ReadyForQuery('I'))
-
-      response must equal(Some(SelectResult(IndexedSeq(Field("email", 0, 1043)), List())))
+      val SelectResult(fields, rows) = connection.receive(ReadyForQuery('I')).get
+      assert(fields sameElements Array(Field("email", 0, 1043)))
+      rows must equal (List())
     }
 
     "handle a select query" in {
       val connection = new Connection(Connected)
 
-      val row1 = DataRow(IndexedSeq(ChannelBuffers.copiedBuffer("donald@duck.com".getBytes(Charsets.Utf8))))
-      val row2 = DataRow(IndexedSeq(ChannelBuffers.copiedBuffer("daisy@duck.com".getBytes(Charsets.Utf8))))
+      val row1 = DataRow(Array(Some(ChannelBuffers.copiedBuffer("donald@duck.com".getBytes(Charsets.Utf8)))))
+      val row2 = DataRow(Array(Some(ChannelBuffers.copiedBuffer("daisy@duck.com".getBytes(Charsets.Utf8)))))
 
       connection.send(Query("select * from emails"))
-      connection.receive(RowDescription(IndexedSeq(FieldDescription("email",16728,2,1043,-1,-1,0))))
+      connection.receive(RowDescription(Array(FieldDescription("email",16728,2,1043,-1,-1,0))))
 
       connection.receive(row1)
       connection.receive(row2)
       connection.receive(CommandComplete(Select(2)))
-      val response = connection.receive(ReadyForQuery('I'))
+      val SelectResult(fields, rows) = connection.receive(ReadyForQuery('I')).get
 
-      response must equal(Some(SelectResult(IndexedSeq(Field("email", 0, 1043)), List(row1, row2))))
+      fields must contain theSameElementsAs Array(Field("email", 0, 1043))
+      rows must equal (List(row1, row2))
     }
   }
 }

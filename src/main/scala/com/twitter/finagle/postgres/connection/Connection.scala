@@ -12,7 +12,7 @@ class Connection(startState: State = AuthenticationRequired) {
   private[this] val logger = Logger("connection")
   private[this] val stateMachine = new ConnectionStateMachine(startState)
 
-  def send(msg: FrontendMessage) {
+  def send(msg: FrontendMessage) = {
     logger.ifDebug("Sent frontend message of type: %s".format(msg.getClass.getName))
 
     msg match {
@@ -21,7 +21,7 @@ class Connection(startState: State = AuthenticationRequired) {
       case _ =>
     }
 
-    val _ = stateMachine.onEvent(msg)
+    stateMachine.onEvent(msg)
   }
 
   def receive(msg: BackendMessage): Option[PgResponse] = {

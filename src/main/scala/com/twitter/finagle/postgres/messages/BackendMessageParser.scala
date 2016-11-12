@@ -80,9 +80,9 @@ class BackendMessageParser {
 
         code match {
           case 3 =>
-            Some(new AuthenticationCleartextPassword())
+            Some(AuthenticationCleartextPassword())
           case 0 =>
-            Some(new AuthenticationOk())
+            Some(AuthenticationOk())
           case _ =>
             None
         }
@@ -92,7 +92,7 @@ class BackendMessageParser {
         if (code == 5) {
           val salt = new Array[Byte](4)
           packet.content.readBytes(salt)
-          Some(new AuthenticationMD5Password(salt))
+          Some(AuthenticationMD5Password(salt))
         } else {
           None
         }
@@ -115,7 +115,7 @@ class BackendMessageParser {
 
     val fields = fieldStream(content).foldLeft(Map.empty[Char,String])(_ + _)
 
-    Some(new ErrorResponse(fields))
+    Some(ErrorResponse(fields))
   }
 
   def parseN(packet: Packet): Option[BackendMessage] = {
@@ -129,7 +129,7 @@ class BackendMessageParser {
         builder.append(Buffers.readCString(content))
       }
 
-      Some(new NoticeResponse(Some(builder.toString)))
+      Some(NoticeResponse(Some(builder.toString)))
     }
   }
 
@@ -142,7 +142,7 @@ class BackendMessageParser {
 
     val status = content.readByte().asInstanceOf[Char]
 
-    Some(new ReadyForQuery(status))
+    Some(ReadyForQuery(status))
   }
 
   def parseK(packet: Packet): Option[BackendMessage] = {
@@ -155,7 +155,7 @@ class BackendMessageParser {
     val processId = content.readInt
     val secretKey = content.readInt
 
-    Some(new BackendKeyData(processId, secretKey))
+    Some(BackendKeyData(processId, secretKey))
   }
 
   def parseSmallD(packet: Packet): Option[BackendMessage] = {
@@ -166,24 +166,24 @@ class BackendMessageParser {
     val Packet(_, _, content, _) = packet
 
     val fieldNumber = content.readShort
-    val fields = new Array[ChannelBuffer](fieldNumber)
+    val fields = new Array[Option[ChannelBuffer]](fieldNumber)
 
     for (i <- 0.until(fieldNumber)) {
       val length = content.readInt
       if (length == -1) {
-        fields(i) = null
+        fields(i) = None
       } else {
         val index = content.readerIndex
         val slice = content.slice(index, length)
         content.readerIndex(index + length)
 
-        fields(i) = slice
+        fields(i) = Some(slice)
 
         content.readerIndex(index + length)
       }
     }
 
-    Some(new DataRow(fields))
+    Some(DataRow(fields))
   }
 
   def parseT(packet: Packet): Option[BackendMessage] = {
@@ -195,7 +195,7 @@ class BackendMessageParser {
     0.until(fieldNumber).foreach {
       index =>
 
-        val field = new FieldDescription(
+        val field = FieldDescription(
           Buffers.readCString(content),
           content.readInt,
           content.readShort,
@@ -207,7 +207,7 @@ class BackendMessageParser {
         fields(index) = field
     }
 
-    Some(new RowDescription(fields))
+    Some(RowDescription(fields))
   }
 
   def parseC(packet: Packet): Option[BackendMessage] = {
@@ -215,7 +215,7 @@ class BackendMessageParser {
 
     val tag = Buffers.readCString(content)
 
-    Some(new CommandComplete(parseTag(tag)))
+    Some(CommandComplete(parseTag(tag)))
   }
 
   def parseTag(tag: String) : CommandCompleteStatus = {
@@ -249,7 +249,7 @@ class BackendMessageParser {
     if (inSslNegotation) {
       Some(SwitchToSsl)
     } else {
-      val parameterStatus = new ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
+      val parameterStatus = ParameterStatus(Buffers.readCString(content), Buffers.readCString(content))
       Some(parameterStatus)
     }
   }
@@ -274,7 +274,7 @@ class BackendMessageParser {
         params(index) = param
     }
 
-    Some(new ParameterDescription(params))
+    Some(ParameterDescription(params))
 
   }
 

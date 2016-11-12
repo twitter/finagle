@@ -1,11 +1,14 @@
 package com.twitter.finagle.postgres.values
 
+import java.nio.charset.StandardCharsets
 import java.time._
 import java.time.temporal.{ChronoField, JulianFields}
 
 import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
 import Generators._
 import com.twitter.finagle.Postgres
+import com.twitter.finagle.postgres.Client.TypeSpecifier
+import com.twitter.finagle.postgres.messages.{DataRow, Field}
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
@@ -20,36 +23,73 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
     send: String,
     typ: String,
     toStr: T => String = (t: T) => t.toString,
-    tester: (T, T) => Boolean = (a: T, b: T) => a == b)(
+    tester: (T, T) => Boolean = (a: T, b: T) => a == b,
+    nonDefault: Boolean = false)(
     implicit client: Client
-  ) = forAll {
-    (t: T) =>
-      //TODO: change this once prepared statements are available
-      val escaped = toStr(t).replaceAllLiterally("'", "\\'")
-      val ResultSet(List(binaryRow)) = Await.result(client.query(s"SELECT $send('$escaped'::$typ) AS out"))
-      val ResultSet(List(textRow)) = Await.result(client.query(s"SELECT CAST('$escaped'::$typ AS text) AS out"))
-      val bytes = binaryRow.get[Array[Byte]]("out")
-      val textString = textRow.get[String]("out")
-      val binaryOut = decoder.decodeBinary(ChannelBuffers.wrappedBuffer(bytes), client.charset).get.value
-      val textOut = decoder.decodeText(textString).get.value
+  ) = {
+    val recv = send.replace("send", "recv")
+    implicit val dec = decoder
+    forAll {
+      (t: T) =>
+        //TODO: change this once prepared statements are available
+        val escaped = toStr(t).replaceAllLiterally("'", "\\'")
+        val ResultSet(List(binaryRow)) = Await.result(client.query(s"SELECT $send('$escaped'::$typ) AS out"))
+        val ResultSet(List(textRow)) = Await.result(client.query(s"SELECT CAST('$escaped'::$typ AS text) AS out"))
+        val bytes = binaryRow.get[Array[Byte]]("out")
+        val textString = textRow.get[String]("out")
+        val binaryOut = decoder.decodeBinary(recv, ChannelBuffers.wrappedBuffer(bytes), client.charset).get
+        val textOut = decoder.decodeText(recv, textString).get
 
-      if(!tester(t, binaryOut))
-        fail(s"binary: $t does not match $binaryOut")
+        if(!tester(t, binaryOut))
+          fail(s"binary: $t does not match $binaryOut")
 
-      if(!tester(t, textOut))
-        fail(s"text: $t does not match $textOut")
+        if(!tester(t, textOut))
+          fail(s"text: $t does not match $textOut")
 
-      val encodedBinary = encoder.encodeBinary(t, client.charset).getOrElse(fail("Binary encoding produced null"))
-      val encodedText = encoder.encodeText(t).getOrElse(fail("Text encoding produced null"))
+        val encodedBinary = encoder.encodeBinary(t, client.charset).getOrElse(fail("Binary encoding produced null"))
+        val encodedText = encoder.encodeText(t).getOrElse(fail("Text encoding produced null"))
 
-      val binaryInOut = decoder.decodeBinary(encodedBinary, client.charset).get.value
-      val textInOut = decoder.decodeText(encodedText).get.value
+        val binaryInOut = decoder.decodeBinary(recv, encodedBinary.duplicate(), client.charset).get
+        val textInOut = decoder.decodeText(recv, encodedText).get
 
-      if(!tester(t, binaryInOut))
-        fail(s"binary: $t was encoded/decoded to $binaryInOut")
+        if(!tester(t, binaryInOut))
+          fail(s"binary: $t was encoded/decoded to $binaryInOut")
 
-      if(!tester(t, textInOut))
-        fail(s"text: $t was encoded/decoded to $textInOut")
+        if(!tester(t, textInOut))
+          fail(s"text: $t was encoded/decoded to $textInOut")
+
+        if(!nonDefault) {
+          val List(rowBinary) = ResultSet(
+            Array(Field("column", 1, 0)), StandardCharsets.UTF_8,
+            List(DataRow(Array(Some(encodedBinary)))),
+            Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
+          ).rows
+
+          assert(tester(rowBinary.getAnyOption("column").get.asInstanceOf[T], t))
+          assert(tester(rowBinary.getAnyOption(0).get.asInstanceOf[T], t))
+          assert(tester(rowBinary.getOption[T]("column").get, t))
+          assert(tester(rowBinary.getOption[T](0).get, t))
+          assert(tester(rowBinary.get[T]("column"), t))
+          assert(tester(rowBinary.get[T](0), t))
+          assert(tester(rowBinary.getTry[T]("column").get, t))
+          assert(tester(rowBinary.getTry[T](0).get, t))
+
+          val List(rowText) = ResultSet(
+            Array(Field("column", 0, 0)), StandardCharsets.UTF_8,
+            List(DataRow(Array(Some(ChannelBuffers.copiedBuffer(encodedText, StandardCharsets.UTF_8))))),
+            Map(0 -> TypeSpecifier(recv, typ, 0)), ValueDecoder.decoders
+          ).rows
+
+          assert(tester(rowText.getAnyOption("column").get.asInstanceOf[T], t))
+          assert(tester(rowText.getAnyOption(0).get.asInstanceOf[T], t))
+          assert(tester(rowText.getOption[T]("column").get, t))
+          assert(tester(rowText.getOption[T](0).get, t))
+          assert(tester(rowText.get[T]("column"), t))
+          assert(tester(rowText.get[T](0), t))
+          assert(tester(rowText.getTry[T]("column").get, t))
+          assert(tester(rowText.getTry[T](0).get, t))
+        }
+    }
   }
 
 
@@ -67,35 +107,36 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
       .newRichClient(hostPort)
 
     "ValueDecoders" should {
-      "parse varchars" in test(ValueDecoder.String, ValueEncoder.string)("varcharsend", "varchar")
-      "parse text" in test(ValueDecoder.String, ValueEncoder.string)("textsend", "text")
-      "parse booleans" in test(ValueDecoder.Boolean, ValueEncoder.boolean)("boolsend", "boolean", b => if(b) "t" else "f")
-      "parse shorts" in test(ValueDecoder.Int2, ValueEncoder.int2)("int2send", "int2")
-      "parse ints" in test(ValueDecoder.Int4, ValueEncoder.int4)("int4send", "int4")
-      "parse longs" in test(ValueDecoder.Int8, ValueEncoder.int8)("int8send", "int8")
+      "parse varchars" in test(ValueDecoder.string, ValueEncoder.string)("varcharsend", "varchar")
+      "parse text" in test(ValueDecoder.string, ValueEncoder.string)("textsend", "text")
+      "parse booleans" in test(ValueDecoder.boolean, ValueEncoder.boolean)("boolsend", "boolean", b => if(b) "t" else "f")
+      "parse shorts" in test(ValueDecoder.int2, ValueEncoder.int2)("int2send", "int2")
+      "parse ints" in test(ValueDecoder.int4, ValueEncoder.int4)("int4send", "int4")
+      "parse longs" in test(ValueDecoder.int8, ValueEncoder.int8)("int8send", "int8")
       //precision seems to be an issue when postgres parses text floats
-      "parse floats" in test(ValueDecoder.Float4, ValueEncoder.float4)("float4send", "numeric")
-      "parse doubles" in test(ValueDecoder.Float8, ValueEncoder.float8)("float8send", "numeric")
-      "parse numerics" in test(ValueDecoder.Numeric, ValueEncoder.numeric)("numeric_send", "numeric")
-      "parse timestamps" in test(ValueDecoder.Timestamp, ValueEncoder.timestamp)(
+      "parse floats" in test(ValueDecoder.float4, ValueEncoder.float4)("float4send", "numeric")
+      "parse doubles" in test(ValueDecoder.float8, ValueEncoder.float8)("float8send", "numeric")
+      "parse numerics" in test(ValueDecoder.bigDecimal, ValueEncoder.numeric)("numeric_send", "numeric")
+      "parse timestamps" in test(ValueDecoder.localDateTime, ValueEncoder.timestamp)(
         "timestamp_send",
         "timestamp",
         ts => java.sql.Timestamp.from(ts.atZone(ZoneId.systemDefault()).toInstant).toString,
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
-      "parse timestamps with time zone" in test(ValueDecoder.TimestampTZ, ValueEncoder.timestampTz)(
+      "parse timestamps with time zone" in test(ValueDecoder.zonedDateTime, ValueEncoder.timestampTz)(
         "timestamptz_send",
         "timestamptz",
         ts => ts.toOffsetDateTime.toString,
-        (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
+        (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY),
+        nonDefault = true
       )
-      "parse timestamps as instants" in test(ValueDecoder.Instant, ValueEncoder.instant)(
+      "parse timestamps as instants" in test(ValueDecoder.instant, ValueEncoder.instant)(
         "timestamptz_send",
         "timestamptz",
         ts => ts.toString
       )
-      "parse uuids" in test(ValueDecoder.Uuid, ValueEncoder.uuid)("uuid_send", "uuid")
-      "parse dates" in test(ValueDecoder.Date, ValueEncoder.date)("date_send", "date")
+      "parse uuids" in test(ValueDecoder.uuid, ValueEncoder.uuid)("uuid_send", "uuid")
+      "parse dates" in test(ValueDecoder.localDate, ValueEncoder.date)("date_send", "date")
     }
   }
 }

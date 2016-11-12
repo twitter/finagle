@@ -15,6 +15,7 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
 
+import scala.language.existentials
 
 /*
  * A Finagle client for communicating with Postgres.
@@ -23,7 +24,7 @@ class Client(
   factory: ServiceFactory[PgRequest, PgResponse],
   id:String,
   types: Option[Map[Int, Client.TypeSpecifier]] = None,
-  customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
+  receiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}],
   binaryResults: Boolean = false,
   binaryParams: Boolean = false
 ) {
@@ -51,8 +52,8 @@ class Client(
     val serviceF = factory.apply
 
     val bootstrapTypes = Map(
-      Type.INT_4 -> ValueDecoder.Int4,
-      Type.TEXT -> ValueDecoder.String
+      Type.INT_4 -> ValueDecoder.int4,
+      Type.TEXT -> ValueDecoder.string
     )
 
     val customTypesResult = for {
@@ -60,19 +61,8 @@ class Client(
       response <- service.apply(PgRequest(Query(customTypesQuery)))
     } yield response match {
       case SelectResult(fields, rows) =>
-        val rowValues = rows.map {
-          row =>
-            row.data.zip(fields).map {
-              case (buf, field) =>
-                val decoder = bootstrapTypes(field.dataType)
-                if(field.format == 0)
-                  decoder.decodeText(Buffers.readString(buf, charset)).getOrElse(null)
-                else
-                  decoder.decodeBinary(buf, charset).getOrElse(null)
-            }
-        }
-        val fieldNames = fields.map(_.name)
-        rowValues.map(row => new Row(fieldNames, row)).map {
+        val rowValues = ResultSet(fields, charset, rows, Client.defaultTypes, receiveFunctions).rows
+        rowValues.map {
           row => row.get[Int]("oid") -> Client.TypeSpecifier(
             row.get[String]("typreceive"),
             row.get[String]("type"),
@@ -96,16 +86,15 @@ class Client(
     }.groupBy(_._1).mapValues(_.map(_._2).min)
   }
 
-  private[postgres] val decoders = customReceiveFunctions orElse ValueDecoder.decoders
-
-
   /*
    * Execute some actions inside of a transaction using a single connection
    */
   def inTransaction[T](fn: Client => Future[T]) = for {
+    types               <- typeMap
     service             <- factory()
-    constFactory        = ServiceFactory.const(service)
-    transactionalClient = new Client(constFactory, Random.alphanumeric.take(28).mkString)
+    constFactory        =  ServiceFactory.const(service)
+    id                  =  Random.alphanumeric.take(28).mkString
+    transactionalClient = new Client(constFactory, id, Some(types), receiveFunctions, binaryResults, binaryParams)
     _                   <- transactionalClient.query("BEGIN")
     result              <- fn(transactionalClient).rescue {
                           case err => for {
@@ -124,8 +113,8 @@ class Client(
    * Issue an arbitrary SQL query and get the response.
    */
   def query(sql: String): Future[QueryResponse] = sendQuery(sql) {
-    case SelectResult(fields, rows) => processFields(fields).map {
-      case (names, parsers) => ResultSet(names, charset, parsers, rows)
+    case SelectResult(fields, rows) => typeMap.map {
+      types => ResultSet(fields, charset, rows, types, receiveFunctions)
     }
     case CommandCompleteResponse(affected) => Future(OK(affected))
   }
@@ -147,9 +136,11 @@ class Client(
   /*
    * Run a single SELECT query and wrap the results with the provided function.
    */
-  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = fetch(sql).flatMap {
-    rs =>
-      extractRows(rs).map(_.map(f))
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = for {
+    types  <- typeMap
+    result <- fetch(sql)
+  } yield result match {
+    case SelectResult(fields, rows) => ResultSet(fields, charset, rows, types, receiveFunctions).rows.map(f)
   }
 
   /*
@@ -215,7 +206,7 @@ class Client(
   }
 
   private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = {
-    send(PgRequest(new Query(sql)))(handler)
+    send(PgRequest(Query(sql)))(handler)
   }
 
   private[this] def parse(
@@ -258,78 +249,39 @@ class Client(
   }
 
   private[this] def describe(
-      name: String,
-      optionalService: Option[Service[PgRequest, PgResponse]] = None
-    ): Future[(IndexedSeq[String], IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])] =
-    send(PgRequest(Describe(portal = true, name = name), flush = true), optionalService) {
-      case RowDescriptions(fields) => processFields(fields)
-    }
+    name: String,
+    optionalService: Option[Service[PgRequest, PgResponse]] = None
+  ): Future[Array[Field]] = send(PgRequest(Describe(portal = true, name = name), flush = true), optionalService) {
+    case RowDescriptions(fields) => Future.value(fields)
+  }
 
 
   private[this] def execute(
-      name: String,
-      maxRows: Int = 0,
-      optionalService: Option[Service[PgRequest, PgResponse]] = None) = {
-    fire(PgRequest(Execute(name, maxRows), flush = true), optionalService)
-  }
+    name: String,
+    maxRows: Int = 0,
+    optionalService: Option[Service[PgRequest, PgResponse]] = None
+  ) = send(PgRequest(Execute(name, maxRows), flush = true), optionalService){ case rep => Future.value(rep) }
+
 
   private[this] def sync(
-      optionalService: Option[Service[PgRequest, PgResponse]] = None): Future[Unit] = {
-    send(PgRequest(Sync), optionalService) {
-      case ReadyForQueryResponse => Future.value(())
-    }
-  }
-
-  private[this] def fire(r: PgRequest, optionalService: Option[Service[PgRequest, PgResponse]] = None) = {
-    optionalService match {
-      case Some(service) =>
-        // A service has been passed in; use it
-        service.apply(r)
-      case _ =>
-        // Create a new service instance from the client factory
-        factory.toService(r)
-    }
+      optionalService: Option[Service[PgRequest, PgResponse]] = None
+  ): Future[Unit] = send(PgRequest(Sync), optionalService) {
+    case ReadyForQueryResponse => Future.value(())
   }
 
   private[this] def send[T](
-      r: PgRequest,
-      optionalService: Option[Service[PgRequest, PgResponse]] = None
-    )(handler: PartialFunction[PgResponse, Future[T]]) = {
-    fire(r, optionalService) flatMap (handler orElse {
-      case some => throw new UnsupportedOperationException("TODO Support exceptions correctly " + some)
-    })
-  }
-
-  private[this] def processFields(
-      fields: IndexedSeq[Field]): Future[(IndexedSeq[String], IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])] = {
-    val names = fields.map(f => f.name)
-    val parsers = fields.toList.map {
-      f => for {
-        types <- typeMap
-      } yield for {
-        Client.TypeSpecifier(recv, name, elem) <- types.get(f.dataType)
-        decoder <- decoders.lift.apply(recv)
-      } yield if(f.format != 0) (decoder.decodeBinary _).tupled else (Buffers.readString _).tupled.andThen(decoder.decodeText)
-    }.foldLeft(Future(Queue.empty[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])) {
-      (accumF, next) => accumF flatMap {
-        accum => next map {
-          d => accum.enqueue(d.getOrElse(ValueDecoder.unknownBinary _))
-        }
-      }
-    }
-
-    parsers.map {
-      decoders => (names, decoders.toIndexedSeq)
+    r: PgRequest,
+    optionalService: Option[Service[PgRequest, PgResponse]] = None)(
+    handler: PartialFunction[PgResponse, Future[T]]
+  ) = {
+    val service = optionalService.getOrElse(factory.toService)
+    service(r).flatMap (handler orElse {
+      case unexpected => Future.exception(new IllegalStateException(s"Unexpected response $unexpected"))
+    }).onFailure {
+      err => service.close()
     }
   }
 
-  private[this] def extractRows(rs: SelectResult): Future[List[Row]] = processFields(rs.fields) map {
-    case (fieldNames, fieldParsers) =>
-
-    rs.rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map {
-      case (d, p) => if (d == null) null else p(d, charset).getOrElse(null)
-    }))
-  }
 
   private[this] class PreparedStatementImpl(
       name: String,
@@ -348,12 +300,13 @@ class Client(
       }
 
       val f = for {
-        _ <- bind(name, paramBuffers, Some(service))
-        (fieldNames, fieldParsers) <- describe(name, Some(service))
-        exec <- execute(name, optionalService = Some(service))
+        types  <- typeMap
+        _      <- bind(name, paramBuffers, Some(service))
+        fields <- describe(name, Some(service))
+        exec   <- execute(name, optionalService = Some(service))
       } yield exec match {
           case CommandCompleteResponse(rows) => OK(rows)
-          case Rows(rows, true) => ResultSet(fieldNames, charset, fieldParsers, rows)
+          case Rows(rows, true) => ResultSet(fields, charset, rows, types, receiveFunctions)
         }
       f transform {
         result =>

@@ -27,20 +27,20 @@ case class ParameterStatus(name: String, value: String) extends BackendMessage
 
 case class BackendKeyData(processId: Int, secretKey: Int) extends BackendMessage
 
-case class ParameterDescription(types: IndexedSeq[Int]) extends BackendMessage
+case class ParameterDescription(types: Array[Int]) extends BackendMessage
 
-case class RowDescription(fields: IndexedSeq[FieldDescription]) extends BackendMessage
+case class RowDescription(fields: Array[FieldDescription]) extends BackendMessage
 
 case class FieldDescription(
     name: String,
     tableId: Int,
-    columnNumber: Int,
+    columnNumber: Short,
     dataType: Int,
-    dataTypeSize: Int,
-    dataTypeMondifier: Int,
-    fieldFormat: Int)
+    dataTypeSize: Short,
+    dataTypeModifier: Int,
+    fieldFormat: Short)
 
-case class DataRow(data: IndexedSeq[ChannelBuffer]) extends BackendMessage
+case class DataRow(data: Array[Option[ChannelBuffer]]) extends BackendMessage
 
 /*
  * Sub-message types used to complete a command.

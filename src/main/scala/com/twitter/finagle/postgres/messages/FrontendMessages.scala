@@ -124,3 +124,7 @@ object Sync extends FrontendMessage {
       .toPacket
   }
 }
+
+object Terminate extends FrontendMessage {
+  def asPacket() = PacketBuilder('X').toPacket
+}

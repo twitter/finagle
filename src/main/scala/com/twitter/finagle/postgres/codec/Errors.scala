@@ -20,6 +20,11 @@ case class ServerError(
  */
 case class ClientError(message : String) extends Exception(message)
 
+/*
+ * An error arising from attempting to access a NULL field
+ */
+case object NullValue extends Exception("Value is NULL")
+
 object Errors {
   def client(message : String) = ClientError(message)
   def server(message : String,

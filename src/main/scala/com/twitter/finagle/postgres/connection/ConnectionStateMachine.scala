@@ -60,14 +60,14 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (ParameterDescription(types), AwaitParamsDescription) => (None, AwaitRowDescription(types))
     case (RowDescription(fields), AwaitParamsDescription) =>
       (Some(RowDescriptions(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)))), Connected)
-    case (NoData, AwaitParamsDescription) => (Some(RowDescriptions(IndexedSeq())), Connected)
+    case (NoData, AwaitParamsDescription) => (Some(RowDescriptions(Array.empty)), Connected)
     case (ErrorResponse(details), AwaitParamsDescription) => (Some(Error(details)), Connected)
   }
 
   transition {
     case (RowDescription(fields), AwaitRowDescription(types)) =>
       (Some(RowDescriptions(fields.map(f => Field(f.name, f.fieldFormat, f.dataType)))), Connected)
-    case (NoData, AwaitRowDescription(types)) => (Some(RowDescriptions(IndexedSeq())), Connected)
+    case (NoData, AwaitRowDescription(types)) => (Some(RowDescriptions(Array.empty)), Connected)
     case (ErrorResponse(details), AwaitRowDescription(_)) => (Some(Error(details)), Connected)
   }
 
@@ -87,7 +87,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
   }
 
   transition {
-    case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(IndexedSeq(), List())))
+    case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(Array.empty, List())))
     case (CommandComplete(CreateTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(CreateType), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(CreateExtension), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
@@ -113,7 +113,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
   }
 
   transition {
-    case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(IndexedSeq(), List())), Connected)
+    case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(Array.empty, List())), Connected)
     case (CommandComplete(CreateTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(CreateType), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(CreateExtension), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
@@ -156,6 +156,10 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
   transition {
     case (ReadyForQuery(_), EmitOnReadyForQuery(response)) => (Some(response), Connected)
     case (ErrorResponse(details), EmitOnReadyForQuery(response)) => (Some(Error(details)), Connected)
+  }
+
+  transition {
+    case (Terminate, _) => (Some(com.twitter.finagle.postgres.messages.Terminated), Terminated)
   }
 
   transition {

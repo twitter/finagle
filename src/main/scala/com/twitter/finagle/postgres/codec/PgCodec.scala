@@ -62,7 +62,7 @@ class AuthenticationProxy(
       service <- delegate.apply(conn)
       optionalSslResponse <- sendSslRequest(service)
       _ <- handleSslResponse(optionalSslResponse)
-      startupResponse <- service(PgRequest(new StartupMessage(user, database)))
+      startupResponse <- service(PgRequest(StartupMessage(user, database)))
       passwordResponse <- sendPassword(startupResponse, service)
       _ <- verifyResponse(passwordResponse)
     } yield service
@@ -79,7 +79,7 @@ class AuthenticationProxy(
   private[this] def handleSslResponse(optionalSslResponse: Option[PgResponse]): Future[Unit] = {
     logger.ifDebug("SSL response: %s".format(optionalSslResponse))
 
-    if (useSsl && optionalSslResponse == Some(SslNotSupportedResponse)) {
+    if (useSsl && (optionalSslResponse contains SslNotSupportedResponse)) {
       throw Errors.server("SSL requested by server doesn't support it")
     } else {
       Future(Unit)
@@ -222,12 +222,16 @@ class PgClientChannelHandler(
 
         pipeline.addFirst("ssl", new SslHandler(engine))
 
-        connection.receive(SwitchToSsl).map {
+        connection.receive(SwitchToSsl).foreach {
           Channels.fireMessageReceived(ctx, _)
         }
       case msg: BackendMessage =>
-        connection.receive(msg).map {
-          Channels.fireMessageReceived(ctx, _)
+        try {
+          connection.receive(msg).foreach {
+            Channels.fireMessageReceived(ctx, _)
+          }
+        } catch {
+          case err: Throwable => Channels.disconnect(ctx.getChannel)
         }
       case unsupported =>
         logger.warning("Only backend messages are supported...")
@@ -236,25 +240,28 @@ class PgClientChannelHandler(
   }
 
   override def writeRequested(ctx: ChannelHandlerContext, event: MessageEvent) = {
-    val buf = event.getMessage match {
+    val (buf, out) = event.getMessage match {
       case PgRequest(msg, flush) =>
         val packet = msg.asPacket()
         val c = ChannelBuffers.dynamicBuffer()
 
-        c.writeBytes(packet.encode)
+        c.writeBytes(packet.encode())
 
         if (flush) {
-          c.writeBytes(Flush.asPacket.encode)
+          c.writeBytes(Flush.asPacket().encode())
         }
 
-        connection.send(msg)
-        c
+        (c, connection.send(msg))
+
       case _ =>
         logger.warning("Cannot convert message... Skipping")
-        event.getMessage
+        (event.getMessage, None)
     }
 
     Channels.write(ctx, event.getFuture, buf, event.getRemoteAddress)
+    out collect {
+      case com.twitter.finagle.postgres.messages.Terminated => Channels.disconnect(ctx.getChannel)
+    }
   }
 }
 

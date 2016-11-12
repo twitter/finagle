@@ -29,6 +29,8 @@ case object Connected extends State
 
 case object Syncing extends State
 
+case object Terminated extends State
+
 // All of the extended query states - Sync can be issued while in these states
 sealed trait ExtendedQueryState extends State
 
@@ -40,10 +42,10 @@ case object ExecutePreparedStatement extends ExtendedQueryState
 
 case object AwaitParamsDescription extends ExtendedQueryState
 
-case class AggregateRows(fields: IndexedSeq[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends ExtendedQueryState
+case class AggregateRows(fields: Array[Field], buff: ListBuffer[DataRow] = ListBuffer()) extends ExtendedQueryState
 
 case class AggregateRowsWithoutFields(buff: ListBuffer[DataRow] = ListBuffer()) extends ExtendedQueryState
 
-case class AwaitRowDescription(types: IndexedSeq[Int]) extends ExtendedQueryState
+case class AwaitRowDescription(types: Array[Int]) extends ExtendedQueryState
 
 case class EmitOnReadyForQuery[R <: PgResponse](emit: R) extends ExtendedQueryState

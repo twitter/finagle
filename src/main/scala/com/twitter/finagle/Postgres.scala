@@ -11,10 +11,13 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Return, Throw, Try}
+import com.twitter.util.{Monitor => _, _}
 import com.twitter.logging.Logger
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
+
+import scala.language.existentials
 
 object Postgres {
 
@@ -150,7 +153,7 @@ object Postgres {
     protected def newTransporter(): Transporter[In, Out] = mkTransport(params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[PgRequest, PgResponse] = {
-      new SerialClientDispatcher(
+      new Dispatcher(
         transport,
         params[Stats].statsReceiver
       )
@@ -160,6 +163,18 @@ object Postgres {
       stack: Stack[ServiceFactory[PgRequest, PgResponse]],
       params: Params
     ): Client {type In = Client.this.In; type Out = Client.this.Out} = copy(stack, params)
+  }
+
+  private class Dispatcher(transport: Transport[PgRequest, PgResponse], statsReceiver: StatsReceiver)
+    extends SerialClientDispatcher[PgRequest, PgResponse](transport, statsReceiver) {
+
+    override def apply(
+      req: PgRequest
+    ): Future[PgResponse] = req match {
+      // allow Terminate requests to go through no matter what
+      case PgRequest(Terminate, true) => transport.write(req).flatMap(_ => transport.close().map(_ => Terminated))
+      case _ => super.apply(req)
+    }
   }
 
   private object PrepConnection extends Stack.ModuleParams[ServiceFactory[PgRequest, PgResponse]] {

@@ -7,8 +7,10 @@ import java.time._
 import java.time.temporal.JulianFields
 import java.util.UUID
 
-import com.twitter.util.{Return, Try}
+import com.twitter.util.{Return, Throw, Try}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+
+import scala.language.existentials
 
 /*
  * Simple wrapper around a value in a Postgres row.
@@ -68,16 +70,28 @@ object Type {
 }
 
 trait ValueDecoder[+T] {
-  def decodeText(text: String): Try[Value[T]]
-  def decodeBinary(bytes: ChannelBuffer, charset: Charset): Try[Value[T]]
+  def decodeText(recv: String, text: String): Try[T]
+  def decodeBinary(recv: String, bytes: ChannelBuffer, charset: Charset): Try[T]
+  def map[U](fn: T => U): ValueDecoder[U] = new ValueDecoder[U] {
+    def decodeText(recv: String, text: String) = ValueDecoder.this.decodeText(recv, text).map(fn)
+    def decodeBinary(recv: String, bytes: ChannelBuffer, charset: Charset) =
+      ValueDecoder.this.decodeBinary(recv, bytes, charset).map(fn)
+  }
 }
 
 object ValueDecoder {
 
-  def instance[T](text: String => Try[T], binary: (ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] = new ValueDecoder[T] {
-    def decodeText(s: String) = text(s).map(t => Value(t))
-    def decodeBinary(b: ChannelBuffer, charset: Charset) = binary(b, charset).map(t => Value(t))
-  }
+  def instance[T](text: String => Try[T], binary: (ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] =
+    new ValueDecoder[T] {
+      def decodeText(recv: String, s: String) = text(s)
+      def decodeBinary(recv: String, b: ChannelBuffer, charset: Charset) = binary(b, charset)
+    }
+
+  def instance[T](text: (String, String) => Try[T], binary: (String, ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] =
+    new ValueDecoder[T] {
+      def decodeText(recv: String, s: String) = text(recv, s)
+      def decodeBinary(recv: String, b: ChannelBuffer, charset: Charset) = binary(recv, b, charset)
+    }
 
   private def readInetAddress(buf: ChannelBuffer) = {
     val family = buf.readByte()
@@ -88,50 +102,43 @@ object ValueDecoder {
     InetAddress.getByAddress(arr)
   }
 
-  implicit val Boolean: ValueDecoder[Boolean] = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
-  implicit val Bytea: ValueDecoder[Array[Byte]] = instance(
+  implicit val boolean: ValueDecoder[Boolean] = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
+  implicit val bytea: ValueDecoder[Array[Byte]] = instance(
     s => Try(s.stripPrefix("\\x").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)),
     (b,c) => Try(Buffers.readBytes(b)))
-  implicit val String: ValueDecoder[String] = instance(s => Return(s), (b,c) => Try(Buffers.readString(b, c)))
-  implicit val Int2: ValueDecoder[Short] = instance(s => Try(s.toShort), (b,c) => Try(b.readShort()))
-  implicit val Int4: ValueDecoder[Int] = instance(s => Try(s.toInt), (b,c) => Try(b.readInt()))
-  implicit val Int8: ValueDecoder[Long] = instance(s => Try(s.toLong), (b,c) => Try(b.readLong()))
-  implicit val Float4: ValueDecoder[Float] = instance(s => Try(s.toFloat), (b,c) => Try(b.readFloat()))
-  implicit val Float8: ValueDecoder[Double] = instance(s => Try(s.toDouble), (b,c) => Try(b.readDouble()))
+
+  // for String, we have a special case of `jsonb` - the user might want it as a String, but if it's jsonb we need
+  // to strip off the version byte in the binary case
+  implicit val string: ValueDecoder[String] =
+    instance((recv, s) => Return(s), (recv, b,c) => recv match {
+      case "jsonb_recv" => b.readByte; Try(Buffers.readString(b, c))
+      case _ => Try(Buffers.readString(b, c))
+    })
+
+  implicit val int2: ValueDecoder[Short] = instance(s => Try(s.toShort), (b,c) => Try(b.readShort()))
+  implicit val int4: ValueDecoder[Int] = instance(s => Try(s.toInt), (b,c) => Try(b.readInt()))
+  implicit val int8: ValueDecoder[Long] = instance(s => Try(s.toLong), (b,c) => Try(b.readLong()))
+  implicit val float4: ValueDecoder[Float] = instance(s => Try(s.toFloat), (b,c) => Try(b.readFloat()))
+  implicit val float8: ValueDecoder[Double] = instance(s => Try(s.toDouble), (b,c) => Try(b.readDouble()))
   val Oid = instance(s => Try(s.toLong), (b,c) => Try(Integer.toUnsignedLong(b.readInt())))
-  implicit val Inet: ValueDecoder[InetAddress] = instance(s => Try(InetAddress.getByName(s)), (b, c) => Try(readInetAddress(b)))
-  implicit val Date: ValueDecoder[LocalDate] = instance(
+  implicit val inet: ValueDecoder[InetAddress] = instance(s => Try(InetAddress.getByName(s)), (b, c) => Try(readInetAddress(b)))
+  implicit val localDate: ValueDecoder[LocalDate] = instance(
     s => Try(LocalDate.parse(s)),
     (b, c) => Try(LocalDate.now().`with`(JulianFields.JULIAN_DAY, b.readInt() + 2451545)))
-  implicit val Time: ValueDecoder[LocalTime] = instance(
+  implicit val localTime: ValueDecoder[LocalTime] = instance(
     s => Try(LocalTime.parse(s)),
     (b, c) => Try(LocalTime.ofNanoOfDay(b.readLong() * 1000))
   )
-  implicit val TimeTz: ValueDecoder[OffsetTime] = instance(
+  implicit val offsetTime: ValueDecoder[OffsetTime] = instance(
     s => Try(DateTimeUtils.parseTimeTz(s)),
     (b, c) => Try(DateTimeUtils.readTimeTz(b))
   )
-  implicit val Timestamp: ValueDecoder[LocalDateTime] = instance(
+  implicit val localDateTime: ValueDecoder[LocalDateTime] = instance(
     s => Try(LocalDateTime.ofInstant(java.sql.Timestamp.valueOf(s).toInstant, ZoneId.systemDefault())),
     (b, c) => Try(LocalDateTime.ofInstant(DateTimeUtils.readTimestamp(b), ZoneOffset.UTC))
   )
-  implicit val TimestampTZ: ValueDecoder[ZonedDateTime] = instance(
-    s => Try {
-      val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
-        case Some(m) => m.group(1) -> (m.group(2) match {
-          case "-" => -1 * m.group(3).toInt
-          case "+" => m.group(3).toInt
-        })
-        case None => throw new DateTimeException("TimestampTZ string could not be parsed")
-      }
-      val zone = ZoneId.ofOffset("", ZoneOffset.ofHours(zoneOffs))
-      LocalDateTime.ofInstant(
-        java.sql.Timestamp.valueOf(str).toInstant,
-        zone).atZone(zone)
-    },
-    (b, c) => Try(DateTimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
-  )
-  implicit val Instant: ValueDecoder[Instant] = instance(
+
+  implicit val instant: ValueDecoder[Instant] = instance(
     s => Try {
       val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
         case Some(m) => m.group(1) -> (m.group(2) match {
@@ -148,16 +155,23 @@ object ValueDecoder {
     (b, c) => Try(DateTimeUtils.readTimestamp(b))
   )
 
-  implicit val Interval: ValueDecoder[Interval] = instance(
+  implicit val zonedDateTime: ValueDecoder[ZonedDateTime] = instant.map(_.atZone(ZoneId.systemDefault()))
+  implicit val offsetDateTime: ValueDecoder[OffsetDateTime] = zonedDateTime.map(_.toOffsetDateTime)
+
+  implicit val interval: ValueDecoder[Interval] = instance(
     s => Try(com.twitter.finagle.postgres.values.Interval.parse(s)),
     (b, c) => Try(DateTimeUtils.readInterval(b))
   )
-  implicit val Uuid: ValueDecoder[UUID] = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
-  implicit val Numeric: ValueDecoder[BigDecimal] = instance(
+
+  implicit val uuid: ValueDecoder[UUID] = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
+  implicit val bigDecimal: ValueDecoder[BigDecimal] = instance(
     s => Try(BigDecimal(s)),
     (b, c) => Try(Numerics.readNumeric(b))
   )
-  val Jsonb = instance(
+
+  implicit val javaBigDecimal: ValueDecoder[java.math.BigDecimal] = bigDecimal.map(_.bigDecimal)
+
+  val jsonb = instance(
     s => Return(s),
     (b, c) => Try {
       b.readByte()  //discard version number
@@ -165,7 +179,7 @@ object ValueDecoder {
     }
   )
 
-  implicit val HStore: ValueDecoder[Map[String, Option[String]]] = instance(
+  implicit val hstoreMap: ValueDecoder[Map[String, Option[String]]] = instance(
     s => Try {
       HStores.parseHStoreString(s)
         .getOrElse(throw new IllegalArgumentException("Invalid format for hstore"))
@@ -173,37 +187,42 @@ object ValueDecoder {
     (buf, charset) => Try(HStores.decodeHStoreBinary(buf, charset))
   )
 
-  val Unknown = instance[Either[String, Array[Byte]]](
+  val unknown: ValueDecoder[Either[String, Array[Byte]]] = instance(
     s => Return(Left(s)),
     (b, c) => Return(Right(Buffers.readBytes(b)))
+  )
+
+  val never: ValueDecoder[Nothing] = instance(
+    (recv, _) => Throw(new NoSuchElementException(s"No decoder available for $recv")),
+    (recv, _ , _) => Throw(new NoSuchElementException(s"No decoder available for $recv"))
   )
 
   def unknownBinary(t: (ChannelBuffer, Charset)): Try[Value[Any]] = Return(Value(Buffers.readBytes(t._1)))
 
   val decoders: PartialFunction[String, ValueDecoder[T forSome { type T }]] = {
-    case "boolrecv" => Boolean
-    case "bytearecv" => Bytea
+    case "boolrecv" => boolean
+    case "bytearecv" => bytea
     case   "charrecv" | "namerecv" | "varcharrecv" | "xml_recv" | "json_recv"
-         | "textrecv" | "bpcharrecv" | "cstring_recv" | "citextrecv" | "enum_recv"  => String
-    case "int8recv" => Int8
-    case "int4recv" => Int4
-    case "int2recv" => Int2
+         | "textrecv" | "bpcharrecv" | "cstring_recv" | "citextrecv" | "enum_recv"  => string
+    case "int8recv" => int8
+    case "int4recv" => int4
+    case "int2recv" => int2
     //TODO: cidr
-    case "float4recv" => Float4
-    case "float8recv" => Float8
-    case "inet_recv" => Inet
-    case "date_recv" => Date
-    case "time_recv" => Time
-    case "timetz_recv" => TimeTz
-    case "timestamp_recv" => Timestamp
-    case "timestamptz_recv" => TimestampTZ
-    case "interval_recv" => Interval
+    case "float4recv" => float4
+    case "float8recv" => float8
+    case "inet_recv" => inet
+    case "date_recv" => localDate
+    case "time_recv" => localTime
+    case "timetz_recv" => offsetTime
+    case "timestamp_recv" => localDateTime
+    case "timestamptz_recv" => instant
+    case "interval_recv" => interval
     //TODO: bit
     //TODO: varbit
-    case "numeric_recv" => Numeric
-    case "uuid_recv" => Uuid
-    case "jsonb_recv" => Jsonb
-    case "hstore_recv" => HStore
+    case "numeric_recv" => bigDecimal
+    case "uuid_recv" => uuid
+    case "jsonb_recv" => jsonb
+    case "hstore_recv" => hstoreMap
   }
 
 }

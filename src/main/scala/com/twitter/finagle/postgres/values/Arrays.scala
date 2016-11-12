@@ -29,13 +29,12 @@ object Arrays {
 
   }
 
+  // TODO: this isn't used anywhere, but it would need access to the type map and it would need to receive the elemoid
   def decodeArrayText[T](str: String, elemDecoder: ValueDecoder[T]) = {
     ArrayStringParser(str).flatMap {
-      strings => strings.map(elemDecoder.decodeText).foldLeft[Try[Queue[T]]](Return(Queue.empty[T])) {
+      strings => strings.map(str => elemDecoder.decodeText("", str)).foldLeft[Try[Queue[T]]](Return(Queue.empty[T])) {
         (accum, next) => accum.flatMap {
-          current => next.map {
-            v => current enqueue v.value
-          }
+          current => next.map(v => current enqueue v)
         }
       }
     }

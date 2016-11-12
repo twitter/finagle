@@ -1,7 +1,7 @@
 package com.twitter.finagle.postgres.integration
 
 import java.sql.Timestamp
-import java.time.{ZoneId, ZonedDateTime}
+import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres.{Client, OK, Row, Spec}
@@ -96,16 +96,16 @@ class IntegrationSpec extends Spec {
         resultRows.size must equal(3)
 
         // Spot check the first row
-        val firstRow = resultRows(0)
+        val firstRow = resultRows.head
 
-        firstRow.getOption("str_field") must equal(Some("hello"))
-        firstRow.getOption("int_field") must equal(Some(7787))
-        firstRow.getOption("double_field") must equal(Some(-42.51))
-        firstRow.getOption("timestamp_field") must equal(Some(
-          ZonedDateTime.ofLocal(new Timestamp(1387897260000L).toLocalDateTime, ZoneId.systemDefault, null).withFixedOffsetZone()
+        firstRow.getOption[String]("str_field") must equal(Some("hello"))
+        firstRow.getOption[Int]("int_field") must equal(Some(7787))
+        firstRow.getOption[Double]("double_field") must equal(Some(-42.51))
+        firstRow.getOption[Instant]("timestamp_field") must equal(Some(
+          new Timestamp(1387897260000L).toInstant
         ))
-        firstRow.getOption("bool_field") must equal(Some(false))
-        firstRow.getOption("bad_column") must equal(None)
+        firstRow.getOption[Boolean]("bool_field") must equal(Some(false))
+        firstRow.getOption[String]("bad_column") must equal(None)
 
 
       }
@@ -159,7 +159,7 @@ class IntegrationSpec extends Spec {
         resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(1)
-        resultRows(0).getOption("str_field") must equal(Some("hello_updated"))
+        resultRows.head.getOption[String]("str_field") must equal(Some("hello_updated"))
       }
 
 
@@ -184,7 +184,7 @@ class IntegrationSpec extends Spec {
         val resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal (1)
-        resultRows (0).getOption("str_field") must equal(Some("goodbye"))
+        resultRows.head.getOption[String]("str_field") must equal(Some("goodbye"))
       }
 
 
@@ -206,8 +206,8 @@ class IntegrationSpec extends Spec {
         resultRows.size must equal(2)
         resultRows.foreach {
           row =>
-            row.getOption("str_field") must equal(Some("hello"))
-            row.getOption("bool_field") must equal(Some(true))
+            row.getOption[String]("str_field") must equal(Some("hello"))
+            row.getOption[Boolean]("bool_field") must equal(Some(true))
         }
       }
 
@@ -284,7 +284,7 @@ class IntegrationSpec extends Spec {
         val resultRows = Await.result(preparedQuery)
 
         resultRows.size must equal(1)
-        resultRows(0).get[String]("str_field") must equal("hello_updated")
+        resultRows.head.get[String]("str_field") must equal("hello_updated")
       }
 
       "return rows from DELETE...RETURNING" in {
@@ -304,7 +304,7 @@ class IntegrationSpec extends Spec {
         val resultRows = Await.result(preparedQuery)
 
         resultRows.size must equal(1)
-        resultRows(0).get[String]("str_field") must equal("delete")
+        resultRows.head.get[String]("str_field") must equal("delete")
       }
 
 
