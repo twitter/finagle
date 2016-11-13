@@ -9,7 +9,7 @@ import java.util
 import org.openjdk.jmh.annotations._
 import scala.util.Random
 
-// ./sbt 'project finagle-benchmark' 'run .*StatsReceiverBenchmark.*'
+// ./sbt 'project finagle-benchmark' 'jmh:run StatsReceiverBenchmark'
 @Threads(3)
 class StatsReceiverBenchmark extends StdBenchAnnotations {
   import StatsReceiverBenchmark._

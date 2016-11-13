@@ -1,12 +1,13 @@
 package com.twitter.finagle.netty4.proxy
 
+import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.proxy.{Socks5ProxyHandler, ProxyHandler}
+import io.netty.handler.proxy.{ProxyHandler, Socks5ProxyHandler}
 import io.netty.util.concurrent.DefaultPromise
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import java.net.InetSocketAddress
 
 @RunWith(classOf[JUnitRunner])
@@ -36,11 +37,19 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     val promise = channel.connect(fakeAddress)
     assert(!promise.isDone)
 
+    channel.writeOutbound("foo")
+    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
+    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
+
+    assert(channel.readOutbound[Any]() == null)
+
     connectPromise.setSuccess(channel)
     assert(promise.isDone)
 
+    assert(channel.readOutbound[String]() == "foo")
+
     assert(channel.pipeline().get(classOf[Netty4ProxyConnectHandler]) == null)
-    assert(channel.finishAndReleaseAll())
+    assert(!channel.finishAndReleaseAll())
   }
 
   test("failure") {
@@ -50,10 +59,19 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     val promise = channel.connect(fakeAddress)
     assert(!promise.isDone)
 
+    channel.writeOutbound("foo")
+    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
+    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
+
+    assert(channel.readOutbound[String]() == null)
+
     val failure = new Exception()
     connectPromise.setFailure(failure)
     assert(promise.isDone)
+
+    assert(intercept[Exception](channel.checkException()) == failure)
+
     assert(promise.cause == failure)
-    assert(channel.finishAndReleaseAll())
+    assert(!channel.finishAndReleaseAll())
   }
 }

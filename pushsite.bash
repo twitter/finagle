@@ -1,16 +1,15 @@
 #!/bin/bash
 
-
 set -e
 
 dir=/tmp/finagle.$$
 trap "rm -fr $dir" 0 1 2
 
 echo 'making site...' 1>&2
-./sbt finagle-doc/make-site >/dev/null 2>&1
+./sbt --warn finagle-doc/make-site
 
 echo 'making unidoc...' 1>&2
-./sbt unidoc >/dev/null 2>&1
+./sbt --warn unidoc
 
 echo 'cloning...' 1>&2
 git clone -b gh-pages git@github.com:twitter/finagle.git $dir >/dev/null 2>&1

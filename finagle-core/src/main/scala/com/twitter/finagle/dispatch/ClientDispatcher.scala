@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.concurrent.{AsyncSemaphore, Permit}
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
@@ -132,5 +132,4 @@ class SerialClientDispatcher[Req, Rep](
       .unit
 
   protected def write(req: Req): Future[Unit] = trans.write(req)
-  protected def read(permit: Permit): Future[Rep] = trans.read().ensure { permit.release() }
 }

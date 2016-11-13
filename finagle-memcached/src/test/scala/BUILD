@@ -18,7 +18,7 @@ scala_library(name='external',
   sources=EXTERNAL_SOURCES
 )
 
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     ':external',
     '3rdparty/jvm/junit',

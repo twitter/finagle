@@ -4,7 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.{RequestParamMap, Response, Request, HttpMuxHandler}
 import com.twitter.io.Buf
-import com.twitter.ostrich.stats.{StatsListener, Stats}
+import com.twitter.ostrich.stats.{StatsListener, Stats => FStats}
 import com.twitter.util.Future
 import com.twitter.util.registry.GlobalRegistry
 
@@ -37,11 +37,11 @@ class OstrichExporter extends HttpMuxHandler {
     val summary = (period, namespace) match {
       case (Some(period), _) =>
         val duration = period.toInt.seconds
-        StatsListener(duration, Stats, regexes).get(filtered)
+        StatsListener(duration, FStats, regexes).get(filtered)
       case (None, Some(namespace)) =>
-        StatsListener(namespace, Stats).get(filtered)
+        StatsListener(namespace, FStats).get(filtered)
       case _ =>
-        Stats.get()
+        FStats.get()
     }
 
     summary.toJson

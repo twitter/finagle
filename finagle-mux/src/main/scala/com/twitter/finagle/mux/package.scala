@@ -1,5 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
  * Package mux implements a generic RPC multiplexer with a rich protocol.
  * Mux is itself encoding independent, so it is meant to use as the
@@ -100,7 +103,8 @@ package com.twitter.finagle
  *
  * ''size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:'' replies
  * to a Tdispatch request. Status codes are as in Rreq. Replies can include
- * request contexts.
+ * request contexts. MuxFailure flags are currently sent via Rdispatch contexts
+ * under the "MuxFailure" key. See the MuxFailure flags section below.
  *
  * ''size:4 Rerr:1 tag:3 why:'' indicates that the corresponding T message
  * produced an error. Rerr is specifically for server errors: the server
@@ -129,5 +133,28 @@ package com.twitter.finagle
  * lease expire. This is used by servers to implement features like garbage collection
  * avoidance.
  *
+ * =MuxFailure Flags=
+ *
+ * Failure flags are read and written as an 8 byte integer. Unrecognized flags
+ * will be ignored silently, but should all be considered reserved for future
+ * use.
+ *
+ *  Flag          Value     Meaning
+ *  Restartable   1 << 0    Request is safe to re-issue
+ *  Rejected      1 << 1    Request was rejected/Nacked by the server
+ *  NonRetryable  1 << 2    Request should not be retried
+ *
  */
-package object mux
+package object mux {
+  /**
+   * The name of the finagle-mux [[ToggleMap]].
+   */
+  private val LibraryName: String =
+    "com.twitter.finagle.mux"
+
+  /**
+   * The [[ToggleMap]] used for finagle-mux.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
+}

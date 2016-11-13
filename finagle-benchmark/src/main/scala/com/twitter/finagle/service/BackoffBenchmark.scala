@@ -5,7 +5,7 @@ import com.twitter.util.Duration
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import org.openjdk.jmh.annotations.{Scope, State, Benchmark}
 
-// ./sbt 'project finagle-benchmark' 'run .*BackoffBenchmark.*'
+// ./sbt 'project finagle-benchmark' 'jmh:run BackoffBenchmark'
 class BackoffBenchmark extends StdBenchAnnotations {
   import BackoffBenchmark._
 

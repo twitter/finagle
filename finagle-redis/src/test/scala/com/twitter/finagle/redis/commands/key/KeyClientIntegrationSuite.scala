@@ -4,7 +4,7 @@ import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{BufToString, StringToBuf}
+import com.twitter.finagle.redis.util.BufToString
 import java.util.Arrays
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -52,7 +52,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       assert(BufToString(withCount(1)) == "baz")
       assert(BufToString(withCount(2)) == "foo")
 
-      val pattern = StringToBuf("b*")
+      val pattern = Buf.Utf8("b*")
       val withPattern = Await.result(client.scans(0, None, Some(pattern)))
       assert(BufToString(withPattern(0)) == "0")
       assert(BufToString(withPattern(1)) == "baz")
@@ -111,7 +111,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       // assert(Await.result(client.move(bufFoo, bufBar)) == false)
 
       Await.result(client.set(bufFoo, bufBar))
-      assert(Await.result(client.move(bufFoo, StringToBuf(toDb.toString))) == true)
+      assert(Await.result(client.move(bufFoo, Buf.Utf8(toDb.toString))) == true)
 
       Await.result(client.dels(Seq(bufFoo))) // clean up
     }

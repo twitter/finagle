@@ -1,4 +1,4 @@
-java_library(name='java',
+java_library(
   provides = artifact(
     org = 'com.twitter',
     name = 'finagle-kestrel-java',
@@ -11,6 +11,6 @@ java_library(name='java',
     'finagle/finagle-memcached/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
-  fatal_warnings=False,
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

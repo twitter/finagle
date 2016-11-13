@@ -100,13 +100,14 @@ module Trace
   end
 
   class SpanId
-    HEX_REGEX = /^[a-f0-9]{16}$/i
+    HEX_REGEX = /^[a-f0-9]{16,32}$/i
     MAX_SIGNED_I64 = 9223372036854775807
     MASK = (2 ** 64) - 1
 
     def self.from_value(v)
       if v.is_a?(String) && v =~ HEX_REGEX
-        new(v.hex)
+        # drops any bits higher than 64 by selecting right-most 16 characters
+        new(v.length > 16 ? v[v.length - 16, 16].hex : v.hex)
       elsif v.is_a?(Numeric)
         new(v)
       elsif v.is_a?(SpanId)

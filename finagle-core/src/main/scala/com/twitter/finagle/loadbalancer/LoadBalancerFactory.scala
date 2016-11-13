@@ -5,6 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
+import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Future, Time, Var}
 import java.util.logging.{Level, Logger}
 
@@ -148,10 +149,15 @@ object LoadBalancerFactory {
 
         val composite = {
           val ia = addr match {
-            case Address.Inet(ia, _) => Some(ia)
+            case Address.Inet(isa, _) => Some(isa)
             case _ => None
           }
-          reporter(label, ia).andThen(monitor)
+
+          // We always install a `DefaultMonitor` that handles all the un-handled
+          // exceptions propagated from the user-defined monitor.
+          val defaultMonitor = DefaultMonitor(label, ia.map(_.toString).getOrElse("n/a"))
+
+          reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
         }
 
         // While constructing a single endpoint stack is fairly cheap,

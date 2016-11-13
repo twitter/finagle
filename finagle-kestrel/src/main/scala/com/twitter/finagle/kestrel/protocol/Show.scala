@@ -1,13 +1,12 @@
 package com.twitter.finagle.kestrel.protocol
 
+import com.twitter.finagle.memcached.protocol.text._
+import com.twitter.io.Buf
+import com.twitter.util.Duration
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
-import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
-import com.twitter.io.Buf
-import com.twitter.util.Duration
-
-object ResponseToEncoding {
+private[finagle] object ResponseToEncoding {
   private val ZERO          = "0"
   private val VALUE         = "VALUE"
   private val ZeroCb        = Buf.Utf8(ZERO)
@@ -61,7 +60,7 @@ object CommandToEncoding {
 
 }
 
-private[kestrel] class CommandToEncoding extends OneToOneEncoder {
+private[finagle] class CommandToEncoding extends AbstractCommandToEncoding[Command] {
   import CommandToEncoding._
 
   // kestrel supports only 32-bit timeouts

@@ -91,3 +91,13 @@ Thrift
   frequently. Use the ``com.twitter.finagle.Thrift.param.MaxReusableBufferSize``
   param to set the max buffer size to the size of a typical thrift response for
   your server.
+
+RecvBufferSizeStatsHandler (when Netty 4 pooling is enabled)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+**transport/receive_buffer_bytes**
+  A histogram of the receive buffer size in bytes. This metric is useful when
+  it comes to tuning pooling of receive buffers in ``finagle-netty4`` (can be enabled
+  with a flag: `-com.twitter.finagle.netty.poolReceiveBuffers`). For maximum throughput,
+  pool's chunk size should be bigger than ``receive_buffer_bytes.max`` of any client/server
+  running on a given JVM.

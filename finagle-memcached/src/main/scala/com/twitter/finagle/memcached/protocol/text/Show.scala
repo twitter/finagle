@@ -7,9 +7,20 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 
 /**
+ * Class that can encode `Command`-type objects into `Decoding`s. Used on the client side.
+ */
+private[finagle] abstract class AbstractCommandToEncoding[Command <: AnyRef] extends OneToOneEncoder {
+
+  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding
+
+  def encode(message: Command): Decoding =
+    encode(null, null, message)
+}
+
+/**
  * Used by the server.
  */
-class ResponseToEncoding extends OneToOneEncoder {
+private[finagle] class ResponseToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = Buf.Utf8("0")
   private[this] val VALUE         = Buf.Utf8("VALUE")
 
@@ -51,25 +62,25 @@ class ResponseToEncoding extends OneToOneEncoder {
 /**
  * Used by the client.
  */
-class CommandToEncoding extends OneToOneEncoder {
-  private[this] val GET           = Buf.Utf8("get")
-  private[this] val GETS          = Buf.Utf8("gets")
-  private[this] val DELETE        = Buf.Utf8("delete")
-  private[this] val INCR          = Buf.Utf8("incr")
-  private[this] val DECR          = Buf.Utf8("decr")
+private[finagle] class CommandToEncoding[Command <: AnyRef] extends AbstractCommandToEncoding[Command] {
+  private[this] val GET = Buf.Utf8("get")
+  private[this] val GETS = Buf.Utf8("gets")
+  private[this] val DELETE = Buf.Utf8("delete")
+  private[this] val INCR = Buf.Utf8("incr")
+  private[this] val DECR = Buf.Utf8("decr")
 
-  private[this] val ADD           = Buf.Utf8("add")
-  private[this] val SET           = Buf.Utf8("set")
-  private[this] val APPEND        = Buf.Utf8("append")
-  private[this] val PREPEND       = Buf.Utf8("prepend")
-  private[this] val REPLACE       = Buf.Utf8("replace")
-  private[this] val CAS           = Buf.Utf8("cas")
+  private[this] val ADD = Buf.Utf8("add")
+  private[this] val SET = Buf.Utf8("set")
+  private[this] val APPEND = Buf.Utf8("append")
+  private[this] val PREPEND = Buf.Utf8("prepend")
+  private[this] val REPLACE = Buf.Utf8("replace")
+  private[this] val CAS = Buf.Utf8("cas")
 
-  private[this] val GETV          = Buf.Utf8("getv")
-  private[this] val UPSERT        = Buf.Utf8("upsert")
+  private[this] val GETV = Buf.Utf8("getv")
+  private[this] val UPSERT = Buf.Utf8("upsert")
 
-  private[this] val QUIT          = Buf.Utf8("quit")
-  private[this] val STATS         = Buf.Utf8("stats")
+  private[this] val QUIT = Buf.Utf8("quit")
+  private[this] val STATS = Buf.Utf8("stats")
 
   private[this] val ZeroBuf = Buf.Utf8("0")
 

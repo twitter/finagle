@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import org.junit.runner.RunWith
-import org.scalactic.{TripleEquals, Tolerance}
+import org.scalactic.Tolerance
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

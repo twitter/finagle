@@ -106,21 +106,43 @@ private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends 
     }
   }
 
+  // this one is only called on END_HEADERS, so it's safe to decide as an HttpResponse
+  // or to collate into a FullHttpResponse.
   override def onHeadersRead(
     ctx: ChannelHandlerContext,
     streamId: Int,
-    headers: Http2Headers,
+    newHeaders: Http2Headers,
     streamDependency: Int,
     weight: Short,
     exclusive: Boolean,
     padding: Int,
     endOfStream: Boolean
   ): Unit = {
-    onHeadersRead(ctx, streamId, headers, padding, endOfStream)
+    onHeadersRead(ctx, streamId, newHeaders, padding, endOfStream)
+    val stream = connection.stream(streamId)
+    val headers = stream.getProperty(headersKey).asInstanceOf[Http2Headers]
+    if (headers != null && !headers.contains(HttpHeaderNames.CONTENT_LENGTH)) {
+      val rep = new DefaultHttpResponse(
+        HttpVersion.HTTP_1_1,
+        HttpConversionUtil.parseStatus(headers.status),
+        false /* validateHeaders */
+      )
+      HttpConversionUtil.addHttp2ToHttpHeaders(
+        streamId,
+        headers,
+        rep.headers,
+        HttpVersion.HTTP_1_1,
+        false /* isTrailer */,
+        false /* isRequest */
+      )
+      HttpUtil.setTransferEncodingChunked(rep, true)
+      ctx.fireChannelRead(Message(rep, streamId))
+      stream.removeProperty(headersKey)
+    }
   }
 
   override def onRstStreamRead(ctx: ChannelHandlerContext, streamId: Int, errorCode: Long): Unit = {
-    ctx.fireChannelRead(Rst(streamId))
+    ctx.fireChannelRead(Rst(streamId, errorCode))
   }
 
   override def onGoAwayRead(
@@ -156,5 +178,5 @@ private[http2] object Http2ClientDowngrader {
   sealed trait StreamMessage
   case class Message(obj: HttpObject, streamId: Int) extends StreamMessage
   case class GoAway(obj: HttpObject) extends StreamMessage
-  case class Rst(streamId: Int) extends StreamMessage
+  case class Rst(streamId: Int, errorCode: Long) extends StreamMessage
 }

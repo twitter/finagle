@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Service, WriteException}
 import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import org.apache.thrift.TApplicationException
@@ -78,7 +79,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)
-      assert(Await.result(f) == arr)
+      assert(Await.result(f, 10.seconds) == arr)
       assert(!validate.isAvailable)
       val resp = validate(req).poll
 
@@ -110,7 +111,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)
-      assert(Await.result(f) == arr)
+      assert(Await.result(f, 10.seconds) == arr)
       assert(validate.isAvailable)
       assert(validate(req).poll match {
         case Some(Return(_)) => true

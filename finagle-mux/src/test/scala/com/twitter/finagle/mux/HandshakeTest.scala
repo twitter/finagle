@@ -4,7 +4,6 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Return}

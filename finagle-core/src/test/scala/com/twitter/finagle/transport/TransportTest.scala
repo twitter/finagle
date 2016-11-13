@@ -1,14 +1,15 @@
 package com.twitter.finagle.transport
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
-import com.twitter.concurrent.AsyncQueue
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {

@@ -26,7 +26,10 @@ private[http2] class PriorKnowledgeTransporter(
 
   private[this] val fn: SocketAddress => Future[MultiplexedTransporter] = { addr: SocketAddress =>
     underlying(addr).map { transport =>
-      val multi = new MultiplexedTransporter(Transport.cast[StreamMessage, StreamMessage](transport))
+      val multi = new MultiplexedTransporter(
+        Transport.cast[StreamMessage, StreamMessage](transport),
+        addr
+      )
       multi.onClose.ensure {
         cache.remove(addr, multi)
       }

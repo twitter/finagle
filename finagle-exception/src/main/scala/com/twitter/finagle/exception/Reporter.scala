@@ -157,8 +157,8 @@ sealed case class Reporter(
   def createEntry(e: Throwable): LogEntry = {
     var se = new ServiceException(serviceName, e, Time.now, Trace.id.traceId.toLong)
 
-    sourceAddress foreach { sa => se = se withSource sa }
-    clientAddress foreach { ca => se = se withClient ca }
+    sourceAddress.foreach { sa => se = se.withSource(sa) }
+    clientAddress.foreach { ca => se = se.withClient(ca) }
 
     LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }
@@ -170,11 +170,12 @@ sealed case class Reporter(
    * implications.
    */
   def handle(t: Throwable): Boolean = {
-    client.log(createEntry(t) :: Nil) onSuccess {
+    client.log(createEntry(t) :: Nil).onSuccess {
       case ResultCode.Ok => okCounter.incr()
       case ResultCode.TryLater => tryLaterCounter.incr()
-    } onFailure {
-      case e => statsReceiver.counter("report_exception_" + e.toString).incr()
+      case ResultCode.EnumUnknownResultCode(_) => // ignored
+    }.onFailure {
+      e => statsReceiver.counter("report_exception_" + e.toString).incr()
     }
 
     false  // did not actually handle

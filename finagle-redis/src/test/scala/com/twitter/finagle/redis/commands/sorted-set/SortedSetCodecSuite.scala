@@ -12,7 +12,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
   test("ZADD", CodecTest) {
     forAll { ms: NelList[ZMember] =>
       assert(encode(ZAdd(Buf.Utf8("foo"), ms.list)) ==
-        Seq("ZADD", "foo") ++ ms.list.flatMap(zm => Seq(zm.score.toString, zm.memberBuf.asString)))
+        Seq("ZADD", "foo") ++ ms.list.flatMap(zm => Seq(zm.score.toString, zm.member.asString)))
     }
   }
 

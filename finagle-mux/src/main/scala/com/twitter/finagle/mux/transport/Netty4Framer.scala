@@ -1,5 +1,7 @@
 package com.twitter.finagle.mux.transport
 
+import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
+import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
 import com.twitter.finagle.netty4.codec.BufCodec
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.{LengthFieldPrepender, LengthFieldBasedFrameDecoder}
@@ -22,6 +24,7 @@ private[finagle] object Netty4Framer extends (ChannelPipeline => Unit) {
       lengthAdjustment,
       initialBytesToStrip))
     pipeline.addLast("frame-encoder", new LengthFieldPrepender(lengthFieldLength))
+    pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
     pipeline.addLast("endec", new BufCodec)
   }
 }

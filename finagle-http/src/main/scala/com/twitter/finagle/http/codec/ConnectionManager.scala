@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.http.{Message, Request, Response}
+import com.twitter.finagle.http.{Fields, Message, Request, Response}
 import com.twitter.util.{Future, Promise}
 
 /**
@@ -48,7 +48,15 @@ private[finagle] class ConnectionManager {
 
   def observeResponse(response: Response, onFinish: Future[Unit]): Unit = synchronized {
     pendingResponses -= 1
-    if ((!response.isChunked && response.contentLength.isEmpty) || !response.isKeepAlive) isKeepAlive = false
+
+    if (!isKeepAlive ||
+        (!response.isChunked && response.contentLength.isEmpty) ||
+        !response.isKeepAlive) {
+      // We are going to close the connection after this response so we ensure that
+      // the 'Connection' header is set to 'close' in order to give the client notice.
+      response.headerMap.set(Fields.Connection, "close")
+      isKeepAlive = false
+    }
 
     // If a response isn't chunked, then we're done with this request,
     // and hence idle.

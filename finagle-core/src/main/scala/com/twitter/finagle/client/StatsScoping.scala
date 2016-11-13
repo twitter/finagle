@@ -1,9 +1,10 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.Addr.Metadata
 import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{Addr, Stack, Stackable, ServiceFactory}
+import com.twitter.finagle.{Addr, ServiceFactory, Stack, Stackable}
 
 /**
  * Stats scoping enabled the modification of the StatsReceiver scoping on a
@@ -23,7 +24,12 @@ object StatsScoping {
     def mk(): (Scoper, Stack.Param[Scoper]) = (this, Scoper.param)
   }
   object Scoper {
-    implicit val param = Stack.Param(Scoper { (stats, _) => stats })
+    private[this] val DefaultFn: ScoperFunction =
+      new Function2[StatsReceiver, Addr.Metadata, StatsReceiver] {
+        def apply(stats: StatsReceiver, md: Metadata): StatsReceiver = stats
+        override def toString: String = "Unscoped"
+      }
+    implicit val param = Stack.Param(Scoper(DefaultFn))
   }
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
@@ -35,7 +41,10 @@ object StatsScoping {
         implicitly[Stack.Param[Scoper]],
         implicitly[Stack.Param[Stats]])
 
-      def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+      def make(
+        params: Stack.Params,
+        next: Stack[ServiceFactory[Req, Rep]]
+      ): Stack[ServiceFactory[Req, Rep]] = {
         val AddrMetadata(metadata) = params[AddrMetadata]
         val Stats(stats) = params[Stats]
         val Scoper(scoper) = params[Scoper]

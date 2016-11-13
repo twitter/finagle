@@ -4,13 +4,14 @@ import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
+import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 
 trait RedisRichClient { self: Client[Command, Reply] =>
@@ -62,14 +63,17 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Command
+    protected type In = Buf
     protected type Out = Reply
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty3Transporter(redis.protocol.RedisClientPipelineFactory, params)
+      Netty3Transporter(redis.protocol.Netty3.Framer, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
-      RedisPool.newDispatcher(transport, params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope))
+      RedisPool.newDispatcher(
+        transport.map(Command.encode, identity),
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

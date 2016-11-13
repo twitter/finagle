@@ -4,17 +4,12 @@ import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.naggati.ProtocolError
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
 object RequireServerProtocol extends ErrorConversion {
   override def getException(msg: String) = new ServerError(msg)
 }
 
-sealed abstract class Reply extends RedisMessage {
-  override def toChannelBuffer: ChannelBuffer =
-    throw new UnsupportedOperationException("Does not support server-side encoding")
-}
-
+sealed abstract class Reply
 sealed abstract class SingleLineReply extends Reply // starts with +,-, or :
 sealed abstract class MultiLineReply extends Reply
 

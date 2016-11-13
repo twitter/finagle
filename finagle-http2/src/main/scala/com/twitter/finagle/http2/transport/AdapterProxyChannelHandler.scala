@@ -22,7 +22,10 @@ import scala.collection.mutable.HashMap
  * @param setupFn is run on each of the channels for each of the streams, and
  *                should be for a pipeline for HttpObject.
  */
-private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit) extends ChannelDuplexHandler {
+private[http2] class AdapterProxyChannelHandler(
+    setupFn: ChannelPipeline => Unit)
+  extends ChannelDuplexHandler {
+
   import AdapterProxyChannelHandler._
 
   // this handler cannot be shared, and depends on netty's thread model to avoid
@@ -30,7 +33,10 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
   private[this] val map = HashMap[Int, CompletingChannel]()
   private[this] val log = Logger.get()
 
-  private[this] def setupEmbeddedChannel(ctx: ChannelHandlerContext, streamId: Int): EmbeddedChannel = {
+  private[this] def setupEmbeddedChannel(
+    ctx: ChannelHandlerContext,
+    streamId: Int
+  ): EmbeddedChannel = {
     val embedded = new EmbeddedChannel(ctx.channel.id)
     val p = embedded.pipeline
     setupFn(p)
@@ -39,7 +45,10 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
     embedded
   }
 
-  private[this] def getEmbeddedChannel(ctx: ChannelHandlerContext, streamId: Int): EmbeddedChannel = map.getOrElseUpdate(
+  private[this] def getEmbeddedChannel(
+    ctx: ChannelHandlerContext,
+    streamId: Int
+  ): EmbeddedChannel = map.getOrElseUpdate(
     streamId,
     new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
   ).embedded
@@ -140,7 +149,11 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
    * asynchronous handlers to work properly, as well as handlers that aggregate
    * or disaggregate message.
    */
-  class InboundPropagator(underlying: ChannelHandlerContext, streamId: Int) extends ChannelInboundHandlerAdapter {
+  class InboundPropagator(
+      underlying: ChannelHandlerContext,
+      streamId: Int)
+    extends ChannelInboundHandlerAdapter {
+
     override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
       underlying.fireChannelRead(Message(msg.asInstanceOf[HttpObject], streamId))
     }
@@ -160,7 +173,11 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
    * asynchronous handlers to work properly, as well as handlers that aggregate
    * or disaggregate message.
    */
-  class OutboundPropagator(underlying: ChannelHandlerContext, streamId: Int) extends ChannelOutboundHandlerAdapter {
+  class OutboundPropagator(
+      underlying: ChannelHandlerContext,
+      streamId: Int)
+    extends ChannelOutboundHandlerAdapter {
+
     import AdapterProxyChannelHandler._
 
     override def flush(ctx: ChannelHandlerContext): Unit = {
@@ -168,7 +185,10 @@ private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit
     }
 
     override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
-      underlying.write(Message(msg.asInstanceOf[HttpObject], streamId), proxyForChannel(underlying.channel, promise))
+      underlying.write(
+        Message(msg.asInstanceOf[HttpObject], streamId),
+        proxyForChannel(underlying.channel, promise)
+      )
     }
 
     override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {

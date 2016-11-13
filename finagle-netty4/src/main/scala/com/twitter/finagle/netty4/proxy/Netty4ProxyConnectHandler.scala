@@ -1,7 +1,9 @@
 package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
-import io.netty.channel.{Channel, ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
+import io.netty.channel.{
+  Channel, ChannelFuture, ChannelFutureListener,
+  ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
 import io.netty.handler.proxy.ProxyHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 import java.net.SocketAddress
@@ -24,16 +26,18 @@ private[netty4] class Netty4ProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] val socksCodecKey: String = "socks codec"
+  private[this] val proxyCodecKey: String = "proxy codec"
   private[proxy] var connectPromise: NettyFuture[Channel] = _ // exposed for testing
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     connectPromise = proxyHandler.connectFuture()
-    ctx.pipeline().addBefore(ctx.name(), socksCodecKey, proxyHandler)
+    ctx.pipeline().addBefore(ctx.name(), proxyCodecKey, proxyHandler)
+    super.handlerAdded(ctx)
   }
 
   override def handlerRemoved(ctx: ChannelHandlerContext): Unit = {
-    ctx.pipeline().remove(socksCodecKey)
+    ctx.pipeline().remove(proxyCodecKey)
+    super.handlerRemoved(ctx)
   }
 
   override def connect(
@@ -50,6 +54,18 @@ private[netty4] class Netty4ProxyConnectHandler(
     // Fail the original promise if a new one is failed.
     proxyConnectPromise.addListener(proxyFailuresTo(promise))
 
+    // Workaround for https://github.com/netty/netty/issues/5933 (CSL-3451)
+    // If ChannelOption.AUTO_READ is turned off, as it is by default for
+    // Netty4 via the com.twitter.finagle.netty4.Netty4Transporter.Backpressure
+    // param, as of Netty 4.1.4, the read of the Socks 5 proxy server is not
+    // kicked off and so must be done manually.
+    proxyConnectPromise.addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture): Unit = {
+        if (f.isSuccess && !ctx.channel().config().isAutoRead())
+          ctx.read()
+      }
+    })
+
     // React on satisfied proxy handshake promise.
     connectPromise.addListener(new GenericFutureListener[NettyFuture[Channel]] {
       override def operationComplete(future: NettyFuture[Channel]): Unit = {
@@ -61,8 +77,8 @@ private[netty4] class Netty4ProxyConnectHandler(
             ctx.pipeline().remove(self) // drains pending writes when removed
           }
         } else {
-          // SOCKS handshake promise is failed so given `ProxyHandler` is going to close the
-          // channel we only  need to fail pending writes and the connect promise.
+          // SOCKS/HTTP proxy handshake promise is failed so given `ProxyHandler` is going to
+          // close the channel, we only need to fail pending writes and the connect promise.
           promise.tryFailure(future.cause())
           failPendingWrites(ctx, future.cause())
         }

@@ -4,7 +4,7 @@ import com.twitter.util.{Time, MockTimer}
 import com.twitter.conversions.time.intToTimeableNumber
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{when, verify, times}
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar

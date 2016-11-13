@@ -1,257 +1,163 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, SummarizingStatsReceiver, Stat}
-import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.{Drv, Rng, DefaultTimer}
-import com.twitter.util.{Function => _, _}
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.TimeUnit
-import scala.io.Source
+import com.twitter.finagle.stats.SummarizingStatsReceiver
+import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
+import com.twitter.util.{Activity, Future, Stopwatch, Var}
 
-private object LatencyProfile {
-  private val rng = Rng("seed".hashCode)
-
-  /**
-   * Creates a latency profile from a file where each line
-   * represents recorded latencies.
-   */
-  def fromFile(path: java.net.URL): () => Duration = {
-    val latencies = Source.fromURL(path).getLines.toIndexedSeq map {
-      line: String => Duration.fromNanoseconds((line.toDouble*1000000).toLong)
-    }
-    val size = latencies.size
-    var i = rng.nextInt(size)
-    () => { i = i + 1; latencies(i%size) }
-  }
-
-  /**
-   * Returns a function which generates a duration between `low`
-   * and `high` when applied.
-   */
-  def between(low: Duration, high: Duration): () => Duration = {
-    require(low <= high)
-    () => low + ((high - low) * math.random)
-  }
-
-  /**
-   * Returns a function which represents the given latency probability distribution.
-   */
-  def apply(
-    min: Duration,
-    p50: Duration,
-    p90: Duration,
-    p95: Duration,
-    p99: Duration,
-    p999: Duration,
-    p9999: Duration
-  ): () => Duration = {
-    val dist = Seq(
-      0.5 -> between(min, p50),
-      0.4 -> between(p50, p90),
-      0.05 -> between(p90, p95),
-      0.04 -> between(p95, p99),
-      0.009 -> between(p99, p999),
-      0.0009 -> between(p999, p9999)
-    )
-    val (d, l) = dist.unzip
-    apply(d, l.toIndexedSeq)
-  }
-
-  /**
-   * Creates a function that applies the probability distribution in
-   * `dist` over the latency functions in `latencies`.
-   */
-  def apply(
-    dist: Seq[Double],
-    latencies: IndexedSeq[() => Duration]
-  ): () => Duration = {
-    val drv = Drv(dist)
-    () => latencies(drv(rng))()
-  }
-}
-
-private[finagle] class LatencyProfile(stopWatch: () => Duration) {
-  /** Increase latency returned from `next` by `factor`. */
-  def slowBy(factor: Long)(next: () => Duration) = () => { next()*factor }
-
-  /**
-   * Increases the latency returned from `next` by `factor` while `stopWatch` is
-   * within `start` and `end`.
-   */
-  def slowWithin(start: Duration, end: Duration, factor: Long)(next: () => Duration) = () => {
-    val time = stopWatch()
-    if (time >= start && time <= end) next()*factor else next()
-  }
-
-  /**
-   * Progressively improve latencies returned from `next` while `stopWatch` is still
-   * within the window terminated at `end`.
-   */
-  def warmup(end: Duration, maxFactor: Double = 5.0)(next: () => Duration) = () => {
-    val time = stopWatch()
-    val factor = if (time < end) (1.0/time.inNanoseconds)*(end.inNanoseconds) else 1.0
-    Duration.fromNanoseconds((next().inNanoseconds*factor.min(maxFactor)).toLong)
-  }
-}
-
-/**
- * Creates a ServiceFactory that applies a latency profile to Services
- * it creates.
- */
-private[finagle] class LatencyFactory(sr: StatsReceiver) {
-
-  def apply(
-    name: Int,
-    next: () => Duration,
-    _weight: Double = 1.0
-  ): ServiceFactory[Unit, Unit] = {
-    val service = new Service[Unit, Unit] {
-      implicit val timer = DefaultTimer.twitter
-      val load = new AtomicInteger(0)
-      val maxload = new AtomicInteger(0)
-      val gauges = Seq(
-        sr.scope("load").addGauge(""+name) { load.get() },
-        sr.scope("maxload").addGauge(""+name) { maxload.get() }
-      )
-      val count = sr.scope("count").counter(""+name)
-
-      def apply(req: Unit) = {
-        synchronized {
-          val l = load.incrementAndGet()
-          if (l > maxload.get()) maxload.set(l)
-        }
-        Future.sleep(next()) ensure {
-          count.incr()
-          load.decrementAndGet()
-        }
-      }
-    }
-
-    new ServiceFactory[Unit, Unit] {
-      def apply(conn: ClientConnection) = Future.value(service)
-      def close(deadline: Time) = Future.Done
-      override def toString = name.toString
-    }
-  }
-}
-
-private[finagle] object Simulation extends com.twitter.app.App {
-
-  val qps = flag("qps", 1250, "QPS at which to run the benchmark")
-  // TODO: add an option to always make a fixed number of requests.
+private object Simulation extends com.twitter.app.App {
+  val qps = flag("qps", 1250, "Number of queries to send per second.")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
-  val nstable = flag("stable", 10, "Number of stable hosts")
-  val bal = flag("bal", "p2c", "Load balancer")
-  val coldstart = flag("coldstart", true, "Add a cold start backend")
-  // we need a client that gets slow and then speeds up again
-  val slowmiddle = flag("slowmiddle", false, "Adds a fast-then-slow-then-fast again backend")
-  val showprogress = flag("showprogress", true, "print stats each second")
-  val showsummary = flag("showsummary", true,
-    "prints a Stats summary or else print each response time")
+
+  val nBackends = flag("backends", 10, "Number of stable uniform backends")
+  val nClients = flag("clients", 1, "Number of clients which uniformly send load")
+  val bal = flag("bal", "p2c", "The load balancer used by the clients")
+
+  val coldStartBackend = flag("coldstart", false, "Add a cold starting backend")
+  val slowMiddleBackend = flag("slowmiddle", false,
+    "Adds a fast-then-slow-then-fast again backend")
+
+  val showProgress = flag("showprogress", false, "Print stats each second")
+  val showSummary = flag("showsummary", true,
+    "Print a stats summary at the end of the test")
+  val showLoadDist = flag("showloaddist", true,
+    "Print a summary of server load distribution at the end of the test")
+
+  // Exception returned by balancers when they have no members in the set.
+  private val noBrokers = new NoBrokersAvailableException
 
   def main() {
-    val Qpms = qps()/1000
-    val Rem = qps()%1000
-
     val stats = new SummarizingStatsReceiver
-    val noBrokers = new NoBrokersAvailableException
-    val newFactory = new LatencyFactory(stats)
 
-    val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
-    val dist = LatencyProfile.fromFile(data)
-    val stable: Set[ServiceFactory[Unit, Unit]] =
-      Seq.tabulate(nstable())(i => newFactory(i, dist)).toSet
-
-    val underlying = Var(stable)
-    val activity: Activity[Set[ServiceFactory[Unit, Unit]]] =
-      Activity(underlying.map { facs => Activity.Ok(facs) })
-
-    val factory = bal() match {
-      case "p2c" => Balancers.p2c().newBalancer(
-        activity,
-        statsReceiver=stats.scope("p2c"),
-        noBrokers)
-
-      case "ewma" => Balancers.p2cPeakEwma().newBalancer(
-        activity,
-        statsReceiver=stats.scope("p2c"),
-        noBrokers)
-
-      case "aperture" =>
-        Balancers.aperture().newBalancer(
-          activity,
-          statsReceiver=stats.scope("aperture"),
-          noBrokers)
-
-      case "rr" =>
-        Balancers.roundRobin().newBalancer(
-          activity,
-          statsReceiver=stats.scope("round_robin"),
-          noBrokers)
+    var serverCount: Int = 0
+    val genServerId: () => String = () => {
+      serverCount += 1
+      serverCount.toString
     }
 
-    val balancer = factory.toService
-    val latstat = stats.stat("latency")
+    // create a latency distribution from a set of recorded ping latencies.
+    val url = getClass.getClassLoader.getResource("real_latencies.data")
+    val stableLatency = LatencyProfile.fromFile(url)
 
-    val call: () => Unit = if (showsummary()) {
-      () => { Stat.timeFuture(latstat, TimeUnit.MILLISECONDS) { balancer(()) } }
-    } else {
-      () => {
-        val profileStopWatch = Stopwatch.start()
-        balancer().ensure {
-          Trace.recordBinary("balancer", profileStopWatch().inMilliseconds)
-        }
+    val servers = Var(Seq.tabulate(nBackends()) { _ =>
+      val id = genServerId()
+      ServerFactory(id, stableLatency, stats.scope(s"srv_${id}"))
+    }.toSet)
+
+    val activityServers = Activity(servers.map { srvs =>
+      Activity.Ok(srvs.asInstanceOf[Set[ServiceFactory[Unit, Unit]]])
+    })
+
+    var clientCount: Int = 0
+    val genClientId: () => String = () => {
+      clientCount += 1
+      clientCount.toString
+    }
+
+    val clients: Seq[Client] = Seq.tabulate(nClients()) { _ =>
+      val id = genClientId()
+      val sr = stats.scope(s"client_${id}")
+      // This gives us a nice entry point to have per-client
+      // id configurations. For example, we can test two groups
+      // of clients (even and odds) running a separate aperture
+      // config.
+      val balancer = bal() match {
+        case "p2c" => Balancers.p2c().newBalancer(
+          activityServers,
+          statsReceiver=sr.scope("p2c"),
+          noBrokers)
+        case "ewma" => Balancers.p2cPeakEwma().newBalancer(
+          activityServers,
+          statsReceiver=sr.scope("p2c_ewma"),
+          noBrokers)
+        case "aperture" =>
+          Balancers.aperture().newBalancer(
+            activityServers,
+            statsReceiver=sr.scope("aperture"),
+            noBrokers)
+        case "rr" =>
+          Balancers.roundRobin().newBalancer(
+            activityServers,
+            statsReceiver=sr.scope("round_robin"),
+            noBrokers)
       }
+      ClientFactory(id, balancer, sr)
     }
 
-    val stopWatch = Stopwatch.start()
-    val p = new LatencyProfile(stopWatch)
-
-    var n = 1
-    if (coldstart()) {
-      val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
-      underlying() += newFactory(nstable()+n, coldStart(dist))
-      n += 1
-      underlying() += newFactory(nstable()+n, p.slowBy(2)(dist))
-      n += 1
+    val query: () => Future[Unit] = () => {
+      Future.collect(clients.map { clnt => clnt(()) }).unit
     }
 
-    if (slowmiddle()) {
-      val slowMiddle = p.slowWithin(15.seconds, 45.seconds, 10)_
-      underlying() += newFactory(nstable() + n, slowMiddle(dist))
-      n += 1
-    }
-
+    val elapsed = Stopwatch.start()
+    val qpms = qps() / 1000
+    val rem = qps() % 1000
     var ms = 0
-    while (stopWatch() < dur()) {
+
+    val p = new LatencyProfile(elapsed)
+
+    // TODO: These latency events are dependent on the running time of
+    // the simulation. They should probably be defined in terms of a ratio
+    // of the running time to be more flexible.
+    if (coldStartBackend()) {
+      val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
+      servers() += ServerFactory(
+        genServerId(),
+        coldStart(stableLatency),
+        stats.scope("srv_cold_start"))
+    }
+
+    if (slowMiddleBackend()) {
+      val slowMiddle = p.slowWithin(15.seconds, 45.seconds, 10)_
+      servers() += ServerFactory(
+        genServerId(),
+        slowMiddle(stableLatency),
+        stats.scope("srv_slow_middle"))
+    }
+
+    // Note, it's important to actually elapse time here instead of
+    // synthesizing it since we want to see the effects of latency
+    // on the load balancer.
+    while (elapsed() < dur()) {
       Thread.sleep(1)
 
       var n = 0
-      while (n < Qpms) {
-        call()
+      while (n < qpms) {
+        query()
         n += 1
       }
 
-      if (Rem > 0 && ms%(1000/Rem) == 0) { call() }
+      if (rem > 0 && ms % (1000 / rem) == 0) { query() }
 
       ms += 1
 
-      if (showprogress()) {
-        if (ms%1000==0) {
-          println("-"*100)
-          println("Requests at %s".format(stopWatch()))
+      if (showProgress() & ms % 1000 == 0) {
+        println("-" * 100)
+        println(s"Requests at ${elapsed()}")
 
-          val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
-          for ((name, value) <- lines.sortBy(_._1))
-            println(name+" "+value)
-        }
+        val lines = for ((name, fn) <- stats.gauges.toSeq)
+          yield (name.mkString("/"), fn())
+        for ((name, value) <- lines.sortBy(_._1))
+          println(s"$name $value")
       }
     }
 
-    if (showsummary()) {
+    if (showSummary()) {
       println(stats.summary(includeTails = true))
+    }
+
+    if (showLoadDist()) {
+      val srvs = servers.sample().toSeq
+      val totalLoad = srvs.map(_.count).sum
+      val optimal = totalLoad / serverCount.toDouble
+      println("# load distribution")
+      println(f"optimal (total / servers): ${optimal}%1.2f")
+      srvs.sortBy(_.count).foreach { srv =>
+        val variance = math.abs(srv.count - optimal)
+        val variancePct = (variance / optimal.toDouble) * 100
+        println(s"srv=${srv.toString} load=${srv.count} " +
+          f"variance=$variance%1.2f (${variancePct}%1.2f%%)")
+      }
+      // TODO: export standard deviation.
     }
   }
 }

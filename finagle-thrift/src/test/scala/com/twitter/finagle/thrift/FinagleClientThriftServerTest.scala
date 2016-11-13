@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.loadbalancer.defaultBalancer
 import com.twitter.test.{AnException, B, SomeStruct}
 import com.twitter.util.{Await, Promise, Return}
-import java.net.{ServerSocket, InetSocketAddress, InetAddress}
+import java.net.{InetAddress, InetSocketAddress, ServerSocket}
 import java.util.concurrent.CyclicBarrier
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
@@ -84,7 +84,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       val future = client.multiply(1, 2)
-      assert(Await.result(future) == 3)
+      assert(Await.result(future, 10.seconds) == 3)
       testServer.shutdown()
     }
 
@@ -103,7 +103,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       intercept[Exception]{
-        Await.result(client.add(1, 2))
+        Await.result(client.add(1, 2), 10.seconds)
       }
       testServer.shutdown()
     }
@@ -121,7 +121,7 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-      Await.result(client.add_one(1, 2))
+      Await.result(client.add_one(1, 2), 10.seconds)
       assert(true == true)
       testServer.shutdown()
     }
@@ -141,8 +141,8 @@ class FinagleClientThriftServerTest extends FunSuite {
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       assert(somewayPromise.isDefined == false)
-      assert(Await.result(client.someway()) == null)  // returns
-      assert(Await.result(somewayPromise.liftToTry) == Return.Unit)
+      assert(Await.result(client.someway(), 10.seconds) == null)  // returns
+      assert(Await.result(somewayPromise.liftToTry, 10.seconds) == Return.Unit)
 
       testServer.shutdown()
     }

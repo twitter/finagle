@@ -1,86 +1,54 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 import java.lang.{Long => JLong}
 
-case class HDel(keyBuf: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HDEL
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HDEL, keyBuf) ++ fields)
+case class HDel(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
+  def name: Buf = Command.HDEL
+  override def body: Seq[Buf] = key +: fields
 }
 
-case class HExists(keyBuf: Buf , field: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HEXISTS
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HEXISTS, keyBuf, field))
+case class HExists(key: Buf, field: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HEXISTS
+  override def body: Seq[Buf] = Seq(key, field)
 }
 
-case class HGet(keyBuf: Buf, field: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HGET
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HGET, keyBuf, field))
+case class HGet(key: Buf, field: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HGET
+  override def body: Seq[Buf] = Seq(key, field)
 }
 
-case class HGetAll(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HGETALL
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HGETALL, keyBuf))
+case class HGetAll(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HGETALL
 }
 
-case class HIncrBy(keyBuf: Buf, field: Buf, amount: Long) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HINCRBY
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(
-    Seq(CommandBytes.HINCRBY, keyBuf, field, StringToBuf(amount.toString))
-  )
+case class HIncrBy(key: Buf, field: Buf, amount: Long) extends StrictKeyCommand {
+  def name: Buf  = Command.HINCRBY
+  override def body: Seq[Buf] = Seq(key, field, Buf.Utf8(amount.toString))
 }
 
-case class HKeys(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HKEYS
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HKEYS, keyBuf))
+case class HKeys(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HKEYS
 }
 
-case class HLen(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HLEN
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HLEN, keyBuf))
+case class HLen(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HLEN
 }
 
-case class HMGet(keyBuf: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String = Commands.HMGET
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HMGET, keyBuf) ++ fields)
+case class HMGet(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
+  def name: Buf = Command.HMGET
+  override def body: Seq[Buf] = key +: fields
 }
 
-case class HMSet(keyBuf: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
+  def name: Buf = Command.HMSET
+  override def body: Seq[Buf] = {
+    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
+      f :: v :: Nil
+    }(collection.breakOut)
 
-  def command: String  = Commands.HMSET
-  val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
-    f :: v :: Nil
-  }(collection.breakOut)
-
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HMSET, keyBuf) ++ fvList)
+    key +: fvList
+  }
 }
 
 case class HScan(
@@ -89,41 +57,31 @@ case class HScan(
   count: Option[JLong] = None,
   pattern: Option[Buf] = None
 ) extends Command {
-  def command: String  = Commands.HSCAN
-  def toChannelBuffer: ChannelBuffer = {
-    val bufs = Seq(CommandBytes.HSCAN, key, StringToBuf(cursor.toString))
+  def name: Buf = Command.HSCAN
+  override def body: Seq[Buf] = {
+    val bufs = Seq(key, Buf.Utf8(cursor.toString))
+
     val withCount = count match {
-      case Some(count) => bufs ++ Seq(CommandBytes.COUNT, StringToBuf(count.toString))
+      case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
       case None        => bufs
     }
-    val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+
+    pattern match {
+      case Some(pattern) => withCount ++ Seq(Command.PATTERN, pattern)
       case None          => withCount
     }
-    RedisCodec.bufToUnifiedChannelBuffer(withPattern)
   }
 }
 
-case class HSet(keyBuf: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String  = Commands.HSET
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HSET, keyBuf, field, value))
+case class HSet(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HSET
+  override def body: Seq[Buf] = Seq(key, field, value)
 }
 
-case class HSetNx(keyBuf: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+case class HSetNx(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HSETNX
+  override def body: Seq[Buf] = Seq(key, field, value)}
 
-  def command: String  = Commands.HSETNX
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HSETNX, keyBuf, field, value))
-}
-
-case class HVals(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  def command: String  = Commands.HVALS
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.HVALS, keyBuf))
+case class HVals(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HVALS
 }

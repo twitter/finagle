@@ -10,8 +10,6 @@ import com.twitter.finagle.ListeningServer;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.Stack;
 import com.twitter.finagle.ThriftMux;
-import com.twitter.finagle.ThriftMuxClient;
-import com.twitter.finagle.ThriftMuxServer;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.param.Label;
@@ -65,7 +63,7 @@ public class EndToEndTest {
       ServerBuilder.get()
         .name("java-test-server")
         .bindTo(addr)
-        .stack(ThriftMuxServer.get())
+        .stack(ThriftMux.server())
     );
 
     ServerBuilder.get().stack(ThriftMux.server());
@@ -87,7 +85,7 @@ public class EndToEndTest {
       ClientBuilder.get()
         .name("java-test-client")
         .hosts(addr)
-        .stack(ThriftMuxClient.withClientId(new ClientId("java-test-client")))
+        .stack(ThriftMux.client().withClientId(new ClientId("java-test-client")))
     );
 
     ClientBuilder.get()

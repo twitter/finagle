@@ -27,15 +27,16 @@ private[mux] object TagSet {
 
   /** Constructs a space-efficient TagSet for the given range */
   def apply(_range: Range): TagSet = new TagSet { self =>
-    val range = _range
+    val range: Range = _range
     // We could easily stripe the bitsets here, since we don't
     // require contiguous tag assignment.
     require(range.step == 1)
-    val start = range.start
-    // thread safety provided by synchronizing on `this`/`self`
-    val bits = new BitSet
+    private[this] val start = range.start
 
-    def acquire(): Option[Int] = synchronized {
+    // thread safety provided by synchronizing on `this`/`self`
+    private[this] val bits = new BitSet
+
+    def acquire(): Option[Int] = self.synchronized {
       val tag = bits.nextClearBit(start)
       if (!range.contains(tag)) None else {
         bits.set(tag)
@@ -43,25 +44,25 @@ private[mux] object TagSet {
       }
     }
 
-    def release(tag: Int): Unit = synchronized {
+    def release(tag: Int): Unit = self.synchronized {
       // TODO: should we worry about releasing clear
       // or out-of-range bits?
       bits.clear(tag)
     }
 
     def iterator: Iterator[Int] = new Iterator[Int] {
-      var _next = start-1
+      private[this] var _next = start-1
       next()
 
       def hasNext: Boolean = _next != -1
-      def next(): Int = {
+      def next(): Int = self.synchronized {
         val cur = _next
-        _next = self.synchronized { bits.nextSetBit(_next+1) }
+        _next = bits.nextSetBit(_next+1)
         cur
       }
     }
 
     // for performance
-    override def isEmpty: Boolean = synchronized { bits.isEmpty }
+    override def isEmpty: Boolean = self.synchronized { bits.isEmpty }
   }
 }

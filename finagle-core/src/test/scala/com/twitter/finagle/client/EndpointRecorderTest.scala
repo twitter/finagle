@@ -8,7 +8,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndpointRecorderTest extends FunSuite {
+final class EndpointRecorderTest extends FunSuite {
 
   val name = "fooClient"
   val path = "/foo"

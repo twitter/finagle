@@ -55,7 +55,10 @@ object StatsFilter {
   /** Basic categorizer with all exceptions under 'failures'. */
   val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
     mkFlags = Failure.flagsOf,
-    mkSource = SourcedException.unapply)
+    mkSource = SourcedException.unapply) {
+
+    override def toString: String = "DefaultCategorizer"
+  }
 
   private val SyntheticException =
     new ResponseClassificationSyntheticException()

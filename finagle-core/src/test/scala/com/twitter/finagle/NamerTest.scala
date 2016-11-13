@@ -207,9 +207,9 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
           case bound: Addr.Bound =>
             assert(bound.addrs.size == 1)
             bound.addrs.head match {
-              case exp.Address.ServiceFactory(sf: ServiceFactory[Path, Path], _) =>
-                val svc = Await.result(sf())
-                val rsp = Await.result(svc(Path.Utf8("yodles")))
+              case exp.Address.ServiceFactory(sf, _) =>
+                val svc = Await.result(sf.asInstanceOf[ServiceFactory[Path, Path]](), 5.seconds)
+                val rsp = Await.result(svc(Path.Utf8("yodles")), 5.seconds)
                 assert(rsp == Path.Utf8("foo", "yodles"))
 
               case addr =>
@@ -231,10 +231,10 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
           case bound: Addr.Bound =>
             assert(bound.addrs.size == 1)
             bound.addrs.head match {
-              case exp.Address.ServiceFactory(sf: ServiceFactory[Int, Int], _) =>
-                val svc = Await.result(sf())
+              case exp.Address.ServiceFactory(sf, _) =>
+                val svc = Await.result(sf.asInstanceOf[ServiceFactory[Int, Int]](), 5.seconds)
                 intercept [ClassCastException] {
-                  val rsp = Await.result(svc(3))
+                  val rsp = Await.result(svc(3), 5.seconds)
                 }
 
               case addr =>

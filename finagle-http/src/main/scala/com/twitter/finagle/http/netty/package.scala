@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.Http.param._
+import com.twitter.finagle.http.param._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http.{Http => HttpCodec}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}

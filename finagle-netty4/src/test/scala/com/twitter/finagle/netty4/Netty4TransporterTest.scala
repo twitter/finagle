@@ -2,16 +2,16 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.{ReadTimedOutException, WriteTimedOutException, Failure}
+import com.twitter.finagle.{Failure, ReadTimedOutException, WriteTimedOutException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.framer.TestFramer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Await}
-import io.netty.buffer.{Unpooled, ByteBuf}
+import com.twitter.util.{Await, Duration}
+import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
-import java.net.{Socket, InetSocketAddress, InetAddress, ServerSocket}
+import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}

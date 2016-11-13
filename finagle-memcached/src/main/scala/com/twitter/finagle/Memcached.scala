@@ -10,8 +10,10 @@ import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactor
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.memcached.exp.LocalMemcached
+import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
+import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
 import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ServerFramer, Netty4ClientFramer, Netty3ClientFramer, Netty3ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
@@ -295,7 +297,10 @@ object Memcached extends finagle.Client[Command, Response]
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
-        new ClientTransport(transport),
+        new ClientTransport[Command, Response](
+          new CommandToEncoding,
+          new DecodingToResponse,
+          transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
         DefaultTimer.twitter
       )
@@ -317,7 +322,9 @@ object Memcached extends finagle.Client[Command, Response]
       val param.KeyHasher(hasher) = params[param.KeyHasher]
       val param.NumReps(numReps) = params[param.NumReps]
 
-      registerClient(label, hasher.toString, isPipelining = true)
+      val label0 = if (label == "") params[Label].label else label
+
+      registerClient(label0, hasher.toString, isPipelining = true)
 
       val healthBroker = new Broker[NodeHealth]
 
@@ -325,11 +332,11 @@ object Memcached extends finagle.Client[Command, Response]
         val key = KetamaClientKey.fromCacheNode(node)
         val stk = stack.replace(FailureAccrualFactory.role,
           KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
-        withStack(stk).newService(mkDestination(node.host, node.port), label)
+        withStack(stk).newService(mkDestination(node.host, node.port), label0)
       }
 
       val group = CacheNodeGroup.fromVarAddr(va)
-      val scopedSr = sr.scope(label)
+      val scopedSr = sr.scope(label0)
       new KetamaPartitionedClient(group, newService, healthBroker, scopedSr, hasher, numReps)
         with TwemcachePartitionedClient
     }

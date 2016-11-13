@@ -1,4 +1,4 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/junit',
     '3rdparty/jvm/io/netty',
@@ -8,4 +8,5 @@ junit_tests(name='java',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
+  fatal_warnings=True,
 )

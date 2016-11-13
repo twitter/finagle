@@ -1,5 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
  * =Deprecation=
  *
@@ -20,7 +23,7 @@ package com.twitter.finagle
  * thrift messages (requests and replies) according to the protocol
  * chosen. This is why the client codecs need to have access to a
  * thrift `ProtocolFactory`.
-
+ *
  * These transports are used by the services produced by the
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle finagle thrift codegenerator]].
  *
@@ -40,4 +43,17 @@ package com.twitter.finagle
  * class `ServiceToClient` is provided by the finagle thrift code
  * generator.
  */
-package object thrift
+package object thrift {
+
+  /**
+   * The name of the finagle-thrift [[ToggleMap]].
+   */
+  private[this] val LibraryName: String = "com.twitter.finagle.thrift"
+
+  /**
+   * The [[ToggleMap]] used for finagle-thrift.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
+}
+

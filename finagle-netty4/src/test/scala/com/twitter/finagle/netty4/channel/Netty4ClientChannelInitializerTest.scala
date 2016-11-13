@@ -5,6 +5,7 @@ import com.twitter.finagle.Stack.Params
 import com.twitter.util.{Await, Promise}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
+import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
@@ -14,6 +15,19 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class Netty4ClientChannelInitializerTest extends FunSuite {
+
+  test("framed channel initializer releases direct bufs") {
+    val e = new EmbeddedChannel()
+    val init = new Netty4ClientChannelInitializer(Params.empty, None)
+    init.initChannel(e)
+
+    val direct = Unpooled.directBuffer(10)
+    direct.writeBytes((1 to 10).toArray.map(_.toByte))
+
+    assert(direct.refCnt() == 1)
+    e.writeInbound(direct)
+    assert(direct.refCnt() == 0)
+  }
 
   test("raw channel initializer exposes netty pipeline") {
     val reverser = new ChannelOutboundHandlerAdapter {

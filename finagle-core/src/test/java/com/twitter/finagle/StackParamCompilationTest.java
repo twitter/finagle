@@ -118,10 +118,7 @@ public class StackParamCompilationTest {
           ).mk())
         .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
 
-    StackClient<String, String> client1 =
-        new ClientBuilder()
-        .failFast(true)
-        .<String, String>stackClientOfCodec(null);
+    ClientBuilder.get().failFast(true);
   }
 
   @Test

@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.{Service, param}
+import com.twitter.finagle.Service
 import com.twitter.util.{Await, Closable, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
@@ -52,11 +52,11 @@ class TraceInitializationTest extends FunSuite {
     testTraces { (serverTracer, clientTracer) =>
       import com.twitter.finagle
       val server = finagle.Http.server
-        .configured(param.Tracer(serverTracer))
-        .configured(param.Label("theServer")).serve(":*", Svc)
+        .withTracer(serverTracer)
+        .withLabel("theServer").serve(":*", Svc)
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
       val client = finagle.Http.client
-        .configured(param.Tracer(clientTracer)).newService(":" + port, "theClient")
+        .withTracer(clientTracer).newService(":" + port, "theClient")
       (client, server)
     }
   }
@@ -87,8 +87,8 @@ class TraceInitializationTest extends FunSuite {
     val tracer = new BufferingTracer
 
     val server = finagle.Http.server
-      .configured(param.Tracer(tracer))
-      .configured(param.Label("theServer")).serve(":*", Svc)
+      .withTracer(tracer)
+      .withLabel("theServer").serve(":*", Svc)
     try {
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
       val client = ClientBuilder()

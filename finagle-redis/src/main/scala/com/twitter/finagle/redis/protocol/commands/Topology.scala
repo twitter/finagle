@@ -1,31 +1,19 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
-case class TopologyAdd(keyBuf: Buf, valueBuf: Buf)
+case class TopologyAdd(key: Buf, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  def command: String = Commands.TOPOLOGYADD
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.TOPOLOGYADD, keyBuf, valueBuf))
+
+  def name: Buf = Command.TOPOLOGYADD
+  override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class TopologyGet(keyBuf: Buf)
-  extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def command: String = Commands.TOPOLOGYGET
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.TOPOLOGYGET, keyBuf))
+case class TopologyGet(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.TOPOLOGYGET
 }
 
-case class TopologyDelete(keyBuf: Buf)
-  extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def command: String = Commands.TOPOLOGYDELETE
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.TOPOLOGYDELETE, keyBuf))
+case class TopologyDelete(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.TOPOLOGYDELETE
 }

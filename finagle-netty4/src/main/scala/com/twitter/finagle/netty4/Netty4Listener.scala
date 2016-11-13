@@ -2,17 +2,21 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4RawServerChannelInitializer, Netty4FramedServerChannelInitializer}
+import com.twitter.finagle.netty4.channel.{
+  Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer,
+  RecvByteBufAllocatorProxy, ServerBridge
+}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.util.concurrent.{Future => NettyFuture, FutureListener}
+import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
@@ -96,6 +100,14 @@ private[finagle] case class Netty4Listener[In, Out](
 
       bootstrap.option(ChannelOption.ALLOCATOR, allocator)
       bootstrap.childOption(ChannelOption.ALLOCATOR, allocator)
+
+      // Use pooling if enabled.
+      if (poolReceiveBuffers()) {
+        bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
+          new RecvByteBufAllocatorProxy(PooledByteBufAllocator.DEFAULT))
+        bootstrap.childOption(ChannelOption.RCVBUF_ALLOCATOR,
+          new RecvByteBufAllocatorProxy(PooledByteBufAllocator.DEFAULT))
+      }
 
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)

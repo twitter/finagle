@@ -78,7 +78,7 @@ class NackAdmissionFilterTest extends FunSuite {
      * know that the nack rate is below the failure threshold.
      */
     def testDropsRequest(): Unit = {
-      failedResponse("failed fast because service is overloaded")
+      failedResponse("Failed fast because service is overloaded")
     }
 
     /**
@@ -117,7 +117,6 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Decrease Ema to just below 1
     testGetNack()
-    assert(filter.hasSentRequest)
     val firstEmaValue = filter.emaValue
     // Increment Ema
     testGetSuccessfulResponse()
@@ -129,7 +128,6 @@ class NackAdmissionFilterTest extends FunSuite {
     import ctx._
 
     testGetNack()
-    assert(filter.hasSentRequest)
     assert(filter.emaValue < 1)
   }
 
@@ -149,10 +147,9 @@ class NackAdmissionFilterTest extends FunSuite {
       testGetNack()
     }
 
-    val sentRequest = filter.hasSentRequest
     val successRate = filter.emaValue
     val multiplier = 1D/DefaultAcceptRateThreshold
-    assert(sentRequest)
+
     assert(0 < successRate && successRate < 1)
     assert(1 <= multiplier * successRate)
     // The next request should be served, not dropped
@@ -166,14 +163,13 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Make the server nack requests so that the EMA drops below the accept
     // rate threshold
-    while (filter.emaValue >= DefaultAcceptRateThreshold) {
+    while (filter.emaValue > DefaultAcceptRateThreshold) {
       nackWithoutTest()
     }
 
-    val sentRequest = filter.hasSentRequest
     val successRate = filter.emaValue
     val multiplier = 1D/DefaultAcceptRateThreshold
-    assert(sentRequest)
+
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
     testDropsRequest()
@@ -194,10 +190,9 @@ class NackAdmissionFilterTest extends FunSuite {
       nackWithoutTest()
     }
 
-    val sentRequest = filter.hasSentRequest
     val successRate = filter.emaValue
     val multiplier = 1D/DefaultAcceptRateThreshold
-    assert(sentRequest)
+
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
     // ... and now, since customRng is pessimistic, we always drop new requests.
@@ -215,6 +210,45 @@ class NackAdmissionFilterTest extends FunSuite {
     // ... but now the accept rate is above the threshold, so new requests
     // are not dropped, even after another rejection from the server.
     testGetNack()
+    testGetSuccessfulResponse()
+  }
+
+  test("Respects MaxDropProbability, and recovers.") {
+    val ctx = new Ctx(Rng.threadLocal, 1.milliseconds)
+    import ctx._
+    import NackAdmissionFilter.MaxDropProbability
+
+    val NumRequests = 1000
+
+    // Nack until EMA is so low that it would not be likely for any requests to
+    // get through without the MaxDropProbability.
+    while(filter.emaValue > 10E-10) {
+      nackWithoutTest()
+      Time.sleep(1.milliseconds)
+    }
+
+    var dropCount = statsReceiver.counter("dropped_requests")()
+
+    // Nack a bunch
+    for(_ <- 0 to NumRequests) { nackWithoutTest() }
+
+    // This is a probability game. Let's test that we have allowed MaxDropProbability +/- 10%
+    val maxDropped = NumRequests * (MaxDropProbability + 0.1)
+    val minDropped = NumRequests * (MaxDropProbability - 0.1)
+
+    // Subtract any requests dropped earlier
+    dropCount = statsReceiver.counter("dropped_requests")() - dropCount
+
+    assert(dropCount < maxDropped)
+    assert(dropCount > minDropped)
+
+    // Have a bunch of successful requests. Test recovery
+    for(_ <- 0 to NumRequests) {
+      Await.result(filter(1, svc).unit.rescue { case _ => Future.Unit }, DefaultTimeout)
+    }
+
+    // Should be very high now.
+    assert(filter.emaValue > 0.9999)
     testGetSuccessfulResponse()
   }
 
@@ -285,7 +319,7 @@ class NackAdmissionFilterTest extends FunSuite {
     // EMA decreases
     for (_ <- 0 to 99) { nackWithoutTest() }
     // Wait for window to safely pass
-    Time.sleep(101.milliseconds)
+    Time.sleep(1010.milliseconds)
     // increase EMA
     testGetSuccessfulResponse()
 
@@ -308,7 +342,7 @@ class NackAdmissionFilterTest extends FunSuite {
   test("negative window value throws IllegalArgumentException") {
     val lowRng: CustomRng = new CustomRng(0)
     val _window: Duration = -10.seconds
-    val errMsg: String = s"requirement failed: window size must be positive: ${_window.inNanoseconds}"
+    val errMsg: String = s"requirement failed: window size must be positive: ${_window}"
     val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
       new Ctx(lowRng, _window)
     }
@@ -318,7 +352,7 @@ class NackAdmissionFilterTest extends FunSuite {
   test("window value of zero throws IllegalArgumentException") {
     val lowRng: CustomRng = new CustomRng(0)
     val _window: Duration = 0.seconds
-    val errMsg: String = s"requirement failed: window size must be positive: ${_window.inNanoseconds}"
+    val errMsg: String = s"requirement failed: window size must be positive: ${_window}"
     val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
       new Ctx(lowRng, _window)
     }

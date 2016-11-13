@@ -1,189 +1,143 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
-case class Append(keyBuf: Buf, valueBuf: Buf)
+case class Append(key: Buf, value: Buf)
   extends StrictKeyCommand
-  with StrictValueCommand
-{
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+  with StrictValueCommand {
 
-  val command: String = Commands.APPEND
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.APPEND, keyBuf, valueBuf))
+  def name: Buf = Command.APPEND
+  override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class BitCount(keyBuf: Buf, start: Option[Int] = None,
-    end: Option[Int] = None) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.BITCOUNT
+case class BitCount(
+    key: Buf,
+    start: Option[Int] = None,
+    end: Option[Int] = None)
+  extends StrictKeyCommand {
+
   RequireClientProtocol(start.isEmpty && end.isEmpty ||
     start.isDefined && end.isDefined, "Both start and end must be specified")
-  def toChannelBuffer: ChannelBuffer = {
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BITCOUNT, keyBuf) ++
+
+  def name: Buf = Command.BITCOUNT
+  override def body: Seq[Buf] = {
+    Seq(key) ++
       (start match {
-        case Some(i) => Seq(StringToBuf(i.toString))
+        case Some(i) => Seq(Buf.Utf8(i.toString))
         case None => Seq.empty
       }) ++ (end match {
-        case Some(i) => Seq(StringToBuf(i.toString))
+        case Some(i) => Seq(Buf.Utf8(i.toString))
         case None => Seq.empty
-      }))
+      })
   }
 }
 
-case class BitOp(op: Buf, dstKey: Buf,
-    srcKeys: Seq[Buf]) extends Command {
-  val command: String = Commands.BITOP
+case class BitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf]) extends Command {
   RequireClientProtocol((op equals BitOp.And) || (op equals BitOp.Or) ||
     (op equals BitOp.Xor) || (op equals BitOp.Not),
     "BITOP supports only AND/OR/XOR/NOT")
   RequireClientProtocol(srcKeys.nonEmpty, "srcKeys must not be empty")
   RequireClientProtocol(!op.equals(BitOp.Not) || srcKeys.size == 1,
     "NOT operation takes only 1 input key")
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.BITOP, op, dstKey) ++ srcKeys)
+
+  def name: Buf = Command.BITOP
+  override def body: Seq[Buf] = Seq(op, dstKey) ++ srcKeys
 }
 
 object BitOp {
-  val And = StringToBuf("AND")
-  val Or = StringToBuf("OR")
-  val Xor = StringToBuf("XOR")
-  val Not = StringToBuf("NOT")
+  val And = Buf.Utf8("AND")
+  val Or = Buf.Utf8("OR")
+  val Xor = Buf.Utf8("XOR")
+  val Not = Buf.Utf8("NOT")
 }
 
-case class Decr(override val keyBuf: Buf) extends DecrBy(keyBuf, 1) {
-  override val command: String = Commands.DECR
-  override def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.DECR, keyBuf))
+case class Decr(override val key: Buf) extends DecrBy(key, 1) {
+  override def name: Buf = Command.DECR
+  override def body: Seq[Buf] = Seq(key)
 }
 
-class DecrBy(val keyBuf: Buf, val amount: Long) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.DECRBY
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-      CommandBytes.DECRBY,
-      keyBuf,
-      StringToBuf(amount.toString)))
-  override def toString = "DecrBy(%s, %d)".format(key, amount)
-  override def equals(other: Any) = other match {
+class DecrBy(val key: Buf, val amount: Long) extends StrictKeyCommand {
+  def name: Buf = Command.DECRBY
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(amount.toString))
+
+  override def toString: String = "DecrBy(%s, %d)".format(key, amount)
+  override def equals(other: Any): Boolean = other match {
     case that: DecrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
     case _ => false
   }
-  def canEqual(other: Any) = other.isInstanceOf[DecrBy]
+  def canEqual(other: Any): Boolean = other.isInstanceOf[DecrBy]
 }
 
 object DecrBy {
-  def apply(keyBuf: Buf, amount: Long) = {
-    new DecrBy(keyBuf, amount)
-  }
+  def apply(keyBuf: Buf, amount: Long): DecrBy = new DecrBy(keyBuf, amount)
 }
 
-case class Get(keyBuf: Buf) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.GET
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.GET, keyBuf))
+case class Get(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.GET
 }
 
-case class GetBit(keyBuf: Buf, offset: Int) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.GETBIT
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.GETBIT,
-    keyBuf, StringToBuf(offset.toString)))
+case class GetBit(key: Buf, offset: Int) extends StrictKeyCommand {
+  def name: Buf = Command.GETBIT
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(offset.toString))
 }
 
-case class GetRange(keyBuf: Buf, start: Long, end: Long) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.GETRANGE
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.GETRANGE, keyBuf,
-      StringToBuf(start.toString),
-      StringToBuf(end.toString)
-    ))
+case class GetRange(key: Buf, start: Long, end: Long) extends StrictKeyCommand {
+  def name: Buf = Command.GETRANGE
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(start.toString), Buf.Utf8(end.toString))
 }
 
-case class GetSet(keyBuf: Buf, valueBuf: Buf)
+case class GetSet(key: Buf, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  val command: String = Commands.GETSET
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.GETSET, keyBuf, valueBuf))
+  def name: Buf = Command.GETSET
+  override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class Incr(override val keyBuf: Buf) extends IncrBy(keyBuf, 1) {
-  override val command: String = Commands.INCR
-  override def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.INCR, keyBuf))
+case class Incr(override val key: Buf) extends IncrBy(key, 1) {
+  override def name: Buf = Command.INCR
+  override def body: Seq[Buf] = Seq(key)
 }
 
-class IncrBy(val keyBuf: Buf, val amount: Long) extends StrictKeyCommand {
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command: String = Commands.INCRBY
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.INCRBY, keyBuf,
-      StringToBuf(amount.toString)))
-  override def toString = "IncrBy(%s, %d)".format(key, amount)
-  override def equals(other: Any) = other match {
+class IncrBy(val key: Buf, val amount: Long) extends StrictKeyCommand {
+  def name: Buf = Command.INCRBY
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(amount.toString))
+  override def toString: String = "IncrBy(%s, %d)".format(key, amount)
+  override def equals(other: Any): Boolean = other match {
     case that: IncrBy => that.canEqual(this) && this.key == that.key && this.amount == that.amount
     case _ => false
   }
-  def canEqual(other: Any) = other.isInstanceOf[IncrBy]
+  def canEqual(other: Any): Boolean = other.isInstanceOf[IncrBy]
 }
 object IncrBy {
-  def apply(keyBuf: Buf, amount: Long) = new IncrBy(keyBuf, amount)
+  def apply(keyBuf: Buf, amount: Long): IncrBy = new IncrBy(keyBuf, amount)
 }
 
-case class MGet(keysBuf: Seq[Buf]) extends StrictKeysCommand {
-  def keys: Seq[ChannelBuffer] = keysBuf.map(BufChannelBuffer(_))
-  val command: String = Commands.MGET
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.MGET +: keysBuf)
+case class MGet(keys: Seq[Buf]) extends StrictKeysCommand {
+  def name: Buf = Command.MGET
+  override def body: Seq[Buf] = keys
 }
 
 case class MSet(kv: Map[Buf, Buf]) extends MultiSet {
   validate()
-  val command: String = Commands.MSET
 
-  def toChannelBuffer: ChannelBuffer = {
-    val kvList: Seq[Buf] = kv.flatMap { case(k,v) =>
-      k :: v :: Nil
-    }(collection.breakOut)
-    RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.MSET +: kvList)
-  }
+  def name: Buf = Command.MSET
 }
 
 case class MSetNx(kv: Map[Buf, Buf]) extends MultiSet {
   validate()
 
-  val command: String = Commands.MSETNX
-
-  def toChannelBuffer: ChannelBuffer = {
-    val kvList: Seq[Buf] = kv.flatMap { case(k,v) =>
-      k :: v :: Nil
-    }(collection.breakOut)
-    RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.MSETNX +: kvList)
-  }
+  def name: Buf = Command.MSETNX
 }
 
-case class PSetEx(keyBuf: Buf, millis: Long, valueBuf: Buf)
+case class PSetEx(key: Buf, millis: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-
-  val command: String = Commands.PSETEX
   RequireClientProtocol(millis > 0, "Milliseconds must be greater than 0")
-  def toChannelBuffer: ChannelBuffer = {
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(
-      CommandBytes.PSETEX,
-      keyBuf,
-      StringToBuf(millis.toString),
-      valueBuf))
-  }
+
+  def name: Buf = Command.PSETEX
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(millis.toString), value)
 }
 
 sealed trait TimeToLive
@@ -191,27 +145,30 @@ case class InSeconds(seconds: Long) extends TimeToLive
 case class InMilliseconds(millis: Long) extends TimeToLive
 
 case class Set(
-  keyBuf: Buf,
-  valueBuf: Buf,
-  ttl: Option[TimeToLive] = None,
-  nx: Boolean = false,
-  xx: Boolean = false)
-    extends StrictKeyCommand
-    with StrictValueCommand {
-  val command: String = Commands.SET
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(
-    Seq(CommandBytes.SET, keyBuf, valueBuf) ++
-      (ttl match {
-        case Some(InSeconds(seconds)) =>
-          Seq(Set.ExBytes, StringToBuf(seconds.toString))
-        case Some(InMilliseconds(millis)) =>
-          Seq(Set.PxBytes, StringToBuf(millis.toString))
-        case _ => Seq()
-      }) ++ (if (nx) Seq(Set.NxBytes) else Seq()) ++
-        (if (xx) Seq(Set.XxBytes) else Seq())
-  )
+    key: Buf,
+    value: Buf,
+    ttl: Option[TimeToLive] = None,
+    nx: Boolean = false,
+    xx: Boolean = false)
+  extends StrictKeyCommand
+  with StrictValueCommand {
+
+  def name: Buf = Command.SET
+  override def body: Seq[Buf] = {
+    val keyAndValue = Seq(key, value)
+
+    val maybeTtl = ttl match {
+      case Some(InSeconds(seconds)) =>
+        Seq(Set.ExBytes, Buf.Utf8(seconds.toString))
+      case Some(InMilliseconds(millis)) =>
+        Seq(Set.PxBytes, Buf.Utf8(millis.toString))
+      case _ => Nil
+      }
+
+    val nxAndXx = (if (nx) Seq(Set.NxBytes) else Nil) ++ (if (xx) Seq(Set.XxBytes) else Nil)
+
+    keyAndValue ++ maybeTtl ++ nxAndXx
+  }
 }
 object Set {
   private val Ex = "EX"
@@ -219,70 +176,49 @@ object Set {
   private val Nx = "NX"
   private val Xx = "XX"
 
-  private val ExBytes = StringToBuf(Ex)
-  private val PxBytes = StringToBuf(Px)
-  private val NxBytes = StringToBuf(Nx)
-  private val XxBytes = StringToBuf(Xx)
+  private val ExBytes = Buf.Utf8(Ex)
+  private val PxBytes = Buf.Utf8(Px)
+  private val NxBytes = Buf.Utf8(Nx)
+  private val XxBytes = Buf.Utf8(Xx)
 }
 
-case class SetBit(keyBuf: Buf, offset: Int, value: Int) extends StrictKeyCommand {
-  val command: String = Commands.SETBIT
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def toChannelBuffer: ChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SETBIT, keyBuf,
-      StringToBuf(offset.toString),
-      StringToBuf(value.toString)))
+case class SetBit(key: Buf, offset: Int, value: Int) extends StrictKeyCommand {
+  def name: Buf = Command.SETBIT
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(offset.toString), Buf.Utf8(value.toString))
 }
 
-case class SetEx(keyBuf: Buf, seconds: Long, valueBuf: Buf)
+case class SetEx(key: Buf, seconds: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
-
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  val command: String = Commands.SETEX
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.SETEX,
-    keyBuf,
-    StringToBuf(seconds.toString),
-    valueBuf
-  ))
+
+  def name: Buf = Command.SETEX
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(seconds.toString), value)
 }
 
-case class SetNx(keyBuf: Buf, valueBuf: Buf)
+case class SetNx(key: Buf, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  val command: String = Commands.SETNX
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SETNX, keyBuf, valueBuf))
+  def name: Buf = Command.SETNX
+  override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class SetRange(keyBuf: Buf, offset: Int, valueBuf: Buf)
+case class SetRange(key: Buf, offset: Int, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-  val command: String = Commands.SETRANGE
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(
-    CommandBytes.SETRANGE,
-    keyBuf,
-    StringToBuf(offset.toString),
-    valueBuf
-  ))
+  def name: Buf = Command.SETRANGE
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(offset.toString), value)
 }
 
-case class Strlen(keyBuf: Buf) extends StrictKeyCommand {
-  val command: String = Commands.STRLEN
-  def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  def toChannelBuffer: ChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.STRLEN, keyBuf))
+case class Strlen(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.STRLEN
 }
 
 trait MultiSet extends KeysCommand {
-  val kv: Map[Buf, Buf]
-  override lazy val keys: Seq[ChannelBuffer] =
-    kv.keys.map(BufChannelBuffer(_)).toSeq
+  def kv: Map[Buf, Buf]
+  def keys: Seq[Buf] = kv.keys.toSeq
+  override def body: Seq[Buf] =
+    kv.flatMap({ case (k, v) => k :: v :: Nil })(collection.breakOut)
 }

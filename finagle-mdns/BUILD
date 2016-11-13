@@ -1,4 +1,4 @@
-target(name='finagle-mdns',
+target(
   dependencies=[
     'finagle/finagle-mdns/src/main/scala'
   ]

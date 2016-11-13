@@ -80,14 +80,15 @@ You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.f
 Why is com.twitter.common.zookeeper#server-set not found?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some of our libraries still aren't published to maven central. If you add
+Some of our libraries weren't published to maven central before finagle 6.39.0. If you add
 
 .. code-block:: scala
 
 	resolvers += "twitter" at "https://maven.twttr.com"
 
-to your sbt configuration, it will be able to pick up the libraries which are
-published externally, but not yet to maven central.
+to your sbt configuration, it will be able to pick up the libraries which were
+published externally, but weren't yet published to maven central.  Note that if you use
+finagle-thrift{,mux}, you will still need it for our patched libthrift.
 
 .. _configuring_finagle6:
 

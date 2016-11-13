@@ -1,16 +1,23 @@
 package com.twitter.finagle.example.java.http;
 
+import static java.lang.Integer.parseInt;
+
+import org.jboss.netty.buffer.ChannelBuffers;
+
 import com.twitter.finagle.Service;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.http.Status;
 import com.twitter.util.Future;
-import org.jboss.netty.buffer.ChannelBuffers;
 
 import static com.twitter.finagle.example.java.http.JsonUtils.toBytes;
-import static java.lang.Integer.parseInt;
 
 public final class Handlers {
+
+    private Handlers() {
+
+    }
+
     static Service<Request, Response> echoHandler() {
         return new Service<Request, Response>() {
             public Future<Response> apply(Request request) {

@@ -17,7 +17,9 @@ sealed trait Address
 
 object Address {
   private[finagle] val failing: Address =
-    Address.Failed(new IllegalArgumentException("failing") with NoStackTrace)
+    Address.Failed(new IllegalArgumentException("failing") with NoStackTrace {
+      override def toString: String = """IllegalArgumentException("failing")"""
+    })
 
   /**
    * An address represented by an Internet socket address.

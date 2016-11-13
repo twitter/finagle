@@ -1,13 +1,13 @@
 package com.twitter.finagle.stats
 
-import com.twitter.ostrich.stats.{Stats, StatsCollection}
+import com.twitter.ostrich.stats.{Stats => FStats, StatsCollection}
 
 class OstrichStatsReceiver(
-  val repr: StatsCollection = Stats,
-  val delimiter: String = "/"
-) extends StatsReceiverWithCumulativeGauges {
+    val repr: StatsCollection = FStats,
+    val delimiter: String = "/")
+  extends StatsReceiverWithCumulativeGauges {
 
-  def this() = this(Stats, "/")
+  def this() = this(FStats, "/")
   // To avoid breaking the Java API:
   def this(repr: StatsCollection) = this(repr, "/")
 
@@ -21,19 +21,19 @@ class OstrichStatsReceiver(
     repr.clearGauge(variableName(name))
   }
 
-  override def counter(name: String*) = new Counter {
+  override def counter(name: String*): Counter = new Counter {
     private[this] val counter = repr.getCounter(variableName(name))
 
-    override def incr(delta: Int) { counter.incr(delta) }
+    override def incr(delta: Int): Unit = counter.incr(delta)
   }
 
-  override def stat(name: String*) = new Stat {
+  override def stat(name: String*): Stat = new Stat {
     private[this] val metric = repr.getMetric(variableName(name))
 
-    override def add(value: Float) {
+    override def add(value: Float): Unit = {
       metric.add(value.toInt)
     }
   }
 
-  private[this] def variableName(name: Seq[String]) = name mkString delimiter
+  private[this] def variableName(name: Seq[String]) = name.mkString(delimiter)
 }

@@ -4,7 +4,7 @@ import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.{ServiceFactory, Service}
+import com.twitter.finagle.{Kestrel, ServiceFactory, Service}
 import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient
@@ -169,7 +169,7 @@ object Client {
 
   def apply(hosts: String): Client = {
     val service = ClientBuilder()
-      .codec(Kestrel())
+      .stack(Kestrel.client)
       .hosts(hosts)
       .hostConnectionLimit(1)
       .daemon(true)

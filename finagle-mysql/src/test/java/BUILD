@@ -1,4 +1,4 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/junit',
     'finagle/finagle-mysql',

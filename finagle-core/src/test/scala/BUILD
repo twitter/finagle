@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
@@ -18,5 +18,6 @@ junit_tests(name='scala',
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-core/src/test/resources'
-  ]
+  ],
+  fatal_warnings=True,
 )

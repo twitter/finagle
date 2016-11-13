@@ -1,11 +1,12 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.Http.{param => httpparam}
+import com.twitter.finagle.http
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http2.param.PriorKnowledge
+import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
+import com.twitter.finagle.netty4.channel.{DirectToHeapInboundHandler, BufferingChannelOutboundHandler}
 import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
@@ -48,7 +49,10 @@ private[http2] object Http2Transporter {
    * Buffers until `channelActive` so we can ensure the connection preface is
    * the first message we send.
    */
-  class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler { self =>
+  class BufferingHandler
+    extends ChannelInboundHandlerAdapter
+    with BufferingChannelOutboundHandler { self =>
+
     override def channelActive(ctx: ChannelHandlerContext): Unit = {
       ctx.fireChannelActive()
       // removing a BufferingChannelOutboundHandler writes and flushes too.
@@ -61,7 +65,12 @@ private[http2] object Http2Transporter {
     def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
       ctx.close(promise)
     }
-    def connect(ctx: ChannelHandlerContext, local: SocketAddress, remote: SocketAddress, promise: ChannelPromise): Unit = {
+    def connect(
+      ctx: ChannelHandlerContext,
+      local: SocketAddress,
+      remote: SocketAddress,
+      promise: ChannelPromise
+    ): Unit = {
       ctx.connect(local, remote, promise)
     }
     def deregister(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
@@ -75,12 +84,29 @@ private[http2] object Http2Transporter {
     }
   }
 
+  private[http2] def initialSettings(params: Stack.Params): Http2Settings = {
+    val HeaderTableSize(headerTableSize) = params[HeaderTableSize]
+    val PushEnabled(pushEnabled) = params[PushEnabled]
+    val MaxConcurrentStreams(maxConcurrentStreams) = params[MaxConcurrentStreams]
+    val InitialWindowSize(initialWindowSize) = params[InitialWindowSize]
+    val MaxFrameSize(maxFrameSize) = params[MaxFrameSize]
+    val MaxHeaderListSize(maxHeaderListSize) = params[MaxHeaderListSize]
+
+    val settings = new Http2Settings()
+    headerTableSize.foreach{ s => settings.headerTableSize(s.inBytes) }
+    pushEnabled.foreach{ settings.pushEnabled }
+    maxConcurrentStreams.foreach{ settings.maxConcurrentStreams }
+    initialWindowSize.foreach{  s => settings.initialWindowSize(s.inBytes.toInt) }
+    maxFrameSize.foreach{ s => settings.maxFrameSize(s.inBytes.toInt) }
+    maxHeaderListSize.foreach{ s => settings.maxHeaderListSize(s.inBytes) }
+    settings
+  }
+
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit =
     { pipeline: ChannelPipeline =>
+      pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
       val connection = new DefaultHttp2Connection(false /*server*/)
-
-      val maxResponseSize = params[httpparam.MaxResponseSize].size
 
       // decompresses data frames according to the content-encoding header
       val adapter = new DelegatingDecompressorFrameListener(
@@ -88,9 +114,15 @@ private[http2] object Http2Transporter {
         // adapts http2 to http 1.1
         new Http2ClientDowngrader(connection)
       )
+
+      val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
+        params[EncoderIgnoreMaxHeaderListSize]
+
       val connectionHandler = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
         .connection(connection)
+        .initialSettings(initialSettings(params))
+        .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
         .build()
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
@@ -102,9 +134,9 @@ private[http2] object Http2Transporter {
           initClient(params)(pipeline)
         }))
       } else {
-        val maxChunkSize = params[httpparam.MaxChunkSize].size
-        val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-        val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
+        val maxChunkSize = params[http.param.MaxChunkSize].size
+        val maxHeaderSize = params[http.param.MaxHeaderSize].size
+        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
 
         val sourceCodec = new HttpClientCodec(
           maxInitialLineSize.inBytes.toInt,
@@ -214,16 +246,17 @@ private[http2] class Http2Transporter(
     } else apply(addr)
   }
 
-  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] = Option(transporterCache.get(addr)) match {
-    case Some(f) =>
-      if (f.isDefined) {
-        onUpgradeFinished(f, addr)
-      } else {
-        // fall back to http/1.1 while upgrading
-        val conn = underlyingHttp11(addr)
-        conn.map(onUpgradeInProgress(f))
-      }
-    case None =>
-      upgrade(addr)
-  }
+  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] =
+    Option(transporterCache.get(addr)) match {
+      case Some(f) =>
+        if (f.isDefined) {
+          onUpgradeFinished(f, addr)
+        } else {
+          // fall back to http/1.1 while upgrading
+          val conn = underlyingHttp11(addr)
+          conn.map(onUpgradeInProgress(f))
+        }
+      case None =>
+        upgrade(addr)
+    }
 }

@@ -210,7 +210,7 @@ private[finagle] object WireTracingFilter {
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
-      val role = ClientTracingFilter.role
+      val role = WireTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
       def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
         val param.Tracer(tracer) = _tracer

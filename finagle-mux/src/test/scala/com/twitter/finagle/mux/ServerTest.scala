@@ -4,13 +4,13 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
-import com.twitter.finagle.mux.transport.Message
+import com.twitter.finagle.mux.transport.{Message, MuxFailure}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.{Dtab, Failure, Path, Service}
 import com.twitter.io.Buf.Utf8
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.security.cert.X509Certificate
 import java.net.SocketAddress
@@ -84,7 +84,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     assert(!m.isDefined)
     server.issue(123.milliseconds)
     assert(m.isDefined)
-    assert(Await.result(m) == Message.Tlease(123.milliseconds))
+    assert(Await.result(m, 5.seconds) == Message.Tlease(123.milliseconds))
   }
 
   test("nack on 0 leases") {
@@ -174,7 +174,31 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
     val reply = serverToClient.poll()
     assert(reply.isDefined)
-    assert(Await.result(reply).isInstanceOf[Message.RdispatchNack])
+    assert(Await.result(reply, 5.seconds).isInstanceOf[Message.RdispatchNack])
+  }
+
+  test("Transmit Failure flags via MuxFailures in response context") {
+    val svc = new Service[Request, Response] {
+      def apply(req: Request) = Future.exception(Failure("Super fail", Failure.NonRetryable))
+    }
+
+    val clientToServer = new AsyncQueue[Message]
+    val serverToClient = new AsyncQueue[Message]
+    val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    val server = ServerDispatcher.newRequestResponse(
+      transport, svc, Lessor.nil, NullTracer, NullStatsReceiver)
+
+    clientToServer.offer(
+      Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, Buf.Empty))
+
+    val reply = serverToClient.poll()
+    assert(reply.isDefined)
+
+    Await.result(reply, 5.seconds) match {
+      case Message.RdispatchError(_, ctxts, _) =>
+        assert(ctxts.equals(MuxFailure(MuxFailure.NonRetryable).contexts))
+      case _ => fail("Reply was not an RdispatchError")
+    }
   }
 
   test("drains properly before closing the socket") {

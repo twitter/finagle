@@ -1,8 +1,9 @@
 package com.twitter.finagle.netty4.http.handler
 
 import com.twitter.conversions.storage._
+import com.twitter.finagle.http.Fields
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
+import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import java.nio.channels.ClosedChannelException
@@ -33,6 +34,7 @@ class PayloadSizeHandlerTest extends FunSuite {
 
     val resp = channel.readOutbound[HttpResponse]()
     assert(resp.status == HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+    assert(resp.headers().get(Fields.Connection) == "close")
   }
 
   test("streamed oversize messages generate 413") {
@@ -44,7 +46,9 @@ class PayloadSizeHandlerTest extends FunSuite {
       false == channel.writeInbound(req)
     )
 
-    assert(channel.readOutbound[HttpResponse]().status() == HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+    val resp = channel.readOutbound[HttpResponse]()
+    assert(resp.status() == HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+    assert(resp.headers().get(Fields.Connection) == "close")
 
     // subsequent chunks are rejected
     val content1 = Unpooled.wrappedBuffer(new Array[Byte](11))
@@ -68,9 +72,9 @@ class PayloadSizeHandlerTest extends FunSuite {
       false == channel.writeInbound(req)
     )
 
-    assert(
-      channel.readOutbound[HttpResponse]().status() == HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE
-    )
+    val resp = channel.readOutbound[HttpResponse]()
+    assert(resp.status() == HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
+    assert(resp.headers().get(Fields.Connection) == "close")
 
     // subsequent chunks are rejected
     intercept[ClosedChannelException] {

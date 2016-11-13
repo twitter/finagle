@@ -2,7 +2,7 @@ package com.twitter.finagle.kestrel.unit
 
 import com.twitter.concurrent.Broker
 import com.twitter.finagle.kestrel.{ReadHandle, ReadMessage}
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

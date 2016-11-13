@@ -4,13 +4,19 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Ema, Rng}
-import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 
 private[finagle] object NackAdmissionFilter {
-  private val overloadFailure = Future.exception(Failure("failed fast because service is overloaded"))
-  private val logger = Logger.get(getClass)
+  private val OverloadFailure = Future.exception(Failure("Failed fast because service is overloaded", Failure.Rejected|Failure.NonRetryable))
   private val role = new Stack.Role("NackAdmissionFilter")
+
+  /**
+   * An upper bound on what percentage of requests this filter will drop.
+   * Without this, it is possible for the filter to fail closed as the EMA
+   * approaches zero. If no requests are allowed through, no new information is
+   * gathered about the service, preventing recovery.
+   */
+  private[finagle] val MaxDropProbability = 0.75
 
   /**
    * By default, the EMA window is 2 minutes: any response that the filter
@@ -117,92 +123,50 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
 
-  val windowInNs = window.inNanoseconds
-  require(windowInNs > 0, s"window size must be positive: $windowInNs")
+  require(window > Duration.Zero, s"window size must be positive: $window")
   require(nackRateThreshold < 1, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
   require(nackRateThreshold > 0, s"nackRateThreshold must lie in (0, 1): $nackRateThreshold")
 
+  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
   private[this] val acceptRateThreshold = 1.0 - nackRateThreshold
-
   private[this] val multiplier = 1D/acceptRateThreshold
+  private[this] val windowInNs = window.inNanoseconds
 
   // EMA representing the rate of responses that are not nacks. We update it
-  // whenever we get a response from the cluster via
-  // [[updateAcceptLikelihood]]. We update it with 1 when we get an accept
-  // response and with 0 when we get a nack. Therefore its value is a Double in
-  // the range [0, 1].
-  private[this] val acceptProbability = new Ema(windowInNs)
-
-  private[filter] def emaValue: Double = {
-    acceptProbability.last
-  }
-
+  // whenever we get a response from the cluster with 0 when the service responds
+  // with a nack and 1 otherwise.
+  private[this] val ema = new Ema(windowInNs)
   private[this] val monoTime = new Ema.Monotime
+  ema.update(monoTime.nanos(), 1) // Start the ema at 1.0
 
-  // Boolean representing whether the first request has been sent.
-  private[this] var sentRequest = false
+  // for testing
+  private[filter] def emaValue: Double = ema.last
 
-  private[filter] def hasSentRequest: Boolean = synchronized {
-    sentRequest
+  // Decrease the EMA if the response is a Nack, increase otherwise. Update the
+  // acceptFraction & last update time
+  private[this] val afterSend: Try[Rep] => Unit = (rep: Try[Rep]) => {
+    val value = rep match {
+      case Throw(f: Failure) if f.isFlagged(Failure.Rejected) => 0
+      case _ => 1
+    }
+    ema.update(monoTime.nanos(), value)
   }
 
-  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
-  private[this] val acceptProbabilityHistogram = statsReceiver.stat("accept_probability")
-
-  private[this] def updateAcceptLikelihood(v: Long) = {
-    acceptProbability.update(monoTime.nanos(), v)
-    acceptProbabilityHistogram.add(acceptProbability.last.toFloat)
-  }
-
-  // Increase the EMA if the response is a success or a non-retryable failure
-  // (that is, not a nack). Decrease the EMA if the response is a nack.
-  private[this] val afterSend: Try[Rep] => Unit = {
-    case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-      updateAcceptLikelihood(0)
-    case _ =>
-      updateAcceptLikelihood(1)
-  }
-
-  private[this] def sendRequest(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    service(req).respond(afterSend)
+  // Drop the current request if:
+  // 1. The accept fraction is under the threshold
+  // 2. A random value is < the calculated drop probability
+  private[this] def shouldDropRequest(): Boolean = {
+    val acceptFraction = ema.last
+    acceptFraction < acceptRateThreshold &&
+      random.nextDouble() < math.min(MaxDropProbability, 1.0 - multiplier * acceptFraction)
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val sentFirstRequest = hasSentRequest
-    val acceptProduct = multiplier * acceptProbability.last
-
-    // Probabilistically drop requests if the accept rate is below the
-    // threshold.
-    val res = if (sentFirstRequest && acceptProduct < 1) {
-      val randomDouble = random.nextDouble()
-      val failureProbability = math.max(0, 1 - acceptProduct)
-      if (randomDouble >= failureProbability) {
-        sendRequest(req, service)
-      } else {
-        droppedRequestCounter.incr()
-        if (logger.isLoggable(Level.DEBUG)) {
-          logger.debug(s"""Dropping request\tacceptLikelihood=${acceptProbability.last}\tacceptProduct=$acceptProduct""")
-        }
-        overloadFailure
-      }
+    if (shouldDropRequest()) {
+      droppedRequestCounter.incr()
+      OverloadFailure
     } else {
-      sendRequest(req, service)
+      service(req).respond(afterSend)
     }
-
-    // Update [[sentRequest]] only after sending the first request. It is
-    // initially `false` to avoid dropping the first request, and it is always
-    // true after we send the first request.
-    if (!sentFirstRequest) {
-      res.ensure {
-        synchronized {
-          sentRequest = true
-        }
-      }
-    }
-    res
   }
-
-  // Start the Ema at 1. This prevents it from updating to 0 if the first
-  // request is NACKed.
-  updateAcceptLikelihood(1)
 }

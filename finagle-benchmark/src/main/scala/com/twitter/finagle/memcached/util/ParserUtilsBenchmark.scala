@@ -7,7 +7,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.openjdk.jmh.annotations.{State, Benchmark, Scope}
 import scala.util.Random
 
-// ./sbt 'project finagle-benchmark' 'run .*ParserUtilsBenchmark.*'
+// ./sbt 'project finagle-benchmark' 'jmh:run ParserUtilsBenchmark'
 class ParserUtilsBenchmark extends StdBenchAnnotations {
 
   @Benchmark

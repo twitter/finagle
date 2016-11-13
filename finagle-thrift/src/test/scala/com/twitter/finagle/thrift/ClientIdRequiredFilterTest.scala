@@ -1,5 +1,6 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
@@ -27,7 +28,7 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
     when(underlying(request)).thenReturn(response)
     clientId.asCurrent {
       val result = service(request)
-      assert(Await.result(result) == Await.result(response))
+      assert(Await.result(result, 10.seconds) == Await.result(response, 10.seconds))
       result
     }
   }
@@ -38,7 +39,7 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
 
     ClientId.let(None) {
       intercept[NoClientIdSpecifiedException]{
-        Await.result(service(request))
+        Await.result(service(request), 10.seconds)
       }
       verify(underlying, times(0)).apply(Matchers.anyString())
     }

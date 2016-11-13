@@ -3,11 +3,11 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.{Transport, QueueTransport}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Failure, Dtab, Path, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Return, Throw, Time, TimeControl, Duration, Future}
+import com.twitter.util.{Await, Throw, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -25,13 +25,13 @@ private class ClientSessionTest extends FunSuite {
     val session = new ClientSession(transport, FailureDetector.NullConfig, "test", stats)
 
     def send(msg: Message) = {
-      Await.result(session.write(msg))
-      Await.result(clientToServer.poll())
+      Await.result(session.write(msg), 10.seconds)
+      Await.result(clientToServer.poll(), 10.seconds)
     }
 
     def recv(msg: Message) = {
       serverToClient.offer(msg)
-      Await.result(session.read())
+      Await.result(session.read(), 10.seconds)
     }
   }
 
@@ -67,7 +67,7 @@ private class ClientSessionTest extends FunSuite {
 
       val tag = 5
       recv(Message.Tdrain(tag))
-      assert(Await.result(clientToServer.poll()) == Message.Rdrain(tag))
+      assert(Await.result(clientToServer.poll(), 10.seconds) == Message.Rdrain(tag))
       assert(session.status == Status.Busy)
 
       session.write(req).poll match {

@@ -3,19 +3,23 @@ package com.twitter.finagle.example.java.http;
 import java.util.HashMap;
 
 public class CatsDB {
-    private final static HashMap<Integer, Cat> db = new HashMap<>();
+    private static final HashMap<Integer, Cat> DB = new HashMap<>();
 
+    /**
+     * Get the Cat for a given id.
+     */
     public Cat get(Integer id) {
-        if (db.isEmpty())
+        if (DB.isEmpty()) {
             addExampleCats();
+        }
 
-        return db.get(id);
+        return DB.get(id);
     }
 
     private void addExampleCats() {
-        db.put(0, new Cat("Doug"));
-        db.put(1, new Cat("Ozzy"));
-        db.put(2, new Cat("Logan"));
-        db.put(3, new Cat("Dylan"));
+        DB.put(0, new Cat("Doug"));
+        DB.put(1, new Cat("Ozzy"));
+        DB.put(2, new Cat("Logan"));
+        DB.put(3, new Cat("Dylan"));
     }
 }

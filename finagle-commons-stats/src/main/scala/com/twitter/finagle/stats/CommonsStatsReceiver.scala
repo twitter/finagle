@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.base.Supplier
-import com.twitter.common.stats.{Percentile, Stats}
+import com.twitter.common.stats.{Percentile, Stats => FStats}
 import com.twitter.util.registry.GlobalRegistry
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
@@ -9,18 +9,18 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     Seq("stats", "commons_stats", "counters_latched"),
     "false")
 
-  val repr = Stats.STATS_PROVIDER
+  val repr = FStats.STATS_PROVIDER
 
   @volatile private[this] var stats = Map.empty[Seq[String], Stat]
   @volatile private[this] var counters = Map.empty[Seq[String], Counter]
 
   override def toString: String = "CommonsStatsReceiver"
 
-  private[this] def variableName(name: Seq[String]) = name mkString "_"
+  private[this] def variableName(name: Seq[String]): String = name.mkString("_")
 
   protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = {
-    Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
-      def get = new java.lang.Float(f)
+    FStats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
+      def get: java.lang.Float = new java.lang.Float(f)
     })
   }
 
@@ -32,8 +32,8 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     if (!counters.contains(name)) synchronized {
       if (!counters.contains(name)) {
         val counter = new Counter {
-          private[this] val underlying = Stats.exportLong(variableName(name))
-          def incr(delta: Int) { underlying.addAndGet(delta) }
+          private[this] val underlying = FStats.exportLong(variableName(name))
+          def incr(delta: Int): Unit = underlying.addAndGet(delta)
         }
 
         counters += (name -> counter)

@@ -1,24 +1,67 @@
 package com.twitter.finagle.util
 
-import com.twitter.logging.{HasLogLevel, Logger, Level}
-import com.twitter.util.{RootMonitor, Monitor, NullMonitor}
+import com.twitter.finagle.context.RemoteInfo
+import com.twitter.logging.{HasLogLevel, Level, Logger}
+import com.twitter.util.{Monitor, NullMonitor}
 import java.net.SocketAddress
+import scala.util.control.NonFatal
+
+private[finagle] object DefaultMonitor {
+
+  /**
+   * A minimal logging level above which a default monitor keeps silence.
+   */
+  val MinLogLevel: Int = Level.INFO.value
+
+  /**
+   * A default logger used in default monitor.
+   */
+  val Log: Logger = Logger(classOf[DefaultMonitor])
+
+  /**
+   * Creates a default monitor with default logger.
+   */
+  def apply(label: String, downstreamAddr: String): DefaultMonitor =
+    new DefaultMonitor(Log, label, downstreamAddr)
+}
 
 /**
- * Exposed for testing.
+ * The default [[Monitor]] to be used throughout Finagle.
  *
- * Use the companion object [[DefaultMonitor]].
+ * This monitor handles exceptions by logging them. Depending on the exception
+ * type, different log levels are used:
+ *
+ *  - [[com.twitter.util.TimeoutException timeout exceptions]] logged with `TRACE`
+ *  - [[HasLogLevel exceptions with log level]] logged with their level only if it's below `INFO`
+ *  - any other exception is logged as `FATAL`
+ *
+ * In addition to the stack trace, this monitor also logs upstream socket address, downstream
+ * socket address, and a client/server label.
+ *
+ * @note We refer to "downstream" as a machine/server your clients talks to. We refer to "upstream"
+ *       as a client that talks to your machine/server.
+ *
+ * @note This monitor does not handle (i.e., returns `false`) [[NonFatal fatal exceptions]].
  */
-private[util] class DefaultMonitor(log: Logger) extends Monitor {
-  private[this] val MinLogLevel = Level.INFO.value
+private[util] class DefaultMonitor(
+    log: Logger,
+    label: String,
+    downstreamAddr: String)
+  extends Monitor {
 
-  private[this] def logThrowable(t: Throwable, level: Level): Unit =
-    log.log(level, t, "Exception propagated to DefaultMonitor")
+  private[this] def upstreamAddr: String =
+    RemoteInfo.Upstream.addr.map(_.toString).getOrElse("n/a")
+
+  private[this] def remoteInfo: String =
+    s"(upstream address: $upstreamAddr, downstream address: $downstreamAddr, label: $label)"
+
+  private[this] def logWithRemoteInfo(t: Throwable, level: Level): Unit =
+    log.logLazy(level, t, s"Exception propagated to the default monitor $remoteInfo.")
 
   def handle(exc: Throwable): Boolean = {
     exc match {
-      case f: HasLogLevel if f.logLevel.value < MinLogLevel =>
-        logThrowable(exc, f.logLevel)
+      case f: HasLogLevel if f.logLevel.value < DefaultMonitor.MinLogLevel =>
+        logWithRemoteInfo(exc, f.logLevel)
         true
       case _: com.twitter.util.TimeoutException =>
         // This is a bit convoluted. `Future.within` and `Future.raiseWithin`
@@ -26,29 +69,16 @@ private[util] class DefaultMonitor(log: Logger) extends Monitor {
         // which in turn leads to noisy logs. By turning the log level down we
         // risk losing other usage of this exception, but it seems like the good
         // outweighs the bad in this case.
-        logThrowable(exc, Level.TRACE)
+        logWithRemoteInfo(exc, Level.TRACE)
         true
       case _ =>
-        RootMonitor.handle(exc)
+        logWithRemoteInfo(exc, Level.FATAL)
+        // We only "handle" non-fatal exceptions.
+        NonFatal(exc)
     }
   }
 
   override def toString: String = "DefaultMonitor"
-}
-
-/**
- * The default [[Monitor]] to be used throughout Finagle.
- *
- * Mostly delegates to [[RootMonitor]], with the exception
- * of [[HasLogLevel HasLogLevels]] with a `logLevel` below `INFO`.
- * [[com.twitter.util.TimeoutException TimeoutExceptions]] are also
- * suppressed because they often originate from `Future.within` and
- * `Future.raiseWithin`.
- */
-object DefaultMonitor
-  extends DefaultMonitor(Logger.get(classOf[DefaultMonitor]))
-{
-  val get = this
 }
 
 trait ReporterFactory extends ((String, Option[SocketAddress]) => Monitor)

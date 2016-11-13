@@ -3,7 +3,7 @@ package com.twitter.finagle.mysql
 import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.mysql.transport.{MysqlBuf, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBufReader, MysqlBuf, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{CancelledRequestException, Service, ServiceProxy, WriteException}
@@ -68,7 +68,7 @@ private[mysql] class PrepareCache(
 object ClientDispatcher {
   private val cancelledRequestExc = new CancelledRequestException
   private val lostSyncExc = new LostSyncException(new Throwable)
-  private val emptyTx = (Nil, EOF(0: Short, 0: Short))
+  private val emptyTx = (Nil, EOF(0: Short, ServerStatus(0)))
   private val wrapWriteException: PartialFunction[Throwable, Future[Nothing]] = {
     case exc: Throwable => Future.exception(WriteException(exc))
   }
@@ -188,6 +188,19 @@ class ClientDispatcher(
     signal: Promise[Unit]
   ): Future[Result] = {
     MysqlBuf.peek(packet.body) match {
+      case Some(Packet.OkByte) if cmd == Command.COM_STMT_FETCH =>
+        // Not really an OK packet; 00 is the header for a row as well
+        readTx().flatMap {
+          case (rowPackets, eof) =>
+            const(FetchResult(packet +: rowPackets, eof))
+        } ensure signal.setDone()
+
+      case Some(Packet.EofByte) if cmd == Command.COM_STMT_FETCH =>
+        // synthesize an empty FetchResult
+        signal.setDone()
+
+        const(EOF(packet) flatMap (FetchResult(Seq(), _)))
+
       case Some(Packet.OkByte) if cmd == Command.COM_STMT_PREPARE =>
         // decode PrepareOk Result: A header packet potentially followed
         // by two transmissions that contain parameter and column
@@ -215,25 +228,31 @@ class ClientDispatcher(
           Future.exception(ServerError(code, state, msg))
         }
 
-      // decode ResultSet
-      case Some(byte) =>
-        val isBinaryEncoded = cmd != Command.COM_QUERY
-        val numCols = Try {
-          val br = MysqlBuf.reader(packet.body)
-          br.readVariableLong().toInt
+    case Some(byte) =>
+      val isBinaryEncoded = cmd != Command.COM_QUERY
+      val numCols = Try {
+        val br = new MysqlBufReader(packet.body)
+        br.readVariableLong().toInt
+      }
+
+      val result = const(numCols).flatMap { cnt =>
+        readTx(cnt).flatMap {
+          case (fields, eof) =>
+            if (eof.serverStatus.has(ServerStatus.CursorExists)) {
+              const(ResultSet(isBinaryEncoded)(packet, fields, Seq()))
+            } else {
+              readTx().flatMap {
+                case (rows, _) =>
+                  const(ResultSet(isBinaryEncoded)(packet, fields, rows))
+              }
+            }
         }
+      }
 
-        val result = for {
-          cnt <- const(numCols)
-          (fields, _) <- readTx(cnt)
-          (rows, _) <- readTx()
-          res <- const(ResultSet(isBinaryEncoded)(packet, fields, rows))
-        } yield res
-
-        // TODO: When streaming is implemented the
-        // done signal should dependent on the
-        // completion of the stream.
-        result ensure signal.setDone()
+      // TODO: When streaming is implemented the
+      // done signal should dependent on the
+      // completion of the stream.
+      result ensure signal.setDone()
 
       case _ =>
         signal.setDone()

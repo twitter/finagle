@@ -1,11 +1,10 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
-import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
-import java.net.InetSocketAddress
+import com.twitter.util.Future
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.when

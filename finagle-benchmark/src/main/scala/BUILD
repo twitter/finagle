@@ -1,4 +1,4 @@
-scala_library(name='scala',
+scala_library(
   dependencies=[
     '3rdparty/jvm/org/apache/curator:curator-framework',
     '3rdparty/jvm/org/apache/curator:curator-test',
@@ -31,20 +31,16 @@ scala_library(name='scala',
     'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
-  sources=rglobs('*.scala')
-)
-
-# depend on this for resources/real_latencies.data
-jar_library(name='metrics-samples',
-  jars = [
-    jar(org='com.twitter.common', name='metrics-data-sample', rev='0.0.1'),
-  ],
+  sources=rglobs('*.scala'),
 )
 
 jvm_binary(
-  name='p2csim',
+  name='lbsim',
   main='com.twitter.finagle.loadbalancer.Simulation',
-  dependencies=[':scala', ':metrics-samples']
+  dependencies=[':scala'],
+  resources=[
+    'finagle/finagle-benchmark/src/main/resources'
+  ],
 )
 
 jvm_binary(

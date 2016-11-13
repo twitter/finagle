@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.Await
+import com.twitter.conversions.time._
+import com.twitter.util.{Await, Return}
 import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
@@ -55,22 +56,22 @@ class StatusTest
     @volatile var status: Status = Status.Busy
     val open = Status.whenOpen(status)
 
-    assert(!open.isDone)
+    assert(open.poll.isEmpty)
 
     status = Status.Open
-    eventually { assert(open.isDone) }
-    Await.result(open)  // no exceptions
+    eventually { assert(open.poll == Some(Return.Unit)) }
+    Await.result(open, 5.seconds)  // no exceptions
   }
 
   test("Status.whenOpen - closes") {
     @volatile var status: Status = Status.Busy
     val open = Status.whenOpen(status)
 
-    assert(!open.isDone)
+    assert(open.poll.isEmpty)
 
     status = Status.Closed
-    eventually { assert(open.isDefined) }
-    intercept[Status.ClosedException] { Await.result(open) }
+    eventually { assert(open.poll.isDefined) }
+    intercept[Status.ClosedException] { Await.result(open, 5.seconds) }
   }
 
   test("Ordering spot check") {

@@ -24,6 +24,7 @@ final class Failure private[finagle](
   import Failure._
 
   require(!isFlagged(Wrapped) || cause.isDefined)
+  require(!isFlagged(Restartable|NonRetryable), "A Failure cannot be flagged as both restartable and non-retryable")
 
   /**
    * Returns a source for a given key, if it exists.
@@ -154,6 +155,13 @@ object Failure {
   val Rejected: Long = 1L << 3
 
   /**
+   * Flag nonretryable indicates that the action that caused this failure should
+   * not be re-issued. This failure should be propagated back along the call
+   * chain as far as possible.
+   */
+  val NonRetryable: Long = 1L << 4
+
+  /**
    * Flag naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = 1L << 32
@@ -166,7 +174,7 @@ object Failure {
    * whose behalf the client is working - it may have performed some side
    * effect before issuing the client call.
    */
-  private val ShowMask: Long = Interrupted | Rejected
+  private val ShowMask: Long = Interrupted | Rejected | NonRetryable
 
   /**
    * Create a new failure with the given cause and flags.
@@ -226,6 +234,7 @@ object Failure {
         if (f.isFlagged(Wrapped))     flags += "wrapped"
         if (f.isFlagged(Rejected))    flags += "rejected"
         if (f.isFlagged(Naming))      flags += "naming"
+        if (f.isFlagged(NonRetryable)) flags += "nonretryable"
         flags
       case _ => Set.empty
     }

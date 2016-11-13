@@ -1,126 +1,74 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.finagle.redis.util._
 
-case class LLen(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  val command = Commands.LLEN
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.LLEN, keyBuf))
+case class LLen(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.LLEN
 }
 
-case class LIndex(keyBuf: Buf, index: Long) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  val command = Commands.LINDEX
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.LINDEX, keyBuf, StringToBuf(index.toString)))
+case class LIndex(key: Buf, index: Long) extends StrictKeyCommand {
+  def name: Buf = Command.LINDEX
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString))
 }
 
 case class LInsert(
-    keyBuf: Buf,
+    key: Buf,
     relativePosition: String,
     pivot: Buf,
-    valueBuf: Buf)
+    value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  override def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-
-  val command = Commands.LINSERT
-  override def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(
-    Seq(CommandBytes.LINSERT, keyBuf, StringToBuf(relativePosition), pivot, valueBuf)
-  )
+  def name: Buf = Command.LINSERT
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(relativePosition), pivot, value)
 }
 
-case class LPop(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  val command = Commands.LPOP
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.LPOP, keyBuf))
+case class LPop(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.LPOP
 }
 
-case class LPush(keyBuf: Buf, values: Seq[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
+case class LPush(key: Buf, values: Seq[Buf]) extends StrictKeyCommand {
   RequireClientProtocol(values.nonEmpty, "values must not be empty")
-
-  val command = Commands.LPUSH
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.LPUSH, keyBuf) ++ values)
+  def name: Buf = Command.LPUSH
+  override def body: Seq[Buf] = key +: values
 }
 
-case class LRem(keyBuf: Buf, count: Long, valueBuf: Buf)
+case class LRem(key: Buf, count: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  override def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-
-  val command = Commands.LREM
-  override def toChannelBuffer = {
-    val commandArgs = Seq(CommandBytes.LREM, keyBuf, StringToBuf(count.toString), valueBuf)
-    RedisCodec.bufToUnifiedChannelBuffer(commandArgs)
-  }
+  def name: Buf = Command.LREM
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(count.toString), value)
 }
 
-case class LSet(keyBuf: Buf, index: Long, valueBuf: Buf)
+case class LSet(key: Buf, index: Long, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  override def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-
-  val command = Commands.LSET
-  override def toChannelBuffer = {
-    val commandArgs = List(CommandBytes.LSET, keyBuf, StringToBuf(index.toString), valueBuf)
-    RedisCodec.bufToUnifiedChannelBuffer(commandArgs)
-  }
+  def name: Buf = Command.LSET
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString), value)
 }
 
-case class LRange(keyBuf: Buf, start: Long, end: Long) extends ListRangeCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  override val command = Commands.LRANGE
+case class LRange(key: Buf, start: Long, end: Long) extends ListRangeCommand {
+  def name: Buf = Command.LRANGE
 }
 
-case class RPop(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  val command = Commands.RPOP
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.RPOP, keyBuf))
+case class RPop(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.RPOP
 }
 
-case class RPush(keyBuf: Buf, values: List[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.RPUSH
-
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.RPUSH, keyBuf) ++ values)
+case class RPush(key: Buf, values: List[Buf]) extends StrictKeyCommand {
+  def name: Buf = Command.RPUSH
+  override def body: Seq[Buf] = key +: values
 }
 
-case class LTrim(keyBuf: Buf, start: Long, end: Long) extends ListRangeCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.LTRIM
+case class LTrim(key: Buf, start: Long, end: Long) extends ListRangeCommand {
+  def name: Buf = Command.LTRIM
 }
 
 trait ListRangeCommand extends StrictKeyCommand {
-  val start: Long
-  val end: Long
-  val command: String
+  def start: Long
+  def end: Long
 
-  override def toChannelBuffer = {
-    RedisCodec.toUnifiedFormat(
-      Seq(
-        StringToChannelBuffer(command),
-        key,
-        StringToChannelBuffer(start.toString),
-        StringToChannelBuffer(end.toString)))
-  }
+  override def body: Seq[Buf] = Seq(key, Buf.Utf8(start.toString), Buf.Utf8(end.toString))
 }

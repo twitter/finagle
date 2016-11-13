@@ -1,7 +1,8 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.Addr.Metadata
 import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
-import com.twitter.finagle.{Addr, Stack, Stackable, ServiceFactory}
+import com.twitter.finagle.{Addr, ServiceFactory, Stack, Stackable}
 import com.twitter.util.Duration
 import java.util.concurrent.atomic.AtomicReference
 
@@ -27,8 +28,12 @@ object LatencyCompensation {
       (this, Compensator.param)
   }
   object Compensator {
+    private[this] val Default = new Function1[Addr.Metadata, Duration] {
+      def apply(v1: Metadata): Duration = Duration.Zero
+      override def toString: String = "NoCompensation"
+    }
     implicit val param =
-      Stack.Param(Compensator(_ => Duration.Zero))
+      Stack.Param(Compensator(Default))
   }
 
   /**

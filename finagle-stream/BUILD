@@ -1,4 +1,4 @@
-target(name='finagle-stream',
+target(
   dependencies=[
     'finagle/finagle-stream/src/main/scala'
   ]

@@ -3,14 +3,14 @@ package com.twitter.finagle.zipkin.thrift
 import com.google.common.io.BaseEncoding
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{Protocols, ThriftClientFramedCodec}
+import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.zipkin.core.{TracerCache, Span, RawZipkinTracer}
-import com.twitter.finagle.zipkin.thriftscala.{ResultCode, LogEntry, Scribe}
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.zipkin.core.{RawZipkinTracer, Span, TracerCache}
+import com.twitter.finagle.zipkin.thriftscala.{LogEntry, ResultCode, Scribe}
 import com.twitter.scrooge.TReusableMemoryTransport
 import com.twitter.util._
 import java.io.CharArrayWriter
@@ -28,9 +28,9 @@ object ScribeRawZipkinTracer {
     name: String
   ): Scribe.FutureIface = {
     val transport = ClientBuilder()
+      .stack(Thrift.client)
       .name(name)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .codec(ThriftClientFramedCodec())
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
       // using an arbitrary, but bounded number of waiters to avoid memory leaks

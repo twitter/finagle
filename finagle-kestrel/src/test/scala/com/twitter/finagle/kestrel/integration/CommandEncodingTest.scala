@@ -1,13 +1,12 @@
 package com.twitter.finagle.kestrel.integration
 
+import com.twitter.finagle.kestrel.protocol._
+import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
+import com.twitter.io.Buf
+import com.twitter.util.{Duration, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-import com.twitter.finagle.kestrel.protocol._
-import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData}
-import com.twitter.io.Buf
-import com.twitter.util.{Duration, Time}
 
 @RunWith(classOf[JUnitRunner])
 class CommandEncodingTest extends FunSuite {

@@ -1,73 +1,43 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
-case class SAdd(keyBuf: Buf, values: Seq[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
+case class SAdd(key: Buf, values: Seq[Buf]) extends StrictKeyCommand {
   RequireClientProtocol(values.nonEmpty, "values must not be empty")
 
-  val command = Commands.SADD
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SADD, keyBuf) ++ values)
+  def name: Buf = Command.SADD
+  override def body: Seq[Buf] = key +: values
 }
 
-case class SMembers(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-
-  val command = Commands.SMEMBERS
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SMEMBERS, keyBuf))
+case class SMembers(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.SMEMBERS
 }
 
-case class SIsMember(keyBuf: Buf, valueBuf: Buf)
+case class SIsMember(key: Buf, value: Buf)
   extends StrictKeyCommand
   with StrictValueCommand {
 
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  override def value: ChannelBuffer = BufChannelBuffer(valueBuf)
-
-  val command = Commands.SISMEMBER
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SISMEMBER, keyBuf, valueBuf))
+  def name: Buf = Command.SISMEMBER
+  override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class SCard(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.SCARD
-
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SCARD, keyBuf))
+case class SCard(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.SCARD
 }
 
-case class SRem(keyBuf: Buf, values: List[Buf]) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.SREM
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SREM, keyBuf) ++ values)
+case class SRem(key: Buf, values: List[Buf]) extends StrictKeyCommand {
+  def name: Buf = Command.SREM
+  override def body: Seq[Buf] = key +: values
 }
 
-case class SPop(keyBuf: Buf) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.SPOP
-  override def toChannelBuffer =
-    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.SPOP, keyBuf))
+case class SPop(key: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.SPOP
 }
 
-case class SRandMember(keyBuf: Buf, count: Option[Int] = None) extends StrictKeyCommand {
-  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
-  val command = Commands.SRANDMEMBER
-  override def toChannelBuffer = {
-    val commands = Seq(CommandBytes.SRANDMEMBER, keyBuf) ++
-      count.map(c => Buf.Utf8(c.toString))
-    RedisCodec.bufToUnifiedChannelBuffer(commands)
-  }
+case class SRandMember(key: Buf, count: Option[Int] = None) extends StrictKeyCommand {
+  def name: Buf = Command.SRANDMEMBER
+  override def body: Seq[Buf] = key +: count.map(c => Seq(Buf.Utf8(c.toString))).getOrElse(Nil)
 }
-case class SInter(keysBuf: Seq[Buf]) extends StrictKeysCommand {
-  override def keys: Seq[ChannelBuffer] = keysBuf.map(BufChannelBuffer.apply)
-
-  val command = Commands.SINTER
-  override def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.SINTER +: keysBuf)
+case class SInter(keys: Seq[Buf]) extends StrictKeysCommand {
+  def name: Buf = Command.SINTER
 }

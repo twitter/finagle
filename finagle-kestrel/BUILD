@@ -1,4 +1,4 @@
-target(name='finagle-kestrel',
+target(
   dependencies=[
     'finagle/finagle-kestrel/src/main/java',
     'finagle/finagle-kestrel/src/main/scala'

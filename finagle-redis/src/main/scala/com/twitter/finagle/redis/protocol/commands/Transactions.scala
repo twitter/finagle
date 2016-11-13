@@ -1,35 +1,27 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
 case object Discard extends Command {
-  def command = Commands.DISCARD
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.DISCARD))
+  def name: Buf = Command.DISCARD
 }
 
 case object Exec extends Command {
-  def command = Commands.EXEC
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXEC))
+  def name: Buf = Command.EXEC
 }
 
 case object Multi extends Command {
-  def command = Commands.MULTI
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.MULTI))
+  def name: Buf = Command.MULTI
 }
 
 case object UnWatch extends Command {
-  def command = Commands.UNWATCH
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.UNWATCH))
+  def name: Buf = Command.UNWATCH
 }
 
-case class Watch(bufs: Seq[Buf]) extends KeysCommand {
-  override val keys: Seq[ChannelBuffer] = bufs.map(ChannelBufferBuf.Owned.extract(_))
-  def command = Commands.WATCH
-  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.WATCH +: bufs)
+case class Watch(keys: Seq[Buf]) extends KeysCommand {
+  def name: Buf = Command.WATCH
+  override def body: Seq[Buf] = keys
 }
 object Watch {
-  def apply(args: => Seq[Array[Byte]]): Watch =
-    new Watch(args.map(Buf.ByteArray.Owned(_)))
+  def apply(args: => Seq[Array[Byte]]): Watch = new Watch(args.map(Buf.ByteArray.Owned(_)))
 }

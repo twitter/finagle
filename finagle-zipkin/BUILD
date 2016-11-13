@@ -1,4 +1,4 @@
-target(name='finagle-zipkin',
+target(
   dependencies=[
     'finagle/finagle-zipkin/src/main/scala'
   ]

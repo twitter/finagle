@@ -79,6 +79,23 @@ class parsersTest extends FunSuite {
     }
   }
 
+  test("longHex") {
+    "abc" match {
+      case longHex(result) => assert(result == 2748L && result == 0xabc)
+      case _ => fail()
+    }
+
+    "0x123" match {
+      case longHex(result) => assert(result == 291L && result == 0x123)
+      case _ => fail()
+    }
+
+    "invalid" match {
+      case longHex(_) => fail()
+      case _ =>
+    }
+  }
+
   test("list") {
     "a:b:c" match {
       case list("a", "b", "c") =>

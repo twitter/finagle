@@ -3,13 +3,14 @@ package com.twitter.finagle.netty4.transport
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.util.{Throw, Return, Await, Future}
-import io.netty.channel.{ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
+import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
+import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
@@ -174,7 +175,7 @@ class ChannelTransportTest extends FunSuite
     // this is subtle.  transport.onClose returns a Future[Throwable].  we want
     // to ensure that we expect a ChannelClosedException, but it should be from
     // a successful Future, not a failed one.
-    val Return(t) = Await.result(transport.onClose.liftToTry, 5.seconds)
+    val Return(t) = Await.result(transport.onClose.liftToTry, timeout)
     intercept[ChannelClosedException] {
       throw t
     }
@@ -191,5 +192,84 @@ class ChannelTransportTest extends FunSuite
     val tr = new ChannelTransport[String, String](ch)
 
     assert(tr.peerCertificate == Some(cert))
+  }
+
+  test("ChannelTransport drains the offer queue before reading from the channel") {
+    val channel = spy(new EmbeddedChannel())
+    channel.config().setAutoRead(false)
+
+    val trans = new ChannelTransport[String, String](channel)
+
+    // buffer data in the underlying channel
+    channel.writeInbound("one")
+    channel.writeInbound("two")
+    channel.writeInbound("three")
+    assert("one" == Await.result(trans.read(), timeout))
+    assert("two" == Await.result(trans.read(), timeout))
+
+    // no reads from the channel yet
+    verify(channel, never).read()
+
+    assert("three" == Await.result(trans.read(), timeout))
+
+    // an empty queue leads to a single read
+    verify(channel, times(1)).read()
+
+
+    // the offer q is drained, so reading another message triggers another channel read
+    trans.read()
+    eventually { verify(channel, times(2)).read() }
+  }
+
+  test("ChannelTransport buffers a single read when backpressure is enabled") {
+    val message = "message 1"
+
+    val channel = spy(new EmbeddedChannel())
+    channel.config().setAutoRead(false)
+
+    val trans = new ChannelTransport[String, String](channel)
+
+    // On startup, the ChannelTransport should queue one read
+    channel.pipeline().fireChannelActive()
+    verify(channel, times(1)).read()
+
+    // When we get a message, we shouldn't do another read until the first message is taken
+    channel.writeInbound(message)
+    eventually { verify(channel, times(1)).read() }
+
+    // We take the message that was queued, so we should have attempted
+    // the next read
+    assert(Await.result(trans.read(), timeout) == message)
+    eventually { verify(channel, times(2)).read() }
+  }
+
+  test("ChannelTransport will continue to trigger reads as waiting reads are fulfilled") {
+    val channel = spy(new EmbeddedChannel())
+    channel.config().setAutoRead(false)
+
+    val trans = new ChannelTransport[String, String](channel)
+
+    verify(channel, never).read()
+    // buffer data in the underlying channel
+    val readOne = trans.read()
+    val readTwo = trans.read()
+    val readThree = trans.read()
+
+    verify(channel, times(3)).read()
+
+    channel.writeInbound("one")
+    // Gets called twice, once by `channelRead0` and once by `channelReadComplete`
+    verify(channel, times(4)).read()
+    assert("one" == Await.result(readOne, timeout))
+
+    channel.writeInbound("two")
+    // Called twice for the same reason
+    verify(channel, times(5)).read()
+    assert("two" == Await.result(readTwo, timeout))
+
+    channel.writeInbound("three")
+    // Called twice to buffer one inbound message to attempt to detect close events
+    verify(channel, times(6)).read()
+    assert("three" == Await.result(readThree, timeout))
   }
 }

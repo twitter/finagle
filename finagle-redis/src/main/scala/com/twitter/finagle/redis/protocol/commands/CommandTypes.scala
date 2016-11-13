@@ -1,46 +1,47 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
 
 trait KeyCommand extends Command {
-  // TODO: remove this method after netty3
-  def key: ChannelBuffer
+  def key: Buf
   protected def validate() {
-    RequireClientProtocol(key != null && key.readableBytes > 0, "Empty Key found")
+    RequireClientProtocol(key != null && key.length > 0, "Empty Key found")
   }
+
+  override def body: Seq[Buf] = Seq(key)
 }
 trait StrictKeyCommand extends KeyCommand {
   validate()
 }
 
 trait KeysCommand extends Command {
-  // TODO: remove this method after netty3
-  def keys: Seq[ChannelBuffer]
+  def keys: Seq[Buf]
   protected def validate() {
-    RequireClientProtocol(keys != null && !keys.isEmpty, "Empty KeySet found")
+    RequireClientProtocol(keys != null && keys.nonEmpty, "Empty KeySet found")
     keys.foreach { key =>
-      RequireClientProtocol(key != null && key.readableBytes > 0, "Empty key found")
+      RequireClientProtocol(key != null && key.length > 0, "Empty key found")
     }
   }
+
+  override def body: Seq[Buf] = keys
 }
 trait StrictKeysCommand extends KeysCommand {
   validate()
 }
 
 trait ValueCommand extends Command {
-  def value: ChannelBuffer
+  def value: Buf
 }
 trait StrictValueCommand extends ValueCommand {
-  RequireClientProtocol(value != null && value.readableBytes > 0,
+  RequireClientProtocol(value != null && value.length > 0,
     "Found unexpected empty value")
 }
 
 trait MemberCommand extends Command {
-  def member: ChannelBuffer
+  def member: Buf
 }
 trait StrictMemberCommand extends MemberCommand {
-  RequireClientProtocol(member != null && member.readableBytes > 0,
+  RequireClientProtocol(member != null && member.length > 0,
     "Found unexpected empty set member")
 }
 

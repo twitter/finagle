@@ -172,6 +172,14 @@ These retries come out of a ``RetryBudget`` that allows for approximately 20% of
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.
 
+Some failures may also be known as unsafe to retry. If a :src:`Failure <com/twitter/finagle/Failure.scala>`
+is flagged ``NonRetryable``, the `Retries` module will not make any attempts to retry the request and
+pass along the failure as is. A `NonRetryable` failure may be used in situations where a client
+determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
+be skipped. Additionally, a service may reject a request that is malformed and thus pointless to retry.
+While Finagle respects the `NonRetryable` flag internally, users should also take care to respect it
+when creating retry filters of their own.
+
 The `Retries` module is configured with two parameters:
 
 1. ``RetryBudget`` - determines whether there is available budget to retry a request
@@ -804,8 +812,8 @@ and then slowly decays, based on the TTL.
 .. [#p2c] Michael Mitzenmacher. 2001. The Power of Two Choices in Randomized Load Balancing.
    IEEE Trans. Parallel Distrib. Syst. 12, 10 (October 2001), 1094-1104.
 
-.. [#p2c_bounds] The maximum load on any server is roughly bound by `ln(ln(n))` where n is
-   the number of requests.
+.. [#p2c_bounds] The maximum load variance between any two servers is bound by `ln(ln(n))`
+   where n is the number of servers in the cluster.
 
 .. [#p2c_jmh] Our micro benchmark exposes the stark differences:
 

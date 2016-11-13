@@ -5,15 +5,16 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 
 /**
- * An inbound channel handler that copies direct byte buffers onto heap.
+ * An inbound channel handler that copies direct byte buffers onto the JVM heap
+ * and gives them a deterministic lifecycle.
  *
- * The intention of this is to make Netty 4 behave as Netty 3 w.r.t. direct byte buffers
- * and offload freeing native memory from the GC cycle.
- *
- * See CSL-3027 for more details.
+ * @note If your protocol manages ref-counting or if you are delegating ref-counting
+ *       to application space you don't need this handler in your pipeline. Every
+ *       other use case needs this handler or you will with very high probability
+ *       incur a direct buffer leak.
  */
 @Sharable
-private[netty4] object DirectToHeapInboundHandler extends ChannelInboundHandlerAdapter  {
+object DirectToHeapInboundHandler extends ChannelInboundHandlerAdapter  {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     case bb: ByteBuf if bb.isDirect =>
       val heapBuf = ctx.alloc().heapBuffer(bb.readableBytes, bb.capacity)

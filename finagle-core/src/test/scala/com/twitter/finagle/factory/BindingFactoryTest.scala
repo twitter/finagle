@@ -131,7 +131,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       val f =
         Dtab.unwind {
           Dtab.local =
-            Dtab.read("/foo/bar=>/$/com.twitter.finagle.factory.BindingFactoryTest$TestNamer")
+            Dtab.read(s"/foo/bar=>/$$/com.twitter.finagle.factory.BindingFactoryTest$$TestNamer")
           factory()
         }
       tc.advance(5678.microseconds)

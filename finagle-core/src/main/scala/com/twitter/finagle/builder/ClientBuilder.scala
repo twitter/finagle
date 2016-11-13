@@ -91,12 +91,12 @@ object ClientConfig {
   val DefaultName = "client"
 
   private case class NilClient[Req, Rep](
-    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-    params: Stack.Params = DefaultParams
-  ) extends StackBasedClient[Req, Rep] {
+      stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+      params: Stack.Params = DefaultParams)
+    extends StackBasedClient[Req, Rep] {
 
-    def withParams(ps: Stack.Params) = copy(params = ps)
-    def transformed(t: Stack.Transformer) = copy(stack = t(stack))
+    def withParams(ps: Stack.Params): StackBasedClient[Req, Rep] = copy(params = ps)
+    def transformed(t: Stack.Transformer): StackBasedClient[Req, Rep] = copy(stack = t(stack))
 
     def newService(dest: Name, label: String): Service[Req, Rep] =
       newClient(dest, label).toService
@@ -117,11 +117,11 @@ object ClientConfig {
     implicit val param = Stack.Param(DestName(Name.empty))
   }
 
-  private[builder] case class GlobalTimeout(timeout: Duration) {
+  private[finagle] case class GlobalTimeout(timeout: Duration) {
     def mk(): (GlobalTimeout, Stack.Param[GlobalTimeout]) =
       (this, GlobalTimeout.param)
   }
-  private[builder] object GlobalTimeout {
+  private[finagle] object GlobalTimeout {
     implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
@@ -154,7 +154,7 @@ object ClientConfig {
 }
 
 @implicitNotFound("Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}")
-private[builder] trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
 
 private[builder] object ClientConfigEvidence {
   implicit object FullyConfigured extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
@@ -243,18 +243,14 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `keepAlive`: Unspecified, in which case the
  *    [[http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE Java default]]
  *    of `false` is used
- *  - `readerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
- *  - `writerIdleTimeout`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
- *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
  *
  * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-  client: StackBasedClient[Req, Rep]
-) {
+    client: StackBasedClient[Req, Rep]) {
   import ClientConfig._
   import com.twitter.finagle.param._
 
@@ -272,16 +268,40 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     new ClientBuilder(client)
 
-  private def configured[P: Stack.Param, HasCluster1, HasCodec1, HasHostConnectionLimit1](
+  private def _configured[P, HasCluster1, HasCodec1, HasHostConnectionLimit1](
     param: P
+  )(
+    implicit stackParam: Stack.Param[P]
   ): ClientBuilder[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     copy(client.configured(param))
+
+  /**
+   * Configure the underlying [[Stack.Param Params]].
+   *
+   * Java users may find it easier to use the `Tuple2` version below.
+   */
+  def configured[P](param: P)(implicit stackParam: Stack.Param[P]): This =
+    copy(client.configured(param))
+
+  /**
+   * Java friendly API for configuring the underlying [[Stack.Param Params]].
+   *
+   * The `Tuple2` can often be created by calls to a `mk(): (P, Stack.Param[P])`
+   * method on parameters (see
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory.Param.mk()]]
+   * as an example).
+   */
+  def configured[P](paramAndStackParam: (P, Stack.Param[P])): This =
+    copy(client.configured(paramAndStackParam._1)(paramAndStackParam._2))
+
+  /**
+   * The underlying [[Stack.Param Params]] used for configuration.
+   */
+  def params: Stack.Params = client.params
 
   // Used in deprecated KetamaClientBuilder, remove when we drop it in
   // favor of the finagle.Memcached protocol object.
   private[finagle] def underlying: StackBasedClient[Req, Rep] = client
-
-  def params: Stack.Params = client.params
 
   /**
    * Specify the set of hosts to connect this client to.  Requests
@@ -419,7 +439,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def dest(
     name: Name
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    configured(DestName(name))
+    _configured(DestName(name))
 
   /**
    * The base [[com.twitter.finagle.Dtab]] used to interpret logical
@@ -662,6 +682,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.readTimeout(duration)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.readTimeout`",
+    "2016-10-05")
   def readerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(readTimeout = duration))
 
@@ -676,6 +699,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.writeTimeout(duration)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.writeTimeout`",
+    "2016-10-05")
   def writerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = duration))
 
@@ -748,7 +774,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
-    configured(params[DefaultPool.Param].copy(high = value))
+    _configured(params[DefaultPool.Param].copy(high = value))
 
   /**
    * The core size of the connection pool: the pool is not shrinked below this limit.
@@ -777,6 +803,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionIdleTime(timeout: Duration): This =
     configured(params[DefaultPool.Param].copy(idleTime = timeout))
 
@@ -795,6 +822,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated(
+    "Use `configured` or or the Stack-based API `SessionPoolingParams.maxWaiters`",
+    "2016-10-18")
   def hostConnectionMaxWaiters(nWaiters: Int): This =
     configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
 
@@ -809,6 +839,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withSession.maxIdleTime(timeout)
    * }}}
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionMaxIdleTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(idleTime = timeout))
 
@@ -823,6 +854,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withSession.maxLifeTime(timeout)
    * }}}
    */
+  @deprecated("Use `configured`", "2016-10-18")
   def hostConnectionMaxLifeTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(lifeTime = timeout))
 
@@ -841,6 +873,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       pooling, such as `com.twitter.finagle.ThriftMux` and
    *       `com.twitter.finagle.Memcached`.
    */
+  @deprecated("Use `configured`", "2016-10-05")
   def expHostConnectionBufferSize(size: Int): This =
     configured(params[DefaultPool.Param].copy(bufferSize = size))
 
@@ -1016,6 +1049,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.sendBufferSize(value)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.sendBufferSize`",
+    "2016-10-05")
   def sendBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
@@ -1030,6 +1066,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.receiveBufferSize(value)
    * }}}
    */
+  @deprecated(
+    "Use `configured` or the Stack-based API `TransportParams.receiveBufferSize`",
+    "2016-10-05")
   def recvBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(recv = Some(value)))
 
@@ -1039,6 +1078,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * meaningfully reference count factory usage, and so the caller is
    * responsible for calling `releaseExternalResources()`.
    */
+  @deprecated("Use `configured`", "2016-10-05")
   def channelFactory(cf: ChannelFactory): This =
     configured(Netty3Transporter.ChannelFactory(cf))
 
@@ -1055,10 +1095,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(hostname: String): This = {
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
       case _ => Ssl.client()
-    }))))
+    }))
       .configured(Transporter.TLSHostname(Some(hostname)))
   }
 
@@ -1076,10 +1116,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(sslContext: SSLContext): This =
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostName, inet.getPort)
       case _ => Ssl.client(sslContext)
-    }))))
+    }))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -1087,10 +1127,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
-    configured((Transport.TLSClientEngine(Some({
+    configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostName), inet.getPort)
       case _ => Ssl.client(sslContext)
-    }))))
+    }))
       .configured(Transporter.TLSHostname(hostname))
 
   /**
@@ -1389,18 +1429,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
  * filters historically included in `ClientBuilder` clients.
  */
 private case class ClientBuilderClient[Req, Rep](
-  client: StackClient[Req, Rep]
-) extends StackClient[Req, Rep] {
+    client: StackClient[Req, Rep])
+  extends StackClient[Req, Rep] {
 
   def params: Stack.Params = client.params
-  def withParams(ps: Stack.Params) = copy(client.withParams(ps))
+  def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(client.withParams(ps))
   def stack: Stack[ServiceFactory[Req, Rep]] = client.stack
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(client.withStack(stack))
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(client.withStack(stack))
 
-  def newClient(dest: Name, label: String) =
+  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
     ClientBuilderClient.newClient(client, dest, label)
 
-  def newService(dest: Name, label: String) =
+  def newService(dest: Name, label: String): Service[Req, Rep] =
     ClientBuilderClient.newService(client, dest, label)
 }
 
@@ -1409,59 +1449,62 @@ private object ClientBuilderClient {
   import com.twitter.finagle.param._
 
   private class StatsFilterModule[Req, Rep]
-      extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder StatsFilter")
+    extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
+    val role: Stack.Role = Stack.Role("ClientBuilder StatsFilter")
     val description: String =
       "Record request stats scoped to 'tries', measured after any retries have occurred"
 
-    override def make(
+    def make(
       statsP: Stats,
       exceptionStatsHandlerP: ExceptionStatsHandler,
       next: ServiceFactory[Req, Rep]
-    ) = {
+    ): ServiceFactory[Req, Rep] = {
       val Stats(statsReceiver) = statsP
       val ExceptionStatsHandler(categorizer) = exceptionStatsHandlerP
 
       val stats = new StatsFilter[Req, Rep](statsReceiver.scope("tries"), categorizer)
-      stats andThen next
+      stats.andThen(next)
     }
   }
 
   private class GlobalTimeoutModule[Req, Rep]
-      extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder GlobalTimeoutFilter")
+    extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
+    val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
     val description: String = "Application-configured global timeout"
 
-    override def make(
+    def make(
       globalTimeoutP: GlobalTimeout,
       timerP: Timer,
       next: ServiceFactory[Req, Rep]
-    ) = {
-      val GlobalTimeout(timeout) = globalTimeoutP
-      val Timer(timer) = timerP
+    ): ServiceFactory[Req, Rep] = {
+      val timeout = globalTimeoutP.timeout
 
-      if (timeout == Duration.Top) next
+
+      if (!timeout.isFinite || timeout <= Duration.Zero) next
       else {
-        val exception = new GlobalRequestTimeoutException(timeout)
-        val globalTimeout = new TimeoutFilter[Req, Rep](timeout, exception, timer)
-        globalTimeout andThen next
+        val filter = new TimeoutFilter[Req, Rep](
+          () => timeout,
+          timeout => new GlobalRequestTimeoutException(timeout),
+          timerP.timer,
+          NullStatsReceiver)
+        filter.andThen(next)
       }
     }
   }
 
   private class ExceptionSourceFilterModule[Req, Rep]
-      extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
-    val role: Stack.Role = new Stack.Role("ClientBuilder ExceptionSourceFilter")
+    extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
+    val role: Stack.Role = Stack.Role("ClientBuilder ExceptionSourceFilter")
     val description: String = "Exception source filter"
 
-    override def make(
+    def make(
       labelP: Label,
       next: ServiceFactory[Req, Rep]
-    ) = {
+    ): ServiceFactory[Req, Rep] = {
       val Label(label) = labelP
 
       val exceptionSource = new ExceptionSourceFilter[Req, Rep](label)
-      exceptionSource andThen next
+      exceptionSource.andThen(next)
     }
   }
 
@@ -1489,7 +1532,7 @@ private object ClientBuilderClient {
           return Future.exception(new IllegalStateException)
         }
 
-        super.close(deadline) ensure {
+        super.close(deadline).ensure {
           exitGuard.foreach(_.unguard())
         }
       }
@@ -1536,14 +1579,14 @@ private object ClientBuilderClient {
  * [[com.twitter.finagle.Codec]].
  */
 private case class CodecClient[Req, Rep](
-  codecFactory: CodecFactory[Req, Rep]#Client,
-  stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-  params: Stack.Params = ClientConfig.DefaultParams
-) extends StackClient[Req, Rep] {
+    codecFactory: CodecFactory[Req, Rep]#Client,
+    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+    params: Stack.Params = ClientConfig.DefaultParams)
+  extends StackClient[Req, Rep] {
   import com.twitter.finagle.param._
 
-  def withParams(ps: Stack.Params) = copy(params = ps)
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(stack = stack)
+  def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(params = ps)
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(stack = stack)
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
     val codec = codecFactory(ClientCodecConfig(label))
@@ -1552,12 +1595,12 @@ private case class CodecClient[Req, Rep](
       def parameters: Seq[Stack.Param[_]] = Nil
       val role: Stack.Role = StackClient.Role.prepConn
       val description = "Connection preparation phase as defined by a Codec"
-      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val Stats(stats) = ps[Stats]
         val underlying = codec.prepareConnFactory(next, ps)
         new ServiceFactoryProxy(underlying) {
-          val stat = stats.stat("codec_connection_preparation_latency_ms")
-          override def apply(conn: ClientConnection) = {
+          private val stat = stats.stat("codec_connection_preparation_latency_ms")
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             val begin = Time.now
             super.apply(conn) ensure {
               stat.add((Time.now - begin).inMilliseconds)
@@ -1598,7 +1641,7 @@ private case class CodecClient[Req, Rep](
           params + Netty3Transporter.TransportFactory(newTransport))
       }
 
-      protected def newDispatcher(transport: Transport[In, Out]) =
+      protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep] =
         codec.newClientDispatcher(transport, params)
     }
 

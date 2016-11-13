@@ -53,7 +53,7 @@ class RefTransport[In, Out](
   override def close(deadline: Time): Future[Unit] = synchronized {
     // prevents further transformations
     closing = true
-    underlying.close(deadline)
+    mapped.close(deadline)
   }
   override def status: Status = mapped.status
 }

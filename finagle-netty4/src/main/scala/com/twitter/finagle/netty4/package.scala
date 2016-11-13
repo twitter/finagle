@@ -1,9 +1,12 @@
 package com.twitter.finagle
 
 import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.util.ProxyThreadFactory
+import com.twitter.finagle.toggle.{StandardToggleMap, Toggle, ToggleMap}
 import com.twitter.util.Awaitable
-import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
+import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
@@ -15,17 +18,65 @@ import java.util.concurrent.Executors
  */
 package object netty4 {
 
-  // NB Setting this system property works around a bug in n4's content [de|en]coder
-  //    where they allocate buffers using the global default allocator rather than
-  //    the allocator configured in the client/server boostrap. By setting this value
-  //    we're changing the global default to unpooled.
-  //
-  //    https://github.com/netty/netty/issues/5294
-  System.setProperty("io.netty.allocator.type", "unpooled")
+  /**
+   * The [[ToggleMap]] used for finagle-netty4.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap("com.twitter.finagle.netty4", DefaultStatsReceiver)
 
-  // this forces netty to use a "cleaner" for direct byte buffers
-  // which we need as long as we don't release them.
-  System.setProperty("io.netty.maxDirectMemory", "0")
+  /**
+   * An experimental option that enables pooling for receive buffers.
+   *
+   * Since we always copy onto the heap (see `DirectToHeapInboundHandler`), the receive
+   * buffers never leave the pipeline hence can safely be pooled.
+   * In its current form, this will preallocate at least N * 128kb (chunk size) of
+   * direct memory at the application startup, where N is the number of worker threads
+   * Finagle uses.
+   *
+   * Example:
+   *
+   * On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 128kb = 4mb.
+   */
+  private[netty4] object poolReceiveBuffers {
+    private[this] val underlying: Toggle[Int] =
+      Toggles("com.twitter.finagle.netty4.poolReceiveBuffers")
+
+    /**
+     * Checks (via a toggle) if pooling of receive buffers is enabled on this instanace.
+     */
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
+
+  // We allocate one arena per a worker thread to reduce contention. By default
+  // this will be equal to the number of logical cores * 2.
+  //
+  // NOTE: Before overriding it, we check whether or not it was set before. This way users
+  // will have a chance to tune it.
+  //
+  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers`).
+  if (System.getProperty("io.netty.allocator.numDirectArenas") == null) {
+    System.setProperty("io.netty.allocator.numDirectArenas", numWorkers().toString)
+  }
+
+  // This determines the size of the memory chunks we allocate in arenas. Netty's default
+  // is 16mb, we shrink it to 128kb.
+  //
+  // We make the trade-off between an initial memory footprint and the max buffer size
+  // that can still be pooled (assuming that 128kb is big enough to cover nearly all
+  // inbound messages sent over TCP). Every allocation that exceeds 128kb will fall back
+  // to an unpooled allocator.
+  //
+  // The `io.netty.allocator.maxOrder` (default: 4) determines the number of left binary
+  // shifts we need to apply to the `io.netty.allocator.pageSize` (default: 8192):
+  // 8192 << 4 = 128kb.
+  //
+  // NOTE: Before overriding it, we check whether or not it was set before. This way users
+  // will have a chance to tune it.
+  //
+  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers`).
+  if (System.getProperty("io.netty.allocator.maxOrder") == null) {
+    System.setProperty("io.netty.allocator.maxOrder", "4")
+  }
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
   //     because we need to disable the leak-detector and
@@ -37,11 +88,18 @@ package object netty4 {
     /* disableLeakDetector */ true
   )
 
+  // Exports N4-related metrics under `finagle/netty4`.
+  exportNetty4Metrics()
+
+  private[finagle] val DirectToHeapInboundHandlerName = "direct to heap"
+
   object param {
 
     private[netty4] case class Allocator(allocator: ByteBufAllocator)
     private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
       // TODO investigate pooled allocator CSL-2089
+      // While we already pool receive buffers, this ticket is about end-to-end pooling
+      // (everything in the pipeline should be pooled).
       override val default: Allocator = Allocator(UnpooledAllocator)
     }
 
