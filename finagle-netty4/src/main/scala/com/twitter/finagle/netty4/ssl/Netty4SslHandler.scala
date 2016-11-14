@@ -75,7 +75,7 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
       .map(SessionVerifier.hostname)
       .getOrElse(SessionVerifier.AlwaysValid)
 
-    ch.pipeline().addFirst("ssl connect", new SslConnectHandler(ssl, sessionValidation))
+    ch.pipeline().addFirst("sslConnect", new SslConnectHandler(ssl, sessionValidation))
     ch.pipeline().addFirst("ssl", ssl)
   }
 

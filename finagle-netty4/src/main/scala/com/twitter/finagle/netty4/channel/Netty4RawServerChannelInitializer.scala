@@ -9,8 +9,8 @@ import io.netty.channel._
 import java.util.logging.Level
 
 private[netty4] object Netty4RawServerChannelInitializer {
-  val ChannelLoggerHandlerKey = "channel logger"
-  val ChannelStatsHandlerKey = "channel stats"
+  val ChannelLoggerHandlerKey = "channelLogger"
+  val ChannelStatsHandlerKey = "channelStats"
 }
 
 /**
@@ -52,11 +52,11 @@ private[netty4] class Netty4RawServerChannelInitializer(
     channelStatsHandler.foreach(pipeline.addFirst(ChannelStatsHandlerKey, _))
 
     // Add SslHandler to the pipeline.
-    pipeline.addFirst("tls init", new Netty4SslHandler(params))
+    pipeline.addFirst("tlsInit", new Netty4SslHandler(params))
 
     // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` are enabled).
     if (poolReceiveBuffers()) {
-      pipeline.addFirst("receive buffers size tracker",
+      pipeline.addFirst("receiveBuffersSizeTracker",
         new RecvBufferSizeStatsHandler(stats.scope("transport")))
     }
   }

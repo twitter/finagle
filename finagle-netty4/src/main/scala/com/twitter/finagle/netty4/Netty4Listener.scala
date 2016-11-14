@@ -158,12 +158,12 @@ private[finagle] case class Netty4Listener[In, Out](
           // netty layer
           ch.pipeline.addLast("marshalling", setupMarshalling(new ChannelInitializer[Channel] {
             def initChannel(ch: Channel): Unit = {
-              ch.pipeline.addLast("framed initializer", framedInitializer)
+              ch.pipeline.addLast("framedInitializer", framedInitializer)
 
               // The bridge handler must be last in the pipeline to ensure
               // that the bridging code sees all encoding and transformations
               // of inbound messages.
-              ch.pipeline.addLast("finagle bridge", bridge)
+              ch.pipeline.addLast("finagleBridge", bridge)
             }
           }))
         }
