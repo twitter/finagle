@@ -84,24 +84,6 @@ private[http2] object Http2Transporter {
     }
   }
 
-  private[http2] def initialSettings(params: Stack.Params): Http2Settings = {
-    val HeaderTableSize(headerTableSize) = params[HeaderTableSize]
-    val PushEnabled(pushEnabled) = params[PushEnabled]
-    val MaxConcurrentStreams(maxConcurrentStreams) = params[MaxConcurrentStreams]
-    val InitialWindowSize(initialWindowSize) = params[InitialWindowSize]
-    val MaxFrameSize(maxFrameSize) = params[MaxFrameSize]
-    val MaxHeaderListSize(maxHeaderListSize) = params[MaxHeaderListSize]
-
-    val settings = new Http2Settings()
-    headerTableSize.foreach{ s => settings.headerTableSize(s.inBytes) }
-    pushEnabled.foreach{ settings.pushEnabled }
-    maxConcurrentStreams.foreach{ settings.maxConcurrentStreams }
-    initialWindowSize.foreach{  s => settings.initialWindowSize(s.inBytes.toInt) }
-    maxFrameSize.foreach{ s => settings.maxFrameSize(s.inBytes.toInt) }
-    maxHeaderListSize.foreach{ s => settings.maxHeaderListSize(s.inBytes) }
-    settings
-  }
-
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit =
     { pipeline: ChannelPipeline =>
@@ -121,7 +103,7 @@ private[http2] object Http2Transporter {
       val connectionHandler = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
         .connection(connection)
-        .initialSettings(initialSettings(params))
+        .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
         .build()
 
