@@ -37,9 +37,9 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     forAll(flag2) { f =>
       val e1, e2 = new Exception
 
-      Failure(e1, f) == Failure(e1, f) &&
-      Failure(e1, f) != Failure(e2, f) &&
-      Failure(e1, f).hashCode == Failure(e1, f).hashCode
+      assert(Failure(e1, f) == Failure(e1, f))
+      assert(Failure(e1, f) != Failure(e2, f))
+      assert(Failure(e1, f).hashCode == Failure(e1, f).hashCode)
     }
   }
 
@@ -47,12 +47,12 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     val e = new Exception
 
     for (flags <- Seq(flag, flag2)) {
-      forAll(flags.suchThat(_!=0)) { f =>
-        Failure(e, f).isFlagged(f) &&
-        Failure(e).flagged(f) == Failure(e, f) &&
-        Failure(e, f) != Failure(e, f).unflagged(f) &&
-        Failure(e, f).isFlagged(f) &&
-        !Failure(e, 0).isFlagged(f)
+      forAll(flags.suchThat(_ != 0)) { f =>
+        assert(Failure(e, f).isFlagged(f))
+        assert(Failure(e).flagged(f) == Failure(e, f))
+        assert(Failure(e, f) != Failure(e, f).unflagged(f))
+        assert(Failure(e, f).isFlagged(f))
+        assert(!Failure(e, 0).isFlagged(f))
       }
     }
   }

@@ -50,6 +50,10 @@ object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.De
   def combined(d1: Deadline, d2: Deadline): Deadline =
     Deadline(d1.timestamp max d2.timestamp, d1.deadline min d2.deadline)
 
+  /**
+   * Marshal deadline to byte buffer, deadline.timestamp and deadline.deadline
+   * must not be Time.Top, Time.Bottom or Time.Undefined
+   */
   def marshal(deadline: Deadline): Buf = {
     val bytes = new Array[Byte](16)
     ByteArrays.put64be(bytes, 0, deadline.timestamp.inNanoseconds)
