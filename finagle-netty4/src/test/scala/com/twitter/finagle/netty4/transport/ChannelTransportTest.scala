@@ -122,18 +122,6 @@ class ChannelTransportTest extends FunSuite
     }
   }
 
-  test("ChannelTransport throws properly on writes when the other end hangs up") {
-    channel.unsafe().outboundBuffer().setUserDefinedWritability(1, false)
-    assert(!channel.isWritable)
-    assert(transport.status == Status.Busy)
-
-    forAll { s: String =>
-      val e = intercept[Exception](Await.result(transport.write(s), timeout))
-      // we do this because forAll doesn't seem to work with just intercepts
-      assert(e.isInstanceOf[DroppedWriteException])
-    }
-  }
-
   test("ChannelTransport fails the connection when the read is interrupted") {
     val e = new Exception
     val seen = transport.read()
