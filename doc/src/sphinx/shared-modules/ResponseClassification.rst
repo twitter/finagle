@@ -41,7 +41,7 @@ is used. This gives us the simple classification rules of responses that are
 ``Returns`` are successful and ``Throws`` are failures.
 
 Custom Classifiers
-^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~
 
 Writing a custom classifier requires understanding of the few classes used. A
 ``ResponseClassifier`` is a ``PartialFunction`` from ``ReqRep`` to
@@ -79,7 +79,7 @@ always using user defined classifiers in combination with
 ``ResponseClassifier.Default`` which will cover all cases.
 
 Thrift and ThriftMux Classifiers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
@@ -125,9 +125,11 @@ classify errors. Lastly (#3), the request can be introspected to make the
 decision.
 
 Other Details
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 If you have a response classifier that categorizes ``Returns`` as
 failures, note that they will be counted in the ``StatsFilter``
 as a ``com.twitter.finagle.service.ResponseClassificationSyntheticException`` in the
-``StatsReceiver`` to indicate when this happens.
+``StatsReceiver`` to indicate when this happens. See the
+`FAQ <http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
+for more details.

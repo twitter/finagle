@@ -20,7 +20,9 @@ StatsFilter
   If you are using a ``ResponseClassifier`` that classifies non-Exceptions
   as failures, it will use a synthetic Exception,
   ``com.twitter.finagle.service.ResponseClassificationSyntheticException``,
-  to account for these.
+  to account for these. See the
+  `FAQ <http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
+  for more details.
 
 **failures**
   A counter of the number of times any failure has been observed.
