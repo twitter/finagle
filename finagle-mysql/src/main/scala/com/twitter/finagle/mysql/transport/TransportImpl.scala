@@ -39,12 +39,10 @@ object TransportImpl {
     }
   }
 
-  private[mysql] val ToggledTransport: TransportImpl = TransportImpl { params =>
-    if (useNetty4) Netty4.transporter(params)
-    else Netty3.transporter(params)
-  }
-
-  implicit val param: Stack.Param[TransportImpl] = Stack.Param(ToggledTransport)
+  implicit val param: Stack.Param[TransportImpl] = Stack.Param(
+    if (useNetty4) Netty4
+    else Netty3
+  )
 
   private val framerFactory = () => {
     new LengthFieldFramer(

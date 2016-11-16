@@ -142,16 +142,10 @@ object Thrift
     val Netty3: ThriftImpl = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
     val Netty4: ThriftImpl = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)
 
-    private[this] val ToggledTransport: ThriftImpl = ThriftImpl ({ params =>
-      if (useNetty4) Netty4.transporter(params)
-      else Netty3.transporter(params)
-    },
-      { params =>
-        if (useNetty4) Netty4.listener(params)
-        else Netty3.listener(params)
-      })
-
-    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(ToggledTransport)
+    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(
+      if (useNetty4) Netty4
+      else Netty3
+    )
   }
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()

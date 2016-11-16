@@ -88,11 +88,4 @@ class MemcachedTest extends FunSuite
 
     assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty3Transporter")
   }
-
-  test("Memcached can be toggled to Netty4") {
-    flag.overrides.let("com.twitter.finagle.memcached.UseNetty4", 1.0) {
-      val params = Memcached.client.params
-      assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty4Transporter")
-    }
-  }
 }

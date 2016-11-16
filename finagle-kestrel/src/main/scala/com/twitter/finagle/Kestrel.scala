@@ -53,12 +53,10 @@ object Kestrel {
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
       private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
-      private[this] val ToggledTransport: KestrelImpl = KestrelImpl { params =>
-        if (useNetty4) Netty4.transporter(params)
-        else Netty3.transporter(params)
-      }
-
-      implicit val param: Stack.Param[KestrelImpl] = Stack.Param(ToggledTransport)
+      implicit val param: Stack.Param[KestrelImpl] = Stack.Param(
+         if (useNetty4) Netty4
+         else Netty3
+      )
     }
   }
 

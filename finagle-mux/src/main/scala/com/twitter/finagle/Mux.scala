@@ -89,17 +89,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         params => Netty4Transporter(Netty4Framer, params),
         params => Netty4Listener(Netty4Framer, params))
 
-      private val defaultTransporter: Stack.Params => Transporter[Buf, Buf] = params => {
-        if (useNetty4) Netty4.transporter(params)
-        else Netty3.transporter(params)
-      }
 
-      private val defaultListener: Stack.Params => Listener[Buf, Buf] = params => {
-        if (useNetty4) Netty4.listener(params)
-        else Netty3.listener(params)
-      }
-
-      implicit val param = Stack.Param(MuxImpl(defaultTransporter, defaultListener))
+      implicit val param = Stack.Param(
+        if (useNetty4) Netty4
+        else Netty3
+      )
     }
   }
 
