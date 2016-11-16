@@ -14,7 +14,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{TlsConfig, Transport}
 import com.twitter.finagle.util._
 import com.twitter.util
 import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
@@ -1094,13 +1094,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Http.client.withTransport.tls(hostname)
    * }}}
    */
-  def tls(hostname: String): This = {
+  def tls(hostname: String): This =
     configured(Transport.TLSClientEngine(Some {
       case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
       case _ => Ssl.client()
     }))
-      .configured(Transporter.TLSHostname(Some(hostname)))
-  }
+    .configured(Transporter.TLSHostname(Some(hostname)))
+    .configured(Transport.Tls(TlsConfig.ClientHostname(hostname)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -1120,6 +1120,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostName, inet.getPort)
       case _ => Ssl.client(sslContext)
     }))
+    .configured(Transport.Tls(TlsConfig.ClientSslContext(sslContext)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -1131,7 +1132,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostName), inet.getPort)
       case _ => Ssl.client(sslContext)
     }))
-      .configured(Transporter.TLSHostname(hostname))
+    .configured(Transporter.TLSHostname(hostname))
+    .configured(Transport.Tls(
+      hostname.fold[TlsConfig](TlsConfig.ClientSslContext(sslContext)) { hn =>
+        TlsConfig.ClientSslContextAndHostname(sslContext, hn)
+      }
+    ))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
@@ -1149,6 +1155,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
       case _ => Ssl.clientWithoutCertificateValidation()
     })))
+    .configured(Transport.Tls(TlsConfig.ClientNoValidation))
+
 
   /**
    * Make connections via the given HTTP proxy.
