@@ -46,7 +46,7 @@ object Postgres {
   case class Database(database: String) extends AnyVal
   object Database { implicit object param extends RequiredParam[Database]("Database") }
 
-  case class CustomTypes(types: Option[Map[Int, postgres.Client.TypeSpecifier]]) extends AnyVal
+  case class CustomTypes(types: Option[Map[Int, postgres.PostgresClient.TypeSpecifier]]) extends AnyVal
   object CustomTypes { implicit val param = Param(CustomTypes(None)) }
 
   case class CustomReceiveFunctions(functions: PartialFunction[String, ValueDecoder[T] forSome {type T}]) extends AnyVal
@@ -100,7 +100,7 @@ object Postgres {
     type In = PgRequest
     type Out = PgResponse
 
-    def newRichClient(): postgres.Client = {
+    def newRichClient(): postgres.PostgresClientImpl = {
 
       val Dest(name) = params[Dest]
       val CustomTypes(customTypes) = params[CustomTypes]
@@ -111,11 +111,11 @@ object Postgres {
 
       val client = newClient(name, id)
 
-      new postgres.Client(client, id, customTypes, customReceiveFunctions, binaryResults, binaryParams)
+      new postgres.PostgresClientImpl(client, id, customTypes, customReceiveFunctions, binaryResults, binaryParams)
     }
 
-    def newRichClient(addr: String): postgres.Client = dest(addr).newRichClient()
-    def newRichClient(addr: Name): postgres.Client = dest(addr).newRichClient()
+    def newRichClient(addr: String): postgres.PostgresClientImpl = dest(addr).newRichClient()
+    def newRichClient(addr: Name): postgres.PostgresClientImpl = dest(addr).newRichClient()
 
     def dest(
       addr: String
@@ -134,9 +134,9 @@ object Postgres {
     def withBinaryParams(enable: Boolean = true) = configured(BinaryParams(enable))
     def withBinaryResults(enable: Boolean = true) = configured(BinaryResults(enable))
     def database(database: String) = configured(Database(database))
-    def withCustomTypes(customTypes: Map[Int, postgres.Client.TypeSpecifier]) =
+    def withCustomTypes(customTypes: Map[Int, postgres.PostgresClient.TypeSpecifier]) =
       configured(CustomTypes(Some(customTypes)))
-    def withDefaultTypes() = configured(CustomTypes(Some(postgres.Client.defaultTypes)))
+    def withDefaultTypes() = configured(CustomTypes(Some(postgres.PostgresClient.defaultTypes)))
     def withCustomReceiveFunctions(receiveFunctions: PartialFunction[String, ValueDecoder[T] forSome { type T }]) =
       configured(CustomReceiveFunctions(receiveFunctions))
 

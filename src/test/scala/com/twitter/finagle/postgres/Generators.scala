@@ -60,11 +60,10 @@ object Generators {
   implicit val arbUUID = Arbitrary[UUID](Gen.uuid)
 
   // arbitrary string that only contains valid UTF-8 characters
-  implicit val arbString = {
-    val encoder = StandardCharsets.UTF_8.newEncoder()
-    val chars = Arbitrary.arbChar.arbitrary.suchThat(ch => ch.toInt != 0 && encoder.canEncode(ch))
-    Arbitrary[String](Gen.listOf(chars).map(_.mkString))
-  }
+  val utf8 = StandardCharsets.UTF_8.newEncoder()
+  implicit val arbUTF8String = Arbitrary(arbitrary[String].filter {
+    str => utf8.canEncode(str)
+  })
 
   // TODO: can empty maps be supported?
   implicit val arbHStore: Arbitrary[Map[String, Option[String]]] = Arbitrary(

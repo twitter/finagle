@@ -13,7 +13,12 @@ case class ServerError(
   detail: Option[String] = None,
   hint: Option[String] = None,
   position: Option[String] = None
-) extends Exception(message)
+) extends Exception(message) {
+  override def toString: String = sqlState match {
+    case Some(state) => s"com.twitter.finagle.postgres.codec.ServerError: SQLSTATE $state: $message"
+    case None => super.toString
+  }
+}
 
 /*
  * An error caused on the client side (e.g., a badly-formed query).

@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
-import com.twitter.finagle.postgres.{Client, OK, Row, Spec}
+import com.twitter.finagle.postgres.{OK, PostgresClient, Row, Spec}
 import com.twitter.finagle.Postgres
 import com.twitter.util.{Await, Duration}
 
@@ -41,11 +41,12 @@ class IntegrationSpec extends Spec {
       Postgres.Client()
         .withCredentials(user, password)
         .database(dbname)
+        .withSessionPool.maxSize(1)
         .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
         .newRichClient(hostPort)
     }
 
-    def cleanDb(client: Client): Unit = {
+    def cleanDb(client: PostgresClient): Unit = {
       val dropQuery = client.executeUpdate("DROP TABLE IF EXISTS %s".format(IntegrationSpec.pgTestTable))
       val response = Await.result(dropQuery, queryTimeout)
 
@@ -65,7 +66,7 @@ class IntegrationSpec extends Spec {
       response2 must equal(OK(1))
     }
 
-    def insertSampleData(client: Client): Unit = {
+    def insertSampleData(client: PostgresClient): Unit = {
       val insertDataQuery = client.executeUpdate(
         """
         |INSERT INTO %s VALUES

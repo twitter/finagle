@@ -1,7 +1,7 @@
 package com.twitter.finagle.postgres.integration
 
 import com.twitter.finagle.Postgres
-import com.twitter.finagle.postgres.{Client, Spec}
+import com.twitter.finagle.postgres.Spec
 import com.twitter.util.{Await, Future}
 
 class TransactionSpec extends Spec {

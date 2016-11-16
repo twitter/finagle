@@ -6,10 +6,10 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 import com.twitter.finagle.postgres.messages.{DataRow, Field}
-import com.twitter.finagle.postgres.values.{Value, ValueDecoder}
+import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.util.Try
 import Try._
-import com.twitter.finagle.postgres.Client.TypeSpecifier
+import com.twitter.finagle.postgres.PostgresClient.TypeSpecifier
 import com.twitter.finagle.postgres.codec.NullValue
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -28,13 +28,30 @@ case class RowFormat(
   @inline final def defaultDecoder(index: Int) = receives.applyOrElse(recv(index), (_: String) => ValueDecoder.never)
 }
 
+trait Row {
+  def getOption[T](name: String)(implicit decoder: ValueDecoder[T]): Option[T]
+  def getOption[T](index: Int)(implicit decoder: ValueDecoder[T]): Option[T]
+  def get[T](name: String)(implicit decoder: ValueDecoder[T]): T
+  def get[T](index: Int)(implicit decoder: ValueDecoder[T]): T
+  def getTry[T](name: String)(implicit decoder: ValueDecoder[T]): Try[T]
+  def getTry[T](index: Int)(implicit decoder: ValueDecoder[T]): Try[T]
+  def getOrElse[T](name: String, default: => T)(implicit decoder: ValueDecoder[T]): T
+  def getOrElse[T](index: Int, default: => T)(implicit decoder: ValueDecoder[T]): T
+  def getAnyOption(name: String): Option[Any]
+  def getAnyOption(index: Int): Option[Any]
+}
+
+object Row {
+  def apply(values: Array[Option[ChannelBuffer]], rowFormat: RowFormat): Row = RowImpl(values, rowFormat)
+}
+
 /*
  * Convenience wrapper around a set of row values. Supports lookup by name.
  */
-case class Row(
+case class RowImpl(
   values: Array[Option[ChannelBuffer]],
   rowFormat: RowFormat
-) {
+) extends Row {
 
   final def getOption[T](name: String)(implicit decoder: ValueDecoder[T]): Option[T] =
     rowFormat.indexMap.get(name).flatMap(i => getOption[T](i))

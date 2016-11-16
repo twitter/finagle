@@ -4,18 +4,18 @@ import java.nio.charset.StandardCharsets
 import java.time._
 import java.time.temporal.{ChronoField, JulianFields}
 
-import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
+import com.twitter.finagle.postgres.{Generators, PostgresClient, ResultSet, Spec}
 import Generators._
 import com.twitter.finagle.Postgres
-import com.twitter.finagle.postgres.Client.TypeSpecifier
+import com.twitter.finagle.postgres.PostgresClient.TypeSpecifier
 import com.twitter.finagle.postgres.messages.{DataRow, Field}
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
+import Arbitrary.arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
-
 
   def test[T : Arbitrary](
     decoder: ValueDecoder[T],
@@ -25,7 +25,7 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
     toStr: T => String = (t: T) => t.toString,
     tester: (T, T) => Boolean = (a: T, b: T) => a == b,
     nonDefault: Boolean = false)(
-    implicit client: Client
+    implicit client: PostgresClient
   ) = {
     val recv = send.replace("send", "recv")
     implicit val dec = decoder
@@ -104,6 +104,7 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
       .database(dbname)
       .withCredentials(user, password)
       .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+      .withSessionPool.maxSize(1)
       .newRichClient(hostPort)
 
     "ValueDecoders" should {

@@ -5,7 +5,7 @@ import java.time.temporal.ChronoField
 
 import com.twitter.finagle.Postgres
 import com.twitter.finagle.postgres.values.{ValueDecoder, ValueEncoder}
-import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
+import com.twitter.finagle.postgres.{Generators, PostgresClient, ResultSet, Spec}
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
@@ -18,7 +18,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
     decoder: ValueDecoder[T])(
     typ: String,
     tester: (T, T) => Boolean = (a: T, b: T) => a == b)(
-    implicit client: Client,
+    implicit client: PostgresClient,
     manifest: Manifest[T],
     binaryParams: Boolean,
     valueEncoder: ValueEncoder[T]
@@ -58,6 +58,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       .withBinaryParams(binaryParams)
       .withBinaryResults(binaryResults)
       .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+      .withSessionPool.maxSize(1)
       .newRichClient(hostPort)
 
 
@@ -73,7 +74,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       "retrieve the available types from the remote DB" in {
         val types = Await.result(client.typeMap)
         assert(types.nonEmpty)
-        assert(types != Client.defaultTypes)
+        assert(types != PostgresClient.defaultTypes)
       }
     }
 
