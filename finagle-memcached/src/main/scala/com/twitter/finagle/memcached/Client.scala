@@ -2,6 +2,7 @@ package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{InetSocketAddress, SocketAddress}
+import _root_.java.nio.charset.StandardCharsets
 import com.twitter.bijection.Bijection
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
@@ -13,15 +14,14 @@ import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.service.{FailedService, ReqRep, ResponseClassifier, FailureAccrualFactory}
+import com.twitter.finagle.service.{FailedService, FailureAccrualFactory, ReqRep, ResponseClassifier}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Command => _, Function => _, _}
 import scala.collection.breakOut
 import scala.collection.{immutable, mutable}
-
 
 object Client {
   /**
@@ -92,12 +92,12 @@ case class GetResult private[memcached](
 }
 
 case class GetsResult(getResult: GetResult) {
-  def hits = getResult.hits
-  def misses = getResult.misses
-  def failures = getResult.failures
-  def values = getResult.values
-  lazy val valuesWithTokens = hits.mapValues { v => (v.value, v.casUnique.get) }
-  def ++(o: GetsResult) = GetsResult(getResult ++ o.getResult)
+  def hits: Map[String, Value] = getResult.hits
+  def misses: immutable.Set[String] = getResult.misses
+  def failures: Map[String, Throwable] = getResult.failures
+  def values: Map[String, Buf] = getResult.values
+  lazy val valuesWithTokens: Map[String, (Buf, Buf)] = hits.mapValues { v => (v.value, v.casUnique.get) }
+  def ++(o: GetsResult): GetsResult = GetsResult(getResult ++ o.getResult)
 }
 
 object GetResult {
@@ -133,28 +133,76 @@ object GetResult {
   }
 }
 
+/**
+ * The result of a check and set command.
+ *
+ * @see [[BaseClient.checkAndSet]]
+ */
 sealed trait CasResult
+
 object CasResult {
   case object Stored extends CasResult
   case object Exists extends CasResult
   case object NotFound extends CasResult
 }
 
+private object BaseClient {
+  private[this] val GetFn: Map[String, Any] => Option[Any] =
+    map => map.values.headOption
+
+  def getFn[T]: Map[String, T] => Option[T] =
+    GetFn.asInstanceOf[Map[String, T] => Option[T]]
+
+  def getsFn[T]: Map[String, (T, Buf)] => Option[(T, Buf)] =
+    GetFn.asInstanceOf[Map[String, (T, Buf)] => Option[(T, Buf)]]
+}
+
 /**
  * A friendly client to talk to a Memcached server.
+ *
+ * @see The Memcached
+ *      [[https://github.com/memcached/memcached/blob/master/doc/protocol.txt protocol docs]]
+ *      for details on the API.
+ *
+ * @define flags `flags` is an arbitrary integer that the server stores along with
+ *               the data and sends back when the item is retrieved.
+ *               Clients may use this as a bit field to store data-specific
+ *               information; this field is opaque to the server.
+ *
+ * @define expiry `expiry` is the expiration time for entries. If it is Time.epoch`,
+ *                `Time.Top`, `Time.Bottom` or `Time.Undefined` then the item
+ *                never expires, although it may be deleted from the cache to
+ *                make room for other items. This is also the case for values
+ *                where the number of seconds is larger than `Long.MaxValue`.
+ *                Otherwise, clients will not be able to retrieve this item after
+ *                the expiration time arrives (measured on the cache server).
+ *
  */
 trait BaseClient[T] {
+  import BaseClient._
   import ClientConstants._
+
+  /**
+   * Deserialize from the bytes in a `Buf` into the client's type, `T`.
+   */
   def bufferToType(a: Buf): T
 
   /**
    * Store a key. Override an existing value.
-   * @return true
+   *
+   * $flags
+   *
+   * $expiry
    */
   def set(key: String, flags: Int, expiry: Time, value: T): Future[Unit]
 
   /**
    * Store a key but only if it doesn't already exist on the server.
+   *
+   * $flags
+   *
+   * $expiry
+   *
    * @return true if stored, false if not stored
    */
   def add(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
@@ -162,6 +210,11 @@ trait BaseClient[T] {
   /**
    * Append bytes to the end of an existing key. If the key doesn't exist, the
    * operation has no effect.
+   *
+   * $flags
+   *
+   * $expiry
+   *
    * @return true if stored, false if not stored
    */
   def append(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
@@ -169,6 +222,11 @@ trait BaseClient[T] {
   /**
    * Prepend bytes to the beginning of an existing key. If the key doesn't
    * exist, the operation has no effect.
+   *
+   * $flags
+   *
+   * $expiry
+   *
    * @return true if stored, false if not stored
    */
   def prepend(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
@@ -176,6 +234,11 @@ trait BaseClient[T] {
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
+   *
+   * $flags
+   *
+   * $expiry
+   *
    * @return true if stored, false if not stored
    */
   def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
@@ -186,8 +249,12 @@ trait BaseClient[T] {
    * extracted from a `gets` command.  We treat the "cas unique" token
    * opaquely, but in reality it is a string-encoded u64.
    *
+   * $flags
+   *
+   * $expiry
+   *
    * @return true if replaced, false if not
-   * @note this is superceded by `checkAndSet` which returns a higher fidelity
+   * @note this is superceded by [[checkAndSet]] which returns a higher fidelity
    *       return value
    */
   @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
@@ -202,8 +269,10 @@ trait BaseClient[T] {
    * extracted from a `gets` command.  We treat the "cas unique" token
    * opaquely, but in reality it is a string-encoded u64.
    *
+   * Neither flags nor expiry are supplied.
+   *
    * @return true if replaced, false if not
-   * @note this is superceded by `checkAndSet` which returns a higher fidelity
+   * @note this is superceded by [[checkAndSet]] which returns a higher fidelity
    *       return value
    */
   @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
@@ -216,9 +285,15 @@ trait BaseClient[T] {
    * extracted from a `gets` command.  We treat the "cas unique" token
    * opaquely, but in reality it is a string-encoded u64.
    *
+   * $flags
+   *
+   * $expiry
+   *
    * @return [[Stored]] if the operation was successful, [[Exists]] if the
    *        operation failed because someone else had changed the value,
    *        or [[NotFound]] if the key was not found in the cache.
+   *
+   * @see [[gets]] and [[getsResult]] for retreiving the cas token.
    */
   def checkAndSet(
     key: String, flags: Int, expiry: Time, value: T, casUnique: Buf
@@ -231,36 +306,51 @@ trait BaseClient[T] {
    * token matches the one on the server, the value is replaced.  We treat the
    * "cas unique" token opaquely, but in reality it is a string-encoded u64.
    *
+   * Neither flags nor expiry are supplied.
+   *
    * @return [[Stored]] if the operation was successful, [[Exists]] if the
    *        operation failed because someone else had changed the value,
    *        or [[NotFound]] if the key was not found in the cache.
+   *
+   * @see [[gets]] and [[getsResult]] for retreiving the cas token.
    */
   def checkAndSet(key: String, value: T, casUnique: Buf): Future[CasResult] =
     checkAndSet(key, 0, Time.epoch, value, casUnique)
 
   /**
    * Get a key from the server.
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[gets]] if you need a "cas unique" token.
    */
-  def get(key: String): Future[Option[T]] = get(Seq(key)).map { _.values.headOption }
+  def get(key: String): Future[Option[T]] =
+    get(Seq(key)).map(getFn)
 
   /**
-   * Get a key from the server, with a "cas unique" token.  The token
+   * Get a key from the server along with a "cas unique" token.  The token
    * is treated opaquely by the memcache client but is in reality a
    * string-encoded u64.
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[get]] if you do not need a "cas unique" token.
+   * @see [[checkAndSet]] for using the token.
    */
   def gets(key: String): Future[Option[(T, Buf)]] =
-    gets(Seq(key)).map { _.values.headOption }
+    gets(Seq(key)).map(getsFn)
 
   /**
    * Get a set of keys from the server.
+   *
    * @return a Map[String, T] of all of the keys that the server had.
+   *
+   * @see [[gets]] if you need a "cas unique" token.
    */
   def get(keys: Iterable[String]): Future[Map[String, T]] = {
-    getResult(keys) flatMap { result =>
+    getResult(keys).flatMap { result =>
       if (result.failures.nonEmpty) {
         Future.exception(result.failures.values.head)
       } else {
-        Future.value(result.values.mapValues { bufferToType(_) })
+        Future.value(result.values.mapValues(bufferToType))
       }
     }
   }
@@ -272,6 +362,9 @@ trait BaseClient[T] {
    *
    * @return a Map[String, (T, Buf)] of all the
    * keys the server had, together with their "cas unique" token
+   *
+   * @see [[get]] if you do not need a "cas unique" token.
+   * @see [[checkAndSet]] for using the token.
    */
   def gets(keys: Iterable[String]): Future[Map[String, (T, Buf)]] = {
     getsResult(keys) flatMap { result =>
@@ -288,6 +381,8 @@ trait BaseClient[T] {
   /**
    * Get a set of keys from the server. Returns a Future[GetResult] that
    * encapsulates hits, misses and failures.
+   *
+   * @see [[getsResult]] if you need "cas unique" tokens.
    */
   def getResult(keys: Iterable[String]): Future[GetResult]
 
@@ -295,6 +390,9 @@ trait BaseClient[T] {
    * Get a set of keys from the server. Returns a Future[GetsResult] that
    * encapsulates hits, misses and failures. This variant includes the casToken
    * from memcached.
+   *
+   * @see [[getResult]] if you do not need "cas unique" tokens.
+   * @see [[checkAndSet]] for using the token.
    */
   def getsResult(keys: Iterable[String]): Future[GetsResult]
 
@@ -305,28 +403,58 @@ trait BaseClient[T] {
   def delete(key: String): Future[JBoolean]
 
   /**
-   * Increment a key. Interpret the value as an Long if it is parseable.
+   * Increment the `key` by `delta`.
+   *
+   * Interprets the stored value for `key` as a Long if it is parseable
+   * as a decimal representation of a 64-bit unsigned integer.
+   *
    * This operation has no effect if there is no value there already.
    */
   def incr(key: String, delta: Long): Future[Option[JLong]]
+
+  /**
+   * Increment the `key` by `1`.
+   *
+   * Interprets the stored value for `key` as a Long if it is parseable
+   * as a decimal representation of a 64-bit unsigned integer.
+   *
+   * This operation has no effect if there is no value there already.
+   */
   def incr(key: String): Future[Option[JLong]] = incr(key, 1L)
 
   /**
-   * Decrement a key. Interpret the value as an JLong if it is parseable.
+   * Decrement the `key` by `n`.
+   *
+   * Interprets the stored value for `key` as a Long if it is parseable
+   * as a decimal representation of a 64-bit unsigned integer.
+   *
    * This operation has no effect if there is no value there already.
    */
   def decr(key: String, delta: Long): Future[Option[JLong]]
+
+  /**
+   * Decrement the `key` by 1.
+   *
+   * Interprets the stored value for `key` as a Long if it is parseable
+   * as a decimal representation of a 64-bit unsigned integer.
+   *
+   * This operation has no effect if there is no value there already.
+   */
   def decr(key: String): Future[Option[JLong]] = decr(key, 1L)
 
   /**
    * Store a key. Override an existing values.
-   * @return true
+   *
+   * Neither flags nor expiry are supplied.
    */
   def set(key: String, value: T): Future[Unit] =
     set(key, 0, Time.epoch, value)
 
   /**
    * Store a key but only if it doesn't already exist on the server.
+   *
+   * Neither flags nor expiry are supplied.
+   *
    * @return true if stored, false if not stored
    */
   def add(key: String, value: T): Future[JBoolean] =
@@ -343,6 +471,9 @@ trait BaseClient[T] {
   /**
    * Prepend a set of bytes to the beginning of an existing key. If the key
    * doesn't exist, the operation has no effect.
+   *
+   * Neither flags nor expiry are supplied.
+   *
    * @return true if stored, false if not stored
    */
   def prepend(key: String, value: T): Future[JBoolean] =
@@ -351,23 +482,35 @@ trait BaseClient[T] {
   /**
    * Replace an item if it exists. If it doesn't exist, the operation has no
    * effect.
+   *
+   * Neither flags nor expiry are supplied.
+   *
    * @return true if stored, false if not stored
    */
   def replace(key: String, value: T): Future[JBoolean] = replace(key, 0, Time.epoch, value)
 
   /**
    * Send a quit command to the server. Alternative to release, for
-   * protocol compatability.
-   * @return none
+   * protocol compatibility.
    */
   def quit(): Future[Unit] = Future(release())
 
   /**
-   * Send a stats command with optional arguments to the server
+   * Send a stats command with optional arguments to the server.
    * @return a sequence of strings, each of which is a line of output
    */
   def stats(args: Option[String]): Future[Seq[String]]
+
+  /**
+   * Send a stats command with the given `args` to the server.
+   * @return a sequence of strings, each of which is a line of output
+   */
   def stats(args: String): Future[Seq[String]] = stats(Some(args))
+
+  /**
+   * Send a stats command to the server.
+   * @return a sequence of strings, each of which is a line of output
+   */
   def stats(): Future[Seq[String]] = stats(None)
 
   /**
@@ -377,7 +520,7 @@ trait BaseClient[T] {
 }
 
 trait Client extends BaseClient[Buf] {
-  def bufferToType(v: Buf) = v
+  def bufferToType(v: Buf): Buf = v
 
   def adapt[T](bijection: Bijection[Buf, T]): BaseClient[T] =
     new ClientAdaptor[T](this, bijection)
@@ -402,32 +545,43 @@ trait Client extends BaseClient[Buf] {
 trait ProxyClient extends Client {
   protected def proxyClient: Client
 
-  def getResult(keys: Iterable[String]) = proxyClient.getResult(keys)
+  def getResult(keys: Iterable[String]): Future[GetResult] = proxyClient.getResult(keys)
 
-  def getsResult(keys: Iterable[String]) = proxyClient.getsResult(keys)
+  def getsResult(keys: Iterable[String]): Future[GetsResult] = proxyClient.getsResult(keys)
 
-  def set(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.set(key, flags, expiry, value)
+  def set(key: String, flags: Int, expiry: Time, value: Buf): Future[Unit] =
+    proxyClient.set(key, flags, expiry, value)
 
-  def add(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.add(key, flags, expiry, value)
+  def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
+    proxyClient.add(key, flags, expiry, value)
 
-  def replace(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.replace(key, flags, expiry, value)
+  def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
+    proxyClient.replace(key, flags, expiry, value)
 
-  def append(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.append(key, flags, expiry, value)
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
+    proxyClient.append(key, flags, expiry, value)
 
-  def prepend(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.prepend(key, flags, expiry, value)
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
+    proxyClient.prepend(key, flags, expiry, value)
 
-  def incr(key: String, delta: Long) = proxyClient.incr(key, delta)
+  def incr(key: String, delta: Long): Future[Option[JLong]] = proxyClient.incr(key, delta)
 
-  def decr(key: String, delta: Long) = proxyClient.decr(key, delta)
+  def decr(key: String, delta: Long): Future[Option[JLong]] = proxyClient.decr(key, delta)
 
-  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+  def checkAndSet(
+    key: String,
+    flags: Int,
+    expiry: Time,
+    value: Buf,
+    casUnique: Buf
+  ): Future[CasResult] =
     proxyClient.checkAndSet(key, flags, expiry, value, casUnique)
 
-  def delete(key: String) = proxyClient.delete(key)
+  def delete(key: String): Future[JBoolean] = proxyClient.delete(key)
 
-  def stats(args: Option[String]) = proxyClient.stats(args)
+  def stats(args: Option[String]): Future[Seq[String]] = proxyClient.stats(args)
 
-  def release() { proxyClient.release() }
+  def release(): Unit = proxyClient.release()
 }
 
 private[memcached] object ClientConstants {
@@ -454,12 +608,12 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   import ClientConstants._
   import scala.collection.breakOut
 
-  protected def rawGet(command: RetrievalCommand) = {
+  protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
     val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
 
     service(command).map {
       case Values(values) =>
-        val hits: Map[String, Value] = values.map { case value =>
+        val hits: Map[String, Value] = values.map { value =>
           val Buf.Utf8(keyStr) = value.key
           (keyStr, value)
         }(breakOut)
@@ -489,7 +643,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     try {
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
       rawGet(Gets(keys)).map { GetsResult(_) }
-    }  catch {
+    } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For keys: " + keys))
     }
   }
@@ -622,7 +776,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           val key = line.key
           val values = line.values
           val Buf.Utf8(keyStr) = key
-          "%s %s".format(keyStr, values.map { case Buf.Utf8(str) => str } mkString (" "))
+          "%s %s".format(keyStr, values.map { case Buf.Utf8(str) => str }.mkString(" "))
         }
       }
       case Error(e) => Future.exception(e)
@@ -651,7 +805,7 @@ trait PartitionedClient extends Client {
     )
   }
 
-  def getResult(keys: Iterable[String]) = {
+  def getResult(keys: Iterable[String]): Future[GetResult] = {
     if (keys.nonEmpty) {
       withKeysGroupedByClient(keys) {
         _.getResult(_)
@@ -661,7 +815,7 @@ trait PartitionedClient extends Client {
     }
   }
 
-  def getsResult(keys: Iterable[String]) = {
+  def getsResult(keys: Iterable[String]): Future[GetsResult] = {
     if (keys.nonEmpty) {
       withKeysGroupedByClient(keys) {
          _.getsResult(_)
@@ -671,22 +825,28 @@ trait PartitionedClient extends Client {
     }
   }
 
-  def set(key: String, flags: Int, expiry: Time, value: Buf) =
+  def set(key: String, flags: Int, expiry: Time, value: Buf): Future[Unit] =
     clientOf(key).set(key, flags, expiry, value)
-  def add(key: String, flags: Int, expiry: Time, value: Buf) =
+  def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     clientOf(key).add(key, flags, expiry, value)
-  def append(key: String, flags: Int, expiry: Time, value: Buf) =
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     clientOf(key).append(key, flags, expiry, value)
-  def prepend(key: String, flags: Int, expiry: Time, value: Buf) =
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     clientOf(key).prepend(key, flags, expiry, value)
-  def replace(key: String, flags: Int, expiry: Time, value: Buf) =
+  def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     clientOf(key).replace(key, flags, expiry, value)
-  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+  def checkAndSet(
+    key: String,
+    flags: Int,
+    expiry: Time,
+    value: Buf,
+    casUnique: Buf
+  ): Future[CasResult] =
     clientOf(key).checkAndSet(key, flags, expiry, value, casUnique)
 
-  def delete(key: String)            = clientOf(key).delete(key)
-  def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
-  def decr(key: String, delta: Long) = clientOf(key).decr(key, delta)
+  def delete(key: String): Future[JBoolean] = clientOf(key).delete(key)
+  def incr(key: String, delta: Long): Future[Option[JLong]] = clientOf(key).incr(key, delta)
+  def decr(key: String, delta: Long): Future[Option[JLong]] = clientOf(key).decr(key, delta)
 
   def stats(args: Option[String]): Future[Seq[String]] =
     throw new UnsupportedOperationException("No logical way to perform stats without a key")
@@ -697,7 +857,7 @@ object PartitionedClient {
   def parseHostPortWeights(hostPortWeights: String): Seq[(String, Int, Int)] =
     hostPortWeights
       .split(Array(' ', ','))
-      .filter((_ != ""))
+      .filter(_ != "")
       .map(_.split(":"))
       .map {
         case Array(host)               => (host, 11211, 1)
@@ -711,14 +871,14 @@ abstract class KetamaClientKey {
 }
 object KetamaClientKey {
   private[memcached] case class HostPortBasedKey(host: String, port: Int, weight: Int) extends KetamaClientKey {
-    val identifier = if (port == 11211) host else host + ":" + port
+    val identifier: String = if (port == 11211) host else host + ":" + port
   }
   private[memcached] case class CustomKey(identifier: String) extends KetamaClientKey
 
   def apply(host: String, port: Int, weight: Int): KetamaClientKey =
     HostPortBasedKey(host, port, weight)
 
-  def apply(id: String) = CustomKey(id)
+  def apply(id: String): CustomKey = CustomKey(id)
 
   def fromCacheNode(node: CacheNode): KetamaClientKey = node.key match {
     case Some(id) => KetamaClientKey(id)
@@ -745,7 +905,7 @@ private[finagle] object KetamaFailureAccrualFactory {
   ): Stackable[ServiceFactory[Req, Rep]] =
     new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
       import FailureAccrualFactory.Param
-      val role = FailureAccrualFactory.role
+      val role: Stack.Role = FailureAccrualFactory.role
       val description: String = "Memcached ketama failure accrual"
       override def parameters: Seq[Stack.Param[_]] = Seq(
         implicitly[Stack.Param[param.Stats]],
@@ -757,7 +917,7 @@ private[finagle] object KetamaFailureAccrualFactory {
         implicitly[Stack.Param[Transporter.EndpointAddr]]
       )
 
-      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) =
+      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
         params[FailureAccrualFactory.Param] match {
             case Param.Configured(policy) =>
               val Memcached.param.EjectFailedHost(ejectFailedHost) =
@@ -947,7 +1107,7 @@ private[finagle] class KetamaPartitionedClient(
   }
 
   override def clientOf(key: String): Client = {
-    val bytes = key.getBytes(Charsets.Utf8)
+    val bytes = key.getBytes(StandardCharsets.UTF_8)
     val hash = keyHasher.hashKey(bytes)
     currentDistributor.nodeForHash(hash)
   }
@@ -1194,22 +1354,22 @@ case class KetamaClientBuilder private[memcached](
 
 object KetamaClientBuilder {
   def apply(): KetamaClientBuilder = KetamaClientBuilder(Group.empty, Some("ketama"), None)
-  def get() = apply()
+  def get(): KetamaClientBuilder = apply()
 }
 
 /**
  * Ruby memcache-client (MemCache) compatible client.
  */
 class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
-  protected[memcached] def clientOf(key: String) = {
-    val bytes = key.getBytes(Charsets.Utf8)
+  protected[memcached] def clientOf(key: String): Client = {
+    val bytes = key.getBytes(StandardCharsets.UTF_8)
     val hash = (KeyHasher.CRC32_ITU.hashKey(bytes) >> 16) & 0x7fff
     val index = hash % clients.size
     clients(index.toInt)
   }
 
-  def release() {
-    clients foreach { _.release() }
+  def release(): Unit = {
+    clients.foreach { _.release() }
   }
 }
 
@@ -1251,15 +1411,15 @@ case class RubyMemCacheClientBuilder(
  */
 class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher)
   extends PartitionedClient {
-  protected[memcached] def clientOf(key: String) = {
+  protected[memcached] def clientOf(key: String): Client = {
     // See mmc_hash() in memcache_standard_hash.c
     val hash = (keyHasher.hashKey(key.getBytes) >> 16) & 0x7fff
-    val index = hash % clients.size
+    val index = hash % clients.length
     clients(index.toInt)
   }
 
-  def release() {
-    clients foreach { _.release() }
+  def release(): Unit = {
+    clients.foreach { _.release() }
   }
 }
 
@@ -1288,15 +1448,15 @@ case class PHPMemCacheClientBuilder(
   def build(): PartitionedClient = {
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
-    val clients = _nodes.map { case (hostname, port, weight) =>
+    val clients = _nodes.flatMap { case (hostname, port, weight) =>
       val client = Client(builder.hosts(hostname + ":" + port).codec(text.Memcached()).build())
       for (i <- (1 to weight)) yield client
-    }.flatten.toArray
+    }.toArray
     new PHPMemCacheClient(clients, keyHasher)
   }
 }
 
 object PHPMemCacheClientBuilder {
   def apply(): PHPMemCacheClientBuilder = PHPMemCacheClientBuilder(Nil, Some("crc32-itu"), None)
-  def get() = apply()
+  def get(): PHPMemCacheClientBuilder = apply()
 }
