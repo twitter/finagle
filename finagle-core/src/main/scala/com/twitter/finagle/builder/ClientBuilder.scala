@@ -117,11 +117,11 @@ object ClientConfig {
     implicit val param = Stack.Param(DestName(Name.empty))
   }
 
-  private[finagle] case class GlobalTimeout(timeout: Duration) {
+  private[builder] case class GlobalTimeout(timeout: Duration) {
     def mk(): (GlobalTimeout, Stack.Param[GlobalTimeout]) =
       (this, GlobalTimeout.param)
   }
-  private[finagle] object GlobalTimeout {
+  private[builder] object GlobalTimeout {
     implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
@@ -1436,7 +1436,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
  * A [[com.twitter.finagle.client.StackClient]] which adds the
  * filters historically included in `ClientBuilder` clients.
  */
-private case class ClientBuilderClient[Req, Rep](
+private[builder] case class ClientBuilderClient[Req, Rep](
     client: StackClient[Req, Rep])
   extends StackClient[Req, Rep] {
 
@@ -1452,11 +1452,11 @@ private case class ClientBuilderClient[Req, Rep](
     ClientBuilderClient.newService(client, dest, label)
 }
 
-private object ClientBuilderClient {
+private[finagle] object ClientBuilderClient {
   import ClientConfig._
   import com.twitter.finagle.param._
 
-  private class StatsFilterModule[Req, Rep]
+  private[builder] class StatsFilterModule[Req, Rep]
     extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
     val role: Stack.Role = Stack.Role("ClientBuilder StatsFilter")
     val description: String =
@@ -1475,8 +1475,9 @@ private object ClientBuilderClient {
     }
   }
 
-  private class GlobalTimeoutModule[Req, Rep]
+  private[builder] class GlobalTimeoutModule[Req, Rep]
     extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
+    /** See [[TimeoutFilter.totalTimeoutRole]]. */
     val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
     val description: String = "Application-configured global timeout"
 
@@ -1486,8 +1487,6 @@ private object ClientBuilderClient {
       next: ServiceFactory[Req, Rep]
     ): ServiceFactory[Req, Rep] = {
       val timeout = globalTimeoutP.timeout
-
-
       if (!timeout.isFinite || timeout <= Duration.Zero) next
       else {
         val filter = new TimeoutFilter[Req, Rep](
@@ -1500,7 +1499,7 @@ private object ClientBuilderClient {
     }
   }
 
-  private class ExceptionSourceFilterModule[Req, Rep]
+  private[builder] class ExceptionSourceFilterModule[Req, Rep]
     extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
     val role: Stack.Role = Stack.Role("ClientBuilder ExceptionSourceFilter")
     val description: String = "Exception source filter"
@@ -1516,7 +1515,7 @@ private object ClientBuilderClient {
     }
   }
 
-  def newClient[Req, Rep](
+  private[builder] def newClient[Req, Rep](
     client: StackBasedClient[Req, Rep],
     dest: Name,
     label: String
@@ -1547,7 +1546,7 @@ private object ClientBuilderClient {
     }
   }
 
-  def newService[Req, Rep](
+  private[builder] def newService[Req, Rep](
     client0: StackBasedClient[Req, Rep],
     dest: Name,
     label: String

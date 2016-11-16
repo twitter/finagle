@@ -2,7 +2,6 @@ package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.ClientConfig
 import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.service.{Retries, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
@@ -30,13 +29,6 @@ class DynamicTimeoutTest extends FunSuite
       .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
   }
 
-  private val totalStack: Stack[ServiceFactory[Int, Int]] = {
-    val svc = mkSvc()
-    val svcFactory = ServiceFactory.const(svc)
-    DynamicTimeout.totalModule[Int, Int]
-      .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
-  }
-
   private val perReqExn = classOf[IndividualRequestTimeoutException]
 
   private val totalExn = classOf[GlobalRequestTimeoutException]
@@ -54,7 +46,7 @@ class DynamicTimeoutTest extends FunSuite
 
   private def totalParams(timeout: Duration): Stack.Params = {
     Stack.Params.empty +
-      ClientConfig.GlobalTimeout(timeout) +
+      TimeoutFilter.TotalTimeout(timeout) +
       TimeoutFilter.Param(timeout) +
       param.Timer(timer) +
       param.Stats(NullStatsReceiver)
@@ -94,9 +86,9 @@ class DynamicTimeoutTest extends FunSuite
     }
   }
 
-  test("total module uses default timeout when key not set") {
+  test("totalFilter uses default timeout when key not set") {
     val params = totalParams(4.seconds)
-    val svc = Await.result(totalStack.make(params).apply(ClientConnection.nil), 5.seconds)
+    val svc = DynamicTimeout.totalFilter(params).andThen(mkSvc())
 
     Time.withCurrentTimeFrozen { tc =>
       val res = svc(1)
@@ -116,9 +108,9 @@ class DynamicTimeoutTest extends FunSuite
     }
   }
 
-  test("total module uses key's timeout when set") {
+  test("totalFilter uses key's timeout when set") {
     val params = totalParams(4.seconds)
-    val svc = Await.result(totalStack.make(params).apply(ClientConnection.nil), 5.seconds)
+    val svc = DynamicTimeout.totalFilter(params).andThen(mkSvc())
 
     Time.withCurrentTimeFrozen { tc =>
       DynamicTimeout.letTotalTimeout(8.seconds) {
@@ -142,9 +134,9 @@ class DynamicTimeoutTest extends FunSuite
     }
   }
 
-  test("total module no timeout used when timeouts are not finite") {
+  test("totalFilter no timeout used when timeouts are not finite") {
     val params = totalParams(4.seconds)
-    val svc = Await.result(totalStack.make(params).apply(ClientConnection.nil), 5.seconds)
+    val svc = DynamicTimeout.totalFilter(params).andThen(mkSvc())
 
     Time.withCurrentTimeFrozen { tc =>
       DynamicTimeout.letTotalTimeout(Duration.Top) {
@@ -206,9 +198,9 @@ class DynamicTimeoutTest extends FunSuite
       Stack.Leaf(Stack.Role("test"), svcFactory))
     stackBuilder.push(DynamicTimeout.perRequestModule)
     stackBuilder.push(Retries.moduleWithRetryPolicy)
-    stackBuilder.push(DynamicTimeout.totalModule)
-    val svc = Await.result(
+    val stackSvc = Await.result(
       stackBuilder.result.make(params).apply(ClientConnection.nil), 5.seconds)
+    val svc = DynamicTimeout.totalFilter(params).andThen(stackSvc)
 
     Time.withCurrentTimeFrozen { tc =>
       DynamicTimeout.letTotalTimeout(150.millis) {

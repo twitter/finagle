@@ -172,9 +172,21 @@ object RetryPolicy extends JavaSingleton {
     case Throw(_: ChannelClosedException) => true
   }
 
-  val Never: RetryPolicy[Try[Nothing]] = new RetryPolicy[Try[Nothing]] {
-    def apply(t: Try[Nothing]): Option[(Duration, Nothing)] = None
+  /**
+   * A [[RetryPolicy]] that never retries.
+   */
+  val none: RetryPolicy[Any] = new RetryPolicy[Any] {
+    def apply(t: Any): Option[(Duration, RetryPolicy[Any])] = None
+
+    override def toString: String = "RetryPolicy.none"
   }
+
+  /**
+   * A [[RetryPolicy]] that never retries.
+   *
+   * @see [[none]] for a more generally applicable version.
+   */
+  val Never: RetryPolicy[Try[Nothing]] = none
 
   /**
    * Converts a `RetryPolicy[Try[Nothing]]` to a `RetryPolicy[(Req, Try[Rep])]`
@@ -186,7 +198,7 @@ object RetryPolicy extends JavaSingleton {
     new RetryPolicy[(Req, Try[Rep])] {
       def apply(input: (Req, Try[Rep])): Option[(Duration, RetryPolicy[(Req, Try[Rep])])] = input match {
         case (_, t@Throw(_)) =>
-          policy(t.asInstanceOf[Throw[Nothing]]) match {
+          policy(t.cast[Nothing]) match {
             case Some((howlong, nextPolicy)) => Some((howlong, convertExceptionPolicy(nextPolicy)))
             case None => None
           }

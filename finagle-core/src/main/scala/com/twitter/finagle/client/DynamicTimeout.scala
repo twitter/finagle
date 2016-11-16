@@ -1,7 +1,6 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.builder.ClientConfig
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -46,7 +45,7 @@ private[finagle] object DynamicTimeout {
 
   /**
    * Sets a total request timeout, scoped to `f`. It only works in conjunction
-   * with a client using the [[totalModule]] installed in its stack.
+   * with a client using [[totalFilter]].
    *
    * This applies to the total request time, including retries.
    *
@@ -85,7 +84,7 @@ private[finagle] object DynamicTimeout {
    *
    * Note that any [[LatencyCompensation]] is added to timeouts.
    *
-   * @see [[totalModule]] for a total timeout including all retries.
+   * @see [[totalFilter]] for a total timeout including all retries.
    * @see [[TimeoutFilter]]
    * @see [[LatencyCompensation]]
    */
@@ -116,9 +115,9 @@ private[finagle] object DynamicTimeout {
     }
 
   /**
-   * A client module that produces a [[TimeoutFilter]] for the stack,
-   * which allows for dynamic total timeouts. These timeouts should
-   * encompass the time included in retry requests.
+   * Produces a [[Filter]] which allows for dynamic total timeouts
+   * from a set of [[Stack.Params]].
+   * These timeouts should encompass the time included in retry requests.
    *
    * This has a similar purpose to using a
    * [[com.twitter.finagle.builder.ClientBuilder.timeout]], while
@@ -130,30 +129,17 @@ private[finagle] object DynamicTimeout {
    * @see [[TimeoutFilter]]
    * @see [[LatencyCompensation]]
    */
-  def totalModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
-    new Stack.Module3[
-      ClientConfig.GlobalTimeout,
-      param.Timer,
-      LatencyCompensation.Compensation,
-      ServiceFactory[Req, Rep]] {
-
-      val role: Stack.Role = TimeoutFilter.role
-      val description: String =
-        "Apply a dynamic timeout-derived deadline to requests, including retries"
-
-      def make(
-        defaultTimeout: ClientConfig.GlobalTimeout,
-        timer: param.Timer,
-        compensation: LatencyCompensation.Compensation,
-        next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = {
-        val filter = new TimeoutFilter[Req, Rep](
-          timeoutFn(TotalKey, defaultTimeout.timeout, compensation.howlong),
-          duration => new GlobalRequestTimeoutException(duration),
-          timer.timer,
-          NullStatsReceiver)
-        filter.andThen(next)
-      }
-    }
+  private[client] def totalFilter[Req, Rep](
+    params: Stack.Params
+  ): Filter[Req, Rep, Req, Rep] = {
+    val defaultTimeout = params[TimeoutFilter.TotalTimeout].timeout
+    val compensation = params[LatencyCompensation.Compensation].howlong
+    val timer = params[param.Timer].timer
+    new TimeoutFilter[Req, Rep](
+      timeoutFn(TotalKey, defaultTimeout, compensation),
+      duration => new GlobalRequestTimeoutException(duration),
+      timer,
+      NullStatsReceiver)
   }
+
 }

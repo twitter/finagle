@@ -547,6 +547,13 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       }
     }
 
+  /**
+   * @inheritdoc
+   *
+   * @param label0 if an empty String is provided, then the label
+   *               from the [[Label]] [[Stack.Params]] is used.
+   *               If that is also an empty String, then `dest` is used.
+   */
   def newClient(dest: Name, label0: String): ServiceFactory[Req, Rep] = {
     val Stats(stats) = params[Stats]
     val Label(label1) = params[Label]
@@ -554,9 +561,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     // For historical reasons, we have two sources for identifying
     // a client. The most recently set `label0` takes precedence.
     val clientLabel = (label0, label1) match {
-      case ("", "") => Showable.show(dest)
-      case ("", l1) => l1
-      case (l0, l1) => l0
+      case (Label.Default, Label.Default) => Showable.show(dest)
+      case (Label.Default, l1) => l1
+      case _ => label0
     }
 
     val clientStack = stack ++ (endpointer +: nilStack)

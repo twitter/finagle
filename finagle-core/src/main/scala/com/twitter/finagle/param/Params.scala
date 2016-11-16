@@ -13,7 +13,9 @@ case class Label(label: String) {
     (this, Label.param)
 }
 object Label {
-  implicit val param = Stack.Param(Label(""))
+  private[finagle] val Default: String = ""
+
+  implicit val param = Stack.Param(Label(Default))
 }
 
 /**

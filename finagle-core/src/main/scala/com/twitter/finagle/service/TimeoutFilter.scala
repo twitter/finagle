@@ -11,7 +11,15 @@ import com.twitter.util.{Duration, Future, Timer}
 object TimeoutFilter {
   val TimeoutAnnotation: String = "finagle.timeout"
 
+  /**
+   * Used for a per request timeout.
+   */
   val role: Stack.Role = Stack.Role("RequestTimeout")
+
+  /**
+   * Used for a total timeout for requests, including retries when applicable.
+   */
+  val totalTimeoutRole: Stack.Role = Stack.Role("Total Timeout")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -24,6 +32,20 @@ object TimeoutFilter {
   object Param {
     implicit val param: Stack.Param[TimeoutFilter.Param] =
       Stack.Param(Param(Duration.Top))
+  }
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.service.TimeoutFilter]] module when used for
+   * a total timeout of a logical request, including retries.
+   */
+  private[finagle] case class TotalTimeout(timeout: Duration) {
+    def mk(): (TotalTimeout, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  private[finagle] object TotalTimeout {
+    implicit val param: Stack.Param[TotalTimeout] =
+      Stack.Param(TotalTimeout(Duration.Top))
   }
 
   /**
