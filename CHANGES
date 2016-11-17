@@ -95,6 +95,10 @@ Breaking API Changes
   * finagle-http: HttpMuxer now takes in a Seq[Route] instead of a
     Seq[(String, Service[Request, Response])]. ``RB_ID=886829``
 
+  * finagle-http: As part of the first step towards restructuring Finagle HTTP modules
+    required for Netty 4 adoption, HTTP params are moved from the inner object `c.t.f.Http.param`
+    into their own package `c.t.f.http.param`. ``RB_ID=885155``
+
   * finagle-redis: A couple of methods had to be renamed (and return type changed) to
     unblock Netty 4 adoption. ``RB_ID=882622``
 
@@ -113,9 +117,12 @@ Breaking API Changes
 
     - The encoding machinery was restructured to eliminate duplicated and dead code.
 
-  * finagle-http: As part of the first step towards restructuring Finagle HTTP modules
-    required for Netty 4 adoption, HTTP params are moved from the inner object `c.t.f.Http.param`
-    into their own package `c.t.f.http.param`.  ``RB_ID=885155``
+  * finagle-thrift: Removed deprecated `ThriftRichClient.newServiceIface` methods
+    which did not take a label. Use the versions that take a String label.
+    ``RB_ID=891004``
+
+  * finagle-thrift: Removed deprecated `ThriftRichClient.newIface` methods based
+    on `Groups`. Use the versions that a `dest` or `Name`. ``RB_ID=891004``
 
   * finagle-thriftmux: Removed deprecated classes `ThriftMuxClient`, `ThriftMuxClientLike`,
     `ThriftMuxServer`, and `ThriftMuxServerLike`. ``RB_ID=880924``

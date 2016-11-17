@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
+import com.twitter.finagle.{Address, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
@@ -162,7 +162,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .serve(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         ifaceToService(impl, protocolFactory))
-    val client = Thrift.client.newIface[B.ServiceIface](server)
+    val client = Thrift.client.newIface[B.ServiceIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     intercept[org.apache.thrift.TApplicationException] {
       Await.result(client.add(1, 2), 10.seconds)
@@ -309,7 +310,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
           case _ =>
             Ssl.clientWithoutCertificateValidation()
         })))
-        .newIface[B.ServiceIface](server)
+        .newIface[B.ServiceIface](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client")
 
 
     val sr = new InMemoryStatsReceiver()
@@ -671,7 +674,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withProtocolFactory(pf)
       .withClientId(ClientId("aClient"))
       .withNoAttemptTTwitterUpgrade
-      .newIface[B.ServiceIface](server)
+      .newIface[B.ServiceIface](
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client")
 
     assert(Await.result(client.someway(), timeout = 100.millis) == null)
     assert(sr.stats.get(Seq("codec_connection_preparation_latency_ms")) == None)

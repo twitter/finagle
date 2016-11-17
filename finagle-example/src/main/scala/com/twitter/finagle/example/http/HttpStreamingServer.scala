@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncStream
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Http, Service}
-import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Await, Future, JavaTimer}
 import scala.util.Random
 
@@ -29,7 +29,7 @@ object HttpStreamingServer {
       // Allow the head of the stream to be collected.
       messages.foreach(_ => messages = messages.drop(1))
 
-      def apply(request: Request) = {
+      def apply(request: Request): Future[Response] = {
         val writable = Reader.writable()
         // Start writing thread.
         messages.foreachF(writable.write)

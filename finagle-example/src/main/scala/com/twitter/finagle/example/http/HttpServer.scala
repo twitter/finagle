@@ -29,7 +29,7 @@ object HttpServer {
             Status.InternalServerError
         }
         val errorResponse = Response(Version.Http11, statusCode)
-        errorResponse.contentString = error.getStackTraceString
+        errorResponse.contentString = error.getStackTrace.mkString("\n")
 
         errorResponse
       }

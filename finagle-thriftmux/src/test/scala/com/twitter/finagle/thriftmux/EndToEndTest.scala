@@ -209,7 +209,8 @@ class EndToEndTest extends FunSuite
       new TestService.FutureIface {
         def query(x: String) = throw new Exception("sad panda")
       })
-    val client = Thrift.client.newIface[TestService.FutureIface](server)
+    val client = Thrift.client.newIface[TestService.FutureIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "aclient")
     val thrown = intercept[TApplicationException] { await(client.query("ok")) }
     assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
 
@@ -377,7 +378,8 @@ class EndToEndTest extends FunSuite
       new TestService.FutureIface {
         def query(x: String) = throw new Exception("sad panda")
       })
-    val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
+    val client = OldPlainThriftClient.newIface[TestService.FutureIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "aclient")
     val thrown = intercept[TApplicationException] { await(client.query("ok")) }
     assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
   }
@@ -760,8 +762,10 @@ class EndToEndTest extends FunSuite
       }
 
       // non-labeled client inherits destination as label
+      val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
       val sr1 = new InMemoryStatsReceiver
-      assertStats(server.toString, sr1, base(sr1).newIface[TestService.FutureIface](server))
+      assertStats(name.toString, sr1, base(sr1).newIface[TestService.FutureIface](
+        name, ""))
 
       // labeled via configured
       val sr2 = new InMemoryStatsReceiver

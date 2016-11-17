@@ -1,7 +1,5 @@
 package com.twitter.finagle.example.thrift
 
-import java.net.{InetAddress, InetSocketAddress}
-
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.example.thriftscala._
@@ -41,7 +39,7 @@ object ThriftServiceIfaceExample {
 
     //#thriftclientapi
     val clientServiceIface: LoggerService.ServiceIface =
-      Thrift.client.newServiceIface[LoggerService.ServiceIface]("localhost:1234")
+      Thrift.client.newServiceIface[LoggerService.ServiceIface]("localhost:1234", "thrift_client")
     //#thriftclientapi
 
     //#thriftclientapi-call

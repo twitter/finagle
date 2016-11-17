@@ -271,7 +271,7 @@ private[twitter] object ThriftUtil {
  * you can construct a client interface with a Finagle Service per Thrift method:
  *
  * {{{
- *   val loggerService = Thrift.client.newServiceIface[Logger.ServiceIface]("localhost:8000")
+ *   val loggerService = Thrift.client.newServiceIface[Logger.ServiceIface]("localhost:8000", "client_label")
  *   val response = loggerService.log(Logger.Log.Args("log message", 1))
  * }}}
  */
@@ -332,24 +332,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
-  def newIface[Iface: ClassTag](group: Group[SocketAddress]): Iface = {
-    val cls = implicitly[ClassTag[Iface]].runtimeClass
-    newIface[Iface](group, cls)
-  }
-
-  /**
-   * $clientUse
-   */
-  @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
-  def newIface[Iface](group: Group[SocketAddress], cls: Class[_]): Iface = group match {
-    case LabelledGroup(g, label) => newIface(Name.fromGroup(g), label, cls)
-    case _ => newIface(Name.fromGroup(group), "", cls)
-  }
-
-  /**
-   * $clientUse
-   */
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
     val underlying = newService(name, label)
     val clientLabel = (label, defaultClientName) match {
@@ -395,22 +377,6 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     val scopedStats = stats.scope(statsLabel)
     builder.newServiceIface(thriftService, protocolFactory, scopedStats)
   }
-
-  /**
-   * $serviceIface
-   */
-  @deprecated("Must provide service label", "2015-10-26")
-  def newServiceIface[ServiceIface](dest: String)(
-    implicit builder: ServiceIfaceBuilder[ServiceIface]
-  ): ServiceIface = newServiceIface(dest, "")
-
-  /**
-   * $serviceIface
-   */
-  @deprecated("Must provide service label", "2015-10-26")
-  def newServiceIface[ServiceIface](dest: Name)(
-    implicit builder: ServiceIfaceBuilder[ServiceIface]
-  ): ServiceIface = newServiceIface(dest, "")
 
   /**
    * Converts from a Service interface (`ServiceIface`) to the

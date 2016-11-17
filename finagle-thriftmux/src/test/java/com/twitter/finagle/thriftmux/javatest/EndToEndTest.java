@@ -2,11 +2,16 @@ package com.twitter.finagle.thriftmux.javatest;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collections;
+
+import scala.collection.JavaConversions;
 
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.junit.Test;
 
+import com.twitter.finagle.Addresses;
 import com.twitter.finagle.ListeningServer;
+import com.twitter.finagle.Name$;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.Stack;
 import com.twitter.finagle.ThriftMux;
@@ -36,7 +41,12 @@ public class EndToEndTest {
       });
 
     TestService.FutureIface client =
-      ThriftMux.client().newIface(server, TestService.FutureIface.class);
+      ThriftMux.client().newIface(
+          Name$.MODULE$.bound(JavaConversions.asScalaBuffer(
+              Collections.singletonList(
+                Addresses.newInetAddress((InetSocketAddress) server.boundAddress())))),
+          "a_client",
+          TestService.FutureIface.class);
     assertEquals(Await.result(client.query("ok")), "okok");
   }
 

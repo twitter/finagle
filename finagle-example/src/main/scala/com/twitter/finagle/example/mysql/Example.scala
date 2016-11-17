@@ -6,15 +6,13 @@ import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
 import java.net.InetSocketAddress
 import java.sql.Date
-import java.util.logging.{Logger, Level}
 
 case class SwimmingRecord(
-  event: String,
-  time: Float,
-  name: String,
-  nationality: String,
-  date: Date
-)
+    event: String,
+    time: Float,
+    name: String,
+    nationality: String,
+    date: Date)
 
 object SwimmingRecord {
   val createTableSQL =
@@ -56,11 +54,11 @@ object Example extends App {
       r <- selectQuery(client)
     } yield r
 
-    resultFuture onSuccess { seq =>
-      seq foreach println
-    } onFailure { e =>
+    resultFuture.onSuccess { seq =>
+      seq.foreach(println)
+    }.onFailure { e =>
       println(e)
-    } ensure {
+    }.ensure {
       client.query("DROP TABLE IF EXISTS `finagle-mysql-example`") ensure {
         client.close()
       }
