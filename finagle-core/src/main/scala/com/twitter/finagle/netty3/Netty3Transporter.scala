@@ -10,7 +10,7 @@ import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.netty3.Netty3Transporter.{ChannelFactory, TransportFactory}
 import com.twitter.finagle.param.{Label, Logger}
 import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
-import com.twitter.finagle.ssl.{SessionVerifier, Engine}
+import com.twitter.finagle.ssl.SessionVerifier
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
@@ -145,18 +145,6 @@ object Netty3Transporter {
     }
   }
 }
-
-/**
- * Netty3 TLS configuration.
- *
- * @param newEngine Creates a new SSL Engine
- *
- * @param verifyHost If specified, checks the session hostname
- * against the given value.
- */
-case class Netty3TransporterTLSConfig(
-    newEngine: SocketAddress => Engine,
-    verifyHost: Option[String])
 
 /**
  * A [[ChannelFutureListener]] instance that fires "channelClosed" upstream event to the
@@ -301,18 +289,16 @@ class Netty3Transporter[In, Out](
     params: Stack.Params,
     addr: SocketAddress
   ): Unit = {
-    val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
-    val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
-    val tlsConfig: Option[Netty3TransporterTLSConfig] =
-      tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) }
+    val Transport.TLSClientEngine(tlsOption) = params[Transport.TLSClientEngine]
 
-    for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {
+    for (tls <- tlsOption)  {
       import org.jboss.netty.handler.ssl._
+      val Transporter.TLSHostname(hostnameOption) = params[Transporter.TLSHostname]
 
-      val engine = newEngine(addr)
+      val engine = tls(addr)
       engine.self.setUseClientMode(true)
 
-      val verifier = verifyHost
+      val verifier = hostnameOption
         .map(SessionVerifier.hostname)
         .getOrElse(SessionVerifier.AlwaysValid)
 

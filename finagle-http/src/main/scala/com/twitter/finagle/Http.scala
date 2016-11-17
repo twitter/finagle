@@ -192,10 +192,6 @@ object Http extends Client[Request, Response] with HttpRichClient
         params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 
-    def withTls(cfg: Netty3TransporterTLSConfig): Client =
-      configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
-      .configured(Transporter.TLSHostname(cfg.verifyHost))
-
     def withTls(hostname: String): Client = withTransport.tls(hostname)
 
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
