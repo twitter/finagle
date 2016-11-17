@@ -89,8 +89,8 @@ class MethodBuilderTest
     val methodBuilder = MethodBuilder.from("dest_paradise", stackClient)
 
     val fourSecs = methodBuilder.newService("4_secs")
-    val twoSecs = methodBuilder.withTimeoutTotal(2.seconds).newService("2_secs")
-    val sixSecs = methodBuilder.withTimeoutTotal(6.seconds).newService("6_secs")
+    val twoSecs = methodBuilder.withTimeout.total(2.seconds).newService("2_secs")
+    val sixSecs = methodBuilder.withTimeout.total(6.seconds).newService("6_secs")
 
     // no method-specific override, then a timeout is only supported
     // if the stack originally has the module
@@ -147,7 +147,7 @@ class MethodBuilderTest
     MethodBuilder.from("retry_it", stackClient)
   }
 
-  test("withRetriesForClassifier") {
+  test("retries.forClassifier") {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()
     val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
@@ -156,7 +156,7 @@ class MethodBuilderTest
         ResponseClass.RetryableFailure
     }
     val client = methodBuilder
-      .withRetriesForClassifier(classifier)
+      .withRetry.forClassifier(classifier)
       .newService("client")
 
     // the client will retry once
@@ -166,17 +166,17 @@ class MethodBuilderTest
     assert(stats.stat("client", "retries")() == Seq(1))
   }
 
-  test("withRetriesForResponse") {
+  test("retries.forResponse") {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()
     val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
     val defaults = methodBuilder.newService("defaults")
 
-    val unoOrDos = methodBuilder.withRetriesForResponse {
+    val unoOrDos = methodBuilder.withRetry.forResponse {
       case Throw(e) if Seq("uno", "dos").contains(e.getMessage) => true
     }.newService("uno_or_dos")
 
-    val unoOnly = methodBuilder.withRetriesForResponse {
+    val unoOnly = methodBuilder.withRetry.forResponse {
       case Throw(e) if "uno" == e.getMessage => true
     }.newService("uno_only")
 
@@ -201,22 +201,22 @@ class MethodBuilderTest
     retrySvc.reqNum = 0
   }
 
-  test("withRetriesForReqRep") {
+  test("retries.forRequestResponse") {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()
     val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
 
-    val reqIsOne = methodBuilder.withRetriesForReqRep {
+    val reqIsOne = methodBuilder.withRetry.forRequestResponse {
       case (req, _) if req == 1 => true
     }.newService("req_is_one")
 
-    val reqIsOneOrRepIsUno = methodBuilder.withRetriesForReqRep {
+    val reqIsOneOrRepIsUno = methodBuilder.withRetry.forRequestResponse {
       case (req, _) if req == 1 => true
       case (_, Throw(t)) if "uno" == t.getMessage => true
     }.newService("req_is_one_or_rep_is_uno")
 
     // this will keep retrying until we hit the max retries allowed
-    assert(2 == MethodBuilder.RetryPolicyMaxRetries)
+    assert(2 == MethodBuilderRetry.MaxRetries)
     assert(3 == Await.result(reqIsOne(1), 5.seconds))
     assert(stats.stat("req_is_one", "retries")() == Seq(2))
     retrySvc.reqNum = 0
@@ -242,7 +242,7 @@ class MethodBuilderTest
       Future.exception(Failure.rejected("nuh uh"))
     }
     val methodBuilder = retryMethodBuilder(svc, stats)
-    val client = methodBuilder.withRetriesForResponse {
+    val client = methodBuilder.withRetry.forResponse {
       case Throw(f: Failure) if f.isFlagged(Failure.Restartable) => true
     }.newService("client")
 
@@ -263,8 +263,8 @@ class MethodBuilderTest
     val methodBuilder = MethodBuilder.from("retry_it", stackClient)
 
     val client = methodBuilder
-      .withTimeoutTotal(1.second)
-      .withRetriesForResponse {
+      .withTimeout.total(1.second)
+      .withRetry.forResponse {
         case Throw(_: GlobalRequestTimeoutException) => true
       }
       .newService("a_client")

@@ -43,8 +43,8 @@ class MethodBuilderTest extends FunSuite {
     val methodBuilder = MethodBuilder.from(
       s"${addr.getHostName}:${addr.getPort}", stackClient)
 
-    val short = methodBuilder.withTimeoutTotal(10.millis).newService("short")
-    val long = methodBuilder.withTimeoutTotal(2.seconds).newService("long")
+    val short = methodBuilder.withTimeout.total(10.millis).newService("short")
+    val long = methodBuilder.withTimeout.total(2.seconds).newService("long")
 
     // check we get a timeout for a client with a short timeout
     intercept[GlobalRequestTimeoutException] {
@@ -67,6 +67,7 @@ class MethodBuilderTest extends FunSuite {
     http.Response()
   )
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   testTotalTimeout(
     "HTTP/2",
     Http.server.configured(Http2),
