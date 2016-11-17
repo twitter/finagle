@@ -1,5 +1,6 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.Method.Patch
 import com.twitter.finagle.Service
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
@@ -81,5 +82,15 @@ class HttpMuxerTest extends FunSuite {
 
     assert(Await.result(orig(Request("/foo/bar"))).contentString == origResp)
     assert(Await.result(overridden(Request("/foo/bar"))).contentString == newResp)
+  }
+
+  test("RouteIndex only allows GET and POST") {
+    assertThrows[AssertionError] {
+      val routeIndex = RouteIndex(
+        alias = "foo",
+        group = "bar",
+        method = Patch
+      )
+    }
   }
 }

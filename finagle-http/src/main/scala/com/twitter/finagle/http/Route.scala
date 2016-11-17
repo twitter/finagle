@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
+import com.twitter.finagle.http.Method.{Get, Post}
 
 /**
  * Represents an element which can be routed to via the HttpMuxer.
@@ -31,8 +32,15 @@ case class Route(
  * is routed to the path as per the [[com.twitter.finagle.http.HttpMuxer]]
  * spec. The path only needs to be specified if the URL accessed in the
  * admin interface is different from the pattern provided in [[Route.pattern]].
+ *
+ * @param method Specifies which HTTP Method to use from
+ * [[com.twitter.finagle.http.Method]]. The default is [[Method.Get]]. Only
+ * [[Method.Get]] and [[Method.Post]] are supported.
  */
 case class RouteIndex(
     alias: String,
     group: String,
-    path: Option[String] = None)
+    path: Option[String] = None,
+    method: Method = Get) {
+  assert(method == Get || method == Post, s"Unsupported method: $method")
+}
