@@ -64,13 +64,21 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle: Some APIs around configuring TLS/SSL on Finagle clients has changed to
+  * finagle: Some APIs around configuring TLS/SSL on Finagle clients have changed to
     unblock Netty 4 adoption. ``RB_ID=890935``
 
     - `c.t.f.Http.client.withTls(Netty3TransporterTLSConfig)` is removed. Use
       variations of `c.t.f.Http.client.withTransport.tls` instead.
 
     - `c.t.f.netty3.Netty3TransporterTLSConfig` is removed.
+
+  * finagle: Some APIs around configuring TLS/SSL on Finagle servers have changed to
+    unblock Netty 4 adoption. ``RB_ID=891270``
+
+    - `c.t.f.Http.server.withTls(Netty3ListenerTLSConfig)` is removed. Use
+      variations of `c.t.f.Http.server.withTransport.tls` instead.
+
+    - `c.t.f.netty3.Netty3ListenerTLSConfig` is removed.
 
   * finagle-core: Removed the protected and unused method `read(permit: Permit): Future[Rep]`
     from `SerialClientDispatcher`. ``RB_ID=881978``

@@ -24,13 +24,6 @@ import org.jboss.netty.handler.timeout.{ReadTimeoutException, ReadTimeoutHandler
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-/**
- * Netty3 TLS configuration.
- *
- * @param newEngine Creates a new SSL engine
- */
-case class Netty3ListenerTLSConfig(newEngine: () => Engine)
-
 object Netty3Listener {
 
   /**
@@ -274,10 +267,7 @@ class Netty3Listener[In, Out](
 
   private[this] def addFirstTlsHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
     val Transport.TLSServerEngine(engine) = params[Transport.TLSServerEngine]
-    val tlsConfig = engine.map(Netty3ListenerTLSConfig)
-
-    for (Netty3ListenerTLSConfig(newEngine) <- tlsConfig)
-      addTlsToPipeline(pipeline, newEngine)
+    engine.foreach(newEngine => addTlsToPipeline(pipeline, newEngine))
   }
 
   private[this] def addLastRequestStatsHandlers(

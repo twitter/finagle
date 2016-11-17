@@ -14,7 +14,6 @@ import com.twitter.finagle.http.netty.{
   Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport
 }
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.netty3._
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpTransporter, Netty4HttpListener}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -340,9 +339,6 @@ object Http extends Client[Request, Response] with HttpRichClient
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
-
-    def withTls(cfg: Netty3ListenerTLSConfig): Server =
-      configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
     /**
      * Configures the maximum request size this server can receive.
