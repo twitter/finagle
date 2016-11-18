@@ -39,7 +39,7 @@ case object EmptyMBulkReply extends MultiLineReply
 
 case object NilMBulkReply extends MultiLineReply
 
-class ReplyCodec extends UnifiedProtocolCodec {
+class ReplyCodec {
   import com.twitter.finagle.redis.naggati.Stages._
   import com.twitter.finagle.redis.naggati.NextStep
   import RedisCodec._

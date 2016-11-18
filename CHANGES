@@ -72,6 +72,13 @@ Breaking API Changes
 
   * finagle-core: `ServiceTimeoutException` now extends `NoStackTrace`. ``RB_ID=886809``
 
+  * finagle-core: Marked `com.twitter.finagle.util.ConcurrentRingBuffer` as
+    private.  It doesn't fit the typical programming model we encourage for
+    users of finagle, and so we found it was rarely used.  ``RB_ID=888801``
+
+  * finagle-http: HttpMuxer now takes in a Seq[Route] instead of a
+    Seq[(String, Service[Request, Response])]. ``RB_ID=886829``
+
   * finagle-redis: A couple of methods had to be renamed (and return type changed) to
     unblock Netty 4 adoption. ``RB_ID=882622``
 

@@ -18,7 +18,8 @@ class ServerFailUpgradeTest extends AbstractHttp1EndToEndTest {
     finagle.Http.server.configured(Http2)
 
   private[this] lazy val unsupported: Set[Feature] = Set(
-    TooLargePayloads  // flaky because of https://github.com/netty/netty/issues/5982
+    TooLargePayloads,  // flaky because of https://github.com/netty/netty/issues/5982
+    TooLongStream      // flaky because of https://github.com/netty/netty/issues/5982
   )
 
   def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)

@@ -18,14 +18,14 @@ import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 import java.util.logging.Level
 
 private[netty4] object Netty4ClientChannelInitializer {
-  val BufCodecKey = "buf codec"
+  val BufCodecKey = "bufCodec"
   val FramerKey = "framer"
-  val WriteTimeoutHandlerKey = "write timeout"
-  val ReadTimeoutHandlerKey = "read timeout"
-  val ConnectionHandlerKey = "connection handler"
-  val ChannelStatsHandlerKey = "channel stats"
-  val ChannelRequestStatsHandlerKey = "channel request stats"
-  val ChannelLoggerHandlerKey = "channel logger"
+  val WriteTimeoutHandlerKey = "writeTimeout"
+  val ReadTimeoutHandlerKey = "readTimeout"
+  val ConnectionHandlerKey = "connectionHandler"
+  val ChannelStatsHandlerKey = "channelStats"
+  val ChannelRequestStatsHandlerKey = "channelRequestStats"
+  val ChannelLoggerHandlerKey = "channelLogger"
 }
 
 /**
@@ -120,10 +120,10 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
       pipe.addLast(WriteTimeoutHandlerKey, new WriteTimeoutHandler(timeoutValue, timeoutUnit))
     }
 
-    pipe.addLast("exception handler", exceptionHandler)
+    pipe.addLast("exceptionHandler", exceptionHandler)
 
     // Add SslHandler to the pipeline.
-    pipe.addFirst("ssl init", new Netty4SslHandler(params))
+    pipe.addFirst("sslInit", new Netty4SslHandler(params))
 
     // SOCKS5 proxy via `Netty4ProxyConnectHandler`.
     socksAddress.foreach { sa =>
@@ -132,7 +132,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
         case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
       }
 
-      pipe.addFirst("socks proxy connect", new Netty4ProxyConnectHandler(proxyHandler))
+      pipe.addFirst("socksProxyConnect", new Netty4ProxyConnectHandler(proxyHandler))
     }
 
     // HTTP proxy via `Netty4ProxyConnectHandler`.
@@ -142,18 +142,18 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
         case Some(c) => new HttpProxyHandler(sa, c.username, c.password)
       }
 
-      pipe.addFirst("http proxy connect", new Netty4ProxyConnectHandler(proxyHandler))
+      pipe.addFirst("httpProxyConnect", new Netty4ProxyConnectHandler(proxyHandler))
     }
 
     // TCP tunneling via HTTP proxy (using `HttpProxyConnectHandler`).
     httpHostAndCredentials.foreach {
-      case (host, credentials) => pipe.addFirst("http proxy connect",
+      case (host, credentials) => pipe.addFirst("httpProxyConnect",
         new HttpProxyConnectHandler(host, credentials))
     }
 
     // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` is enabled).
     if (poolReceiveBuffers()) {
-      pipe.addFirst("receive buffers size tracker",
+      pipe.addFirst("receiveBuffersSizeTracker",
         new RecvBufferSizeStatsHandler(stats.scope("transport")))
     }
   }

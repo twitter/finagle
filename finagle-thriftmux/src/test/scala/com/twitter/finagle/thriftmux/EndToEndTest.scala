@@ -23,6 +23,7 @@ import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
 import org.junit.runner.RunWith
+import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.{FunSuite, Tag}
@@ -38,7 +39,7 @@ class EndToEndTest extends FunSuite
     Await.result(a, d)
 
   // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags:_*) {
       mux.sessionFailureDetector.let("none") { f }
     }

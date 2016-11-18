@@ -2,10 +2,11 @@ package com.twitter.finagle.exception
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle.Thrift
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.exception.thriftscala.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{Protocols, ThriftClientFramedCodec}
+import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ReporterFactory
 import com.twitter.util.{Future, GZIPStringEncoder, Monitor, NullMonitor, Time}
@@ -93,7 +94,7 @@ object Reporter {
     val service = ClientBuilder() // these are from the zipkin tracer
       .name("exception_reporter")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .codec(ThriftClientFramedCodec())
+      .stack(Thrift.client)
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
       // using an arbitrary, but bounded number of waiters to avoid memory leaks

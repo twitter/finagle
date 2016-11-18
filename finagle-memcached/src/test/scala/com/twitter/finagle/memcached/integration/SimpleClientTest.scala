@@ -1,7 +1,5 @@
 package com.twitter.finagle.memcached.integration
 
-import _root_.java.lang.{Boolean => JBoolean}
-
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
@@ -93,7 +91,7 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       assert(casUnique == Buf.Utf8("1"))
 
       assert(!Await.result(client.cas("x", Buf.Utf8("z"), Buf.Utf8("2"))))
-      assert(Await.result(client.cas("x", Buf.Utf8("z"), casUnique)))
+      assert(Await.result(client.cas("x", Buf.Utf8("z"), casUnique)).booleanValue)
       val res = Await.result(client.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))

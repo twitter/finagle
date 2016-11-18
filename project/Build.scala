@@ -34,7 +34,7 @@ object Finagle extends Build {
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
-  val jacksonVersion = "2.8.3"
+  val jacksonVersion = "2.8.4"
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -59,8 +59,8 @@ object Finagle extends Build {
     organization := "com.twitter",
     scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
-      "org.scalacheck" %% "scalacheck" % "1.12.5" % "test",
-      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.13.1" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.0" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),

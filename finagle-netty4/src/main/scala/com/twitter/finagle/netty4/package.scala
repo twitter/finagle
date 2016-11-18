@@ -91,7 +91,7 @@ package object netty4 {
   // Exports N4-related metrics under `finagle/netty4`.
   exportNetty4Metrics()
 
-  private[finagle] val DirectToHeapInboundHandlerName = "direct to heap"
+  private[finagle] val DirectToHeapInboundHandlerName = "directToHeap"
 
   object param {
 

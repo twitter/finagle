@@ -17,14 +17,14 @@ private[finagle] object Netty4Framer extends (ChannelPipeline => Unit) {
   private val initialBytesToStrip = 4
 
   def apply(pipeline: ChannelPipeline): Unit = {
-    pipeline.addLast("frame-decoder", new LengthFieldBasedFrameDecoder(
+    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
       maxFrameLength,
       lengthFieldOffset,
       lengthFieldLength,
       lengthAdjustment,
       initialBytesToStrip))
-    pipeline.addLast("frame-encoder", new LengthFieldPrepender(lengthFieldLength))
+    pipeline.addLast("frameEncoder", new LengthFieldPrepender(lengthFieldLength))
     pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
-    pipeline.addLast("endec", new BufCodec)
+    pipeline.addLast("bufCodec", new BufCodec)
   }
 }
