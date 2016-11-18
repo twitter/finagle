@@ -150,8 +150,8 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       assert(value == Buf.Utf8("y"))
       assert(casUnique == Buf.Utf8("1"))
 
-      assert(!Await.result(client.cas("x", Buf.Utf8("z"), Buf.Utf8("2"))))
-      assert(Await.result(client.cas("x", Buf.Utf8("z"), casUnique)).booleanValue)
+      assert(!Await.result(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
+      assert(Await.result(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue)
       val res = Await.result(client.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))
@@ -225,7 +225,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { Await.result(client.prepend("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { Await.result(client.replace("bad key", Buf.Utf8("bar"))) }
     intercept[ClientError] { Await.result(client.add("bad key", Buf.Utf8("2"))) }
-    intercept[ClientError] { Await.result(client.cas("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
+    intercept[ClientError] { Await.result(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
     intercept[ClientError] { Await.result(client.incr("bad key")) }
     intercept[ClientError] { Await.result(client.decr("bad key")) }
     intercept[ClientError] { Await.result(client.delete("bad key")) }

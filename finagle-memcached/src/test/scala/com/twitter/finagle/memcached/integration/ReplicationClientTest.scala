@@ -679,13 +679,15 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     assert(Await.result(replicatedClient.gets("inconsistent-key")) == None)
 
     // cas overwrites existing data
-    assert(Await.result(replicatedClient.cas("foo", Buf.Utf8("baz"), Buf.Utf8("1|1"))) == true)
+    assert(Await.result(
+      replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Buf.Utf8("1|1"))
+        .map(_.replaced)))
 
     // inconsistent replica state
     firstTestServerPool(0).stop()
     firstTestServerPool(1).stop()
     intercept[SimpleReplicationFailure] {
-      Await.result(replicatedClient.cas("foo", Buf.Utf8("baz"), Buf.Utf8("2|3")))
+      Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Buf.Utf8("2|3")))
     }
     intercept[SimpleReplicationFailure] {
       Await.result(replicatedClient.gets("foo"))

@@ -138,12 +138,28 @@ object GetResult {
  *
  * @see [[BaseClient.checkAndSet]]
  */
-sealed trait CasResult
+sealed trait CasResult {
+
+  /**
+   * Whether or not the operation replaced the value.
+   *
+   * This may be useful for developers transitioning to the
+   * [[Client.checkAndSet]] methods from the deprecated
+   * [[Client.cas]] methods.
+   */
+  def replaced: Boolean
+}
 
 object CasResult {
-  case object Stored extends CasResult
-  case object Exists extends CasResult
-  case object NotFound extends CasResult
+  case object Stored extends CasResult {
+    def replaced: Boolean = true
+  }
+  case object Exists extends CasResult {
+    def replaced: Boolean = false
+  }
+  case object NotFound extends CasResult {
+    def replaced: Boolean = false
+  }
 }
 
 private object BaseClient {

@@ -7,12 +7,15 @@ import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
+import com.twitter.finagle.memcached.CasResult;
 import com.twitter.finagle.memcached.GetResult;
 import com.twitter.finagle.memcached.GetsResult;
 import com.twitter.io.Buf;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
+
+import static com.twitter.util.Function.func;
 
 public class ClientBase extends Client {
 
@@ -130,13 +133,15 @@ public class ClientBase extends Client {
   }
 
   public Future<Boolean> cas(String key, Buf value, Buf casUnique) {
-    return underlying.cas(key, value, casUnique);
+    return underlying.checkAndSet(key, value, casUnique)
+        .map(func(CasResult::replaced));
   }
 
   public Future<Boolean> cas(
     String key, int flags, Time expiry,
     Buf value, Buf casUnique) {
-    return underlying.cas(key, flags, expiry, value, casUnique);
+    return underlying.checkAndSet(key, flags, expiry, value, casUnique)
+        .map(func(CasResult::replaced));
   }
 
   public Future<Boolean> delete(String key) {

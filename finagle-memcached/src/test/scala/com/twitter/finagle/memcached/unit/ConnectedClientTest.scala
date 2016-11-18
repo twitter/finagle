@@ -23,13 +23,13 @@ class ConnectedClientTest extends FunSuite with MockitoSugar {
 
   test("cas correctly responds to return states of the service") {
     when(service.apply(any[Command])).thenReturn(Future.value(Stored()))
-    assert(Await.result(client.cas(key, value, casUnique)) == true)
+    assert(Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
     when(service.apply(any[Command])).thenReturn(Future.value(Exists()))
-    assert(Await.result(client.cas(key, value, casUnique)) == false)
+    assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
     when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
-    assert(Await.result(client.cas(key, value, casUnique)) == false)
+    assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
  }
 
  test("checkAndSet correctly responds to return states of the service") {
@@ -42,14 +42,6 @@ class ConnectedClientTest extends FunSuite with MockitoSugar {
     when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
     assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.NotFound)
  }
-
-  test("cas correctly responds to the error states of the service") {
-    when(service.apply(any[Command])).thenReturn(Future.value(Error(new IllegalAccessException("exception"))))
-    intercept[IllegalAccessException] { Await.result(client.cas(key, value, casUnique)) }
-
-    when(service.apply(any[Command])).thenReturn(Future.value(Deleted()))
-    intercept[IllegalStateException] { Await.result(client.cas(key, value, casUnique)) }
-  }
 
   test("checkAndSet correctly responds to the error states of the service") {
     when(service.apply(any[Command])).thenReturn(Future.value(Error(new IllegalAccessException("exception"))))
