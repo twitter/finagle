@@ -10,7 +10,7 @@ import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{TlsConfig, Transport}
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
@@ -447,9 +447,18 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Http.server.withTransport.tls(...)
    * }}}
    */
-  def tls(certificatePath: String, keyPath: String,
-          caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
-    newFinagleSslEngine(() => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
+  def tls(
+    certificatePath: String,
+    keyPath: String,
+    caCertificatePath: String = null,
+    ciphers: String = null,
+    nextProtos: String = null
+  ): This =
+    newFinagleSslEngine(
+      () => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
+    ).configured(Transport.Tls(TlsConfig.ServerCertAndKey(
+      certificatePath, keyPath, Option(caCertificatePath), Option(ciphers), Option(nextProtos)
+    )))
 
   /**
    * Provide a raw SSL engine that is used to establish SSL sessions.
