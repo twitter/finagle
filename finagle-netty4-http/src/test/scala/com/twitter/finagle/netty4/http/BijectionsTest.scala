@@ -138,6 +138,10 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       assert(out.isChunked == false)
       assert(out.contentString == body)
       assert(out.version == Bijections.netty.versionToFinagle(in.protocolVersion))
+
+      if (in.headers().getAll("Host").isEmpty) {
+        in.headers().set("Host", "")
+      }
       out.headerMap.foreach { case (k, v) =>
         assert(in.headers.getAll(k).asScala.toSet == out.headerMap.getAll(k).toSet)
       }

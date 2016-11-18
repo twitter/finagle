@@ -289,14 +289,15 @@ object Request {
     val reqIn = new DefaultHttpRequest(from(version), from(method), uri)
     buildRequest(
       request = reqIn,
-      socketAddress = new InetSocketAddress(0)
+      socketAddress = new InetSocketAddress(0),
+      None
     )
   }
 
   private def buildRequest(
     request: HttpRequest,
     socketAddress: InetSocketAddress,
-    reader: Option[Reader] = None): Request = {
+    reader: Option[Reader]): Request = {
 
     val req = reader match {
       case Some(readerIn: Reader) =>
@@ -311,7 +312,7 @@ object Request {
           lazy val remoteSocketAddress: InetSocketAddress = socketAddress
         }
     }
-
+    //Host header required by RFC for HTTP 1.1 (https://tools.ietf.org/html/rfc7230#page-44)
     if (req.version == Version.Http11 && !req.headers.contains(HttpHeaders.Names.HOST)) {
       req.headers.set(HttpHeaders.Names.HOST, "")
     }
@@ -374,7 +375,8 @@ object Request {
   private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
     buildRequest(
       request = httpRequestArg,
-      socketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      socketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress],
+      None
     )
 
   /** Create a query string from URI and parameters. */
