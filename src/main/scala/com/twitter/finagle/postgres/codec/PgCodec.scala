@@ -18,6 +18,7 @@ import org.jboss.netty.handler.ssl.util.InsecureTrustManagerFactory
 import org.jboss.netty.handler.ssl.{SslContext, SslHandler}
 import scala.collection.mutable
 
+import com.sun.corba.se.impl.protocol.RequestCanceledException
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.{TlsConfig, Transport}
 
@@ -34,13 +35,22 @@ class HandleErrorsProxy(
   }
 
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
+
+    object ShouldClose {
+      def unapply(err: Throwable): Option[Throwable] = err match {
+        case err: ChannelClosedException => Some(err)
+        case err: RequestCanceledException => Some(err)
+        case Failure(Some(ShouldClose(e))) => Some(e)
+      }
+    }
+
     def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) = {
       service.apply(request).flatMap {
         case Error(msg, severity, sqlState, detail, hint, position) =>
           Future.exception(Errors.server(msg.getOrElse("unknown failure"), Some(request), severity, sqlState, detail, hint, position))
         case r => Future.value(r)
       }.onFailure {
-        case err: ChannelClosedException => service.close()
+        case ShouldClose(err) => service(PgRequest(Terminate, true)) ensure { service.close() }
         case _ =>
       }
     }
