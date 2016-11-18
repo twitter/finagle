@@ -445,6 +445,7 @@ object Message {
   private[http] val Utf8          = Charset.forName("UTF-8")
   val CharsetUtf8           = "charset=utf-8"
   val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8
+  val ContentTypeJsonPatch  = MediaType.JsonPatch + ";" + CharsetUtf8
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
   val ContentTypeWwwFrom    = MediaType.WwwForm + ";" + CharsetUtf8
 

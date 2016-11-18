@@ -10,6 +10,7 @@ object MediaType {
   val Javascript    = "application/javascript"
   val Jpeg          = "image/jpeg"
   val Json          = "application/json"
+  val JsonPatch     = "application/json-patch+json"
   val OctetStream   = "application/octet-stream"
   val PlainText     = "text/plain"
   val Png           = "image/png"
