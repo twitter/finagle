@@ -101,14 +101,7 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       "parse times with timezone" in test(ValueDecoder.offsetTime)("timetz")
       "parse intervals" in test(ValueDecoder.interval)("interval")
       "parse uuids" in test(ValueDecoder.uuid)("uuid")
-
-      try {
-        //not sure why this test doesn't pass in Travis
-        Await.result(client.query("CREATE EXTENSION IF NOT EXISTS hstore"))
-        "parse hstore maps" in test(ValueDecoder.hstoreMap)("hstore")
-      } catch {
-        case err: Throwable => // can't run this one because we're not superuser
-      }
+      "parse hstore maps" in test(ValueDecoder.hstoreMap)("hstore")
     }
 
   }

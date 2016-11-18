@@ -29,7 +29,7 @@ trait StateMachine[E, R, S] {
   }
 
   private[this] def handleMisc: PartialFunction[(E, S), (Option[R], S)] = {
-    case (e, s) => throw new IllegalArgumentException("Unknown event " + e + " for state " + s)
+    case (e, s) => throw new IllegalStateException("Unknown event " + e + " for state " + s)
   }
 
   def onEvent(e: E): Option[R] = {

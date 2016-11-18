@@ -251,7 +251,13 @@ class PgClientChannelHandler(
           c.writeBytes(Flush.asPacket().encode())
         }
 
-        (c, connection.send(msg))
+        try {
+          (c, connection.send(msg))
+        } catch {
+          case err: Throwable =>
+            Channels.fireExceptionCaught(ctx, err)
+            (Terminate.asPacket().encode(), Some(com.twitter.finagle.postgres.messages.Terminated))
+        }
 
       case _ =>
         logger.warning("Cannot convert message... Skipping")
@@ -260,7 +266,9 @@ class PgClientChannelHandler(
 
     Channels.write(ctx, event.getFuture, buf, event.getRemoteAddress)
     out collect {
-      case com.twitter.finagle.postgres.messages.Terminated => Channels.disconnect(ctx.getChannel)
+      case term @ com.twitter.finagle.postgres.messages.Terminated =>
+        Channels.disconnect(ctx.getChannel)
+        Channels.fireMessageReceived(ctx, term)
     }
   }
 }

@@ -40,6 +40,8 @@ trait ValueEncoder[T] {
 
 object ValueEncoder extends LowPriorityEncoder {
 
+  def apply[T](implicit encoder: ValueEncoder[T]) = encoder
+
   case class Exported[T](encoder: ValueEncoder[T])
 
   private val nullParam = {

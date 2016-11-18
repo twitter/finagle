@@ -83,7 +83,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
 
   transition {
     case (ReadyForQuery(_), Syncing) => (Some(ReadyForQueryResponse), Connected)
-    case (ErrorResponse(details), Syncing) => (Some(Error(details)), Connected)
+    case (ErrorResponse(details), Syncing) => throw new IllegalStateException("Received an error in response to Sync")
   }
 
   transition {
