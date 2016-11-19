@@ -41,6 +41,7 @@ class HandleErrorsProxy(
         case err: ChannelClosedException => Some(err)
         case err: RequestCanceledException => Some(err)
         case Failure(Some(ShouldClose(e))) => Some(e)
+        case _ => None
       }
     }
 
