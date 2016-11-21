@@ -172,7 +172,11 @@ private[finagle] case class Netty4Listener[In, Out](
       // Block until listening socket is bound. `ListeningServer`
       // represents a bound server and if we don't block here there's
       // a race between #listen and #boundAddress being available.
-      val ch = bootstrap.bind(addr).awaitUninterruptibly().channel()
+      val bound = bootstrap.bind(addr).awaitUninterruptibly()
+      if (!bound.isSuccess)
+        throw new java.net.BindException(s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}")
+
+      val ch = bound.channel()
 
       /**
        * Immediately close the listening socket then shutdown the netty

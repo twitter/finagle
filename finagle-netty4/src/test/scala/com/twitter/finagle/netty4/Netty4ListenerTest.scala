@@ -140,6 +140,15 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     Await.ready(server.close(), 2.seconds)
   }
 
+  test("bind failures are rethrown synchronously") {
+    val ss = new java.net.ServerSocket(0, 10, InetAddress.getLoopbackAddress)
+    val listener = Netty4Listener[String, String](StringServerInit, Params.empty)
+    intercept[java.net.BindException] {
+      listener.listen(ss.getLocalSocketAddress)(_ => ())
+    }
+    ss.close()
+  }
+
   test("Netty4Listener records basic channel stats") {
     val ctx = new StatsCtx { }
     import ctx._

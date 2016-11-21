@@ -146,6 +146,8 @@ Bug Fixes
     now works properly. This previously resulted in a timeout and
     `ProxyConnectException`. ``RB_ID=884344``
 
+  * finagle-netty4: Don't swallow bind failures. ``RB_ID=892217``
+
 Deprecations
 ~~~~~~~~~~~~
 
