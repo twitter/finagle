@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.concurrent.{AsyncQueue, AsyncMutex}
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.Failure
 import com.twitter.finagle.stats.StatsReceiver
@@ -49,24 +49,15 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
         finally loop()
       }
 
-  // this is unbounded because we assume a higher layer bounds how many
-  // concurrent requests we can have
-  private[this] val mutex = new AsyncMutex()
-
   private[this] def loop(): Unit =
     q.poll().onSuccess(transRead)
 
   loop()
 
+  // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
+  // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    mutex.acquire().flatMap { permit =>
-      // we must map on offering so that we don't relinquish the mutex until we
-      // have enqueued the promise, so we don't have to worry about out of order
-      // Promises
-      trans.write(req).before { q.offer(p); Future.Done }.ensure {
-        permit.release()
-      }
-    }
+    trans.write(req).before { q.offer(p); Future.Done }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)
