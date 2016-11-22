@@ -52,17 +52,33 @@ class DeadlineStatsFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("DeadlineFilter should record remaining deadline for the request") {
+  test("DeadlineFilter should record expired deadline for the request") {
     val h = new DeadlineFilterHelper
     import h._
 
     promise.setValue("polo")
 
     Time.withCurrentTimeFrozen { tc =>
-      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(200.milliseconds)) {
+        tc.advance(1.second)
+        val res = deadlineService("marco")
+        assert(statsReceiver.stats(Seq("expired_ms"))(0) == 800f)
+        assert(Await.result(res, 1.second) == "polo")
+      }
+    }
+  }
+
+  test("DeadlineFilter should ignore non-expired deadline for the request") {
+    val h = new DeadlineFilterHelper
+    import h._
+
+    promise.setValue("polo")
+
+    Time.withCurrentTimeFrozen { tc =>
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.second)) {
         tc.advance(200.milliseconds)
         val res = deadlineService("marco")
-        assert(statsReceiver.stats(Seq("deadline_budget_ms"))(0) == 800f)
+        assert(!statsReceiver.stats.contains(Seq("expired_ms")))
         assert(Await.result(res, 1.second) == "polo")
       }
     }

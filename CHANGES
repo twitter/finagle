@@ -96,6 +96,13 @@ Breaking API Changes
     private.  It doesn't fit the typical programming model we encourage for
     users of finagle, and so we found it was rarely used.  ``RB_ID=888801``
 
+  * finagle-core: Removed the `StatsReceiver` argument from `TimeoutFilter`.  ``RB_ID=891380``
+
+  * finagle-core: Stopped exporting a few metrics related to deadlines, and replaced with a simpler
+    one.  There was a per-`TimeoutFilter` one named `timeout/expired_deadline_ms`, and a per-server
+    one named `admission_control/deadline/deadline_budget_ms`.  We added instead a per-server one
+    named `admission_control/deadline/exceeded_ms`. ``RB_ID=891380``
+
   * finagle-http: HttpMuxer now takes in a Seq[Route] instead of a
     Seq[(String, Service[Request, Response])]. ``RB_ID=886829``
 

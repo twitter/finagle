@@ -2,7 +2,6 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -77,8 +76,7 @@ class TimeoutFilterTest extends FunSuite
 
     val timer = new MockTimer
     val exception = new IndividualRequestTimeoutException(timeout)
-    val statsReceiver = new InMemoryStatsReceiver
-    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer, statsReceiver)
+    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer)
     val timeoutService = timeoutFilter andThen service
   }
 
@@ -124,8 +122,6 @@ class TimeoutFilterTest extends FunSuite
         timeoutService((): Unit)
       }
       assert(Await.result(f) == Some(Deadline(now + 5.seconds, now + 1.second)))
-
-      assert(statsReceiver.stats(Seq("expired_deadline_ms"))(0) == 4.seconds.inMillis)
     }
   }
 
@@ -173,8 +169,7 @@ class TimeoutFilterTest extends FunSuite
     val filter = new TimeoutFilter[String, String](
       () => atomicTimeout.get,
       timeout => new IndividualRequestTimeoutException(timeout),
-      timer,
-      NullStatsReceiver)
+      timer)
 
     val h = new TimeoutFilterHelper()
     val svc = filter.andThen(h.service)
@@ -218,8 +213,7 @@ class TimeoutFilterTest extends FunSuite
     val filter = new TimeoutFilter[String, String](
       () => atomicTimeout.get,
       timeout => new IndividualRequestTimeoutException(timeout),
-      timer,
-      NullStatsReceiver)
+      timer)
 
     val h = new TimeoutFilterHelper()
     val svc = filter.andThen(h.service)

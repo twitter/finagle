@@ -4,7 +4,6 @@ import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.client.LatencyCompensation
 import com.twitter.finagle.context.{Contexts, Deadline}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Duration, Future, Timer}
 
@@ -53,11 +52,10 @@ object TimeoutFilter {
    * for use in clients.
    */
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module3[
         TimeoutFilter.Param,
         param.Timer,
         LatencyCompensation.Compensation,
-        param.Stats,
         ServiceFactory[Req, Rep]] {
       val role: Stack.Role = TimeoutFilter.role
       val description: String =
@@ -67,7 +65,6 @@ object TimeoutFilter {
         _param: Param,
         _timer: param.Timer,
         _compensation: LatencyCompensation.Compensation,
-        _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val timeout = _param.timeout + _compensation.howlong
@@ -78,8 +75,7 @@ object TimeoutFilter {
           val filter = new TimeoutFilter[Req, Rep](
             () => timeout,
             timeout => new IndividualRequestTimeoutException(timeout),
-            _timer.timer,
-            _stats.statsReceiver.scope("timeout"))
+            _timer.timer)
           filter.andThen(next)
         }
       }
@@ -90,10 +86,9 @@ object TimeoutFilter {
    * for use in servers.
    */
   def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[
+    new Stack.Module2[
         TimeoutFilter.Param,
         param.Timer,
-        param.Stats,
         ServiceFactory[Req, Rep]] {
       val role: Stack.Role = TimeoutFilter.role
       val description: String =
@@ -101,16 +96,13 @@ object TimeoutFilter {
       def make(
         _param: Param,
         _timer: param.Timer,
-        _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
-        val param.Stats(stats) = _stats
         if (!timeout.isFinite || timeout <= Duration.Zero) next else {
           val exc = new IndividualRequestTimeoutException(timeout)
-          val filter = new TimeoutFilter[Req, Rep](
-            timeout, exc, timer, stats.scope("timeout"))
+          val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
           filter.andThen(next)
         }
       }
@@ -144,30 +136,14 @@ object TimeoutFilter {
 class TimeoutFilter[Req, Rep](
     timeoutFn: () => Duration,
     exceptionFn: Duration => RequestTimeoutException,
-    timer: Timer,
-    statsReceiver: StatsReceiver)
+    timer: Timer)
   extends SimpleFilter[Req, Rep] {
 
-  def this(
-    timeout: Duration,
-    exception: RequestTimeoutException,
-    timer: Timer,
-    statsReceiver: StatsReceiver
-  ) = this(
-    () => timeout,
-    _ => exception,
-    timer,
-    statsReceiver
-  )
-
   def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
-    this(timeout, exception, timer, NullStatsReceiver)
+    this(() => timeout, _ => exception, timer)
 
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
-
-  private[this] val expiredDeadlineStat =
-    statsReceiver.stat("expired_deadline_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeout = timeoutFn()
@@ -178,10 +154,6 @@ class TimeoutFilter[Req, Rep](
     val deadline = Deadline.current match {
       case Some(current) => Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline
-    }
-
-    if (deadline.expired) {
-      expiredDeadlineStat.add(-deadline.remaining.inMillis)
     }
 
     Contexts.broadcast.let(Deadline, deadline) {

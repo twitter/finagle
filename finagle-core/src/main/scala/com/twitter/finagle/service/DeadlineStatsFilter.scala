@@ -43,14 +43,17 @@ private[finagle] class DeadlineStatsFilter[Req, Rep](statsReceiver: StatsReceive
 
   private[this] val exceededStat = statsReceiver.counter("exceeded")
   private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
-  private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
+  private[this] val expiredTimeStat = statsReceiver.stat("expired_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     Deadline.current match {
       case Some(deadline) =>
         val now = Time.now
+        if (deadline.deadline < now) {
+          val exceeded = now - deadline.deadline
+          expiredTimeStat.add(exceeded.inMilliseconds)
+        }
         transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMilliseconds)
-        budgetTimeStat.add(((deadline.deadline-now) max Duration.Zero).inMilliseconds)
 
         if (deadline.expired)
           exceededStat.incr()

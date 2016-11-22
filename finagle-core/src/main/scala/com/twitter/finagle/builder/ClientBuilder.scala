@@ -1492,8 +1492,7 @@ private[finagle] object ClientBuilderClient {
         val filter = new TimeoutFilter[Req, Rep](
           () => timeout,
           timeout => new GlobalRequestTimeoutException(timeout),
-          timerP.timer,
-          NullStatsReceiver)
+          timerP.timer)
         filter.andThen(next)
       }
     }

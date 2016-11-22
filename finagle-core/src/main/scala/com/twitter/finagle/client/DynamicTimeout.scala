@@ -3,7 +3,6 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Duration
 
 /**
@@ -108,8 +107,7 @@ private[finagle] object DynamicTimeout {
         val filter = new TimeoutFilter[Req, Rep](
           timeoutFn(PerRequestKey, defaultTimeout.timeout, compensation.howlong),
           duration => new IndividualRequestTimeoutException(duration),
-          timer.timer,
-          NullStatsReceiver)
+          timer.timer)
         filter.andThen(next)
       }
     }
@@ -138,8 +136,7 @@ private[finagle] object DynamicTimeout {
     new TimeoutFilter[Req, Rep](
       timeoutFn(TotalKey, defaultTimeout, compensation),
       duration => new GlobalRequestTimeoutException(duration),
-      timer,
-      NullStatsReceiver)
+      timer)
   }
 
 }
