@@ -79,7 +79,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     )
   }
 
-  private[finagle] val Netty3Impl: HttpImpl = HttpImpl(
+  val Netty3Impl: HttpImpl = HttpImpl(
     new Netty3ClientStreamTransport(_),
     new Netty3ServerStreamTransport(_),
     Netty3HttpTransporter,
