@@ -12,6 +12,7 @@ private[redis] trait HashCommands { self: BaseClient =>
    * Deletes `fields` from given hash `key`. Returns the number of fields deleted.
    */
   def hDel(key: Buf, fields: Seq[Buf]): Future[JLong] =
+    // HDel case class is from protocol package, serve as command interface.
     doRequest(HDel(key, fields)) {
       case IntegerReply(n) => Future.value(n)
     }

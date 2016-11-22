@@ -51,6 +51,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       .insertBefore(DefaultPool.Role, RedisPool.module)
   }
 
+  // Review 1
   case class Client(
       stack: Stack[ServiceFactory[Command, Reply]] = Client.newStack,
       params: Stack.Params = Client.defaultParams)

@@ -97,6 +97,7 @@ abstract class BaseClient(
   /**
    * Helper function for passing a command to the service
    */
+  // Review 2
   private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]): Future[T] = {
     factory.toService.apply(cmd).flatMap (handler orElse {
       case ErrorReply(message)   => Future.exception(new ServerError(message))
