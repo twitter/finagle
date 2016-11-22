@@ -43,7 +43,7 @@ sealed trait Stack[T] {
    * the map traverses on the element produced by `fn`, not the
    * original stack.
    */
-  def transform(fn: Stack[T] => Stack[T]): Stack[T] =
+  protected def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
       case Node(hd, mk, next) => Node(hd, mk, next.transform(fn))
       case leaf@Leaf(_, _) => leaf

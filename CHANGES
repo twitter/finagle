@@ -96,6 +96,9 @@ Breaking API Changes
     private.  It doesn't fit the typical programming model we encourage for
     users of finagle, and so we found it was rarely used.  ``RB_ID=888801``
 
+  * finagle-core: Marked `transform` in `com.twitter.finagle.Stack` as protected. It is
+    too powerful and unnecessary for users, and should be used by implementors only.
+
   * finagle-core: Removed the `StatsReceiver` argument from `TimeoutFilter`.  ``RB_ID=891380``
 
   * finagle-core: Stopped exporting a few metrics related to deadlines, and replaced with a simpler
