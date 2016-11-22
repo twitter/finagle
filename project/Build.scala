@@ -13,10 +13,10 @@ object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
   val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-  val libVersion = "6.39.0" + suffix
-  val utilVersion = "6.38.0" + suffix
-  val ostrichVersion = "9.22.0" + suffix
-  val scroogeVersion = "4.11.0" + suffix
+  val libVersion = "6.40.0" + suffix
+  val utilVersion = "6.39.0" + suffix
+  val ostrichVersion = "9.23.0" + suffix
+  val scroogeVersion = "4.12.0" + suffix
 
   val libthriftVersion = "0.5.0-7"
 
