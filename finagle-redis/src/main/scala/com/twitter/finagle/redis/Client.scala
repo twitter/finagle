@@ -94,6 +94,7 @@ abstract class BaseClient(
    */
   def close(deadline: Time): Future[Unit] = factory.close(deadline)
 
+  // Review 2
   /**
    * Helper function for passing a command to the service
    */
