@@ -1,11 +1,15 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.{Service, Filter}
-import com.twitter.util.{Base64StringEncoder, Future, FuturePool, Return}
+import com.twitter.conversions.time._
+import com.twitter.finagle.{Filter, Service}
+import com.twitter.util.{Base64StringEncoder, Duration, Future, FuturePool, Return, Time}
 import com.twitter.logging.Logger
 import java.security.PrivilegedAction
+import java.util.concurrent.locks.StampedLock
 import javax.security.auth.Subject
-import javax.security.auth.login.LoginContext
+import javax.security.auth.kerberos.KerberosTicket
+import javax.security.auth.login.{LoginContext, LoginException}
+import scala.collection.JavaConverters._
 import org.ietf.jgss._
 
 /**
@@ -97,23 +101,112 @@ object SpnegoAuthenticator {
        *
        */
       val SpnegoMechanism = new Oid("1.3.6.1.5.5.2")
+      /**
+       * The amount of time before the TGT in a LoginContext expires in which the user should begin
+       * to renew the TGT.
+       *
+       */
+      val PortalLoginExpirationBuffer: Duration = 1.minute
     }
 
     trait JAAS {
+      /** 'portal' is synchronized using 'lock'. */
+      private[this] var portalOption: Option[LoginContext] = None
+      private val lock = new StampedLock()
       val loginContext: String
 
       def load(): Future[GSSContext] = pool {
         log.debug("Getting context: %s", loginContext)
-        val portal = new LoginContext(loginContext)
-        // TODO: should logout?
-        portal.login()
-        Subject.doAs(portal.getSubject, createContextAction)
+
+        /**
+         * LoginContext's login() method calls the KDC each invocation. The KDC will grant a TGT
+         * that can be used to talk to the TGS to get session tokens for different services. The
+         * TGT expires after a set amount of time but while it is valid we do not need to send
+         * anymore requests to the KDC.
+         *
+         * The code below checks to see if the TGT has expired. If it has, request a new one from
+         * the KDC.
+         */
+        var stamp = lock.readLock()
+        var hasLoggedIn = false
+        try {
+          /**
+           * 'portalOption' is volatile so you must have a read lock from 'lock' before calling
+           * 'isLoginValid' (or passing it to any method).
+           */
+          while (!hasLoggedIn && !isLoginValid(portalOption)) {
+            val writeStamp = lock.tryConvertToWriteLock(stamp)
+            if (writeStamp != 0L) {
+              stamp = writeStamp
+              portalOption.foreach(portal => portal.logout())
+              portalOption = Some(new LoginContext(loginContext))
+              portalOption.get.login()
+              hasLoggedIn = true
+            } else {
+              /**
+               * At this point, we know 'stamp' is always a read stamp because
+               * 'tryConvertToWriteLock' cannot fail if it is provided a write stamp.
+               */
+              lock.unlockRead(stamp)
+              stamp = lock.writeLock()
+            }
+          }
+        } catch {
+          case le: LoginException =>
+            log.debug("Could not create LoginContext in JAAS.load().", le)
+            throw le
+        } finally {
+          lock.unlock(stamp)
+        }
+
+        Subject.doAs(getSubject, createContextAction)
       }
 
       private val createContextAction =
         new PrivilegedAction[GSSContext] {
           def run(): GSSContext = createGSSContext()
         }
+
+      /**
+       * Check to see if the login has expired by finding the expiration date of the TGT and
+       * comparing it with the current time (with a 1 minute buffer).
+       */
+      protected final def isLoginValid(portal: Option[LoginContext]): Boolean =
+        portal.exists { instance =>
+          getTicketGrantingTicket(instance).exists(withinValidTimeWindow)
+        }
+
+      /** Gets the ticket granting ticket from a portal's private credentials. */
+      private def getTicketGrantingTicket(portal: LoginContext): Option[KerberosTicket] =
+        Option(portal.getSubject) flatMap { subject =>
+          subject.getPrivateCredentials(classOf[KerberosTicket]).asScala.toSet.find {
+            ticket => ticket.getServer.getName.startsWith("krbtgt/")
+          }
+        }
+
+      /** Determines if a Kerberos ticket is within the valid time window, including a buffer. */
+      private def withinValidTimeWindow(ticket: KerberosTicket): Boolean = {
+        val currentTimePlusBuffer = Time.now + JAAS.PortalLoginExpirationBuffer
+        currentTimePlusBuffer < Time(ticket.getEndTime)
+      }
+
+      /**
+       * Get the subject from the current LoginContext held by the JAAS trait. This must be called
+       * after the 'load' method since 'load' will initialize the needed LoginContext.
+       *
+       * Throws a 'RuntimeException' if 'portalOption' is None.
+       */
+      protected final def getSubject: Subject = {
+        val stamp = lock.readLock()
+        try {
+          portalOption match {
+            case Some(instance) => instance.getSubject
+            case None => throw new RuntimeException("Must call 'load' before 'getSubject'")
+          }
+        } finally {
+          lock.unlockRead(stamp)
+        }
+      }
 
       /** Called while running with the privileges of the given loginContext.  */
       protected def createGSSContext(): GSSContext
@@ -138,7 +231,7 @@ object SpnegoAuthenticator {
         val tokenIn = challengeToken.getOrElse(Token.Empty)
         var tokenOut: Token = null
         do {
-          tokenOut = context.initSecContext(tokenIn, 0, tokenIn.length)
+          tokenOut = Subject.doAs(getSubject, initContextAction(context, tokenIn))
         } while (tokenOut == null);
         tokenOut
       }
@@ -155,6 +248,11 @@ object SpnegoAuthenticator {
           ),
           lifetime
         )
+
+      private def initContextAction(context: GSSContext, tokenIn: Token) =
+        new PrivilegedAction[Array[Byte]] {
+          def run(): Array[Byte] = context.initSecContext(tokenIn, 0, tokenIn.length)
+        }
     }
 
     class JAASServerSource(val loginContext: String) extends ServerSource with JAAS {
