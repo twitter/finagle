@@ -342,17 +342,16 @@ case class ZScan(
   count: Option[JLong] = None,
   pattern: Option[Buf] = None
   ) extends Command {
-  def command: String  = Commands.ZSCAN
-  def toBuf: Buf = {
-    val bufs = Seq(CommandBytes.HSCAN, key, StringToBuf(cursor.toString))
+  def name: Buf  = Command.ZSCAN
+  def toBuf: Seq[Buf] = {
+    val bufs = Seq(key, Buf.Utf8(cursor.toString))
     val withCount = count match {
-      case Some(count) => bufs ++ Seq(CommandBytes.COUNT, StringToBuf(count.toString))
+      case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
       case None        => bufs
     }
-    val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+    pattern match {
+      case Some(pattern) => withCount ++ Seq(Command.PATTERN, pattern)
       case None          => withCount
     }
-    RedisCodec.toUnifiedBuf(withPattern)
   }
 }
