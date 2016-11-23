@@ -6,20 +6,21 @@ import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer, Netty4Framer}
-import com.twitter.finagle.mux.{Handshake, FailureDetector, Toggles}
+import com.twitter.finagle.mux.{FailureDetector, Handshake, Toggles}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
+import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.{Transport, StatsTransport}
+import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
+import scala.util.hashing.MurmurHash3
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -71,7 +72,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     object MuxImpl {
       private val UseNetty4ToggleId: String = "com.twitter.finagle.mux.UseNetty4"
       private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
+      private def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
 
       /**
        * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.

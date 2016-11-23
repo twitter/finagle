@@ -5,7 +5,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, PipeliningDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.Toggles
@@ -14,16 +14,16 @@ import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ServerFramer, Netty4ClientFramer, Netty3ClientFramer, Netty3ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty3ServerFramer, Netty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
-import com.twitter.finagle.netty4.{Netty4Transporter, Netty4Listener}
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.stats.{StatsReceiver, ExceptionStatsHandler}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
@@ -34,6 +34,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
 import scala.collection.mutable
+import scala.util.hashing.MurmurHash3
 
 private[finagle] object MemcachedTracingFilter {
 
@@ -196,7 +197,7 @@ object Memcached extends finagle.Client[Command, Response]
         "com.twitter.finagle.memcached.UseNetty4"
 
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
+      private[this] def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
 
       implicit val param: Stack.Param[MemcachedImpl] = Stack.Param(
         if (useNetty4) Netty4

@@ -8,8 +8,8 @@ import com.twitter.finagle.kestrel.protocol._
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty3ClientFramer}
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Stats, Tracer => _, _}
+import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty4ClientFramer}
+import com.twitter.finagle.param.{Stats, ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service._
@@ -19,6 +19,7 @@ import com.twitter.finagle.tracing.{ClientRequestTracingFilter, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
+import scala.util.hashing.MurmurHash3
 
 object Kestrel {
 
@@ -51,7 +52,7 @@ object Kestrel {
 
       private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.kestrel.UseNetty4"
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
+      private[this] def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
 
       implicit val param: Stack.Param[KestrelImpl] = Stack.Param(
          if (useNetty4) Netty4

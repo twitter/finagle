@@ -10,6 +10,7 @@ import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
+import scala.util.hashing.MurmurHash3
 
 /**
  * Package netty4 implements the bottom finagle primitives:
@@ -44,7 +45,7 @@ package object netty4 {
     /**
      * Checks (via a toggle) if pooling of receive buffers is enabled on this instanace.
      */
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+    def apply(): Boolean = underlying(MurmurHash3.stringHash(ServerInfo().id))
   }
 
   // We allocate one arena per a worker thread to reduce contention. By default

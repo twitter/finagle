@@ -5,16 +5,14 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.{
   DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request,
-  Response, Toggles
-}
+  Response, Toggles}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.http.netty.{
-  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport
-}
+  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter,Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.netty4.http.exp.{Netty4HttpTransporter, Netty4HttpListener}
+import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -24,6 +22,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
 import java.net.SocketAddress
+import scala.util.hashing.MurmurHash3
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -53,7 +52,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   // Toggles transport implementation to Netty 4.
   private[this] object useNetty4 {
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseNetty4")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+    def apply(): Boolean = underlying(MurmurHash3.stringHash(ServerInfo().id))
   }
 
   /**
@@ -103,7 +102,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     http.Toggles(ServerErrorsAsFailuresToggleId)
 
   private[this] def treatServerErrorsAsFailures: Boolean =
-    serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
+    serverErrorsAsFailuresToggle(MurmurHash3.stringHash(ServerInfo().id))
 
   /** exposed for testing */
   private[finagle] val responseClassifierParam: param.ResponseClassifier = {
