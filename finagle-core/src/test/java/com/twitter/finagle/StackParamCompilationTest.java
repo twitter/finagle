@@ -20,6 +20,7 @@ import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
 import com.twitter.finagle.netty3.param.Netty3Timer;
+import com.twitter.finagle.param.ExceptionStatsHandler;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
 import com.twitter.finagle.param.Monitor;
@@ -119,6 +120,11 @@ public class StackParamCompilationTest {
         .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
 
     ClientBuilder.get().failFast(true);
+  }
+
+  @Test
+  public void testDefaults() {
+      Stack.Param<ExceptionStatsHandler> param = ExceptionStatsHandler.param();
   }
 
   @Test

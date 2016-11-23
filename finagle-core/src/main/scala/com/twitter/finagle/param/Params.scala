@@ -15,7 +15,7 @@ case class Label(label: String) {
 object Label {
   private[finagle] val Default: String = ""
 
-  implicit val param = Stack.Param(Label(Default))
+  implicit val param: Stack.Param[Label] = Stack.Param(Label(Default))
 }
 
 /**
@@ -27,7 +27,7 @@ case class ProtocolLibrary(name: String) {
     (this, ProtocolLibrary.param)
 }
 object ProtocolLibrary {
-  implicit val param = Stack.Param(ProtocolLibrary("not-specified"))
+  implicit val param: Stack.Param[ProtocolLibrary] = Stack.Param(ProtocolLibrary("not-specified"))
 }
 
 /**
@@ -47,7 +47,7 @@ case class Timer(timer: com.twitter.util.Timer) {
     (this, Timer.param)
 }
 object Timer {
-  implicit val param = Stack.Param(Timer(util.DefaultTimer.twitter))
+  implicit val param: Stack.Param[Timer] = Stack.Param(Timer(util.DefaultTimer.twitter))
 }
 
 /**
@@ -78,7 +78,7 @@ object HighResTimer {
       override def stop(): Unit = ()
     }
 
-  implicit val param = Stack.Param(HighResTimer(Default))
+  implicit val param: Stack.Param[HighResTimer] = Stack.Param(HighResTimer(Default))
 }
 
 /**
@@ -90,7 +90,7 @@ case class Logger(log: java.util.logging.Logger) {
     (this, Logger.param)
 }
 object Logger {
-  implicit val param = Stack.Param(Logger(util.DefaultLogger))
+  implicit val param: Stack.Param[Logger] = Stack.Param(Logger(util.DefaultLogger))
 }
 
 /**
@@ -103,7 +103,7 @@ case class Stats(statsReceiver: stats.StatsReceiver) {
     (this, Stats.param)
 }
 object Stats {
-  implicit val param = Stack.Param(Stats(stats.DefaultStatsReceiver))
+  implicit val param: Stack.Param[Stats] = Stack.Param(Stats(stats.DefaultStatsReceiver))
 }
 
 /**
@@ -115,7 +115,7 @@ case class Monitor(monitor: com.twitter.util.Monitor) {
     (this, Monitor.param)
 }
 object Monitor {
-  implicit val param = Stack.Param(Monitor(NullMonitor))
+  implicit val param: Stack.Param[Monitor] = Stack.Param(Monitor(NullMonitor))
 }
 
 /**
@@ -148,7 +148,7 @@ case class ResponseClassifier(
     (this, ResponseClassifier.param)
 }
 object ResponseClassifier {
-  implicit val param = Stack.Param(ResponseClassifier(
+  implicit val param: Stack.Param[ResponseClassifier] = Stack.Param(ResponseClassifier(
     com.twitter.finagle.service.ResponseClassifier.Default))
 }
 
@@ -162,7 +162,7 @@ case class Reporter(reporter: util.ReporterFactory) {
     (this, Reporter.param)
 }
 object Reporter {
-  implicit val param = Stack.Param(Reporter(util.LoadedReporterFactory))
+  implicit val param: Stack.Param[Reporter] = Stack.Param(Reporter(util.LoadedReporterFactory))
 }
 
 /**
@@ -175,7 +175,7 @@ case class Tracer(tracer: tracing.Tracer) {
     (this, Tracer.param)
 }
 object Tracer {
-  implicit val param = Stack.Param(Tracer(tracing.DefaultTracer))
+  implicit val param: Stack.Param[Tracer] = Stack.Param(Tracer(tracing.DefaultTracer))
 }
 
 /**
@@ -189,7 +189,7 @@ object Tracer {
  */
 case class ExceptionStatsHandler(categorizer: stats.ExceptionStatsHandler)
 object ExceptionStatsHandler {
-  implicit val param = new Stack.Param[ExceptionStatsHandler] {
+  implicit val param: Stack.Param[ExceptionStatsHandler] = new Stack.Param[ExceptionStatsHandler] {
     // Note, this is lazy to avoid potential failures during
     // static initialization.
     lazy val default = ExceptionStatsHandler(StatsFilter.DefaultExceptions)
