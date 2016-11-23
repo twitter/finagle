@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
+    <title>Clients &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.39.0-SNAPSHOT',
+        VERSION:     '6.40.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -205,6 +205,13 @@ bytes were written to the wire and protocol level NACKs) will be automatically r
 These retries come out of a <code class="docutils literal"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.</p>
+<p>Some failures may also be known as unsafe to retry. If a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a>
+is flagged <code class="docutils literal"><span class="pre">NonRetryable</span></code>, the <cite>Retries</cite> module will not make any attempts to retry the request and
+pass along the failure as is. A <cite>NonRetryable</cite> failure may be used in situations where a client
+determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
+be skipped. Additionally, a service may reject a request that is malformed and thus pointless to retry.
+While Finagle respects the <cite>NonRetryable</cite> flag internally, users should also take care to respect it
+when creating retry filters of their own.</p>
 <p>The <cite>Retries</cite> module is configured with two parameters:</p>
 <ol class="arabic simple">
 <li><code class="docutils literal"><span class="pre">RetryBudget</span></code> - determines whether there is available budget to retry a request</li>
@@ -763,6 +770,8 @@ straightforward manner, for example, in a ThriftMux client:</p>
 defined for a given request/response pair then <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code>
 is used. This gives us the simple classification rules of responses that are
 <code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
+<div class="section" id="custom-classifiers">
+<h3>Custom Classifiers<a class="headerlink" href="#custom-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>Writing a custom classifier requires understanding of the few classes used. A
 <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
 <code class="docutils literal"><span class="pre">ResponseClass</span></code>.</p>
@@ -792,6 +801,9 @@ Here is an example that counts HTTP 503s as failures:</p>
 <p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn&#8217;t total which is ok due to Finagle
 always using user defined classifiers in combination with
 <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
+</div>
+<div class="section" id="thrift-and-thriftmux-classifiers">
+<h3>Thrift and ThriftMux Classifiers<a class="headerlink" href="#thrift-and-thriftmux-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
@@ -830,10 +842,15 @@ deserialized <code class="docutils literal"><span class="pre">NotFoundException<
 &#8220;successful&#8221; response can be examined to enable services using status codes to
 classify errors. Lastly (#3), the request can be introspected to make the
 decision.</p>
+</div>
+<div class="section" id="other-details">
+<h3>Other Details<a class="headerlink" href="#other-details" title="Permalink to this headline">¶</a></h3>
 <p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
 failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
 as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
-<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens.</p>
+<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
+<a class="reference external" href="http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
+for more details.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="backoff" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -917,6 +934,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 </table>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -971,7 +989,12 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#response-classification">Response Classification</a></li>
+<li><a class="reference internal" href="#response-classification">Response Classification</a><ul>
+<li><a class="reference internal" href="#custom-classifiers">Custom Classifiers</a></li>
+<li><a class="reference internal" href="#thrift-and-thriftmux-classifiers">Thrift and ThriftMux Classifiers</a></li>
+<li><a class="reference internal" href="#other-details">Other Details</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

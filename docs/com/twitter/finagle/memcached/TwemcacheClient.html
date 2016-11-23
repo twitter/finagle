@@ -113,7 +113,17 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#append" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="append(key:String,flags:Int,expiry:com.twitter.util.Time,value:T):com.twitter.util.Future[Boolean]"></a>
       <a id="append(String,Int,Time,Buf):Future[Boolean]"></a>
@@ -131,7 +141,17 @@
       </a>
     </span>
       <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't exist, the
-operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#checkAndSet" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="checkAndSet(key:String,flags:Int,expiry:com.twitter.util.Time,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]"></a>
       <a id="checkAndSet(String,Int,Time,Buf,Buf):Future[CasResult]"></a>
@@ -153,10 +173,19 @@ changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
 changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
-opaquely, but in reality it is a string-encoded u64.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
+opaquely, but in reality it is a string-encoded u64.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
        operation failed because someone else had changed the value,
-       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#gets">gets</a> and <a href="BaseClient.html#getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#getsResult">getsResult</a> for retreiving the cas token.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#decr" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="decr(key:String,delta:Long):com.twitter.util.Future[Option[Long]]"></a>
       <a id="decr(String,Long):Future[Option[Long]]"></a>
@@ -173,8 +202,8 @@ opaquely, but in reality it is a string-encoded u64.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an JLong if it is parseable.
-This operation has no effect if there is no value there already.
+      <p class="shortcomment cmt">Decrement the <code>key</code> by <code>n</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement the <code>key</code> by <code>n</code>.</p><p>Interprets the stored value for <code>key</code> as a Long if it is parseable
+as a decimal representation of a 64-bit unsigned integer.</p><p>This operation has no effect if there is no value there already.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#delete" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="delete(key:String):com.twitter.util.Future[Boolean]"></a>
@@ -211,7 +240,7 @@ This operation has no effect if there is no value there already.
     </span>
       <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetResult] that
 encapsulates hits, misses and failures.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#getsResult">getsResult</a> if you need &quot;cas unique&quot; tokens.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#getsResult" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]"></a>
       <a id="getsResult(Iterable[String]):Future[GetsResult]"></a>
@@ -231,7 +260,7 @@ encapsulates hits, misses and failures.
       <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server. Returns a Future[GetsResult] that
 encapsulates hits, misses and failures. This variant includes the casToken
 from memcached.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">checkAndSet</a> for using the token.</p></span><span class="cmt"><p><a href="BaseClient.html#getResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#getResult">getResult</a> if you do not need &quot;cas unique&quot; tokens.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient#getvResult" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="getvResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]"></a>
       <a id="getvResult(Iterable[String]):Future[GetsResult]"></a>
@@ -266,8 +295,8 @@ of GetsResult since the data format for gets and getv are identical</p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parseable.
-This operation has no effect if there is no value there already.
+      <p class="shortcomment cmt">Increment the <code>key</code> by <code>delta</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the <code>key</code> by <code>delta</code>.</p><p>Interprets the stored value for <code>key</code> as a Long if it is parseable
+as a decimal representation of a 64-bit unsigned integer.</p><p>This operation has no effect if there is no value there already.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#prepend" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="prepend(key:String,flags:Int,expiry:com.twitter.util.Time,value:T):com.twitter.util.Future[Boolean]"></a>
@@ -286,7 +315,17 @@ This operation has no effect if there is no value there already.
       </a>
     </span>
       <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key doesn't
-exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+exist, the operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#release" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="release():Unit"></a>
       <a id="release():Unit"></a>
@@ -323,7 +362,17 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
       </a>
     </span>
       <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
-operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+operation has no effect.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#set" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="set(key:String,flags:Int,expiry:com.twitter.util.Time,value:T):com.twitter.util.Future[Unit]"></a>
       <a id="set(String,Int,Time,Buf):Future[Unit]"></a>
@@ -340,7 +389,17 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#stats" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="stats(args:Option[String]):com.twitter.util.Future[Seq[String]]"></a>
       <a id="stats(Option[String]):Future[Seq[String]]"></a>
@@ -357,7 +416,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Send a stats command with optional arguments to the server</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with optional arguments to the server</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command with optional arguments to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with optional arguments to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient#upsert" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="upsert(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,version:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
       <a id="upsert(String,Int,Time,Buf,Buf):Future[Boolean]"></a>
@@ -464,7 +523,8 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p><p>Neither flags nor expiry are supplied.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#append" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="append(key:String,value:T):com.twitter.util.Future[Boolean]"></a>
       <a id="append(String,Buf):Future[Boolean]"></a>
@@ -516,7 +576,8 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Deserialize from the bytes in a <code>Buf</code> into the client's type, <code>T</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Deserialize from the bytes in a <code>Buf</code> into the client's type, <code>T</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#checkAndSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]"></a>
       <a id="checkAndSet(String,Buf,Buf):Future[CasResult]"></a>
@@ -538,10 +599,10 @@ since the value was last retrieved.</p><div class="fullcomment"><div class="comm
 since the value was last retrieved.  This is enforced by passing a
 <code>casUnique</code> token extracted from a <code>gets</code> command.  If the <code>casUnique</code>
 token matches the one on the server, the value is replaced.  We treat the
-&quot;cas unique&quot; token opaquely, but in reality it is a string-encoded u64.
+&quot;cas unique&quot; token opaquely, but in reality it is a string-encoded u64.</p><p>Neither flags nor expiry are supplied.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
        operation failed because someone else had changed the value,
-       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#gets">gets</a> and <a href="BaseClient.html#getsResult(keys:Iterable[String]):com.twitter.util.Future[com.twitter.finagle.memcached.GetsResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#getsResult">getsResult</a> for retreiving the cas token.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -581,7 +642,9 @@ token matches the one on the server, the value is replaced.  We treat the
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Decrement the <code>key</code> by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement the <code>key</code> by 1.</p><p>Interprets the stored value for <code>key</code> as a Long if it is parseable
+as a decimal representation of a 64-bit unsigned integer.</p><p>This operation has no effect if there is no value there already.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -655,7 +718,8 @@ token matches the one on the server, the value is replaced.  We treat the
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, T] of all of the keys that the server had.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, T] of all of the keys that the server had.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#gets">gets</a> if you need a &quot;cas unique&quot; token.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get(key:String):com.twitter.util.Future[Option[T]]"></a>
       <a id="get(String):Future[Option[Buf]]"></a>
@@ -673,7 +737,7 @@ token matches the one on the server, the value is replaced.  We treat the
       </a>
     </span>
       <p class="shortcomment cmt">Get a key from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a key from the server.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>None</code> if there is no value stored for <code>key</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#gets(keys:Iterable[String]):com.twitter.util.Future[Map[String,(T,com.twitter.io.Buf)]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#gets">gets</a> if you need a &quot;cas unique&quot; token.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -712,7 +776,7 @@ token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys
 token.  The token is treated opaquely by the memcache client but
 is in reality a string-encoded u64.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, (T, Buf)] of all the
-keys the server had, together with their &quot;cas unique&quot; token</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+keys the server had, together with their &quot;cas unique&quot; token</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">checkAndSet</a> for using the token.</p></span><span class="cmt"><p><a href="BaseClient.html#get(keys:Iterable[String]):com.twitter.util.Future[Map[String,T]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#get">get</a> if you do not need a &quot;cas unique&quot; token.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#gets" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="gets(key:String):com.twitter.util.Future[Option[(T,com.twitter.io.Buf)]]"></a>
       <a id="gets(String):Future[Option[(Buf,Buf)]]"></a>
@@ -729,10 +793,10 @@ keys the server had, together with their &quot;cas unique&quot; token</p></dd></
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Get a key from the server, with a &quot;cas unique&quot; token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a key from the server, with a &quot;cas unique&quot; token.  The token
+      <p class="shortcomment cmt">Get a key from the server along with a &quot;cas unique&quot; token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a key from the server along with a &quot;cas unique&quot; token.  The token
 is treated opaquely by the memcache client but is in reality a
 string-encoded u64.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>None</code> if there is no value stored for <code>key</code>.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">checkAndSet</a> for using the token.</p></span><span class="cmt"><p><a href="BaseClient.html#get(keys:Iterable[String]):com.twitter.util.Future[Map[String,T]]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#get">get</a> if you do not need a &quot;cas unique&quot; token.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient#getv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getv(keys:Iterable[String]):com.twitter.util.Future[Map[String,(com.twitter.io.Buf,com.twitter.io.Buf)]]"></a>
       <a id="getv(Iterable[String]):Future[Map[String,(Buf,Buf)]]"></a>
@@ -804,7 +868,9 @@ keys the server had, together with their &quot;version&quot; token</p></dd></dl>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Increment the <code>key</code> by <code>1</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Increment the <code>key</code> by <code>1</code>.</p><p>Interprets the stored value for <code>key</code> as a Long if it is parseable
+as a decimal representation of a 64-bit unsigned integer.</p><p>This operation has no effect if there is no value there already.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -890,7 +956,8 @@ keys the server had, together with their &quot;version&quot; token</p></dd></dl>
       </a>
     </span>
       <p class="shortcomment cmt">Prepend a set of bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend a set of bytes to the beginning of an existing key. If the key
-doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+doesn't exist, the operation has no effect.</p><p>Neither flags nor expiry are supplied.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#quit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="quit():com.twitter.util.Future[Unit]"></a>
       <a id="quit():Future[Unit]"></a>
@@ -908,7 +975,8 @@ doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"
       </a>
     </span>
       <p class="shortcomment cmt">Send a quit command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a quit command to the server. Alternative to release, for
-protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>none</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+protocol compatibility.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#replace" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replace(key:String,value:T):com.twitter.util.Future[Boolean]"></a>
       <a id="replace(String,Buf):Future[Boolean]"></a>
@@ -926,7 +994,8 @@ protocol compatability.</p></div><dl class="paramcmts block"><dt>returns</dt><dd
       </a>
     </span>
       <p class="shortcomment cmt">Replace an item if it exists.</p><div class="fullcomment"><div class="comment cmt"><p>Replace an item if it exists. If it doesn't exist, the operation has no
-effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+effect.</p><p>Neither flags nor expiry are supplied.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#set" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="set(key:String,value:T):com.twitter.util.Future[Unit]"></a>
       <a id="set(String,Buf):Future[Unit]"></a>
@@ -943,7 +1012,8 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing values.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing values.</p><p>Neither flags nor expiry are supplied.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#stats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats():com.twitter.util.Future[Seq[String]]"></a>
       <a id="stats():Future[Seq[String]]"></a>
@@ -960,7 +1030,7 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#stats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats(args:String):com.twitter.util.Future[Seq[String]]"></a>
       <a id="stats(String):Future[Seq[String]]"></a>
@@ -977,7 +1047,7 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command with the given <code>args</code> to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with the given <code>args</code> to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -1110,7 +1180,7 @@ newer than the provided one.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withBytes</span><span class="result">: <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <span class="name">withBytes</span><span class="result">: <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.TwemcacheClient@withBytes:com.twitter.finagle.memcached.BaseClient[Array[Byte]]" title="Permalink" target="_top">
@@ -1163,11 +1233,11 @@ changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
 changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
-opaquely, but in reality it is a string-encoded u64.
+opaquely, but in reality it is a string-encoded u64.</p><p>Neither flags nor expiry are supplied.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <code>checkAndSet</code> which returns a higher fidelity
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">checkAndSet</a> which returns a higher fidelity
       return value</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#cas" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
@@ -1190,11 +1260,20 @@ changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
 changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
-opaquely, but in reality it is a string-encoded u64.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>Annotations</dt><dd>
+opaquely, but in reality it is a string-encoded u64.</p><p><code>flags</code> is an arbitrary integer that the server stores along with
+              the data and sends back when the item is retrieved.
+              Clients may use this as a bit field to store data-specific
+              information; this field is opaque to the server.</p><p><code>expiry</code> is the expiration time for entries. If it is Time.epoch<code>,
+               </code>Time.Top<code>, </code>Time.Bottom<code> or </code>Time.Undefined<code> then the item
+               never expires, although it may be deleted from the cache to
+               make room for other items. This is also the case for values
+               where the number of seconds is larger than </code>Long.MaxValue<code>.
+               Otherwise, clients will not be able to retrieve this item after
+               the expiration time arrives (measured on the cache server).
+</code></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <code>checkAndSet</code> which returns a higher fidelity
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">checkAndSet</a> which returns a higher fidelity
       return value</p></span></dd></dl></div>
     </li></ol>
             </div>

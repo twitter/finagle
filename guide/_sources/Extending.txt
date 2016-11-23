@@ -82,8 +82,8 @@ to extract the final ``ServiceFactory`` that represents the entirety of the stac
 we simply call ``stack.make(params)``.
 
 Finagle defines default (polymorphic) stacks for both
-:api:`clients <com.twitter.finagle.client.StackClient$.newStack>` and
-:api:`servers <com.twitter.finagle.server.StackServer$.newStack>`.
+:api:`clients <com.twitter.finagle.client.StackClient$@newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>` and
+:api:`servers <com.twitter.finagle.server.StackServer$@newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>`.
 
 We'll now discuss the constituent parts of Finagle's clients and servers.
 

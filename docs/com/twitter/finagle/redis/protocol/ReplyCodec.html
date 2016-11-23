@@ -45,13 +45,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ReplyCodec</span><span class="result"> extends <a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a></span>
+        <span class="name">ReplyCodec</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +69,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.redis.protocol.ReplyCodec"><span>ReplyCodec</span></li><li class="in" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec"><span>UnifiedProtocolCodec</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.redis.protocol.ReplyCodec"><span>ReplyCodec</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -108,27 +108,7 @@
     </li></ol>
             </div>
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec.ByteArrays" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ByteArrays=List[Array[Byte]]"></a>
-      <a id="ByteArrays:ByteArrays"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ByteArrays</span><span class="result"> = <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.immutable.List" class="extype" target="_top">List</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ReplyCodec@ByteArrays=List[Array[Byte]]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         
 
@@ -293,40 +273,6 @@
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec#decodeRequestLines" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decodeRequestLines[T&lt;:AnyRef](i:Long,lines:UnifiedProtocolCodec.this.ByteArrays,doneFn:UnifiedProtocolCodec.this.ByteArrays=&gt;T):com.twitter.finagle.redis.naggati.NextStep"></a>
-      <a id="decodeRequestLines[T&lt;:AnyRef](Long,ByteArrays,(ByteArrays)⇒T):NextStep"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decodeRequestLines</span><span class="tparams">[<span name="T">T &lt;: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>]</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="lines">lines: <a href="#ByteArrays=List[Array[Byte]]" class="extmbr" name="com.twitter.finagle.redis.protocol.ReplyCodec.ByteArrays">ByteArrays</a></span>, <span name="doneFn">doneFn: (<a href="#ByteArrays=List[Array[Byte]]" class="extmbr" name="com.twitter.finagle.redis.protocol.ReplyCodec.ByteArrays">ByteArrays</a>) ⇒ <span class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec.decodeRequestLines.T">T</span></span>)</span><span class="result">: <a href="../naggati/NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ReplyCodec@decodeRequestLines[T&lt;:AnyRef](i:Long,lines:UnifiedProtocolCodec.this.ByteArrays,doneFn:UnifiedProtocolCodec.this.ByteArrays=&gt;T):com.twitter.finagle.redis.naggati.NextStep" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec#decodeUnifiedFormat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decodeUnifiedFormat[T&lt;:AnyRef](argCount:Long,doneFn:UnifiedProtocolCodec.this.ByteArrays=&gt;T):com.twitter.finagle.redis.naggati.NextStep"></a>
-      <a id="decodeUnifiedFormat[T&lt;:AnyRef](Long,(ByteArrays)⇒T):NextStep"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decodeUnifiedFormat</span><span class="tparams">[<span name="T">T &lt;: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>]</span><span class="params">(<span name="argCount">argCount: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="doneFn">doneFn: (<a href="#ByteArrays=List[Array[Byte]]" class="extmbr" name="com.twitter.finagle.redis.protocol.ReplyCodec.ByteArrays">ByteArrays</a>) ⇒ <span class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec.decodeUnifiedFormat.T">T</span></span>)</span><span class="result">: <a href="../naggati/NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ReplyCodec@decodeUnifiedFormat[T&lt;:AnyRef](argCount:Long,doneFn:UnifiedProtocolCodec.this.ByteArrays=&gt;T):com.twitter.finagle.redis.naggati.NextStep" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -598,9 +544,7 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">
-              <h3>Inherited from <a href="UnifiedProtocolCodec.html" class="extype" name="com.twitter.finagle.redis.protocol.UnifiedProtocolCodec">UnifiedProtocolCodec</a></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

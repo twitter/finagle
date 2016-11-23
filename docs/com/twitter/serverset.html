@@ -45,7 +45,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">serverset</span><span class="result"> extends <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <span class="extype" name="com.twitter.BaseServersetNamer">BaseServersetNamer</span></span>
+        <span class="name">serverset</span><span class="result"> extends <a href="finagle/serverset2/naming/IdPrefixingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer">IdPrefixingNamer</a></span>
       </span>
       </h4>
       
@@ -56,7 +56,7 @@ For example:</p><pre>/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<spa
 the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.BaseServersetNamer">BaseServersetNamer</span>, <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="finagle/serverset2/naming/IdPrefixingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer">IdPrefixingNamer</a>, <a href="finagle/serverset2/naming/TransformingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.TransformingNamer">TransformingNamer</a>, <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -74,7 +74,7 @@ the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.serverset"><span>serverset</span></li><li class="in" name="com.twitter.BaseServersetNamer"><span>BaseServersetNamer</span></li><li class="in" name="com.twitter.finagle.Namer"><span>Namer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.serverset"><span>serverset</span></li><li class="in" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer"><span>IdPrefixingNamer</span></li><li class="in" name="com.twitter.finagle.serverset2.naming.TransformingNamer"><span>TransformingNamer</span></li><li class="in" name="com.twitter.finagle.Namer"><span>Namer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -106,6 +106,23 @@ the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#com.twitter.serverset@&lt;init&gt;():com.twitter.serverset" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.serverset#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(zk2:com.twitter.finagle.serverset2.Zk2Resolver):com.twitter.serverset"></a>
+      <a id="&lt;init&gt;:serverset"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serverset</span><span class="params">(<span name="zk2">zk2: <a href="finagle/serverset2/Zk2Resolver.html" class="extype" name="com.twitter.finagle.serverset2.Zk2Resolver">Zk2Resolver</a></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#com.twitter.serverset@&lt;init&gt;(zk2:com.twitter.finagle.serverset2.Zk2Resolver):com.twitter.serverset" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -187,23 +204,6 @@ the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.serverset#bind" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bind(path:com.twitter.finagle.Path):Option[com.twitter.finagle.Name.Bound]"></a>
-      <a id="bind(Path):Option[Bound]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="path">path: <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="finagle/Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@bind(path:com.twitter.finagle.Path):Option[com.twitter.finagle.Name.Bound]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Bind a name.</p><div class="fullcomment"><div class="comment cmt"><p>Bind a name.</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.serverset">serverset</a> → BaseServersetNamer</dd></dl></div>
     </li><li name="com.twitter.finagle.Namer#bind" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bind(tree:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]"></a>
       <a id="bind(NameTree[Path]):Activity[NameTree[Bound]]"></a>
@@ -355,7 +355,7 @@ to 100 is allowed.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.BaseServersetNamer#lookup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.serverset2.naming.TransformingNamer#lookup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lookup(path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name]]"></a>
       <a id="lookup(Path):Activity[NameTree[Name]]"></a>
       <h4 class="signature">
@@ -374,7 +374,7 @@ to 100 is allowed.
       <p class="shortcomment cmt">Translate a <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> into a
 <a href="finagle/NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Translate a <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> into a
 <a href="finagle/NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseServersetNamer → <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="finagle/serverset2/naming/TransformingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.TransformingNamer">TransformingNamer</a> → <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -426,57 +426,6 @@ to 100 is allowed.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.BaseServersetNamer#resolve0" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolve0(spec:String):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="resolve0(String):Var[Addr]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">resolve0</span><span class="params">(<span name="spec">spec: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="finagle/Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@resolve0(spec:String):com.twitter.util.Var[com.twitter.finagle.Addr]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Resolve a resolver string to a Var[Addr].</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a resolver string to a Var[Addr].</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>BaseServersetNamer</dd></dl></div>
-    </li><li name="com.twitter.BaseServersetNamer#resolveServerset" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolveServerset(hosts:String,path:String,endpoint:Option[String],shardId:Option[Int]):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="resolveServerset(String,String,Option[String],Option[Int]):Var[Addr]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">resolveServerset</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="finagle/Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@resolveServerset(hosts:String,path:String,endpoint:Option[String],shardId:Option[Int]):com.twitter.util.Var[com.twitter.finagle.Addr]" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>BaseServersetNamer</dd></dl></div>
-    </li><li name="com.twitter.BaseServersetNamer#resolverScheme" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolverScheme:String"></a>
-      <a id="resolverScheme:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">resolverScheme</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@resolverScheme:String" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>BaseServersetNamer</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -511,6 +460,23 @@ to 100 is allowed.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer#transform" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="transform(bound:com.twitter.finagle.Name.Bound):com.twitter.finagle.Name.Bound"></a>
+      <a id="transform(Bound):Bound"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">transform</span><span class="params">(<span name="bound">bound: <a href="finagle/Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>)</span><span class="result">: <a href="finagle/Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#com.twitter.serverset@transform(bound:com.twitter.finagle.Name.Bound):com.twitter.finagle.Name.Bound" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="finagle/serverset2/naming/IdPrefixingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer">IdPrefixingNamer</a> → <a href="finagle/serverset2/naming/TransformingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.TransformingNamer">TransformingNamer</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -589,8 +555,10 @@ to 100 is allowed.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.BaseServersetNamer">
-              <h3>Inherited from <span class="extype" name="com.twitter.BaseServersetNamer">BaseServersetNamer</span></h3>
+        <div class="parent" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer">
+              <h3>Inherited from <a href="finagle/serverset2/naming/IdPrefixingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.IdPrefixingNamer">IdPrefixingNamer</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.serverset2.naming.TransformingNamer">
+              <h3>Inherited from <a href="finagle/serverset2/naming/TransformingNamer.html" class="extype" name="com.twitter.finagle.serverset2.naming.TransformingNamer">TransformingNamer</a></h3>
             </div><div class="parent" name="com.twitter.finagle.Namer">
               <h3>Inherited from <a href="finagle/Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></h3>
             </div><div class="parent" name="scala.AnyRef">

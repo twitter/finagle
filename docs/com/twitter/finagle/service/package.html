@@ -376,7 +376,8 @@ for details.
       <p class="shortcomment cmt">Used by <a href="../param/ResponseClassifier.html" class="extype" name="com.twitter.finagle.param.ResponseClassifier">response classification</a>
 to indicate synthetic failures that are not <code>Exceptions</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Used by <a href="../param/ResponseClassifier.html" class="extype" name="com.twitter.finagle.param.ResponseClassifier">response classification</a>
 to indicate synthetic failures that are not <code>Exceptions</code>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">com.twitter.finagle.service.StatsFilter</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception" target="_blank">FAQ</a>
+     for more details.</p></span><span class="cmt"><p><a href="StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">com.twitter.finagle.service.StatsFilter</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.ResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]"></a>
       <a id="ResponseClassifier:ResponseClassifier"></a>
@@ -648,7 +649,7 @@ request failures.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that a timeout to requests.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that a timeout to requests.</p><p>If the response is not satisfied within the <code>timeout</code>,
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a timeout to requests.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a timeout to requests.</p><p>If the response is not satisfied within the <code>timeout</code>,
 the <span class="extype" name="Future">Future</span> will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The sections on
      <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">clients</a>

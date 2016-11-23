@@ -167,6 +167,27 @@
 interruption.</p><div class="fullcomment"><div class="comment cmt"><p>Flag interrupted indicates that the error was caused due to an
 interruption. (e.g., by invoking <span class="extype" name="Future.raise">Future.raise</span>.)
 </p></div></div>
+    </li><li name="com.twitter.finagle.Failure#NonRetryable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NonRetryable:Long"></a>
+      <a id="NonRetryable:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NonRetryable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Failure$@NonRetryable:Long" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Flag nonretryable indicates that the action that caused this failure should
+not be re-issued.</p><div class="fullcomment"><div class="comment cmt"><p>Flag nonretryable indicates that the action that caused this failure should
+not be re-issued. This failure should be propagated back along the call
+chain as far as possible.
+</p></div></div>
     </li><li name="com.twitter.finagle.Failure#Rejected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Rejected:Long"></a>
       <a id="Rejected:Long"></a>

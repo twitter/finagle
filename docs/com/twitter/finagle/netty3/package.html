@@ -217,24 +217,6 @@ that yields <code><code>Out</code></code>-typed upstream messages and accepts
 that yields <code><code>Out</code></code>-typed upstream messages and accepts
 <code><code>In</code></code>-typed downstream messages.
 </p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3ListenerTLSConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3ListenerTLSConfigextendsProductwithSerializable"></a>
-      <a id="Netty3ListenerTLSConfig:Netty3ListenerTLSConfig"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Netty3ListenerTLSConfig.html"><span class="name">Netty3ListenerTLSConfig</span></a><span class="params">(<span name="newEngine">newEngine: () ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3ListenerTLSConfigextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Netty3 TLS configuration.</p><div class="fullcomment"><div class="comment cmt"><p>Netty3 TLS configuration.
-</p></div><dl class="paramcmts block"><dt class="param">newEngine</dt><dd class="cmt"><p>Creates a new SSL engine</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a>
       <a id="Netty3Transporter[In,Out]:Netty3Transporter[In,Out]"></a>
@@ -259,25 +241,6 @@ endpoint.
 </p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of requests. The given pipeline must consume
 <code>Req</code>-typed objects</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of replies. The given pipeline must produce
 objects of this type.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3TransporterTLSConfigextendsProductwithSerializable"></a>
-      <a id="Netty3TransporterTLSConfig:Netty3TransporterTLSConfig"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Netty3TransporterTLSConfig.html"><span class="name">Netty3TransporterTLSConfig</span></a><span class="params">(<span name="newEngine">newEngine: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a></span>, <span name="verifyHost">verifyHost: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3TransporterTLSConfigextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Netty3 TLS configuration.</p><div class="fullcomment"><div class="comment cmt"><p>Netty3 TLS configuration.
-</p></div><dl class="paramcmts block"><dt class="param">newEngine</dt><dd class="cmt"><p>Creates a new SSL Engine</p></dd><dt class="param">verifyHost</dt><dd class="cmt"><p>If specified, checks the session hostname
-against the given value.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.SimpleChannelSnooper" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleChannelSnooperextendsChannelSnooper"></a>
       <a id="SimpleChannelSnooper:SimpleChannelSnooper"></a>
@@ -439,6 +402,23 @@ performed.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.netty3.package@Netty3Transporter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.netty3#WorkerPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WorkerPool:org.jboss.netty.channel.socket.nio.NioWorkerPool"></a>
+      <a id="WorkerPool:NioWorkerPool"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">WorkerPool</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.socket.nio.NioWorkerPool">NioWorkerPool</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.package@WorkerPool:org.jboss.netty.channel.socket.nio.NioWorkerPool" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

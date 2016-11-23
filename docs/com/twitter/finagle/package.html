@@ -1148,7 +1148,7 @@ and thus lookup results are represented by a <a href="https://twitter.github.io/
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.NoBrokersAvailableException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="NoBrokersAvailableExceptionextendsRequestException"></a>
+      <a id="NoBrokersAvailableExceptionextendsRequestExceptionwithSourcedException"></a>
       <a id="NoBrokersAvailableException:NoBrokersAvailableException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1156,10 +1156,10 @@ and thus lookup results are represented by a <a href="https://twitter.github.io/
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="NoBrokersAvailableException.html"><span class="name">NoBrokersAvailableException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
+        <a href="NoBrokersAvailableException.html"><span class="name">NoBrokersAvailableException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@NoBrokersAvailableExceptionextendsRequestException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@NoBrokersAvailableExceptionextendsRequestExceptionwithSourcedException" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1664,7 +1664,7 @@ that is unavailable. This constitutes a fail-stop condition.
 This is useful if you want to wrap-but-modify an existing service.
 </p></div></div>
     </li><li name="com.twitter.finagle.ServiceTimeoutException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ServiceTimeoutExceptionextendsExceptionwithWriteExceptionwithServiceExceptionwithTimeoutException"></a>
+      <a id="ServiceTimeoutExceptionextendsExceptionwithWriteExceptionwithServiceExceptionwithTimeoutExceptionwithNoStackTrace"></a>
       <a id="ServiceTimeoutException:ServiceTimeoutException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1672,10 +1672,10 @@ This is useful if you want to wrap-but-modify an existing service.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServiceTimeoutException.html"><span class="name">ServiceTimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a></span>
+        <a href="ServiceTimeoutException.html"><span class="name">ServiceTimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="ServiceException.html" class="extype" name="com.twitter.finagle.ServiceException">ServiceException</a> with <a href="TimeoutException.html" class="extype" name="com.twitter.finagle.TimeoutException">TimeoutException</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ServiceTimeoutExceptionextendsExceptionwithWriteExceptionwithServiceExceptionwithTimeoutException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@ServiceTimeoutExceptionextendsExceptionwithWriteExceptionwithServiceExceptionwithTimeoutExceptionwithNoStackTrace" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1879,6 +1879,24 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
                 <span class="name">@State</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.StreamClosedException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamClosedExceptionextendsChannelExceptionwithNoStackTrace"></a>
+      <a id="StreamClosedException:StreamClosedException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamClosedException.html"><span class="name">StreamClosedException</span></a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@StreamClosedExceptionextendsChannelExceptionwithNoStackTrace" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a given stream was closed, for instance if the stream
+was reset by a peer or a proxy.</p>
     </li><li name="com.twitter.finagle.ThriftRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ThriftRichClientextendsAnyRef"></a>
       <a id="ThriftRichClient:ThriftRichClient"></a>
@@ -2140,63 +2158,6 @@ to assign labels to groups that ascribe meaning to them.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMuxClientLike" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftMuxClientLikeextendsStackBasedClient[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]withStack.Parameterized[com.twitter.finagle.ThriftMuxClientLike]withStack.Transformable[com.twitter.finagle.ThriftMuxClientLike]withThriftRichClient"></a>
-      <a id="ThriftMuxClientLike:ThriftMuxClientLike"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxClientLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClientLike</span></a><span class="result"> extends <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ThriftMuxClientLikeextendsStackBasedClient[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]withStack.Parameterized[com.twitter.finagle.ThriftMuxClientLike]withStack.Transformable[com.twitter.finagle.ThriftMuxClientLike]withThriftRichClient" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> for the Thrift protocol served over
-<a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> for the Thrift protocol served over
-<a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. This class can't be instantiated. For a default
-instance of ThriftMuxClientLike, see <a href="ThriftMuxClient$.html" class="extype" name="com.twitter.finagle.ThriftMuxClient">com.twitter.finagle.ThriftMuxClient</a>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use object ThriftMux</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMuxServerLike" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftMuxServerLikeextendsServer[Array[Byte],Array[Byte]]withThriftRichServerwithcom.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Array[Byte],Array[Byte]]"></a>
-      <a id="ThriftMuxServerLike:ThriftMuxServerLike"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxServerLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServerLike</span></a><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ThriftMuxServerLikeextendsServer[Array[Byte],Array[Byte]]withThriftRichServerwithcom.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A server for the Thrift protocol served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A server for the Thrift protocol served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
-ThriftMuxServer is backwards-compatible with Thrift clients that use the
-framed transport and binary protocol. It switches to the backward-compatible
-mode when the first request is not recognized as a valid Mux message but can
-be successfully handled by the underlying Thrift service. Since a Thrift
-message that is encoded with the binary protocol starts with a header value of
-0x800100xx, Mux does not confuse it with a valid Mux message (0x80 = -128 is
-an invalid Mux message type) and the server can reliably detect the non-Mux
-Thrift client and switch to the backwards-compatible mode.</p><p>Note that the server is also compatible with non-Mux finagle-thrift clients.
-It correctly responds to the protocol up-negotiation request and passes the
-tracing information embedded in the thrift requests to Mux (which has native
-tracing support).</p><p>This class can't be instantiated. For a default instance of ThriftMuxServerLike,
-see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.ThriftMuxServer">com.twitter.finagle.ThriftMuxServer</a>
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use object ThriftMux</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -2958,7 +2919,7 @@ most to least healthy:</p><ul><li>Open</li><li>Busy</li><li>Closed</li></ul><p>(
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@Thrift" title="Permalink" target="_top">
@@ -2986,7 +2947,32 @@ finagle server (or any other supporting this extension), we reply
 to the request, and every subsequent request is dispatched with an
 envelope carrying trace metadata. The envelope itself is also a
 Thrift struct described
-<a href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Clients </h4><p>$clientExample</p><p>$thriftUpgrade</p><h4> Servers </h4><p>$serverExample</p></div></div>
+<a href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
+a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
+  string query(<span class="num">1</span>: string x)
+}</pre><p>compiled with Scrooge, generates the interface
+<code>TestService.FutureIface</code>. This is then passed
+into <code>Thrift.Client.newIface</code>:</p><pre>Thrift.client.newIface[TestService.FutureIface](
+  addr, classOf[TestService.FutureIface])</pre><p>However note that the Scala compiler can insert the latter
+<code>Class</code> for us, for which another variant of <code>newIface</code> is
+provided:</p><pre>Thrift.client.newIface[TestService.FutureIface](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.FutureIface client =
+  Thrift.client.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);</pre><p>The client uses the standard thrift protocols, with support for
+both framed and buffered transports. Finagle attempts to upgrade
+the protocol in order to ship an extra envelope carrying trace IDs
+and client IDs associated with the request. These are used by
+Finagle's tracing facilities and may be collected via aggregators
+like <a href="http://twitter.github.com/zipkin/" target="_blank">Zipkin</a>.</p><p>The negotiation is simple: on connection establishment, an
+improbably-named method is dispatched on the server. If that
+method isn't found, we are dealing with a legacy thrift server,
+and the standard protocol is used. If the remote server is also a
+finagle server (or any other supporting this extension), we reply
+to the request, and every subsequent request is dispatched with an
+envelope carrying trace metadata. The envelope itself is also a
+Thrift struct described <a href="https://github.com/twitter/finagle/blob/master/finagle-thrift/src/main/thrift/tracing.thrift" target="_blank">here</a>.</p><h4> Servers </h4><p><code>TestService.FutureIface</code> must be implemented and passed
+into <code>serveIface</code>:</p><pre><span class="cmt">// An echo service</span>
+ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+  <span class="kw">def</span> query(x: <span class="std">String</span>): Future[<span class="std">String</span>] = Future.value(x)
+})</pre></div></div>
     </li><li name="com.twitter.finagle.ThriftMux" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftMux"></a>
       <a id="ThriftMux:ThriftMux"></a>
@@ -2996,26 +2982,38 @@ Thrift struct described
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@ThriftMux" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The <code>ThriftMux</code> object is both a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> and a
-<a href="Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> for the Thrift protocol served over
-<a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>ThriftMux</code> object is both a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> and a
-<a href="Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> for the Thrift protocol served over
+      <p class="shortcomment cmt">The <code>ThriftMux</code> object is both a <code>com.twitter.finagle.Client</code> and a
+<code>com.twitter.finagle.Server</code> for the Thrift protocol served over
+<a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>ThriftMux</code> object is both a <code>com.twitter.finagle.Client</code> and a
+<code>com.twitter.finagle.Server</code> for the Thrift protocol served over
 <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. Rich interfaces are provided to adhere to those
 generated from a <a href="http://thrift.apache.org/docs/idl/" target="_blank">Thrift IDL</a> by
 <a href="http://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><p>Clients can be created directly from an interface generated from
-a Thrift IDL:</p><p>$clientExample</p><p>Servers are also simple to expose:</p><p>$serverExample</p><p>This object does not expose any configuration options. Both clients and servers
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
+a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
+  string query(<span class="num">1</span>: string x)
+}</pre><p>compiled with Scrooge, generates the interface
+<code>TestService.FutureIface</code>. This is then passed
+into <code>ThriftMux.Client.newIface</code>:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](
+  addr, classOf[TestService.FutureIface])</pre><p>However note that the Scala compiler can insert the latter
+<code>Class</code> for us, for which another variant of <code>newIface</code> is
+provided:</p><pre>ThriftMux.client.newIface[TestService.FutureIface](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.FutureIface client =
+  ThriftMux.client.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);</pre><h4> Servers </h4><p>Servers are also simple to expose:</p><p><code>TestService.FutureIface</code> must be implemented and passed
+into <code>serveIface</code>:</p><pre><span class="cmt">// An echo service</span>
+ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+  <span class="kw">def</span> query(x: <span class="std">String</span>): Future[<span class="std">String</span>] = Future.value(x)
+})</pre><p>This object does not expose any configuration options. Both clients and servers
 are instantiated with sane defaults. Clients are labeled with the &quot;clnt/thrift&quot;
 prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration, see the
-<a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">com.twitter.finagle.ThriftMux.Server</a> and <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">com.twitter.finagle.ThriftMux.Client</a>
-classes.</p></div></div>
+<a href="http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.WriteException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WriteException"></a>
       <a id="WriteException:WriteException"></a>
@@ -3435,7 +3433,8 @@ codes are as follows: 0=OK; the body contains the reply. 1=ERROR; the
 body contains a string describing the error. 2=NACK; a negative
 acknowledgment, the body contains a string describing the reason.</p><p><i>size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:</i> replies
 to a Tdispatch request. Status codes are as in Rreq. Replies can include
-request contexts.</p><p><i>size:4 Rerr:1 tag:3 why:</i> indicates that the corresponding T message
+request contexts. MuxFailure flags are currently sent via Rdispatch contexts
+under the &quot;MuxFailure&quot; key. See the MuxFailure flags section below.</p><p><i>size:4 Rerr:1 tag:3 why:</i> indicates that the corresponding T message
 produced an error. Rerr is specifically for server errors: the server
 failed to interpret or act on the message. The body carries a string
 describing the error.</p><p><i>size:4 Tdrain:1 tag:3</i> is a request sent by the server telling the
@@ -3452,7 +3451,12 @@ be 0. Unit '0' is reserved for duration in milliseconds. Whenever a lease has no
 issued, a client can assume it holds an indefinite lease. Adhering to the lease is
 optional, but the server may reject requests or provide degraded service should the
 lease expire. This is used by servers to implement features like garbage collection
-avoidance.</p></div></div>
+avoidance.</p><h3>MuxFailure Flags</h3><p>Failure flags are read and written as an 8 byte integer. Unrecognized flags
+will be ignored silently, but should all be considered reserved for future
+use.</p><p> Flag          Value     Meaning
+ Restartable   1 &lt;&lt; 0    Request is safe to re-issue
+ Rejected      1 &lt;&lt; 1    Request was rejected/Nacked by the server
+ NonRetryable  1 &lt;&lt; 2    Request should not be retried</p></div></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mysql"></a>
       <a id="mysql:mysql"></a>
@@ -3942,57 +3946,6 @@ generator.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-08-22)</i> Use <code>com.twitter.finagle.context.Deadline</code> instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMuxClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftMuxClient"></a>
-      <a id="ThriftMuxClient:ThriftMuxClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxClient$.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClient</span></a><span class="result"> extends <a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ThriftMuxClient" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A client for thrift served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a></p><div class="fullcomment"><div class="comment cmt"><p>A client for thrift served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a></p><p>For example, this IDL:</p><pre>service TestService {
-  string query(<span class="num">1</span>: string x)
-}</pre><p>compiled with Scrooge, generates the interface
-<code>TestService.FutureIface</code>. This is then passed
-into <code>newIface</code>:</p><pre>ThriftMuxClient.newIface[TestService.FutureIface](
-  addr, classOf[TestService.FutureIface])</pre><p>However note that the Scala compiler can insert the latter
-<code>Class</code> for us, for which another variant of <code>newIface</code> is
-provided:</p><pre>ThriftMuxClient.newIface[TestService.FutureIface](addr)</pre><p>In Java, we need to provide the class object:</p><pre>TestService.FutureIface client =
-  ThriftMuxClient.newIface(addr, TestService.FutureIface.<span class="kw">class</span>);</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use object ThriftMux</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMuxServer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftMuxServer"></a>
-      <a id="ThriftMuxServer:ThriftMuxServer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="ThriftMuxServer$.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServer</span></a><span class="result"> extends <a href="ThriftMuxServerLike.html" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">ThriftMuxServerLike</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ThriftMuxServer" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A Thrift server served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A Thrift server served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><p><code>TestService.FutureIface</code> must be implemented and passed
-into <code>serveIface</code>:</p><pre>ThriftMuxServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
-  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
-})</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use object ThriftMux</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

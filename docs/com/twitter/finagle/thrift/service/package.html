@@ -86,10 +86,10 @@
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"><span class="extype" name="ResponseClassifier">ResponseClassifiers</span> for use with <code>finagle-thrift</code>
-request/responses.</p><div class="fullcomment"><div class="comment cmt"><p><span class="extype" name="ResponseClassifier">ResponseClassifiers</span> for use with <code>finagle-thrift</code>
+      <p class="shortcomment cmt"><code>ResponseClassifiers</code> for use with <code>finagle-thrift</code>
+request/responses.</p><div class="fullcomment"><div class="comment cmt"><p><code>ResponseClassifiers</code> for use with <code>finagle-thrift</code>
 request/responses.</p><p>Thrift (and ThriftMux) services are a bit unusual in that
-there is only a single <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> from <code>Array[Byte]</code>
+there is only a single <code>Service</code> from <code>Array[Byte]</code>
 to <code>Array[Byte]</code> for all the methods of an IDL's service.</p><p>Thrift classifiers should be written in terms
 of the Scrooge generated request <code>$Service.$Method.Args</code> type and the
 method's response type. This is because there is support in Scrooge

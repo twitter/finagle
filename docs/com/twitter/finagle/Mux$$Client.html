@@ -451,8 +451,13 @@ services but instead wrap the resulting service with a rich API.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.
+</p></div><dl class="paramcmts block"><dt class="param">label0</dt><dd class="cmt"><p>if an empty String is provided, then the label
+              from the <span class="extype" name="Label">Label</span> <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Stack.Params</a> is used.
+              If that is also an empty String, then <code>dest</code> is used.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
       <a id="newClient(String,String):ServiceFactory[Request,Response]"></a>
@@ -469,7 +474,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -488,6 +495,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[Client.this.In,Client.this.Out]):com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]"></a>
@@ -527,7 +536,9 @@ finagle client. Concrete implementations are expected to specify this.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -546,6 +557,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -564,6 +577,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#newTransporter" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newTransporter():com.twitter.finagle.client.Transporter[Client.this.In,Client.this.Out]"></a>

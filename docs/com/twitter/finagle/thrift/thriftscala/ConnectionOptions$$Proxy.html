@@ -54,7 +54,7 @@ behavior and implement the read-only methods from ConnectionOptions using an und
 instance.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -72,7 +72,7 @@ instance.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions"><span>ConnectionOptions</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.scrooge.ThriftStruct"><span>ThriftStruct</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions"><span>ConnectionOptions</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.twitter.scrooge.HasThriftStructCodec3"><span>HasThriftStructCodec3</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.scrooge.ThriftStruct"><span>ThriftStruct</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -168,6 +168,23 @@ instance.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions#_codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_codec:com.twitter.scrooge.ThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.ConnectionOptions]"></a>
+      <a id="_codec:ThriftStructCodec3[ConnectionOptions]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">_codec</span><span class="result">: <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thriftscala.ConnectionOptions$$Proxy@_codec:com.twitter.scrooge.ThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.ConnectionOptions]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a> → HasThriftStructCodec3</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions.Proxy#_passthroughFields" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="_passthroughFields:scala.collection.immutable.Map[Short,com.twitter.scrooge.TFieldBlob]"></a>
       <a id="_passthroughFields:Map[Short,TFieldBlob]"></a>
@@ -701,6 +718,8 @@ from the passthroughFields map, if present.
               <h3>Inherited from <a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.twitter.scrooge.HasThriftStructCodec3">
+              <h3>Inherited from <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>]</h3>
             </div><div class="parent" name="scala.Product">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">

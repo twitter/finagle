@@ -108,6 +108,25 @@
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.Http.HttpImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HttpImplextendsProductwithSerializable"></a>
+      <a id="HttpImpl:HttpImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Http$$HttpImpl.html"><span class="name">HttpImpl</span></a><span class="params">(<span name="clientTransport">clientTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>, <span name="serverTransport">serverTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>, <span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Http$@HttpImplextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">configure alternative http 1.1 implementations
+</p><div class="fullcomment"><div class="comment cmt"><p>configure alternative http 1.1 implementations
+</p></div><dl class="paramcmts block"><dt class="param">clientTransport</dt><dd class="cmt"><p>client <span class="extype" name="StreamTransport">StreamTransport</span> factory</p></dd><dt class="param">serverTransport</dt><dd class="cmt"><p>server <span class="extype" name="StreamTransport">StreamTransport</span> factory</p></dd><dt class="param">transporter</dt><dd class="cmt"><p><span class="extype" name="Transporter">Transporter</span> factory</p></dd><dt class="param">listener</dt><dd class="cmt"><p><span class="extype" name="Listener">Listener</span> factory</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerextendsStdStackServer[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,com.twitter.finagle.Http.Server]withProductwithSerializable"></a>
       <a id="Server:Server"></a>
@@ -196,6 +215,57 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Http$@Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.Http.HttpImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpImpl"></a>
+      <a id="HttpImpl:HttpImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Http$$HttpImpl$.html"><span class="name">HttpImpl</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Http$@HttpImpl" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.Http#Netty3Impl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Netty3Impl:com.twitter.finagle.Http.HttpImpl"></a>
+      <a id="Netty3Impl:HttpImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Netty3Impl</span><span class="result">: <a href="Http$$HttpImpl.html" class="extype" name="com.twitter.finagle.Http.HttpImpl">HttpImpl</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Http$@Netty3Impl:com.twitter.finagle.Http.HttpImpl" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.Http#Netty4Impl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Netty4Impl:com.twitter.finagle.Http.HttpImpl"></a>
+      <a id="Netty4Impl:HttpImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Netty4Impl</span><span class="result">: <a href="Http$$HttpImpl.html" class="extype" name="com.twitter.finagle.Http.HttpImpl">HttpImpl</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Http$@Netty4Impl:com.twitter.finagle.Http.HttpImpl" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -449,7 +519,9 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http">Http</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -467,7 +539,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -486,6 +560,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Http#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a>
@@ -503,7 +579,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http">Http</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -522,6 +600,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -540,6 +620,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -575,23 +657,6 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Http.param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="param"></a>
-      <a id="param:param"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Http$$param$.html"><span class="name">param</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Http$@param" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.Http#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]):com.twitter.finagle.ListeningServer"></a>
       <a id="serve(SocketAddress,ServiceFactory[Request,Response]):ListeningServer"></a>

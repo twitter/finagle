@@ -60,7 +60,7 @@ finagle, for example <a href="Http$.html" class="extype" name="com.twitter.finag
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Mysql$.html" class="extype" name="com.twitter.finagle.Mysql">Mysql</a>, <a href="Redis$.html" class="extype" name="com.twitter.finagle.Redis">Redis</a>, <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>, <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a>, <a href="ThriftMuxClient$.html" class="extype" name="com.twitter.finagle.ThriftMuxClient">ThriftMuxClient</a>, <a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a></div>
+            <div class="subClasses hiddenContent"><a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Mysql$.html" class="extype" name="com.twitter.finagle.Mysql">Mysql</a>, <a href="Redis$.html" class="extype" name="com.twitter.finagle.Redis">Redis</a>, <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>, <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a></div>
           </div></div>
         
 
@@ -117,7 +117,9 @@ finagle, for example <a href="Http$.html" class="extype" name="com.twitter.finag
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -135,7 +137,9 @@ The label is used to display stats, etc.</p></div></div>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
     </li></ol>
             </div>
@@ -374,9 +378,11 @@ The label is used to display stats, etc.</p></div></div>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
-    </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
       <a id="newClient(String):ServiceFactory[Req,Rep]"></a>
       <h4 class="signature">
@@ -392,8 +398,11 @@ The label is used to display stats, etc.</p></div></div>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p>
-    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="newService(String,String):Service[Req,Rep]"></a>
       <h4 class="signature">
@@ -409,8 +418,11 @@ The label is used to display stats, etc.</p></div></div>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p>
-    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
+</p></div></div>
+    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String):com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="newService(String):Service[Req,Rep]"></a>
       <h4 class="signature">
@@ -426,7 +438,10 @@ The label is used to display stats, etc.</p></div></div>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p>
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
+</p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>

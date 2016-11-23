@@ -47,13 +47,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ZInterStore</span><span class="params">(<span name="destination">destination: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="numkeys">numkeys: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keysBuf">keysBuf: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="weights">weights: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Weights.html" class="extype" name="com.twitter.finagle.redis.protocol.Weights">Weights</a>] = <span class="symbol">None</span></span>, <span name="aggregate">aggregate: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Aggregate.html" class="extype" name="com.twitter.finagle.redis.protocol.Aggregate">Aggregate</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">ZInterStore</span><span class="params">(<span name="destination">destination: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="numkeys">numkeys: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="weights">weights: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Weights.html" class="extype" name="com.twitter.finagle.redis.protocol.Weights">Weights</a>] = <span class="symbol">None</span></span>, <span name="aggregate">aggregate: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Aggregate.html" class="extype" name="com.twitter.finagle.redis.protocol.Aggregate">Aggregate</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a>, <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a>, <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a>, <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a>, <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -71,7 +71,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.redis.protocol.ZInterStore"><span>ZInterStore</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.redis.protocol.ZStore"><span>ZStore</span></li><li class="in" name="com.twitter.finagle.redis.protocol.KeysCommand"><span>KeysCommand</span></li><li class="in" name="com.twitter.finagle.redis.protocol.Command"><span>Command</span></li><li class="in" name="com.twitter.finagle.redis.protocol.RedisMessage"><span>RedisMessage</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.redis.protocol.ZInterStore"><span>ZInterStore</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.redis.protocol.ZStore"><span>ZStore</span></li><li class="in" name="com.twitter.finagle.redis.protocol.KeysCommand"><span>KeysCommand</span></li><li class="in" name="com.twitter.finagle.redis.protocol.Command"><span>Command</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -91,7 +91,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.redis.protocol.ZInterStore#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(destination:com.twitter.io.Buf,numkeys:Int,keysBuf:Seq[com.twitter.io.Buf],weights:Option[com.twitter.finagle.redis.protocol.Weights],aggregate:Option[com.twitter.finagle.redis.protocol.Aggregate]):com.twitter.finagle.redis.protocol.ZInterStore"></a>
+      <a id="&lt;init&gt;(destination:com.twitter.io.Buf,numkeys:Int,keys:Seq[com.twitter.io.Buf],weights:Option[com.twitter.finagle.redis.protocol.Weights],aggregate:Option[com.twitter.finagle.redis.protocol.Aggregate]):com.twitter.finagle.redis.protocol.ZInterStore"></a>
       <a id="&lt;init&gt;:ZInterStore"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,10 +99,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ZInterStore</span><span class="params">(<span name="destination">destination: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="numkeys">numkeys: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keysBuf">keysBuf: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="weights">weights: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Weights.html" class="extype" name="com.twitter.finagle.redis.protocol.Weights">Weights</a>] = <span class="symbol">None</span></span>, <span name="aggregate">aggregate: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Aggregate.html" class="extype" name="com.twitter.finagle.redis.protocol.Aggregate">Aggregate</a>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">ZInterStore</span><span class="params">(<span name="destination">destination: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="numkeys">numkeys: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="weights">weights: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Weights.html" class="extype" name="com.twitter.finagle.redis.protocol.Weights">Weights</a>] = <span class="symbol">None</span></span>, <span name="aggregate">aggregate: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Aggregate.html" class="extype" name="com.twitter.finagle.redis.protocol.Aggregate">Aggregate</a>] = <span class="symbol">None</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@&lt;init&gt;(destination:com.twitter.io.Buf,numkeys:Int,keysBuf:Seq[com.twitter.io.Buf],weights:Option[com.twitter.finagle.redis.protocol.Weights],aggregate:Option[com.twitter.finagle.redis.protocol.Aggregate]):com.twitter.finagle.redis.protocol.ZInterStore" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@&lt;init&gt;(destination:com.twitter.io.Buf,numkeys:Int,keys:Seq[com.twitter.io.Buf],weights:Option[com.twitter.finagle.redis.protocol.Weights],aggregate:Option[com.twitter.finagle.redis.protocol.Aggregate]):com.twitter.finagle.redis.protocol.ZInterStore" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -201,6 +201,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.protocol.ZStore#body" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="body:Seq[com.twitter.io.Buf]"></a>
+      <a id="body:Seq[Buf]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">body</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@body:Seq[com.twitter.io.Buf]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> → <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a> → <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -224,40 +241,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#command" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="command:String"></a>
-      <a id="command:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">command</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@command:String" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.ZInterStore">ZInterStore</a> → <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#commandBytes" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="commandBytes:com.twitter.io.Buf"></a>
-      <a id="commandBytes:Buf"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">commandBytes</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@commandBytes:com.twitter.io.Buf" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.ZInterStore">ZInterStore</a> → <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#destination" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="destination:com.twitter.io.Buf"></a>
       <a id="destination:Buf"></a>
@@ -349,40 +332,40 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.ZStore#keys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="keys:Seq[org.jboss.netty.buffer.ChannelBuffer]"></a>
-      <a id="keys:Seq[ChannelBuffer]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">keys</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@keys:Seq[org.jboss.netty.buffer.ChannelBuffer]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> → <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#keysBuf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="keysBuf:Seq[com.twitter.io.Buf]"></a>
-      <a id="keysBuf:Seq[Buf]"></a>
+    </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#keys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="keys:Seq[com.twitter.io.Buf]"></a>
+      <a id="keys:Seq[Buf]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">keysBuf</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">keys</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@keysBuf:Seq[com.twitter.io.Buf]" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@keys:Seq[com.twitter.io.Buf]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.ZInterStore">ZInterStore</a> → <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.ZInterStore">ZInterStore</a> → <a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> → <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.protocol.ZInterStore#name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="name:com.twitter.io.Buf"></a>
+      <a id="name:Buf"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@name:com.twitter.io.Buf" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.ZInterStore">ZInterStore</a> → <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -468,40 +451,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.RedisMessage#toByteArray" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toByteArray:Array[Byte]"></a>
-      <a id="toByteArray:Array[Byte]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toByteArray</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@toByteArray:Array[Byte]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.protocol.ZStore#toChannelBuffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="toChannelBuffer:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toChannelBuffer</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.ZInterStore@toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ZStore.html" class="extype" name="com.twitter.finagle.redis.protocol.ZStore">ZStore</a> → <a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.protocol.ZStore#validate" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="validate():Unit"></a>
       <a id="validate():Unit"></a>
@@ -628,8 +577,6 @@
               <h3>Inherited from <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a></h3>
             </div><div class="parent" name="com.twitter.finagle.redis.protocol.Command">
               <h3>Inherited from <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.redis.protocol.RedisMessage">
-              <h3>Inherited from <a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

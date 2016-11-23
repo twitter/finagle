@@ -464,8 +464,13 @@ services but instead wrap the resulting service with a rich API.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
-The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to display stats, etc.
+</p></div><dl class="paramcmts block"><dt class="param">label0</dt><dd class="cmt"><p>if an empty String is provided, then the label
+              from the <span class="extype" name="Label">Label</span> <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Stack.Params</a> is used.
+              If that is also an empty String, then <code>dest</code> is used.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
       <a id="newClient(String,String):ServiceFactory[Request,Result]"></a>
@@ -482,7 +487,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -501,6 +508,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[com.twitter.finagle.mysql.transport.Packet,com.twitter.finagle.mysql.transport.Packet]):com.twitter.finagle.Service[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]"></a>
@@ -525,18 +534,18 @@ Together with a <code>Transporter</code>, it forms the foundation of a
 finagle client. Concrete implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a>
-      <a id="newRichClient(String):mysql.ClientwithTransactions"></a>
+      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a>
+      <a id="newRichClient(String):mysql.ClientwithTransactionswithCursors"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Mysql$$Client@newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Mysql$$Client@newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -545,18 +554,18 @@ destination described by <code>dest</code>.</p><div class="fullcomment"><div cla
 destination described by <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a>
-      <a id="newRichClient(Name,String):mysql.ClientwithTransactions"></a>
+      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a>
+      <a id="newRichClient(Name,String):mysql.ClientwithTransactionswithCursors"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Mysql$$Client@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Mysql$$Client@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -582,7 +591,9 @@ destination described by <code>dest</code> with the assigned
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+      <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -601,6 +612,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:String):com.twitter.finagle.Service[Req,Rep]"></a>
@@ -619,6 +632,8 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </a>
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
+See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#newTransporter" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newTransporter():com.twitter.finagle.client.Transporter[com.twitter.finagle.mysql.transport.Packet,com.twitter.finagle.mysql.transport.Packet]"></a>
@@ -690,6 +705,23 @@ Concrete StackClient implementations are expected to specify this.
       </a>
     </span>
       <p class="shortcomment cmt">The current parameter map.</p><div class="fullcomment"><div class="comment cmt"><p>The current parameter map.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Mysql.Client#richClientStatsReceiver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="richClientStatsReceiver:com.twitter.finagle.stats.StatsReceiver"></a>
+      <a id="richClientStatsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">richClientStatsReceiver</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mysql$$Client@richClientStatsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a> → <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mysql.Client#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]]"></a>
       <a id="stack:Stack[ServiceFactory[Request,Result]]"></a>

@@ -49,12 +49,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A mixin trait to provide a rich Thrift server API.</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A mixin trait to provide a rich Thrift server API.</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.ThriftMuxServer">ThriftMuxServer</a>, <a href="ThriftMuxServerLike.html" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">ThriftMuxServerLike</a></div>
+            <div class="subClasses hiddenContent"><a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a></div>
           </div></div>
         
 
@@ -424,11 +424,8 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
-into <code>serveIface</code>:</p><pre>ThriftMuxRichServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
-  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
-})</pre><p>Note that this interface is discovered by reflection. Passing an
-invalid interface implementation will result in a runtime error.</p></div></div>
+implementing the above IDL.
+</p></div></div>
     </li><li name="com.twitter.finagle.ThriftRichServer#serveIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveIface(addr:String,iface:AnyRef):com.twitter.finagle.ListeningServer"></a>
       <a id="serveIface(String,AnyRef):ListeningServer"></a>
@@ -452,11 +449,8 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
-into <code>serveIface</code>:</p><pre>ThriftMuxRichServer.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
-  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
-})</pre><p>Note that this interface is discovered by reflection. Passing an
-invalid interface implementation will result in a runtime error.</p></div></div>
+implementing the above IDL.
+</p></div></div>
     </li><li name="com.twitter.finagle.ThriftRichServer#serverLabel" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serverLabel:String"></a>
       <a id="serverLabel:String"></a>
@@ -466,7 +460,7 @@ invalid interface implementation will result in a runtime error.</p></div></div>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">serverLabel</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">serverLabel</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.ThriftRichServer@serverLabel:String" title="Permalink" target="_top">

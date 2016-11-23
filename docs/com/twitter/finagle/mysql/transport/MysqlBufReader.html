@@ -541,7 +541,7 @@ Negative indices are not accepted.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readLengthCodedBytes</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
+        <span class="name">readLengthCodedBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.mysql.transport.MysqlBufReader@readLengthCodedBytes():Array[Byte]" title="Permalink" target="_top">
@@ -656,7 +656,7 @@ offset.</p></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readNullTerminatedBytes</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
+        <span class="name">readNullTerminatedBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.mysql.transport.MysqlBufReader@readNullTerminatedBytes():Array[Byte]" title="Permalink" target="_top">
@@ -902,6 +902,26 @@ bytes expected to follow.</p></dd></dl></div>
     </span>
       <p class="shortcomment cmt">The remainder of bytes that the reader is capable of reading.</p><div class="fullcomment"><div class="comment cmt"><p>The remainder of bytes that the reader is capable of reading.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.ProxyBufReader#remainingUntil" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remainingUntil(byte:Byte):Int"></a>
+      <a id="remainingUntil(Byte):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remainingUntil</span><span class="params">(<span name="byte">byte: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.mysql.transport.MysqlBufReader@remainingUntil(byte:Byte):Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).</p><div class="fullcomment"><div class="comment cmt"><p>The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).
+Returns <code>-1</code> when <code>byte</code> is not found on the underlying <span class="extype" name="Buf">Buf</span>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd><dt>Note</dt><dd><span class="cmt"><p>Depending on the implementation, this may copy (usually partially) the
+      underlying direct buffer onto the heap.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.util.ProxyBufReader#skip" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="skip(n:Int):Unit"></a>
       <a id="skip(Int):Unit"></a>
@@ -946,7 +966,7 @@ bytes expected to follow.</p></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">take</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
+        <span class="name">take</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.mysql.transport.MysqlBufReader@take(n:Int):Array[Byte]" title="Permalink" target="_top">

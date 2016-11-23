@@ -186,6 +186,16 @@ See :ref:`this example <disabling_fail_fast>` on how to disable `Fail Fast` for 
 
 Refer to the :ref:`fail fast <client_fail_fast>` section for further context.
 
+What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While typically, a :src:`StatsFilter <com/twitter/finagle/service/StatsFilter.scala>` counts
+`Exceptions` as failures, a user may supply a
+`ResponseClassifier <http://twitter.github.io/finagle/guide/Clients.html#response-classification>`_
+that treats non-Exceptions as failures. In that case, while no exceptions have occurred, a
+`ResponseClassificationSyntheticException` is used as a "synthetic" exception for
+bookkeeping purposes.
+
 How long should my Clients live?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

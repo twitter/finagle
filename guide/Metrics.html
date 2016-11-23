@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
+    <title>Metrics &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.39.0-SNAPSHOT',
+        VERSION:     '6.40.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -99,7 +99,9 @@ They are also useful in diagnosing what contributes to request latency.</p>
 If you are using a <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> that classifies non-Exceptions
 as failures, it will use a synthetic Exception,
 <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code>,
-to account for these.</dd>
+to account for these. See the
+<a class="reference external" href="http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
+for more details.</dd>
 <dt><strong>failures</strong></dt>
 <dd>A counter of the number of times any failure has been observed.</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
@@ -142,13 +144,6 @@ This entails establishing a connection or waiting for a connection from a pool.<
 This is how long it takes to set up the chain of <code class="docutils literal"><span class="pre">Future</span></code>s to be used in the
 response without waiting for the response. Large values suggest blocking code
 on a Finagle thread.</dd>
-<dt><strong>transit_latency_ms</strong></dt>
-<dd>A stat that attempts to measure (wall time) transit times between hops, e.g.,
-from client to server. Be aware that clock drift between hosts and other factors
-can contribute here. Not supported by all protocols.</dd>
-<dt><strong>deadline_budget_ms</strong></dt>
-<dd>A stat accounting for the (implied) amount of time remaining for this request,
-for example from a deadline or timeout. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="requestsemaphorefilter">
@@ -168,14 +163,6 @@ on simultaneous requests.</dd>
 <dd>A histogram of the number of bytes per request&#8217;s payload.</dd>
 <dt><strong>response_payload_bytes</strong></dt>
 <dd>A histogram of the number of bytes per response&#8217;s payload.</dd>
-</dl>
-</div>
-<div class="section" id="timeoutfilter">
-<h3>TimeoutFilter<a class="headerlink" href="#timeoutfilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>timeout/expired_deadline_ms</strong></dt>
-<dd>A stat of the elapsed time since expiry if a deadline has expired, in
-milliseconds. Temporary stat to aid in debugging.</dd>
 </dl>
 </div>
 </div>
@@ -282,6 +269,40 @@ evicted from <a class="reference external" href="https://github.com/twitter/fina
 <dt><strong>inet/dns/cache/hit_rate</strong></dt>
 <dd>A gauge of the ratio of DNS lookups which were already cached by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">FixedInetResolver</a></dd>
+</dl>
+</div>
+<div class="section" id="netty-4">
+<h3>Netty 4<a class="headerlink" href="#netty-4" title="Permalink to this headline">¶</a></h3>
+<p>These metrics are exported from Finagle&#8217;s underlying transport
+implementation, the Netty 4 library and available under <cite>finagle/netty4</cite>
+on any instance running Finagle with Netty 4.</p>
+<dl class="docutils">
+<dt>NOTE: All pooling metrics are only exported when pooling is enabled</dt>
+<dd>(default: disabled) and only account for direct memory.</dd>
+<dt><strong>pooling/allocations/huge</strong></dt>
+<dd>A gauge (a counter) of total number of HUGE <em>direct allocations</em>
+(i.e., unpooled allocations that exceed the current chunk size).</dd>
+<dt><strong>pooling/allocations/normal</strong></dt>
+<dd>A gauge (a counter) of total number of NORMAL <em>direct allocations</em>
+(i.e., less than a current chunk size).</dd>
+<dt><strong>pooling/allocations/small</strong></dt>
+<dd>A gauge (a counter) of total number of SMALL <em>direct allocations</em>
+(i.e., less than a page size, 8192 bytes).</dd>
+<dt><strong>pooling/allocations/tiny</strong></dt>
+<dd>A gauge (a counter) of total number of TINY <em>direct allocations</em>
+(i.e., less than 512 bytes).</dd>
+<dt><strong>pooling/deallocations/huge</strong></dt>
+<dd>A gauge (a counter) of total number of HUGE <em>direct deallocations</em>
+(i.e., unpooled allocations that exceed the current chunk size).</dd>
+<dt><strong>pooling/deallocations/normal</strong></dt>
+<dd>A gauge (a counter) of total number of NORMAL <em>direct deallocations</em>
+(i.e., less than a chunk size).</dd>
+<dt><strong>pooling/deallocations/small</strong></dt>
+<dd>A gauge (a counter) of total number of SMALL <em>direct deallocations</em>
+(i.e., less than a page size, 8192 bytes).</dd>
+<dt><strong>pooling/deallocations/tiny</strong></dt>
+<dd>A gauge (a counter) of total number of TINY <em>direct deallocations</em>
+(i.e., less than 512 bytes).</dd>
 </dl>
 </div>
 </div>
@@ -515,6 +536,13 @@ strategies.</p>
 <dl class="docutils" id="deadline-admission-control-stats">
 <dt><strong>admission_control/deadline/exceeded</strong></dt>
 <dd>A counter of the number of requests whose deadline has expired.</dd>
+<dt><strong>admission_control/deadline/expired_ms</strong></dt>
+<dd>A stat of the elapsed time since expiry if a deadline has expired, in
+milliseconds.</dd>
+<dt><strong>admission_control/deadline/transit_latency_ms</strong></dt>
+<dd>A stat that attempts to measure (wall time) transit times between hops, e.g.,
+from client to server. Be aware that clock drift between hosts, stop the world
+pauses, and queue backups can contribute here. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="nack-admission-control">
@@ -920,7 +948,6 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 <li><a class="reference internal" href="#serverstatsfilter">ServerStatsFilter</a></li>
 <li><a class="reference internal" href="#requestsemaphorefilter">RequestSemaphoreFilter</a></li>
 <li><a class="reference internal" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)</a></li>
-<li><a class="reference internal" href="#timeoutfilter">TimeoutFilter</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#construction">Construction</a><ul>
@@ -934,6 +961,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 <li><a class="reference internal" href="#timer">Timer</a></li>
 <li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
 <li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>
+<li><a class="reference internal" href="#netty-4">Netty 4</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>

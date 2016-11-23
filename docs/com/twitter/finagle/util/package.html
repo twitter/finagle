@@ -149,31 +149,6 @@ functions are executed in the order that they are provided to <code>await</code>
       </a>
     </span>
       <p class="shortcomment cmt">Allows resources to register their handlers to be invoked when service is closing.</p>
-    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConcurrentRingBuffer[T]extendsAnyRef"></a>
-      <a id="ConcurrentRingBuffer[T]:ConcurrentRingBuffer[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.util.package@ConcurrentRingBuffer[T]extendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A simple, lock-free, non-blocking ring buffer.</p><div class="fullcomment"><div class="comment cmt"><p>A simple, lock-free, non-blocking ring buffer.</p><p>This differs from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.RingBuffer" class="extype" target="_top">com.twitter.util.RingBuffer</a> in that it is
-simpler (fewer features), and is fully concurrent (and hence also
-threadsafe). This should probably be  moved into util at some
-point.</p><p><b>Note:</b> For very high-rate usages, sizing buffers by powers of
-two may be advantageous.</p><p><b>Caveats:</b> References are kept to old entries until they are
-overwritten again. You can get around this by storing nullable
-references (though this would require another allocation for each
-item).
-</p></div></div>
     </li><li name="com.twitter.finagle.util.ConcurrentRingBufferBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConcurrentRingBufferBenchextendsStdBenchAnnotations"></a>
       <a id="ConcurrentRingBufferBench:ConcurrentRingBufferBench"></a>
@@ -436,28 +411,6 @@ dynamic introspection.
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.util.DefaultMonitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DefaultMonitor"></a>
-      <a id="DefaultMonitor:DefaultMonitor"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.util.package@DefaultMonitor" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The default <span class="extype" name="Monitor">Monitor</span> to be used throughout Finagle.</p><div class="fullcomment"><div class="comment cmt"><p>The default <span class="extype" name="Monitor">Monitor</span> to be used throughout Finagle.</p><p>Mostly delegates to <span class="extype" name="RootMonitor">RootMonitor</span>, with the exception
-of <span class="extype" name="HasLogLevel">HasLogLevels</span> with a <code>logLevel</code> below <code>INFO</code>.
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.TimeoutException" class="extype" target="_top">TimeoutExceptions</a> are also
-suppressed because they often originate from <code>Future.within</code> and
-<code>Future.raiseWithin</code>.
-</p></div></div>
     </li><li name="com.twitter.finagle.util.DefaultTimer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultTimer"></a>
       <a id="DefaultTimer:DefaultTimer"></a>

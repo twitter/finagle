@@ -49,12 +49,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A mixin trait to provide a rich Thrift client API.</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A mixin trait to provide a rich Thrift client API.</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="ThriftMuxClient$.html" class="extype" name="com.twitter.finagle.ThriftMuxClient">ThriftMuxClient</a>, <a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a></div>
+            <div class="subClasses hiddenContent"><a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a></div>
           </div></div>
         
 
@@ -128,9 +128,9 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Stack.Params</a> to be used by this client.</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Stack.Params</a> to be used by this client.</p><p>Both <a href="#defaultClientName:String" class="extmbr" name="com.twitter.finagle.ThriftRichClient#defaultClientName">defaultClientName</a> and <a href="#stats:com.twitter.finagle.stats.StatsReceiver" class="extmbr" name="com.twitter.finagle.ThriftRichClient#stats">stats</a> predate <code>Params</code>
+      <p class="shortcomment cmt">The <code>Stack.Params</code> to be used by this client.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>Stack.Params</code> to be used by this client.</p><p>Both <a href="#defaultClientName:String" class="extmbr" name="com.twitter.finagle.ThriftRichClient#defaultClientName">defaultClientName</a> and <a href="#stats:com.twitter.finagle.stats.StatsReceiver" class="extmbr" name="com.twitter.finagle.ThriftRichClient#stats">stats</a> predate Params<code>
 and as such are implemented separately.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+</code></p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftRichClient#protocolFactory" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a>
       <a id="protocolFactory:TProtocolFactory"></a>
@@ -404,7 +404,9 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
     </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newIface[Iface](dest:String,label:String)(implicitevidence$2:scala.reflect.ClassTag[Iface]):Iface"></a>
       <a id="newIface[Iface](String,String)(ClassTag[Iface]):Iface"></a>
@@ -421,7 +423,9 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
+by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
+<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
     </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newIface[Iface](dest:String)(implicitevidence$1:scala.reflect.ClassTag[Iface]):Iface"></a>
       <a id="newIface[Iface](String)(ClassTag[Iface]):Iface"></a>
@@ -495,8 +499,9 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="com.twitter.finagle.ThriftRichClient#newServiceIface" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Converts from a Service interface (<code>ServiceIface</code>) to the
+method interface (<code>newIface</code>).</p>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newServiceIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newServiceIface[ServiceIface](dest:com.twitter.finagle.Name,label:String)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
       <a id="newServiceIface[ServiceIface](Name,String)(ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
       <h4 class="signature">
@@ -512,7 +517,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Construct a Finagle <code>Service</code> interface for a Scrooge-generated Thrift object.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Finagle <code>Service</code> interface for a Scrooge-generated Thrift object.</p><p>E.g. given a Thrift service</p><pre>service Logger {
+  string log(<span class="num">1</span>: string message, <span class="num">2</span>: i32 logLevel);
+  i32 getLogSize();
+}</pre><p>you can construct a client interface with a Finagle Service per Thrift method:</p><pre><span class="kw">val</span> loggerService = Thrift.client.newServiceIface[Logger.ServiceIface](<span class="lit">"localhost:8000"</span>, <span class="lit">"client_label"</span>)
+<span class="kw">val</span> response = loggerService.log(Logger.Log.Args(<span class="lit">"log message"</span>, <span class="num">1</span>))</pre></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>Address of the service to connect to.</p></dd><dt class="param">label</dt><dd class="cmt"><p>Assign a label for scoped stats.</p></dd><dt class="param">builder</dt><dd class="cmt"><p>The builder type is generated by Scrooge for a thrift service.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftRichClient#newServiceIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newServiceIface[ServiceIface](dest:String,label:String)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
       <a id="newServiceIface[ServiceIface](String,String)(ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
@@ -529,11 +538,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Construct a Finagle Service interface for a Scrooge-generated thrift object.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Finagle Service interface for a Scrooge-generated thrift object.</p><p>E.g. given a thrift service</p><pre>service Logger {
+      <p class="shortcomment cmt">Construct a Finagle <code>Service</code> interface for a Scrooge-generated Thrift object.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Finagle <code>Service</code> interface for a Scrooge-generated Thrift object.</p><p>E.g. given a Thrift service</p><pre>service Logger {
   string log(<span class="num">1</span>: string message, <span class="num">2</span>: i32 logLevel);
   i32 getLogSize();
-}</pre><p>you can construct a client interface with a Finagle Service per thrift method:</p><pre><span class="kw">val</span> loggerService = Thrift.client.newServiceIface[Logger.ServiceIface](<span class="lit">"localhost:8000"</span>)
-<span class="kw">val</span> response = loggerService.log(Logger.Log.Args(<span class="lit">"log message"</span>, <span class="num">1</span>))</pre></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>Address of the service to connect to, in the format accepted by <a href="Resolver$.html#eval(name:String):com.twitter.finagle.Name" class="extmbr" name="com.twitter.finagle.Resolver#eval">Resolver.eval</a>.</p></dd><dt class="param">label</dt><dd class="cmt"><p>Assign a label for scoped stats.</p></dd><dt class="param">builder</dt><dd class="cmt"><p>The builder type is generated by Scrooge for a thrift service.</p></dd></dl></div>
+}</pre><p>you can construct a client interface with a Finagle Service per Thrift method:</p><pre><span class="kw">val</span> loggerService = Thrift.client.newServiceIface[Logger.ServiceIface](<span class="lit">"localhost:8000"</span>, <span class="lit">"client_label"</span>)
+<span class="kw">val</span> response = loggerService.log(Logger.Log.Args(<span class="lit">"log message"</span>, <span class="num">1</span>))</pre></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>Address of the service to connect to, in the format accepted by <code>Resolver.eval</code>.</p></dd><dt class="param">label</dt><dd class="cmt"><p>Assign a label for scoped stats.</p></dd><dt class="param">builder</dt><dd class="cmt"><p>The builder type is generated by Scrooge for a thrift service.</p></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -693,98 +702,7 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 
         
 
-        <div id="values" class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newIface[Iface](group:com.twitter.finagle.Group[java.net.SocketAddress],cls:Class[_]):Iface"></a>
-      <a id="newIface[Iface](Group[SocketAddress],Class[_]):Iface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[_]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.ThriftRichClient.newIface.Iface">Iface</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ThriftRichClient@newIface[Iface](group:com.twitter.finagle.Group[java.net.SocketAddress],cls:Class[_]):Iface" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newIface[Iface](group:com.twitter.finagle.Group[java.net.SocketAddress])(implicitevidence$4:scala.reflect.ClassTag[Iface]):Iface"></a>
-      <a id="newIface[Iface](Group[SocketAddress])(ClassTag[Iface]):Iface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names via newIface(String) or newIface(Name)">newIface</span><span class="tparams">[<span name="Iface">Iface</span>]</span><span class="params">(<span name="group">group: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.reflect.ClassTag" class="extype" target="_top">ClassTag</a>[<span class="extype" name="com.twitter.finagle.ThriftRichClient.newIface.Iface">Iface</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.ThriftRichClient.newIface.Iface">Iface</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ThriftRichClient@newIface[Iface](group:com.twitter.finagle.Group[java.net.SocketAddress])(implicitevidence$4:scala.reflect.ClassTag[Iface]):Iface" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names via newIface(String) or newIface(Name)</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newServiceIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newServiceIface[ServiceIface](dest:com.twitter.finagle.Name)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
-      <a id="newServiceIface[ServiceIface](Name)(ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2015-10-26) Must provide service label">newServiceIface</span><span class="tparams">[<span name="ServiceIface">ServiceIface</span>]</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="thrift/ServiceIfaceBuilder.html" class="extype" name="com.twitter.finagle.thrift.ServiceIfaceBuilder">ServiceIfaceBuilder</a>[<span class="extype" name="com.twitter.finagle.ThriftRichClient.newServiceIface.ServiceIface">ServiceIface</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.ThriftRichClient.newServiceIface.ServiceIface">ServiceIface</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ThriftRichClient@newServiceIface[ServiceIface](dest:com.twitter.finagle.Name)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-10-26)</i> Must provide service label</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newServiceIface" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newServiceIface[ServiceIface](dest:String)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
-      <a id="newServiceIface[ServiceIface](String)(ServiceIfaceBuilder[ServiceIface]):ServiceIface"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2015-10-26) Must provide service label">newServiceIface</span><span class="tparams">[<span name="ServiceIface">ServiceIface</span>]</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="builder">builder: <a href="thrift/ServiceIfaceBuilder.html" class="extype" name="com.twitter.finagle.thrift.ServiceIfaceBuilder">ServiceIfaceBuilder</a>[<span class="extype" name="com.twitter.finagle.ThriftRichClient.newServiceIface.ServiceIface">ServiceIface</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.ThriftRichClient.newServiceIface.ServiceIface">ServiceIface</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ThriftRichClient@newServiceIface[ServiceIface](dest:String)(implicitbuilder:com.twitter.finagle.thrift.ServiceIfaceBuilder[ServiceIface]):ServiceIface" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-10-26)</i> Must provide service label</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

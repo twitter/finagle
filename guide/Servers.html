@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
+    <title>Servers &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.39.0-SNAPSHOT',
+        VERSION:     '6.40.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -103,7 +103,7 @@ for more details.</p>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
 behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span>clients</span></a>.</p>
-<div class="figure" id="id4">
+<div class="figure" id="id5">
 <img src="_images/serverstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle server.
 Requests flow from left to right.</span></p>
 </div>
@@ -161,8 +161,6 @@ straightforward manner, for example, in a ThriftMux client:</p>
 defined for a given request/response pair then <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code>
 is used. This gives us the simple classification rules of responses that are
 <code class="docutils literal"><span class="pre">Returns</span></code> are successful and <code class="docutils literal"><span class="pre">Throws</span></code> are failures.</p>
-<div class="section" id="custom-classifiers">
-<h3>Custom Classifiers<a class="headerlink" href="#custom-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>Writing a custom classifier requires understanding of the few classes used. A
 <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is a <code class="docutils literal"><span class="pre">PartialFunction</span></code> from <code class="docutils literal"><span class="pre">ReqRep</span></code> to
 <code class="docutils literal"><span class="pre">ResponseClass</span></code>.</p>
@@ -192,9 +190,6 @@ Here is an example that counts HTTP 503s as failures:</p>
 <p>Note that this <code class="docutils literal"><span class="pre">PartialFunction</span></code> isn&#8217;t total which is ok due to Finagle
 always using user defined classifiers in combination with
 <code class="docutils literal"><span class="pre">ResponseClassifier.Default</span></code> which will cover all cases.</p>
-</div>
-<div class="section" id="thrift-and-thriftmux-classifiers">
-<h3>Thrift and ThriftMux Classifiers<a class="headerlink" href="#thrift-and-thriftmux-classifiers" title="Permalink to this headline">¶</a></h3>
 <p>Thrift and ThriftMux classifiers require a bit more care as the request and
 response types are not as obvious. This is because there is only a single
 <code class="docutils literal"><span class="pre">Service</span></code> from <code class="docutils literal"><span class="pre">Array[Byte]</span></code> to <code class="docutils literal"><span class="pre">Array[Byte]</span></code> for all the methods of an
@@ -233,14 +228,12 @@ deserialized <code class="docutils literal"><span class="pre">NotFoundException<
 &#8220;successful&#8221; response can be examined to enable services using status codes to
 classify errors. Lastly (#3), the request can be introspected to make the
 decision.</p>
-</div>
-<div class="section" id="other-details">
-<h3>Other Details<a class="headerlink" href="#other-details" title="Permalink to this headline">¶</a></h3>
 <p>If you have a response classifier that categorizes <code class="docutils literal"><span class="pre">Returns</span></code> as
 failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
 as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
-<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens.</p>
-</div>
+<code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
+<a class="reference external" href="http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
+for more details.</p>
 <div class="section" id="concurrency-limit">
 <h3>Concurrency Limit<a class="headerlink" href="#concurrency-limit" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Concurrency Limit</cite> module is implemented by
@@ -269,6 +262,24 @@ that might be handled concurrently by your server, use the following example <a 
 <cite>static admission controller</cite> monitoring the current concurrency level of the incoming requests.</p>
 <p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><span>Requests Concurrency metrics</span></a> for more details.</p>
 </div>
+<div class="section" id="rejecting-requests">
+<h3>Rejecting Requests<a class="headerlink" href="#rejecting-requests" title="Permalink to this headline">¶</a></h3>
+<p>A service may explicitly reject requests on a case-by-case basis. To generate a rejection response,
+have the server return a Future.exception of <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure</a> with
+the <cite>Rejected</cite> flag set. A convenience method, <cite>Failure.rejected</cite> exists for this. By default, this
+also sets the <cite>Restartable</cite> flag which indicates the failure is safe to retry. The client&#8217;s
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a> will automatically retry such
+failures.
+For requests that should not be retried, the server should return a <cite>Failure</cite> with the <cite>NonRetryable</cite>
+flag set.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+
+<span class="k">val</span> <span class="n">rejection</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">.</span><span class="n">rejected</span><span class="o">(</span><span class="s">&quot;busy&quot;</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">nonRetryable</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">(</span><span class="s">&quot;Don&#39;t try again&quot;</span><span class="o">,</span> <span class="nc">Failure</span><span class="o">.</span><span class="nc">Rejected</span><span class="o">|</span><span class="nc">Failure</span><span class="o">.</span><span class="nc">NonRetryable</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>These responses will be considered <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id3">[1]</a> by Finagle.</p>
+</div>
 <div class="section" id="request-timeout">
 <h3>Request Timeout<a class="headerlink" href="#request-timeout" title="Permalink to this headline">¶</a></h3>
 <p>The <cite>Request Timeout</cite> module is implemented by
@@ -287,14 +298,17 @@ processed.</p>
 <table class="docutils footnote" frame="void" id="nack" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Depending on the protocol, a rejected request might be transformed into a <cite>NACK</cite>
-(currently supported in HTTP/1.1 and Mux) so the remote client can safely <cite>retry</cite> it.</td></tr>
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <cite>NACK</cite>
+(currently supported in HTTP/1.1 and Mux) message. A <cite>NACK</cite> means that the server did not attempt
+to perform any work associated with the request and therefore is typically safe to retry. However,
+Finagle also supports <cite>NACK</cite> messages that are explicitly non-retryable. See the Retries section of
+<a class="reference internal" href="Clients.html"><em>Clients</em></a></td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="example" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id4">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
 the API usage, not the real world values. We do not recommend blindly applying those values
 to production systems.</td></tr>
 </tbody>
@@ -307,7 +321,7 @@ the lifetime of a session. The <cite>Session Expiration</cite> module is attache
 and expires a service/session after a certain amount of idle time. The module is
 implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
-it can be configured <a class="footnote-reference" href="#example" id="id3">[2]</a>.</p>
+it can be configured <a class="footnote-reference" href="#example" id="id4">[2]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
@@ -353,10 +367,8 @@ it can be configured <a class="footnote-reference" href="#example" id="id3">[2]<
 </ul>
 </li>
 <li><a class="reference internal" href="#response-classification">Response Classification</a><ul>
-<li><a class="reference internal" href="#custom-classifiers">Custom Classifiers</a></li>
-<li><a class="reference internal" href="#thrift-and-thriftmux-classifiers">Thrift and ThriftMux Classifiers</a></li>
-<li><a class="reference internal" href="#other-details">Other Details</a></li>
 <li><a class="reference internal" href="#concurrency-limit">Concurrency Limit</a></li>
+<li><a class="reference internal" href="#rejecting-requests">Rejecting Requests</a></li>
 <li><a class="reference internal" href="#request-timeout">Request Timeout</a></li>
 <li><a class="reference internal" href="#session-expiration">Session Expiration</a></li>
 </ul>

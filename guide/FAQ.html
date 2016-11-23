@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
+    <title>FAQ &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.39.0-SNAPSHOT',
+        VERSION:     '6.40.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -234,6 +234,15 @@ the visibility into which endpoints are up.</p>
 <p>See <a class="reference internal" href="Clients.html#disabling-fail-fast"><span>this example</span></a> on how to disable <cite>Fail Fast</cite> for a given client.</p>
 <p>Refer to the <a class="reference internal" href="Clients.html#client-fail-fast"><span>fail fast</span></a> section for further context.</p>
 </div>
+<div class="section" id="what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">
+<h3>What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?<a class="headerlink" href="#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception" title="Permalink to this headline">¶</a></h3>
+<p>While typically, a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">StatsFilter</a> counts
+<cite>Exceptions</cite> as failures, a user may supply a
+<a class="reference external" href="http://twitter.github.io/finagle/guide/Clients.html#response-classification">ResponseClassifier</a>
+that treats non-Exceptions as failures. In that case, while no exceptions have occurred, a
+<cite>ResponseClassificationSyntheticException</cite> is used as a &#8220;synthetic&#8221; exception for
+bookkeeping purposes.</p>
+</div>
 <div class="section" id="how-long-should-my-clients-live">
 <h3>How long should my Clients live?<a class="headerlink" href="#how-long-should-my-clients-live" title="Permalink to this headline">¶</a></h3>
 <p>One client should be made per set of fungible services.  You should not be reinstantiating
@@ -317,6 +326,7 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
 <li><a class="reference internal" href="#why-is-com-twitter-common-zookeeper-server-set-not-found">Why is com.twitter.common.zookeeper#server-set not found?</a></li>
 <li><a class="reference internal" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis">How do I configure clients and servers with Finagle 6 APIs?</a></li>
 <li><a class="reference internal" href="#why-do-clients-see-com-twitter-finagle-failedfastexception-s">Why do clients see com.twitter.finagle.FailedFastException&#8217;s?</a></li>
+<li><a class="reference internal" href="#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?</a></li>
 <li><a class="reference internal" href="#how-long-should-my-clients-live">How long should my Clients live?</a></li>
 </ul>
 </li>

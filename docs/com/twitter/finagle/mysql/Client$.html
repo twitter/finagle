@@ -148,18 +148,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.Client#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a>
-      <a id="apply(ServiceFactory[Request,Result]):ClientwithTransactions"></a>
+      <a id="apply(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a>
+      <a id="apply(ServiceFactory[Request,Result],StatsReceiver):ClientwithTransactionswithCursors"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>)</span><span class="result">: <a href="Client.html" class="extype" name="com.twitter.finagle.mysql.Client">Client</a> with <a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
+        <span class="name">apply</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>)</span><span class="result">: <a href="Client.html" class="extype" name="com.twitter.finagle.mysql.Client">Client</a> with <a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mysql.Client$@apply(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result]):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.mysql.Client$@apply(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -471,31 +471,7 @@
 
         
 
-        <div id="values" class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.Client#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(host:String,username:String,password:String,dbname:String,logLevel:java.util.logging.Level,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mysql.Client"></a>
-      <a id="apply(String,String,String,String,Level,StatsReceiver):Client"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.6.2) Use the com.twitter.finagle.Mysql object to build a client">apply</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="username">username: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="dbname">dbname: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="logLevel">logLevel: <span class="extype" name="java.util.logging.Level">Level</span> = <span class="symbol">Level.OFF</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>)</span><span class="result">: <a href="Client.html" class="extype" name="com.twitter.finagle.mysql.Client">Client</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mysql.Client$@apply(host:String,username:String,password:String,dbname:String,logLevel:java.util.logging.Level,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mysql.Client" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Constructs a Client using a single host.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a Client using a single host.</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>a String of host:port combination.</p></dd><dt class="param">username</dt><dd class="cmt"><p>the username used to authenticate to the mysql instance</p></dd><dt class="param">password</dt><dd class="cmt"><p>the password used to authenticate to the mysql instance</p></dd><dt class="param">dbname</dt><dd class="cmt"><p>database to initially use</p></dd><dt class="param">logLevel</dt><dd class="cmt"><p>log level for logger used in the finagle ChannelSnooper
-and the finagle-mysql netty pipeline.</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>collects finagle stats scoped to &quot;mysql&quot;</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.6.2)</i> Use the com.twitter.finagle.Mysql object to build a client</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

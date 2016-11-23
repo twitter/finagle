@@ -49,9 +49,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><span class="extype" name="ResponseClassifier">ResponseClassifiers</span> for use with <code>finagle-thriftmux</code>
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>ResponseClassifiers</code> for use with <code>finagle-thriftmux</code>
 request/responses.</p><p>Thrift (and ThriftMux) services are a bit unusual in that
-there is only a single <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> from <code>Array[Byte]</code>
+there is only a single <code>com.twitter.finagle.Service</code> from <code>Array[Byte]</code>
 to <code>Array[Byte]</code> for all the methods of an IDL's service.</p><p>ThriftMux classifiers should be written in terms
 of the Scrooge generated request <code>$Service.$Method.Args</code> type and the
 method's response type. This is because there is support in Scrooge
@@ -189,7 +189,7 @@ a non-retryable failure.
       </a>
     </span>
       <p class="shortcomment cmt">Categorizes responses where the <b>deserialized</b> response is a
-Thrift Exception as a <span class="extype" name="ResponseClass.NonRetryableFailure">ResponseClass.NonRetryableFailure</span>.</p>
+Thrift Exception as a <code>ResponseClass.NonRetryableFailure</code>.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>

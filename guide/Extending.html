@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &mdash; Finagle 6.39.0-SNAPSHOT documentation</title>
+    <title>Extending Finagle &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.39.0-SNAPSHOT',
+        VERSION:     '6.40.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.39.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -134,8 +134,8 @@ a constructor for a <code class="docutils literal"><span class="pre">ServiceFact
 to extract the final <code class="docutils literal"><span class="pre">ServiceFactory</span></code> that represents the entirety of the stack,
 we simply call <code class="docutils literal"><span class="pre">stack.make(params)</span></code>.</p>
 <p>Finagle defines default (polymorphic) stacks for both
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.StackClient$.newStack">clients</a> and
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.server.StackServer$.newStack">servers</a>.</p>
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.StackClient$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">clients</a> and
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.server.StackServer$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">servers</a>.</p>
 <p>We&#8217;ll now discuss the constituent parts of Finagle&#8217;s clients and servers.</p>
 </div>
 <div class="section" id="transport-layer">

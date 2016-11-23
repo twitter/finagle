@@ -368,7 +368,10 @@ strictest deadline and the latest observation.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Marshal an A-typed value into a Buf.</p><div class="fullcomment"><div class="comment cmt"><p>Marshal an A-typed value into a Buf.
+      <p class="shortcomment cmt">Marshal deadline to byte buffer, deadline.timestamp and deadline.deadline
+must not be Time.Top, Time.Bottom or Time.Undefined
+</p><div class="fullcomment"><div class="comment cmt"><p>Marshal deadline to byte buffer, deadline.timestamp and deadline.deadline
+must not be Time.Top, Time.Bottom or Time.Undefined
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a> → <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.MarshalledContext.Key#marshalId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="marshalId:com.twitter.io.Buf"></a>

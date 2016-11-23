@@ -851,30 +851,6 @@ For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 Http.client.withSessionPool.minSize(value)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
       pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
       <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="hostConnectionIdleTime(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hostConnectionIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The amount of time a connection is allowed to linger (when it
-otherwise would have been closed by the pool) before being
-closed.</p><div class="fullcomment"><div class="comment cmt"><p>The amount of time a connection is allowed to linger (when it
-otherwise would have been closed by the pool) before being
-closed.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
-      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
-      <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionLimit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hostConnectionLimit(value:Int):com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,com.twitter.finagle.builder.ClientConfig.Yes]"></a>
       <a id="hostConnectionLimit(Int):ClientBuilder[Req,Rep,HasCluster,HasCodec,Yes]"></a>
@@ -897,68 +873,6 @@ connections than this limit.</p><p>To migrate to the Stack-based APIs, use <code
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client.withSessionPool.maxSize(value)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
-      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
-      <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="hostConnectionMaxIdleTime(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to linger unused.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxIdleTime</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withSession.maxIdleTime(timeout)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="hostConnectionMaxLifeTime(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to exist, regardless of occupancy.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxLifeTime</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withSession.maxLifeTime(timeout)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This"></a>
-      <a id="hostConnectionMaxWaiters(Int):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hostConnectionMaxWaiters</span><span class="params">(<span name="nWaiters">nWaiters: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The maximum queue size for the connection pool.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum queue size for the connection pool.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.maxWaiters</code>.
-For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-Http.client.withSessionPool.maxWaiters(nWaiters)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
       pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
       <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1954,6 +1868,104 @@ arithmetic.
       pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
       <code>com.twitter.finagle.Memcached</code>.</p></span>, <span class="cmt"><p>This will be integrated into the mainline pool, at
 which time the experimental option will go away.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
+      <a id="hostConnectionIdleTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-18) Use configured">hostConnectionIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The amount of time a connection is allowed to linger (when it
+otherwise would have been closed by the pool) before being
+closed.</p><div class="fullcomment"><div class="comment cmt"><p>The amount of time a connection is allowed to linger (when it
+otherwise would have been closed by the pool) before being
+closed.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-18)</i> Use <code>configured</code></p></dd><dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
+      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
+      <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
+      <a id="hostConnectionMaxIdleTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-18) Use configured">hostConnectionMaxIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to linger unused.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxIdleTime</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSession.maxIdleTime(timeout)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-18)</i> Use <code>configured</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
+      <a id="hostConnectionMaxLifeTime(Duration):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-18) Use configured">hostConnectionMaxLifeTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to exist, regardless of occupancy.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxLifeTime</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSession.maxLifeTime(timeout)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-18)</i> Use <code>configured</code></p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This"></a>
+      <a id="hostConnectionMaxWaiters(Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-10-18) Use configured or or the Stack-based API SessionPoolingParams.maxWaiters">hostConnectionMaxWaiters</span><span class="params">(<span name="nWaiters">nWaiters: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The maximum queue size for the connection pool.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum queue size for the connection pool.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.maxWaiters</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionPool.maxWaiters(nWaiters)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-10-18)</i> Use <code>configured</code> or or the Stack-based API <code>SessionPoolingParams.maxWaiters</code></p></dd><dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this style of connection
+      pooling, such as <code>com.twitter.finagle.ThriftMux</code> and
+      <code>com.twitter.finagle.Memcached</code>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="readerIdleTimeout(Duration):This"></a>

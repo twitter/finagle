@@ -88,7 +88,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.memcached.BaseClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.memcached.BaseClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="BaseClient[T]extendsAnyRef"></a>
       <a id="BaseClient[T]:BaseClient[T]"></a>
       <h4 class="signature">
@@ -104,7 +104,10 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p>
+      <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p><div class="fullcomment"><div class="comment cmt"><p>A friendly client to talk to a Memcached server.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The Memcached
+     <a href="https://github.com/memcached/memcached/blob/master/doc/protocol.txt" target="_blank">protocol docs</a>
+     for details on the API.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.CacheNode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CacheNodeextendsSocketAddresswithProductwithSerializable"></a>
       <a id="CacheNode:CacheNode"></a>
@@ -164,7 +167,7 @@ from zookeeper serverset parent node, and the expected cache pool size is the on
 we need for now. In the future this can be extended for other config attributes like cache
 pool migrating state, backup cache servers list, or replication role, etc
 </p></div></div>
-    </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="CasResultextendsAnyRef"></a>
       <a id="CasResult:CasResult"></a>
       <h4 class="signature">
@@ -180,7 +183,8 @@ pool migrating state, backup cache servers list, or replication role, etc
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">The result of a check and set command.</p><div class="fullcomment"><div class="comment cmt"><p>The result of a check and set command.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="BaseClient.html#checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" class="extmbr" name="com.twitter.finagle.memcached.BaseClient#checkAndSet">BaseClient.checkAndSet</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ClientextendsBaseClient[com.twitter.io.Buf]"></a>
       <a id="Client:Client"></a>

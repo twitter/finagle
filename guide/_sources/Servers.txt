@@ -101,6 +101,27 @@ All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` wil
 
 See :ref:`Requests Concurrency metrics <requests_concurrency_limit>` for more details.
 
+Rejecting Requests
+^^^^^^^^^^^^^^^^^^
+
+A service may explicitly reject requests on a case-by-case basis. To generate a rejection response,
+have the server return a Future.exception of :src:`Failure <com/twitter/finagle/Failure.scala>` with
+the `Rejected` flag set. A convenience method, `Failure.rejected` exists for this. By default, this
+also sets the `Restartable` flag which indicates the failure is safe to retry. The client's
+:src:`RequeueFilter <com/twitter/finagle/service/RequeueFilter.scala>` will automatically retry such
+failures.
+For requests that should not be retried, the server should return a `Failure` with the `NonRetryable`
+flag set.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.Failure
+
+  val rejection = Future.exception(Failure.rejected("busy"))
+  val nonRetryable = Future.exception(Failure("Don't try again", Failure.Rejected|Failure.NonRetryable))
+
+These responses will be considered `rejected` [#nack]_ by Finagle.
+
 Request Timeout
 ^^^^^^^^^^^^^^^
 
@@ -118,7 +139,10 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 .. rubric:: Footnotes
 
 .. [#nack] Depending on the protocol, a rejected request might be transformed into a `NACK`
-   (currently supported in HTTP/1.1 and Mux) so the remote client can safely `retry` it.
+   (currently supported in HTTP/1.1 and Mux) message. A `NACK` means that the server did not attempt
+   to perform any work associated with the request and therefore is typically safe to retry. However,
+   Finagle also supports `NACK` messages that are explicitly non-retryable. See the Retries section of
+   :doc:`/Clients`
 
 .. [#example] Configuration parameters/values provided in this example are only demonstrate
    the API usage, not the real world values. We do not recommend blindly applying those values

@@ -140,8 +140,8 @@ generator.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> for Thrift services that enforces all
-requests specify a <a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">com.twitter.finagle.thrift.ClientId</a>.</p>
+      <p class="shortcomment cmt">A <code>Filter</code> for Thrift services that enforces all
+requests specify a <code>com.twitter.finagle.thrift.ClientId</code>.</p>
     </li><li name="com.twitter.finagle.thrift.DeserializeCtx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DeserializeCtx[Rep]extendsAnyRef"></a>
       <a id="DeserializeCtx[Rep]:DeserializeCtx[Rep]"></a>
@@ -247,8 +247,8 @@ with one built from a ServiceIface.</p><p>Scrooge generates implementations of t
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Indicates that a request without a <a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">com.twitter.finagle.thrift.ClientId</a>
-was issued to a server that requires them.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a request without a <a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">com.twitter.finagle.thrift.ClientId</a>
+      <p class="shortcomment cmt">Indicates that a request without a <code>com.twitter.finagle.thrift.ClientId</code>
+was issued to a server that requires them.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a request without a <code>com.twitter.finagle.thrift.ClientId</code>
 was issued to a server that requires them. See
 <a href="ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">com.twitter.finagle.thrift.ClientIdRequiredFilter</a> for details.
 </p></div></div>
@@ -281,15 +281,15 @@ was issued to a server that requires them. See
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SeqIdFilter.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="SeqIdFilter.html"><span class="name">SeqIdFilter</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@SeqIdFilterextendsSimpleFilter[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that overrides Thrift request sequence IDs,
-replacing them with our own randomly-assigned i32s.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that overrides Thrift request sequence IDs,
+      <p class="shortcomment cmt">A <code>Filter</code> that overrides Thrift request sequence IDs,
+replacing them with our own randomly-assigned i32s.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Filter</code> that overrides Thrift request sequence IDs,
 replacing them with our own randomly-assigned i32s. Upon response receipt,
 this filter ensures that responses have the correct corresponding sequence ID,
 failing any requests that do not.
@@ -341,7 +341,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientFramedCodec.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftClientFramedCodec.html"><span class="name">ThriftClientFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftClientFramedCodecextendsCodec[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]" title="Permalink" target="_top">
@@ -358,7 +358,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftClientFramedCodecFactory.html"><span class="name">ThriftClientFramedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftClientFramedCodecFactory.html"><span class="name">ThriftClientFramedCodecFactory</span></a><span class="result"> extends (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftClientFramedCodecFactoryextendscom.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]" title="Permalink" target="_top">
@@ -431,7 +431,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftServerFramedCodec.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftServerFramedCodec.html"><span class="name">ThriftServerFramedCodec</span></a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftServerFramedCodecextendsCodec[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
@@ -448,7 +448,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftServerFramedCodecFactory.html"><span class="name">ThriftServerFramedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftServerFramedCodecFactory.html"><span class="name">ThriftServerFramedCodecFactory</span></a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ThriftServerFramedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
@@ -465,7 +465,7 @@ Scrooge generates implementations of this builder.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ValidateThriftService.html"><span class="name">ValidateThriftService</span></a><span class="result"> extends <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ValidateThriftService.html"><span class="name">ValidateThriftService</span></a><span class="result"> extends <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<a href="ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.thrift.package@ValidateThriftServiceextendsServiceProxy[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]" title="Permalink" target="_top">
@@ -678,7 +678,7 @@ requests.</p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Construct Service interface for a thrift method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct Service interface for a thrift method.</p><p>There are two ways to use a Scrooge-generated thrift service with Finagle:</p><p>1. Using a Service interface, i.e. a collection of finagle <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p><p>2. Using a method interface, i.e. a collection of methods returning <span class="extype" name="Future">Futures</span>.</p><p>Example: for a thrift service</p><pre>service Logger {
+      <p class="shortcomment cmt">Construct Service interface for a thrift method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct Service interface for a thrift method.</p><p>There are two ways to use a Scrooge-generated thrift service with Finagle:</p><p>1. Using a Service interface, i.e. a collection of finagle <code>Services</code>.</p><p>2. Using a method interface, i.e. a collection of methods returning <code>Futures</code>.</p><p>Example: for a thrift service</p><pre>service Logger {
   string log(<span class="num">1</span>: string message, <span class="num">2</span>: i32 logLevel);
   i32 getLogSize();
 }</pre><p>the Service interface is</p><pre><span class="kw">trait</span> LoggerServiceIface {
@@ -687,7 +687,7 @@ requests.</p>
  }</pre><p>and the method interface is</p><pre><span class="kw">trait</span> Logger[Future] {
   <span class="kw">def</span> log(message: <span class="std">String</span>, logLevel: <span class="std">Int</span>): Future[<span class="std">String</span>]
   <span class="kw">def</span> getLogSize(): Future[<span class="std">Int</span>]
-}</pre><p>Service interfaces can be modified and composed with Finagle <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filters</a>.
+}</pre><p>Service interfaces can be modified and composed with Finagle <code>Filters</code>.
 </p></div></div>
     </li><li name="com.twitter.finagle.thrift.maxReusableBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="maxReusableBufferSize"></a>

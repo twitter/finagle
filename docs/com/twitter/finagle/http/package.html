@@ -485,6 +485,51 @@ that wraps Request without exposing the underlying netty http type.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.http.Route" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RouteextendsProductwithSerializable"></a>
+      <a id="Route:Route"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Route.html"><span class="name">Route</span></a><span class="params">(<span name="pattern">pattern: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="handler">handler: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>, <span name="index">index: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="RouteIndex.html" class="extype" name="com.twitter.finagle.http.RouteIndex">RouteIndex</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@RouteextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents an element which can be routed to via the HttpMuxer.</p><div class="fullcomment"><div class="comment cmt"><p>Represents an element which can be routed to via the HttpMuxer.
+</p></div><dl class="paramcmts block"><dt class="param">pattern</dt><dd class="cmt"><p>The pattern the handler is bound to. This is also often
+used as the path to access the route, but if something more detailed is
+required, the <a href="RouteIndex.html#path:Option[String]" class="extmbr" name="com.twitter.finagle.http.RouteIndex#path">RouteIndex.path</a> parameter can be used.</p></dd><dt class="param">handler</dt><dd class="cmt"><p>The service which requests are routed to.</p></dd><dt class="param">index</dt><dd class="cmt"><p>Optionally contains information for the route UI.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.RouteIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RouteIndexextendsProductwithSerializable"></a>
+      <a id="RouteIndex:RouteIndex"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteIndex.html"><span class="name">RouteIndex</span></a><span class="params">(<span name="alias">alias: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="group">group: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="method">method: <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">Method</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Get</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@RouteIndexextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Contains the route UI information.</p><div class="fullcomment"><div class="comment cmt"><p>Contains the route UI information.
+</p></div><dl class="paramcmts block"><dt class="param">alias</dt><dd class="cmt"><p>A short name used to identify the route when listed in
+index.</p></dd><dt class="param">group</dt><dd class="cmt"><p>A grouping used to organize the route in the
+index. Routes with the same grouping are displayed together.</p></dd><dt class="param">path</dt><dd class="cmt"><p>The path used to access the route. A request
+is routed to the path as per the <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">com.twitter.finagle.http.HttpMuxer</a>
+spec. The path only needs to be specified if the URL accessed in the
+admin interface is different from the pattern provided in <a href="Route.html#pattern:String" class="extmbr" name="com.twitter.finagle.http.Route#pattern">Route.pattern</a>.</p></dd><dt class="param">method</dt><dd class="cmt"><p>Specifies which HTTP Method to use from
+<a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a>. The default is <a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a>. Only
+<a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a> and <a href="Method$$Post$.html" class="extype" name="com.twitter.finagle.http.Method.Post">Method.Post</a> are supported.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http.SafeHttpServerCodec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SafeHttpServerCodecextendsHttpServerCodec"></a>
       <a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
@@ -1077,6 +1122,23 @@ its credentials from a provided CredentialSource... usually JAAS.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.http.package@netty" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.http.param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="param"></a>
+      <a id="param:param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="param/package.html"><span class="name">param</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@param" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -114,7 +114,7 @@
     </span>
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.HttpMuxHandler#pattern" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.HttpMuxHandler#pattern" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="pattern:String"></a>
       <a id="pattern:String"></a>
       <h4 class="signature">
@@ -123,14 +123,17 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">pattern</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2016-11-08) Use route(pattern, this) instead">pattern</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.http.HttpMuxHandler@pattern:String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The pattern that this handler gets bound to</p>
+      <p class="shortcomment cmt">The pattern that this handler gets bound to</p><div class="fullcomment"><div class="comment cmt"><p>The pattern that this handler gets bound to</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-11-08)</i> Use route(pattern, this) instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -514,6 +517,23 @@ with a reasonable likelihood of success).
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpMuxHandler#route" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="route:com.twitter.finagle.http.Route"></a>
+      <a id="route:Route"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">route</span><span class="result">: <a href="Route.html" class="extype" name="com.twitter.finagle.http.Route">Route</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.HttpMuxHandler@route:com.twitter.finagle.http.Route" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures the route for this handler</p>
     </li><li name="com.twitter.finagle.Service#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a>
       <a id="status:finagle.Status"></a>

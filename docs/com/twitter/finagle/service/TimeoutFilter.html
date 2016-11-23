@@ -51,7 +51,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that a timeout to requests.</p><p>If the response is not satisfied within the <code>timeout</code>,
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a timeout to requests.</p><p>If the response is not satisfied within the <code>timeout</code>,
 the <span class="extype" name="Future">Future</span> will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The sections on
      <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">clients</a>
@@ -130,7 +130,7 @@ the <span class="extype" name="Future">Future</span> will be interrupted via <sp
     </span>
       
     </li><li name="com.twitter.finagle.service.TimeoutFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(timeout:com.twitter.util.Duration,exception:com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.service.TimeoutFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer):com.twitter.finagle.service.TimeoutFilter[Req,Rep]"></a>
       <a id="&lt;init&gt;:TimeoutFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -138,14 +138,14 @@ the <span class="extype" name="Future">Future</span> will be interrupted via <sp
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">TimeoutFilter</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="exception">exception: <a href="../RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span>
+        <span class="name">TimeoutFilter</span><span class="params">(<span name="timeoutFn">timeoutFn: () ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="exceptionFn">exceptionFn: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>) ⇒ <a href="../RequestTimeoutException.html" class="extype" name="com.twitter.finagle.RequestTimeoutException">RequestTimeoutException</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.TimeoutFilter@&lt;init&gt;(timeout:com.twitter.util.Duration,exception:com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.service.TimeoutFilter[Req,Rep]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.TimeoutFilter@&lt;init&gt;(timeoutFn:()=&gt;com.twitter.util.Duration,exceptionFn:com.twitter.util.Duration=&gt;com.twitter.finagle.RequestTimeoutException,timer:com.twitter.util.Timer):com.twitter.finagle.service.TimeoutFilter[Req,Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timeout</dt><dd class="cmt"><p>the timeout to apply to requests</p></dd><dt class="param">exception</dt><dd class="cmt"><p>an exception object to return in cases of timeout exceedance</p></dd><dt class="param">timer</dt><dd class="cmt"><p>a <code>Timer</code> object used to track elapsed time</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timeoutFn</dt><dd class="cmt"><p>the timeout to apply to requests</p></dd><dt class="param">exceptionFn</dt><dd class="cmt"><p>an exception object to return in cases of timeout exceedance</p></dd><dt class="param">timer</dt><dd class="cmt"><p>a <code>Timer</code> object used to track elapsed time</p></dd></dl></div>
     </li></ol>
             </div>
 

@@ -316,36 +316,36 @@ builder methods for constructing a mysql client.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a>
-      <a id="newRichClient(String):mysql.ClientwithTransactions"></a>
+      <a id="newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a>
+      <a id="newRichClient(String):mysql.ClientwithTransactionswithCursors"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.MysqlRichClient@newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.MysqlRichClient@newRichClient(dest:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code>.</p>
     </li><li name="com.twitter.finagle.MysqlRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions"></a>
-      <a id="newRichClient(Name,String):mysql.ClientwithTransactions"></a>
+      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors"></a>
+      <a id="newRichClient(Name,String):mysql.ClientwithTransactionswithCursors"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">Transactions</a> with <a href="mysql/Cursors.html" class="extype" name="com.twitter.finagle.mysql.Cursors">Cursors</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.MysqlRichClient@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactions" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.MysqlRichClient@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.mysql.Clientwithcom.twitter.finagle.mysql.Transactionswithcom.twitter.finagle.mysql.Cursors" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -389,6 +389,23 @@ destination described by <code>dest</code> with the assigned
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.MysqlRichClient#richClientStatsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="richClientStatsReceiver:com.twitter.finagle.stats.StatsReceiver"></a>
+      <a id="richClientStatsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">richClientStatsReceiver</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.MysqlRichClient@richClientStatsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
