@@ -11,12 +11,12 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
   def implName: String = "prior knowledge http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
-      .configured(Http2)
+      .configuredParams(Http2)
       .configured(PriorKnowledge(true))
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
-      .configured(Http2)
+      .configuredParams(Http2)
       .configured(PriorKnowledge(true))
 
 

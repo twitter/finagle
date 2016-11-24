@@ -408,6 +408,13 @@ object Stack {
       configured(p)(sp)
     }
 
+    /**
+     * Adds all parameters, `newParams`, to the current [[Params]].
+     */
+    def configuredParams(newParams: Stack.Params): T = {
+      withParams(params ++ newParams)
+    }
+
     def withParams(ps: Stack.Params): T
   }
 

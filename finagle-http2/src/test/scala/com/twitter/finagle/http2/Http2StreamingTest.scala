@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class Http2StreamingTest extends AbstractStreamingTest {
-  def impl: HttpImpl = Http2
+  def impl: HttpImpl = Http2[HttpImpl]
   override def configureClient: Http.Client => Http.Client  = { client =>
     client.configured(PriorKnowledge(true))
   }

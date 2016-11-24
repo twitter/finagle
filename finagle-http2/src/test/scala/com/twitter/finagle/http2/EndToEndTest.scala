@@ -12,11 +12,11 @@ class EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
   def clientImpl(): finagle.Http.Client =
     finagle.Http.client
-      .configured(Http2)
+      .configuredParams(Http2)
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
-      .configured(Http2)
+      .configuredParams(Http2)
 
   /**
    * The client and server start with the plain-text upgrade so the first request

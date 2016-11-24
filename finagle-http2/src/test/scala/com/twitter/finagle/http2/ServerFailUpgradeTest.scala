@@ -15,7 +15,7 @@ class ServerFailUpgradeTest extends AbstractHttp1EndToEndTest {
     finagle.Http.client
 
   def serverImpl(): finagle.Http.Server =
-    finagle.Http.server.configured(Http2)
+    finagle.Http.server.configuredParams(Http2)
 
   private[this] lazy val unsupported: Set[Feature] = Set(
     TooLargePayloads,  // flaky because of https://github.com/netty/netty/issues/5982

@@ -79,8 +79,8 @@ class DynamicTimeoutTest extends FunSuite {
   if (!sys.props.contains("SKIP_FLAKY"))
   testDynamicTimeouts(
     "HTTP/2",
-    Http.server.configured(Http2),
-    Http.client.configured(Http2),
+    Http.server.configuredParams(Http2),
+    Http.client.configuredParams(Http2),
     http.Request(),
     http.Response()
   )

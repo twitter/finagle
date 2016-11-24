@@ -11,6 +11,7 @@ import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
+import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.client.Transporter;
 import com.twitter.finagle.factory.BindingFactory;
 import com.twitter.finagle.factory.TimeoutFactory;
@@ -117,7 +118,8 @@ public class StackParamCompilationTest {
           new Transport.TLSClientEngine(
             Option.<scala.Function1<SocketAddress, Engine>>empty()
           ).mk())
-        .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
+        .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk())
+        .configuredParams(StackClient$.MODULE$.defaultParams());
 
     ClientBuilder.get().failFast(true);
   }

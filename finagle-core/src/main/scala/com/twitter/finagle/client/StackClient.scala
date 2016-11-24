@@ -408,6 +408,7 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
   def withParams(ps: Stack.Params): StackClient[Req, Rep]
   def configured[P: Stack.Param](p: P): StackClient[Req, Rep]
   def configured[P](psp: (P, Stack.Param[P])): StackClient[Req, Rep]
+  def configuredParams(params: Stack.Params): StackClient[Req, Rep]
 }
 
 /**

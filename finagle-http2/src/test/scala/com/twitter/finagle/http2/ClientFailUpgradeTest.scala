@@ -12,7 +12,7 @@ import org.scalatest.junit.JUnitRunner
 class ClientFailUpgradeTest extends AbstractHttp1EndToEndTest {
   def implName: String = "http/2 client, http/1.1 server"
   def clientImpl(): finagle.Http.Client =
-    finagle.Http.client.configured(Http2)
+    finagle.Http.client.configuredParams(Http2)
 
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
