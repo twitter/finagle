@@ -101,33 +101,33 @@ NOTE: All pooling metrics are only exported when pooling is enabled
       (default: disabled) and only account for direct memory.
 
 **pooling/allocations/huge**
-  A gauge (a counter) of total number of HUGE _direct allocations_
+  A gauge (a counter) of total number of HUGE *direct allocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
 **pooling/allocations/normal**
-  A gauge (a counter) of total number of NORMAL _direct allocations_
+  A gauge (a counter) of total number of NORMAL *direct allocations*
   (i.e., less than a current chunk size).
 
 **pooling/allocations/small**
-  A gauge (a counter) of total number of SMALL _direct allocations_
+  A gauge (a counter) of total number of SMALL *direct allocations*
   (i.e., less than a page size, 8192 bytes).
 
 **pooling/allocations/tiny**
-  A gauge (a counter) of total number of TINY _direct allocations_
+  A gauge (a counter) of total number of TINY *direct allocations*
   (i.e., less than 512 bytes).
 
 **pooling/deallocations/huge**
-  A gauge (a counter) of total number of HUGE _direct deallocations_
+  A gauge (a counter) of total number of HUGE *direct deallocations*
   (i.e., unpooled allocations that exceed the current chunk size).
 
 **pooling/deallocations/normal**
-  A gauge (a counter) of total number of NORMAL _direct deallocations_
+  A gauge (a counter) of total number of NORMAL *direct deallocations*
   (i.e., less than a chunk size).
 
 **pooling/deallocations/small**
-  A gauge (a counter) of total number of SMALL _direct deallocations_
+  A gauge (a counter) of total number of SMALL *direct deallocations*
   (i.e., less than a page size, 8192 bytes).
 
 **pooling/deallocations/tiny**
-  A gauge (a counter) of total number of TINY _direct deallocations_
+  A gauge (a counter) of total number of TINY *direct deallocations*
   (i.e., less than 512 bytes).
