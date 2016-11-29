@@ -1,10 +1,10 @@
 package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.thrift.thrift
-import com.twitter.util.NonFatal
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.nio.ByteBuffer
 import java.util.logging.Logger
+import scala.util.control.NonFatal
 
 /**
  * Endpoints describe a TCP endpoint that terminates RPC

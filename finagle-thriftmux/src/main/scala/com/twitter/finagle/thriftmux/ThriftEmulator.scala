@@ -10,10 +10,11 @@ import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Failure, Path, Dtab}
 import com.twitter.io.Buf
 import com.twitter.logging.Level
-import com.twitter.util.{Future, NonFatal, Try, Return, Promise, Throw, Updatable}
+import com.twitter.util.{Future, Try, Return, Promise, Throw, Updatable}
 import java.util.logging.Logger
 import org.apache.thrift.protocol.{TProtocolFactory, TMessage, TMessageType}
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 /**
  * A [[com.twitter.finagle.transport.Transport]] that manages the downgrading

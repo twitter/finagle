@@ -14,6 +14,7 @@ import _root_.java.util.concurrent.atomic.AtomicInteger
 import _root_.java.{util => ju}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 /**
  * Indicates that all [[com.twitter.finagle.kestrel.ReadHandle ReadHandles]]

@@ -11,6 +11,7 @@ import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import scala.util.control.NonFatal
 
 /**
  * A [[Transport]] implementation based on Netty's [[Channel]].

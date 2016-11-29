@@ -5,13 +5,14 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http._
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, NonFatal}
+import com.twitter.util.{Await, Future}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import java.nio.file.{Path, Files}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class SslTest extends FunSuite {

@@ -1,10 +1,10 @@
 package com.twitter.finagle.mysql.transport
 
 import com.twitter.io.Buf
-import com.twitter.util.NonFatal
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, _}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
+import scala.util.control.NonFatal
 
 /**
  * Decodes logical MySQL packets that could be fragmented across

@@ -16,6 +16,7 @@ import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
 import org.apache.thrift.transport.TMemoryInputTransport
+import scala.util.control.NonFatal
 
 /**
  * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a

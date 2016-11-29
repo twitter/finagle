@@ -11,10 +11,11 @@ import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3Server
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, NonFatal, StorageUnit}
+import com.twitter.util.{Closable, StorageUnit}
 import java.lang.{Long => JLong}
 import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
+import scala.util.control.NonFatal
 
 /**
  * a HttpChunkAggregator which recovers decode failures into 4xx http responses

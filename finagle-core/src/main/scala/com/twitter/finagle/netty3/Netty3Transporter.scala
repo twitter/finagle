@@ -15,7 +15,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, WriteException, CancelledConnectionException}
-import com.twitter.util.{Future, Promise, NonFatal, Stopwatch}
+import com.twitter.util.{Future, Promise, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
 import java.util.IdentityHashMap
@@ -28,6 +28,7 @@ import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 /** Bridges a netty3 channel with a transport */
 private[netty3] class ChannelConnector[In, Out](

@@ -20,6 +20,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatience {

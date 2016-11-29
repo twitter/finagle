@@ -5,12 +5,12 @@ import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.util.Showable
-import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import scala.language.existentials
 import scala.reflect.ClassTag
+import scala.util.control.NonFatal
 
 private[twitter] object ThriftUtil {
   private type BinaryService = Service[Array[Byte], Array[Byte]]

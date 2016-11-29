@@ -7,9 +7,10 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Futures, NonFatal, Throw, Timer}
+import com.twitter.util.{Future, Futures, Throw, Timer}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 object SubscribeCommands {
 

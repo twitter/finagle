@@ -3,7 +3,8 @@ package com.twitter.finagle.http.codec
 import com.twitter.finagle.context.{Deadline, Contexts, Retries}
 import com.twitter.finagle.http.Message
 import com.twitter.logging.{Level, Logger}
-import com.twitter.util.{NonFatal, Time}
+import com.twitter.util.Time
+import scala.util.control.NonFatal
 
 object HttpContext {
 

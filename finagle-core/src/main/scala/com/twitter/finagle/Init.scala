@@ -4,10 +4,11 @@ import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.util.{FuturePool, NonFatal}
+import com.twitter.util.FuturePool
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
+import scala.util.control.NonFatal
 
 /**
  * Global initialization of Finagle.

@@ -7,7 +7,7 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Stack}
 import com.twitter.io.Buf
-import com.twitter.util.{Future, NonFatal, Promise}
+import com.twitter.util.{Future, Promise}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
@@ -15,6 +15,7 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.nio.channels.UnresolvedAddressException
+import scala.util.control.NonFatal
 
 private[finagle] object Netty4Transporter {
   /**

@@ -2,9 +2,10 @@ package com.twitter.finagle.memcached.integration
 
 import collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.util.{Stopwatch, Duration, RandomSocket, NonFatal}
+import com.twitter.util.{Stopwatch, Duration, RandomSocket}
 import java.net.{InetAddress, BindException, ServerSocket, InetSocketAddress}
 import scala.collection._
+import scala.util.control.NonFatal
 
 object TestMemcachedServer {
   def start(): Option[TestMemcachedServer] = start(None)

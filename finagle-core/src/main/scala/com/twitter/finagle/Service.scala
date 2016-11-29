@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
-import com.twitter.util.{Closable, Future, NonFatal, Time}
+import com.twitter.util.{Closable, Future, Time}
 import java.net.SocketAddress
+import scala.util.control.NonFatal
 
 object Service {
 

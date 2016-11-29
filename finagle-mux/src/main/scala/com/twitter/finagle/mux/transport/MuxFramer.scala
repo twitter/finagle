@@ -6,10 +6,11 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Future, NonFatal, Promise,Time, Throw, Return}
+import com.twitter.util.{Future, Promise,Time, Throw, Return}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicInteger
+import scala.util.control.NonFatal
 
 /**
  * Defines a [[com.twitter.finagle.transport.Transport]] which allows a

@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.twitter.util.NonFatal
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 private[serverset2] object IntObj {
   def unapply(o: Object): Option[Int] = o match {

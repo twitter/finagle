@@ -5,6 +5,7 @@ import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.util.Future
+import scala.util.control.NonFatal
 
 private[redis] class RedisTracingFilter extends SimpleFilter[Command, Reply] {
 

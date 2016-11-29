@@ -3,7 +3,8 @@ package com.twitter.finagle.thrift.service
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.DeserializeCtx
-import com.twitter.util.{NonFatal, Return, Try, Throw}
+import com.twitter.util.{Return, Try, Throw}
+import scala.util.control.NonFatal
 
 /**
  * `ResponseClassifiers` for use with `finagle-thrift`

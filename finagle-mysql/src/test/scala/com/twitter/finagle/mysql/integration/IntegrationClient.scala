@@ -2,11 +2,11 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
-import com.twitter.util.NonFatal
 import java.io.{File, FileInputStream}
 import java.net.{ServerSocket, BindException}
 import java.util.logging.{Level, Logger}
 import java.util.Properties
+import scala.util.control.NonFatal
 
 trait IntegrationClient {
   private val logger = Logger.getLogger("integration-client")
