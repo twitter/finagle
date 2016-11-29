@@ -1,16 +1,19 @@
 package com.twitter.finagle.postgres.connection
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import com.twitter.finagle.postgres.messages._
 import com.twitter.logging.Logger
-
 import scala.collection.mutable.ListBuffer
 
 /*
  * Representation of a single Postgres connection.
  */
 class Connection(startState: State = AuthenticationRequired) {
-  private[this] val logger = Logger("connection")
-  private[this] val stateMachine = new ConnectionStateMachine(startState)
+  val id = Connection.nextId()
+  private[this] val logger = Logger(s"connection-$id")
+  private[this] val stateMachine = new ConnectionStateMachine(startState, id)
+
 
   def send(msg: FrontendMessage) = {
     logger.ifDebug("Sent frontend message of type: %s".format(msg.getClass.getName))
@@ -28,7 +31,14 @@ class Connection(startState: State = AuthenticationRequired) {
     logger.ifDebug("Received backend message of type: %s".format(msg.getClass.getName))
 
     val result = stateMachine.onEvent(msg)
-    logger.ifDebug("Emitting result")
+    result foreach {
+      r => logger.ifDebug(s"Emitting result ${r.getClass.getName}")
+    }
     result
   }
+}
+
+object Connection {
+  private[this] val currentId = new AtomicInteger(0)
+  private def nextId() = currentId.getAndIncrement()
 }

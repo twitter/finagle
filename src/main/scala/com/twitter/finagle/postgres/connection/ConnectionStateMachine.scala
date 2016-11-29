@@ -10,8 +10,8 @@ import scala.collection.mutable.ListBuffer
  *
  * See associated Postgres documentation: http://www.postgresql.org/docs/9.0/static/protocol-flow.html
  */
-class ConnectionStateMachine(state: State = AuthenticationRequired) extends StateMachine[Message, PgResponse, State] {
-  private[this] val logger = Logger("psql state machine")
+class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int) extends StateMachine[Message, PgResponse, State] {
+  private[this] val logger = Logger(s"psql state machine:$id")
 
   startState(state)
 
@@ -148,7 +148,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (row: DataRow, state: AggregateRows) =>
       state.buff += row
       (None, state)
-    case (CommandComplete(Select(count)), AggregateRows(fields, rows)) =>
+    case (CommandComplete(_), AggregateRows(fields, rows)) =>
       (None, EmitOnReadyForQuery(SelectResult(fields, rows.toList)))
     case (ErrorResponse(details), AggregateRows(_, _)) => (Some(Error(details)), Connected)
   }
@@ -160,6 +160,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
 
   transition {
     case (Terminate, _) => (Some(com.twitter.finagle.postgres.messages.Terminated), Terminated)
+    case (_, Terminated) => (Some(com.twitter.finagle.postgres.messages.Terminated), Terminated)
   }
 
   transition {

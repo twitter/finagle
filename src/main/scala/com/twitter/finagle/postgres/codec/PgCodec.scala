@@ -1,10 +1,11 @@
 package com.twitter.finagle.postgres.codec
 
 import java.net.{InetSocketAddress, SocketAddress}
+import java.nio.channels.ClosedChannelException
 
 import com.twitter.finagle._
 import com.twitter.finagle.postgres.ResultSet
-import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl}
+import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
 import com.twitter.logging.Logger
@@ -36,23 +37,13 @@ class HandleErrorsProxy(
 
   object HandleErrors extends SimpleFilter[PgRequest, PgResponse] {
 
-    object ShouldClose {
-      def unapply(err: Throwable): Option[Throwable] = err match {
-        case err: ChannelClosedException => Some(err)
-        case err: RequestCanceledException => Some(err)
-        case Failure(Some(ShouldClose(e))) => Some(e)
-        case _ => None
-      }
-    }
-
     def apply(request: PgRequest, service: Service[PgRequest, PgResponse]) = {
       service.apply(request).flatMap {
         case Error(msg, severity, sqlState, detail, hint, position) =>
           Future.exception(Errors.server(msg.getOrElse("unknown failure"), Some(request), severity, sqlState, detail, hint, position))
+        case Terminated =>
+          Future.exception(new ChannelClosedException())
         case r => Future.value(r)
-      }.onFailure {
-        case ShouldClose(err) => service(PgRequest(Terminate, true)) ensure { service.close() }
-        case _ =>
       }
     }
   }
@@ -242,11 +233,14 @@ class PgClientChannelHandler(
             Channels.fireMessageReceived(ctx, _)
           }
         } catch {
-          case err: Throwable => Channels.disconnect(ctx.getChannel)
+          case err @ WrongStateForEvent(evt, state) =>
+            logger.error(s"Could not handle event $evt while in state $state; connection will be terminated", err)
+            Channels.write(ctx.getChannel, Terminate.asPacket().encode())
+            Channels.fireExceptionCaught(ctx, err)
         }
       case unsupported =>
         logger.warning("Only backend messages are supported...")
-        Channels.disconnect(ctx.getChannel)
+        Channels.close(ctx.getChannel)
     }
   }
 
@@ -263,22 +257,28 @@ class PgClientChannelHandler(
         }
 
         try {
-          (c, connection.send(msg))
+          (Some(c), connection.send(msg))
         } catch {
-          case err: Throwable =>
+          case err @ WrongStateForEvent(evt, state) =>
+            logger.error(s"Could not handle event $evt while in state $state; connection will be terminated", err)
             Channels.fireExceptionCaught(ctx, err)
-            (Terminate.asPacket().encode(), Some(com.twitter.finagle.postgres.messages.Terminated))
+            (None, Some(com.twitter.finagle.postgres.messages.Terminated))
         }
 
-      case _ =>
-        logger.warning("Cannot convert message... Skipping")
-        (event.getMessage, None)
+      case buffer: ChannelBuffer =>
+        (Some(buffer), None)
+
+      case other =>
+        logger.warning(s"Cannot convert message of type ${other.getClass.getName}... Skipping")
+        (Some(event.getMessage), None)
     }
 
-    Channels.write(ctx, event.getFuture, buf, event.getRemoteAddress)
+    buf.filter(_ => ctx.getChannel.isOpen) foreach {
+      bytes => Channels.write(ctx, event.getFuture, bytes, event.getRemoteAddress)
+    }
     out collect {
       case term @ com.twitter.finagle.postgres.messages.Terminated =>
-        Channels.disconnect(ctx.getChannel)
+        Channels.close(ctx.getChannel)
         Channels.fireMessageReceived(ctx, term)
     }
   }

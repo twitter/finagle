@@ -8,6 +8,9 @@ object Undefined extends PartialFunction[Any, Nothing] {
   def apply(o: Any) = sys.error("undefined")
 }
 
+case class WrongStateForEvent[E, S](event: E, state: S)
+  extends IllegalStateException("Unknown event " + event + " for state " + state)
+
 /*
  * Generic definition of a state machine. Used to define connection state machine
  * in Connection.scala.
@@ -15,7 +18,9 @@ object Undefined extends PartialFunction[Any, Nothing] {
 trait StateMachine[E, R, S] {
   type Transition = PartialFunction[(E, S), (Option[R], S)]
 
-  private[this] val logger = Logger("state machine")
+  val id: Int
+
+  private[this] val logger = Logger(s"state machine-$id")
   private[this] var transitionFunction: Transition = Undefined
 
   @volatile private[this] var currentState: S = _
@@ -29,12 +34,12 @@ trait StateMachine[E, R, S] {
   }
 
   private[this] def handleMisc: PartialFunction[(E, S), (Option[R], S)] = {
-    case (e, s) => throw new IllegalStateException("Unknown event " + e + " for state " + s)
+    case (e, s) => throw WrongStateForEvent(e, s)
   }
 
   def onEvent(e: E): Option[R] = {
     val f = transitionFunction.orElse(handleMisc)
-    logger.ifDebug("Received event in state %s".format(currentState.getClass.getName))
+    logger.ifDebug("Received event %s in state %s".format(e.getClass.getName, currentState.getClass.getName))
 
     val (result, newState) = f((e, currentState))
     logger.ifDebug("Transitioning to state %s and emiting result".format(newState.getClass.getName))
