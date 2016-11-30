@@ -9,8 +9,6 @@ import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duratio
 import java.net.SocketAddress
 import java.security.cert.Certificate
 
-// Mapped: ideally via a util-codec?
-
 /**
  * A transport is a representation of a stream of objects that may be
  * read from and written to asynchronously. Transports are connected
@@ -19,7 +17,7 @@ import java.security.cert.Certificate
  */
 trait Transport[In, Out] extends Closable { self =>
   /**
-   * Write {{req}} to this transport; the returned future
+   * Write `req` to this transport; the returned future
    * acknowledges write completion.
    */
   def write(req: In): Future[Unit]
@@ -210,7 +208,7 @@ object Transport {
    * done using them.
    *
    * {{{
-   * copyToWriter(trans, w)(f) ensure {
+   * copyToWriter(trans, w)(f).ensure {
    *   trans.close()
    *   w.close()
    * }
@@ -222,11 +220,15 @@ object Transport {
    *
    * @param f A mapping from `A` to `Future[Option[Buf]]`.
    */
-  private[finagle] def copyToWriter[A](trans: Transport[_, A], w: Writer)
-                     (f: A => Future[Option[Buf]]): Future[Unit] = {
+  private[finagle] def copyToWriter[A](
+    trans: Transport[_, A],
+    w: Writer
+  )(
+    f: A => Future[Option[Buf]]
+  ): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
-      case Some(buf) => w.write(buf) before copyToWriter(trans, w)(f)
+      case Some(buf) => w.write(buf).before(copyToWriter(trans, w)(f))
     }
   }
 
@@ -244,8 +246,10 @@ object Transport {
    * the path of interrupts are a little convoluted; they would be
    * clarified by an independent implementation.
    */
-  private[finagle] def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
-  : Reader with Future[Unit] = new Promise[Unit] with Reader {
+  private[finagle] def collate[A](
+    trans: Transport[_, A],
+    chunkOfA: A => Future[Option[Buf]]
+  ): Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
 
     // Ensure that collate's future is satisfied _before_ its reader
@@ -262,13 +266,15 @@ object Transport {
         rw.close()
     }
 
-    def read(n: Int) = rw.read(n)
+    def read(n: Int): Future[Option[Buf]] = rw.read(n)
 
     def discard(): Unit = {
       rw.discard()
       raise(new Reader.ReaderDiscarded)
     }
   }
+
+  private[this] val castMapFn: Any => Any = Predef.identity
 
   /**
    * Casts an object transport to `Transport[In1, Out1]`. Note that this is
@@ -277,7 +283,9 @@ object Transport {
    * for example.
    */
   def cast[In1, Out1](trans: Transport[Any, Any]): Transport[In1, Out1] =
-    trans.map(_.asInstanceOf[Any], _.asInstanceOf[Out1])
+    trans.map(
+      castMapFn.asInstanceOf[In1 => Any],
+      castMapFn.asInstanceOf[Any => Out1])
 }
 
 /**
@@ -307,12 +315,13 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
  * A `Transport` interface to a pair of queues (one for reading, one
  * for writing); useful for testing.
  */
-class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
-  extends Transport[In, Out]
-{
+class QueueTransport[In, Out](
+    writeq: AsyncQueue[In],
+    readq: AsyncQueue[Out])
+  extends Transport[In, Out] {
   private[this] val closep = new Promise[Throwable]
 
-  def write(input: In) = {
+  def write(input: In): Future[Unit] = {
     writeq.offer(input)
     Future.Done
   }
@@ -322,15 +331,16 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
       closep.updateIfEmpty(Throw(exc))
     }
 
-  def status = if (closep.isDefined) Status.Closed else Status.Open
-  def close(deadline: Time) = {
+  def status: Status = if (closep.isDefined) Status.Closed else Status.Open
+
+  def close(deadline: Time): Future[Unit] = {
     val ex = new IllegalStateException("close() is undefined on QueueTransport")
     closep.updateIfEmpty(Return(ex))
     Future.exception(ex)
   }
 
-  val onClose = closep
-  val localAddress = new SocketAddress{}
-  val remoteAddress = new SocketAddress{}
+  val onClose: Future[Throwable] = closep
+  val localAddress: SocketAddress = new SocketAddress{}
+  val remoteAddress: SocketAddress = new SocketAddress{}
   def peerCertificate: Option[Certificate] = None
 }
