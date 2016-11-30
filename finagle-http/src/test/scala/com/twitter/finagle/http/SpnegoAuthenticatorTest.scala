@@ -114,7 +114,8 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     }
 
     val jaas = new JaasLoginTest
-    val principal = new KerberosPrincipal("krbtgt/random") // Needs to start with 'krbtgt/'
+    // Needs to start with 'krbtgt/' and have a realm (@REALM.NAME).
+    val principal = new KerberosPrincipal("krbtgt/random@TEST.REALM")
 
     // End date for TGT has not passed yet, ticket is valid
     val goodTicket = createTicketWithEndTime(Time.Top, principal)
