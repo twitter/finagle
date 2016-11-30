@@ -159,13 +159,24 @@ object SpnegoAuthenticator {
           lock.unlock(stamp)
         }
 
-        Subject.doAs(getSubject, createContextAction)
+        /** Here, we know that the portal and subject exist. */
+        subjectDoAction(createContextAction)
       }
 
       private val createContextAction =
         new PrivilegedAction[GSSContext] {
           def run(): GSSContext = createGSSContext()
         }
+
+      /** Do a privileged action using the subject of the current login context. */
+      protected final def subjectDoAction[T](action: PrivilegedAction[T]): T = {
+        val stamp = lock.readLock()
+        try {
+          Subject.doAs(getSubject, action)
+        } finally {
+          lock.unlockRead(stamp)
+        }
+      }
 
       /**
        * Check to see if the login has expired by finding the expiration date of the TGT and
@@ -192,21 +203,16 @@ object SpnegoAuthenticator {
 
       /**
        * Get the subject from the current LoginContext held by the JAAS trait. This must be called
-       * after the 'load' method since 'load' will initialize the needed LoginContext.
+       * after the 'load' method since 'load' will initialize the needed LoginContext. You must hold
+       * the read lock before calling this method.
        *
        * Throws a 'RuntimeException' if 'portalOption' is None.
        */
-      protected final def getSubject: Subject = {
-        val stamp = lock.readLock()
-        try {
-          portalOption match {
-            case Some(instance) => instance.getSubject
-            case None => throw new RuntimeException("Must call 'load' before 'getSubject'")
-          }
-        } finally {
-          lock.unlockRead(stamp)
+      private def getSubject: Subject =
+        portalOption match {
+          case Some(instance) => instance.getSubject
+          case None => throw new RuntimeException("Must call 'load' before 'getSubject'")
         }
-      }
 
       /** Called while running with the privileges of the given loginContext.  */
       protected def createGSSContext(): GSSContext
@@ -231,7 +237,7 @@ object SpnegoAuthenticator {
         val tokenIn = challengeToken.getOrElse(Token.Empty)
         var tokenOut: Token = null
         do {
-          tokenOut = Subject.doAs(getSubject, initContextAction(context, tokenIn))
+          tokenOut = subjectDoAction(initContextAction(context, tokenIn))
         } while (tokenOut == null);
         tokenOut
       }
