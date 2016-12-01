@@ -438,7 +438,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   }
 
   def readAll(): Buf = {
-    val b = buf.slice(0, buf.length)
+    val b = buf
     buf = Buf.Empty
     b
   }
