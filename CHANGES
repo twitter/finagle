@@ -7,6 +7,13 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * The `codec` method has been removed from the kestrel MultiReader object. Configure
+    a ClientBuilder protocol using the default thrift StackClient, Thrift.client, via the
+    `stack` method of ClientBuilder. ``RB_ID=894297``
+
 6.40.0
 ------
 

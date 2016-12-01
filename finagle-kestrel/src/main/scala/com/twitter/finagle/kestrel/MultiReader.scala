@@ -6,7 +6,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{ThriftClientFramedCodecFactory, ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
 import _root_.java.net.SocketAddress
@@ -334,12 +334,6 @@ object MultiReaderThrift {
   def apply(va: Var[Addr], queueName: String): MultiReaderBuilderThrift = {
     this(va,queueName, None)
   }
-
-  /**
-   * Helper for getting the right codec for the thrift protocol
-   * @return the ThriftClientFramedCodec codec
-   */
-  def codec(clientId: ClientId): ThriftClientFramedCodecFactory = ThriftClientFramedCodec(Some(clientId))
 }
 
 /**
@@ -666,13 +660,19 @@ class MultiReaderBuilderThrift private[kestrel](
       config: MultiReaderConfig[ThriftClientRequest, Array[Byte]]): MultiReaderBuilderThrift =
     new MultiReaderBuilderThrift(config)
 
-  protected[kestrel] def defaultClientBuilder: ThriftClientBuilder =
+  protected[kestrel] def defaultClientBuilder: ThriftClientBuilder = {
+    val stackClient = config.clientId match {
+      case Some(id) => Thrift.client.withClientId(id)
+      case None => Thrift.client
+    }
+
     ClientBuilder()
-      .codec(ThriftClientFramedCodec(config.clientId))
+      .stack(stackClient)
       .connectTimeout(1.minute)
       .requestTimeout(1.minute)
       .hostConnectionLimit(1)
       .daemon(true)
+  }
 
   protected[kestrel] def createClient(
       factory: ServiceFactory[ThriftClientRequest, Array[Byte]]): Client =
