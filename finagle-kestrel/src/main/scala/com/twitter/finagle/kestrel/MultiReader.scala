@@ -248,7 +248,7 @@ object MultiReaderMemcache {
  *     MultiReaderThrift("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
- *           .codec(MultiReaderThrift.codec(ClientId("myClientName"))
+ *           .stack(Thrift.client.withClientId(ClientId("myClientName")))
  *           .requestTimeout(1.minute)
  *           .connectTimeout(1.minute)
  *           .hostConnectionLimit(1) /* etc... but do not set hosts or build */)
