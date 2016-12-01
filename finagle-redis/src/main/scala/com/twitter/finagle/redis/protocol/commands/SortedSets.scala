@@ -343,7 +343,7 @@ case class ZScan(
   pattern: Option[Buf] = None
   ) extends Command {
   def name: Buf  = Command.ZSCAN
-  def toBuf: Seq[Buf] = {
+  override def body: Seq[Buf] = {
     val bufs = Seq(key, Buf.Utf8(cursor.toString))
     val withCount = count match {
       case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
