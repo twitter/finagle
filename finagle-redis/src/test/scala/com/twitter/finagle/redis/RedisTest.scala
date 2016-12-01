@@ -1,14 +1,15 @@
 package com.twitter.finagle.redis
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis
-import com.twitter.finagle.redis.naggati._
+import com.twitter.finagle.netty3.BufChannelBuffer
+import com.twitter.finagle.redis.naggati.Codec
+import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalacheck.{Arbitrary, Gen}
@@ -39,7 +40,7 @@ trait RedisTest extends FunSuite {
         waitUntil(message, countDown - 1)(ready)
       }
     }
-    else throw new IllegalStateException(s"Timeout: ${message}")
+    else throw new IllegalStateException(s"Timeout: $message")
   }
 
   def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit): Unit = {
@@ -47,23 +48,15 @@ trait RedisTest extends FunSuite {
   }
 }
 
-trait RedisResponseTest extends RedisTest {
-  protected val replyCodec = new ReplyCodec
-  protected val (codec, counter) = TestCodec(replyCodec.decode, Codec.NONE)
-}
+trait MissingInstances {
 
-trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
+  val Eol = Buf.Utf8("\r\n")
 
-  case class NelList[A](list: List[A])
-
-  def genNelList[A: Arbitrary]: Gen[NelList[A]] =
-    Gen.nonEmptyListOf(Arbitrary.arbitrary[A]).map(NelList.apply)
-
-  implicit def arbitraryNelList[A: Arbitrary]: Arbitrary[NelList[A]] = Arbitrary(genNelList[A])
+  def genNonEmptyString: Gen[String] = Gen.alphaStr.suchThat(_.nonEmpty)
 
   // Gen non empty Bufs (per Redis protocol)
   def genBuf: Gen[Buf] = for {
-    s <- Gen.alphaStr.suchThat(_.nonEmpty)
+    s <- genNonEmptyString
     b <- Gen.oneOf(
       Buf.Utf8(s),
       Buf.ByteArray.Owned(s.getBytes("UTF-8"))
@@ -72,11 +65,70 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
 
   implicit val arbitraryBuf: Arbitrary[Buf] = Arbitrary(genBuf)
 
+  def genStatusReply: Gen[StatusReply] = genNonEmptyString.map(StatusReply.apply)
+  def genErrorReply: Gen[ErrorReply] = genNonEmptyString.map(ErrorReply.apply)
+  def genIntegerReply: Gen[IntegerReply] = Arbitrary.arbLong.arbitrary.map(IntegerReply.apply)
+  def genBulkReply: Gen[BulkReply] = genBuf.map(BulkReply.apply)
+
+  def genFlatMBulkReply: Gen[MBulkReply] = for {
+    n <- Gen.choose(1, 10)
+    line <- Gen.listOfN(n, Gen.oneOf(genStatusReply, genErrorReply, genIntegerReply, genBulkReply))
+  } yield MBulkReply(line)
+
+  def genMBulkReply(maxDeep: Int): Gen[MBulkReply] =
+    if (maxDeep == 0) genFlatMBulkReply
+    else for {
+      n <- Gen.choose(1, 10)
+      line <- Gen.listOfN(n, Gen.oneOf(
+        genStatusReply, genErrorReply, genIntegerReply, genBulkReply, genMBulkReply(maxDeep - 1)
+      ))
+    } yield MBulkReply(line)
+
+  implicit def arbitraryStatusReply: Arbitrary[StatusReply] = Arbitrary(genStatusReply)
+  implicit def arbitraryErrorReply: Arbitrary[ErrorReply] = Arbitrary(genErrorReply)
+  implicit def arbitraryIntegerReply: Arbitrary[IntegerReply] = Arbitrary(genIntegerReply)
+  implicit def arbitraryBulkReply: Arbitrary[BulkReply] = Arbitrary(genBulkReply)
+  implicit def arbitraryMBulkReplu: Arbitrary[MBulkReply] = Arbitrary(genMBulkReply(10))
+}
+
+trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
+  private[this] val replyCodec = new ReplyCodec
+  private[this] val (codec, _) = TestCodec(replyCodec.decode, Codec.NONE)
+
+  def encodeAndDecode(r: Reply): Option[Reply] =
+    codec(BufChannelBuffer(encode(r))).headOption.map(_.asInstanceOf[Reply])
+
+  def decode(s: String): Option[Reply] =
+    codec(ChannelBuffers.wrappedBuffer(s.getBytes("UTF-8"))).headOption.map(_.asInstanceOf[Reply])
+
+  def encode(r: Reply): Buf = r match {
+    case StatusReply(s) => Buf.Utf8("+").concat(Buf.Utf8(s)).concat(Eol)
+    case ErrorReply(s) => Buf.Utf8("-").concat(Buf.Utf8(s)).concat(Eol)
+    case IntegerReply(i) => Buf.Utf8(":").concat(Buf.Utf8(i.toString)).concat(Eol)
+    case BulkReply(buf) =>
+      Buf.Utf8("$")
+        .concat(Buf.Utf8(buf.length.toString))
+        .concat(Eol)
+        .concat(buf)
+        .concat(Eol)
+    case MBulkReply(replies) =>
+      val header =
+        Buf.Utf8("*")
+          .concat(Buf.Utf8(replies.size.toString))
+          .concat(Eol)
+      val body = replies.map(encode).reduce((a, b) => a.concat(b))
+
+      header.concat(body)
+    case _ => Buf.Empty
+  }
+}
+
+trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
+
   def genZMember: Gen[ZMember] = for {
     d <- Arbitrary.arbitrary[Double]
     b <- genBuf
   } yield ZMember(d, b)
-
 
   implicit val arbitraryZMember: Arbitrary[ZMember] = Arbitrary(genZMember)
 
@@ -88,13 +140,13 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
   implicit val arbitraryZInterval: Arbitrary[ZInterval] = Arbitrary(genZInterval)
 
   def genWeights: Gen[Weights] =
-    genNelList[Double].map(nel => Weights(nel.list.toArray))
+    Gen.nonEmptyListOf(Arbitrary.arbDouble.arbitrary).map(l => Weights(l.toArray))
 
   implicit val arbitraryWeights: Arbitrary[Weights] = Arbitrary(genWeights)
 
-  def genAgregate: Gen[Aggregate] = Gen.oneOf(Aggregate.Max, Aggregate.Min, Aggregate.Sum)
+  def genAggregate: Gen[Aggregate] = Gen.oneOf(Aggregate.Max, Aggregate.Min, Aggregate.Sum)
 
-  implicit val arbitraryAggregate: Arbitrary[Aggregate] = Arbitrary(genAgregate)
+  implicit val arbitraryAggregate: Arbitrary[Aggregate] = Arbitrary(genAggregate)
 
   def encode(c: Command): Seq[String] = {
     val strings = BufToString(Command.encode(c)).split("\r\n")
@@ -135,9 +187,9 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
   }
 
   def checkMultiKey(c: String, f: Seq[Buf] => Command): Unit = {
-    forAll { keys: NelList[Buf] =>
+    forAll(Gen.nonEmptyListOf(genBuf)) { keys =>
       assert(
-        encode(f(keys.list)) == c +: keys.list.map(_.asString)
+        encode(f(keys)) == c +: keys.map(_.asString)
       )
     }
 
@@ -146,9 +198,9 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks {
   }
 
   def checkSingleKeyMultiVal(c: String, f: (Buf, Seq[Buf]) => Command): Unit = {
-    forAll { (key: Buf, vals: NelList[Buf]) =>
+    forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (key, vals) =>
       assert(
-        encode(f(key, vals.list)) == c +: key.asString +: vals.list.map(_.asString)
+        encode(f(key, vals)) == c +: key.asString +: vals.map(_.asString)
       )
     }
 
