@@ -109,13 +109,16 @@ abstract class AbstractStreamingTest extends FunSuite {
 
   test("client: server disconnect on pending response should fail request") {
     val failure = new Promise[Unit]
-    val server = startServer(neverRespond, closingTransport(failure))
+    val (mod, closable) = closingTransport(failure)
+    val server = startServer(neverRespond, mod)
     val client = connect(server.boundAddress, identity)
 
     val resF = client(get("/"))
+
     failure.setDone()
     intercept[ChannelException] { await(resF) }
 
+    await(closable.close())
     await(client.close())
     await(server.close())
   }
@@ -125,7 +128,8 @@ abstract class AbstractStreamingTest extends FunSuite {
     val service = Service.mk[Request, Response] { req =>
       Future.value(Response())
     }
-    val server = startServer(service, closingTransport(serverClose))
+    val (mod, closable) = closingTransport(serverClose)
+    val server = startServer(service, mod)
     val client = connect(server.boundAddress, transport => {
       clientClosed.become(transport.onClose.unit)
       transport
@@ -135,6 +139,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     assert(await(res.reader.read(1)) == None)
     serverClose.setDone()
     await(clientClosed)
+    await(closable.close())
   }
 
   test("client: fail request writer") (new ClientCtx {
@@ -170,7 +175,8 @@ abstract class AbstractStreamingTest extends FunSuite {
       }
     }
 
-    val server = startServer(service, closingOnceTransport(failure))
+    val (mod, closable) = closingOnceTransport(failure)
+    val server = startServer(service, mod)
     val client1 = connect(server.boundAddress, identity, "client1")
     val client2 = connect(server.boundAddress, identity, "client2")
 
@@ -193,7 +199,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2).close()
+    Closable.all(server, client1, client2, closable).close()
   }
 
   test("server: response stream fails write") {
@@ -217,7 +223,8 @@ abstract class AbstractStreamingTest extends FunSuite {
       }
     }
 
-    val server = startServer(service, closingOnceTransport(failure))
+    val (mod, closable) = closingOnceTransport(failure)
+    val server = startServer(service, mod)
     val client1 = connect(server.boundAddress, identity, "client1")
     val client2 = connect(server.boundAddress, identity, "client2")
 
@@ -241,7 +248,7 @@ abstract class AbstractStreamingTest extends FunSuite {
 
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
-    Closable.all(server, client1, client2).close()
+    Closable.all(server, client1, client2, closable).close()
   }
 
   test("server: fail response writer") {
@@ -361,6 +368,28 @@ abstract class AbstractStreamingTest extends FunSuite {
       .configured(modifiedImpl)
       .newService(Name.bound(Address(addr.asInstanceOf[InetSocketAddress])), name)
   }
+
+  def closingTransport(closed: Future[Unit]): (Modifier, Closable) = {
+    (
+      (transport: Transport[Any, Any]) => {
+        closed.ensure { transport.close() }
+        transport
+      },
+      Closable.nop
+    )
+  }
+
+  def closingOnceTransport(closed: Future[Unit]): (Modifier, Closable) = {
+    val setFail = new AtomicBoolean(false)
+
+    (
+      (transport: Transport[Any, Any]) => {
+        if (!setFail.getAndSet(true)) closed.ensure { transport.close() }
+        transport
+      },
+      Closable.nop
+    )
+  }
 }
 
 object StreamingTest {
@@ -409,22 +438,6 @@ object StreamingTest {
       )(
         serveTransport: Transport[Any, Any] => Unit
       ): ListeningServer = underlying.listen(addr)(mod.andThen(serveTransport))
-    }
-  }
-
-  def closingTransport(closed: Future[Unit]): Modifier = {
-    (transport: Transport[Any, Any]) => {
-      closed.ensure { transport.close() }
-      transport
-    }
-  }
-
-  def closingOnceTransport(closed: Future[Unit]): Modifier = {
-    val setFail = new AtomicBoolean(false)
-
-    (transport: Transport[Any, Any]) => {
-      if (!setFail.getAndSet(true)) closed.ensure { transport.close() }
-      transport
     }
   }
 }

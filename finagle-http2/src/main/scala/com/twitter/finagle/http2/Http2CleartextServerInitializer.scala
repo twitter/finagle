@@ -2,6 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.http
 import com.twitter.finagle.Stack
+import com.twitter.finagle.http2.transport.PriorKnowledgeHandler
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
@@ -22,9 +23,27 @@ private[http2] class Http2CleartextServerInitializer(
     params: Stack.Params)
   extends ChannelInitializer[SocketChannel] {
 
+  val newInitializer = new ChannelInitializer[Channel] {
+    def initChannel(ch: Channel): Unit = {
+      ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
+
+      // we want to drop reset frames because the Http2ServerDowngrader doesn't know what to
+      // do with them, and our dispatchers expect to only get http/1.1 message types.
+      ch.pipeline.addLast(new ChannelInboundHandlerAdapter() {
+        override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
+          if (!msg.isInstanceOf[Http2ResetFrame])
+            super.channelRead(ctx, msg)
+        }
+      })
+      initServer(params)(ch.pipeline)
+      ch.pipeline.addLast(init)
+    }
+  }
+
   val upgradeCodecFactory: UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
+
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
             ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
@@ -41,13 +60,13 @@ private[http2] class Http2CleartextServerInitializer(
             ch.pipeline.addLast(init)
           }
         }
+
         new Http2ServerUpgradeCodec(new Http2Codec(true /* server */, initializer)) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             // we turn off backpressure because Http2 only works with autoread on for now
             ctx.channel.config.setAutoRead(true)
             super.upgradeTo(ctx, upgradeRequest)
           }
-
         }
       } else null
     }
@@ -66,6 +85,7 @@ private[http2] class Http2CleartextServerInitializer(
         Logger.get(this.getClass).error(ex, msg)
         throw ex
     }
+    p.addBefore(HttpCodecName, "priorKnowledgeHandler", new PriorKnowledgeHandler(newInitializer, params))
     p.addAfter(HttpCodecName, "upgradeHandler",
       new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
 

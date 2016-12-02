@@ -17,8 +17,6 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
   def serverImpl(): finagle.Http.Server =
     finagle.Http.server
       .configuredParams(Http2)
-      .configured(PriorKnowledge(true))
-
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresToBeImplemented = Set[Feature](
