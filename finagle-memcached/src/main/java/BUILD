@@ -13,6 +13,7 @@ java_library(
     'finagle/finagle-core/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
+    'util/util-function/src/main/java:java',
   ],
   sources=rglobs('*.java')
 )

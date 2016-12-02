@@ -5,7 +5,8 @@ java_library(
     repo = artifactory,
   ),
   dependencies=[
-    'finagle/finagle-http/src/main/scala'
+    'finagle/finagle-http/src/main/scala',
+    'finagle/finagle-base-http/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.java'),
