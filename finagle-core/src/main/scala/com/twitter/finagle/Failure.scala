@@ -187,23 +187,28 @@ object Failure {
     else
       new Failure(cause.getMessage, Some(cause), flags, logLevel = logLevel)
 
+  private[this] def computeLogLevel(t: Throwable): Level = t match {
+    case HasLogLevel(level) => level
+    case _ => Level.WARNING
+  }
+
   /**
    * Create a new failure with the given cause; no flags.
    */
   def apply(cause: Throwable): Failure =
-    apply(cause, 0L)
+    apply(cause, 0L, computeLogLevel(cause))
 
   /**
    * Create a new failure with the given message, cause, and flags.
    */
   def apply(why: String, cause: Throwable, flags: Long): Failure =
-    new Failure(why, Option(cause), flags)
+    new Failure(why, Option(cause), flags, logLevel = computeLogLevel(cause))
 
   /**
    * Create a new failure with the given message and cause; no flags.
    */
   def apply(why: String, cause: Throwable): Failure =
-    apply(why, cause, 0L)
+    new Failure(why, Option(cause), 0L, logLevel = computeLogLevel(cause))
 
   /**
    * Create a new failure with the given message and flags.
@@ -246,7 +251,7 @@ object Failure {
    */
   def adapt(exc: Throwable, flags: Long): Failure = exc match {
     case f: Failure => f.chained.flagged(flags)
-    case exc => Failure(exc, flags)
+    case _ => Failure(exc, flags, computeLogLevel(exc))
   }
 
   /**
@@ -257,7 +262,7 @@ object Failure {
     require(exc != null)
     exc match {
       case f: Failure => f.flagged(flags|Failure.Wrapped)
-      case exc => Failure(exc, flags|Failure.Wrapped)
+      case _ => Failure(exc, flags|Failure.Wrapped, computeLogLevel(exc))
     }
   }
 
@@ -317,18 +322,19 @@ object Failure {
       service(req).rescue(Process)
   }
 
-  val role = Stack.Role("ProcessFailure")
+  val role: Stack.Role = Stack.Role("ProcessFailure")
 
   /**
    * A module to strip out dangerous flags.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
-      val role = Failure.role
-      val description = "process failures"
+      val role: Stack.Role = Failure.role
+      val description: String = "process failures"
 
       private[this] val filter = new ProcessFailures[Req, Rep]
 
-      def make(next: ServiceFactory[Req, Rep]) = filter andThen next
+      def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+        filter.andThen(next)
     }
 }

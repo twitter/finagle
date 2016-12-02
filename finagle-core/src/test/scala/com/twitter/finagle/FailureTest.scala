@@ -1,20 +1,22 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
+import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.{JUnitRunner, AssertionsForJUnit}
+import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
 class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
-  val exc = Gen.oneOf[Throwable](
+  private val exc = Gen.oneOf[Throwable](
     null,
     new Exception("first"),
     new Exception("second"))
 
-  val flag = Gen.oneOf(
+  private val flag = Gen.oneOf(
     0L,
     Failure.Restartable,
     Failure.Interrupted,
@@ -23,7 +25,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     Failure.Naming)
     // Failure.NonRetryable - Conflicts with Restartable, so omitted here.
 
-  val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
+  private val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
 
   test("simple failures with a cause") {
     val why = "boom!"
@@ -97,6 +99,23 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     }
   }
 
+  private class WithLogLevel(val logLevel: Level) extends Exception with HasLogLevel
+
+  test("Failure.apply uses HasLogLevel's logLevel") {
+    Seq(Level.CRITICAL, Level.TRACE, Level.ALL).foreach { level =>
+      assert(level == Failure(new WithLogLevel(level)).logLevel)
+    }
+  }
+
+  test("Failure.apply follows chain to HasLogLevel") {
+    val nested = new Exception(new WithLogLevel(Level.DEBUG))
+    assert(Level.DEBUG == Failure(nested).logLevel)
+  }
+
+  test("Failure.apply defaults logLevel to warning") {
+    assert(Level.WARNING == Failure(new Exception()).logLevel)
+  }
+
   test("Failure.rejected sets correct flags") {
     val flags = Failure.Restartable | Failure.Rejected
     assert(Failure.rejected(":(").isFlagged(flags))
@@ -106,10 +125,10 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Failure.ProcessFailures") {
     val echo = Service.mk((exc: Throwable) => Future.exception(exc))
-    val service = (new Failure.ProcessFailures) andThen echo
+    val service = new Failure.ProcessFailures().andThen(echo)
 
     def assertFail(exc: Throwable, expect: Throwable) = {
-      val exc1 = intercept[Throwable] { Await.result(service(exc)) }
+      val exc1 = intercept[Throwable] { Await.result(service(exc), 5.seconds) }
       assert(exc1 == expect)
     }
 
