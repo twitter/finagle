@@ -119,7 +119,8 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
     window: Duration,
     nackRateThreshold: Double,
     random: Rng,
-    statsReceiver: StatsReceiver)
+    statsReceiver: StatsReceiver,
+    monoTime: Ema.Monotime = new Ema.Monotime)
   extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
 
@@ -136,7 +137,6 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   // whenever we get a response from the cluster with 0 when the service responds
   // with a nack and 1 otherwise.
   private[this] val ema = new Ema(windowInNs)
-  private[this] val monoTime = new Ema.Monotime
   ema.update(monoTime.nanos(), 1) // Start the ema at 1.0
 
   // for testing
