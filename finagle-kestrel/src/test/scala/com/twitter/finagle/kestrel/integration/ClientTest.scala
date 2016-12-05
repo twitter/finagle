@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Thrift
+import com.twitter.finagle.ThriftMux
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Client
 import com.twitter.finagle.Kestrel
@@ -38,8 +38,7 @@ class ClientTest extends FunSuite {
     test("ThriftConnectedClient should set & get") {
       val serviceFactory = ClientBuilder()
         .hosts("localhost:2229")
-        .stack(Thrift.client.withClientId(ClientId("testcase")))
-        .hostConnectionLimit(1)
+        .stack(ThriftMux.client.withClientId(ClientId("testcase")))
         .buildFactory()
       val client = Client.makeThrift(serviceFactory)
 

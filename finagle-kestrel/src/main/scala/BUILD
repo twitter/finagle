@@ -13,6 +13,7 @@ scala_library(
     'finagle/finagle-netty4',
     'finagle/finagle-thrift',
     'finagle/finagle-thrift/src/main/java',
+    'finagle/finagle-thriftmux',
     'finagle/finagle-toggle',
     'scrooge/scrooge-core/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
