@@ -1,10 +1,9 @@
 package com.twitter.finagle.mysql.transport
 
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.finagle.util.{ProxyBufWriter, ProxyBufReader, BufReader, BufWriter}
-import java.nio.charset.{Charset => JCharset}
+import java.nio.charset.{Charset => JCharset, StandardCharsets}
 import scala.collection.mutable.{Buffer => MutableBuffer}
-
 
 /**
  * MysqlBuf provides convenience methods for reading/writing a logical packet
@@ -73,7 +72,8 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
   /**
    * Reads a null-terminated UTF-8 encoded string
    */
-  def readNullTerminatedString(): String = new String(readNullTerminatedBytes(), Charsets.Utf8)
+  def readNullTerminatedString(): String =
+    new String(readNullTerminatedBytes(), StandardCharsets.UTF_8)
 
   /**
    * Reads a length encoded set of bytes according to the MySQL
@@ -180,7 +180,7 @@ class MysqlBufWriter(bytes: Array[Byte]) extends ProxyBufWriter {
    * @param s String to write.
    */
   def writeNullTerminatedString(s: String): MysqlBufWriter = {
-    writeBytes(s.getBytes(Charsets.Utf8))
+    writeBytes(s.getBytes(StandardCharsets.UTF_8))
     writeByte(0x00)
     this
   }
