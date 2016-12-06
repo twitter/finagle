@@ -1,17 +1,15 @@
 package com.twitter.finagle.memcached.replication
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-
-import scala.util.Random
-
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
-import com.twitter.finagle.Group
+import com.twitter.finagle.{Group, Name}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
+import scala.util.Random
 
 sealed trait ReplicationStatus[T]
 
@@ -42,7 +40,7 @@ case class SCasUnique(casUnique: Buf) extends ReplicaCasUnique
 /**
  * Replication client helper
  */
-object ReplicationClient {
+private[finagle] object ReplicationClient {
   def newBaseReplicationClient(
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
@@ -50,8 +48,9 @@ object ReplicationClient {
     failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
-      Await.result(pool.ready)
-      KetamaClientBuilder(Group.fromCluster(pool), hashName, clientBuilder, failureAccrualParams).build()
+      val group = Group.fromCluster(pool)
+      val name = Name.bound(group.members.map(CacheNode.toAddress).toSeq:_*)
+      KetamaClientBuilder(name, hashName, clientBuilder, failureAccrualParams).build()
     }
     val repStatsReceiver =
       clientBuilder map { _.statsReceiver.scope("cache_replication") } getOrElse(NullStatsReceiver)

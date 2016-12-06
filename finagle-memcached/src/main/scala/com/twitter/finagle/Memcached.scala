@@ -330,9 +330,8 @@ object Memcached extends finagle.Client[Command, Response]
         withStack(stk).newService(mkDestination(node.host, node.port), label0)
       }
 
-      val group = CacheNodeGroup.fromVarAddr(va)
       val scopedSr = sr.scope(label0)
-      new KetamaPartitionedClient(group, newService, healthBroker, scopedSr, hasher, numReps)
+      new KetamaPartitionedClient(va, newService, healthBroker, scopedSr, hasher, numReps)
         with TwemcachePartitionedClient
     }
 
