@@ -6,14 +6,14 @@ java_library(
   ),
   dependencies=[
     '3rdparty/jvm/com/google/guava',
-    'science/src/java/com/twitter/common/zookeeper:client',
-    '3rdparty/jvm/org/scala-lang:scala-library',
-    'finagle/finagle-memcached/src/main/scala',
     '3rdparty/jvm/com/google/inject:guice',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-memcached/src/main/scala',
+    'science/src/java/com/twitter/common/zookeeper:client',
     'util/util-core/src/main/scala:scala',
-    'util/util-stats/src/main/scala:scala',
     'util/util-function/src/main/java:java',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java')
 )
