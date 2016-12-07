@@ -25,6 +25,15 @@ package object netty4 {
   private[finagle] val Toggles: ToggleMap =
     StandardToggleMap("com.twitter.finagle.netty4", DefaultStatsReceiver)
 
+  // We set a sane default and reject client initiated TLS/SSL session
+  // renegotiations (for security reasons).
+  //
+  // NOTE: This property affects both JDK SSL (Java 8+) and Netty 4 OpenSSL
+  // implementations.
+  if (System.getProperty("jdk.tls.rejectClientInitiatedRenegotiation") == null) {
+    System.setProperty("jdk.tls.rejectClientInitiatedRenegotiation", "true")
+  }
+
   /**
    * An experimental option that enables pooling for receive buffers.
    *
