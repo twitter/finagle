@@ -27,6 +27,9 @@ Runtime Behavior Changes
     exceptions: `CancelledRequestException`, `TooManyWaitersException`,
     `CancelledConnectionException`, `FailedFastException`. ``RB_ID=895702``
 
+  * finagle-core: `c.t.f.util.DefaultMonitor` now logs most exceptions at
+    `WARNING` level instead of `FATAL`. ``RB_ID=895983``
+
 6.40.0
 ------
 

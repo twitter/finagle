@@ -4,64 +4,99 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.{Failure, TimeoutException}
-import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
+import java.util.logging.Handler
 import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, Matchers}
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.verify
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 
 @RunWith(classOf[JUnitRunner])
 class DefaultMonitorTest extends FunSuite
   with Matchers
-{
-  private[this] class MyTimeoutException(
-    protected val timeout: Duration,
-    protected val explanation: String
-  ) extends TimeoutException
+  with MockitoSugar
+  with BeforeAndAfterEach {
 
-  private val handler = new StringHandler(BareFormatter, Some(Level.TRACE))
-  private val logger = Logger.get("DefaultMonitorTest")
-  logger.addHandler(handler)
-  logger.setLevel(Level.TRACE)
+  private var handler: Handler = _
+
+  private var log: Logger = _
+
+  override def beforeEach(): Unit = {
+    handler = mock[Handler]
+    log = Logger.get()
+    log.setLevel(Level.TRACE)
+    log.clearHandlers()
+    log.addHandler(handler)
+  }
+
+  private def verifyPublished(
+    expectedLevel: Level,
+    expectedThrown: Throwable
+  ): Unit = {
+    val capture =
+      ArgumentCaptor.forClass(classOf[java.util.logging.LogRecord])
+    verify(handler).publish(capture.capture())
+
+    assert(expectedLevel == capture.getValue.getLevel)
+    assert(expectedThrown == capture.getValue.getThrown)
+  }
+
+  private[this] class MyTimeoutException(
+      protected val timeout: Duration,
+      protected val explanation: String)
+    extends TimeoutException
 
   test("Failures with low log levels are handled") {
-    handler.clear()
-    val monitor = new DefaultMonitor(logger, "n/a", "n/a")
-
     val f = Failure("debug handled").withLogLevel(Level.DEBUG)
-    assert(monitor.handle(f))
+    val monitor = new DefaultMonitor(log, "n/a", "n/a")
 
-    handler.get should include("Exception propagated to the default monitor")
+    assert(monitor.handle(f))
+    verifyPublished(f.logLevel, f)
   }
 
   test("c.t.util.TimeoutExceptions are handled") {
-    handler.clear()
-    val monitor = new DefaultMonitor(logger, "n/a", "n/a")
+    val f = new UtilTimeoutException("7 minute abs")
+    val monitor = new DefaultMonitor(log, "n/a", "n/a")
 
-    assert(monitor.handle(new UtilTimeoutException("7 minute abs")))
+    assert(monitor.handle(f))
+    verifyPublished(Level.TRACE, f)
+  }
 
-    handler.get should include("Exception propagated to the default monitor")
+  test("HasLogLevel is respected") {
+    val f = Failure("debug handled").withLogLevel(Level.FATAL)
+    val monitor = new DefaultMonitor(log, "n/a", "n/a")
+
+    assert(monitor.handle(f))
+    verifyPublished(f.logLevel, f)
   }
 
   test("c.t.finagle.TimeoutExceptions are handled") {
-    handler.clear()
-    val monitor = new DefaultMonitor(logger, "n/a", "n/a")
+    val f = new MyTimeoutException(30.seconds, "5 minute abs")
+    val monitor = new DefaultMonitor(log, "n/a", "n/a")
 
-    assert(monitor.handle(new MyTimeoutException(30.seconds, "5 minute abs")))
-
-    handler.get should include("Exception propagated to the default monitor")
+    assert(monitor.handle(f))
+    verifyPublished(f.logLevel, f)
   }
 
   test("peer information is logged") {
-    handler.clear()
-    val monitor = new DefaultMonitor(logger, "foo", "bar")
+    val f = new Exception("error")
+    val monitor = new DefaultMonitor(log, "foo", "bar")
 
     Contexts.local.let(Upstream.AddressCtx, InetSocketAddressUtil.unconnected) {
-      assert(monitor.handle(new Exception("error")))
+      assert(monitor.handle(f))
     }
 
-    val remoteInfo = s"(upstream address: unconnected, downstream address: bar, label: foo)"
+    val capture =
+      ArgumentCaptor.forClass(classOf[java.util.logging.LogRecord])
+    verify(handler).publish(capture.capture())
 
-    handler.get should include(remoteInfo)
+    assert(Level.WARNING == capture.getValue.getLevel)
+    assert(f == capture.getValue.getThrown)
+
+    val remoteInfo = "(upstream address: unconnected, downstream address: bar, label: foo)"
+    capture.getValue.getMessage should include(remoteInfo)
   }
 }

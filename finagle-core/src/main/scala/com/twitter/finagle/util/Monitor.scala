@@ -9,11 +9,6 @@ import scala.util.control.NonFatal
 private[finagle] object DefaultMonitor {
 
   /**
-   * A minimal logging level above which a default monitor keeps silence.
-   */
-  val MinLogLevel: Int = Level.INFO.value
-
-  /**
    * A default logger used in default monitor.
    */
   val Log: Logger = Logger(classOf[DefaultMonitor])
@@ -32,8 +27,8 @@ private[finagle] object DefaultMonitor {
  * type, different log levels are used:
  *
  *  - [[com.twitter.util.TimeoutException timeout exceptions]] logged with `TRACE`
- *  - [[HasLogLevel exceptions with log level]] logged with their level only if it's below `INFO`
- *  - any other exception is logged as `FATAL`
+ *  - [[HasLogLevel exceptions with log level]] logged with their level
+ *  - any other exception is logged as `WARNING`
  *
  * In addition to the stack trace, this monitor also logs upstream socket address, downstream
  * socket address, and a client/server label.
@@ -60,7 +55,7 @@ private[util] class DefaultMonitor(
 
   def handle(exc: Throwable): Boolean = {
     exc match {
-      case f: HasLogLevel if f.logLevel.value < DefaultMonitor.MinLogLevel =>
+      case f: HasLogLevel =>
         logWithRemoteInfo(exc, f.logLevel)
         true
       case _: com.twitter.util.TimeoutException =>
@@ -72,7 +67,7 @@ private[util] class DefaultMonitor(
         logWithRemoteInfo(exc, Level.TRACE)
         true
       case _ =>
-        logWithRemoteInfo(exc, Level.FATAL)
+        logWithRemoteInfo(exc, Level.WARNING)
         // We only "handle" non-fatal exceptions.
         NonFatal(exc)
     }
@@ -95,7 +90,7 @@ object LoadedReporterFactory extends ReporterFactory {
   def apply(name: String, addr: Option[SocketAddress]): Monitor =
     factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) => a andThen m }
 
-  val get = this
+  val get: ReporterFactory = this
 
   override def toString: String = {
     val names = factories.map(_.getClass.getName).mkString(",")
