@@ -9,7 +9,7 @@ import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached.{CachePoolConfig, PartitionedClient}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

@@ -3,8 +3,9 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
+import java.nio.charset.{StandardCharsets => Charsets}
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -234,7 +235,7 @@ private[twitter] object Message {
         }
       }
 
-      val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.Utf8)
+      val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.UTF_8)
       n += 2 + dstbytes.length
       n += 2
 
@@ -243,8 +244,8 @@ private[twitter] object Message {
       var i = 0
       while (i < dtab.length) {
         val dentry = dtab(i)
-        val srcbytes = dentry.prefix.show.getBytes(Charsets.Utf8)
-        val treebytes = dentry.dst.show.getBytes(Charsets.Utf8)
+        val srcbytes = dentry.prefix.show.getBytes(Charsets.UTF_8)
+        val treebytes = dentry.dst.show.getBytes(Charsets.UTF_8)
 
         n += srcbytes.length + 2 + treebytes.length + 2
 

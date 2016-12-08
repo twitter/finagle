@@ -6,8 +6,9 @@ import com.twitter.finagle.service.{ReqRep, ResponseClassifier, ResponseClass}
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.finagle.thrift.DeserializeCtx
 import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService}
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.{Throw, Return}
+import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -22,7 +23,7 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
   }
 
   private val deserializer = { bytes: Array[Byte] =>
-    val asString = new String(bytes, Charsets.Utf8)
+    val asString = new String(bytes, UTF_8)
     if (asString.startsWith("fail")) Throw(new InvalidQueryException(asString.length))
     else Return(asString)
   }
@@ -114,7 +115,7 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
     val in = "fail"
     val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
     Contexts.local.let(DeserializeCtx.Key, ctx) {
-      assert(deserializer(in.getBytes(Charsets.Utf8)).isThrow)
+      assert(deserializer(in.getBytes(UTF_8)).isThrow)
       val rep = mux.Response(Buf.Utf8(in))
       val reqRep = ReqRep(in, Return(rep))
       assert(ThriftMuxResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))

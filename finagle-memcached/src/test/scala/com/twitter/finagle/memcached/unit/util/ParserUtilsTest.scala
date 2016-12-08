@@ -1,7 +1,8 @@
 package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.finagle.memcached.util.ParserUtils
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
+import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -11,17 +12,17 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
 
   private def isDigitsBB(str: String): Boolean = {
-    val bb = Charsets.Utf8.encode(str)
+    val bb = UTF_8.encode(str)
     ParserUtils.isDigits(Buf.ByteBuffer.Owned(bb))
   }
 
   private def isDigitsBA(str: String): Boolean = {
-    val bytes = str.getBytes(Charsets.Utf8)
+    val bytes = str.getBytes(UTF_8)
     ParserUtils.isDigits(Buf.ByteArray.Owned(bytes))
   }
 
   private def isDigitsBuf(str: String): Boolean = {
-    val buf = new TestBuf(str.getBytes(Charsets.Utf8))
+    val buf = new TestBuf(str.getBytes(UTF_8))
     ParserUtils.isDigits(buf)
   }
 
@@ -65,7 +66,7 @@ class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
 
   test("ByteArrayString to positive Int") {
     forAll { num: Int =>
-      val bytes = num.toString.getBytes(Charsets.Utf8)
+      val bytes = num.toString.getBytes(UTF_8)
       if (num >= 0)
         assert(ParserUtils.byteArrayStringToInt(bytes, bytes.length) == num)
       else
@@ -83,7 +84,7 @@ class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
       )
 
     stringsAndLengths.foreach { case (str, length) =>
-      val bytes = str.getBytes(Charsets.Utf8)
+      val bytes = str.getBytes(UTF_8)
       assert(ParserUtils.byteArrayStringToInt(bytes, length) == -1)
     }
   }

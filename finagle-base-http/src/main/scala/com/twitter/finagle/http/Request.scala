@@ -3,8 +3,9 @@ package com.twitter.finagle.http
 import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.exp.Multipart
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.io.{Charsets, Reader}
+import com.twitter.io.Reader
 import java.net.{InetAddress, InetSocketAddress}
+import java.nio.charset.{StandardCharsets => Charsets}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
@@ -232,7 +233,7 @@ object Request {
 
   /** Decode a Request from a String */
   def decodeString(s: String): Request = {
-    decodeBytes(s.getBytes(Charsets.Utf8))
+    decodeBytes(s.getBytes(Charsets.UTF_8))
   }
 
   /** Decode a Request from Array[Byte] */

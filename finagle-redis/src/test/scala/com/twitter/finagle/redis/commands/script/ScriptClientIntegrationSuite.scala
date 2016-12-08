@@ -4,9 +4,10 @@ import com.twitter.finagle.redis.ScriptCommands._
 import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.protocol.Reply
 import com.twitter.finagle.redis.{Client, ServerError}
-import com.twitter.io.{Charsets, Buf}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.math.BigInteger
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -18,7 +19,7 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
   def stringToBuffer(s: String): Buf = Buf.Utf8(s)
 
   def stringToChannelBuffer(s: String): ChannelBuffer =
-    ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.Utf8))
+    ChannelBuffers.wrappedBuffer(s.getBytes(UTF_8))
 
 
   def stringsToBuffers(s: String*): Seq[Buf] =

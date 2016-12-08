@@ -5,8 +5,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.http.exp.Multi
 import com.twitter.finagle.http._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.Await
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -81,14 +82,14 @@ class Netty3StreamTransportTest extends FunSuite {
     assert(req1.getUri() == "twitter.com")
     assert(req1.isChunked)
     assert(!f.isDefined)
-    assert(req1.getContent.toString(Charsets.Utf8) == "")
+    assert(req1.getContent.toString(UTF_8) == "")
 
     // the first chunk has the 0s
     val freq2 = in.poll()
     assert(freq2.isDefined)
     val req2 = Await.result(freq2, 5.seconds).asInstanceOf[HttpChunk]
     assert(!f.isDefined)
-    assert(req2.getContent.toString(Charsets.Utf8) == ("0" * 1000))
+    assert(req2.getContent.toString(UTF_8) == ("0" * 1000))
 
     // start writing some 1s, and then read them
     val freq3 = in.poll()
@@ -96,7 +97,7 @@ class Netty3StreamTransportTest extends FunSuite {
     assert(streamedReq.writer.write(Buf.Utf8("1" * 1000)).isDefined)
     val req3 = Await.result(freq3, 5.seconds).asInstanceOf[HttpChunk]
     assert(!f.isDefined)
-    assert(req3.getContent.toString(Charsets.Utf8) == ("1" * 1000))
+    assert(req3.getContent.toString(UTF_8) == ("1" * 1000))
 
     // close the stream
     assert(streamedReq.writer.close().isDefined)
@@ -121,14 +122,14 @@ class Netty3StreamTransportTest extends FunSuite {
     assert(!future.isDefined)
 
     // write some 0s
-    out.offer(new DefaultHttpChunk(ChannelBuffers.copiedBuffer("0" * 1000, Charsets.Utf8)))
+    out.offer(new DefaultHttpChunk(ChannelBuffers.copiedBuffer("0" * 1000, UTF_8)))
     val Some(Buf.Utf8(zeros)) = Await.result(rep.reader.read(1000), 5.seconds)
     assert(zeros == "0" * 1000)
 
     val f = rep.reader.read(1000)
     assert(!f.isDefined)
     // write some 1s
-    out.offer(new DefaultHttpChunk(ChannelBuffers.copiedBuffer("1" * 1000, Charsets.Utf8)))
+    out.offer(new DefaultHttpChunk(ChannelBuffers.copiedBuffer("1" * 1000, UTF_8)))
     val Some(Buf.Utf8(ones)) = Await.result(f, 5.seconds)
     assert(ones == "1" * 1000)
 

@@ -1,9 +1,10 @@
 package com.twitter.finagle.netty4.codec
 
 import com.twitter.finagle.Failure
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
+import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -14,7 +15,7 @@ class BufCodecTest extends FunSuite {
     val ch = new EmbeddedChannel(new BufCodec)
     val q = ch.inboundMessages
 
-    ch.writeInbound(Unpooled.wrappedBuffer("hello".getBytes(Charsets.Utf8)))
+    ch.writeInbound(Unpooled.wrappedBuffer("hello".getBytes(UTF_8)))
     assert(q.size == 1)
     assert(q.poll() == Buf.Utf8("hello"))
     assert(q.size == 0)
@@ -30,7 +31,7 @@ class BufCodecTest extends FunSuite {
     assert(q.size == 1)
     assert(q.peek().isInstanceOf[ByteBuf])
     val bb = q.poll().asInstanceOf[ByteBuf]
-    assert(bb.toString(Charsets.Utf8) == "hello")
+    assert(bb.toString(UTF_8) == "hello")
     assert(q.size == 0)
 
     val channelFuture = ch.write(new Object)
