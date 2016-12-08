@@ -120,14 +120,14 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
       case (_, Throw(RetryableWriteException(_))) => false
       case _ => true
     }
-    val retries = mb.config.retries.copy(retryPolicy = withoutRequeues)
-    mb.withConfig(mb.config.copy(retries = retries))
+    val retries = mb.config.retry.copy(retryPolicy = withoutRequeues)
+    mb.withConfig(mb.config.copy(retry = retries))
   }
 
   private[client] def filter(
     scopedStats: StatsReceiver
   ): Filter[Req, Rep, Req, Rep] = {
-    val config = mb.config.retries
+    val config = mb.config.retry
     if (config.retryPolicy == RetryPolicy.none)
       Filter.identity[Req, Rep]
     else new RetryFilter[Req, Rep](

@@ -47,8 +47,8 @@ private[finagle] object MethodBuilder {
   }
 
   private[client] case class Config[Req, Rep](
-      retries: MethodBuilderRetry.Config[Req, Rep],
-      timeouts: MethodBuilderTimeout.Config)
+      retry: MethodBuilderRetry.Config[Req, Rep],
+      timeout: MethodBuilderTimeout.Config)
 
 }
 
@@ -74,7 +74,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * import com.twitter.util.Try
    *
    * val builder: MethodBuilder[Int, Int] = ???
-   * builder.withRetry.forResponses {
+   * builder.withRetry.forResponse {
    *   case Throw(_) => true
    * }
    * }}}
@@ -135,7 +135,9 @@ private[finagle] class MethodBuilder[Req, Rep] private (
 
     val totalTimeoutFilter = withTimeout.totalFilter
     val retryFilter = withRetry.filter(stats)
-    totalTimeoutFilter.andThen(retryFilter)
+
+    totalTimeoutFilter
+      .andThen(retryFilter)
   }
 
 }

@@ -23,12 +23,12 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
    *                no method specific timeout will be applied.
    */
   def total(howLong: Duration): MethodBuilder[Req, Rep] = {
-    val timeouts = mb.config.timeouts.copy(total = howLong)
-    mb.withConfig(mb.config.copy(timeouts = timeouts))
+    val timeouts = mb.config.timeout.copy(total = howLong)
+    mb.withConfig(mb.config.copy(timeout = timeouts))
   }
 
   private[client] def totalFilter: Filter[Req, Rep, Req, Rep] = {
-    val config = mb.config.timeouts
+    val config = mb.config.timeout
     if (!config.total.isFinite) {
       if (config.stackHadTotalTimeout)
         DynamicTimeout.totalFilter[Req, Rep](mb.params) // use their defaults
