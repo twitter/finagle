@@ -129,6 +129,8 @@ trait StackServer[Req, Rep]
   override def configured[P: Param](p: P): StackServer[Req, Rep]
 
   override def configured[P](psp: (P, Param[P])): StackServer[Req, Rep]
+
+  override def configuredParams(params: Stack.Params): StackServer[Req, Rep]
 }
 
 /**
@@ -187,6 +189,13 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   override def configured[P](psp: (P, Stack.Param[P])): This = {
     val (p, sp) = psp
     configured(p)(sp)
+  }
+
+  /**
+   * Creates a new StackServer with additional parameters `newParams`.
+   */
+  override def configuredParams(newParams: Stack.Params): This = {
+    withParams(params ++ newParams)
   }
 
   /**

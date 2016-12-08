@@ -482,6 +482,13 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   }
 
   /**
+   * Creates a new StackClient with additional parameters `newParams`.
+   */
+  override def configuredParams(newParams: Stack.Params): This = {
+    withParams(params ++ newParams)
+  }
+
+  /**
    * Creates a new StackClient with `params` used to configure this StackClient's `stack`.
    */
   def withParams(params: Stack.Params): This =

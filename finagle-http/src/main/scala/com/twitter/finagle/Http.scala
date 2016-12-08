@@ -279,6 +279,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
 
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
+    override def configuredParams(newParams: Stack.Params): Client =
+      super.configuredParams(newParams)
     override def filtered(filter: Filter[Request, Response, Request, Response]): Client =
       super.filtered(filter)
   }
@@ -411,6 +413,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
 
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
+    override def configuredParams(newParams: Stack.Params): Server =
+      super.configuredParams(newParams)
   }
 
   val server: Http.Server = Server()

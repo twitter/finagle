@@ -8,6 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import com.twitter.finagle.Server;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ServerBuilder;
+import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.http.Http;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
@@ -52,6 +53,7 @@ public final class HttpServerTest {
             .server()
             .withCompressionLevel(2)
             .configured(new Label("test").mk())
-            .withDecompression(true);
+            .withDecompression(true)
+            .configuredParams(StackClient$.MODULE$.defaultParams());
   }
 }
