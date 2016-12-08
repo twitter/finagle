@@ -6,6 +6,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached
 import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
@@ -54,13 +55,13 @@ object MemcacheStress extends App {
       .hosts(config.hosts())
 
     if (config.nworkers() > 0)
-      builder = builder.channelFactory(
+      builder = builder.configured(Netty3Transporter.ChannelFactory(
           new NioClientSocketChannelFactory(
             Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
             Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
             config.nworkers()
           )
-        )
+        ))
 
     if (config.stats())    builder = builder.reportTo(new OstrichStatsReceiver)
     if (config.tracing())  com.twitter.finagle.tracing.Trace.enable()

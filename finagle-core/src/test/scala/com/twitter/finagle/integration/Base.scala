@@ -97,7 +97,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     val clientBuilder = ClientBuilder()
       .name(name)
       .codec(codecFactory)
-      .channelFactory(channelFactory)
+      .configured(Netty3Transporter.ChannelFactory(channelFactory))
       .daemon(true) // don't create an exit guard
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)

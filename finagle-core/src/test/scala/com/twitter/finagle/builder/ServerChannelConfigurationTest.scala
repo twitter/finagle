@@ -23,10 +23,9 @@ class ServerChannelConfigurationTest
     val lifeTime = 1.seconds
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(Server())
+      .stack(Server().withSession.maxLifeTime(lifeTime))
       .bindTo(address)
       .name("FinagleServer")
-      .hostConnectionMaxLifeTime(lifeTime)
       .build(identityService)
 
     val client: Service[String, String] = ClientBuilder()
@@ -46,10 +45,11 @@ class ServerChannelConfigurationTest
     val idleTime = 1.second
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(Server())
+      .stack(Server()
+        .withSession.maxIdleTime(idleTime)
+      )
       .bindTo(address)
       .name("FinagleServer")
-      .hostConnectionMaxIdleTime(idleTime)
       .build(identityService)
 
     val client: Service[String, String] = ClientBuilder()

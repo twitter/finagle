@@ -22,7 +22,7 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
-import org.jboss.netty.channel.{Channel, ChannelFactory}
+import org.jboss.netty.channel.Channel
 import scala.annotation.{implicitNotFound, varargs}
 
 /**
@@ -672,40 +672,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
 
   /**
-   * The maximum time a connection may have received no data.
-   *
-   * To migrate to the Stack-based APIs, use `TransportParams.readTimeout`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withTransport.readTimeout(duration)
-   * }}}
-   */
-  @deprecated(
-    "Use `configured` or the Stack-based API `TransportParams.readTimeout`",
-    "2016-10-05")
-  def readerIdleTimeout(duration: Duration): This =
-    configured(params[Transport.Liveness].copy(readTimeout = duration))
-
-  /**
-   * The maximum time a connection may not have sent any data.
-   *
-   * To migrate to the Stack-based APIs, use `TransportParams.writeTimeout`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withTransport.writeTimeout(duration)
-   * }}}
-   */
-  @deprecated(
-    "Use `configured` or the Stack-based API `TransportParams.writeTimeout`",
-    "2016-10-05")
-  def writerIdleTimeout(duration: Duration): This =
-    configured(params[Transport.Liveness].copy(writeTimeout = duration))
-
-  /**
    * Report stats to the given `StatsReceiver`.  This will report
    * verbose global statistics and counters, that in turn may be
    * exported to monitoring applications.
@@ -793,89 +759,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def hostConnectionCoresize(value: Int): This =
     configured(params[DefaultPool.Param].copy(low = value))
-
-  /**
-   * The amount of time a connection is allowed to linger (when it
-   * otherwise would have been closed by the pool) before being
-   * closed.
-   *
-   * @note not all protocol implementations support this style of connection
-   *       pooling, such as `com.twitter.finagle.ThriftMux` and
-   *       `com.twitter.finagle.Memcached`.
-   */
-  @deprecated("Use `configured`", "2016-10-18")
-  def hostConnectionIdleTime(timeout: Duration): This =
-    configured(params[DefaultPool.Param].copy(idleTime = timeout))
-
-  /**
-   * The maximum queue size for the connection pool.
-   *
-   * To migrate to the Stack-based APIs, use `SessionPoolingParams.maxWaiters`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withSessionPool.maxWaiters(nWaiters)
-   * }}}
-   *
-   * @note not all protocol implementations support this style of connection
-   *       pooling, such as `com.twitter.finagle.ThriftMux` and
-   *       `com.twitter.finagle.Memcached`.
-   */
-  @deprecated(
-    "Use `configured` or or the Stack-based API `SessionPoolingParams.maxWaiters`",
-    "2016-10-18")
-  def hostConnectionMaxWaiters(nWaiters: Int): This =
-    configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
-
-  /**
-   * The maximum time a connection is allowed to linger unused.
-   *
-   * To migrate to the Stack-based APIs, use `SessionParams.maxIdleTime`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withSession.maxIdleTime(timeout)
-   * }}}
-   */
-  @deprecated("Use `configured`", "2016-10-18")
-  def hostConnectionMaxIdleTime(timeout: Duration): This =
-    configured(params[ExpiringService.Param].copy(idleTime = timeout))
-
-  /**
-   * The maximum time a connection is allowed to exist, regardless of occupancy.
-   *
-   * To migrate to the Stack-based APIs, use `SessionParams.maxLifeTime`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withSession.maxLifeTime(timeout)
-   * }}}
-   */
-  @deprecated("Use `configured`", "2016-10-18")
-  def hostConnectionMaxLifeTime(timeout: Duration): This =
-    configured(params[ExpiringService.Param].copy(lifeTime = timeout))
-
-  /**
-   * Experimental option to buffer `size` connections from the pool.
-   * The buffer is fast and lock-free, reducing contention for
-   * services with very high requests rates. The buffer size should
-   * be sized roughly to the expected concurrency. Buffers sized by
-   * power-of-twos may be faster due to the use of modular
-   * arithmetic.
-   *
-   * @note This will be integrated into the mainline pool, at
-   * which time the experimental option will go away.
-   *
-   * @note not all protocol implementations support this style of connection
-   *       pooling, such as `com.twitter.finagle.ThriftMux` and
-   *       `com.twitter.finagle.Memcached`.
-   */
-  @deprecated("Use `configured`", "2016-10-05")
-  def expHostConnectionBufferSize(size: Int): This =
-    configured(params[DefaultPool.Param].copy(bufferSize = size))
 
   /**
    * Configure a [[com.twitter.finagle.service.ResponseClassifier]]
@@ -1037,50 +920,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def retryBudget(budget: RetryBudget, backoffSchedule: Stream[Duration]): This =
     configured(Retries.Budget(budget, backoffSchedule))
-
-  /**
-   * Sets the TCP send buffer size.
-   *
-   * To migrate to the Stack-based APIs, use `TransportParams.sendBufferSize`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withTransport.sendBufferSize(value)
-   * }}}
-   */
-  @deprecated(
-    "Use `configured` or the Stack-based API `TransportParams.sendBufferSize`",
-    "2016-10-05")
-  def sendBufferSize(value: Int): This =
-    configured(params[Transport.BufferSizes].copy(send = Some(value)))
-
-  /**
-   * Sets the TCP recv buffer size.
-   *
-   * To migrate to the Stack-based APIs, use `TransportParams.receiveBufferSize`.
-   * For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * Http.client.withTransport.receiveBufferSize(value)
-   * }}}
-   */
-  @deprecated(
-    "Use `configured` or the Stack-based API `TransportParams.receiveBufferSize`",
-    "2016-10-05")
-  def recvBufferSize(value: Int): This =
-    configured(params[Transport.BufferSizes].copy(recv = Some(value)))
-
-  /**
-   * Use the given channel factory instead of the default. Note that
-   * when using a non-default ChannelFactory, finagle can't
-   * meaningfully reference count factory usage, and so the caller is
-   * responsible for calling `releaseExternalResources()`.
-   */
-  @deprecated("Use `configured`", "2016-10-05")
-  def channelFactory(cf: ChannelFactory): This =
-    configured(Netty3Transporter.ChannelFactory(cf))
 
   /**
    * Encrypt the connection with SSL.  Hostname verification will be

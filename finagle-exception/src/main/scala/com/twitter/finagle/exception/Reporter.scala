@@ -94,12 +94,11 @@ object Reporter {
     val service = ClientBuilder() // these are from the zipkin tracer
       .name("exception_reporter")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .stack(Thrift.client)
+      .stack(Thrift.client
+        // somewhat arbitrary, but bounded timeouts
+        .withSessionPool.maxWaiters(250))
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
-      // using an arbitrary, but bounded number of waiters to avoid memory leaks
-      .hostConnectionMaxWaiters(250)
-      // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
       .daemon(true)
       .build()

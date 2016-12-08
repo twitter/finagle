@@ -29,13 +29,13 @@ object ScribeRawZipkinTracer {
     name: String
   ): Scribe.FutureIface = {
     val transport = ClientBuilder()
-      .stack(Thrift.client)
+      .stack(Thrift.client
+        // using an arbitrary, but bounded number of waiters to avoid memory leaks
+        .withSessionPool.maxWaiters(250))
       .name(name)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
-      // using an arbitrary, but bounded number of waiters to avoid memory leaks
-      .hostConnectionMaxWaiters(250)
       // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
       .daemon(true)

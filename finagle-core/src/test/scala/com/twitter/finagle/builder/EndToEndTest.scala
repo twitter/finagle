@@ -226,13 +226,19 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
     // start with an empty cluster
     val cluster = new DynamicCluster[SocketAddress](Seq[SocketAddress]())
-    val client = ClientBuilder()
+
+    val client = {
+      val cb = ClientBuilder()
       .cluster(cluster)
       .codec(StringCodec)
       .daemon(true) // don't create an exit guard
       .hostConnectionLimit(1)
-      .hostConnectionMaxWaiters(5)
-      .build()
+      
+      val maxWaiters = cb.params[DefaultPool.Param].copy(
+           maxWaiters = 5)
+
+      cb.configured(maxWaiters).build()
+    }
 
     val responses = new Array[Future[String]](5)
     0 until 5 foreach { i =>
@@ -269,16 +275,21 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       .build(never)
 
     val mem = new InMemoryStatsReceiver
-    val client = ClientBuilder()
-      .name("client")
-      .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-      .codec(StringCodec)
-      .daemon(true) // don't create an exit guard
-      .requestTimeout(10.millisecond)
-      .hostConnectionLimit(1)
-      .hostConnectionMaxWaiters(1)
-      .reportTo(mem)
-      .build()
+    val client = {
+      val cb = ClientBuilder()
+        .name("client")
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+        .codec(StringCodec)
+        .daemon(true) // don't create an exit guard
+        .requestTimeout(10.millisecond)
+        .hostConnectionLimit(1)
+        .reportTo(mem)
+
+      val maxWaiters = cb.params[DefaultPool.Param].copy(
+        maxWaiters = 1)
+
+      cb.configured(maxWaiters).build()
+    }
 
     // generate com.twitter.finagle.IndividualRequestTimeoutException
     intercept[IndividualRequestTimeoutException] { Await.result(client("hi"), 1.second) }
@@ -293,16 +304,21 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
   test("ClientBuilder should be properly instrumented on service acquisition failure") {
     val mem = new InMemoryStatsReceiver
-    val client = ClientBuilder()
+    val client = {
+      val cb = ClientBuilder()
         .name("client")
         .addrs(Address.failing)
         .codec(StringCodec)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
         .hostConnectionLimit(1)
-        .hostConnectionMaxWaiters(1)
         .reportTo(mem)
-        .build()
+
+      val maxWaiters = cb.params[DefaultPool.Param].copy(
+           maxWaiters = 1)
+        
+      cb.configured(maxWaiters).build()
+    }
 
     // generate com.twitter.finagle.ChannelWriteException
     val traceId = Trace.id
@@ -335,15 +351,20 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       .build(always)
 
     val mem = new InMemoryStatsReceiver
-    val client = ClientBuilder()
-      .name("testClient")
-      .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-      .codec(StringCodec)
-      .hostConnectionLimit(1)
-      .hostConnectionMaxWaiters(1)
-      .reportTo(mem)
-      .retries(1)
-      .build()
+    val client = {
+      val cb = ClientBuilder()
+        .name("testClient")
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+        .codec(StringCodec)
+        .hostConnectionLimit(1)
+        .reportTo(mem)
+        .retries(1)
+
+      val maxWaiters = cb.params[DefaultPool.Param].copy(
+        maxWaiters = 1)
+
+      cb.configured(maxWaiters).build()
+    }
 
     Await.result(client("ping"), 10.second)
     Await.ready(server.close(), 1.second)
