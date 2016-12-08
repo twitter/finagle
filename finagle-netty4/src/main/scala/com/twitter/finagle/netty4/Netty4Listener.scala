@@ -56,6 +56,9 @@ private[finagle] case class Netty4Listener[In, Out](
   extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
+  // Exports N4-related metrics under `finagle/netty4`.
+  exportNetty4Metrics()
+
   private[this] val Timer(timer) = params[Timer]
 
   // transport params

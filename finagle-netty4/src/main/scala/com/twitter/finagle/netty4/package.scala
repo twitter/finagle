@@ -1,16 +1,8 @@
 package com.twitter.finagle
 
-import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.stats.DefaultStatsReceiver
-import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.util.ProxyThreadFactory
-import com.twitter.finagle.toggle.{StandardToggleMap, Toggle, ToggleMap}
-import com.twitter.util.Awaitable
-import io.netty.buffer.{ByteBufAllocator, UnpooledByteBufAllocator}
-import io.netty.channel.EventLoopGroup
-import io.netty.channel.nio.NioEventLoopGroup
-import java.util.concurrent.Executors
-import scala.util.hashing.MurmurHash3
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+import io.netty.buffer.UnpooledByteBufAllocator
 
 /**
  * Package netty4 implements the bottom finagle primitives:
@@ -32,29 +24,6 @@ package object netty4 {
   // implementations.
   if (System.getProperty("jdk.tls.rejectClientInitiatedRenegotiation") == null) {
     System.setProperty("jdk.tls.rejectClientInitiatedRenegotiation", "true")
-  }
-
-  /**
-   * An experimental option that enables pooling for receive buffers.
-   *
-   * Since we always copy onto the heap (see `DirectToHeapInboundHandler`), the receive
-   * buffers never leave the pipeline hence can safely be pooled.
-   * In its current form, this will preallocate at least N * 128kb (chunk size) of
-   * direct memory at the application startup, where N is the number of worker threads
-   * Finagle uses.
-   *
-   * Example:
-   *
-   * On a 16 core machine, the lower bound for the pool size will be 16 * 2 * 128kb = 4mb.
-   */
-  private[netty4] object poolReceiveBuffers {
-    private[this] val underlying: Toggle[Int] =
-      Toggles("com.twitter.finagle.netty4.poolReceiveBuffers")
-
-    /**
-     * Checks (via a toggle) if pooling of receive buffers is enabled on this instanace.
-     */
-    def apply(): Boolean = underlying(MurmurHash3.stringHash(ServerInfo().id))
   }
 
   // We allocate one arena per a worker thread to reduce contention. By default
@@ -98,49 +67,5 @@ package object netty4 {
     /* disableLeakDetector */ true
   )
 
-  // Exports N4-related metrics under `finagle/netty4`.
-  exportNetty4Metrics()
-
   private[finagle] val DirectToHeapInboundHandlerName = "directToHeap"
-
-  object param {
-
-    private[netty4] case class Allocator(allocator: ByteBufAllocator)
-    private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
-      // TODO investigate pooled allocator CSL-2089
-      // While we already pool receive buffers, this ticket is about end-to-end pooling
-      // (everything in the pipeline should be pooled).
-      override val default: Allocator = Allocator(UnpooledAllocator)
-    }
-
-    /**
-     * A class eligible for configuring the [[io.netty.channel.EventLoopGroup]] used
-     * to execute I/O work for finagle clients and servers. The default is global and shared
-     * among clients and servers such that we can inline work on the I/O threads. Modifying
-     * the default has performance and instrumentation implications and should only be
-     * done so with care. If there is particular work you would like to schedule off
-     * the I/O threads, consider scheduling that work on a separate thread pool
-     * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
-     */
-    case class WorkerPool(eventLoopGroup: EventLoopGroup)
-    implicit object WorkerPool extends Stack.Param[WorkerPool] {
-      override val default: WorkerPool = {
-        val threadFactory = new ProxyThreadFactory(
-          new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true),
-          ProxyThreadFactory.newProxiedRunnable(
-            () => Awaitable.enableBlockingTimeTracking(),
-            () => Awaitable.disableBlockingTimeTracking()
-          )
-        )
-        // Netty will create `numWorkers` children in the `NioEventLoopGroup` (which
-        // in this case are of type `NioEventLoop`). Each `NioEventLoop` will pin itself
-        // to a thread acquired from the `executor` and will multiplex over channels.
-        // Thus, with this configuration, we should not acquire more than `numWorkers`
-        // threads from the `executor`.
-        val executor = Executors.newCachedThreadPool(threadFactory)
-        val eventLoopGroup = new NioEventLoopGroup(numWorkers(), executor)
-        WorkerPool(eventLoopGroup)
-      }
-    }
-  }
 }

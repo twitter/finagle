@@ -42,6 +42,10 @@ private[finagle] object Netty4Transporter {
     init: ChannelInitializer[Channel],
     params: Stack.Params
   ): Transporter[In, Out] = new Transporter[In, Out] {
+
+    // Exports N4-related metrics under `finagle/netty4`.
+    exportNetty4Metrics()
+
     def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
       val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
       val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
