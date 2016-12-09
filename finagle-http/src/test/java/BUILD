@@ -2,6 +2,7 @@ junit_tests(
   dependencies=[
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/junit',
+    'finagle/finagle-base-http/src/main/scala:scala',
     'finagle/finagle-core/src/main/java:java',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http',
