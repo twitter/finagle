@@ -82,11 +82,6 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     }
   }
 
-  def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
-    val service = Service.mk(f)
-    req => Filter.this.apply(req, service)
-  }
-
   /**
    * Terminates a filter chain in a [[ServiceFactory]]. For example,
    *
@@ -215,13 +210,6 @@ object Filter {
       next: Filter[ReqIn, RepOut, ReqOut, RepIn]
     ): Filter[ReqIn, RepOut, ReqOut, RepIn] =
       toFilter[ReqIn, RepOut].andThen(next)
-
-    /**
-     * Convert this to an appropriately-typed [[Filter]] and compose
-     * with `andThen`.
-     */
-    def andThen[Req, Rep](f: Req => Future[Rep]): Req => Future[Rep] =
-      toFilter[Req, Rep].andThen(f)
 
     /**
      * Convert this to an appropriately-typed [[Filter]] and compose

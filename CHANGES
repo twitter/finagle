@@ -16,25 +16,33 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-* finagle-core: `c.t.f.builder.ClientBuilder` remove deprecated methods.
-  The same functionality is available through the Stack-based APIs or
-  `ClientBuilder.configured`, with the exception of `channelFactory`, which
-  has no analog because it exposes a Netty 3 API. ``RB_ID=893147``
+  * finagle-core:  Remove the `Filter#andThen(Req1 => Future[Rep1]): Req2 => Future[Rep2]`
+    method.  This overload is no longer usable in scala 2.12, because `Service`
+    is a SAM.  Because of the order in which SAMs get resolved, literal
+    functions in scala will get confused about which method they should use.
+    Instead of passing a Function directly, wrap the Function with a Service.mk.
+    ``RB_ID=896524``.
 
-    - `channelFactory`
-    - `expHostConnectionBufferSize`
-    - `hostConnectionIdleTime`
-    - `hostConnectionMaxIdleTime`
-    - `hostConnectionMaxLifeTime`
-    - `hostConnectionMaxWaiters`
-    - `readerIdleTimeout`
-    - `recvBufferSize`
-    - `sendBufferSize`
-    - `writerIdleTimeout`
+  * finagle-core: `c.t.f.builder.ClientBuilder` remove deprecated methods.
+    The same functionality is available through the Stack-based APIs or
+    `ClientBuilder.configured`, with the exception of `channelFactory`, which
+    has no analog because it exposes a Netty 3 API. ``RB_ID=893147``
 
-  * The `codec` method has been removed from the kestrel MultiReader object. Configure
-    a ClientBuilder protocol using the default thrift StackClient, Thrift.client, via the
-    `stack` method of ClientBuilder. ``RB_ID=894297``
+      - `channelFactory`
+      - `expHostConnectionBufferSize`
+      - `hostConnectionIdleTime`
+      - `hostConnectionMaxIdleTime`
+      - `hostConnectionMaxLifeTime`
+      - `hostConnectionMaxWaiters`
+      - `readerIdleTimeout`
+      - `recvBufferSize`
+      - `sendBufferSize`
+      - `writerIdleTimeout`
+
+  * finagle-kestrel: The `codec` method has been removed from the kestrel
+    MultiReader object. Configure a ClientBuilder protocol using the default
+    thrift StackClient, Thrift.client, via the `stack` method of ClientBuilder.
+    ``RB_ID=894297``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

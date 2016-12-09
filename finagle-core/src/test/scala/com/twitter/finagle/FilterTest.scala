@@ -14,10 +14,6 @@ class FilterTest extends FunSuite {
     def apply(req: Int, svc: Service[Int, Int]) = svc(req)
   }
 
-  class PassThruFunction extends Function1[Int, Future[Int]] {
-    def apply(req: Int) = Future.value(req)
-  }
-
   class PassThruServiceFactory extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = Future.value(constSvc)
     def close(deadline: Time) = Future.Done
@@ -50,13 +46,6 @@ class FilterTest extends FunSuite {
     val svc = (new PassThruFilter).andThen(NilService)
     val result = Await.result(svc(4).liftToTry)
     assert(result.isThrow)
-  }
-
-  test("Filter.andThen(Function1): applies next filter") {
-    val spied = spy(new PassThruFunction)
-    val svc = (new PassThruFilter).andThen(spied)
-    Await.result(svc(4))
-    verify(spied).apply(any[Int])
   }
 
   test("Filter.andThen(ServiceFactory): applies next filter") {
@@ -110,7 +99,7 @@ class FilterTest extends FunSuite {
     // seen when evaluating f on an input.
     def getCalls(f: Filter[Any, Unit, Any, Unit]) = {
       calls.clear()
-      f.andThen((_: Any) => Future.Done).apply(Input)
+      f.andThen(Service.mk((_: Any) => Future.Done)).apply(Input)
       calls.result
     }
 
