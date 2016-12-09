@@ -46,6 +46,13 @@ Runtime Behavior Changes
   * finagle-core: `c.t.f.util.DefaultMonitor` now logs most exceptions at
     `WARNING` level instead of `FATAL`. ``RB_ID=895983``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-kestrel: Deprecate the `codec` method on `c.t.f.kestrel.MultiReaderMemcache`.
+    Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
+    ``RB_ID=895989``
+
 6.40.0
 ------
 
