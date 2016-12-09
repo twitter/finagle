@@ -17,22 +17,9 @@ import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable
 
-object CacheNode {
-
-  /**
-   * Utility method for translating a `CacheNode` to an `Address`
-   * (used when constructing a `Name` representing a `Cluster`).
-   */
-  private[memcached] val toAddress: CacheNode => Address = node => node match {
-    case CacheNode(host, port, weight, key) =>
-      val metadata = CacheNodeMetadata.toAddrMetadata(CacheNodeMetadata(weight, key))
-      Address.Inet(new InetSocketAddress(host, port), metadata)
-  }
-}
-
 // Type definition representing a cache node
 case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None) extends SocketAddress {
-  // Use overloads to keep the same API
+  // Use overloads to keep the same ABI
   def this(host: String, port: Int, weight: Int) = this(host, port, weight, None)
 }
 
@@ -124,6 +111,22 @@ object CacheNodeGroup {
         val ep = inst.getServiceEndpoint
         val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
         CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
+    }
+  }
+
+  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) = new Group[CacheNode] {
+    protected[finagle] val set: Var[Set[CacheNode]] = va map {
+      case Addr.Bound(addrs, _) =>
+        addrs.collect {
+          case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
+            CacheNode(ia.getHostName, ia.getPort, weight, key)
+          case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
+            val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+            CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+          case Address.Inet(ia, _) if !useOnlyResolvedAddress=>
+            CacheNode(ia.getHostName, ia.getPort, 1, None)
+        }
+      case _ => Set[CacheNode]()
     }
   }
 }

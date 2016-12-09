@@ -62,7 +62,7 @@ class ClusterClientTest
     )
     zkServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
-    // start five memcached servers and join the cluster
+    // start five memcached server and join the cluster
     Await.result(
       Future.collect(
         (0 to 4) map { _ =>

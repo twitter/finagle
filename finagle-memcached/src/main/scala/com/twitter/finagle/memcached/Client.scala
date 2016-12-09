@@ -51,7 +51,7 @@ object Client {
   /**
    * Construct a client from a Group
    */
-  @deprecated("Use `apply(name: Name)` instead", "2016-11-28")
+  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
   def apply(group: Group[SocketAddress]): Client = Client(
     ClientBuilder()
       .group(group)
@@ -63,7 +63,7 @@ object Client {
   /**
    * Construct a client from a Cluster
    */
-  @deprecated("Use `apply(name: Name)` instead", "2016-11-28")
+  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
   def apply(cluster: Cluster[SocketAddress]): Client = Client(
     ClientBuilder()
       .cluster(cluster)
@@ -1065,7 +1065,7 @@ private[finagle] object KetamaPartitionedClient {
  * so that we can support non-bound names.
  */
 private[finagle] class KetamaPartitionedClient(
-    addrs: Var[Addr],
+    cacheNodeGroup: Group[CacheNode],
     newService: CacheNode => Service[Command, Response],
     nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth],
     statsReceiver: StatsReceiver = NullStatsReceiver,
@@ -1076,29 +1076,13 @@ private[finagle] class KetamaPartitionedClient(
 
   import KetamaPartitionedClient._
 
-  private[this] def ketamaNodesFromAddr(
-    addr: Addr
-  ): immutable.Set[(KetamaClientKey, KetamaNode[Client])] = addr match {
-    case Addr.Bound(addrs, _) => addrs.map { addr =>
-      addr match {
-        case Address.Inet(ia, cn) =>
-          val cacheNode = cn match {
-            case CacheNodeMetadata(w, k) =>
-              CacheNode(ia.getHostName, ia.getPort, w, k)
-            case _ =>
-              CacheNode(ia.getHostName, ia.getPort, 1, None)
-          }
-          val key = KetamaClientKey.fromCacheNode(cacheNode)
-          val underlying = TwemcacheClient(newService(cacheNode))
-          val kNode: KetamaNode[Client] = KetamaNode(key.identifier, cacheNode.weight, underlying)
-          key -> kNode
-      }
+  // exposed for testing
+  private[memcached] val ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])] =
+    cacheNodeGroup.map { node =>
+      val key = KetamaClientKey.fromCacheNode(node)
+      val underlying = TwemcacheClient(newService(node))
+      key -> KetamaNode(key.identifier, node.weight, underlying)
     }
-    case _ => immutable.Set.empty
-  }
-
-  private[this] val ketamaNodesChanges: Event[immutable.Set[(KetamaClientKey, KetamaNode[Client])]] =
-    addrs.changes.map(ketamaNodesFromAddr).filter(_.nonEmpty)
 
   private[this] val nodes = mutable.Map[KetamaClientKey, Node]()
 
@@ -1126,18 +1110,17 @@ private[finagle] class KetamaPartitionedClient(
     self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Ejected } }
   }
 
+  private[this] val ketamaNodeGrpChanges: Event[immutable.Set[((KetamaClientKey, KetamaNode[Client]))]] =
+    ketamaNodeGrp.set.changes.filter(_.nonEmpty)
+
   // We listen for changes on a group to update the cache ring.
-  private[this] val listener: Closable = ketamaNodesChanges.respond(updateNodes)
+  private[this] val listener: Closable = ketamaNodeGrpChanges.respond(updateGroup)
 
   // We also listen on a broker to eject/revive cache nodes.
   nodeHealthBroker.recv.foreach {
     case NodeMarkedDead(key) => ejectNode(key)
     case NodeRevived(key) => reviveNode(key)
   }
-
-  /** exposed for testing */
-  private[memcached] def ketamaNodes: immutable.Set[(KetamaClientKey, KetamaNode[Client])] =
-    snapshot
 
   override def clientOf(key: String): Client = {
     val bytes = key.getBytes(StandardCharsets.UTF_8)
@@ -1155,7 +1138,7 @@ private[finagle] class KetamaPartitionedClient(
       else new KetamaDistributor(liveNodes, numReps, oldLibMemcachedVersionComplianceMode)
   }
 
-  private[this] def updateNodes(current: immutable.Set[(KetamaClientKey, KetamaNode[Client])]): Unit =
+  private[this] def updateGroup(current: immutable.Set[(KetamaClientKey, KetamaNode[Client])]): Unit =
     self.synchronized {
       val old = snapshot
       // remove old nodes and release clients
@@ -1201,7 +1184,7 @@ private[finagle] class KetamaPartitionedClient(
   // this readiness here will be fulfilled the first time the ketamaNodeGrp is updated
   // with non-empty content, after that group can still be updated with empty endpoints
   // which will throw NoShardAvailableException to users indicating the lost of cache access
-  val ready = ketamaNodesChanges.toFuture().unit
+  val ready = ketamaNodeGrpChanges.toFuture().unit
 
   override def getsResult(keys: Iterable[String]) =
     ready.interruptible().before(super.getsResult(keys))
@@ -1249,9 +1232,9 @@ object KetamaClient {
   val DefaultNumReps = KetamaPartitionedClient.DefaultNumReps
 }
 
-@deprecated(message = "Use the `com.twitter.finagle.Memcached builder", since = "2016-11-28")
+@deprecated(message = "Use the `com.twitter.finagle.Memcached builder", since = "2015-02-22")
 case class KetamaClientBuilder private[memcached](
-  _name: Name,
+  _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
@@ -1264,19 +1247,20 @@ case class KetamaClientBuilder private[memcached](
   private lazy val localMemcachedName = Resolver.eval("localhost:" + LocalMemcached.port)
 
   private def withLocalMemcached = {
-    copy(_name = localMemcachedName)
+    val Name.Bound(va) = localMemcachedName
+    copy(_group = CacheNodeGroup.fromVarAddr(va))
   }
 
   def dest(
     name: Name,
     useOnlyResolvedAddress: Boolean = false
   ): KetamaClientBuilder = {
-    val va = if (LocalMemcached.enabled) {
+    val Name.Bound(va) = if (LocalMemcached.enabled) {
       localMemcachedName
     } else {
       name
     }
-    copy(_name = va)
+    copy(_group = CacheNodeGroup.fromVarAddr(va, useOnlyResolvedAddress))
   }
 
   def dest(name: String): KetamaClientBuilder =
@@ -1284,26 +1268,26 @@ case class KetamaClientBuilder private[memcached](
       withLocalMemcached
     } else dest(Resolver.eval(name))
 
-  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "2016-11-28")
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
     if (LocalMemcached.enabled) {
       withLocalMemcached
     } else {
-      copy(_name = Name.bound(group.members.map(CacheNode.toAddress).toSeq:_*))
+      copy(_group = group)
     }
   }
 
-  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "2016-11-28")
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    group(CacheNodeGroup(Group.fromCluster(cluster).map(_.asInstanceOf[SocketAddress])))
+    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
   }
 
-  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "2016-11-28")
+  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
     if (LocalMemcached.enabled) {
       withLocalMemcached
     } else {
-      group(Group.fromCluster(cluster))
+      copy(_group = Group.fromCluster(cluster))
     }
   }
 
@@ -1311,12 +1295,9 @@ case class KetamaClientBuilder private[memcached](
     if (LocalMemcached.enabled) {
       withLocalMemcached
     } else {
-      val addrs: Seq[Address.Inet] = nodes.map {
-        case (host, port, weight) =>
-          val metadata = CacheNodeMetadata.toAddrMetadata(CacheNodeMetadata(weight, None))
-          Address.Inet(new InetSocketAddress(host, port), metadata)
-      }
-      copy(_name = Name.bound(addrs:_*))
+      copy(_group = Group(nodes.map {
+        case (host, port, weight) => new CacheNode(host, port, weight)
+      }: _*))
     }
   }
 
@@ -1365,12 +1346,6 @@ case class KetamaClientBuilder private[memcached](
 
     Memcached.registerClient(label, keyHasher.toString, isPipelining = false)
 
-    val va = _name match {
-      case Name.Bound(va) => va
-      case n =>
-        throw new IllegalArgumentException(s"Memcached client only supports Bound Names, was: $n")
-    }
-
     def newService(node: CacheNode) = stackBasedClient
       .configured(Memcached.param.EjectFailedHost(_ejectFailedHost))
       .configured(FailureAccrualFactory.Param(numFailures, markDeadFor))
@@ -1383,7 +1358,7 @@ case class KetamaClientBuilder private[memcached](
       }).newClient(mkDestination(node.host, node.port)).toService
 
     new KetamaPartitionedClient(
-      va,
+      _group,
       newService,
       healthBroker,
       stats,
@@ -1394,7 +1369,7 @@ case class KetamaClientBuilder private[memcached](
 }
 
 object KetamaClientBuilder {
-  def apply(): KetamaClientBuilder = KetamaClientBuilder(Name.empty, Some("ketama"), None)
+  def apply(): KetamaClientBuilder = KetamaClientBuilder(Group.empty, Some("ketama"), None)
   def get(): KetamaClientBuilder = apply()
 }
 
