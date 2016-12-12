@@ -22,6 +22,8 @@ class DefaultMonitorTest extends FunSuite
 
   private var handler: Handler = _
 
+  private var monitor: DefaultMonitor = _
+
   private var log: Logger = _
 
   override def beforeEach(): Unit = {
@@ -30,6 +32,7 @@ class DefaultMonitorTest extends FunSuite
     log.setLevel(Level.TRACE)
     log.clearHandlers()
     log.addHandler(handler)
+    monitor = new DefaultMonitor(log, "n/a", "n/a")
   }
 
   private def verifyPublished(
@@ -51,39 +54,44 @@ class DefaultMonitorTest extends FunSuite
 
   test("Failures with low log levels are handled") {
     val f = Failure("debug handled").withLogLevel(Level.DEBUG)
-    val monitor = new DefaultMonitor(log, "n/a", "n/a")
-
     assert(monitor.handle(f))
     verifyPublished(f.logLevel, f)
   }
 
   test("c.t.util.TimeoutExceptions are handled") {
     val f = new UtilTimeoutException("7 minute abs")
-    val monitor = new DefaultMonitor(log, "n/a", "n/a")
+    assert(monitor.handle(f))
+    verifyPublished(Level.TRACE, f)
+  }
 
+  test("wrapped c.t.util.TimeoutExceptions are handled") {
+    val f = new RuntimeException(new UtilTimeoutException("6 minute abs"))
+    assert(monitor.handle(f))
+    verifyPublished(Level.TRACE, f)
+  }
+
+  test("HasLogLevel wrapped c.t.util.TimeoutExceptions are handled") {
+    val f = Failure.wrap(new UtilTimeoutException("6 minute abs"))
+      .withLogLevel(Level.DEBUG)
     assert(monitor.handle(f))
     verifyPublished(Level.TRACE, f)
   }
 
   test("HasLogLevel is respected") {
     val f = Failure("debug handled").withLogLevel(Level.FATAL)
-    val monitor = new DefaultMonitor(log, "n/a", "n/a")
-
     assert(monitor.handle(f))
     verifyPublished(f.logLevel, f)
   }
 
   test("c.t.finagle.TimeoutExceptions are handled") {
     val f = new MyTimeoutException(30.seconds, "5 minute abs")
-    val monitor = new DefaultMonitor(log, "n/a", "n/a")
-
     assert(monitor.handle(f))
     verifyPublished(f.logLevel, f)
   }
 
   test("peer information is logged") {
     val f = new Exception("error")
-    val monitor = new DefaultMonitor(log, "foo", "bar")
+    monitor = new DefaultMonitor(log, "foo", "bar")
 
     Contexts.local.let(Upstream.AddressCtx, InetSocketAddressUtil.unconnected) {
       assert(monitor.handle(f))

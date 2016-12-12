@@ -7,12 +7,6 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-  * finagle-netty4: Client initiated TLS/SSL session renegotiations are now rejected
-    by default. ``RB_ID=895871``
-
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -22,6 +16,14 @@ Breaking API Changes
     functions in scala will get confused about which method they should use.
     Instead of passing a Function directly, wrap the Function with a Service.mk.
     ``RB_ID=896524``.
+
+  * finagle-kestrel: The `codec` method has been removed from the kestrel
+    MultiReader object. Configure a ClientBuilder protocol using the default
+    thrift StackClient, Thrift.client, via the `stack` method of ClientBuilder.
+    ``RB_ID=894297``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: `c.t.f.builder.ClientBuilder` remove deprecated methods.
     The same functionality is available through the Stack-based APIs or
@@ -39,20 +41,19 @@ Breaking API Changes
       - `sendBufferSize`
       - `writerIdleTimeout`
 
-  * finagle-kestrel: The `codec` method has been removed from the kestrel
-    MultiReader object. Configure a ClientBuilder protocol using the default
-    thrift StackClient, Thrift.client, via the `stack` method of ClientBuilder.
-    ``RB_ID=894297``
-
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-  * finagle-core: Lower logging level used in `DefaultMonitor` for expected
+  * finagle-core: Lower logging level used in `c.t.f.util.DefaultMonitor` for expected
     exceptions: `CancelledRequestException`, `TooManyWaitersException`,
     `CancelledConnectionException`, `FailedFastException`. ``RB_ID=895702``
 
   * finagle-core: `c.t.f.util.DefaultMonitor` now logs most exceptions at
     `WARNING` level instead of `FATAL`. ``RB_ID=895983``
+
+  * finagle-core: `c.t.f.util.DefaultMonitor` works harder to find the appropriate
+    log level by walking the exception's causes to find `c.t.util.TimeoutExceptions`
+    and `c.t.logging.HasLogLevel`. ``RB_ID=896695``
+
+  * finagle-netty4: Client initiated TLS/SSL session renegotiations are now rejected
+    by default. ``RB_ID=895871``
 
 Deprecations
 ~~~~~~~~~~~~
