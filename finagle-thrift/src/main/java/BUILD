@@ -8,3 +8,11 @@ java_library(
                     name='finagle-thrift-java',
                     repo = artifactory,),
 )
+
+# For usecases (like scrooge codegen) where this dependency is used, but not detected as
+# used by zinc.
+target(
+  name='forced',
+  scope='forced',
+  dependencies=[':java'],
+)
