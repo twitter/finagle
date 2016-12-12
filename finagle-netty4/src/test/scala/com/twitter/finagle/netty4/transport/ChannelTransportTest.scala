@@ -89,39 +89,6 @@ class ChannelTransportTest extends FunSuite
     }
   }
 
-  test("ChannelTransport cancels the underlying write when interrupted by the caller") {
-    var p: Option[ChannelPromise] = None
-    channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
-        // we store pending promise to make sure it's canceled
-        p = Some(promise)
-      }
-    })
-
-    forAll { s: String =>
-      val written = transport.write(s)
-      assert(!written.isDefined)
-
-      written.raise(new Exception)
-      assert(p.forall(_.isCancelled))
-    }
-  }
-
-  test("ChannelTransport write propagates a failure back when it's cancelled in the netty layer") {
-    channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
-        // we cancel every single write
-        promise.cancel(false /*mayInterruptIfRunning*/)
-      }
-    })
-
-    forAll { s: String =>
-      val thrown = intercept[Exception](Await.result(transport.write(s), timeout))
-      // we do this because forAll doesn't seem to work with just intercepts
-      assert(thrown.isInstanceOf[CancelledWriteException])
-    }
-  }
-
   test("ChannelTransport fails the connection when the read is interrupted") {
     val e = new Exception
     val seen = transport.read()

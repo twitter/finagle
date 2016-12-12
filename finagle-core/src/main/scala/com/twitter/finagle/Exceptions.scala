@@ -415,13 +415,6 @@ case class RefusedByRateLimiter() extends ChannelException
 class TransportException extends Exception with SourcedException
 
 /**
- * Indicates that a request failed because a
- * [[com.twitter.finagle.transport.Transport]] write associated with the request
- * was cancelled.
- */
-class CancelledWriteException extends TransportException
-
-/**
  * Indicates that a [[com.twitter.finagle.transport.Transport]] write associated
  * with the request was dropped by the transport (usually to respect backpressure).
  */

@@ -98,15 +98,11 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
     val p = new Promise[Unit]
     op.addListener(new ChannelFutureListener {
       def operationComplete(f: ChannelFuture): Unit =
-        if (f.isSuccess)
-          p.setDone()
-        else if (f.isCancelled)
-          p.setException(new CancelledWriteException)
-        else
+        if (f.isSuccess) p.setDone() else {
           p.setException(ChannelException(f.cause, remoteAddress))
+        }
     })
 
-    p.setInterruptHandler { case _ => op.cancel(true /* mayInterruptIfRunning */) }
     p
   }
 
