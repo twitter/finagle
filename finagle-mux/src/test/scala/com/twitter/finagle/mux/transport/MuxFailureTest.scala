@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.Failure
+import com.twitter.finagle.{Failure, FailureFlags}
 import com.twitter.finagle.util.BufWriter
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
@@ -10,16 +10,20 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MuxFailureTest extends FunSuite {
 
+  class FlaggedClass(val flags: Long) extends FailureFlags[FlaggedClass] {
+    protected def copyWithFlags(f: Long): FlaggedClass = ???
+  }
+
   test("Flag values") {
-    assert(MuxFailure.Restartable == 1L << 0)
+    assert(MuxFailure.Retryable == 1L << 0)
     assert(MuxFailure.Rejected == 1L << 1)
     assert(MuxFailure.NonRetryable == 1L << 2)
   }
 
-  test("convert flags with c.t.f.Failure") {
+  test("convert flags with c.t.f.FailureFlags") {
     val flagTests = Seq(
-      (Failure.Restartable|Failure.Rejected, MuxFailure.Restartable|MuxFailure.Rejected),
-      (Failure.NonRetryable, MuxFailure.NonRetryable),
+      (FailureFlags.Retryable|FailureFlags.Rejected, MuxFailure.Retryable|MuxFailure.Rejected),
+      (FailureFlags.NonRetryable, MuxFailure.NonRetryable),
       (0L, 0L)
     )
 
@@ -27,6 +31,7 @@ class MuxFailureTest extends FunSuite {
       case (finagle, mux) =>
         assert(MuxFailure(mux).finagleFlags == finagle)
         assert(MuxFailure.fromThrow(Failure(":(", finagle)).flags == mux)
+        assert(MuxFailure.fromThrow(new FlaggedClass(finagle)).flags == mux)
     }
   }
 

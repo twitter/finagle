@@ -208,11 +208,17 @@ class CancelledConnectionException(cause: Throwable)
  * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s user guide]]
  *      for additional details.
  */
-class FailedFastException(message: String)
+class FailedFastException(message: String, private[finagle] val flags: Long = FailureFlags.Empty)
   extends RequestException(message, cause = null)
   with WriteException
   with HasLogLevel
+  with FailureFlags[FailedFastException]
 {
+  protected def copyWithFlags(newFlags: Long): FailedFastException =
+    new FailedFastException(message, newFlags)
+
+  def this(message: String) = this(message, FailureFlags.Empty)
+
   def this() = this(null)
   def logLevel: Level = Level.DEBUG
 }
