@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, ConcurrentLoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.{ConcurrentLoadBalancerFactory, DefaultBalancerFactory}
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -38,8 +38,8 @@ private object TrafficDistributorTest {
   val busyWeight = 2.0
   case class AddressFactory(addr: Address) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = Future.value(Service.mk(i => Future.value(i)))
-    def close(deadline: Time) = Future.Done
-    override def toString = s"AddressFactory($addr)"
+    def close(deadline: Time): Future[Unit] = Future.Done
+    override def toString: String = s"AddressFactory($addr)"
     override def status: Status =
       addr match {
         case WeightedTestAddr(_, weight) if weight == busyWeight => Status.Busy
@@ -50,15 +50,15 @@ private object TrafficDistributorTest {
   case class Balancer(endpoints: Activity[Set[ServiceFactory[Int, Int]]])
     extends ServiceFactory[Int, Int] {
       var offeredLoad = 0
-      def apply(conn: ClientConnection) = {
+      def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
         offeredLoad += 1
         // new hotness in load balancing
         val nodes = endpoints.sample().toSeq
         if (nodes.isEmpty) Future.exception(new NoBrokersAvailableException)
         else nodes((math.random * nodes.size).toInt)(conn)
       }
-      def close(deadline:Time) = Future.Done
-      override def toString = s"Balancer($endpoints)"
+      def close(deadline:Time): Future[Unit] = Future.Done
+      override def toString: String = s"Balancer($endpoints)"
     }
 
     // Return the distribution for the the given `balancer` as a tuple
@@ -106,7 +106,7 @@ private object TrafficDistributorTest {
       )
     }
 
-    def resetCounters() {
+    def resetCounters(): Unit = {
       newEndpointCalls = 0
       newBalancerCalls = 0
     }
@@ -123,7 +123,7 @@ class TrafficDistributorTest extends FunSuite {
     val sr = new InMemoryStatsReceiver
     val dist = newDist(dest, statsReceiver = sr)
 
-    val R = 100
+    val R = 50
     for (_ <- 0 until R) dist()
     assert(balancers.size == 1)
     assert(balancers.head.offeredLoad == R)
@@ -131,9 +131,8 @@ class TrafficDistributorTest extends FunSuite {
   })
 
   test("distributes according to non-uniform weights") (new Ctx {
-    val R = 10 * 10 * 1000
-
     locally {
+      val R = 1000
       val ε: Double = 0.01
       val weightClasses = Seq((1.0, 1000), (2.0, 5), (10.0, 150))
       val classes = weightClasses.flatMap(weightClass.tupled).toSet
@@ -152,6 +151,7 @@ class TrafficDistributorTest extends FunSuite {
     }
 
     locally {
+      val R = 10 * 1000
       // This shows that weights can still be interpreted as multipliers for load relative
       // to other nodes. For example, a node with weight 2.0 should receive roughly twice
       // the traffic it would have normally received with weight 1.0. We say "roughly"
@@ -159,7 +159,7 @@ class TrafficDistributorTest extends FunSuite {
       // In practice, the lbs aren't purely equitable –- their distribution is impacted
       // by other feedback as well (e.g. latency, failure, etc.) -- but that should be okay
       // for most use-cases of weights.
-      val ε: Double = .05 // 5%
+      val ε: Double = .1 // 10%
       balancers = Set.empty
       val weightClasses = Seq((1.0, 500), (2.0, 1), (3.0, 1), (4.0, 1))
       val classes = weightClasses.flatMap(weightClass.tupled).toSet
@@ -416,7 +416,8 @@ class TrafficDistributorTest extends FunSuite {
     // step this socket address through weight classes. Previous weight
     // classes are closed during each step. This is similar to how we
     // redline a shard.
-    for (i <- 1 to 10) withClue(s"for i=$i:") {
+    val N = 5
+    for (i <- 1 to N) withClue(s"for i=$i:") {
       val addr = WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
       va() = Addr.Bound(addr)
       assert(Await.result(client("hello")) == "hello".reverse)
@@ -432,8 +433,8 @@ class TrafficDistributorTest extends FunSuite {
 
     va() = Addr.Bound(Set.empty[Address])
     assert(sr.counters(Seq("test", "closes")) == 1)
-    assert(sr.counters(Seq("test", "loadbalancer", "adds")) == 10)
-    assert(sr.counters(Seq("test", "loadbalancer", "removes")) == 10)
+    assert(sr.counters(Seq("test", "loadbalancer", "adds")) == N)
+    assert(sr.counters(Seq("test", "loadbalancer", "removes")) == N)
     assert(sr.gauges(Seq("test", "loadbalancer", "size"))() == 0)
     assert(sr.numGauges(Seq("test", "loadbalancer", "size")) == 1)
     assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == 0)

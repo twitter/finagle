@@ -20,7 +20,7 @@ class ServerChannelConfigurationTest
   val identityService = Service.mk[String, String] { req => Future.value(req) }
 
   test("close connection after max life time duration") {
-    val lifeTime = 1.seconds
+    val lifeTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .stack(Server().withSession.maxLifeTime(lifeTime))
@@ -42,7 +42,7 @@ class ServerChannelConfigurationTest
   }
 
   test("close connection after max idle time duration") {
-    val idleTime = 1.second
+    val idleTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
       .stack(Server()

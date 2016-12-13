@@ -3,22 +3,21 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.collection.SortedMap
+import scala.collection.{SortedMap, mutable}
 import scala.language.reflectiveCalls
 
 private[loadbalancer] trait P2CSuite {
   // number of servers
   val N: Int = 100
   // number of reqs
-  val R: Int = 1000000
+  val R: Int = 100000
   // tolerated variance
   val ε: Double = 0.0001*R
 
@@ -68,14 +67,14 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     // This isn't quite the right notion of mean load, but it's good enough.
     def meanLoad: Double = if (count == 0) 0.0 else sum.toDouble/count.toDouble
 
-    def apply(conn: ClientConnection) = {
+    def apply(conn: ClientConnection): Future[Service[Unit, Int]] = {
       load += 1
       sum += load
       count += 1
 
       Future.value(new Service[Unit, Int] {
-        def apply(req: Unit) = Future.value(which)
-        override def close(deadline: Time) = {
+        def apply(req: Unit): Future[Int] = Future.value(which)
+        override def close(deadline: Time): Future[Unit] = {
           load -= 1
           sum += load
           count += 1
@@ -84,9 +83,9 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
       })
     }
 
-    def close(deadline: Time) = Future.Done
-    override def toString = "LoadedFactory(%d)".format(load)
-    override def status = stat
+    def close(deadline: Time): Future[Unit] = Future.Done
+    override def toString: String = "LoadedFactory(%d)".format(load)
+    override def status: Status = stat
   }
 
   def statsDict(r: InMemoryStatsReceiver) = new {
@@ -100,7 +99,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balances evenly") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -154,13 +153,13 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Skip downed nodes; revive them") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
-    var byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
+    val byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
       with mutable.MultiMap[Int, Closable]
 
-    def run(n: Int) {
+    def run(n: Int): Unit = {
       for (_ <- 0 until n) {
         val s = Await.result(bal())
         val i = Await.result(s(()))
@@ -190,7 +189,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     // twice our normal load assignments in a period of R.
     // (This demonstrates nicely why and how P2C converges
     // slower than a heap-based balancer.)
-    assert(math.abs(init(0).load - 2*R/N) < ε*5)
+    assert(math.abs(init(0).load - 2*R/N) < ε*6)
   }
 
   test("Handle empty vectors") {
@@ -199,7 +198,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     val exc = intercept[NoBrokersAvailableException] { Await.result(bal()) }
     assert(exc eq noBrokers)
 
-    vec() :+= new LoadedFactory(0)
+    vec() :+= LoadedFactory(0)
     for (_ <- 0 until R) Await.result(bal())
     assert(vec().head.load == R)
 
@@ -208,7 +207,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balance all-downed nodes.") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) bal()
@@ -250,7 +249,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(stats.removes == 0)
     assert(stats.available == 0)
 
-    vec() +:= new LoadedFactory(0)
+    vec() +:= LoadedFactory(0)
 
     assert(stats.load == 0)
     assert(stats.rsize == 1)
@@ -258,7 +257,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(stats.removes == 0)
     assert(stats.available == 1)
 
-    vec() +:= new LoadedFactory(1)
+    vec() +:= LoadedFactory(1)
 
     assert(stats.load == 0)
     assert(stats.rsize == 2)
@@ -279,7 +278,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Closes") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     // Give it some traffic.
     for (_ <- 0 until R) bal()
@@ -303,7 +302,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     statsReceiver = sr,
     emptyException = noBrokers
   ) {
-    override def nanoTime() = clock()
+    override def nanoTime(): Long = clock()
   }
 
   def run(fs: Traversable[P2CServiceFactory], n: Int): Unit = {
@@ -315,7 +314,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
       val next = if (step >= n) schedule else {
         val svc = Await.result(bal())
         val latency = Await.result(svc((): Unit)).toLong
-        val work = (clock()+latency -> (schedule.getOrElse(clock()+latency, Nil) :+ svc))
+        val work = clock()+latency -> (schedule.getOrElse(clock()+latency, Nil) :+ svc)
         schedule + work
       }
       for (seq <- next.get(step); c <- seq) c.close()
@@ -329,17 +328,17 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     val weight = 1D
     var load = 0
     var sum = 0
-    def meanLoad = if (load == 0) 0.0 else sum.toDouble/load.toDouble
-    def apply(conn: ClientConnection) = {
+    def meanLoad: Double = if (load == 0) 0.0 else sum.toDouble/load.toDouble
+    def apply(conn: ClientConnection): Future[Service[Unit, Int]] = {
       load += 1
       sum += load
       Future.value(new Service[Unit, Int] {
-        def apply(req: Unit) = Future.value(latency((): Unit))
+        def apply(req: Unit): Future[Int] = Future.value(latency((): Unit))
       })
     }
-    def close(deadline: Time) = Future.Done
-    override def toString = which.toString
-    override def status = Status.Open
+    def close(deadline: Time): Future[Unit] = Future.Done
+    override def toString: String = which.toString
+    override def status: Status = Status.Open
   }
 
   test("Balances evenly across identical nodes") {

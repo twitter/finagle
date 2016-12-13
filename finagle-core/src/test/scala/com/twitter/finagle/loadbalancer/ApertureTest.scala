@@ -10,8 +10,6 @@ import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
 trait ApertureTesting {
-  val N = 100000
-
   class Empty extends Exception
 
   trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
@@ -33,7 +31,7 @@ trait ApertureTesting {
     }
 
     // Expose some protected methods for testing
-    def adjustx(n: Int) = adjust(n)
+    def adjustx(n: Int): Unit = adjust(n)
     def aperturex: Int = aperture
     def unitsx: Int = units
   }
@@ -44,12 +42,12 @@ trait ApertureTesting {
 
     def clear() { n = 0 }
 
-    def apply(conn: ClientConnection) = {
+    def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = {
       n += 1
       p += 1
       Future.value(new Service[Unit, Unit] {
-        def apply(unit: Unit) = ???
-        override def close(deadline: Time) = {
+        def apply(unit: Unit): Future[Unit] = ???
+        override def close(deadline: Time): Future[Unit] = {
           p -= 1
           Future.Done
         }
@@ -58,10 +56,10 @@ trait ApertureTesting {
 
     @volatile var _status: Status = Status.Open
 
-    override def status = _status
+    override def status: Status = _status
     def status_=(v: Status) { _status = v }
 
-    def close(deadline: Time) = ???
+    def close(deadline: Time): Future[Unit] = ???
   }
 
   class Counts extends Iterable[Factory] {
@@ -73,9 +71,9 @@ trait ApertureTesting {
       factories.values.foreach(_.clear())
     }
 
-    def aperture = nonzero.size
+    def aperture: Int = nonzero.size
 
-    def nonzero = factories.filter({
+    def nonzero: Set[Int] = factories.filter({
       case (_, f) => f.n > 0
     }).keys.toSet
 
@@ -223,7 +221,7 @@ class LoadBandTest extends FunSuite with ApertureTesting {
   class Bal(protected val lowLoad: Double, protected val highLoad: Double)
       extends TestBal with LoadBand[Unit, Unit] {
     def this() = this(0.5, 2.0)
-    protected def smoothWin = Duration.Zero
+    protected def smoothWin: Duration = Duration.Zero
   }
 
   class Avg {
@@ -259,7 +257,7 @@ class LoadBandTest extends FunSuite with ApertureTesting {
       // statistical view of things.
       val avgLoad = new Avg
 
-      for (i <- 0 to 1000) {
+      for (i <- 0 to 100) {
         counts.clear()
         val factories = Seq.fill(c) { Await.result(bal.apply()) }
         for (f <- counts if f.n > 0) { avgLoad.update(f.p) }
