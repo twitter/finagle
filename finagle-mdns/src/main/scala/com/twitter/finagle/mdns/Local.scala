@@ -5,19 +5,17 @@ import com.twitter.util.{Future, Var}
 import java.net.InetSocketAddress
 
 private object Local {
-  def mkAddr(name: String) = "mdns!" + name + "._finagle._tcp.local."
+  def mkAddr(name: String): String = s"mdns!$name._finagle._tcp.local."
 }
 
 class LocalAnnouncer extends Announcer {
   val scheme = "local"
-
   def announce(ia: InetSocketAddress, addr: String): Future[Announcement] =
     Announcer.announce(ia, Local.mkAddr(addr))
 }
 
 class LocalResolver extends Resolver {
   val scheme = "local"
-
   def bind(arg: String): Var[Addr]= {
     val Name.Bound(va) = Resolver.eval(Local.mkAddr(arg))
     va

@@ -55,6 +55,9 @@ Runtime Behavior Changes
     log level by walking the exception's causes to find `c.t.util.TimeoutExceptions`
     and `c.t.logging.HasLogLevel`. ``RB_ID=896695``
 
+  * finagle-mdns: Uses only one implementation backed by jmdns instead of trying
+    to use a platform specific implementation of DDNS if present. ``RB_ID=897917``
+
   * finagle-netty4: Client initiated TLS/SSL session renegotiations are now rejected
     by default. ``RB_ID=895871``
 

@@ -5,7 +5,7 @@ scala_library(
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty/jvm/javax/jmdns',
+    '3rdparty/jvm/org/jmdns',
     'finagle/finagle-core/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],

@@ -621,8 +621,6 @@ object Finagle extends Build {
       name := "finagle-exp"
     ).dependsOn(finagleCore, finagleThrift)
 
-  // Uses
-
   lazy val finagleMdns = Project(
     id = "finagle-mdns",
     base = file("finagle-mdns"),
@@ -630,7 +628,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-mdns",
-    libraryDependencies += "javax.jmdns" % "jmdns" % "3.4.1"
+    libraryDependencies += "org.jmdns" % "jmdns" % "3.5.1"
   ).dependsOn(finagleCore)
 
   lazy val finagleExample = Project(

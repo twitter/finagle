@@ -5,9 +5,9 @@ import com.twitter.util.{Await, Var}
 import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.SpanSugar._
-import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
@@ -74,8 +74,8 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
     val res = new MDNSResolver
     val ann = new MDNSAnnouncer
     val ia = new InetSocketAddress(loopback, 0)
-    intercept[MDNSAddressException] { ann.announce(ia, "invalidname") }
-    intercept[MDNSAddressException] { res.bind("invalidname") }
+    intercept[MdnsAddressException] { ann.announce(ia, "invalidname") }
+    intercept[MdnsAddressException] { res.bind("invalidname") }
   }
 
   test("name parser") {
