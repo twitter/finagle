@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{ExpiringService, DeadlineStatsFilter, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{ExpiringService, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle.stats.ServerStatsReceiver
@@ -50,7 +50,6 @@ object StackServer {
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
-   * @see [[com.twitter.finagle.service.DeadlineStatsFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
@@ -71,7 +70,6 @@ object StackServer {
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
-    stk.push(DeadlineStatsFilter.module)
     stk.push(DtabStatsFilter.module)
     // Admission Control filters are inserted after `StatsFilter` so that rejected
     // requests are counted. We may need to adjust how latency are recorded

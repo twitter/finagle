@@ -86,6 +86,9 @@ New Features
   * finagle-core: Introduce the `c.t.f.client.DynamicTimeout` module allowing clients
     to specify call-site specific timeouts. ``RB_ID=885005``
 
+  * finagle-core: A new module, `c.t.f.service.DeadlineFilter`, can be added to stack-based servers
+    and clients, which rejects requests with expired deadlines ``RB_ID=895820``
+
   * finagle-memcached: Introduce `c.t.f.memcached.CasResult.replaced: Boolean`
     to help transition usage off of the deprecated `cas` client method to
     `checkAndSet`. ``RB_ID=891628``
@@ -115,6 +118,12 @@ Runtime Behavior Changes
 
     - `RootMonitor` is still used to handle fatal exceptions from pending side-effect-only
       closures (i.e., `onFailure`, `onSuccess`) on a service future/promise.
+
+  * finagle-core: `c.t.f.service.DeadlineStatsFilter` has been removed from the
+    server stack, along with all related stats.
+    The "admission_control/deadline/transit_latency_ms" stat has been moved to
+    `c.t.f.filter.ServerStatsFilter` and re-scoped as "transit_latency_ms"
+    ``RB_ID=895820``
 
   * finagle-mux: `com.twitter.finagle.Failures` are now sent over the wire with
     their flags intact via `com.twitter.finagle.mux.transport.MuxFailure` in the
