@@ -47,14 +47,17 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">ThriftClientFramedCodec</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2016-12-01) Use the com.twitter.finagle.Thrift object to build a client">ThriftClientFramedCodec</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>ThriftClientFramedCodec implements a framed thrift transport that
 supports upgrading in order to provide TraceContexts across
 requests.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-01)</i> Use the com.twitter.finagle.Thrift object to build a client</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -150,26 +153,6 @@ requests.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.ThriftClientFramedCodec#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory"></a>
-      <a id="apply(Option[ClientId]):ThriftClientFramedCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="clientId">clientId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftClientFramedCodec$@apply(clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">com.twitter.finagle.thrift.ThriftClientFramedCodecFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">com.twitter.finagle.thrift.ThriftClientFramedCodecFactory</a>.
-Passing a ClientId will propagate that information to the server iff the server is a finagle
-server.
-</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -267,23 +250,6 @@ server.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.ThriftClientFramedCodec#get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="get():com.twitter.finagle.thrift.ThriftClientFramedCodecFactory"></a>
-      <a id="get():ThriftClientFramedCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">get</span><span class="params">()</span><span class="result">: <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftClientFramedCodec$@get():com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -494,7 +460,53 @@ server.
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.thrift.ThriftClientFramedCodec#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory"></a>
+      <a id="apply(Option[ClientId]):ThriftClientFramedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-12-01) Use the com.twitter.finagle.Thrift object to build a client">apply</span><span class="params">(<span name="clientId">clientId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftClientFramedCodec$@apply(clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">com.twitter.finagle.thrift.ThriftClientFramedCodecFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">com.twitter.finagle.thrift.ThriftClientFramedCodecFactory</a>.
+Passing a ClientId will propagate that information to the server iff the server is a finagle
+server.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-01)</i> Use the com.twitter.finagle.Thrift object to build a client</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftClientFramedCodec#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get():com.twitter.finagle.thrift.ThriftClientFramedCodecFactory"></a>
+      <a id="get():ThriftClientFramedCodecFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-12-01) Use Thrift.client to configure the thrift framed protocol">get</span><span class="params">()</span><span class="result">: <a href="ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftClientFramedCodec$@get():com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-01)</i> Use Thrift.client to configure the thrift framed protocol</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

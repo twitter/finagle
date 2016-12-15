@@ -47,7 +47,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Failure</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
+        <span class="name">Failure</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
       </span>
       </h4>
       
@@ -57,7 +57,7 @@ describe the origins of the failure to aid in debugging and flags
 mark attributes of the Failure (e.g. Restartable).
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -75,7 +75,7 @@ mark attributes of the Failure (e.g. Restartable).
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.Failure"><span>Failure</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.Failure"><span>Failure</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="scala.util.control.NoStackTrace"><span>NoStackTrace</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -185,6 +185,42 @@ mark attributes of the Failure (e.g. Restartable).
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asNonRetryable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asNonRetryable:T"></a>
+      <a id="asNonRetryable:Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asNonRetryable</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Failure@asNonRetryable:T" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asRejected:T"></a>
+      <a id="asRejected:Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asRejected</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Failure@asRejected:T" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="com.twitter.finagle.Failure#cause" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="cause:Option[Throwable]"></a>
       <a id="cause:Option[Throwable]"></a>
@@ -242,6 +278,26 @@ mark attributes of the Failure (e.g. Restartable).
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.Failure#copyWithFlags" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copyWithFlags(newFlags:Long):com.twitter.finagle.Failure"></a>
+      <a id="copyWithFlags(Long):Failure"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyWithFlags</span><span class="params">(<span name="newFlags">newFlags: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Failure@copyWithFlags(newFlags:Long):com.twitter.finagle.Failure" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
+caller of this method should check to see if a copy is necessary before
+calling.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -316,25 +372,7 @@ mark attributes of the Failure (e.g. Restartable).
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#flagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="flagged(addFlags:Long):com.twitter.finagle.Failure"></a>
-      <a id="flagged(Long):Failure"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">flagged</span><span class="params">(<span name="addFlags">addFlags: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Failure@flagged(addFlags:Long):com.twitter.finagle.Failure" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">This failure with the given flags added.</p><div class="fullcomment"><div class="comment cmt"><p>This failure with the given flags added.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> for flag definitions.
-</p></div></div>
-    </li><li name="com.twitter.finagle.Failure#flags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Failure#flags" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flags:Long"></a>
       <a id="flags:Long"></a>
       <h4 class="signature">
@@ -350,7 +388,7 @@ mark attributes of the Failure (e.g. Restartable).
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → FailureFlags</dd></dl></div>
     </li><li name="java.lang.Throwable#getCause" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getCause():Throwable"></a>
       <a id="getCause():Throwable"></a>
@@ -504,7 +542,7 @@ mark attributes of the Failure (e.g. Restartable).
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#isFlagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.FailureFlags#isFlagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isFlagged(which:Long):Boolean"></a>
       <a id="isFlagged(Long):Boolean"></a>
       <h4 class="signature">
@@ -520,8 +558,9 @@ mark attributes of the Failure (e.g. Restartable).
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Test whether the given flags are set.</p><div class="fullcomment"><div class="comment cmt"><p>Test whether the given flags are set.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> flag definitions.
-</p></div></div>
+      <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
+</p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -556,24 +595,6 @@ mark attributes of the Failure (e.g. Restartable).
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → HasLogLevel</dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#masked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="masked(mask:Long):com.twitter.finagle.Failure"></a>
-      <a id="masked(Long):Failure"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">masked</span><span class="params">(<span name="mask">mask: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Failure@masked(mask:Long):com.twitter.finagle.Failure" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Apply the given flags mask.</p><div class="fullcomment"><div class="comment cmt"><p>Apply the given flags mask.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> forflag definitions.
-</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -764,24 +785,6 @@ or to return from a user's <a href="Service.html" class="extype" name="com.twitt
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a> → Throwable → AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.Failure#unflagged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="unflagged(delFlags:Long):com.twitter.finagle.Failure"></a>
-      <a id="unflagged(Long):Failure"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">unflagged</span><span class="params">(<span name="delFlags">delFlags: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Failure@unflagged(delFlags:Long):com.twitter.finagle.Failure" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">This failure with the given flags removed.</p><div class="fullcomment"><div class="comment cmt"><p>This failure with the given flags removed.</p><p>See <a href="Failure$.html" class="extype" name="com.twitter.finagle.Failure">Failure</a> forflag definitions.
-</p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -896,7 +899,9 @@ within finagle and this only applies to ones that are.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.logging.HasLogLevel">
+        <div class="parent" name="com.twitter.finagle.FailureFlags">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</h3>
+            </div><div class="parent" name="com.twitter.logging.HasLogLevel">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></h3>
             </div><div class="parent" name="scala.util.control.NoStackTrace">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></h3>

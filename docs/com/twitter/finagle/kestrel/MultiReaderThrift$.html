@@ -49,25 +49,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
-style using Kestrel's memcache protocol.  The load balancing is simple,
-and falls out naturally from the user of the {{Offer}} mechanism: When
-there are multiple available messages, round-robin across them.  Otherwise,
-wait for the first message to arrive.</p><p>Example with a custom client builder:</p><pre><span class="kw">val</span> readHandle =
-  MultiReaderThrift(<span class="lit">"/the/path"</span>, <span class="lit">"the-queue"</span>)
-    .clientBuilder(
-      ClientBuilder()
-        .codec(MultiReaderThrift.codec(ClientId(<span class="lit">"myClientName"</span>))
-        .requestTimeout(<span class="num">1.</span>minute)
-        .connectTimeout(<span class="num">1.</span>minute)
-        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
-    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
-    .build()</pre><p>Example without a customer client builder so clientId passed to apply</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
-<span class="kw">val</span> va: Var[Addr] = name.bind()
-<span class="kw">val</span> readHandle =
-  MultiReaderThrift(va, <span class="lit">"the-queue"</span>, ClientId(<span class="lit">"myClientName"</span>))
-    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
-    .build()</pre></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -184,7 +166,8 @@ not be provided or will be provided to the codec was part of creating
 a custom client builder.</p><div class="fullcomment"><div class="comment cmt"><p>Used to create a thrift based MultiReader when a ClientId will neither
 not be provided or will be provided to the codec was part of creating
 a custom client builder.
-This is provided as a separate method for Java compatability.</p></div><dl class="paramcmts block"><dt class="param">va</dt><dd class="cmt"><p>endpoints for Kestrel</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift</p></dd></dl></div>
+This is provided as a separate method for Java compatability.
+</p></div><dl class="paramcmts block"><dt class="param">va</dt><dd class="cmt"><p>endpoints for Kestrel</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift</p></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(va:com.twitter.util.Var[com.twitter.finagle.Addr],queueName:String,clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.kestrel.MultiReaderBuilderThrift"></a>
       <a id="apply(Var[Addr],String,Option[ClientId]):MultiReaderBuilderThrift"></a>
@@ -206,7 +189,8 @@ client builder will not be used.</p><div class="fullcomment"><div class="comment
 client builder will not be used.  If a custom client builder will be
 used then it is more reasonable to use the version of apply that does
 not take a ClientId or else the client id will need to be passed to
-both apply and the codec in clientBuilder.</p></div><dl class="paramcmts block"><dt class="param">va</dt><dd class="cmt"><p>endpoints for Kestrel</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt class="param">clientId</dt><dd class="cmt"><p>the clientid to be used</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift</p></dd></dl></div>
+both apply and the codec in clientBuilder.
+</p></div><dl class="paramcmts block"><dt class="param">va</dt><dd class="cmt"><p>endpoints for Kestrel</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt class="param">clientId</dt><dd class="cmt"><p>the clientid to be used</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift</p></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(dest:com.twitter.finagle.Name,queueName:String,clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.kestrel.MultiReaderBuilderThrift"></a>
       <a id="apply(Name,String,Option[ClientId]):MultiReaderBuilderThrift"></a>
@@ -228,7 +212,8 @@ client builder will not be used.</p><div class="fullcomment"><div class="comment
 client builder will not be used.  If a custom client builder will be
 used then it is more reasonable to use the version of apply that does
 not take a ClientId or else the client id will need to be passed to
-both apply and the codec in clientBuilder.</p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>a <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">com.twitter.finagle.Name</a> representing the Kestrel
+both apply and the codec in clientBuilder.
+</p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>a <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">com.twitter.finagle.Name</a> representing the Kestrel
 endpoints to connect to</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from</p></dd><dt class="param">clientId</dt><dd class="cmt"><p>the clientid to be used</p></dd><dt>returns</dt><dd class="cmt"><p>A MultiReaderBuilderThrift</p></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(dest:String,queueName:String,clientId:Option[com.twitter.finagle.thrift.ClientId]):com.twitter.finagle.kestrel.MultiReaderBuilderThrift"></a>
@@ -293,23 +278,6 @@ ReadHandle is not on the request path. Weights are discarded.</p></dd></dl></div
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift#codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="codec(clientId:com.twitter.finagle.thrift.ClientId):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory"></a>
-      <a id="codec(ClientId):ThriftClientFramedCodecFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">codec</span><span class="params">(<span name="clientId">clientId: <a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a></span>)</span><span class="result">: <a href="../thrift/ThriftClientFramedCodecFactory.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodecFactory">ThriftClientFramedCodecFactory</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderThrift$@codec(clientId:com.twitter.finagle.thrift.ClientId):com.twitter.finagle.thrift.ThriftClientFramedCodecFactory" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Helper for getting the right codec for the thrift protocol</p><div class="fullcomment"><div class="comment cmt"><p>Helper for getting the right codec for the thrift protocol</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the ThriftClientFramedCodec codec</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

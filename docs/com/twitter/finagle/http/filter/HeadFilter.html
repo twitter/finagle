@@ -210,23 +210,6 @@
       <p class="shortcomment cmt">Terminates a filter chain in a <a href="../../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>. For example,</p><pre>myFilter.andThen(myServiceFactory)</pre></div><dl class="paramcmts block"><dt class="param">factory</dt><dd class="cmt"><p>a service factory that takes the output request type and
                the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]"></a>
-      <a id="andThen((Req)⇒Future[Response]):(Req)⇒Future[Response]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.http.filter.HeadFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.http.filter.HeadFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.filter.HeadFilter@andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(service:com.twitter.finagle.Service[ReqOut,RepIn]):com.twitter.finagle.Service[ReqIn,RepOut]"></a>
       <a id="andThen(Service[Req,Response]):Service[Req,Response]"></a>
       <h4 class="signature">

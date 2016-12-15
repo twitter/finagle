@@ -119,9 +119,6 @@
       <div class="name">Header</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/HttpTracing$.html" class="extype" name="com.twitter.finagle.http.HttpTracing">HttpTracing</a> <a href="../com/twitter/finagle/stream/package.html" class="extype" name="com.twitter.finagle.stream">stream</a> </div>
     </div><div class="entry">
-      <div class="name">HeaderLine</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/naggati/codec/package.html" class="extype" name="com.twitter.finagle.redis.naggati.codec">codec</a> </div>
-    </div><div class="entry">
       <div class="name">HeaderMap</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/package.html" class="extype" name="com.twitter.finagle.http">http</a> </div>
     </div><div class="entry">
@@ -194,6 +191,9 @@
       <div class="name">Http11</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/Version$.html" class="extype" name="com.twitter.finagle.http.Version">Version</a> </div>
     </div><div class="entry">
+      <div class="name">Http2</div>
+      <div class="occurrences"><a href="../com/twitter/finagle/http2/package.html" class="extype" name="com.twitter.finagle.http2">http2</a> </div>
+    </div><div class="entry">
       <div class="name">HttpConnectHandler</div>
       <div class="occurrences"><a href="../com/twitter/finagle/httpproxy/package.html" class="extype" name="com.twitter.finagle.httpproxy">httpproxy</a> </div>
     </div><div class="entry">
@@ -223,9 +223,6 @@
     </div><div class="entry">
       <div class="name">HttpProxyTo</div>
       <div class="occurrences"><a href="../com/twitter/finagle/client/Transporter$.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a> </div>
-    </div><div class="entry">
-      <div class="name">HttpRequest</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/naggati/codec/package.html" class="extype" name="com.twitter.finagle.redis.naggati.codec">codec</a> </div>
     </div><div class="entry">
       <div class="name">HttpResponseClassifier</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/service/package.html" class="extype" name="com.twitter.finagle.http.service">service</a> </div>
@@ -303,7 +300,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/http2/param/HeaderTableSize.html" class="extype" name="com.twitter.finagle.http2.param.HeaderTableSize">HeaderTableSize</a> </div>
     </div><div class="entry">
       <div class="name">headers</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/http/HttpTracing$.html" class="extype" name="com.twitter.finagle.http.HttpTracing">HttpTracing</a> <a href="../com/twitter/finagle/http/Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> <a href="../com/twitter/finagle/redis/naggati/codec/HttpRequest.html" class="extype" name="com.twitter.finagle.redis.naggati.codec.HttpRequest">HttpRequest</a> <a href="../com/twitter/finagle/stream/Header$$Ops.html" class="extype" name="com.twitter.finagle.stream.Header.Ops">Ops</a> <a href="../com/twitter/finagle/stream/StreamRequest.html" class="extype" name="com.twitter.finagle.stream.StreamRequest">StreamRequest</a> <a href="../com/twitter/finagle/stream/StreamResponse$$Info.html" class="extype" name="com.twitter.finagle.stream.StreamResponse.Info">Info</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/http/HttpTracing$.html" class="extype" name="com.twitter.finagle.http.HttpTracing">HttpTracing</a> <a href="../com/twitter/finagle/http/Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> <a href="../com/twitter/finagle/stream/Header$$Ops.html" class="extype" name="com.twitter.finagle.stream.Header.Ops">Ops</a> <a href="../com/twitter/finagle/stream/StreamRequest.html" class="extype" name="com.twitter.finagle.stream.StreamRequest">StreamRequest</a> <a href="../com/twitter/finagle/stream/StreamResponse$$Info.html" class="extype" name="com.twitter.finagle.stream.StreamResponse.Info">Info</a> </div>
     </div><div class="entry">
       <div class="name">heap</div>
       <div class="occurrences"><a href="../com/twitter/finagle/loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> <a href="../com/twitter/finagle/loadbalancer/HeapBalancerBench.html" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancerBench">HeapBalancerBench</a> </div>
@@ -338,20 +335,14 @@
       <div class="name">hostConnectionCoresize</div>
       <div class="occurrences"><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> </div>
     </div><div class="entry">
-      <div class="name"><strike>hostConnectionIdleTime</strike></div>
-      <div class="occurrences"><strike><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a></strike> </div>
-    </div><div class="entry">
       <div class="name">hostConnectionLimit</div>
       <div class="occurrences"><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> </div>
     </div><div class="entry">
       <div class="name">hostConnectionMaxIdleTime</div>
-      <div class="occurrences"><strike><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a></strike> <a href="../com/twitter/finagle/builder/ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/builder/ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> </div>
     </div><div class="entry">
       <div class="name">hostConnectionMaxLifeTime</div>
-      <div class="occurrences"><strike><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a></strike> <a href="../com/twitter/finagle/builder/ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> </div>
-    </div><div class="entry">
-      <div class="name"><strike>hostConnectionMaxWaiters</strike></div>
-      <div class="occurrences"><strike><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a></strike> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/builder/ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> </div>
     </div><div class="entry">
       <div class="name">hostStatsReceiver</div>
       <div class="occurrences"><a href="../com/twitter/finagle/loadbalancer/LoadBalancerFactory$$HostStats.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.HostStats">HostStats</a> </div>

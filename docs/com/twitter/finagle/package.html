@@ -333,7 +333,7 @@ Stacks.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.CancelledConnectionException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CancelledConnectionExceptionextendsRequestException"></a>
+      <a id="CancelledConnectionExceptionextendsRequestExceptionwithHasLogLevel"></a>
       <a id="CancelledConnectionException:CancelledConnectionException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -341,10 +341,10 @@ Stacks.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CancelledConnectionException.html"><span class="name">CancelledConnectionException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
+        <a href="CancelledConnectionException.html"><span class="name">CancelledConnectionException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@CancelledConnectionExceptionextendsRequestException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@CancelledConnectionExceptionextendsRequestExceptionwithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -358,7 +358,7 @@ during session establishment.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
      for additional details.</p></span><span class="cmt"><p>com.twitter.finagle.CancelledRequestException</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.CancelledRequestException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CancelledRequestExceptionextendsRequestException"></a>
+      <a id="CancelledRequestExceptionextendsRequestExceptionwithHasLogLevel"></a>
       <a id="CancelledRequestException:CancelledRequestException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -366,10 +366,10 @@ during session establishment.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="CancelledRequestException.html"><span class="name">CancelledRequestException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
+        <a href="CancelledRequestException.html"><span class="name">CancelledRequestException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@CancelledRequestExceptionextendsRequestException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@CancelledRequestExceptionextendsRequestExceptionwithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -381,25 +381,6 @@ default propagate an interrupt to its downstream, and so on. This is done to
 conserve resources.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
      for additional details.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.CancelledWriteException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CancelledWriteExceptionextendsTransportException"></a>
-      <a id="CancelledWriteException:CancelledWriteException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="CancelledWriteException.html"><span class="name">CancelledWriteException</span></a><span class="result"> extends <a href="TransportException.html" class="extype" name="com.twitter.finagle.TransportException">TransportException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@CancelledWriteExceptionextendsTransportException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Indicates that a request failed because a
-<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a> write associated with the request
-was cancelled.</p>
     </li><li name="com.twitter.finagle.ChannelBufferUsageException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ChannelBufferUsageExceptionextendsException"></a>
       <a id="ChannelBufferUsageException:ChannelBufferUsageException"></a>
@@ -725,7 +706,7 @@ implements the default binding stategy.
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> which acquires a new service for
 each request.</p>
     </li><li name="com.twitter.finagle.FailedFastException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="FailedFastExceptionextendsRequestExceptionwithWriteException"></a>
+      <a id="FailedFastExceptionextendsRequestExceptionwithWriteExceptionwithHasLogLevelwithFailureFlags[com.twitter.finagle.FailedFastException]"></a>
       <a id="FailedFastException:FailedFastException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -733,10 +714,10 @@ each request.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FailedFastException.html"><span class="name">FailedFastException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a></span>
+        <a href="FailedFastException.html"><span class="name">FailedFastException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="FailedFastException.html" class="extype" name="com.twitter.finagle.FailedFastException">FailedFastException</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@FailedFastExceptionextendsRequestExceptionwithWriteException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@FailedFastExceptionextendsRequestExceptionwithWriteExceptionwithHasLogLevelwithFailureFlags[com.twitter.finagle.FailedFastException]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -749,7 +730,7 @@ for details on this behavior.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s" target="_blank">user guide</a>
      for additional details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Failure" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="FailureextendsExceptionwithNoStackTracewithHasLogLevel"></a>
+      <a id="FailureextendsExceptionwithNoStackTracewithHasLogLevelwithFailureFlags[com.twitter.finagle.Failure]"></a>
       <a id="Failure:Failure"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -757,10 +738,10 @@ for details on this behavior.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
+        <a href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@FailureextendsExceptionwithNoStackTracewithHasLogLevel" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@FailureextendsExceptionwithNoStackTracewithHasLogLevelwithFailureFlags[com.twitter.finagle.Failure]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1973,7 +1954,7 @@ within the confines of Finagle.
 allowable, where &quot;allowable&quot; is typically determined based on some
 configurable maximum.</p>
     </li><li name="com.twitter.finagle.TooManyWaitersException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TooManyWaitersExceptionextendsRequestException"></a>
+      <a id="TooManyWaitersExceptionextendsRequestExceptionwithHasLogLevel"></a>
       <a id="TooManyWaitersException:TooManyWaitersException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1981,10 +1962,10 @@ configurable maximum.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="TooManyWaitersException.html"><span class="name">TooManyWaitersException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
+        <a href="TooManyWaitersException.html"><span class="name">TooManyWaitersException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@TooManyWaitersExceptionextendsRequestException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@TooManyWaitersExceptionextendsRequestExceptionwithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -2269,7 +2250,7 @@ to assign labels to groups that ascribe meaning to them.
       <p class="shortcomment cmt">An exception that is raised on requests that are discarded because
 their corresponding backup requests succeeded first.</p><div class="fullcomment"><div class="comment cmt"><p>An exception that is raised on requests that are discarded because
 their corresponding backup requests succeeded first. See
-<a href="exp/BackupRequestFilter.html" class="extype" name="com.twitter.finagle.exp.BackupRequestFilter">com.twitter.finagle.exp.BackupRequestFilter</a> for details.
+<code>com.twitter.finagle.exp.BackupRequestFilter</code> for details.
 </p></div></div>
     </li><li name="com.twitter.finagle.CanStackFrom" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CanStackFrom"></a>
@@ -2424,6 +2405,24 @@ their corresponding backup requests succeeded first. See
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.FailureFlags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FailureFlags"></a>
+      <a id="FailureFlags:FailureFlags"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="FailureFlags$.html"><span class="name">FailureFlags</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@FailureFlags" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><code>FailureFlags</code> may be applied to any Failure/Exception encountered during the
+handling of a request.</p>
     </li><li name="com.twitter.finagle.Filter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Filter"></a>
       <a id="Filter:Filter"></a>
@@ -3782,7 +3781,7 @@ exactly one stream. The session terminates together with the stream.
       <p class="shortcomment cmt">Please use the new interface, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
 for constructing Thrift clients and servers.</p><div class="fullcomment"><div class="comment cmt"><h3>Deprecation</h3><p>Please use the new interface, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">com.twitter.finagle.Thrift</a>,
 for constructing Thrift clients and servers.</p><h4>Thrift codecs</h4><p>We provide client and server protocol support for the framed protocol.
-The public implementations are:</p><ul><li><a href="thrift/ThriftClientFramedCodec.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientFramedCodec">com.twitter.finagle.thrift.ThriftClientFramedCodec</a></li><li><a href="thrift/ThriftServerFramedCodec.html" class="extype" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">com.twitter.finagle.thrift.ThriftServerFramedCodec</a></li></ul><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
+The public implementations are defined on the Thrift object:</p><ul><li><a href="Thrift$.html#client:com.twitter.finagle.Thrift.Client" class="extmbr" name="com.twitter.finagle.Thrift#client">com.twitter.finagle.Thrift.client</a></li><li><a href="Thrift$.html#server:com.twitter.finagle.Thrift.Server" class="extmbr" name="com.twitter.finagle.Thrift#server">com.twitter.finagle.Thrift.server</a></li></ul><p>The type of the server codec is <code>Service[Array[Byte], Array[Byte]]</code>
 and the client codecs are <code>Service[ThriftClientRequest,
 Array[Byte]]</code>. The service provided is that of a &quot;transport&quot; of
 thrift messages (requests and replies) according to the protocol
@@ -3790,7 +3789,7 @@ chosen. This is why the client codecs need to have access to a
 thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the services produced by the
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">finagle thrift codegenerator</a>.</p><pre><span class="kw">val</span> service: Service[ThriftClientRequest, <span class="std">Array</span>[<span class="std">Byte</span>]] = ClientBuilder()
   .hosts(<span class="lit">"foobar.com:123"</span>)
-  .codec(ThriftClientFramedCodec())
+  .stack(Thrift.client)
   .build()
 
 <span class="cmt">// Wrap the raw Thrift transport in a Client decorator. The client</span>

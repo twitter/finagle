@@ -279,7 +279,25 @@ Kestrel's memcache protocol.</p>
       </a>
     </span>
       <p class="shortcomment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
-Kestrel's thrift protocol.</p>
+Kestrel's thriftmux protocol.</p>
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderBuilderThriftMux" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultiReaderBuilderThriftMuxextendsMultiReaderBuilder[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte],com.twitter.finagle.kestrel.MultiReaderBuilderThriftMux]"></a>
+      <a id="MultiReaderBuilderThriftMux:MultiReaderBuilderThriftMux"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderBuilderThriftMux.html"><span class="name">MultiReaderBuilderThriftMux</span></a><span class="result"> extends <a href="MultiReaderBuilder.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilder">MultiReaderBuilder</a>[<a href="../thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="MultiReaderBuilderThriftMux.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderThriftMux">MultiReaderBuilderThriftMux</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderBuilderThriftMuxextendsMultiReaderBuilder[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte],com.twitter.finagle.kestrel.MultiReaderBuilderThriftMux]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
+Kestrel's thriftmux protocol.</p>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultiReaderConfig[Req,Rep]extendsProductwithSerializable"></a>
       <a id="MultiReaderConfig[Req,Rep]:MultiReaderConfig[Req,Rep]"></a>
@@ -501,14 +519,14 @@ there are multiple available messages, round-robin across them.  Otherwise,
 wait for the first message to arrive.</p><p>Example with a custom client builder:</p><pre><span class="kw">val</span> readHandle =
   MultiReaderMemcache(<span class="lit">"/the/path"</span>, <span class="lit">"the-queue"</span>)
     .clientBuilder(
-      ClientBuilder()
-        .codec(MultiReaderMemcache.codec)
-        .requestTimeout(<span class="num">1.</span>minute)
-        .connectTimeout(<span class="num">1.</span>minute)
-        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+      ClientBuilder()      <span class="cmt">/* etc... but do not set hosts or build */</span>
+        .stack(Kestrel.client
+          .withSession.acquisitionTimeout(<span class="num">1.</span>minute)
+          .withRequestTimeout(<span class="num">1.</span>minute)
+          .withSessionPool.maxValue(<span class="num">1</span>)))
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre></div></div>
-    </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultiReaderThrift"></a>
       <a id="MultiReaderThrift:MultiReaderThrift"></a>
       <h4 class="signature">
@@ -524,24 +542,41 @@ wait for the first message to arrive.</p><p>Example with a custom client builder
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
+      
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderThriftMux" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MultiReaderThriftMux"></a>
+      <a id="MultiReaderThriftMux:MultiReaderThriftMux"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiReaderThriftMux$.html"><span class="name">MultiReaderThriftMux</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderThriftMux" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
 style using Kestrel's memcache protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
 style using Kestrel's memcache protocol.  The load balancing is simple,
 and falls out naturally from the user of the {{Offer}} mechanism: When
 there are multiple available messages, round-robin across them.  Otherwise,
 wait for the first message to arrive.</p><p>Example with a custom client builder:</p><pre><span class="kw">val</span> readHandle =
-  MultiReaderThrift(<span class="lit">"/the/path"</span>, <span class="lit">"the-queue"</span>)
+  MultiReaderThriftMux(<span class="lit">"/the/path"</span>, <span class="lit">"the-queue"</span>)
     .clientBuilder(
       ClientBuilder()
-        .codec(MultiReaderThrift.codec(ClientId(<span class="lit">"myClientName"</span>))
-        .requestTimeout(<span class="num">1.</span>minute)
-        .connectTimeout(<span class="num">1.</span>minute)
-        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+        .stack(ThriftMux.client
+          .withClientId(ClientId(<span class="lit">"myClientName"</span>))
+          .withSession.acquisitionTimeout(<span class="num">1.</span>minute)
+          .withRequestTimeout(<span class="num">1.</span>minute))
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre><p>Example without a customer client builder so clientId passed to apply</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
 <span class="kw">val</span> va: Var[Addr] = name.bind()
 <span class="kw">val</span> readHandle =
-  MultiReaderThrift(va, <span class="lit">"the-queue"</span>, ClientId(<span class="lit">"myClientName"</span>))
+  MultiReaderThriftMux(va, <span class="lit">"the-queue"</span>, ClientId(<span class="lit">"myClientName"</span>))
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre></div></div>
     </li><li name="com.twitter.finagle.kestrel.OutOfRetriesException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -663,7 +698,7 @@ retry budget.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="MultiReader$.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThrift instead">MultiReader</span></a>
+        <a href="MultiReader$.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThriftMux instead">MultiReader</span></a>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReader" title="Permalink" target="_top">
@@ -680,16 +715,16 @@ the first message to arrive.</p><p>Var[Addr] example:</p><pre><span class="kw">v
 <span class="kw">val</span> readHandle =
   MultiReader(va, <span class="lit">"the-queue"</span>)
     .clientBuilder(
-      ClientBuilder()
-        .codec(Kestrel())
-        .requestTimeout(<span class="num">1.</span>minute)
-        .connectTimeout(<span class="num">1.</span>minute)
-        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+      ClientBuilder()      <span class="cmt">/* etc... but do not set hosts or build */</span>
+        .stack(Kestrel.client
+          .withSession.acquisitionTimeout(<span class="num">1.</span>minute)
+          .withRequestTimeout(<span class="num">1.</span>minute)
+          .withSessionPool.maxSize(<span class="num">1</span>)))
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThrift instead</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThriftMux instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

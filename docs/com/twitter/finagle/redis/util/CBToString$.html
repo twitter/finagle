@@ -154,7 +154,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="arg">arg: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Charsets.Utf8</a></span></span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">apply</span><span class="params">(<span name="arg">arg: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol">UTF_8</span></span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.util.CBToString$@apply(arg:org.jboss.netty.buffer.ChannelBuffer,charset:java.nio.charset.Charset):String" title="Permalink" target="_top">
@@ -268,7 +268,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromList</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Charsets.Utf8</a></span></span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name">fromList</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol">UTF_8</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.util.CBToString$@fromList(args:Seq[org.jboss.netty.buffer.ChannelBuffer],charset:java.nio.charset.Charset):Seq[String]" title="Permalink" target="_top">
@@ -285,7 +285,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromTuples</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>)]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Charsets.Utf8</a></span></span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[(<span class="extype" name="java.lang.String">String</span>, <span class="extype" name="java.lang.String">String</span>)]</span>
+        <span class="name">fromTuples</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>)]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol">UTF_8</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[(<span class="extype" name="java.lang.String">String</span>, <span class="extype" name="java.lang.String">String</span>)]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.util.CBToString$@fromTuples(args:Seq[(org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer)],charset:java.nio.charset.Charset):Seq[(String,String)]" title="Permalink" target="_top">
@@ -302,7 +302,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromTuplesWithDoubles</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Double" class="extype" target="_top">Double</a>)]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol"><span class="name"><a href="../../../../package.html">Charsets.Utf8</a></span></span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[(<span class="extype" name="java.lang.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Double" class="extype" target="_top">Double</a>)]</span>
+        <span class="name">fromTuplesWithDoubles</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Double" class="extype" target="_top">Double</a>)]</span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">Charset</span> = <span class="symbol">UTF_8</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[(<span class="extype" name="java.lang.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Double" class="extype" target="_top">Double</a>)]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.util.CBToString$@fromTuplesWithDoubles(args:Seq[(org.jboss.netty.buffer.ChannelBuffer,Double)],charset:java.nio.charset.Charset):Seq[(String,Double)]" title="Permalink" target="_top">

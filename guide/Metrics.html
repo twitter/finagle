@@ -144,6 +144,10 @@ This entails establishing a connection or waiting for a connection from a pool.<
 This is how long it takes to set up the chain of <code class="docutils literal"><span class="pre">Future</span></code>s to be used in the
 response without waiting for the response. Large values suggest blocking code
 on a Finagle thread.</dd>
+<dt><strong>transit_latency_ms</strong></dt>
+<dd>A stat that attempts to measure (wall time) transit times between hops, e.g.,
+from client to server. Be aware that clock drift between hosts, stop the world
+pauses, and queue backups can contribute here. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="requestsemaphorefilter">
@@ -539,10 +543,6 @@ strategies.</p>
 <dt><strong>admission_control/deadline/expired_ms</strong></dt>
 <dd>A stat of the elapsed time since expiry if a deadline has expired, in
 milliseconds.</dd>
-<dt><strong>admission_control/deadline/transit_latency_ms</strong></dt>
-<dd>A stat that attempts to measure (wall time) transit times between hops, e.g.,
-from client to server. Be aware that clock drift between hosts, stop the world
-pauses, and queue backups can contribute here. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="nack-admission-control">
@@ -860,6 +860,25 @@ count as 5XX for this counter.</dd>
 <dd>A histogram on duration in milliseconds per HTTP status code category.</dd>
 </dl>
 </div>
+<div class="section" id="memcached">
+<h2>Memcached<a class="headerlink" href="#memcached" title="Permalink to this headline">¶</a></h2>
+<p id="memcached-stats">These stats pertain to the Memcached protocol.</p>
+<dl class="docutils">
+<dt><strong>&lt;label&gt;/redistributes</strong></dt>
+<dd>A counter of the number of times the cache ring has been rebuilt. This occurs
+whenever a node has been ejected or revived, or the set of nodes changes.</dd>
+<dt><strong>&lt;label&gt;/joins</strong></dt>
+<dd>A counter of the number of times a node has been added to the cache ring because
+the backing set of servers has changed.</dd>
+<dt><strong>&lt;label/leaves&gt;</strong></dt>
+<dd>A counter of the number of times a node has been removed from the cache ring.
+because the backing set of servers has changed.</dd>
+<dt><strong>&lt;label&gt;/ejections</strong></dt>
+<dd>A counter of the number of times a node has been ejected from the cache ring.</dd>
+<dt><strong>&lt;label&gt;/revivals</strong></dt>
+<dd>A counter of the number of times an ejected node has been re-added to the cache ring.</dd>
+</dl>
+</div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
 <p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span>Mux</span></a> protocol.</p>
@@ -1025,6 +1044,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </li>
 <li><a class="reference internal" href="#toggles">Toggles</a></li>
 <li><a class="reference internal" href="#http">HTTP</a></li>
+<li><a class="reference internal" href="#memcached">Memcached</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
 </ul>

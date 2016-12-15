@@ -45,7 +45,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThrift instead">MultiReader</span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThriftMux instead">MultiReader</span>
       </span>
       </h4>
       
@@ -58,16 +58,16 @@ the first message to arrive.</p><p>Var[Addr] example:</p><pre><span class="kw">v
 <span class="kw">val</span> readHandle =
   MultiReader(va, <span class="lit">"the-queue"</span>)
     .clientBuilder(
-      ClientBuilder()
-        .codec(Kestrel())
-        .requestTimeout(<span class="num">1.</span>minute)
-        .connectTimeout(<span class="num">1.</span>minute)
-        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+      ClientBuilder()      <span class="cmt">/* etc... but do not set hosts or build */</span>
+        .stack(Kestrel.client
+          .withSession.acquisitionTimeout(<span class="num">1.</span>minute)
+          .withRequestTimeout(<span class="num">1.</span>minute)
+          .withSessionPool.maxSize(<span class="num">1</span>)))
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThrift instead</p></dd></dl><div class="toggleContainer block">
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThriftMux instead</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>

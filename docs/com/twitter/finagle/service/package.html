@@ -700,23 +700,33 @@ is to be retried.
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.service.DeadlineStatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DeadlineStatsFilter"></a>
-      <a id="DeadlineStatsFilter:DeadlineStatsFilter"></a>
+    </li><li name="com.twitter.finagle.service.DeadlineFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeadlineFilter"></a>
+      <a id="DeadlineFilter:DeadlineFilter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DeadlineStatsFilter$.html"><span class="name">DeadlineStatsFilter</span></a>
+        <a href="DeadlineFilter$.html"><span class="name">DeadlineFilter</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.package@DeadlineStatsFilter" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@DeadlineFilter" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">DeadlineFilter provides an admission control module that can be pushed onto the stack to
+reject requests with expired deadlines (deadlines are set in the TimeoutFilter).</p><div class="fullcomment"><div class="comment cmt"><p>DeadlineFilter provides an admission control module that can be pushed onto the stack to
+reject requests with expired deadlines (deadlines are set in the TimeoutFilter).
+For servers, DeadlineFilter.module should be pushed onto the stack after the stats filters so
+stats are recorded for the request, and before TimeoutFilter where a new Deadline is set.
+For clients, DeadlineFilter.module should be after the stats filters; higher in the stack is
+preferable so requests are rejected as early as possible.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Deadlines cross process boundaries and can span multiple nodes in a call graph.
+      Even if a direct caller doesn't set a deadline, the server may still receive one and thus
+      potentially fail the request. It is advised that all clients in the call graph be
+      well prepared to handle NACKs before using this.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.DelayedFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DelayedFactory"></a>
       <a id="DelayedFactory:DelayedFactory"></a>

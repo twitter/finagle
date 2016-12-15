@@ -58,7 +58,7 @@
           <div class="superTypes hiddenContent"><a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
+            <div class="subClasses hiddenContent"><a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
           </div></div>
         
 
@@ -364,6 +364,24 @@ Concrete StackServer implementations are expected to specify this.
       </a>
     </span>
       <p class="shortcomment cmt">Creates a new StackServer with parameter <code>p</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with parameter <code>p</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.server.StdStackServer#configuredParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configuredParams(newParams:com.twitter.finagle.Stack.Params):This"></a>
+      <a id="configuredParams(Params):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">configuredParams</span><span class="params">(<span name="newParams">newParams: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.StdStackServer@configuredParams(newParams:com.twitter.finagle.Stack.Params):This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Creates a new StackServer with additional parameters <code>newParams</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with additional parameters <code>newParams</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
