@@ -6,8 +6,6 @@ import scala.language.implicitConversions
 
 private[finagle] object Bufs {
 
-  final val INVALID_KEY_CHARACTERS = Set('\n'.toByte, '\u0000'.toByte, '\r'.toByte, ' '.toByte)
-
   /**
    * @return the Buf representation of non-empty and non-null Strings, else null
    */

@@ -1,6 +1,5 @@
 package com.twitter.finagle.memcached.protocol
 
-import com.twitter.finagle.memcached.util.Bufs
 import com.twitter.io.Buf
 import com.twitter.util.Time
 import scala.collection.immutable
@@ -10,12 +9,15 @@ private object KeyValidation {
 
   private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
 
+  private[this] def invalidChar(b: Byte): Boolean =
+    b == '\n' || b == '\u0000' || b == '\r' || b == ' '
+
   /** Return -1 if no invalid bytes */
   private def invalidByteIndex(key: Buf): Int = {
     val bs = Buf.ByteArray.Owned.extract(key)
     var i = 0
     while (i < bs.length) {
-      if (Bufs.INVALID_KEY_CHARACTERS.contains(bs(i)))
+      if (invalidChar(bs(i)))
         return i
       i += 1
     }
