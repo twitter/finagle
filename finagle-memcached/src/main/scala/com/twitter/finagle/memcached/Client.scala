@@ -1123,7 +1123,8 @@ private[finagle] class KetamaPartitionedClient(
   }
 
   override def clientOf(key: String): Client = {
-    val bytes = key.getBytes(StandardCharsets.UTF_8)
+    // use `getBytes(String)` as it is faster
+    val bytes = key.getBytes(StandardCharsets.UTF_8.name())
     val hash = keyHasher.hashKey(bytes)
     currentDistributor.nodeForHash(hash)
   }
