@@ -22,8 +22,14 @@ object FailureAccrualFactory {
   private[finagle] val jitteredBackoff: Stream[Duration] =
     Backoff.equalJittered(5.seconds, 300.seconds)
 
-  private[finagle] val defaultPolicy =
-    () => FailureAccrualPolicy.consecutiveFailures(defaultConsecutiveFailures, jitteredBackoff)
+  private[finagle] val defaultPolicy: Function0[FailureAccrualPolicy] =
+    new Function0[FailureAccrualPolicy] {
+      def apply(): FailureAccrualPolicy = FailureAccrualPolicy
+        .consecutiveFailures(defaultConsecutiveFailures, jitteredBackoff)
+
+      override def toString: String = s"FailureAccrualPolicy.consecutiveFailures(numFailures: " +
+        s"$defaultConsecutiveFailures, markDeadFor: $jitteredBackoff"
+    }
 
   /**
    * Add jitter in `markDeadFor` to reduce correlation.
@@ -70,6 +76,22 @@ object FailureAccrualFactory {
   //  2. It's not possible to construct a triply-nested Scala class in Java using the sane API.
   //     See http://stackoverflow.com/questions/30809070/accessing-scala-nested-classes-from-java
 
+  // Create a consecutiveFailures FailureAccrualPolicy, helper method used by Param to provide
+  // description details, without overriding toString method description will only show function0
+  private def consecutiveFailurePolicy(
+    numFailures: Int,
+    markDeadFor: () => Duration
+  ): Function0[FailureAccrualPolicy] = {
+    val markDeadForStream = Backoff.fromFunction(markDeadFor)
+    new Function0[FailureAccrualPolicy] {
+      def apply(): FailureAccrualPolicy = FailureAccrualPolicy
+        .consecutiveFailures(numFailures, markDeadForStream)
+
+      override def toString: String = s"FailureAccrualPolicy.consecutiveFailures(" +
+        s"numFailures: $numFailures, markDeadFor: $markDeadForStream)"
+    }
+  }
+
   /**
    * Configures the [[FailureAccrualFactory]].
    *
@@ -82,8 +104,7 @@ object FailureAccrualFactory {
    *      for more details.
    */
   def Param(numFailures: Int, markDeadFor: () => Duration): Param =
-    Param.Configured(() => FailureAccrualPolicy.consecutiveFailures(
-      numFailures, Backoff.fromFunction(markDeadFor)))
+    Param.Configured(consecutiveFailurePolicy(numFailures, markDeadFor))
 
   /**
    * Configures the [[FailureAccrualFactory]].
@@ -95,8 +116,7 @@ object FailureAccrualFactory {
    *      for more details.
    */
   def Param(numFailures: Int, markDeadFor: Duration): Param =
-    Param.Configured(() => FailureAccrualPolicy.consecutiveFailures(numFailures,
-      Backoff.const(markDeadFor)))
+    Param.Configured(consecutiveFailurePolicy(numFailures, () => markDeadFor))
 
   /**
    * Configures the [[FailureAccrualFactory]].
