@@ -1,7 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.context.{Deadline, Contexts}
+import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.util.Time
 import org.openjdk.jmh.annotations._
@@ -25,6 +25,9 @@ class TraceBenchmark extends StdBenchAnnotations {
   private[this] val clientId = ClientId("bench")
 
   private[this] val deadline = Deadline(Time.Top, Time.Top)
+
+  @Param(Array("3"))
+  var num = 3
 
   @Benchmark
   def contexts0(hole: Blackhole): Unit = {
@@ -57,5 +60,21 @@ class TraceBenchmark extends StdBenchAnnotations {
   @Benchmark
   def contexts5(hole: Blackhole): Unit =
     Trace.letTracer(NullTracer) { contexts4(hole) }
+
+
+  private[this] def traced(n: Int): Boolean =
+    if (n == 0) {
+      Trace.letId(traceId) {
+        Trace.isActivelyTracing
+      }
+    } else {
+      Trace.letTracer(ConsoleTracer) {
+        traced(n - 1)
+      }
+    }
+
+  @Benchmark
+  def isActivelyTracing: Boolean =
+    traced(num)
 
 }
