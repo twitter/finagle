@@ -223,6 +223,15 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 **time/<statusCategory>**
   A histogram on duration in milliseconds per HTTP status code category.
 
+Memcached
+---------
+
+.. _memcached_stats:
+
+These stats pertain to the Memcached protocol.
+
+.. include:: metrics/Memcached.rst
+
 Mux
 ---
 
