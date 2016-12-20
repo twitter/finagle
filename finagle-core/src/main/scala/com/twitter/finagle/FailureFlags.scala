@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.twitter.util.{Future, Throw, Try}
+
 /**
  * `FailureFlags` may be applied to any Failure/Exception encountered during the
  * handling of a request.
@@ -70,6 +72,18 @@ object FailureFlags {
     if ((flags & Naming) > 0)       names += "naming"
     if ((flags & NonRetryable) > 0) names += "nonretryable"
     names
+  }
+
+  /**
+   * A function for transforming unsuccessful responses into ones that are
+   * flagged as NonRetryable
+   */
+  private[finagle] def asNonRetryable[Rep](t: Try[Rep]): Future[Rep] = {
+    t match {
+      case Throw(f: FailureFlags[_]) => Future.exception(f.asNonRetryable)
+      case Throw(exn) => Future.exception(Failure(exn, FailureFlags.NonRetryable))
+      case _ => Future.const(t)
+    }
   }
 }
 

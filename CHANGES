@@ -61,6 +61,10 @@ Runtime Behavior Changes
     log level by walking the exception's causes to find `c.t.util.TimeoutExceptions`
     and `c.t.logging.HasLogLevel`. ``RB_ID=896695``
 
+  * finagle-core: The `c.t.f.service.Retries` module will now flag a response as
+    `NonRetryable` if either the retry limit is reached or the retry budget is exhausted.
+    ``RB_ID=897800``
+
   * finagle-mdns: Uses only one implementation backed by jmdns instead of trying
     to use a platform specific implementation of DDNS if present. ``RB_ID=897917``
 

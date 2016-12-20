@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.context
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{ServiceFactory, FailedFastException, Service}
+import com.twitter.finagle.{ServiceFactory, FailedFastException, FailureFlags, Service}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
 import org.junit.runner.RunWith
@@ -28,10 +28,11 @@ class RequeueFilterTest extends FunSuite {
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
-    intercept[FailedFastException] {
+    val exn = intercept[FailedFastException] {
       Await.result(svc(new FailedFastException("lolll")), 5.seconds)
     }
 
+    assert(exn.isFlagged(FailureFlags.NonRetryable))
     assert(minRetries * percentRequeues == stats.counter("requeues")())
     assert(Seq(minRetries * percentRequeues) == stats.stat("requeues_per_request")())
     // the budget is not considered exhausted if we only used
@@ -56,10 +57,11 @@ class RequeueFilterTest extends FunSuite {
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
-    intercept[FailedFastException] {
+    val exn = intercept[FailedFastException] {
       Await.result(svc(new FailedFastException("lolll")), 5.seconds)
     }
 
+    assert(exn.isFlagged(FailureFlags.NonRetryable))
     assert(minRetries == stats.counter("requeues")())
     assert(Seq(minRetries) == stats.stat("requeues_per_request")())
     assert(1 == stats.counter("budget_exhausted")())

@@ -155,7 +155,7 @@ class RetriesTest extends FunSuite {
     val svc: Service[Exception, Int] =
       Await.result(svcFactory(), 5.seconds)
 
-    intercept[MyRetryEx] {
+    intercept[Failure] {
       Await.result(svc(new MyRetryEx()), 5.seconds)
     }
 
@@ -249,19 +249,16 @@ class RetriesTest extends FunSuite {
     val numReqs = 100
     Time.withCurrentTimeFrozen { _ =>
       0.until(numReqs).foreach { _ =>
-        intercept[MyRetryEx] {
+        intercept[Failure] {
           Await.result(svc(new MyRetryEx()), 5.seconds)
         }
       }
 
-      // verify each layer only sees 20% more
-      assert((numReqs * 0.2).toInt ==
-        nRetries(stats.stats(Seq("front", "retries"))))
-      assert((numReqs * (0.2 * 1.2)).toInt ==
-        nRetries(stats.stats(Seq("mid", "retries"))))
-      // numReqs + front's retries + mid's retries
-      // which is a 1.44x multiplier
-      assert((numReqs * 1.44).toInt == backReqs.get)
+      // Verify that the NonRetryable flag is respected and only one layer here
+      // retries requests. Behavior should be the same as only having one filter.
+      assert(0 == nRetries(stats.stats(Seq("front", "retries"))))
+      assert((numReqs * 0.2).toInt == nRetries(stats.stats(Seq("mid", "retries"))))
+      assert((numReqs * 1.2).toInt == backReqs.get)
     }
   }
 

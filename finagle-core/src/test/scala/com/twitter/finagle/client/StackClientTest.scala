@@ -415,7 +415,7 @@ class StackClientTest extends FunSuite
         param.Stats(sr) +
         BindingFactory.BaseDtab(() => baseDtab)))
 
-    intercept[ChannelWriteException] {
+    intercept[Failure] {
       Await.result(service(()), 5.seconds)
     }
 

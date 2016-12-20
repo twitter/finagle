@@ -90,14 +90,14 @@ private[finagle] class RequeueFilter[Req, Rep](
               case _ =>
                 // Schedule has run out of entries. Budget is empty.
                 budgetExhaustCounter.incr()
-                responseFuture(attempt, t)
+                responseFuture(attempt, t).transform(FailureFlags.asNonRetryable)
             }
           } else {
             if (retriesRemaining > 0)
               budgetExhaustCounter.incr()
             else
               requestLimitCounter.incr()
-            responseFuture(attempt, t)
+            responseFuture(attempt, t).transform(FailureFlags.asNonRetryable)
           }
         case t =>
           responseFuture(attempt, t)

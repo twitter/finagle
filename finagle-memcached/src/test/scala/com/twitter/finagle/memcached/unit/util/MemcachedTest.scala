@@ -10,7 +10,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
-import com.twitter.finagle.WriteException
+import com.twitter.finagle.Failure
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
@@ -63,7 +63,7 @@ class MemcachedTest extends FunSuite
     val numberRequests = 10
     Time.withCurrentTimeFrozen { _ =>
       for (i <- 0 until numberRequests)
-        intercept[WriteException](Await.result(client.get("foo"), 3.seconds))
+        intercept[Failure](Await.result(client.get("foo"), 3.seconds))
       // Since FactoryToService is enabled, number of requeues should be
       // limited by leaky bucket until it exhausts retries, instead of
       // retrying 25 times on service acquisition.
