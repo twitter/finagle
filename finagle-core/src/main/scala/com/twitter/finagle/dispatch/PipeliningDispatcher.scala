@@ -45,7 +45,7 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
   private[this] val transRead: Promise[Rep] => Unit =
     p =>
       trans.read().respond { res =>
-        try p.update(res)
+        try p.updateIfEmpty(res)
         finally loop()
       }
 
