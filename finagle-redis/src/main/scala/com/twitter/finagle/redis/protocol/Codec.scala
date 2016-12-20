@@ -3,13 +3,8 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.util.StringToChannelBuffer
 import com.twitter.io.Buf
 import org.jboss.netty.buffer.ChannelBuffers
-import scala.collection.immutable.WrappedString
 
 private[redis] object RedisCodec {
-  object NilValue extends WrappedString("nil") {
-    def getBytes(charset: String = "UTF_8") = Array[Byte]()
-    def getBytes = Array[Byte]()
-  }
 
   val STATUS_REPLY        = '+'
   val ERROR_REPLY         = '-'
@@ -23,7 +18,7 @@ private[redis] object RedisCodec {
   val TOKEN_DELIMITER     = ' '
   val EOL_DELIMITER       = "\r\n"
 
-  val NIL_VALUE           = NilValue
+  val NIL_VALUE           = "nil"
   val NIL_VALUE_BA        = ChannelBuffers.EMPTY_BUFFER
 
 

@@ -193,7 +193,8 @@ class Zk2Resolver(
         // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
-        val reg = (discoverer.health.changes joinLast states).register(Witness { tuple =>
+        val reg = (discoverer.health.changes joinLast states)
+            .register(Witness { tuple: (ServiceDiscoverer.ClientHealth, Zk2Resolver.State) =>
           val (clientHealth, state) = tuple
 
           if (chatty()) {

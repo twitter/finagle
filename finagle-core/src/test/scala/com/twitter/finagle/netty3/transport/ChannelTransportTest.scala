@@ -106,7 +106,9 @@ class ChannelTransportTest
 
     sendUpstream({
       val e = mock[ChannelStateEvent]
-      when(e.getState).thenReturn(ChannelState.CONNECTED)
+
+      // TODO: Workaround for 2.12 bug; this should be ChannelState.CONNECTED
+      when(e.getState).thenReturn(ChannelState.valueOf("CONNECTED"))
       when(e.getValue).thenReturn(java.lang.Boolean.TRUE)
       e
     })

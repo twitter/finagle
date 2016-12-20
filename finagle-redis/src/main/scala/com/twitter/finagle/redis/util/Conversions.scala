@@ -131,7 +131,7 @@ object ReplyFormat {
     }
   }
 
-  private val EmptyBulkReplyString: List[String] = List(RedisCodec.NIL_VALUE.toString)
+  private val EmptyBulkReplyString: List[String] = List(RedisCodec.NIL_VALUE)
   private val EmptyMBulkReplyString: List[String] = List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
   private val EmptyBulkReplyChannelBuffer: List[Buf] = List(RedisCodec.NIL_VALUE_BUF)
 }

@@ -8,9 +8,9 @@ import org.scalatest.junit.JUnitRunner
 class WriteOnceTest extends FunSuite {
 
   test("write does not allow null") {
-    val wo = new WriteOnce[Int](1234)
+    val wo = new WriteOnce[String]("hello")
     intercept[IllegalArgumentException] {
-      wo.write(null.asInstanceOf[Int])
+      wo.write(null)
     }
   }
 

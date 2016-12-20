@@ -7,7 +7,7 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
 import sbtunidoc.Plugin.UnidocKeys._
 import sbtunidoc.Plugin.{ScalaUnidoc, unidocSettings}
-import scoverage.ScoverageSbtPlugin
+import scoverage.ScoverageKeys
 
 object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
@@ -57,15 +57,16 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.12.1",
+    crossScalaVersions := Seq("2.11.8", "2.12.1"),
     libraryDependencies ++= Seq(
-      "org.scalacheck" %% "scalacheck" % "1.13.1" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
 
-    ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
+    ScoverageKeys.coverageHighlighting := true,
     ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
@@ -516,15 +517,39 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       guavaLib,
-      "com.twitter" %% "bijection-core" % "0.9.2",
+      "com.twitter" %% "bijection-core" % "0.9.4",
       "com.twitter.common" % "io-json" % "0.0.54",
       "com.twitter.common" % "zookeeper-testing" % "0.0.56" % "test" excludeAll(
+        // These exclusions are necessary because zookeeper-testing has an explicit
+        // dependency on scala 2.11 and some 2.11 scala libraries
         ExclusionRule("com.google.testing", "test-libraries-for-java"),
         ExclusionRule("com.twitter", "finagle-core-java"),
         ExclusionRule("com.twitter", "finagle-core_2.11"),
+        ExclusionRule("com.twitter", "finagle-core_2.12"),
+        ExclusionRule("com.twitter", "finagle-http_2.11"),
+        ExclusionRule("com.twitter", "finagle-http_2.12"),
         ExclusionRule("com.twitter", "finagle-http-java"),
+        ExclusionRule("com.twitter", "finagle-stats_2.11"),
+        ExclusionRule("com.twitter", "finagle-stats_2.12"),
+        ExclusionRule("com.twitter", "finagle-toggle_2.11"),
+        ExclusionRule("com.twitter", "finagle-toggle_2.12"),
+        ExclusionRule("com.twitter", "util-app_2.11"),
+        ExclusionRule("com.twitter", "util-app_2.12"),
+        ExclusionRule("com.twitter", "util-codec_2.11"),
+        ExclusionRule("com.twitter", "util-codec_2.12"),
+        ExclusionRule("com.twitter", "util-collection_2.11"),
+        ExclusionRule("com.twitter", "util-collection_2.12"),
         ExclusionRule("com.twitter", "util-core-java"),
         ExclusionRule("com.twitter", "util-core_2.11"),
+        ExclusionRule("com.twitter", "util-core_2.12"),
+        ExclusionRule("com.twitter", "util-lint_2.11"),
+        ExclusionRule("com.twitter", "util-list_2.12"),
+        ExclusionRule("com.twitter", "util-logging_2.11"),
+        ExclusionRule("com.twitter", "util-logging_2.12"),
+        ExclusionRule("com.twitter", "util-registry_2.11"),
+        ExclusionRule("com.twitter", "util-registry_2.12"),
+        ExclusionRule("com.twitter", "util-stats_2.11"),
+        ExclusionRule("com.twitter", "util-stats_2.12"),
         ExclusionRule("com.twitter", "twitter-server_2.11"),
         ExclusionRule("com.twitter.common", "metrics"),
         ExclusionRule("com.twitter.common", "service-thrift"),
@@ -532,12 +557,22 @@ object Finagle extends Build {
         ExclusionRule("org.apache.zookeeper", "zookeeper"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
         ExclusionRule("org.apache.zookeeper", "zookeeper-server"),
-        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
+        ExclusionRule("com.fasterxml.jackson.module", "jackson-module-scala_2.11"),
+        ExclusionRule("com.fasterxml.jackson.module", "jackson-module-scala_2.12"),
+        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11"),
+        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.12"),
+        ExclusionRule("org.scala-lang.modules", "scala-xml_2.11"),
+        ExclusionRule("org.scala-lang.modules", "scala-xml_2.12")
       ),
       "com.twitter" % "libthrift" % libthriftVersion
     ),
     libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleNetty4, finagleServersets, finagleToggle)
+  ).dependsOn(
+  finagleCore,
+  finagleNetty4,
+  finagleServersets,
+  finagleStats,
+  finagleToggle)
 
   lazy val finagleKestrel = Project(
     id = "finagle-kestrel",
@@ -554,7 +589,7 @@ object Finagle extends Build {
     finagleThrift,
     finagleThriftMux,
     finagleToggle)
-
+  
   lazy val finagleRedis = Project(
     id = "finagle-redis",
     base = file("finagle-redis"),

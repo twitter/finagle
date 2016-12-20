@@ -729,7 +729,7 @@ public class B {
       return true;
     }
 
-    private class add implements ProcessFunction {
+    private class add implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         add_args args = new add_args();
@@ -768,7 +768,7 @@ public class B {
 
     }
 
-    private class add_one implements ProcessFunction {
+    private class add_one implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         add_one_args args = new add_one_args();
@@ -806,7 +806,7 @@ public class B {
 
     }
 
-    private class complex_return implements ProcessFunction {
+    private class complex_return implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         complex_return_args args = new complex_return_args();
@@ -832,7 +832,7 @@ public class B {
 
     }
 
-    private class someway implements ProcessFunction {
+    private class someway implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         someway_args args = new someway_args();
@@ -853,7 +853,7 @@ public class B {
       }
     }
 
-    private class show_me_your_dtab implements ProcessFunction {
+    private class show_me_your_dtab implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         show_me_your_dtab_args args = new show_me_your_dtab_args();
@@ -879,7 +879,7 @@ public class B {
 
     }
 
-    private class show_me_your_dtab_size implements ProcessFunction {
+    private class show_me_your_dtab_size implements A.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         show_me_your_dtab_size_args args = new show_me_your_dtab_size_args();
