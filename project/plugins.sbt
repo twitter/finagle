@@ -1,7 +1,7 @@
 resolvers += Classpaths.sbtPluginReleases
 
 val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
-val scroogeSbtPluginVersionPrefix = "4.12.0"
+val scroogeSbtPluginVersionPrefix = "4.13.0"
 val scroogeSbtPluginVersion =
   if (branch == "master") scroogeSbtPluginVersionPrefix
   else scroogeSbtPluginVersionPrefix + "-SNAPSHOT"

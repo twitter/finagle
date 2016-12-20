@@ -4,4 +4,4 @@ version := "1.0"
 
 scalaVersion := "2.11.8"
 
-libraryDependencies += "com.twitter" %% "finagle-http" % "6.40.0"
+libraryDependencies += "com.twitter" %% "finagle-http" % "6.41.0"
