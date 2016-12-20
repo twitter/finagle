@@ -115,15 +115,6 @@ object StackClient {
     stk.push(TimeoutFilter.clientModule)
 
     /**
-     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
-     * downstream addr/client id, and trace id) in exceptions. This needs to be near the top
-     * of the stack so that failures anywhere lower in the stack have remote
-     * info added to them, but below the stats, tracing, and monitor filters so these filters
-     * see exceptions with remote info added.
-     */
-    stk.push(ExceptionRemoteInfoFactory.module)
-
-    /**
      * `FailureAccrualFactory` accrues request failures per endpoint updating its
      * status so that modules higher in the stack may route around an unhealthy
      * endpoint.
@@ -135,6 +126,15 @@ object StackClient {
      * admission rejections.
      */
     stk.push(FailureAccrualFactory.module)
+
+    /**
+     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
+     * downstream addr/client id, and trace id) in exceptions. This needs to be near the top
+     * of the stack so that failures anywhere lower in the stack have remote
+     * info added to them, but below the stats, tracing, and monitor filters so these filters
+     * see exceptions with remote info added.
+     */
+    stk.push(ExceptionRemoteInfoFactory.module)
 
     /**
      * `StatsServiceFactory` exports a gauge which reports the status of the stack

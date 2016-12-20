@@ -393,4 +393,28 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     assert(sr.counters(Seq("test_client", "loadbalancer", "adds")) == NumConnections * 5)
     assert(sr.counters(Seq("test_client", "loadbalancer", "removes")) == NumConnections)
   }
+
+  test("FailureAccrualFactoryException has remote address") {
+
+    val client = Memcached.client
+      .withLoadBalancer.connectionsPerEndpoint(1)
+      // 1 failure triggers FA; make sure FA stays in "dead" state after failure
+      .configured(FailureAccrualFactory.Param(1, 10.minutes))
+      .withEjectFailedHost(false)
+      .newTwemcacheClient(Name.bound(Address("localhost", 1234)), "client")
+
+    // Trigger transition to "Dead" state
+    intercept[Exception] {
+      Await.result(client.delete("foo"), 1.second)
+    }
+
+    // Client has not been ejected, so the same client gets a re-application of the connection,
+    // triggering the 'failureAccrualEx' in KetamaFailureAccrualFactory
+    val failureAccrualEx = intercept[HasRemoteInfo] {
+      Await.result(client.delete("foo"), 1.second)
+    }
+
+    assert(failureAccrualEx.getMessage.contains("Endpoint is marked dead by failureAccrual"))
+    assert(failureAccrualEx.getMessage.contains("Downstream Address: localhost/127.0.0.1:1234"))
+  }
 }
