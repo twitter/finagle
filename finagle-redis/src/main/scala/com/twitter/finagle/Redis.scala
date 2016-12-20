@@ -11,7 +11,6 @@ import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 
 trait RedisRichClient { self: Client[Command, Reply] =>
@@ -63,15 +62,15 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Buf
+    protected type In = Command
     protected type Out = Reply
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty3Transporter(redis.protocol.Netty3.Framer, params)
+      Netty3Transporter(redis.protocol.Netty3.Codec, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(
-        transport.map(Command.encode, identity),
+        transport,
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 

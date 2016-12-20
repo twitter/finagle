@@ -20,6 +20,11 @@ abstract class Command {
 
 object Command {
 
+  // Common constants
+  val EOL               = Buf.Utf8("\r\n")
+  val ARG_COUNT         = Buf.Utf8("*")
+  val ARG_SIZE          = Buf.Utf8("$")
+
   // BTreeSorterSets
   val BADD              = Buf.Utf8("BADD")
   val BCARD             = Buf.Utf8("BCARD")
@@ -182,23 +187,14 @@ object Command {
   /**
    * Encodes a given [[Command]] as [[Buf]].
    */
-  def encode(c: Command): Buf = {
+  private[redis] def encode(c: Command): Buf = {
     val args = c.name +: c.body
 
     val header: Vector[Buf] = Vector(
-      RedisCodec.ARG_COUNT_MARKER_BUF,
-      Buf.Utf8(args.length.toString),
-      RedisCodec.EOL_DELIMITER_BUF
-    )
+      ARG_COUNT, Buf.Utf8(args.length.toString), EOL)
 
     val bufs = args.flatMap { arg =>
-      Vector(
-        RedisCodec.ARG_SIZE_MARKER_BUF,
-        Buf.Utf8(arg.length.toString),
-        RedisCodec.EOL_DELIMITER_BUF,
-        arg,
-        RedisCodec.EOL_DELIMITER_BUF
-      )
+      Vector(ARG_SIZE, Buf.Utf8(arg.length.toString), EOL, arg, EOL)
     }
 
     ConcatBuf(header ++ bufs)

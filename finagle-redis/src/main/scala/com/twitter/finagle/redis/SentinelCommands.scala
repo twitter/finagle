@@ -76,7 +76,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
         ReplyFormat.toBuf(messages) match {
           case host :: port :: Nil =>
             Some(InetSocketAddress.createUnresolved(
-              BufToString(host), NumberFormat.toInt(BufToString(port))))
+              BufToString(host), BufToString(port).toInt))
         })
     }
 

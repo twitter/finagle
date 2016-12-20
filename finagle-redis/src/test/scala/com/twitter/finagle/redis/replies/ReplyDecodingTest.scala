@@ -10,7 +10,7 @@ import org.scalatest.junit.JUnitRunner
 class ReplyDecodingTest extends RedisResponseTest {
 
   test("string") {
-    forAll { s: StatusReply => assert(encodeAndDecode(s).contains(s)) }
+    forAll(genChunkedReply[StatusReply])(testDecodingInChunks)
   }
 
   test("string (empty)") {
@@ -18,7 +18,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("error") {
-    forAll { e: ErrorReply => assert(encodeAndDecode(e).contains(e)) }
+    forAll(genChunkedReply[ErrorReply])(testDecodingInChunks)
   }
 
   test("error (empty)") {
@@ -26,7 +26,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("integer") {
-    forAll { i: IntegerReply => assert(encodeAndDecode(i).contains(i)) }
+    forAll(genChunkedReply[IntegerReply])(testDecodingInChunks)
   }
 
   test("integer (too small)") {
@@ -38,7 +38,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("bulk") {
-    forAll { b: BulkReply => assert(encodeAndDecode(b).contains(b)) }
+    forAll(genChunkedReply[BulkReply])(testDecodingInChunks)
   }
 
   test("bulk (empty)") {
@@ -50,7 +50,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("array") {
-    forAll { mb: MBulkReply => assert(encodeAndDecode(mb).contains(mb)) }
+    forAll(genChunkedReply[MBulkReply])(testDecodingInChunks)
   }
 
   test("array (empty)") {

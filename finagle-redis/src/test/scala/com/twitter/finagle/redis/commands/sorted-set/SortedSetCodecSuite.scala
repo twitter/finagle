@@ -49,7 +49,6 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (d, keys) =>
       assert(encode(ZInterStore(d, keys)) ==
         Seq("ZINTERSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
-
       assert(encode(ZUnionStore(d, keys)) ==
         Seq("ZUNIONSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
     }

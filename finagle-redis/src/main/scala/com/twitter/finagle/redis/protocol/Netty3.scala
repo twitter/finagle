@@ -1,38 +1,44 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.redis.naggati.{Codec => NaggatiCodec}
+import com.twitter.finagle.netty3.codec.BufCodec
 import com.twitter.io.Buf
-import org.jboss.netty.channel.ChannelHandler.Sharable
 import org.jboss.netty.channel._
-
 
 private[finagle] object Netty3 {
 
-  /**
-   * This is almost a copy of `BufCodec` except for it does pass-through inbound
-   * messages w/o conversion.
-   *
-   * We can replace it with `BufCodec` once we're able to decode from `Buf`s.
-   */
-  @Sharable
-  private[this] object RedisBufCodec extends SimpleChannelHandler {
+  private[this] class RedisCodec extends SimpleChannelHandler {
+
+    private[this] val decoder = new StageDecoder(Reply.decode)
+
     override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
+        e.getMessage match {
+          case c: Command =>
+            Channels.write(ctx, e.getFuture, Command.encode(c))
+          case other =>
+            e.getFuture.setFailure(Failure(
+              s"unexpected type ${other.getClass.getSimpleName} when encoding Command"))
+        }
+
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
       e.getMessage match {
-        case b: Buf => Channels.write(ctx, e.getFuture, BufChannelBuffer(b))
-        case typ => e.getFuture.setFailure(Failure(
-          s"unexpected type ${typ.getClass.getSimpleName} when encoding to ChannelBuffer"))
+        case b: Buf =>
+          var reply = decoder.absorb(b)
+          while (reply != null) {
+            Channels.fireMessageReceived(ctx, reply)
+            reply = decoder.absorb(Buf.Empty)
+          }
+        case other => Channels.fireExceptionCaught(ctx, Failure(
+          s"unexpected type ${other.getClass.getSimpleName} when decoding Reply"))
       }
   }
 
-  val Framer: ChannelPipelineFactory = new ChannelPipelineFactory {
+  val Codec: ChannelPipelineFactory = new ChannelPipelineFactory {
     override def getPipeline: ChannelPipeline =  {
       val pipeline = Channels.pipeline()
-      val replyCodec = new ReplyCodec
 
-      pipeline.addLast("buf codec", RedisBufCodec)
-      pipeline.addLast("redis codec", new NaggatiCodec(replyCodec.decode, NaggatiCodec.NONE))
+      pipeline.addLast("bufCodec", new BufCodec)
+      pipeline.addLast("redisCodec", new RedisCodec)
 
       pipeline
     }

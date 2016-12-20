@@ -197,7 +197,7 @@ object ZRangeResults {
   def apply(tuples: Seq[(Buf, Buf)]): ZRangeResults = {
     val arrays = tuples.unzip
     val doubles = arrays._2 map { score =>
-      NumberFormat.toDouble(BytesToString(Buf.ByteArray.Owned.extract(score)))
+      BytesToString(Buf.ByteArray.Owned.extract(score)).toDouble
     }
 
     ZRangeResults(arrays._1.toArray, doubles.toArray)
@@ -215,11 +215,11 @@ case class ZInterval(value: String) {
     case P_INF => P_INF
     case double => double.head match {
       case EXCLUSIVE => RequireClientProtocol.safe {
-        NumberFormat.toDouble(double.tail)
+        double.tail.toDouble
         double
       }
       case f => RequireClientProtocol.safe {
-        NumberFormat.toDouble(value)
+        value.toDouble
         double
       }
     }

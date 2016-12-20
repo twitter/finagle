@@ -4,12 +4,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis
-import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.redis.naggati.Codec
-import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalacheck.{Arbitrary, Gen}
@@ -92,14 +89,30 @@ trait MissingInstances {
 }
 
 trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
-  private[this] val replyCodec = new ReplyCodec
-  private[this] val (codec, _) = TestCodec(replyCodec.decode, Codec.NONE)
 
-  def encodeAndDecode(r: Reply): Option[Reply] =
-    codec(BufChannelBuffer(encode(r))).headOption.map(_.asInstanceOf[Reply])
+  private[this] def chunk(buf: Buf): Gen[Seq[Buf]] =
+    if (buf.isEmpty) Gen.const(Seq.empty[Buf])
+    else Gen.choose(1, buf.length).flatMap { n =>
+      val taken = math.min(buf.length, n)
+      val a = buf.slice(0, taken)
+      val b = buf.slice(taken, buf.length)
+
+      chunk(b).map(rest => a +: rest)
+    }
+
+  def genChunkedReply[R <: Reply](implicit a: Arbitrary[R]): Gen[(R, Seq[Buf])] =
+    a.arbitrary.flatMap(r => chunk(encode(r)).map(chunks => r -> chunks))
+
+  def testDecodingInChunks(replyAndChunks: (Reply, Seq[Buf])): Unit = replyAndChunks match {
+    case (expected, chunks) =>
+      val decoder = new StageDecoder(Reply.decode)
+      val actual = chunks.map(c => decoder.absorb(c)).dropWhile(_ == null).headOption
+
+      assert(actual.contains(expected))
+  }
 
   def decode(s: String): Option[Reply] =
-    codec(ChannelBuffers.wrappedBuffer(s.getBytes("UTF-8"))).headOption.map(_.asInstanceOf[Reply])
+    Option(new StageDecoder(Reply.decode).absorb(Buf.Utf8(s)))
 
   def encode(r: Reply): Buf = r match {
     case StatusReply(s) => Buf.Utf8("+").concat(Buf.Utf8(s)).concat(Eol)
@@ -117,7 +130,6 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
           .concat(Buf.Utf8(replies.size.toString))
           .concat(Eol)
       val body = replies.map(encode).reduce((a, b) => a.concat(b))
-
       header.concat(body)
     case _ => Buf.Empty
   }
