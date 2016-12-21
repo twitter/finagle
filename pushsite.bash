@@ -19,7 +19,7 @@ cd $dir
 git rm -fr .
 touch .nojekyll
 cp $savedir/site/index.html .
-cp -r $savedir/target/scala-2.11/unidoc/ docs
+cp -r $savedir/target/scala-2.12/unidoc/ docs
 cp -r $savedir/doc/target/site guide
 git add -f .
 git diff-index --quiet HEAD || (git commit -am"site push by $(whoami)"; git push origin gh-pages:gh-pages;)
