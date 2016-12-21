@@ -7,9 +7,10 @@ scala_library(
   dependencies=[
     'util/util-logging',
     '3rdparty/jvm/io/netty:netty',
-    'finagle/finagle-core/src/main/scala:scala',
-    'util/util-core/src/main/scala:scala',
-    'util/util-stats/src/main/scala:scala',
+    'finagle/finagle-core',
+    'finagle/finagle-netty4',
+    'util/util-core',
+    'util/util-stats',
   ],
   sources=rglobs('*.scala'),
 )

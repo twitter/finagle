@@ -3,8 +3,8 @@ package com.twitter.finagle
 import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.netty3.codec.BufCodec
+import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
@@ -14,7 +14,6 @@ import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
-import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory, Channels}
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -51,10 +50,6 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
      */
     def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
       .insertBefore(DefaultPool.Role, RedisPool.module)
-
-    private[finagle] val Netty3PipelineFactory = new ChannelPipelineFactory {
-      override def getPipeline: ChannelPipeline = Channels.pipeline(new BufCodec)
-    }
   }
 
   case class Client(
@@ -73,7 +68,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected type Out = Buf
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty3Transporter(Client.Netty3PipelineFactory, params)
+      Netty4Transporter(_.addLast(new BufCodec), params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(

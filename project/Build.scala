@@ -603,7 +603,7 @@ object Finagle extends Build {
     testOptions in Test := Seq(Tests.Filter {
       name => !name.startsWith("com.twitter.finagle.redis.integration")
     })
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleNetty4)
 
   lazy val finagleMux = Project(
     id = "finagle-mux",
