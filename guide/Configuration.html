@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
+    <title>Configuration &#8212; Finagle 6.41.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.40.0-SNAPSHOT',
+        VERSION:     '6.41.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -57,7 +59,7 @@
         <li class="right" >
           <a href="ServicesAndFilters.html" title="Services &amp; Filters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -70,15 +72,15 @@
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="clients-and-servers">
 <h2>Clients and Servers<a class="headerlink" href="#clients-and-servers" title="Permalink to this headline">¶</a></h2>
-<p>Prior to <a class="reference internal" href="changelog.html"><em>version 6.0</em></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
-primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span>client</span></a>
-or <a class="reference internal" href="Servers.html#finagle-servers"><span>server</span></a>. We are moving away from this model for various
-<a class="reference internal" href="FAQ.html#configuring-finagle6"><span>reasons</span></a>.</p>
+<p>Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
+primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
+or <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a>. We are moving away from this model for various
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">reasons</span></a>.</p>
 <p>The modern way of configuring Finagle clients or servers is to use the Finagle 6 API,
 which is generally available via the <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods. For example, the following
 code snippet creates a new HTTP client altered with two extra parameters: label and transport
 verbosity.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;my-http-client&quot;</span><span class="o">)</span>
@@ -91,8 +93,8 @@ verbosity.</p>
 <p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
 method and we encourage all the Finagle users to follow this pattern given that
 the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
-For help migrating, see <a class="reference internal" href="FAQ.html#configuring-finagle6"><span>the FAQ</span></a> as well as
-<a class="reference internal" href="Clients.html#finagle-clients"><span>client</span></a> and <a class="reference internal" href="Servers.html#finagle-servers"><span>server</span></a> configuration.</p>
+For help migrating, see <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">the FAQ</span></a> as well as
+<a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a> and <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a> configuration.</p>
 </div>
 <p>In addition to <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods that provide easy-to-use and safe-to-configure
 parameters of Finagle clients and servers, there is an expert-level <cite>Stack API</cite>.</p>
@@ -100,7 +102,7 @@ parameters of Finagle clients and servers, there is an expert-level <cite>Stack 
 that takes a stack param: a value of arbitrary type for which there is an implicit instance
 of <code class="docutils literal"><span class="pre">Stack.Param</span></code> type-class available in the scope. For example, the following code
 demonstrates how to use <code class="docutils literal"><span class="pre">.configured</span></code> to override TCP socket options provided by default.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.transport.Transport</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -163,8 +165,8 @@ Various basic implementations exist on the <cite>ToggleMap</cite> companion obje
 <p>If a <cite>Toggle</cite> is on the request path, it is recommended that it be stored in
 a member variable to avoid unnecessary overhead on the common path. If the <cite>Toggle</cite> is
 used only at startup this is unnecessary.</p>
-<p>Here is an example <a class="reference internal" href="ServicesAndFilters.html#filters"><span>Filter</span></a> which uses a <cite>Toggle</cite> on the request path:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">package</span> <span class="nn">com.example.service</span>
+<p>Here is an example <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filter</span></a> which uses a <cite>Toggle</cite> on the request path:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
 
 <span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
@@ -209,7 +211,7 @@ and can be wired in via a
 <p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>&#8216;s settings via
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
 using:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
 
 <span class="n">flag</span><span class="o">.</span><span class="n">overrides</span><span class="o">.</span><span class="n">let</span><span class="o">(</span><span class="s">&quot;your.toggle.id.here&quot;</span><span class="o">,</span> <span class="n">fractionToUse</span><span class="o">)</span> <span class="o">{</span>
   <span class="c1">// code that uses the flag in this block will have the</span>

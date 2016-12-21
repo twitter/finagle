@@ -104,6 +104,16 @@ These client stats help you keep track of connection churn.
 
 .. include:: metrics/Pooling.rst
 
+PendingRequestFilter
+--------------------
+
+.. _pending_request_filter:
+
+These stats represent information about the behavior of PendingRequestFilter.
+
+**pending_requests/rejected**
+  a counter of the number of requests that have been rejected by this filter.
+
 Retries
 -------
 

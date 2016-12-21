@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
+    <title>Metrics &#8212; Finagle 6.41.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.40.0-SNAPSHOT',
+        VERSION:     '6.41.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -57,7 +59,7 @@
         <li class="right" >
           <a href="Extending.html" title="Extending Finagle"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -126,10 +128,10 @@ failures include additional information on what service caused the failure.</dd>
 <h3>StatsFactoryWrapper<a class="headerlink" href="#statsfactorywrapper" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils" id="service-factory-failures">
 <dt><strong>failures/&lt;exception_class_name&gt;</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
 creation has failed with this specific exception.</dd>
 <dt><strong>failures</strong></dt>
-<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><em>Service</em></a>
+<dd>A counter of the number of times <a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Service</span></a>
 creation has failed.</dd>
 <dt><strong>service_acquisition_latency_ms</strong></dt>
 <dd>A stat of the latency, in milliseconds, to acquire a service.
@@ -411,7 +413,7 @@ reactivated after the penalty period has elapsed.</dd>
 <div class="section" id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
 <p id="idle-apoptosis-stats">These client stats keep track of how frequently
-<a class="reference internal" href="ServicesAndFilters.html"><em>Services</em></a> are closed due to prolonged idleness.</p>
+<a class="reference internal" href="ServicesAndFilters.html"><span class="doc">Services</span></a> are closed due to prolonged idleness.</p>
 <div class="section" id="expiringservice">
 <h3>ExpiringService<a class="headerlink" href="#expiringservice" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -472,6 +474,14 @@ must be retried.</dd>
 died and must be retried.</dd>
 </dl>
 </div>
+</div>
+<div class="section" id="pendingrequestfilter">
+<h2>PendingRequestFilter<a class="headerlink" href="#pendingrequestfilter" title="Permalink to this headline">¶</a></h2>
+<p id="pending-request-filter">These stats represent information about the behavior of PendingRequestFilter.</p>
+<dl class="docutils">
+<dt><strong>pending_requests/rejected</strong></dt>
+<dd>a counter of the number of requests that have been rejected by this filter.</dd>
+</dl>
 </div>
 <div class="section" id="retries">
 <h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
@@ -688,7 +698,7 @@ running on a given JVM.</dd>
 <p id="id4">These metrics track the state of name resolution and service discovery.</p>
 <div class="section" id="id5">
 <h3>Name Resolution<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<p>Finagle clients resolve <a class="reference internal" href="Names.html"><em>names</em></a> into sets of network
+<p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Dtab.scala">Dtabs</a>,
@@ -826,7 +836,7 @@ operations).</dd>
 </div>
 <div class="section" id="toggles">
 <h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
-<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span>feature toggles</span></a>.</p>
+<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span class="std std-ref">feature toggles</span></a>.</p>
 <dl class="docutils">
 <dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt>
 <dd>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
@@ -881,7 +891,7 @@ because the backing set of servers has changed.</dd>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
-<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span>Mux</span></a> protocol.</p>
+<p id="mux-stats">These stats pertain to the <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>A counter of the number of times the server has initiated session draining.</dd>
@@ -929,7 +939,7 @@ This includes exceptions in handshaking, thrift downgrading (for servers), etc.<
 </div>
 <div class="section" id="thriftmux">
 <h2>ThriftMux<a class="headerlink" href="#thriftmux" title="Permalink to this headline">¶</a></h2>
-<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span>ThriftMux</span></a> protocol.</p>
+<p id="thriftmux-stats">These stats pertain to the <a class="reference internal" href="FAQ.html#whats-thriftmux"><span class="std std-ref">ThriftMux</span></a> protocol.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/thriftmux/connects</strong></dt>
 <dd>A counter of the number of times the server has created a ThriftMux
@@ -1010,6 +1020,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 <li><a class="reference internal" href="#singletonpool">SingletonPool</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#pendingrequestfilter">PendingRequestFilter</a></li>
 <li><a class="reference internal" href="#retries">Retries</a></li>
 <li><a class="reference internal" href="#dispatching">Dispatching</a></li>
 <li><a class="reference internal" href="#admission-control">Admission Control</a><ul>

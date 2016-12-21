@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contexts &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
+    <title>Contexts &#8212; Finagle 6.41.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.40.0-SNAPSHOT',
+        VERSION:     '6.41.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Clients" href="Clients.html" />
    
@@ -57,7 +59,7 @@
         <li class="right" >
           <a href="Clients.html" title="Clients"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,7 +71,7 @@
   <div class="section" id="contexts">
 <h1>Contexts<a class="headerlink" href="#contexts" title="Permalink to this headline">¶</a></h1>
 <p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java&#8217;s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
-across <a class="reference internal" href="Futures.html"><em>asynchronous</em></a> code.
+across <a class="reference internal" href="Futures.html"><span class="doc">asynchronous</span></a> code.
 They give you access to request-scoped state, such as a request&#8217;s deadline,
 throughout the logical life of a request without requiring them to be explicitly passed.
 Finagle explicitly manages them for you across threads and execution
@@ -81,7 +83,7 @@ contexts may be marshalled and transmitted across process boundaries.</p>
 <p>Most <code class="docutils literal"><span class="pre">Context</span></code> usage is hidden behind other APIs, which means you may not
 realize you are using this functionality. This example shows how a <code class="docutils literal"><span class="pre">ClientId</span></code>
 is available within <code class="docutils literal"><span class="pre">Timer</span></code> functions:</p>
-<div class="highlight-scala"><div class="highlight"><pre>scala&gt; import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
+<div class="highlight-scala"><div class="highlight"><pre><span></span>scala&gt; import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
 import com.twitter.conversions.time._
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.util.HashedWheelTimer

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
+    <title>Servers &#8212; Finagle 6.41.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.40.0-SNAPSHOT',
+        VERSION:     '6.41.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -57,7 +59,7 @@
         <li class="right" >
           <a href="Configuration.html" title="Configuration"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,17 +71,17 @@
   <div class="section" id="servers">
 <span id="finagle-servers"></span><h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
 <p>Finagle servers implement a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Server.scala">interface:</a></p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">serve</span><span class="o">(</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">serve</span><span class="o">(</span>
   <span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">,</span>
   <span class="n">factory</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 <span class="o">)</span><span class="k">:</span> <span class="kt">ListeningServer</span>
 </pre></div>
 </div>
-<p>When given a <code class="docutils literal"><span class="pre">SocketAddress</span></code> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span>ServiceFactory</span></a>, a server returns a
+<p>When given a <code class="docutils literal"><span class="pre">SocketAddress</span></code> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>, a server returns a
 <code class="docutils literal"><span class="pre">ListeningServer</span></code>. The <code class="docutils literal"><span class="pre">ListeningServer</span></code> allows for management of server resources. The interface
 comes with variants that allow for serving a simple <code class="docutils literal"><span class="pre">Service</span></code> as well. Typical usage takes the form
 <code class="docutils literal"><span class="pre">Protocol.serve(...)</span></code>, for example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
@@ -95,16 +97,16 @@ comes with variants that allow for serving a simple <code class="docutils litera
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last"><cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
-via a Thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span>Thrift</span></a>
+via a Thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">Thrift</span></a>
 for more details.</p>
 </div>
 <div class="section" id="server-modules">
 <h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
-behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span>clients</span></a>.</p>
+behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">clients</span></a>.</p>
 <div class="figure" id="id5">
-<img src="_images/serverstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle server.
+<img alt="_images/serverstack.svg" src="_images/serverstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle server.
 Requests flow from left to right.</span></p>
 </div>
 <p>Many of the server modules act as <cite>admission controllers</cite> that make a decision (based on either a dynamic or
@@ -122,7 +124,7 @@ their servers. This includes <a class="reference external" href="https://github.
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/tracing/TraceInitializerFilter.scala">Tracing</a>,
 and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">Stats</a>.</p>
 <p>All the unhandled exceptions from a user-defined service flow through the <code class="docutils literal"><span class="pre">Monitor</span></code> object
-used by the given Finagle server. See <a class="reference internal" href="Clients.html#configuring-monitors"><span>this example</span></a> on how to
+used by the given Finagle server. See <a class="reference internal" href="Clients.html#configuring-monitors"><span class="std std-ref">this example</span></a> on how to
 override the default instance that simply logs exceptions onto a the standard output.</p>
 </div>
 </div>
@@ -132,15 +134,15 @@ override the default instance that simply logs exceptions onto a the standard ou
 developers can provide classification of responses on clients and servers by using
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/package.scala">response classifiers</a>.
 This gives Finagle the proper domain knowledge and improves the efficacy of
-<a class="reference internal" href="Clients.html#client-failure-accrual"><span>failure accrual</span></a> and more accurate
-<a class="reference internal" href="Metrics.html#metrics-stats-filter"><span>success rate stats</span></a>.</p>
+<a class="reference internal" href="Clients.html#client-failure-accrual"><span class="std std-ref">failure accrual</span></a> and more accurate
+<a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">success rate stats</span></a>.</p>
 <p>For HTTP clients and servers, using <code class="docutils literal"><span class="pre">HttpResponseClassifier.ServerErrorsAsFailures</span></code> often works
 great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
 clients you may want to use <code class="docutils literal"><span class="pre">ThriftResponseClassifier.ThriftExceptionsAsFailures</span></code>
 which classifies any deserialized Thrift Exception as a failure. For a large set of
 use cases these should suffice. Classifiers get wired up to your client and server in a
 straightforward manner, for example, in a ThriftMux client:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.ThriftMux</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.thrift.service.ThriftResponseClassifier</span>
 
 <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
@@ -149,7 +151,7 @@ straightforward manner, for example, in a ThriftMux client:</p>
 </pre></div>
 </div>
 <p>In an HTTP server:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.service.HttpResponseClassifier</span>
 
 <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
@@ -177,7 +179,7 @@ request and response.</p>
 <p>Creating a custom <code class="docutils literal"><span class="pre">ResponseClassifier</span></code> is fairly straightforward for HTTP
 as the <code class="docutils literal"><span class="pre">ReqRep</span></code> is an <code class="docutils literal"><span class="pre">http.Request</span></code> and <code class="docutils literal"><span class="pre">Try[http.Response]</span></code> pair.
 Here is an example that counts HTTP 503s as failures:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
 
@@ -198,7 +200,7 @@ IDL&#8217;s service. To make this workable, there is support in Scrooge and
 deserialize the responses into the expected application types so that
 classifiers can be written in terms of the Scrooge generated request type,
 <code class="docutils literal"><span class="pre">$Service.$Method.Args</span></code>, and the method&#8217;s response type. Given an IDL:</p>
-<div class="highlight-none"><div class="highlight"><pre>exception NotFoundException { 1: string reason }
+<div class="highlight-none"><div class="highlight"><pre><span></span>exception NotFoundException { 1: string reason }
 
 service SocialGraph {
   i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
@@ -206,7 +208,7 @@ service SocialGraph {
 </pre></div>
 </div>
 <p>One possible classifier would be:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">,</span> <span class="nc">ResponseClassifier</span><span class="o">}</span>
 
 <span class="k">val</span> <span class="n">classifier</span><span class="k">:</span> <span class="kt">ResponseClassifier</span> <span class="o">=</span> <span class="o">{</span>
   <span class="c1">// #1</span>
@@ -242,7 +244,7 @@ the <cite>concurrency</cite> of the Finagle server.</p>
 <p>By default, this module is disabled, which means a Finagle server&#8217;s requests concurrency is unbounded.
 To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
 that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id1">[2]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
   <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">concurrencyLimit</span><span class="o">(</span>
@@ -260,7 +262,7 @@ that might be handled concurrently by your server, use the following example <a 
 <p>All the incoming requests on top of <code class="docutils literal"><span class="pre">(maxConcurrentRequests</span> <span class="pre">+</span> <span class="pre">maxWaiters)</span></code> will be
 <cite>rejected</cite> <a class="footnote-reference" href="#nack" id="id2">[1]</a> by the server. That said, the <cite>Concurrency Limit</cite> module acts as
 <cite>static admission controller</cite> monitoring the current concurrency level of the incoming requests.</p>
-<p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><span>Requests Concurrency metrics</span></a> for more details.</p>
+<p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><span class="std std-ref">Requests Concurrency metrics</span></a> for more details.</p>
 </div>
 <div class="section" id="rejecting-requests">
 <h3>Rejecting Requests<a class="headerlink" href="#rejecting-requests" title="Permalink to this headline">¶</a></h3>
@@ -272,7 +274,7 @@ also sets the <cite>Restartable</cite> flag which indicates the failure is safe 
 failures.
 For requests that should not be retried, the server should return a <cite>Failure</cite> with the <cite>NonRetryable</cite>
 flag set.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
 
 <span class="k">val</span> <span class="n">rejection</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">.</span><span class="n">rejected</span><span class="o">(</span><span class="s">&quot;busy&quot;</span><span class="o">))</span>
 <span class="k">val</span> <span class="n">nonRetryable</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">(</span><span class="s">&quot;Don&#39;t try again&quot;</span><span class="o">,</span> <span class="nc">Failure</span><span class="o">.</span><span class="nc">Rejected</span><span class="o">|</span><span class="nc">Failure</span><span class="o">.</span><span class="nc">NonRetryable</span><span class="o">))</span>
@@ -286,7 +288,7 @@ flag set.</p>
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> and simply <cite>fails</cite> all the
 requests that a given server hasn&#8217;t be able to handle in the given amount of time. As well as for
 Finagle clients, this module is disabled by default (the timeout is unbounded). See
-<a class="reference internal" href="Clients.html#configuring-timeouts"><span>this example</span></a> to override this behaviour.</p>
+<a class="reference internal" href="Clients.html#configuring-timeouts"><span class="std std-ref">this example</span></a> to override this behaviour.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The <cite>Request Timeout</cite> module doesn&#8217;t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
@@ -302,7 +304,7 @@ processed.</p>
 (currently supported in HTTP/1.1 and Mux) message. A <cite>NACK</cite> means that the server did not attempt
 to perform any work associated with the request and therefore is typically safe to retry. However,
 Finagle also supports <cite>NACK</cite> messages that are explicitly non-retryable. See the Retries section of
-<a class="reference internal" href="Clients.html"><em>Clients</em></a></td></tr>
+<a class="reference internal" href="Clients.html"><span class="doc">Clients</span></a></td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="example" rules="none">
@@ -322,7 +324,7 @@ and expires a service/session after a certain amount of idle time. The module is
 implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p>The default setting for the <cite>Expiration</cite> module is to never expire a session. Here is how
 it can be configured <a class="footnote-reference" href="#example" id="id4">[2]</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
@@ -337,7 +339,7 @@ it can be configured <a class="footnote-reference" href="#example" id="id4">[2]<
 <li><cite>maxIdleTime</cite> - the maximum duration for which a session is allowed to idle
 (not sending any requests)</li>
 </ol>
-<p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span>Expiration metrics</span></a> for more details.</p>
+<p>See <a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><span class="std std-ref">Expiration metrics</span></a> for more details.</p>
 </div>
 </div>
 </div>

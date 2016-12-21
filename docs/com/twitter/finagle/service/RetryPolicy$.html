@@ -1,44 +1,445 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>RetryPolicy - com.twitter.finagle.service.RetryPolicy</title>
-          <meta name="description" content="RetryPolicy - com.twitter.finagle.service.RetryPolicy" />
-          <meta name="keywords" content="RetryPolicy com.twitter.finagle.service.RetryPolicy" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
+      <link href="../../../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
-      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
-      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../../../lib/index.js"></script>
+      <script type="text/javascript" src="../../../../index.js"></script>
+      <script type="text/javascript" src="../../../../lib/scheduler.js"></script>
       <script type="text/javascript" src="../../../../lib/template.js"></script>
       <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
       
       <script type="text/javascript">
-         if(top === self) {
-            var url = '../../../../index.html';
-            var hash = 'com.twitter.finagle.service.RetryPolicy$';
-            var anchor = window.location.hash;
-            var anchor_opt = '';
-            if (anchor.length >= 1)
-              anchor_opt = '@' + anchor.substring(1);
-            window.location.href = url + '#' + hash + anchor_opt;
-         }
-   	  </script>
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../../../';
+      </script>
     
         </head>
-        <body class="value">
-      <div id="definition">
-        <a href="RetryPolicy.html" title="See companion class"><img alt="Object/Class" src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.service">service</a></p>
-        <h1><a href="RetryPolicy.html" title="See companion class">RetryPolicy</a></h1><h3><span class="morelinks"><div>
-            Related Docs:
-            <a href="RetryPolicy.html" title="See companion class">class RetryPolicy</a>
-            | <a href="package.html" class="extype" name="com.twitter.finagle.service">package service</a>
-          </div></span></h3><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../../../index.html">
+              <span class="name">root</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.com" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="com"></a><a id="com:com"></a>
+      <span class="permalink">
+      <a href="index.html#com" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Start with com.twitter.finagle." href="../../../index.html">
+              <span class="name">com</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">Start with <a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Start with <a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="com.twitter" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="twitter"></a><a id="twitter:twitter"></a>
+      <span class="permalink">
+      <a href="../com/index.html#twitter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Start with com.twitter.finagle." href="../../index.html">
+              <span class="name">twitter</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">Start with <a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Start with <a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com">com</a></dd></dl></div>
+    </li><li name="com.twitter.finagle" visbl="pub" class="indented3 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finagle"></a><a id="finagle:finagle"></a>
+      <span class="permalink">
+      <a href="../../com/twitter/index.html#finagle" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Finagle is an extensible RPC system." href="../index.html">
+              <span class="name">finagle</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">Finagle is an extensible RPC system.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle is an extensible RPC system.</p><p>Services are represented by class <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Clients make use of
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> objects while servers implement them.</p><p>Finagle contains a number of protocol implementations; each of these implement
+<a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> and/or <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a>. For example, Finagle's
+HTTP implementation, <a href="../Http$.html" class="extype" name="com.twitter.finagle.Http">com.twitter.finagle.Http</a> (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> com.twitter.finagle.http.{Request, Response}
+<span class="kw">import</span> com.twitter.util.{Await, Future}
+
+<span class="kw">val</span> service = <span class="kw">new</span> Service[Request, Response] {
+  <span class="kw">def</span> apply(req: Request): Future[Response] =
+    Future.value(Response())
+}
+<span class="kw">val</span> server = Http.server.serve(<span class="lit">":8080"</span>, service)
+Await.ready(server)</pre><p>We first define a service to which requests are dispatched. In this case, the service returns
+immediately with a HTTP 200 OK response, and with no content.</p><p>This service is then served via the Http protocol on TCP port 8080. Finally we wait for the server
+to stop serving.</p><p>We can now query our web server:</p><pre>% curl -D - localhost:<span class="num">8080</span>
+HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Building an HTTP client is also simple. (Note that type annotations are added for illustration.)</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> com.twitter.finagle.http.{Request, Response}
+<span class="kw">import</span> com.twitter.util.{Future, Return, Throw}
+
+<span class="kw">val</span> client: Service[Request, Response] = Http.client.newService(<span class="lit">"localhost:8080"</span>)
+<span class="kw">val</span> f: Future[Response] = client(Request()).respond {
+  <span class="kw">case</span> Return(rep) <span class="kw">=&gt;</span>
+    printf(<span class="lit">"Got HTTP response %s\n"</span>, rep)
+  <span class="kw">case</span> Throw(exc) <span class="kw">=&gt;</span>
+    printf(<span class="lit">"Got error %s\n"</span>, exc)
+}</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
+connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
+returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+resources for using Finagle.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.service" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="service"></a><a id="service:service"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#service" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="index.html">
+              <span class="name">service</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exp"></a><a id="exp:exp"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/index.html#exp" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="exp/index.html">
+              <span class="name">exp</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.service">service</a></dd></dl></div>
+    </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Backoff$.html" title="Implements various backoff strategies."></a>
+                        <a href="Backoff$.html" title="Implements various backoff strategies.">
+                          Backoff
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="BackoffBenchmark$.html" title=""></a>
+                        <a class="class" href="BackoffBenchmark.html" title=""></a>
+                        <a href="BackoffBenchmark.html" title="">
+                          BackoffBenchmark
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result."></a>
+                        <a href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result.">
+                          ConstantService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="DeadlineFilter$.html" title="DeadlineFilter provides an admission control module that can be pushed onto the stack to
+reject requests with expired deadlines (deadlines are set in the TimeoutFilter)."></a>
+                        <a href="DeadlineFilter$.html" title="DeadlineFilter provides an admission control module that can be pushed onto the stack to
+reject requests with expired deadlines (deadlines are set in the TimeoutFilter).">
+                          DeadlineFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="DelayedFactory$.html" title=""></a>
+                        <a class="class" href="DelayedFactory.html" title="A factory that won't satisfy the service future until an underlying service factory
+is ready."></a>
+                        <a href="DelayedFactory.html" title="A factory that won't satisfy the service future until an underlying service factory
+is ready.">
+                          DelayedFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ExpiringService$.html" title=""></a>
+                        <a class="class" href="ExpiringService.html" title="A service wrapper that expires the self service after a
+certain amount of idle time."></a>
+                        <a href="ExpiringService.html" title="A service wrapper that expires the self service after a
+certain amount of idle time.">
+                          ExpiringService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="FailFastFactory$.html" title=""></a>
+                        <a href="FailFastFactory$.html" title="">
+                          FailFastFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FailedService.html" title="A com.twitter.finagle.Service that fails with a constant Throwable."></a>
+                        <a href="FailedService.html" title="A com.twitter.finagle.Service that fails with a constant Throwable.">
+                          FailedService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FailingFactory.html" title="A com.twitter.finagle.ServiceFactory that fails to construct services."></a>
+                        <a href="FailingFactory.html" title="A com.twitter.finagle.ServiceFactory that fails to construct services.">
+                          FailingFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="FailureAccrualFactory$.html" title=""></a>
+                        <a class="class" href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking
+itself unavailable when deemed unhealthy according to its configuration."></a>
+                        <a href="FailureAccrualFactory.html" title="A com.twitter.finagle.ServiceFactory that accrues failures, marking
+itself unavailable when deemed unhealthy according to its configuration.">
+                          FailureAccrualFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="KetamaShardingServiceBuilder.html" title=""></a>
+                        <a href="KetamaShardingServiceBuilder.html" title="">
+                          KetamaShardingServiceBuilder
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="LocalRateLimitingStrategy.html" title="Strategy responsible for tracking requests and computing rate per client."></a>
+                        <a href="LocalRateLimitingStrategy.html" title="Strategy responsible for tracking requests and computing rate per client.">
+                          LocalRateLimitingStrategy
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="NilService$.html" title="A static FailedService object."></a>
+                        <a href="NilService$.html" title="A static FailedService object.">
+                          NilService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="OptionallyServableFilter.html" title="A com.twitter.finagle.Filter that uses an argument function to predicate
+whether or not to apply the subsequent com.twitter.finagle.Service."></a>
+                        <a href="OptionallyServableFilter.html" title="A com.twitter.finagle.Filter that uses an argument function to predicate
+whether or not to apply the subsequent com.twitter.finagle.Service.">
+                          OptionallyServableFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="PendingRequestFilter$.html" title="A module which allows clients to limit the number of pending
+requests per connection."></a>
+                        <a href="PendingRequestFilter$.html" title="A module which allows clients to limit the number of pending
+requests per connection.">
+                          PendingRequestFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RateLimitingFilter.html" title="A com.twitter.finagle.Filter that accepts or refuses requests based on a
+rate limiting strategy."></a>
+                        <a href="RateLimitingFilter.html" title="A com.twitter.finagle.Filter that accepts or refuses requests based on a
+rate limiting strategy.">
+                          RateLimitingFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ReqRep.html" title="Represents a request/response pair."></a>
+                        <a href="ReqRep.html" title="Represents a request/response pair.">
+                          ReqRep
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ResponseClass$.html" title=""></a>
+                        <a class="trait" href="ResponseClass.html" title="A classification of the result of a request/response pair."></a>
+                        <a href="ResponseClass.html" title="A classification of the result of a request/response pair.">
+                          ResponseClass
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ResponseClasses.html" title="Java APIs for ResponseClass."></a>
+                        <a href="ResponseClasses.html" title="Java APIs for ResponseClass.">
+                          ResponseClasses
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ResponseClassificationSyntheticException.html" title="Used by response classification
+to indicate synthetic failures that are not Exceptions."></a>
+                        <a href="ResponseClassificationSyntheticException.html" title="Used by response classification
+to indicate synthetic failures that are not Exceptions.">
+                          ResponseClassificationSyntheticException
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ResponseClassifier$.html" title=""></a>
+                        <a href="ResponseClassifier$.html" title="">
+                          ResponseClassifier
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Retries$.html" title="The Stack parameters and modules for configuring
+which and how many failed requests are retried for
+a client."></a>
+                        <a href="Retries$.html" title="The Stack parameters and modules for configuring
+which and how many failed requests are retried for
+a client.">
+                          Retries
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="RetryBudget$.html" title="See RetryBudgets for Java APIs."></a>
+                        <a class="trait" href="RetryBudget.html" title="Represents a budget for retrying requests."></a>
+                        <a href="RetryBudget.html" title="Represents a budget for retrying requests.">
+                          RetryBudget
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RetryBudgets.html" title="Java APIs for RetryBudget."></a>
+                        <a href="RetryBudgets.html" title="Java APIs for RetryBudget.">
+                          RetryBudgets
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="RetryExceptionsFilter$.html" title=""></a>
+                        <a class="class" href="RetryExceptionsFilter.html" title="A com.twitter.finagle.Filter that coordinates retries of subsequent
+Services."></a>
+                        <a href="RetryExceptionsFilter.html" title="A com.twitter.finagle.Filter that coordinates retries of subsequent
+Services.">
+                          RetryExceptionsFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="RetryFilter$.html" title=""></a>
+                        <a class="class" href="RetryFilter.html" title="A com.twitter.finagle.Filter that coordinates retries of subsequent
+Services."></a>
+                        <a href="RetryFilter.html" title="A com.twitter.finagle.Filter that coordinates retries of subsequent
+Services.">
+                          RetryFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="" title=""></a>
+                        <a class="class" href="RetryPolicy.html" title="A function defining retry behavior for a given value type A."></a>
+                        <a href="RetryPolicy.html" title="A function defining retry behavior for a given value type A.">
+                          RetryPolicy
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="RetryingService$.html" title=""></a>
+                        <a href="RetryingService$.html" title="">
+                          RetryingService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service."></a>
+                        <a href="ShardingService.html" title="ShardingService takes a Distributor where the handle is a service.">
+                          ShardingService
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SimpleRetryPolicy.html" title="A retry policy abstract class."></a>
+                        <a href="SimpleRetryPolicy.html" title="A retry policy abstract class.">
+                          SimpleRetryPolicy
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SingletonFactory.html" title="A com.twitter.finagle.ServiceFactory that produces
+Services identical to the argument service."></a>
+                        <a href="SingletonFactory.html" title="A com.twitter.finagle.ServiceFactory that produces
+Services identical to the argument service.">
+                          SingletonFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="StatsFilter$.html" title=""></a>
+                        <a class="class" href="StatsFilter.html" title="A StatsFilter reports request statistics including number of requests,
+number successful and request latency to the given StatsReceiver."></a>
+                        <a href="StatsFilter.html" title="A StatsFilter reports request statistics including number of requests,
+number successful and request latency to the given StatsReceiver.">
+                          StatsFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="StatsServiceFactory.html" title=""></a>
+                        <a href="StatsServiceFactory.html" title="">
+                          StatsServiceFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="TimeoutFilter$.html" title=""></a>
+                        <a class="class" href="TimeoutFilter.html" title="A com.twitter.finagle.Filter that applies a timeout to requests."></a>
+                        <a href="TimeoutFilter.html" title="A com.twitter.finagle.Filter that applies a timeout to requests.">
+                          TimeoutFilter
+                        </a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="object value">
+      <div id="definition">
+        <a href="RetryPolicy.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.service">service</a></p>
+        <h1><a href="RetryPolicy.html" title="See companion class">RetryPolicy</a><span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        <h3><span class="morelinks"><div>
+            Companion <a href="RetryPolicy.html" title="See companion class">class RetryPolicy</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -50,40 +451,52 @@
         <span class="name">RetryPolicy</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></span>
       </span>
       </h4>
+
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
-          <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
       <div id="mbrsel">
-        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        <div id="order">
-              <span class="filtertype">Ordering</span>
-              <ol>
-                
-                <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By Inheritance</span></li>
-              </ol>
-            </div>
-        <div id="ancestors">
-                <span class="filtertype">Inherited<br />
-                </span>
-                <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.service.RetryPolicy"><span>RetryPolicy</span></li><li class="in" name="com.twitter.util.JavaSingleton"><span>JavaSingleton</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
-                </ol>
-              </div><div id="ancestors">
-            <span class="filtertype"></span>
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
             <ol>
-              <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show All</span></li>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
             </ol>
           </div>
-        <div id="visbl">
-            <span class="filtertype">Visibility</span>
-            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="com.twitter.finagle.service.RetryPolicy"><span>RetryPolicy</span></li><li class="in" name="com.twitter.util.JavaSingleton"><span>JavaSingleton</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
       </div>
 
       <div id="template">
@@ -94,170 +507,149 @@
 
         
 
-        <div id="values" class="values members">
+        <div class="values members">
               <h3>Value Members</h3>
-              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:Any):Boolean"></a>
-      <a id="!=(Any):Boolean"></a>
-      <h4 class="signature">
+              <ol>
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#!=(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="##():Int"></a>
-      <a id="##():Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@##():Int" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:Any):Boolean"></a>
-      <a id="==(Any):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#ChannelClosedExceptionsOnly" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ChannelClosedExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a>
-      <a id="ChannelClosedExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">ChannelClosedExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@ChannelClosedExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
       
-    </li><li name="com.twitter.finagle.service.RetryPolicy#Never" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Never:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]"></a>
-      <a id="Never:RetryPolicy[Try[Nothing]]"></a>
-      <h4 class="signature">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html###():Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#==(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#ChannelClosedExceptionsOnly" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelClosedExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a><a id="ChannelClosedExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#ChannelClosedExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">Never</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>
+        <span class="name">ChannelClosedExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@Never:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="com.twitter.finagle.service.RetryPolicy#Never" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Never:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]"></a><a id="Never:RetryPolicy[Try[Nothing]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#Never:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Never</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>
+      </span>
+      
       <p class="shortcomment cmt">A <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a> that never retries.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a> that never retries.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#none:com.twitter.finagle.service.RetryPolicy[Any]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#none">none</a> for a more generally applicable version.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy.RetryableWriteException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RetryableWriteException"></a>
-      <a id="RetryableWriteException:RetryableWriteException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="RetryPolicy$$RetryableWriteException$.html"><span class="name">RetryableWriteException</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@RetryableWriteException" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+    </li><li name="com.twitter.finagle.service.RetryPolicy#TimeoutAndWriteExceptionsOnly" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TimeoutAndWriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a><a id="TimeoutAndWriteExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#TimeoutAndWriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="com.twitter.finagle.service.RetryPolicy#TimeoutAndWriteExceptionsOnly" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TimeoutAndWriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a>
-      <a id="TimeoutAndWriteExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">TimeoutAndWriteExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <span class="name">TimeoutAndWriteExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@TimeoutAndWriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      
+    </li><li name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a><a id="WriteExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      
-    </li><li name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]"></a>
-      <a id="WriteExceptionsOnly:PartialFunction[Try[Nothing],Boolean]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">WriteExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <span class="name">WriteExceptionsOnly</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">Failures that are generally retryable because the request failed
 before it finished being written to the remote service.</p><div class="fullcomment"><div class="comment cmt"><p>Failures that are generally retryable because the request failed
 before it finished being written to the remote service.
 See <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">com.twitter.finagle.WriteException</a>.
 </p></div></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]"></a>
-      <a id="apply[A]((A)⇒Option[(Duration,RetryPolicy[A])]):RetryPolicy[A]"></a>
-      <h4 class="signature">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="apply[A]((A)⇒Option[(Duration,RetryPolicy[A])]):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>])]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>]</span>
+        <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>])]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.apply.A">A</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@apply[A](f:A=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#asInstanceOf[T0]:T0" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <p class="shortcomment cmt">Lifts a function of type <code>A =&gt; Option[(Duration, RetryPolicy[A])]</code> in the  <code>RetryPolicy</code> type.</p>
-    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="asInstanceOf[T0]:T0"></a>
-      <a id="asInstanceOf[T0]:T0"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -265,67 +657,60 @@ See <a href="../WriteException.html" class="extype" name="com.twitter.finagle.Wr
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#backoff" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="backoff[A](Stream[Duration])(PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#backoff" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a>
-      <a id="backoff[A](Stream[Duration])(PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">backoff</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="backoffs">backoffs: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="params">(<span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoff.A">A</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoff.A">A</span>]</span>
+        <span class="name">backoff</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="backoffs">backoffs: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="params">(<span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoff.A">A</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoff.A">A</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">Retry based on a series of backoffs defined by a <code>Stream[Duration]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry based on a series of backoffs defined by a <code>Stream[Duration]</code>. The
 stream is consulted to determine the duration after which a request is to
 be retried. A <code>PartialFunction</code> argument determines which request types
 are retryable.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#backoffJava[A](backoffs:java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]],shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoffJava">backoffJava</a> for a Java friendly API.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#backoffJava" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="backoffJava[A](backoffs:java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]],shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a>
-      <a id="backoffJava[A](Callable[Iterator[Duration]],PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
-      <h4 class="signature">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#backoffJava" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="backoffJava[A](backoffs:java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]],shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="backoffJava[A](Callable[Iterator[Duration]],PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#backoffJava[A](backoffs:java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]],shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">backoffJava</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="backoffs">backoffs: <span class="extype" name="java.util.concurrent.Callable">Callable</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]]</span>, <span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoffJava.A">A</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoffJava.A">A</span>]</span>
+        <span class="name">backoffJava</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="backoffs">backoffs: <span class="extype" name="java.util.concurrent.Callable">Callable</span>[<span class="extype" name="java.util.Iterator">Iterator</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]]</span>, <span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoffJava.A">A</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.backoffJava.A">A</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@backoffJava[A](backoffs:java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]],shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">A version of <a href="#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">backoff</a> usable from Java.</p><div class="fullcomment"><div class="comment cmt"><p>A version of <a href="#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">backoff</a> usable from Java.
 </p></div><dl class="paramcmts block"><dt class="param">backoffs</dt><dd class="cmt"><p>can be created via <a href="Backoff$.html#toJava(backoffs:Stream[com.twitter.util.Duration]):java.util.concurrent.Callable[java.util.Iterator[com.twitter.util.Duration]]" class="extmbr" name="com.twitter.finagle.service.Backoff#toJava">Backoff.toJava</a>.</p></dd></dl></div>
-    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="clone():Object"></a>
-      <a id="clone():AnyRef"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a><a id="clone():AnyRef"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#clone():Object" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@clone():Object" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -333,10 +718,13 @@ are retryable.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#combine" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="combine[A](policies:com.twitter.finagle.service.RetryPolicy[A]*):com.twitter.finagle.service.RetryPolicy[A]"></a>
-      <a id="combine[A](RetryPolicy[A]*):RetryPolicy[A]"></a>
-      <h4 class="signature">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#combine" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="combine[A](policies:com.twitter.finagle.service.RetryPolicy[A]*):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="combine[A](RetryPolicy[A]*):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#combine[A](policies:com.twitter.finagle.service.RetryPolicy[A]*):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -344,11 +732,7 @@ are retryable.
       <span class="symbol">
         <span class="name">combine</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="policies">policies: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.combine.A">A</span>]*</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.combine.A">A</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@combine[A](policies:com.twitter.finagle.service.RetryPolicy[A]*):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">Combines multiple <code>RetryPolicy</code>s into a single combined <code>RetryPolicy</code>, with interleaved
 backoffs.</p><div class="fullcomment"><div class="comment cmt"><p>Combines multiple <code>RetryPolicy</code>s into a single combined <code>RetryPolicy</code>, with interleaved
 backoffs.  For a given value of <code>A</code>, each policy in <code>policies</code> is tried in order.  If all
@@ -365,56 +749,53 @@ of exceptions is equal to the sum of the individual maximum retries of each subp
 put a cap on the combined maximum number of retries, you can call <code>limit</code> on the combined
 policy with a smaller cap.
 </p></div></div>
-    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="eq(x$1:AnyRef):Boolean"></a>
-      <a id="eq(AnyRef):Boolean"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a>
-      <a id="equals(Any):Boolean"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#equals(x$1:Any):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
-      <a id="finalize():Unit"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@finalize():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -422,10 +803,13 @@ policy with a smaller cap.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.util.JavaSingleton#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get:com.twitter.util.JavaSingleton"></a>
-      <a id="get:JavaSingleton"></a>
-      <h4 class="signature">
+    </li><li name="com.twitter.util.JavaSingleton#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get:com.twitter.util.JavaSingleton"></a><a id="get:JavaSingleton"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#get:com.twitter.util.JavaSingleton" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -433,16 +817,15 @@ policy with a smaller cap.
       <span class="symbol">
         <span class="name">get</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@get:com.twitter.util.JavaSingleton" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>JavaSingleton</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#getClass():Class[_]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>JavaSingleton</dd></dl></div>
-    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getClass():Class[_]"></a>
-      <a id="getClass():Class[_]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -450,118 +833,111 @@ policy with a smaller cap.
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#hashCode():Int" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hashCode():Int"></a>
-      <a id="hashCode():Int"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@hashCode():Int" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
-      <a id="isInstanceOf[T0]:Boolean"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ne(x$1:AnyRef):Boolean"></a>
-      <a id="ne(AnyRef):Boolean"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#none" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="none:com.twitter.finagle.service.RetryPolicy[Any]"></a><a id="none:RetryPolicy[Any]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#none:com.twitter.finagle.service.RetryPolicy[Any]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#none" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="none:com.twitter.finagle.service.RetryPolicy[Any]"></a>
-      <a id="none:RetryPolicy[Any]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">none</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
+        <span class="name">none</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@none:com.twitter.finagle.service.RetryPolicy[Any]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">A <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a> that never retries.</p>
-    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
-      <a id="notify():Unit"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#notify():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@notify():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#notifyAll():Unit" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="notifyAll():Unit"></a>
-      <a id="notifyAll():Unit"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
-      <a id="synchronized[T0](⇒T0):T0"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
@@ -569,16 +945,15 @@ policy with a smaller cap.
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString():String"></a>
-      <a id="toString():String"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
@@ -586,28 +961,23 @@ policy with a smaller cap.
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@toString():String" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]"></a><a id="tries(Int):RetryPolicy[Try[Nothing]]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" title="Permalink">
+        <i class="material-icons"></i>
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]"></a>
-      <a id="tries(Int):RetryPolicy[Try[Nothing]]"></a>
-      <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tries</span><span class="params">(<span name="numTries">numTries: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>
+        <span class="name">tries</span><span class="params">(<span name="numTries">numTries: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">Try up to a specific number of times of times on failures that are
 <a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Try up to a specific number of times of times on failures that are
 <a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.</p><p>The returned policy has jittered backoffs between retries.
@@ -615,22 +985,21 @@ policy with a smaller cap.
   A value of <code>1</code> means one attempt and no retries on failure.
   A value of <code>2</code> means one attempt and then a single retry if the failure meets the
   criteria of <a href="#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a>.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tries[A](numTries:Int,shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a>
-      <a id="tries[A](Int,PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
-      <h4 class="signature">
+    </li><li name="com.twitter.finagle.service.RetryPolicy#tries" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tries[A](numTries:Int,shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]"></a><a id="tries[A](Int,PartialFunction[A,Boolean]):RetryPolicy[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#tries[A](numTries:Int,shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tries</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="numTries">numTries: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>]</span>
+        <span class="name">tries</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="numTries">numTries: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="shouldRetry">shouldRetry: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>)</span><span class="result">: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.tries.A">A</span>]</span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@tries[A](numTries:Int,shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <p class="shortcomment cmt">Try up to a specific number of times, based on the supplied <code>PartialFunction[A, Boolean]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Try up to a specific number of times, based on the supplied <code>PartialFunction[A, Boolean]</code>.
 A value of type <code>A</code> is considered retryable if and only if the PartialFunction
 is defined at and returns true for that value.</p><p>The returned policy has jittered backoffs between retries.
@@ -638,22 +1007,21 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
   A value of <code>1</code> means one attempt and no retries on failure.
   A value of <code>2</code> means one attempt and then a single retry if the failure meets the
   criteria of <code>shouldRetry</code>.</p></dd><dt class="param">shouldRetry</dt><dd class="cmt"><p>which <code>A</code>-typed values are considered retryable.</p></dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
-      <a id="wait():Unit"></a>
-      <h4 class="signature">
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@wait():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -661,22 +1029,21 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
-      <a id="wait(Long,Int):Unit"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -684,22 +1051,21 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait(x$1:Long):Unit"></a>
-      <a id="wait(Long):Unit"></a>
-      <h4 class="signature">
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#wait(x$1:Long):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
       <span class="modifier_kind">
         <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryPolicy$@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
+      
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -707,7 +1073,26 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
     </span>)</span>
               
         </dd></dl></div>
-    </li></ol>
+    </li><li name="com.twitter.finagle.service.RetryPolicy.RetryableWriteException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryableWriteException"></a><a id="RetryableWriteException:RetryableWriteException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/RetryPolicy$.html#RetryableWriteException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RetryPolicy$$RetryableWriteException$.html">
+              <span class="name">RetryableWriteException</span>
+            </a>
+      </span>
+      
+      
+    </li>
+              </ol>
             </div>
 
         
@@ -719,9 +1104,9 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
         <div class="parent" name="com.twitter.util.JavaSingleton">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -738,7 +1123,9 @@ is defined at and returns true for that value.</p><p>The returned policy has jit
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-
-
+    </body>
+          </div>
+        </div>
+      </div>
     </body>
       </html>

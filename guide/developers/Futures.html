@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Twitter Futures &mdash; Finagle 6.40.0-SNAPSHOT documentation</title>
+    <title>Twitter Futures &#8212; Finagle 6.41.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '6.40.0-SNAPSHOT',
+        VERSION:     '6.41.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.40.0-SNAPSHOT documentation" href="../index.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="Finagle 6.41.0 documentation" href="../index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -49,7 +51,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -107,12 +109,12 @@ that the stack traces aren&#8217;t as useful (in practice we sometimes &#8220;ru
 </dl>
 <p>To illustrate this, imagine that we&#8217;re doing three pieces of work, doWorkA, doWorkB, doWorkC.</p>
 <p>We write it as:</p>
-<div class="highlight-text"><div class="highlight"><pre>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
+<div class="highlight-text"><div class="highlight"><pre><span></span>Future.value(doWorkA()).map { a =&gt; doWorkB(a) }.map { b =&gt; doWorkC(b) }
 </pre></div>
 </div>
 <p>So what does this turn into at run time?  The answer is different depending upon which model we have for Future.</p>
 <p>With Scala, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre>val executor = new ForkJoinPool(2 /* parallelism */)
+<div class="highlight-text"><div class="highlight"><pre><span></span>val executor = new ForkJoinPool(2 /* parallelism */)
 val a = doWorkA()
 executor.submit(new Runnable() { def run(): Unit = {
   val b = doWorkB(a)
@@ -121,7 +123,7 @@ executor.submit(new Runnable() { def run(): Unit = {
 </pre></div>
 </div>
 <p>With Java, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre>def workA(): C = {
+<div class="highlight-text"><div class="highlight"><pre><span></span>def workA(): C = {
   val a = doWorkA()
   workB(a)
 }
@@ -136,7 +138,7 @@ workA()
 </pre></div>
 </div>
 <p>With Twitter, it becomes:</p>
-<div class="highlight-text"><div class="highlight"><pre>val a = doWorkA()
+<div class="highlight-text"><div class="highlight"><pre><span></span>val a = doWorkA()
 val b = doWorkB(a)
 doWorkC(b)
 </pre></div>
