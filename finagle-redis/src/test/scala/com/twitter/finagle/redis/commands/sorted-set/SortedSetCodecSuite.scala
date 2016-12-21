@@ -12,7 +12,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("ZADD", CodecTest) {
     forAll(Gen.nonEmptyListOf(genZMember)) { ms =>
-      assert(encode(ZAdd(Buf.Utf8("foo"), ms)) ==
+      assert(encodeCommand(ZAdd(Buf.Utf8("foo"), ms)) ==
         Seq("ZADD", "foo") ++ ms.flatMap(zm => Seq(zm.score.toString, zm.member.asString)))
     }
   }
@@ -21,13 +21,13 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("INCRBY", CodecTest) {
     forAll { (k: Buf, m: Buf) =>
-      assert(encode(ZIncrBy(k, 0.42, m)) == Seq("ZINCRBY", k.asString, "0.42", m.asString))
+      assert(encodeCommand(ZIncrBy(k, 0.42, m)) == Seq("ZINCRBY", k.asString, "0.42", m.asString))
     }
   }
 
   test("ZCOUNT", CodecTest) {
     forAll { (k: Buf, a: ZInterval, b: ZInterval) =>
-      assert(encode(ZCount(k, a, b)) == Seq("ZCOUNT", k.asString, a.toString, b.toString))
+      assert(encodeCommand(ZCount(k, a, b)) == Seq("ZCOUNT", k.asString, a.toString, b.toString))
     }
   }
 
@@ -37,8 +37,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("ZRANGE", CodecTest) {
     forAll { (k: Buf, a: Int, b: Int) =>
-      assert(encode(ZRange(k, a, b)) == Seq("ZRANGE", k.asString, a.toString, b.toString))
-      assert(encode(ZRange(k, a, b, WithScores)) ==
+      assert(encodeCommand(ZRange(k, a, b)) == Seq("ZRANGE", k.asString, a.toString, b.toString))
+      assert(encodeCommand(ZRange(k, a, b, WithScores)) ==
         Seq("ZRANGE", k.asString, a.toString, b.toString, "WITHSCORES"))
     }
   }
@@ -47,16 +47,16 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("ZINTERSTORE|ZUNIONSTORE", CodecTest) {
     forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (d, keys) =>
-      assert(encode(ZInterStore(d, keys)) ==
+      assert(encodeCommand(ZInterStore(d, keys)) ==
         Seq("ZINTERSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
-      assert(encode(ZUnionStore(d, keys)) ==
+      assert(encodeCommand(ZUnionStore(d, keys)) ==
         Seq("ZUNIONSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
     }
   }
 
   test("ZREVRANGE") {
     forAll { (k: Buf, a: Long, b: Long) =>
-      assert(encode(ZRevRange(k, a, b)) == Seq("ZREVRANGE", k.asString, a.toString, b.toString))
+      assert(encodeCommand(ZRevRange(k, a, b)) == Seq("ZREVRANGE", k.asString, a.toString, b.toString))
     }
   }
 

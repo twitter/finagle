@@ -8,9 +8,9 @@ import scala.collection.mutable.ListBuffer
 /**
  * Thread-safe, stateful, asynchronous Redis decoder.
  */
-private[redis] class StageDecoder(init: Stage) {
+private[redis] final class StageDecoder(init: Stage) {
 
-  private[this] class Acc(
+  private[this] final class Acc(
       var n: Long,
       val replies: ListBuffer[Reply],
       val finish: List[Reply] => Reply)
@@ -21,7 +21,14 @@ private[redis] class StageDecoder(init: Stage) {
   private[this] var stack = List.empty[Acc]
   private[this] var current = init
 
-  final def absorb(buf: Buf): Reply = synchronized {
+  /**
+   * Returns a [[Reply]] or `null` if it's not enough data in the
+   * underlying buffer.
+   *
+   * @note Passing `Buf.Empty` to this function means "decode from whatever
+   *       is in the underlying buffer so far".
+   */
+  def absorb(buf: Buf): Reply = synchronized {
     // Absorb the new buffer.
     reader = BufReader(reader.readAll().concat(buf))
 

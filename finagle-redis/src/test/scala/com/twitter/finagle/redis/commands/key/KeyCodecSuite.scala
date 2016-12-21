@@ -18,7 +18,7 @@ final class KeyCodecSuite extends RedisRequestTest {
   test("PERSIST", CodecTest) { checkSingleKey("PERSIST", Persist.apply) }
   test("RENAME", CodecTest) { checkSingleKeySingleVal("RENAME", Rename.apply) }
   test("RENAMENX", CodecTest) { checkSingleKeySingleVal("RENAMENX", RenameNx.apply) }
-  test("RANDOMKEY", CodecTest) { assert(encode(Randomkey) == Seq("RANDOMKEY")) }
+  test("RANDOMKEY", CodecTest) { assert(encodeCommand(Randomkey) == Seq("RANDOMKEY")) }
   test("TTL", CodecTest) { checkSingleKey("TTL", Ttl.apply) }
   test("PTTL", CodecTest) { checkSingleKey("PTTL", PTtl.apply) }
   test("TYPE", CodecTest) { checkSingleKey("TYPE", Type.apply) }
@@ -34,10 +34,10 @@ final class KeyCodecSuite extends RedisRequestTest {
   }
 
   test("SCAN", CodecTest) {
-    assert(encode(Scan(42, None, None)) == Seq("SCAN", "42"))
-    assert(encode(Scan(42, Some(10L), None)) == Seq("SCAN", "42", "COUNT", "10"))
-    assert(encode(Scan(42, None, Some(Buf.Utf8("foo")))) == Seq("SCAN", "42", "PATTERN", "foo"))
-    assert(encode(Scan(42, Some(10L), Some(Buf.Utf8("foo")))) ==
+    assert(encodeCommand(Scan(42, None, None)) == Seq("SCAN", "42"))
+    assert(encodeCommand(Scan(42, Some(10L), None)) == Seq("SCAN", "42", "COUNT", "10"))
+    assert(encodeCommand(Scan(42, None, Some(Buf.Utf8("foo")))) == Seq("SCAN", "42", "PATTERN", "foo"))
+    assert(encodeCommand(Scan(42, Some(10L), Some(Buf.Utf8("foo")))) ==
       Seq("SCAN", "42", "COUNT", "10", "PATTERN", "foo"))
   }
 }

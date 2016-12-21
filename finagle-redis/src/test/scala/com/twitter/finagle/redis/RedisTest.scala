@@ -49,7 +49,8 @@ trait MissingInstances {
 
   val Eol = Buf.Utf8("\r\n")
 
-  def genNonEmptyString: Gen[String] = Gen.alphaStr.suchThat(_.nonEmpty)
+  def genNonEmptyString: Gen[String] =
+    Gen.nonEmptyListOf(Gen.alphaChar).map(_.mkString)
 
   // Gen non empty Bufs (per Redis protocol)
   def genBuf: Gen[Buf] = for {
@@ -81,11 +82,16 @@ trait MissingInstances {
       ))
     } yield MBulkReply(line)
 
+  def genReply: Gen[Reply] = Gen.oneOf(
+    genStatusReply, genErrorReply, genIntegerReply, genBulkReply, genMBulkReply(10)
+  )
+
   implicit def arbitraryStatusReply: Arbitrary[StatusReply] = Arbitrary(genStatusReply)
   implicit def arbitraryErrorReply: Arbitrary[ErrorReply] = Arbitrary(genErrorReply)
   implicit def arbitraryIntegerReply: Arbitrary[IntegerReply] = Arbitrary(genIntegerReply)
   implicit def arbitraryBulkReply: Arbitrary[BulkReply] = Arbitrary(genBulkReply)
-  implicit def arbitraryMBulkReplu: Arbitrary[MBulkReply] = Arbitrary(genMBulkReply(10))
+  implicit def arbitraryMBulkReply: Arbitrary[MBulkReply] = Arbitrary(genMBulkReply(10))
+  implicit def arbitraryReply: Arbitrary[Reply] = Arbitrary(genReply)
 }
 
 trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
@@ -101,7 +107,7 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
     }
 
   def genChunkedReply[R <: Reply](implicit a: Arbitrary[R]): Gen[(R, Seq[Buf])] =
-    a.arbitrary.flatMap(r => chunk(encode(r)).map(chunks => r -> chunks))
+    a.arbitrary.flatMap(r => chunk(encodeReply(r)).map(chunks => r -> chunks))
 
   def testDecodingInChunks(replyAndChunks: (Reply, Seq[Buf])): Unit = replyAndChunks match {
     case (expected, chunks) =>
@@ -111,10 +117,10 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
       assert(actual.contains(expected))
   }
 
-  def decode(s: String): Option[Reply] =
+  def decodeReply(s: String): Option[Reply] =
     Option(new StageDecoder(Reply.decode).absorb(Buf.Utf8(s)))
 
-  def encode(r: Reply): Buf = r match {
+  def encodeReply(r: Reply): Buf = r match {
     case StatusReply(s) => Buf.Utf8("+").concat(Buf.Utf8(s)).concat(Eol)
     case ErrorReply(s) => Buf.Utf8("-").concat(Buf.Utf8(s)).concat(Eol)
     case IntegerReply(i) => Buf.Utf8(":").concat(Buf.Utf8(i.toString)).concat(Eol)
@@ -129,7 +135,7 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
         Buf.Utf8("*")
           .concat(Buf.Utf8(replies.size.toString))
           .concat(Eol)
-      val body = replies.map(encode).reduce((a, b) => a.concat(b))
+      val body = replies.map(encodeReply).reduce((a, b) => a.concat(b))
       header.concat(body)
     case _ => Buf.Empty
   }
@@ -160,7 +166,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
   implicit val arbitraryAggregate: Arbitrary[Aggregate] = Arbitrary(genAggregate)
 
-  def encode(c: Command): Seq[String] = {
+  def encodeCommand(c: Command): Seq[String] = {
     val strings = BufToString(Command.encode(c)).split("\r\n")
 
     val length = strings.head.toList match {
@@ -192,7 +198,7 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
 
   def checkSingleKey(c: String, f: Buf => Command): Unit = {
     forAll { key: Buf =>
-      assert(encode(f(key)) == c +: Seq(key.asString))
+      assert(encodeCommand(f(key)) == c +: Seq(key.asString))
     }
 
     intercept[ClientError](f(Buf.Empty))
@@ -201,45 +207,45 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
   def checkMultiKey(c: String, f: Seq[Buf] => Command): Unit = {
     forAll(Gen.nonEmptyListOf(genBuf)) { keys =>
       assert(
-        encode(f(keys)) == c +: keys.map(_.asString)
+        encodeCommand(f(keys)) == c +: keys.map(_.asString)
       )
     }
 
-    intercept[ClientError](encode(f(Seq.empty)))
-    intercept[ClientError](encode(f(Seq(Buf.Empty))))
+    intercept[ClientError](encodeCommand(f(Seq.empty)))
+    intercept[ClientError](encodeCommand(f(Seq(Buf.Empty))))
   }
 
   def checkSingleKeyMultiVal(c: String, f: (Buf, Seq[Buf]) => Command): Unit = {
     forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (key, vals) =>
       assert(
-        encode(f(key, vals)) == c +: key.asString +: vals.map(_.asString)
+        encodeCommand(f(key, vals)) == c +: key.asString +: vals.map(_.asString)
       )
     }
 
-    intercept[ClientError](encode(f(Buf.Empty, Seq.empty)))
-    intercept[ClientError](encode(f(Buf.Utf8("x"), Seq.empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Empty, Seq.empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Utf8("x"), Seq.empty)))
   }
 
   def checkSingleKeySingleVal(c: String, f: (Buf, Buf) => Command): Unit = {
     forAll { (key: Buf, value: Buf) =>
       assert(
-        encode(f(key, value)) == c +: Seq(key.asString, value.asString)
+        encodeCommand(f(key, value)) == c +: Seq(key.asString, value.asString)
       )
     }
 
-    intercept[ClientError](encode(f(Buf.Empty, Buf.Empty)))
-    intercept[ClientError](encode(f(Buf.Utf8("x"), Buf.Empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Empty, Buf.Empty)))
+    intercept[ClientError](encodeCommand(f(Buf.Utf8("x"), Buf.Empty)))
   }
 
   def checkSingleKeyArbitraryVal[A: Arbitrary](c: String, f: (Buf, A) => Command): Unit = {
     forAll { (key: Buf, value: A) =>
       assert(
-        encode(f(key, value)) == c +: Seq(key.asString, value.toString)
+        encodeCommand(f(key, value)) == c +: Seq(key.asString, value.toString)
       )
     }
 
     Arbitrary.arbitrary[A].sample.foreach(a =>
-      intercept[ClientError](encode(f(Buf.Empty, a)))
+      intercept[ClientError](encodeCommand(f(Buf.Empty, a)))
     )
   }
 
@@ -247,13 +253,13 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
     c: String, f: (Buf, A, B) => Command
   ): Unit = {
     forAll { (key: Buf, a: A, b: B) =>
-      assert(encode(f(key, a, b)) == c +: Seq(key.asString, a.toString, b.toString))
+      assert(encodeCommand(f(key, a, b)) == c +: Seq(key.asString, a.toString, b.toString))
     }
 
     for {
       aa <- Arbitrary.arbitrary[A].sample
       bb <- Arbitrary.arbitrary[B].sample
-    } intercept[ClientError](encode(f(Buf.Empty, aa, bb)))
+    } intercept[ClientError](encodeCommand(f(Buf.Empty, aa, bb)))
   }
 }
 

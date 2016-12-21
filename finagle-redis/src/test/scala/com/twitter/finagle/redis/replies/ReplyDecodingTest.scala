@@ -14,7 +14,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("string (empty)") {
-    intercept[ServerError] { decode("+\r\n") }
+    intercept[ServerError] { decodeReply("+\r\n") }
   }
 
   test("error") {
@@ -22,7 +22,7 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("error (empty)") {
-    intercept[ServerError] { decode("-\r\n") }
+    intercept[ServerError] { decodeReply("-\r\n") }
   }
 
   test("integer") {
@@ -30,11 +30,11 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("integer (too small)") {
-    intercept[ServerError] { decode(s":-9223372036854775809\r\n") }
+    intercept[ServerError] { decodeReply(s":-9223372036854775809\r\n") }
   }
 
   test("integer (too big)") {
-    intercept[ServerError] { decode(s":9223372036854775808\r\n") }
+    intercept[ServerError] { decodeReply(s":9223372036854775808\r\n") }
   }
 
   test("bulk") {
@@ -42,11 +42,11 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("bulk (empty)") {
-    assert(decode("$0\r\n\r\n").contains(BulkReply(Buf.Empty)))
+    assert(decodeReply("$0\r\n\r\n").contains(BulkReply(Buf.Empty)))
   }
 
   test("bulk (nil)") {
-    assert(decode("$-1\r\n").contains(EmptyBulkReply))
+    assert(decodeReply("$-1\r\n").contains(EmptyBulkReply))
   }
 
   test("array") {
@@ -54,10 +54,10 @@ class ReplyDecodingTest extends RedisResponseTest {
   }
 
   test("array (empty)") {
-    assert(decode("*0\r\n").contains(EmptyMBulkReply))
+    assert(decodeReply("*0\r\n").contains(EmptyMBulkReply))
   }
 
   test("array (nil)") {
-    assert(decode("*-1\r\n").contains(NilMBulkReply))
+    assert(decodeReply("*-1\r\n").contains(NilMBulkReply))
   }
 }
