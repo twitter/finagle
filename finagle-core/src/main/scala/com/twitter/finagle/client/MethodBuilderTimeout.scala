@@ -6,6 +6,8 @@ import com.twitter.util.{Duration, Future}
 /**
  * '''Experimental:''' This API is under construction.
  *
+ * Defaults to having no timeouts set.
+ *
  * @see [[MethodBuilder.withTimeout]]
  */
 private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (

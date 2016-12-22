@@ -1,9 +1,8 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException, WriteException}
-import com.twitter.util.{
-  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Return, Throw, Try}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException, WriteException}
+import com.twitter.util.{Duration, JavaSingleton, Return, Throw, Try, TimeoutException => UtilTimeoutException}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
@@ -139,13 +138,20 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 }
 
 object RetryPolicy extends JavaSingleton {
+
+  /**
+   * An extractor for exceptions which are known to be safe to retry.
+   *
+   * @see [[RequeueFilter.Requeueable]]
+   */
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
       // We don't retry interruptions by default since they indicate that the
       // request was discarded.
-      case f: Failure if f.isFlagged(Failure.Interrupted) => None
-      case f: Failure if f.isFlagged(Failure.NonRetryable) => None
+      case f: FailureFlags[_] if f.isFlagged(Failure.Interrupted) => None
+      case f: FailureFlags[_] if f.isFlagged(Failure.NonRetryable) => None
       case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
+      case f: FailureFlags[_] if f.isFlagged(Failure.Restartable) => Some(f)
       case WriteException(exc) => Some(exc)
       case _ => None
     }

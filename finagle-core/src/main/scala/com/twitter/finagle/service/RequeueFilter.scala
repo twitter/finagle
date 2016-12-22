@@ -31,7 +31,7 @@ import com.twitter.util._
  * @param timer Timer used to schedule retries
  *
  * @note consider using a [[Timer]] with high resolution so there is
- * less correlation between retries. For example [[HighResTimer.Default]]
+ * less correlation between retries. For example [[param.HighResTimer.Default]]
  *
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
  *      for more details.
@@ -44,6 +44,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     maxRetriesPerReq: Double,
     timer: Timer)
   extends SimpleFilter[Req, Rep] {
+  import RequeueFilter.Requeueable
 
   require(maxRetriesPerReq >= 0,
     s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
@@ -71,7 +72,7 @@ private[finagle] class RequeueFilter[Req, Rep](
   ): Future[Rep] = {
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
       service(req).transform {
-        case t@Throw(RetryPolicy.RetryableWriteException(_)) =>
+        case t@Throw(Requeueable(_)) =>
           if (!canRetry()) {
             canNotRetryCounter.incr()
             responseFuture(attempt, t)
@@ -110,4 +111,16 @@ private[finagle] class RequeueFilter[Req, Rep](
     val maxRetries = Math.ceil(maxRetriesPerReq * retryBudget.balance).toInt
     applyService(req, service, 0, maxRetries, retryBackoffs)
   }
+}
+
+object RequeueFilter {
+
+  /**
+   * An extractor for exceptions which are known to be safe to retry.
+   */
+  object Requeueable {
+    def unapply(t: Throwable): Option[Throwable] =
+      RetryPolicy.RetryableWriteException.unapply(t)
+  }
+
 }

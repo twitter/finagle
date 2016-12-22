@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.context
+import com.twitter.finagle._
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{ServiceFactory, FailedFastException, FailureFlags, Service}
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
+import java.io.IOException
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -189,4 +189,26 @@ class RequeueFilterTest extends FunSuite {
       assert(stats.stat("retry_context_retries")().map(_.toInt) == retriesInContext)
     }
   }
+
+  test("Requeueable.unapply for retryable exceptions") {
+    Seq(
+      Failure.rejected("rejected"),
+      WriteException(new RuntimeException())
+    ).foreach {
+      case RequeueFilter.Requeueable(_) =>
+      case x => fail(s"should be Requeueable: $x")
+    }
+  }
+
+  test("Requeueable.unapply for non-retryable exceptions") {
+    Seq(
+      Failure("not retryable", Failure.NonRetryable),
+      Failure("interrupted", Failure.Interrupted),
+      new IOException("an io exception")
+    ).foreach {
+      case RequeueFilter.Requeueable(x) => fail(s"should not be Requeueable: $x")
+      case _ =>
+    }
+  }
+
 }

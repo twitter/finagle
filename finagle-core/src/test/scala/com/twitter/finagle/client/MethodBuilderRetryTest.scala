@@ -29,16 +29,55 @@ class MethodBuilderRetryTest extends FunSuite {
 
   private def retryMethodBuilder(
     svc: Service[Int, Int],
-    stats: StatsReceiver
+    stats: StatsReceiver,
+    params: Stack.Params = Stack.Params.empty
   ): MethodBuilder[Int, Int] = {
     val svcFactory = ServiceFactory.const(svc)
     val stack = Stack.Leaf(Stack.Role("test"), svcFactory)
-    val params =
+    val ps =
       Stack.Params.empty +
         param.Stats(stats) +
-        Retries.Budget(RetryBudget.Infinite)
-    val stackClient = TestStackClient(stack, params)
+        Retries.Budget(RetryBudget.Infinite) ++
+        params
+    val stackClient = TestStackClient(stack, ps)
     MethodBuilder.from("retry_it", stackClient)
+  }
+
+  test("uses stack's ResponseClassifier by default") {
+    val stats = new InMemoryStatsReceiver()
+    val retrySvc = new RetrySvc()
+    val retryIllegalArgClassifier: ResponseClassifier = {
+      case ReqRep(_, Throw(_: IllegalArgumentException)) =>
+        ResponseClass.RetryableFailure
+    }
+    val methodBuilder = retryMethodBuilder(
+      retrySvc.svc,
+      stats,
+      Stack.Params.empty + param.ResponseClassifier(retryIllegalArgClassifier))
+    val defaults = methodBuilder.newService("defaults")
+
+    // the client will use the stack's ResponseClassifier, which
+    // will retry the 1st response of an IllegalArgumentException
+    intercept[NullPointerException] {
+      Await.result(defaults(1), 5.seconds)
+    }
+    assert(stats.stat("defaults", "retries")() == Seq(1))
+  }
+
+  test("retries can be disabled using `RetryPolicy.none`") {
+    val stats = new InMemoryStatsReceiver()
+    val retrySvc = new RetrySvc()
+    val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
+    val noRetries = methodBuilder
+      .withRetry.forPolicy(RetryPolicy.none)
+      .newService("no_retries")
+
+    // the client will not retry anything, let alone have a retry filter,
+    // and see the 1st response
+    intercept[IllegalArgumentException] {
+      Await.result(noRetries(1), 5.seconds)
+    }
+    assert(stats.stat("no_retries", "retries")() == Seq.empty)
   }
 
   test("forClassifier") {
@@ -74,12 +113,12 @@ class MethodBuilderRetryTest extends FunSuite {
       case Throw(e) if "uno" == e.getMessage => true
     }.newService("uno_only")
 
-    // the client will not retry anything, let alone have a retry filter,
-    // and see the 1st response
+    // the client will use the stack's ResponseClassifier, which
+    // will not retry the first response.
     intercept[IllegalArgumentException] {
       Await.result(defaults(1), 5.seconds)
     }
-    assert(stats.stat("defaults", "retries")() == Seq.empty)
+    assert(stats.stat("defaults", "retries")() == Seq(0))
     retrySvc.reqNum = 0
 
     // this client will retry the first 2 responses and then see the 3rd response

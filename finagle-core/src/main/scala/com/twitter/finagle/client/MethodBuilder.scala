@@ -28,7 +28,7 @@ private[finagle] object MethodBuilder {
     new MethodBuilder[Req, Rep](
       service,
       stackClient.params,
-      Config.create(needsTotalTimeoutModule))
+      Config.create(stackClient.params, needsTotalTimeoutModule))
   }
 
   private[this] def modified[Req, Rep](
@@ -39,9 +39,12 @@ private[finagle] object MethodBuilder {
   }
 
   private object Config {
-    def create[Req, Rep](stackHadTotalTimeout: Boolean): Config[Req, Rep] = {
+    def create[Req, Rep](
+      params: Stack.Params,
+      stackHadTotalTimeout: Boolean
+    ): Config[Req, Rep] = {
       Config(
-        MethodBuilderRetry.Config(),
+        MethodBuilderRetry.newConfig(params),
         MethodBuilderTimeout.Config(stackHadTotalTimeout))
     }
   }
@@ -79,6 +82,10 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * }
    * }}}
    *
+   * Defaults to using the client's [[com.twitter.finagle.service.ResponseClassifier]]
+   * to retry failures
+   * [[com.twitter.finagle.service.ResponseClass.RetryableFailure marked as retryable]].
+   *
    * @see [[MethodBuilderRetry]]
    */
   val withRetry: MethodBuilderRetry[Req, Rep] =
@@ -95,6 +102,8 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * val builder: MethodBuilder[Int, Int] = ???
    * builder.withTimeout.total(200.milliseconds)
    * }}}
+   *
+   * Defaults to having no timeouts set.
    *
    * @see [[MethodBuilderTimeout]]
    */
