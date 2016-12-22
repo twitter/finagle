@@ -1279,11 +1279,6 @@ case class KetamaClientBuilder private[memcached](
   }
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
-  def cluster(cluster: Cluster[InetSocketAddress]): KetamaClientBuilder = {
-    group(CacheNodeGroup(Group.fromCluster(cluster).map{_.asInstanceOf[SocketAddress]}))
-  }
-
-  @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
     if (LocalMemcached.enabled) {
       withLocalMemcached

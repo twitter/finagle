@@ -40,6 +40,9 @@ Breaking API Changes
     thrift StackClient, Thrift.client, via the `stack` method of ClientBuilder.
     ``RB_ID=894297``
 
+  * finagle-memcached: Remove deprecated `cluster` method on `c.t.f.memcached.KetamaClientBuilder`.
+    ``RB_ID=898365``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
