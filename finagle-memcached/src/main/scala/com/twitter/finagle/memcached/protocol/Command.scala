@@ -10,7 +10,7 @@ private object KeyValidation {
   private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
 
   private[this] def invalidChar(b: Byte): Boolean =
-    b == '\n' || b == '\u0000' || b == '\r' || b == ' '
+    b <= ' ' && (b == '\n' || b == '\u0000' || b == '\r' || b == ' ')
 
   /** Return -1 if no invalid bytes */
   private def invalidByteIndex(key: Buf): Int = {
