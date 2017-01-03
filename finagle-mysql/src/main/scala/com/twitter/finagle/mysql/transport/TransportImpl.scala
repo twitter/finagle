@@ -11,7 +11,6 @@ import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import java.net.SocketAddress
-import scala.util.hashing.MurmurHash3
 
 /**
  * Responsible for the transport layer plumbing required to produce
@@ -23,7 +22,7 @@ import scala.util.hashing.MurmurHash3
 object TransportImpl {
   private val UseNetty4ToggleId: String = "com.twitter.finagle.mysql.UseNetty4"
   private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-  private def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
+  private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
   val Netty3: TransportImpl = TransportImpl(params => Netty3Transporter(MysqlClientPipelineFactory, params))
 
@@ -36,7 +35,7 @@ object TransportImpl {
         }
       }
       // Used in the registry
-      override def toString = bufTransporter.toString
+      override def toString: String = bufTransporter.toString
     }
   }
 

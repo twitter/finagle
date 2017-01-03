@@ -22,7 +22,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
 import java.net.SocketAddress
-import scala.util.hashing.MurmurHash3
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -52,7 +51,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   // Toggles transport implementation to Netty 4.
   private[this] object useNetty4 {
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseNetty4")
-    def apply(): Boolean = underlying(MurmurHash3.stringHash(ServerInfo().id))
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
   /**
@@ -102,7 +101,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     http.Toggles(ServerErrorsAsFailuresToggleId)
 
   private[this] def treatServerErrorsAsFailures: Boolean =
-    serverErrorsAsFailuresToggle(MurmurHash3.stringHash(ServerInfo().id))
+    serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
 
   /** exposed for testing */
   private[finagle] val responseClassifierParam: param.ResponseClassifier = {

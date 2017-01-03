@@ -31,6 +31,12 @@ Runtime Behavior Changes
   * finagle-redis: Transport implementation is now based on Netty 4 (instead of Netty 3).
     ``RB_ID=895728``
 
+  * finagle-toggle: `ToggleMap` `Toggles` now rehash the inputs to
+    `apply` and `isDefinedAt` in order to promote a relatively even
+    distribution even when the inputs do not have a good distribution.
+    This allows users to get away with using a poor hashing function
+    such as `String.hashCode`. ``RB_ID=899195``
+
 6.41.0
 ------
 
@@ -48,7 +54,7 @@ Breaking API Changes
     is a SAM.  Because of the order in which SAMs get resolved, literal
     functions in scala will get confused about which method they should use.
     Instead of passing a Function directly, wrap the Function with a Service.mk.
-    ``RB_ID=896524``.
+    ``RB_ID=896524``
 
   * finagle-core: `CancelledWriteException` was removed as it is no longer used.
   ``RB_ID=896757``

@@ -34,7 +34,6 @@ import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
 import scala.collection.mutable
-import scala.util.hashing.MurmurHash3
 
 private[finagle] object MemcachedTracingFilter {
 
@@ -197,7 +196,7 @@ object Memcached extends finagle.Client[Command, Response]
         "com.twitter.finagle.memcached.UseNetty4"
 
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private[this] def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
+      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
       implicit val param: Stack.Param[MemcachedImpl] = Stack.Param(
         if (useNetty4) Netty4

@@ -2,7 +2,6 @@ package com.twitter.finagle.netty4
 
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.toggle.Toggle
-import scala.util.hashing.MurmurHash3
 
 /**
  * An experimental option that enables pooling for receive buffers.
@@ -24,5 +23,5 @@ private[netty4] object poolReceiveBuffers {
   /**
    * Checks (via a toggle) if pooling of receive buffers is enabled on this instanace.
    */
-  def apply(): Boolean = underlying(MurmurHash3.stringHash(ServerInfo().id))
+  def apply(): Boolean = underlying(ServerInfo().id.hashCode)
 }

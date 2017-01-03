@@ -250,12 +250,12 @@ class ToggleMapTest extends FunSuite
       // to change if the underlying algorithm changes. we want
       // some mechanism for seeing that the values can be variable.
       val someToggle = ToggleMap.flags("com.toggle.some")
-      assert(someToggle.isDefinedAt(123))
-      assert(!someToggle(123))
+      assert(someToggle.isDefinedAt(999))
+      assert(someToggle(999))
       assert(someToggle.isDefinedAt(Int.MinValue))
-      assert(someToggle(Int.MinValue))
+      assert(!someToggle(Int.MinValue))
       assert(someToggle.isDefinedAt(Int.MaxValue))
-      assert(someToggle(Int.MaxValue))
+      assert(!someToggle(Int.MaxValue))
     }
   }
 

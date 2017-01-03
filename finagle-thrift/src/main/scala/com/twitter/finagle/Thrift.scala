@@ -17,7 +17,6 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Duration, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
-import scala.util.hashing.MurmurHash3
 
 /**
  * Client and server for [[http://thrift.apache.org Apache Thrift]].
@@ -138,7 +137,7 @@ object Thrift
   object ThriftImpl {
     private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.thrift.UseNetty4"
     private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-    private[this] def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
+    private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
     val Netty3: ThriftImpl = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
     val Netty4: ThriftImpl = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)

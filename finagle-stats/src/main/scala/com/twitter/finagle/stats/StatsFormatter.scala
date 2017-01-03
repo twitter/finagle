@@ -5,7 +5,6 @@ import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.toggle.Toggle
 import scala.collection.Map
 import scala.collection.mutable
-import scala.util.hashing.MurmurHash3
 import scala.util.matching.Regex
 
 object format extends GlobalFlag[String](
@@ -87,7 +86,7 @@ private[stats] object StatsFormatter {
   private[this] val exportEmptyHistogramToggle: Toggle[Int] =
     Stats.Toggles(ExportEmptyHistogramToggleId)
 
-  private[this] val ToggleInput = MurmurHash3.stringHash(ServerInfo().id)
+  private[this] val ToggleInput = ServerInfo().id.hashCode
 
   def shouldIncludeEmptyHistograms: Boolean = {
     if (includeEmptyHistograms.isDefined)

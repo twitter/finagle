@@ -20,7 +20,6 @@ import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
-import scala.util.hashing.MurmurHash3
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -72,7 +71,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     object MuxImpl {
       private val UseNetty4ToggleId: String = "com.twitter.finagle.mux.UseNetty4"
       private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private def useNetty4: Boolean = netty4Toggle(MurmurHash3.stringHash(ServerInfo().id))
+      private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
       /**
        * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.

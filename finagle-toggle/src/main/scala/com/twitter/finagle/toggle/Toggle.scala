@@ -139,7 +139,7 @@ object Toggle {
     }
   }
 
-  private[toggle] def apply[T](
+  private def apply[T](
     id: String,
     pf: PartialFunction[T, Boolean]
   ): Toggle[T] = new Toggle[T](id) {
