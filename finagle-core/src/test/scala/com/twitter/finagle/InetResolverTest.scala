@@ -109,7 +109,5 @@ class InetResolverTest extends FunSuite {
     }
 
     assert(latch.await(pollInterval * 2))
-
   }
-
 }
