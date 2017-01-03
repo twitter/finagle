@@ -29,6 +29,7 @@ object Client {
    *
    * @param host a String of host:port combination.
    */
+  @deprecated(message = "Use `com.twitter.finagle.Memcached.client`", since = "2016-12-22")
   def apply(host: String): Client = Client(
     ClientBuilder()
       .hosts(host)
@@ -40,33 +41,10 @@ object Client {
   /**
    * Construct a client from a Name
    */
+  @deprecated(message = "Use `com.twitter.finagle.Memcached.client`", since = "2016-12-22")
   def apply(name: Name): Client = Client(
     ClientBuilder()
       .dest(name)
-      .hostConnectionLimit(1)
-      .codec(new text.Memcached)
-      .daemon(true)
-      .build())
-
-  /**
-   * Construct a client from a Group
-   */
-  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
-  def apply(group: Group[SocketAddress]): Client = Client(
-    ClientBuilder()
-      .group(group)
-      .hostConnectionLimit(1)
-      .codec(new text.Memcached)
-      .daemon(true)
-      .build())
-
-  /**
-   * Construct a client from a Cluster
-   */
-  @deprecated("Use `apply(name: Name)` instead", "7.0.0")
-  def apply(cluster: Cluster[SocketAddress]): Client = Client(
-    ClientBuilder()
-      .cluster(cluster)
       .hostConnectionLimit(1)
       .codec(new text.Memcached)
       .daemon(true)

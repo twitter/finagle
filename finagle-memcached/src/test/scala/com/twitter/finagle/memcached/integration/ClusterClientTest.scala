@@ -111,47 +111,6 @@ class ClusterClientTest
     }
   }
 
-  test("Simple ClusterClient using finagle load balancing - many keys") {
-    // create simple cluster client
-    val mycluster =
-      new ZookeeperServerSetCluster(
-        ServerSets.create(zookeeperClient, ZooKeeperUtils.EVERYONE_READ_CREATOR_ALL, zkPath))
-    Await.result(mycluster.ready, TimeOut) // give it sometime for the cluster to get the initial set of memberships
-    val client = Client(mycluster)
-
-    val count = 100
-    Await.result(
-      Future.collect((0 until count) map { n =>
-        client.set("foo"+n, Buf.Utf8("bar"+n))
-      })
-    , TimeOut)
-
-    val tmpClients = testServers map {
-      case(server) =>
-        Client(
-          ClientBuilder()
-            .hosts(server.address)
-            .codec(new Memcached)
-            .hostConnectionLimit(1)
-            .daemon(true)
-            .build())
-    }
-
-    (0 until count).foreach {
-      n => {
-        var found = false
-        tmpClients foreach {
-          c =>
-          if (Await.result(c.get("foo"+n), TimeOut)!=None) {
-            assert(!found)
-            found = true
-          }
-        }
-        assert(found)
-      }
-    }
-  }
-
   if (!sys.props.contains("SKIP_FLAKY"))
     test("Cache specific cluster - add and remove") {
 

@@ -1,10 +1,11 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.builder.{ClientBuilder, Server => MServer, ServerBuilder}
-import com.twitter.finagle.memcached.Client
-import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.TwemcacheClient
 import com.twitter.finagle.memcached.protocol.{Command, Response}
+import com.twitter.finagle.memcached.protocol.text.{Memcached => MemcachedProtocol}
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.io.Buf
 import com.twitter.util.Await
@@ -20,7 +21,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
   /**
    * Note: This integration test requires a real Memcached server to run.
    */
-  var externalClient: Client = null
+  var externalClient: TwemcacheClient = null
   var server: MServer = null
   var serverAddress: InetSocketAddress = null
   var proxyService: MemcacheService = null
@@ -33,7 +34,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
       proxyClient = ClientBuilder()
         .hosts(Seq(testServer.get.address))
-        .codec(Memcached())
+        .codec(MemcachedProtocol())
         .hostConnectionLimit(1)
         .build()
       proxyService = new MemcacheService {
@@ -41,13 +42,14 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       }
 
       server = ServerBuilder()
-        .codec(Memcached())
+        .codec(MemcachedProtocol())
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("memcached")
         .build(proxyService)
 
       serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
-      externalClient = Client("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
+      externalClient = Memcached.client
+        .newTwemcacheClient("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
     }
   }
 
