@@ -90,6 +90,10 @@ object Response {
   def apply(): Response =
     apply(Version.Http11, Status.Ok)
 
+  /** Create Response from status. */
+  def apply(status: Status): Response =
+    apply(Version.Http11, status)
+
   /** Create Response from version and status. */
   def apply(version: Version, status: Status): Response =
     apply(new DefaultHttpResponse(from(version), from(status)))
@@ -103,6 +107,13 @@ object Response {
     apply(res, reader)
   }
 
+  /** Create 200 Response with the same HTTP version as the provided Request */
+  def apply(request: Request): Response =
+    new Response {
+      final val httpResponse =
+        new DefaultHttpResponse(from(request.version), HttpResponseStatus.OK)
+    }
+
   private[http] def apply(response: HttpResponse): Response =
     new Response {
       val httpResponse = response
@@ -112,16 +123,5 @@ object Response {
     new Response {
       val httpResponse = response
       override val reader = readerIn
-    }
-
-  /** Create Response from status. */
-  def apply(status: Status): Response =
-    apply(Version.Http11, status)
-
-  /** Create Response from Request. */
-  private[http] def apply(httpRequest: Request): Response =
-    new Response {
-      final val httpResponse =
-        new DefaultHttpResponse(from(httpRequest.version), HttpResponseStatus.OK)
     }
 }

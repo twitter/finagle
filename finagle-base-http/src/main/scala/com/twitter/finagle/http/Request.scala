@@ -187,13 +187,15 @@ abstract class Request extends Message {
   def getParamNames(): JSet[String] =
     params.keySet.asJava
 
-  /** Response associated with request */
+  /** Response associated with request. */
+  @deprecated("Use the Response constructor functions", "2016-12-29")
   lazy val response: Response = Response(this)
 
   /** Get response associated with request. */
+  @deprecated("Use the Response constructor functions", "2016-12-29")
   def getResponse(): Response = response
 
-  /** Encode an HTTP message to String */
+  /** Encode an HTTP message to String. */
   def encodeString(): String = {
     new String(encodeBytes(), "UTF-8")
   }

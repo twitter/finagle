@@ -19,6 +19,11 @@ Breaking API Changes
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-base-http: Deprecate the lazy `response: Response` field on the Request type.
+    This field is potentially hazardous as it's not necessarily the Response that will
+    be returned by a Service but it is often used as such. Construct a Response using
+    the static constructor methods. ``RB_ID=899983``
+
   * finagle-memcached: Deprecate methods on `c.t.f.memcached.Client`:
       - `apply(name: Name)`
       - `apply(host: String)`
