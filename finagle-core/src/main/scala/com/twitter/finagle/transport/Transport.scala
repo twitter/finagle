@@ -5,9 +5,11 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.ssl
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
+import scala.runtime.NonLocalReturnControl
+import scala.util.control.NonFatal
 
 /**
  * A transport is a representation of a stream of objects that may be
@@ -65,7 +67,13 @@ trait Transport[In, Out] extends Closable { self =>
    */
   def map[In1, Out1](f: In1 => In, g: Out => Out1): Transport[In1, Out1] =
     new Transport[In1, Out1] {
-      def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
+      def write(in1: In1): Future[Unit] =
+        try self.write(f(in1))
+        catch {
+          case NonFatal(t) => Future.exception(t)
+          case nlrc: NonLocalReturnControl[_] => Future.exception(new FutureNonLocalReturnControl(nlrc))
+        }
+
       def read(): Future[Out1] = self.read().map(g)
       def status: Status = self.status
       def onClose: Future[Throwable] = self.onClose

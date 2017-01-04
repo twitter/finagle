@@ -30,11 +30,9 @@ object OpTransport {
 
 }
 
-class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
+class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
   import org.scalatest.Assertions._
   import OpTransport._
-
-  var ops = _ops
 
   def read() = ops match {
     case Read(res) :: rest =>
@@ -45,7 +43,6 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
   }
 
   def write(in: In) = ops match {
-
     case Write(accept, res) :: rest =>
       if (!accept(in))
         fail(s"Did not accept write $in")
@@ -195,8 +192,8 @@ class HttpClientDispatcherTest extends FunSuite {
     val writep = new Promise[Unit]
     val readp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
-      Read(readp),
       Write(Function.const(true), writep),
+      Read(readp),
       Close(Future.Done))
 
     val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
@@ -224,10 +221,10 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val readp = new Promise[Nothing]
     val transport = OpTransport[Any, Any](
-      // Read the response
-      Read(readp),
       // Write the initial request.
       Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(readp),
       Close(Future.Done))
 
     val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
@@ -255,10 +252,10 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val chunkp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
-      // Read the response
-      Read(Future.never),
       // Write the initial request.
       Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(Future.never),
       // Then we try to write the chunk
       Write(_.isInstanceOf[HttpChunk], chunkp),
       Close(Future.Done))
