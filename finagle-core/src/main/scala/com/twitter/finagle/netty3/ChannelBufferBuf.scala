@@ -21,15 +21,16 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
   override def toString = s"ChannelBufferBuf($underlying)"
 
   def write(bytes: Array[Byte], off: Int): Unit = {
+    checkWriteArgs(bytes.length, off)
     val dup = underlying.duplicate()
     dup.readBytes(bytes, off, dup.readableBytes)
   }
 
   def slice(i: Int, j: Int): Buf = {
-    require(i >=0 && j >= 0, "Index out of bounds")
+    checkSliceArgs(i, j)
 
-    if (j <= i || i >= length) Buf.Empty
-    else if (i == 0 && j >= length) this
+    if (isSliceEmpty(i, j)) Buf.Empty
+    else if (isSliceIdentity(i, j)) this
     else {
       val from = i + underlying.readerIndex
       val until = math.min(j-i, length-i)

@@ -61,6 +61,7 @@ private[finagle] class ByteBufAsBuf(private[finagle] val underlying: ByteBuf) ex
   // nb: `underlying` is exposed for testing
 
   def write(bytes: Array[Byte], off: Int): Unit = {
+    checkWriteArgs(bytes.length, off)
     val dup = underlying.duplicate()
     dup.readBytes(bytes, off, dup.readableBytes)
   }
@@ -76,12 +77,11 @@ private[finagle] class ByteBufAsBuf(private[finagle] val underlying: ByteBuf) ex
   def length: Int = underlying.readableBytes
 
   def slice(from: Int, until: Int): Buf = {
-    if (from < 0 || until < 0)
-      throw new IndexOutOfBoundsException(s"slice indexes must be >= 0, saw from: $from until: $until")
+    checkSliceArgs(from, until)
 
-    if (until <= from || from >= length) Buf.Empty
-    else if (from == 0 && until >= length) this
-    else new ByteBufAsBuf(underlying.slice(from, Math.min((until-from), (length-from))))
+    if (isSliceEmpty(from, until)) Buf.Empty
+    else if (isSliceIdentity(from, until)) this
+    else new ByteBufAsBuf(underlying.slice(from, Math.min(until - from, length - from)))
   }
 
   override def equals(other: Any): Boolean = other match {
