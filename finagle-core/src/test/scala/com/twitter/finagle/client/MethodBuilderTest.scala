@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{NoOpModule, Params}
 import com.twitter.finagle._
-import com.twitter.finagle.service.{Retries, RetryBudget, TimeoutFilter}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, Retries, RetryBudget, TimeoutFilter}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import org.junit.runner.RunWith
@@ -62,8 +62,9 @@ class MethodBuilderTest
 
     val client = methodBuilder
       .withTimeout.total(10.milliseconds)
-      .withRetry.forResponse {
-        case Throw(_: GlobalRequestTimeoutException) => true
+      .withRetry.forClassifier {
+        case ReqRep(_, Throw(_: GlobalRequestTimeoutException)) =>
+          ResponseClass.RetryableFailure
       }
       .newService("a_client")
 

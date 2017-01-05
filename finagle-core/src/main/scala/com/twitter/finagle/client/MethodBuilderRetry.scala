@@ -54,63 +54,50 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
   /**
    * Retry based on [[ResponseClassifier]].
    *
+   * The default behavior is to use the client's classifier which is typically
+   * configured through `theClient.withResponseClassifier` or
+   * `ClientBuilder.withResponseClassifier`.
+   *
+   * For example, retrying on `Exception` responses:
+   * {{{
+   * import com.twitter.finagle.client.MethodBuilder
+   * import com.twitter.finagle.service.{ReqRep, ResponseClass}
+   * import com.twitter.util.Throw
+   *
+   * val builder: MethodBuilder[Int, Int] = ???
+   * builder.withRetry.forClassifier {
+   *   case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
+   * }
+   * }}}
+   *
    * @param classifier when a [[ResponseClass.Failed Failed]] with `retryable`
    *                   is `true` is returned for a given `ReqRep`, the
    *                   request will be retried.
    *                   This is often [[ResponseClass.RetryableFailure]].
    *
-   * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification response classification user guide]]
-   * @see [[forResponse]]
-   * @see [[forRequestResponse]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification
+   *     response classification user guide]]
    */
   def forClassifier(
     classifier: ResponseClassifier
   ): MethodBuilder[Req, Rep] =
-    forRequestResponse(shouldRetry(classifier))
+    forPolicy(policyForReqRep(shouldRetry(classifier)))
 
   /**
-   * Retry based on responses.
-   *
-   * @param shouldRetry when `true` for a given response,
-   *                    the request will be retried.
-   *
-   * @see [[forRequestResponse]]
-   * @see [[forClassifier]]
-   */
-  def forResponse(
-    shouldRetry: PartialFunction[Try[Rep], Boolean]
-  ): MethodBuilder[Req, Rep] = {
-    val shouldRetryWithReq = new PartialFunction[(Req, Try[Rep]), Boolean] {
-      def isDefinedAt(reqRep: (Req, Try[Rep])): Boolean =
-        shouldRetry.isDefinedAt(reqRep._2)
-      def apply(reqRep: (Req, Try[Rep])): Boolean =
-        shouldRetry(reqRep._2)
-    }
-    forRequestResponse(shouldRetryWithReq)
-  }
-
-  /**
-   * Retry based on the request and response.
-   *
-   * @param shouldRetry when `true` for a given request and response,
-   *                    the request will be retried.
-   *
-   * @see [[forResponse]]
-   * @see [[forClassifier]]
-   */
-  def forRequestResponse(
-    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
-  ): MethodBuilder[Req, Rep] =
-    forPolicy(policyForReqRep(shouldRetry))
-
-  /**
-   * '''Expert API:''' For most users, the other retry configuration
-   * APIs should suffice as they provide good defaults.
+   * '''Expert API:''' For most users, the default policy which uses
+   * the client's [[ResponseClassifier]] is appropriate.
    *
    * Retry based on a [[RetryPolicy]].
    *
-   * @see [[forResponse]]
-   * @see [[forRequestResponse]]
+   * @note Retries can be disabled using [[RetryPolicy.none]]:
+   * {{{
+   * import com.twitter.finagle.client.MethodBuilder
+   * import com.twitter.finagle.service.RetryPolicy
+   *
+   * val methodBuilder: MethodBuilder[Int, Int] = ???
+   * methodBuilder.withRetry.forPolicy(RetryPolicy.none)
+   * }}}
+   *
    * @see [[forClassifier]]
    */
   def forPolicy(

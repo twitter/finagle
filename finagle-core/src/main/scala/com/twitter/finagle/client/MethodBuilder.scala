@@ -74,11 +74,12 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * For example, retrying on `Exception` responses:
    * {{{
    * import com.twitter.finagle.client.MethodBuilder
-   * import com.twitter.util.Try
+   * import com.twitter.finagle.service.{ReqRep, ResponseClass}
+   * import com.twitter.util.Throw
    *
    * val builder: MethodBuilder[Int, Int] = ???
-   * builder.withRetry.forResponse {
-   *   case Throw(_) => true
+   * builder.withRetry.forClassifier {
+   *   case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
    * }
    * }}}
    *
@@ -134,7 +135,6 @@ private[finagle] class MethodBuilder[Req, Rep] private (
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
     //
-    // - Failure recovery (TODO)
     // - Logical Stats (TODO)
     // - Total Timeout
     // - Retries

@@ -99,84 +99,15 @@ class MethodBuilderRetryTest extends FunSuite {
     assert(stats.stat("client", "retries")() == Seq(1))
   }
 
-  test("forResponse") {
-    val stats = new InMemoryStatsReceiver()
-    val retrySvc = new RetrySvc()
-    val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
-    val defaults = methodBuilder.newService("defaults")
-
-    val unoOrDos = methodBuilder.withRetry.forResponse {
-      case Throw(e) if Seq("uno", "dos").contains(e.getMessage) => true
-    }.newService("uno_or_dos")
-
-    val unoOnly = methodBuilder.withRetry.forResponse {
-      case Throw(e) if "uno" == e.getMessage => true
-    }.newService("uno_only")
-
-    // the client will use the stack's ResponseClassifier, which
-    // will not retry the first response.
-    intercept[IllegalArgumentException] {
-      Await.result(defaults(1), 5.seconds)
-    }
-    assert(stats.stat("defaults", "retries")() == Seq(0))
-    retrySvc.reqNum = 0
-
-    // this client will retry the first 2 responses and then see the 3rd response
-    assert(3 == Await.result(unoOrDos(1), 5.seconds))
-    assert(stats.stat("uno_or_dos", "retries")() == Seq(2))
-    retrySvc.reqNum = 0
-
-    // this client will retry the first response and then see the 2nd response
-    intercept[NullPointerException] {
-      Await.result(unoOnly(1), 5.seconds)
-    }
-    assert(stats.stat("uno_only", "retries")() == Seq(1))
-    retrySvc.reqNum = 0
-  }
-
-  test("forRequestResponse") {
-    val stats = new InMemoryStatsReceiver()
-    val retrySvc = new RetrySvc()
-    val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
-
-    val reqIsOne = methodBuilder.withRetry.forRequestResponse {
-      case (req, _) if req == 1 => true
-    }.newService("req_is_one")
-
-    val reqIsOneOrRepIsUno = methodBuilder.withRetry.forRequestResponse {
-      case (req, _) if req == 1 => true
-      case (_, Throw(t)) if "uno" == t.getMessage => true
-    }.newService("req_is_one_or_rep_is_uno")
-
-    // this will keep retrying until we hit the max retries allowed
-    assert(2 == MethodBuilderRetry.MaxRetries)
-    assert(3 == Await.result(reqIsOne(1), 5.seconds))
-    assert(stats.stat("req_is_one", "retries")() == Seq(2))
-    retrySvc.reqNum = 0
-
-    // should not retry this, as the request is not 1
-    intercept[IllegalArgumentException] {
-      Await.result(reqIsOne(2), 5.seconds)
-    }
-    assert(stats.stat("req_is_one", "retries")() == Seq(2, 0))
-    retrySvc.reqNum = 0
-
-    // retry once, since the rep will be uno
-    intercept[NullPointerException] {
-      Await.result(reqIsOneOrRepIsUno(2), 5.seconds)
-    }
-    assert(stats.stat("req_is_one_or_rep_is_uno", "retries")() == Seq(1))
-    retrySvc.reqNum = 0
-  }
-
   test("retries do not apply to failures handled by the RequeueFilter") {
     val stats = new InMemoryStatsReceiver()
     val svc = Service.mk[Int, Int] { _ =>
       Future.exception(Failure.rejected("nuh uh"))
     }
     val methodBuilder = retryMethodBuilder(svc, stats)
-    val client = methodBuilder.withRetry.forResponse {
-      case Throw(f: Failure) if f.isFlagged(Failure.Restartable) => true
+    val client = methodBuilder.withRetry.forClassifier {
+      case ReqRep(_, Throw(f: Failure)) if f.isFlagged(Failure.Restartable) =>
+        ResponseClass.RetryableFailure
     }.newService("client")
 
     val ex = intercept[Failure] {
