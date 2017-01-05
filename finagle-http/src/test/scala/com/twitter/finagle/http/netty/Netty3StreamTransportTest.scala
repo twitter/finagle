@@ -23,18 +23,6 @@ class Netty3StreamTransportTest extends FunSuite {
     val transport = new Netty3ClientStreamTransport(qTransport)
   }
 
-  test("BadHttpRequest instances are identified as finagle BadReq") {
-    val in = new AsyncQueue[Any]
-    val out = new AsyncQueue[Any]
-    val qTransport = new QueueTransport(in, out)
-    val transport = new Netty3ServerStreamTransport(qTransport)
-
-    val bad: DefaultHttpRequest = BadHttpRequest(new Exception)
-    out.offer(bad)
-    val Multi(rep, _) = Await.result(transport.read(), 5.seconds)
-    assert(rep.isInstanceOf[BadReq])
-  }
-
   test("writing unchunked content gets turned into a single whole request") {
     val ctx = new Ctx
     import ctx._

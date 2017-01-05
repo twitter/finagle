@@ -7,7 +7,7 @@ import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Writer, Buf, Reader}
 import com.twitter.util._
-import io.netty.handler.codec.{http => NettyHttp, TooLongFrameException}
+import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
 
@@ -127,19 +127,6 @@ private[finagle] class Netty4ServerStreamTransport(
 
   def read(): Future[Multi[Request]] = {
     transport.read().flatMap {
-      case req: NettyHttp.HttpRequest if req.decoderResult.isFailure =>
-        val exn = req.decoderResult.cause
-        val bad = exn match {
-          case ex: TooLongFrameException =>
-            if (ex.getMessage.startsWith("An HTTP line is larger than "))
-              BadRequest.uriTooLong(exn)
-            else
-              BadRequest.headerTooLong(exn)
-          case _ =>
-            BadRequest(exn)
-        }
-        Future.value(Multi(bad, Future.Done))
-
       case req: NettyHttp.FullHttpRequest =>
         val finagleReq = Bijections.netty.fullRequestToFinagle(req,
           transport.remoteAddress match {

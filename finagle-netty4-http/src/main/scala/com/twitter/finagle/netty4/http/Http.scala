@@ -5,7 +5,8 @@ import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
 import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
-import com.twitter.finagle.netty4.http.handler.{FixedLengthMessageAggregator, PayloadSizeHandler, RespondToExpectContinue}
+import com.twitter.finagle.netty4.http.handler.{
+  BadRequestHandler, FixedLengthMessageAggregator, PayloadSizeHandler, RespondToExpectContinue}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.server.Listener
@@ -106,6 +107,9 @@ object exp {
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxRequestSize.inBytes.toInt)
         )
+
+      // We need to handle bad requests as the dispatcher doesn't know how to handle them.
+      pipeline.addLast("badRequestHandler", BadRequestHandler)
     }
   }
 

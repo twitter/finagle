@@ -7,15 +7,15 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{BadMessageConverter, Netty3ClientStreamTransport, Netty3ServerStreamTransport}
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit}
 import java.lang.{Long => JLong}
-import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http._
-import scala.util.control.NonFatal
 
 /**
  * a HttpChunkAggregator which recovers decode failures into 4xx http responses
@@ -23,19 +23,16 @@ import scala.util.control.NonFatal
 private[http] class SafeServerHttpChunkAggregator(maxContentSizeBytes: Int) extends HttpChunkAggregator(maxContentSizeBytes) {
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
-    try {
-      super.handleUpstream(ctx, e)
-    } catch {
-      case NonFatal(ex) =>
-        val channel = ctx.getChannel()
-        ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    try super.handleUpstream(ctx, e)
+    catch { case ex: TooLongFrameException =>
+      val event = BadMessageConverter.errorToDownstreamEvent(ctx.getChannel, ex)
+      ctx.sendDownstream(event)
     }
   }
 }
 
 /** Convert exceptions to BadHttpRequests */
-class SafeHttpServerCodec(
+private[http] class SafeHttpServerCodec(
     maxInitialLineLength: Int,
     maxHeaderSize: Int,
     maxChunkSize: Int)
@@ -45,13 +42,13 @@ class SafeHttpServerCodec(
     // this only catches Codec exceptions -- when a handler calls sendUpStream(), it
     // rescues exceptions from the upstream handlers and calls notifyHandlerException(),
     // which doesn't throw exceptions.
-    try {
-     super.handleUpstream(ctx, e)
-    } catch {
-      case ex: Exception =>
-        val channel = ctx.getChannel()
-        ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    try super.handleUpstream(ctx, e)
+    catch { case ex: Exception =>
+      val event = BadMessageConverter.errorToDownstreamEvent(ctx.getChannel, ex)
+      
+      // The event must be handled by `this` because we are the codec
+      // responsible for handling http messages
+      this.handleDownstream(ctx, event)
     }
   }
 }

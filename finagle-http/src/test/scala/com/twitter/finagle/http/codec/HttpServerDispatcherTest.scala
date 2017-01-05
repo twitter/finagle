@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http
-import com.twitter.finagle.http.{BadHttpRequest, Fields, Request, Response, Version}
+import com.twitter.finagle.http.{Fields, Request, Response, Version}
 import com.twitter.finagle.http.netty.Netty3ServerStreamTransport
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -13,7 +13,7 @@ import com.twitter.io.Reader
 import com.twitter.util.{Await, Future, Promise}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{
-  DefaultHttpChunk, HttpChunk, HttpResponse, HttpResponseStatus, HttpVersion}
+  DefaultHttpChunk, HttpChunk, HttpResponse, HttpResponseStatus}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -38,33 +38,6 @@ class HttpServerDispatcherTest extends FunSuite {
     in.write("invalid")
     Await.ready(out.onClose, 5.seconds)
     assert(out.status == Status.Closed)
-  }
-
-  test("bad HTTP/1.0 request") {
-    val resp = runBadRequest(BadHttpRequest(new Exception()))
-
-    assert(resp.getProtocolVersion == HttpVersion.HTTP_1_0)
-    assert(resp.headers().get(Fields.Connection) == "close")
-  }
-
-  test("bad HTTP/1.1 request") {
-    val badRequest = BadHttpRequest(new Exception()).copy(httpVersion = HttpVersion.HTTP_1_1)
-    val resp = runBadRequest(badRequest)
-
-    assert(resp.getProtocolVersion == HttpVersion.HTTP_1_1)
-    assert(resp.headers().get(Fields.Connection) == "close")
-  }
-
-  private def runBadRequest(badReq: BadHttpRequest): HttpResponse = {
-    val (in, out) = mkPair[Any, Any]
-    val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
-
-    in.write(badReq)
-    Await.result(in.read, 5.seconds) match {
-      case resp: HttpResponse => resp
-      case other => fail(s"Received unknown type: ${other.getClass.getSimpleName}")
-    }
   }
 
   test("don't clobber service 'Connection: close' headers set by service") {
