@@ -52,6 +52,8 @@ class MemcachedTest extends FunSuite
   test("Memcache.newPartitionedClient enables FactoryToService") {
     val st = new InMemoryStatsReceiver
     val client = Memcached.client
+      .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.consecutiveFailures(
+        100, Backoff.const(1.seconds))))
       .configured(Stats(st))
       .newRichClient("memcache=127.0.0.1:12345")
 
