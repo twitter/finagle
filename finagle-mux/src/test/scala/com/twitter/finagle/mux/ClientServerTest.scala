@@ -31,13 +31,16 @@ private object TestContext {
   }
 }
 
-private[mux] class ClientServerTest(canDispatch: Boolean)
+private[mux] abstract class ClientServerTest
   extends FunSuite
   with OneInstancePerTest
   with MockitoSugar
   with AssertionsForJUnit
   with Eventually
   with IntegrationPatience {
+
+  def canDispatch: Boolean
+
   val tracer = new BufferingTracer
 
   class Ctx(config: FailureDetector.Config = FailureDetector.NullConfig) {
@@ -288,7 +291,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientServerTestNoDispatch extends ClientServerTest(false) {
+class ClientServerTestNoDispatch extends ClientServerTest {
+  val canDispatch = false
+
   test("does not dispatch destinations") {
     val ctx = new Ctx
     import ctx._
@@ -303,7 +308,9 @@ class ClientServerTestNoDispatch extends ClientServerTest(false) {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientServerTestDispatch extends ClientServerTest(true) {
+class ClientServerTestDispatch extends ClientServerTest {
+  val canDispatch = true
+
   import TestContext._
 
   // Note: We test trace propagation here, too,
