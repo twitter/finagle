@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
-import com.twitter.io.{Buf, ConcatBuf}
+import com.twitter.io.Buf
 
 object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String): Exception = ClientError(msg)
@@ -197,6 +197,6 @@ object Command {
       Vector(ARG_SIZE, Buf.Utf8(arg.length.toString), EOL, arg, EOL)
     }
 
-    ConcatBuf(header ++ bufs)
+    Buf(header ++ bufs)
   }
 }

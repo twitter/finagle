@@ -57,7 +57,9 @@ private[finagle] object ByteBufAsBuf {
 /**
  * a [[Buf]] wrapper for Netty `ByteBuf`s.
  */
-private[finagle] class ByteBufAsBuf(private[finagle] val underlying: ByteBuf) extends Buf {
+private[finagle] class ByteBufAsBuf(
+    private[finagle] val underlying: ByteBuf)
+  extends Buf {
   // nb: `underlying` is exposed for testing
 
   def write(bytes: Array[Byte], off: Int): Unit = {
@@ -78,7 +80,6 @@ private[finagle] class ByteBufAsBuf(private[finagle] val underlying: ByteBuf) ex
 
   def slice(from: Int, until: Int): Buf = {
     checkSliceArgs(from, until)
-
     if (isSliceEmpty(from, until)) Buf.Empty
     else if (isSliceIdentity(from, until)) this
     else new ByteBufAsBuf(underlying.slice(from, Math.min(until - from, length - from)))
