@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.logging.Level
 import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
 
 
@@ -99,7 +100,6 @@ object DeadlineFilter {
  * @param statsReceiver for stats reporting, typically scoped to
  *        ".../admission_control/deadline/"
  * @param nowMillis current time in milliseconds
- *
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
  *      for more details.
  */
@@ -131,7 +131,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
     new Failure(
       s"exceeded request deadline of ${deadline - timestamp} " +
       s"by $elapsed. Deadline expired at $deadline and now it is $now.",
-      flags = Failure.NonRetryable | Failure.Rejected)
+      flags = Failure.NonRetryable | Failure.Rejected, logLevel = Level.DEBUG)
 
   // The request is rejected if the set deadline has expired and there are at least
   // `rejectWithdrawal` tokens in `rejectBucket`. Otherwise, the request is
