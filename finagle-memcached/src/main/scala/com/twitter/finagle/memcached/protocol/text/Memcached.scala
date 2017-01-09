@@ -9,6 +9,7 @@ import com.twitter.io.Buf
 import org.jboss.netty.channel._
 import scala.collection.immutable
 
+@deprecated(message = "Use `com.twitter.finagle.Memcached.client to create clients`", since = "2016-12-22")
 object Memcached {
   def apply(): Memcached = new Memcached()
   def get() = apply()
@@ -48,6 +49,8 @@ object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
     pipeline
   }
 }
+
+@deprecated(message = "Use `com.twitter.finagle.Memcached.client to create clients`", since = "2016-12-22")
 class Memcached extends CodecFactory[Command, Response] {
 
   def server = Function.const {

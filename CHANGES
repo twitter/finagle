@@ -33,6 +33,9 @@ Deprecations
 
     Use `c.t.f.Memcached.client` to create a Memcached client. `RB_ID=899331``
 
+  * finagle-memcached: Deprecate `c.t.f.memcached.protocol.text.Memcached` object.
+    Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=899009``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

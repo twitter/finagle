@@ -1,16 +1,17 @@
 package com.twitter.finagle.memcached.integration
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
-
-import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.Address
+import com.twitter.finagle.Memcached
+import com.twitter.finagle.Name
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.Await
+import java.net.InetSocketAddress
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class SimpleClientTest extends FunSuite with BeforeAndAfter {
@@ -25,12 +26,11 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
   before {
     testServer = TestMemcachedServer.start()
     if (testServer.isDefined) {
-      val service = ClientBuilder()
-        .hosts(Seq(testServer.get.address))
-        .reportTo(stats)
-        .codec(new Memcached())
-        .hostConnectionLimit(1)
-        .build()
+      val address = Address(testServer.get.address.asInstanceOf[InetSocketAddress])
+      val service = Memcached.client
+        .withStatsReceiver(stats)
+        .withLoadBalancer.connectionsPerEndpoint(1)
+        .newService(Name.bound(address), "memcache")
       client = Client(service)
     }
   }
