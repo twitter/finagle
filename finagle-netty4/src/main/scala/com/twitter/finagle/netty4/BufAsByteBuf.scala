@@ -15,7 +15,7 @@ private[finagle] object BufAsByteBuf {
         case ByteBufAsBuf.Owned(underlying) =>
           underlying
         case Buf.ByteArray.Owned(bytes, begin, end) =>
-          Unpooled.wrappedBuffer(bytes, begin, end)
+          Unpooled.wrappedBuffer(bytes, begin, end - begin)
         case _ =>
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Owned.extract(buf))
       }

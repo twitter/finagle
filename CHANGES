@@ -45,6 +45,12 @@ Runtime Behavior Changes
     This allows users to get away with using a poor hashing function
     such as `String.hashCode`. ``RB_ID=899195``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Properly compute length when converting a `Buf.ByteArray`
+    to a Netty 4 `ByteBuf`. ``RB_ID=901605``
+
 6.41.0
 ------
 

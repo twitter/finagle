@@ -1475,6 +1475,11 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
   )
 
   testConstructAndExtract(
+    "Buf.ByteArray with begin and end",
+    Buf.ByteArray.Owned(Array[Byte](0, 1, 2, 3, 4), 3, 4)
+  )
+
+  testConstructAndExtract(
     "Buf.ByteBuffer",
     Buf.ByteBuffer.Owned(
       ByteBuffer.wrap(Array[Byte](0, 1, 2, 3, 4))
