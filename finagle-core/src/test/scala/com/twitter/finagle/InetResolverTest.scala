@@ -101,17 +101,14 @@ class InetResolverTest extends FunSuite {
     val inetResolverWithPool = new InetResolver(resolveLoopback, DefaultStatsReceiver, Some(pollInterval), resolvePool)
 
     val maxWaitTimeout = Duration(500, TimeUnit.MILLISECONDS)
-    Time.withCurrentTimeFrozen { timeControl =>
-      val addr = inetResolverWithPool.bind("127.0.0.1:80")
-      val f = addr.changes.filter(_ != Addr.Pending).toFuture
-      Await.result(f, maxWaitTimeout) match {
-        case Addr.Bound(b, meta) if meta.isEmpty =>
-          assert(b.contains(Address("127.0.0.1", 80)))
-        case _ => fail()
-      }
-
-      timeControl.advance(pollInterval)
-      assert(latch.await(maxWaitTimeout))
+    val addr = inetResolverWithPool.bind("127.0.0.1:80")
+    val f = addr.changes.filter(_ != Addr.Pending).toFuture
+    Await.result(f, maxWaitTimeout) match {
+      case Addr.Bound(b, meta) if meta.isEmpty =>
+        assert(b.contains(Address("127.0.0.1", 80)))
+      case _ => fail()
     }
+
+    assert(latch.await(maxWaitTimeout))
   }
 }
