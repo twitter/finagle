@@ -20,6 +20,7 @@ env:
     - PROJECT=finagle-mdns
     - PROJECT=finagle-mux
     - PROJECT=finagle-mysql
+    - PROJECT=finagle-native
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
     - PROJECT=finagle-ostrich4
@@ -40,7 +41,7 @@ cache:
    - $HOME/.m2
    - $HOME/.ivy2
    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
-   - $HOME/.gitshas
+   - $HOME/.dodo
 
 before_cache:
   # Tricks to avoid unnecessary cache updates
@@ -62,19 +63,13 @@ before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS
   - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
-  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
-  - >
-    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
-      # run conditionally because they don't pass with openjdks
-      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update finagle-native/test
-    fi
-
+  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update finagle-native/update
   # don't test these projects because they don't pass on travis-ci
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script:
   # run for all environments
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 after_success:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
