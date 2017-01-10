@@ -108,7 +108,6 @@ class InetResolverTest extends FunSuite {
         assert(b.contains(Address("127.0.0.1", 80)))
       case _ => fail()
     }
-
     assert(latch.await(maxWaitTimeout))
   }
 }
