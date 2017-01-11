@@ -1,17 +1,19 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.netty4.http.exp._
-import io.netty.buffer.{ByteBufUtil, ByteBuf}
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import io.netty.buffer.Unpooled._
+import io.netty.buffer.{ByteBufUtil, ByteBuf}
 import io.netty.channel._
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http2.Http2CodecUtil._
 import io.netty.util.CharsetUtil._
 import org.junit.runner.RunWith
-import org.mockito.{ArgumentCaptor, Matchers}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.mockito.{ArgumentCaptor, Matchers}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -25,7 +27,11 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
   var channel: EmbeddedChannel = null
   var dummyHandler: ChannelInboundHandlerAdapter = null
 
+  val stats = new InMemoryStatsReceiver
+  var params = Params.empty + Stats(stats)
+
   before {
+    stats.clear()
     channel = new EmbeddedChannel()
     pipeline = channel.pipeline()
 
@@ -33,7 +39,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
       def initChannel(ch: Channel): Unit = {}
     }
 
-    val priorKnowledgeHandler = new PriorKnowledgeHandler(initializer, Params.empty)
+    val priorKnowledgeHandler = new PriorKnowledgeHandler(initializer, params)
     pipeline.addLast(PriorKnowledgeHandlerName, priorKnowledgeHandler)
 
     dummyHandler = mock[ChannelInboundHandlerAdapter]
@@ -57,6 +63,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     verify(dummyHandler).channelRead(anyObject(), Matchers.eq(nonPrefaceBytes))
     assert(!pipeline.names().contains(PriorKnowledgeHandlerName))
     assert(pipeline.names().contains(HttpCodecName))
+    assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
 
 
@@ -86,6 +93,8 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
 
     assert(ByteBufUtil.equals(capturedMessages.get(1), 0,
       nonMatching, 0, nonMatching.capacity()))
+
+    assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
 
 
@@ -113,5 +122,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
 
     assert(ByteBufUtil.equals(capturedMessages.get(1), 0,
       extraBytes, 0, extraBytes.capacity()))
+
+    assert(stats.counters(Seq("upgrade", "success")) == 1)
   }
 }

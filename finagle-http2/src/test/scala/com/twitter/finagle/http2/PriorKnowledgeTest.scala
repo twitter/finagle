@@ -1,8 +1,10 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle
-import com.twitter.finagle.http.AbstractEndToEndTest
+import com.twitter.finagle.Service
+import com.twitter.finagle.http.{AbstractEndToEndTest, Request, Response}
 import com.twitter.finagle.http2.param.PriorKnowledge
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -25,4 +27,16 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
   )
 
   def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
+
+  test("A prior knowledge connection counts as one upgrade for stats") {
+    val client = nonStreamingConnect(Service.mk { req: Request =>
+      Future.value(Response())
+    })
+
+    await(client(Request("/")))
+
+    assert(statsRecv.counters(Seq("server", "upgrade", "success")) == 1)
+    assert(statsRecv.counters(Seq("client", "upgrade", "success")) == 1)
+    await(client.close())
+  }
 }

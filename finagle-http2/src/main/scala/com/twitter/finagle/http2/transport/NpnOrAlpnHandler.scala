@@ -1,5 +1,6 @@
 package com.twitter.finagle.http2.transport
 
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.http.exp._
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
@@ -8,6 +9,9 @@ import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegoti
 
 private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params: Stack.Params)
   extends ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
+
+  private[this] val Stats(statsReceiver) = params[Stats]
+  private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
 
   @throws(classOf[Exception])
   protected def configurePipeline(ctx: ChannelHandlerContext, protocol: String) {
@@ -22,6 +26,7 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
             ch.pipeline.addLast(init)
           }
         }
+        upgradeCounter.incr()
 
         ctx.channel.config.setAutoRead(true)
         ctx.pipeline().replace(

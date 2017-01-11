@@ -2,6 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.netty4.http.exp.initClient
 import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
 import io.netty.channel.{ChannelInboundHandlerAdapter, ChannelHandlerContext}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -14,6 +15,9 @@ import scala.collection.JavaConverters.iterableAsScalaIterableConverter
 private[http2] class UpgradeRequestHandler(
     params: Stack.Params)
   extends ChannelInboundHandlerAdapter {
+
+  private[this] val Stats(statsReceiver) = params[Stats]
+  private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
 
   override def userEventTriggered(ctx: ChannelHandlerContext, event: Any): Unit = {
     event match {
@@ -40,6 +44,7 @@ private[http2] class UpgradeRequestHandler(
             initClient(params)(pipeline)
           })
         )
+        upgradeCounter.incr()
         ctx.fireChannelRead(successful)
         ctx.pipeline.remove(this)
       case _ => // nop

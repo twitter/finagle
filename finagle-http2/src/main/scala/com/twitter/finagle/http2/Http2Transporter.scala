@@ -37,7 +37,7 @@ private[http2] object Http2Transporter {
     val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
 
     if (priorKnowledge) {
-      new PriorKnowledgeTransporter(underlying)
+      new PriorKnowledgeTransporter(underlying, params)
     } else {
       val underlyingHttp11 = Netty4HttpTransporter(params)
 

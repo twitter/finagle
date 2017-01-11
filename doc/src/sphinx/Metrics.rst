@@ -223,6 +223,12 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 **time/<statusCategory>**
   A histogram on duration in milliseconds per HTTP status code category.
 
+HTTP2
+-----
+These stats pertain to HTTP2 only.
+
+.. include:: metrics/Http2.rst
+
 Memcached
 ---------
 

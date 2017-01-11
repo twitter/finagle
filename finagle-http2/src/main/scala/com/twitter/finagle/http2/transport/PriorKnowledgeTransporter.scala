@@ -4,6 +4,8 @@ import com.twitter.cache.FutureCache
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.Http2Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.param.Stats
+import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import java.net.SocketAddress
@@ -19,8 +21,12 @@ import java.util.concurrent.ConcurrentHashMap
  * Instead, it speaks http/2 from birth.
  */
 private[http2] class PriorKnowledgeTransporter(
-    underlying: Transporter[Any, Any])
+    underlying: Transporter[Any, Any],
+    params: Stack.Params)
   extends Transporter[Any, Any] {
+
+  private[this] val Stats(statsReceiver) = params[Stats]
+  private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
 
   private[this] val cache = new ConcurrentHashMap[SocketAddress, Future[MultiplexedTransporter]]()
 
@@ -33,6 +39,9 @@ private[http2] class PriorKnowledgeTransporter(
       multi.onClose.ensure {
         cache.remove(addr, multi)
       }
+
+      // Consider the creation of a new prior knowledge transport as an upgrade
+      upgradeCounter.incr()
       multi
     }
   }

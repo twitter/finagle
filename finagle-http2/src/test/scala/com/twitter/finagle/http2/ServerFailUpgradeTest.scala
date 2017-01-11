@@ -1,7 +1,9 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.http.AbstractHttp1EndToEndTest
 import com.twitter.finagle
+import com.twitter.finagle.http.{AbstractHttp1EndToEndTest, Request, Response}
+import com.twitter.finagle.Service
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -23,4 +25,17 @@ class ServerFailUpgradeTest extends AbstractHttp1EndToEndTest {
   )
 
   def featureImplemented(feature: Feature): Boolean = !unsupported.contains(feature)
+
+  test("Upgrade counters are not incremented") {
+    val client = nonStreamingConnect(Service.mk { req: Request =>
+      Future.value(Response())
+    })
+
+    await(client(Request("/")))
+
+    assert(!statsRecv.counters.contains(Seq("server", "upgrade", "success")))
+    assert(!statsRecv.counters.contains(Seq("client", "upgrade", "success")))
+
+    await(client.close())
+  }
 }

@@ -18,6 +18,7 @@ scala_library(
     'util/util-cache',
     'util/util-core',
     'util/util-logging',
+    'util/util-stats',
   ],
   strict_deps=True,
   fatal_warnings=True,
