@@ -14,6 +14,7 @@ junit_tests(
     'finagle/finagle-core',
     'finagle/finagle-http',
     'util/util-core',
+    'util/util-logging',
     'util/util-stats',
   ],
   strict_deps=True,
