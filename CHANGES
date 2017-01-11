@@ -76,6 +76,14 @@ Breaking API Changes
   * finagle-core: `CancelledWriteException` was removed as it is no longer used.
   ``RB_ID=896757``
 
+  * finagle-core: The structure of Context and its subtypes, LocalContext and
+    MarshalledContext, have been significantly refined, eliminating StackOverflowErrors
+    and memory leaks while also refining the API. The `letClear()` method, which cleared all
+    items from the context, has been renamed to `letClearAll` to avoid confusion with other
+    `letClear` methods which clear individual keys. The bulk `letClear` method now takes
+    a collection of `Key[_]`s, making it usable from Java. Bulk `let` operations can now be
+    done using a collection of `KeyValuePair`s. ``RB_ID=896663``
+
   * finagle-kestrel: The `codec` method has been removed from the kestrel
     MultiReader object. Configure a ClientBuilder protocol using the default
     thrift StackClient, Thrift.client, via the `stack` method of ClientBuilder.

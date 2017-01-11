@@ -61,19 +61,19 @@ object HttpContext {
    * and run `fn`.
    */
   private[http] def read[R](msg: Message)(fn: => R): R = {
-    var env: Contexts.broadcast.Env = Contexts.broadcast.env
+    var ctxValues: List[Contexts.broadcast.KeyValuePair[_]] = Nil
 
     msg.headerMap.get(DeadlineHeaderKey).flatMap(unmarshalDeadline) match {
-      case Some(deadline) => env = env.bound(Deadline, deadline)
+      case Some(deadline) => ctxValues = Contexts.broadcast.KeyValuePair(Deadline, deadline)::ctxValues
       case None =>
     }
 
     msg.headerMap.get(RetriesHeaderKey).flatMap(unmarshalRetries) match {
-      case Some(retries) => env = env.bound(Retries, retries)
+      case Some(retries) => ctxValues = Contexts.broadcast.KeyValuePair(Retries, retries)::ctxValues
       case None =>
     }
 
-    Contexts.broadcast.let(env)(fn)
+    Contexts.broadcast.let(ctxValues)(fn)
   }
 
   /**

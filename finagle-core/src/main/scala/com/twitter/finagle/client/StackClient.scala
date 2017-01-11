@@ -545,7 +545,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
               () => transporter(ia).map { trans =>
                 // we do not want to capture and request specific Locals
                 // that would live for the life of the session.
-                Contexts.letClear {
+                Contexts.letClearAll {
                   endpointClient.newDispatcher(trans)
                 }
               }

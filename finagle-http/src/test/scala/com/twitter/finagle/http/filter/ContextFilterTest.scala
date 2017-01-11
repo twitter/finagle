@@ -31,7 +31,7 @@ class ContextFilterTest extends FunSuite {
         HttpContext.write(req)
 
         // Clear the deadline/retries values in the context
-        Contexts.broadcast.letClear() {
+        Contexts.broadcast.letClearAll {
           // ensure the deadline was cleared
           assert(Deadline.current == None)
 

@@ -7,6 +7,7 @@ import com.twitter.finagle.{Service, SimpleFilter, Dtab}
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
+import scala.collection.JavaConverters._
 
 private[finagle] class TTwitterServerFilter(
   serviceName: String,
@@ -46,19 +47,10 @@ private[finagle] class TTwitterServerFilter(
       // loaded, but it should never be the case that the ids from the two
       // paths won't match.
       Trace.letId(richHeader.traceId) {
+
         // Destination is ignored for now,
         // as it really requires a dispatcher.
         Dtab.local ++= richHeader.dtab
-
-        var env = Contexts.broadcast.env
-        if (header.contexts != null) {
-          val iter = header.contexts.iterator()
-          while (iter.hasNext) {
-            val c = iter.next()
-            env = Contexts.broadcast.Translucent(
-              env, Buf.ByteArray.Owned(c.getKey()), Buf.ByteArray.Owned(c.getValue()))
-          }
-        }
 
         Trace.recordRpc({
           val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
@@ -66,12 +58,23 @@ private[finagle] class TTwitterServerFilter(
         })
 
         // If `header.client_id` field is non-null, then allow it to take
-        // precedence over the id provided by ClientIdContext.
+        // precedence over an id potentially provided by in the key-value pairs
+        // when performing tracing.
         ClientId.let(richHeader.clientId) {
           Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
 
-          Contexts.broadcast.let(env) {
-            service(request_) map {
+          // Load the values from the received context into the broadcast context
+          val ctxKeys: Iterable[(Buf, Buf)] = {
+            if (header.contexts == null) Iterable.empty
+            else {
+              header.contexts.asScala.map { c =>
+                Buf.ByteArray.Owned(c.getKey()) -> Buf.ByteArray.Owned(c.getValue())
+              }
+            }
+          }
+
+          Contexts.broadcast.letUnmarshal(ctxKeys) {
+            service(request_).map {
               case response if response.isEmpty => response
               case response =>
                 val responseHeader = new thrift.ResponseHeader

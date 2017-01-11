@@ -1,15 +1,15 @@
 package com.twitter.finagle.context
 
-import org.junit.runner.RunWith
+import com.twitter.conversions.time._
+import com.twitter.util.{Await, Future, Promise, Return}
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import com.twitter.util.{Await, Future, Promise}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
-class ContextTest extends FunSuite with AssertionsForJUnit {
-  val ctx = new LocalContext
-  val a = new ctx.Key[String]
-  val b = new ctx.Key[Int]
+abstract class AbstractContextTest extends FunSuite with AssertionsForJUnit {
+  val ctx: Context
+  val a: ctx.Key[String]
+  val b: ctx.Key[Int]
+
   val DefaultStr = "theDefault"
   val StrFn = () => DefaultStr
   val DefaultInt = 999
@@ -24,38 +24,29 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     var ran = 0
     ctx.let(a, "ok") {
       ran += 1
+      // Test all common access methods
       assert(ctx.contains(a))
       assert(ctx.get(a) == Some("ok"))
       assert(ctx.getOrElse(a, StrFn) == "ok")
       assert(ctx(a) == "ok")
     }
 
-    assert(ran == 1)
+    assert(ran == 1)  // Make sure it was only run once
   }
 
-  test("Context.let binds, shadows") {
-    val env = ctx.Empty.bound(a, "ok")
-    var ran = 0
-    ctx.let(env) {
-      ran += 1
-      assert(ctx.contains(a))
-      assert(ctx.get(a) == Some("ok"))
-      assert(ctx(a) == "ok")
-      assert(ctx.getOrElse(a, StrFn) == "ok")
-      assert(!ctx.contains(b))
+  test("Context.let(Iterable(pair1, pair2, ..)) binds multiple keys") {
+    // not set yet
+    assert(ctx.get(a) == None)
+    assert(ctx.get(b) == None)
 
-      val env = ctx.Empty.bound(a, "ok1")
-      ctx.let(env) {
-        ran *= 3
-        assert(ctx.contains(a))
-        assert(ctx.get(a) == Some("ok1"))
-        assert(ctx.getOrElse(a, StrFn) == "ok1")
-        assert(ctx(a) == "ok1")
-        assert(!ctx.contains(b))
-      }
+    ctx.let(Seq(ctx.KeyValuePair(a, "1"), ctx.KeyValuePair(b, 2))) {
+      assert(ctx.get(a) == Some("1"))
+      assert(ctx.get(b) == Some(2))
     }
 
-    assert(ran == 3)
+    // Only valid in the let block
+    assert(ctx.get(a) == None)
+    assert(ctx.get(b) == None)
   }
 
   test("Shadowing binds") {
@@ -78,7 +69,7 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ctx.getOrElse(b, IntFn) == DefaultInt)
   }
 
-  test("letClear individual keys") {
+  test("letClear(key) clears key") {
     var ranInner, ranOuter = 0
     ctx.let(a, "ok", b, 1) {
       ranOuter += 1
@@ -98,12 +89,35 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ranOuter == 1)
   }
 
-  test("Empty Context") {
-    val empty = ctx.Empty
-    assert(empty.get(a).isEmpty)
-    assert(empty.getOrElse(a, StrFn) == DefaultStr)
-    intercept[NoSuchElementException] { empty(a) }
-    assert(!empty.contains(a))
+  test("letClear(Iterable(key1, key2, ..)) clears multiple keys") {
+    // Clear multiple keys at once
+    ctx.let(Seq(ctx.KeyValuePair(a, "ok"), ctx.KeyValuePair(b, 0))) {
+      assert(ctx.contains(a))
+      assert(ctx.contains(b))
+
+      ctx.letClear(Seq(a, b)) {
+        assert(!ctx.contains(a))
+        assert(!ctx.contains(b))
+      }
+    }
+  }
+
+  test("empty Context") {
+    ctx.letClearAll {
+      assert(ctx.get(a).isEmpty)
+      assert(ctx.getOrElse(a, StrFn) == DefaultStr)
+      intercept[NoSuchElementException] { ctx(a) }
+      assert(!ctx.contains(a))
+    }
+  }
+
+  test("Supports multiple keys") {
+    ctx.let(a, "ok") {
+      ctx.let(b, 1) {
+        assert(ctx.get(a) == Some("ok"))
+        assert(ctx.get(b) == Some(1))
+      }
+    }
   }
 
   test("Propagates with future execution") {
@@ -118,16 +132,16 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(!f.isDefined)
     p.setDone()
     assert(f.isDefined)
-    assert(Await.result(f) == "ok")
+    assert(f.poll == Some(Return("ok")))
   }
 
-  test("letClear all keys, basics") {
+  test("letClearAll clears all keys, basics") {
     assert(!ctx.contains(a))
     var ran = 0
     ctx.let(a, "0") {
       ran += 1
       assert(ctx(a) == "0")
-      ctx.letClear() {
+      ctx.letClearAll {
         ran += 1
         assert(!ctx.contains(a))
       }
@@ -135,14 +149,14 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ran == 2)
   }
 
-  test("letClear all keys, nested let after clearing") {
+  test("letClearAll clears all keys, nested let after clearing") {
     assert(!ctx.contains(a))
     assert(!ctx.contains(b))
     var ran = 0
     ctx.let(a, "a") {
       ran += 1
       assert(ctx(a) == "a")
-      ctx.letClear() {
+      ctx.letClearAll {
         ran += 1
         assert(!ctx.contains(a))
         ctx.let(b, 2) {
@@ -157,7 +171,7 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ran == 3)
   }
 
-  test("letClear all keys, affects current scope") {
+  test("letClearAll clears all keys, affects current scope") {
     assert(!ctx.contains(a))
     assert(!ctx.contains(b))
     var ran = 0
@@ -170,7 +184,7 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
         ctx.let(a, "ok2") {
           ran += 1
           assert(ctx(a) == "ok2")
-          ctx.letClear() {
+          ctx.letClearAll {
             ran += 1
             assert(!ctx.contains(a))
             assert(!ctx.contains(b))
@@ -183,4 +197,21 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(ran == 4)
   }
 
+  test("Recursive binds don't result in StackOverflowError") {
+    def loop(i: Int): Future[Unit] = {
+      if (i <= 0) {
+        assert(ctx.get(b) == None)  // Forces evaluation of the whole context
+        Future.value(())
+      } else ctx.let(a, "value") {
+        // We propagate the current context for use in the `before` block, but trampoline it
+        // by using a Future so we don't get a SOE from trying to build the computation itself.
+        Future.value(()).before(loop(i - 1))
+      }
+    }
+
+
+    val f = loop(20*1024).liftToTry // should be enough to cause a SOE, if its going to happen
+    val r = Await.result(f, 10.seconds)
+    assert(r.isReturn)
+  }
 }
