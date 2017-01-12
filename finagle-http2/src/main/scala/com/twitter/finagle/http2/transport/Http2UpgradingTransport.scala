@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http2.{RefTransport, Http2Transporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
-import com.twitter.util.{Promise, Future}
+import com.twitter.util.{Promise, Future, Try}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http.HttpObject
 
@@ -16,7 +16,7 @@ import io.netty.handler.codec.http.HttpObject
 private[http2] class Http2UpgradingTransport(
     t: Transport[Any, Any],
     ref: RefTransport[Any, Any],
-    p: Promise[Option[() => Transport[HttpObject, HttpObject]]])
+    p: Promise[Option[() => Try[Transport[HttpObject, HttpObject]]]])
   extends TransportProxy[Any, Any](t) {
 
   import Http2Transporter._

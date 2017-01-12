@@ -21,14 +21,14 @@ import scala.collection.JavaConverters._
  * After a stream finishes, the transport represents the next stream id.
  *
  * Since each transport only represents a single stream at a time, one of these
- * transports cannot be multiplexed-instead, the MultiplexedTransport is the
- * unit of Multiplexing, so if you want to increase concurrency, you should
+ * transports cannot be multiplexed-instead, the ChildTransport is the
+ * unit of multiplexing, so if you want to increase concurrency, you should
  * create a new Transport.
  */
 private[http2] class MultiplexedTransporter(
     underlying: Transport[StreamMessage, StreamMessage],
     addr: SocketAddress)
-  extends (() => Transport[HttpObject, HttpObject]) {
+  extends (() => Try[Transport[HttpObject, HttpObject]]) { self =>
 
   import MultiplexedTransporter._
 
@@ -36,6 +36,10 @@ private[http2] class MultiplexedTransporter(
   private[this] val queues: ConcurrentHashMap[Int, AsyncQueue[HttpObject]] =
     new ConcurrentHashMap[Int, AsyncQueue[HttpObject]]()
   private[this] val id = new AtomicInteger(1)
+
+  // synchronized by this
+  private[this] var curStreams = 0
+  private[this] var dead = false
 
   // exposed for testing
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
@@ -109,7 +113,7 @@ private[http2] class MultiplexedTransporter(
    * just need a response to advance to the next stream.
    */
   def first(): Transport[HttpObject, HttpObject] = {
-    val ct = new ChildTransport()
+    val ct = createChildTransport()
 
     ct.synchronized {
       ct.finishedWriting = true
@@ -118,8 +122,26 @@ private[http2] class MultiplexedTransporter(
     ct
   }
 
-  def apply(): Transport[HttpObject, HttpObject] =
-    new ChildTransport()
+  private[this] def createChildTransport(): ChildTransport = self.synchronized {
+    val ct = new ChildTransport()
+    curStreams += 1
+    ct.onClose.ensure {
+      self.synchronized {
+        curStreams -= 1
+        if (curStreams == 0) {
+          dead = true
+          underlying.close()
+        }
+      }
+    }
+
+    ct
+  }
+
+  def apply(): Try[Transport[HttpObject, HttpObject]] = self.synchronized {
+    if (dead) Throw(new DeadConnectionException(addr, FailureFlags.Retryable))
+    else Return(createChildTransport())
+  }
 
   def onClose: Future[Throwable] = underlying.onClose
 
@@ -133,8 +155,7 @@ private[http2] class MultiplexedTransporter(
   // connections.  This can be improved by adding an extra layer between pooling
   // and dispatching, or making the distinction between streams and sessions
   // explicit.
-  private[http2] class ChildTransport
-    extends Transport[HttpObject, HttpObject] { child =>
+  private[http2] class ChildTransport extends Transport[HttpObject, HttpObject] { child =>
 
     private[this] val _onClose: Promise[Throwable] = Promise[Throwable]()
 
@@ -184,7 +205,6 @@ private[http2] class MultiplexedTransporter(
         if (result == null) {
           log.error(s"Expected to remove stream id: $curId but it wasn't there")
         }
-
         incrementStream()
       }
     }
@@ -197,18 +217,15 @@ private[http2] class MultiplexedTransporter(
       if (curId < 0) {
         close()
         _onClose.updateIfEmpty(Return(new StreamIdOverflowException(addr)))
+      } else if (curId % 2 != 1) { // stream ids initiated by the client must be odd
+        val exn = new IllegalStreamIdException(addr, curId)
+        close()
+        _onClose.updateIfEmpty(Return(exn))
+        log.error(exn, s"id $id was not odd, but client-side ids must be odd. this is a bug.")
       } else {
         queue = tryToInitializeQueue(curId)
         nextRead = queue.poll()
         handleCloses(nextRead)
-
-        // stream ids initiated by the client must be odd
-        if (curId % 2 != 1) {
-          val exn = new IllegalStreamIdException(addr, curId)
-          close()
-          _onClose.updateIfEmpty(Return(exn))
-          log.error(exn, s"id $id was not odd, but client-side ids must be odd. this is a bug.")
-        }
       }
     }
 
@@ -262,6 +279,8 @@ private[http2] class MultiplexedTransporter(
               .ensure {
                 tryToInitializeQueue(curId).fail(new StreamClosedException(addr, curId.toString))
               }
+          } else {
+            tryToInitializeQueue(curId).fail(new StreamClosedException(addr, curId.toString))
           }
         }
       }
@@ -271,6 +290,16 @@ private[http2] class MultiplexedTransporter(
 }
 
 private[http2] object MultiplexedTransporter {
+  class DeadConnectionException(
+      addr: SocketAddress,
+      private[finagle] val flags: Long)
+    extends Exception(s"assigned an already dead connection to address $addr")
+    with FailureFlags[DeadConnectionException] {
+
+    protected def copyWithFlags(newFlags: Long): DeadConnectionException =
+      new DeadConnectionException(addr, newFlags)
+  }
+
   class StreamIdOverflowException(
       addr: SocketAddress,
       private[finagle] val flags: Long = FailureFlags.Retryable)

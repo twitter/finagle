@@ -6,7 +6,7 @@ import com.twitter.finagle.FailureFlags
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.MultiplexedTransporter._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import io.netty.handler.codec.http.LastHttpContent
 import java.net.SocketAddress
 import org.junit.runner.RunWith
@@ -16,15 +16,22 @@ import org.scalatest.FunSuite
 @RunWith(classOf[JUnitRunner])
 class MultiplexedTransporterTest extends FunSuite {
 
+  class SlowClosingQueue(
+      left: AsyncQueue[StreamMessage],
+      right: AsyncQueue[StreamMessage])
+    extends QueueTransport[StreamMessage, StreamMessage](left, right) {
+    override val onClose: Future[Throwable] = Future.never
+  }
+
   test("MultiplexedTransporter children should kill themselves when born with a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new QueueTransport[StreamMessage, StreamMessage](writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr)
     multi.setStreamId(Int.MaxValue)
 
-    val first = multi()
-    val second = multi()
+    val first = multi().get
+    val second = multi().get
 
     assert(!first.onClose.isDefined)
     assert(second.onClose.isDefined)
@@ -36,12 +43,12 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children should kill themselves when they grow to a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new QueueTransport[StreamMessage, StreamMessage](writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr)
     multi.setStreamId(Int.MaxValue)
 
-    val child = multi()
+    val child = multi().get
 
     assert(!child.onClose.isDefined)
     child.write(LastHttpContent.EMPTY_LAST_CONTENT)
@@ -57,12 +64,12 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children can't even") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new QueueTransport[StreamMessage, StreamMessage](writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr)
     multi.setStreamId(2)
 
-    val child = multi()
+    val child = multi().get
 
     assert(child.onClose.isDefined)
     val exn = intercept[IllegalStreamIdException] {

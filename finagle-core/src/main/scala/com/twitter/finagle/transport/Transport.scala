@@ -342,9 +342,9 @@ class QueueTransport[In, Out](
   def status: Status = if (closep.isDefined) Status.Closed else Status.Open
 
   def close(deadline: Time): Future[Unit] = {
-    val ex = new IllegalStateException("close() is undefined on QueueTransport")
+    val ex = new Exception("QueueTransport is now closed")
     closep.updateIfEmpty(Return(ex))
-    Future.exception(ex)
+    Future.Done
   }
 
   val onClose: Future[Throwable] = closep

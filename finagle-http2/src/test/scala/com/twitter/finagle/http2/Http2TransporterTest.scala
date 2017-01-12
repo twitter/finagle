@@ -7,7 +7,7 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Await, Duration, Future, Time, Promise}
 import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpVersion,
-  HttpResponseStatus, HttpResponse}
+  HttpResponseStatus, HttpResponse, LastHttpContent}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.security.cert.Certificate
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -58,9 +58,6 @@ class Http2TransporterTest extends FunSuite {
     val addr = new InetSocketAddress("127.1", 14400)
     val tf = transporter(addr)
     assert(transporter.cached(addr))
-    val t = await(tf)
-    await(t.close())
-    assert(!transporter.cached(addr))
   }
 
   test("Http2Transporter decaches transport when closed") {
@@ -102,13 +99,14 @@ class Http2TransporterTest extends FunSuite {
       Future.value(upgradeRep)
     } else {
       if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL && count == 1) {
-        val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        val message = Http2ClientDowngrader.Message(rep, 1)
         count += 1
-        Future.value(message)
+        val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+        Future.value(Http2ClientDowngrader.Message(rep, 1))
       } else if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
+        count += 1
         Future.never
       } else {
+        count += 1
         val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
         Future.value(rep)
       }
@@ -243,6 +241,31 @@ class Http2TransporterTest extends FunSuite {
     assert(actual == e)
     assert(t1.count == 1)
     assert(t2.count == 0)
+
+    await(transporter(addr))
+    assert(t1.count == 2)
+    assert(t2.count == 0)
+  }
+
+  test("Http2Transporter evicts the connection if it dies") {
+    val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
+    val t2 = new TestTransporter()
+    val transporter = new Http2Transporter(t1, t2)
+    val addr = new InetSocketAddress("127.1", 14400)
+
+    val first = await(transporter(addr))
+    assert(t1.count == 1)
+    assert(t2.count == 0)
+
+    await(first.write(LastHttpContent.EMPTY_LAST_CONTENT))
+    assert(await(first.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
+
+    val second = await(transporter(addr))
+    assert(t1.count == 1)
+    assert(t2.count == 0)
+
+    first.close()
+    second.close()
 
     await(transporter(addr))
     assert(t1.count == 2)

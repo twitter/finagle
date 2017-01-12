@@ -11,7 +11,7 @@ import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Throw, Return, Promise}
+import com.twitter.util.{Future, Throw, Return, Promise, Try}
 import io.netty.channel.{
   ChannelHandlerContext,
   ChannelInboundHandlerAdapter,
@@ -167,20 +167,32 @@ private[http2] class Http2Transporter(
   import Http2Transporter._
 
   protected[this] val transporterCache =
-    new ConcurrentHashMap[SocketAddress, Future[Option[() => Transport[HttpObject, HttpObject]]]]()
+    new ConcurrentHashMap[SocketAddress, Future[Option[() => Try[Transport[HttpObject, HttpObject]]]]]()
 
   private[this] def onUpgradeFinished(
-    f: Future[Option[() => Transport[HttpObject, HttpObject]]],
+    f: Future[Option[() => Try[Transport[HttpObject, HttpObject]]]],
     addr: SocketAddress
   ): Future[Transport[Any, Any]] = f.transform {
-    case Return(Some(fn)) => Future.value(unsafeCast(fn()))
+    // we rescue here to ensure our future is failed *after* we evict from the cache.
+    case Return(Some(fn)) => Future.const(fn().map(unsafeCast)).rescue { case exn: Throwable =>
+      log.warning(
+        exn,
+        s"A previously successful connection to address $addr stopped being successful."
+      )
+
+      // kick us out of the cache so we can try to reestablish the connection
+      transporterCache.remove(addr, f)
+      Future.exception(exn)
+    }
     case Return(None) =>
       // we didn't upgrade
       underlyingHttp11(addr)
     case Throw(exn) =>
+      log.warning(exn, s"A cached connection to address $addr was failed.")
+
       // kick us out of the cache so we can try to reestablish the connection
       transporterCache.remove(addr, f)
-      apply(addr)
+      Future.exception(exn)
   }
 
   // uses http11 underneath, but marks itself as dead if the upgrade succeeds or
@@ -209,7 +221,7 @@ private[http2] class Http2Transporter(
 
   private[this] def upgrade(addr: SocketAddress): Future[Transport[Any, Any]] = {
     val conn: Future[Transport[Any, Any]] = underlying(addr)
-    val p = Promise[Option[() => Transport[HttpObject, HttpObject]]]()
+    val p = Promise[Option[() => Try[Transport[HttpObject, HttpObject]]]]()
     if (transporterCache.putIfAbsent(addr, p) == null) {
       conn.transform {
         case Return(trans) =>
@@ -222,6 +234,7 @@ private[http2] class Http2Transporter(
           }
           Future.value(ref)
         case Throw(e) =>
+          transporterCache.remove(addr, p)
           p.setException(e)
           Future.exception(e)
       }

@@ -62,6 +62,11 @@ private[http2] class AdapterProxyChannelHandler(
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     closeAll()
+    // although we typically propagate these methods through the embedded
+    // channel, we call closeAll here instead of channelInactive, so it's
+    // impossible to propagate properly.  instead, we manually propagate it
+    // ourselves.
+    super.channelInactive(ctx)
   }
 
   override def handlerRemoved(ctx: ChannelHandlerContext): Unit = {
