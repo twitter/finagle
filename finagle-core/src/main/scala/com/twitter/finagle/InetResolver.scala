@@ -10,7 +10,7 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Await, Closable, Var, _}
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
 
-private[finagle] class DnsResolver(statsReceiver: StatsReceiver)
+private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: FuturePool)
   extends (String => Future[Seq[InetAddress]]) {
 
   private[this] val dnsLookupFailures = statsReceiver.counter("dns_lookup_failures")
@@ -33,7 +33,7 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver)
     } else {
       dnsLookups.incr()
       dnsCond.acquire().flatMap { permit =>
-        FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)
+        resolvePool(InetAddress.getAllByName(host).toSeq)
           .onFailure { e =>
             log.info(s"Failed to resolve $host. Error $e")
             dnsLookupFailures.incr()
@@ -49,16 +49,23 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver)
  */
 object InetResolver {
   def apply(): Resolver = apply(DefaultStatsReceiver)
-  def apply(unscopedStatsReceiver: StatsReceiver): Resolver = {
+
+  def apply(resolvePool: FuturePool): Resolver = apply(DefaultStatsReceiver, resolvePool)
+
+  def apply(unscopedStatsReceiver: StatsReceiver): Resolver =
+    apply(unscopedStatsReceiver, FuturePool.unboundedPool)
+
+  def apply(unscopedStatsReceiver: StatsReceiver, resolvePool: FuturePool): Resolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new InetResolver(new DnsResolver(statsReceiver), statsReceiver, Some(5.seconds))
+    new InetResolver(new DnsResolver(statsReceiver, resolvePool), statsReceiver, Some(5.seconds), resolvePool)
   }
 }
 
 private[finagle] class InetResolver(
   resolveHost: String => Future[Seq[InetAddress]],
   statsReceiver: StatsReceiver,
-  pollIntervalOpt: Option[Duration])
+  pollIntervalOpt: Option[Duration],
+  resolvePool: FuturePool)
   extends Resolver {
   import InetSocketAddressUtil._
 
@@ -131,7 +138,7 @@ private[finagle] class InetResolver(
             }
           }
           timer.schedule(pollInterval.fromNow, pollInterval) {
-            FuturePool.unboundedPool(updater(()))
+            resolvePool(updater(()))
           }
         case None =>
           Closable.nop
@@ -189,7 +196,7 @@ object FixedInetResolver {
   ): InetResolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
     new FixedInetResolver(cache(
-      new DnsResolver(statsReceiver), maxCacheSize, backoffs, timer), statsReceiver)
+      new DnsResolver(statsReceiver, FuturePool.unboundedPool), maxCacheSize, backoffs, timer), statsReceiver)
   }
 
   // A size-bounded FutureCache backed by a LoaderCache
@@ -237,7 +244,7 @@ object FixedInetResolver {
 private[finagle] class FixedInetResolver(
   cache: LoadingCache[String, Future[Seq[InetAddress]]],
   statsReceiver: StatsReceiver)
-  extends InetResolver(CaffeineCache.fromLoadingCache(cache), statsReceiver, None) {
+  extends InetResolver(CaffeineCache.fromLoadingCache(cache), statsReceiver, None, FuturePool.unboundedPool) {
 
   override val scheme = FixedInetResolver.scheme
 
