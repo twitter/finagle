@@ -16,12 +16,6 @@ class ValidateRequestFilterTest extends FunSuite {
     assert(response.status == Status.Ok)
   }
 
-  test("error on bad request") {
-    val request = Request("/bad-http-request")
-    val response = Await.result(ValidateRequestFilter(request, NullService))
-    assert(response.status == Status.BadRequest)
-  }
-
   test("errror on invalid params") {
     val request  = Request("/search.json?q=%3G")
     val response = Await.result(ValidateRequestFilter(request, NullService))

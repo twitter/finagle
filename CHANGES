@@ -39,6 +39,10 @@ Deprecations
     be returned by a Service but it is often used as such. Construct a Response using
     the static constructor methods. ``RB_ID=899983``
 
+  * finagle-http: Deprecate ValidateRequestFilter which now has limited utility.
+    See entry in Runtime Behavior Changes. If this is still needed, copy the remaining
+    behavior into a new filter. ``RB_ID=899895``
+
   * finagle-memcached: Deprecate methods on `c.t.f.memcached.Client`:
       - `apply(name: Name)`
       - `apply(host: String)`
@@ -50,6 +54,11 @@ Deprecations
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http: ValidateRequestFilter doesn't look for the uri "/bad-http-request" which
+    had been indicative of the netty3 http codec giving up on decoding a http request. These
+    events are caught lower in the pipeline and should not bubble up to the level of this
+    filter. ``RB_ID=899895``
 
   * finagle-redis: Transport implementation is now based on Netty 4 (instead of Netty 3).
     ``RB_ID=895728``
