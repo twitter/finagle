@@ -1,22 +1,19 @@
 package com.twitter.finagle.http
 
 import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.util.{Await, Duration, Closable}
-import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter, Reader, Writer}
+import com.twitter.util.{Closable, Duration}
+import java.io._
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
 import java.util.{Date, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer.{
-  ChannelBufferInputStream, DynamicChannelBuffer, ChannelBuffer,
-  ChannelBufferOutputStream, ChannelBuffers
-}
+  ChannelBuffer, ChannelBufferInputStream, ChannelBufferOutputStream, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage}
 import scala.collection.JavaConverters._
-
 import Bijections._
 
 /**
@@ -344,59 +341,69 @@ abstract class Message {
   def getReader(): Reader =
     new InputStreamReader(getInputStream())
 
-  /** Append string to content. */
-  def write(string: String) {
-    write(string.getBytes("UTF-8"))
-  }
-
-  /** Append bytes to content. */
-  def write(bytes: Array[Byte]) {
-    getContent match {
-      case buffer: DynamicChannelBuffer =>
-        buffer.writeBytes(bytes)
-      case _ =>
-        val buffer = ChannelBuffers.wrappedBuffer(bytes)
-        write(buffer)
-    }
-  }
-
-  /** Append ChannelBuffer to content.
+  /**
+   * Append string to content.
    *
-   * If `isChunked` then multiple writes must be composed using `writer` and
-   * `flatMap` to have the appropriate backpressure semantics.
-   *
-   * Attempting to `write` after calling `close` will result in a thrown
-   * [[com.twitter.io.Reader.ReaderDiscarded]].
+   * An `IllegalStateException` is thrown if this message is chunked.
    */
-  @throws(classOf[BufReader.ReaderDiscarded])
   @throws(classOf[IllegalStateException])
-  def write(buffer: ChannelBuffer) {
-    if (isChunked) writeChunk(buffer) else {
-      getContent match {
-        case ChannelBuffers.EMPTY_BUFFER =>
-          setContent(buffer)
-        case content =>
-          setContent(ChannelBuffers.wrappedBuffer(content, buffer))
+  def write(string: String): Unit = {
+    write(Buf.Utf8(string))
+  }
+
+  /**
+   * Append a Buf to content.
+   *
+   * An `IllegalStateException` is thrown if this message is chunked.
+   */
+  @throws(classOf[IllegalStateException])
+  def write(buf: Buf): Unit = {
+    if (isChunked) throw new IllegalStateException("Cannot write bytes to chunked message")
+    else  {
+      val channelBuffer = buf match {
+        case ChannelBufferBuf(channelBuffer) => channelBuffer
+        case _ => BufChannelBuffer(buf)
       }
+      setContent(ChannelBuffers.wrappedBuffer(getContent(), channelBuffer))
     }
   }
 
   /**
-   * Use content as OutputStream.  Content is replaced with stream contents.
-   * (Java users can use this with a Function, or use Netty's ChannelBufferOutputStream
-   * and then call setContent() with the underlying buffer.)
+   * Append bytes to content.
+   *
+   * This method makes a defensive copy of the provided byte array. This can
+   * be avoided by wrapping the byte array via `Buf.ByteArray.Owned` and
+   * using the `write(Buf)` method.
+   *
+   * An `IllegalStateException` is thrown if this message is chunked.
    */
+  @throws(classOf[IllegalStateException])
+  def write(bytes: Array[Byte]): Unit = {
+    write(Buf.ByteArray.Shared(bytes))
+  }
+
+  /**
+   * Append content via an OutputStream.
+   *
+   * An `IllegalStateException` is thrown if this message is chunked.
+   */
+  @throws(classOf[IllegalStateException])
   def withOutputStream[T](f: OutputStream => T): T = {
     // Use buffer size of 1024.  Netty default is 256, which seems too small.
     // Netty doubles buffers on resize.
     val outputStream = new ChannelBufferOutputStream(ChannelBuffers.dynamicBuffer(1024))
     val result = f(outputStream) // throws
     outputStream.close()
-    write(outputStream.buffer)
+    write(ChannelBufferBuf.Owned(outputStream.buffer))
     result
   }
 
-  /** Use as a Writer.  Content is replaced with writer contents. */
+  /**
+   * Append content via a Writer.
+   *
+   * An `IllegalStateException` is thrown if this message is chunked.
+   */
+  @throws(classOf[IllegalStateException])
   def withWriter[T](f: Writer => T): T = {
     withOutputStream { outputStream =>
       val writer = new OutputStreamWriter(outputStream, Message.Utf8)
@@ -414,14 +421,6 @@ abstract class Message {
 
   /** End the response stream. */
   def close() = writer.close()
-
-  private[this] def writeChunk(buf: ChannelBuffer) {
-    if (buf.readable) {
-      val future = writer.write(new ChannelBufferBuf(buf))
-      // Unwraps the future in the Return case, or throws exception in the Throw case.
-      if (future.isDefined) Await.result(future)
-    }
-  }
 
   private[http] def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
 

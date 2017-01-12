@@ -10,11 +10,23 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-base-http: `Message.write(ChannelBuffer)` has been replaced with a method that
+    receives a `Buf`. The semantics of calling the `write` method on chunked messages has
+    changed from potentially throwing an exception based on the state of the `Writer` to
+    always throwing an `IllegalStateException`. Existing users of the `write(..)` methods
+    on chunked messages should use the `Writer` directly. ``RB_ID=900091``
+
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
       - `apply(group: Group[SocketAddress])`
       - `apply(cluster: Cluster[SocketAddress])`
 
     Use `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=899331``
+
+  * finagle-toggle: `ToggleMap` `Toggles` now rehash the inputs to
+    `apply` and `isDefinedAt` in order to promote a relatively even
+    distribution even when the inputs do not have a good distribution.
+    This allows users to get away with using a poor hashing function
+    such as `String.hashCode`. ``RB_ID=899195``
 
 Deprecations
 ~~~~~~~~~~~~
