@@ -30,7 +30,7 @@ class MethodBuilderTest extends FunSuite {
     }
   }
 
-  def testTotalTimeout[Req, Rep](
+  private def testTotalTimeout[Req, Rep](
     name: String,
     stackServer: StackServer[Req, Rep],
     stackClient: StackClient[Req, Rep],
@@ -85,6 +85,68 @@ class MethodBuilderTest extends FunSuite {
   )
 
   testTotalTimeout(
+    "Mux",
+    Mux.server,
+    Mux.client,
+    mux.Request.empty,
+    mux.Response.empty
+  )
+
+  private def testPerRequestTimeout[Req, Rep](
+    name: String,
+    stackServer: StackServer[Req, Rep],
+    stackClient: StackClient[Req, Rep],
+    req: Req,
+    rep: Rep
+  ): Unit = test(s"$name client can use per request method builder timeouts") {
+    val server = stackServer.serve("localhost:*", mkService(rep))
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+
+    val methodBuilder = MethodBuilder.from(
+      s"${addr.getHostName}:${addr.getPort}", stackClient)
+
+    val short = methodBuilder.withTimeout.perRequest(5.millis).newService("short")
+    val long = methodBuilder.withTimeout.perRequest(2.seconds).newService("long")
+
+    // check we get a timeout for a client with a short timeout
+    intercept[IndividualRequestTimeoutException] {
+      await(short(req))
+    }
+
+    // check we get a response for a client with a long timeout
+    await(long(req))
+
+    await(short.close())
+    await(long.close())
+    await(server.close())
+  }
+
+  testPerRequestTimeout(
+    "HTTP/1.1",
+    Http.server,
+    Http.client,
+    http.Request(),
+    http.Response()
+  )
+
+  if (!sys.props.contains("SKIP_FLAKY"))
+  testPerRequestTimeout(
+    "HTTP/2",
+    Http.server.configuredParams(Http2),
+    Http.client.configuredParams(Http2),
+    http.Request(),
+    http.Response()
+  )
+
+  testPerRequestTimeout(
+    "Memcached",
+    Memcached.server,
+    Memcached.client,
+    Quit(),
+    NoOp()
+  )
+
+  testPerRequestTimeout(
     "Mux",
     Mux.server,
     Mux.client,
