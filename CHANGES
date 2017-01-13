@@ -75,6 +75,9 @@ Bug Fixes
   * finagle-core: Properly compute length when converting a `Buf.ByteArray`
     to a Netty 4 `ByteBuf`. ``RB_ID=901605``
 
+  * finagle-memcached: AtomicMap change lock function to synchronize on map
+    object. ``DIFF_ID=D18735``
+
 6.41.0
 ------
 
