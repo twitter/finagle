@@ -16,6 +16,7 @@ scala_library(
     scoped('util/util-lint', scope='forced'),
     'util/util-logging',
     'util/util-registry',
+    'util/util-security',
     'util/util-stats',
     'util/util-core/src/main/scala:scala',
   ],

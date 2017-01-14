@@ -31,5 +31,5 @@ private[ssl] object TrustCredentials {
    * @file A file containing a collection of X.509 certificates
    * in PEM format.
    */
-  case class CertCollection(path: File) extends TrustCredentials
+  case class CertCollection(file: File) extends TrustCredentials
 }

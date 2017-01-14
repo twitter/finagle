@@ -258,6 +258,7 @@ object Finagle extends Build {
       util("lint"),
       util("logging"),
       util("registry"),
+      util("security"),
       util("stats"),
       caffeineLib,
       jsr305Lib,
@@ -589,7 +590,7 @@ object Finagle extends Build {
     finagleThrift,
     finagleThriftMux,
     finagleToggle)
-  
+
   lazy val finagleRedis = Project(
     id = "finagle-redis",
     base = file("finagle-redis"),
