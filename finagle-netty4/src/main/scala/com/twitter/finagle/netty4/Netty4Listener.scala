@@ -51,7 +51,7 @@ private[finagle] object Netty4Listener {
 private[finagle] case class Netty4Listener[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
-    transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
+    transportFactory: Channel => Transport[In, Out] = { ch: Channel => new ChannelTransport[In, Out](ch) },
     setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity)
   extends Listener[In, Out] {
   import Netty4Listener.BackPressure

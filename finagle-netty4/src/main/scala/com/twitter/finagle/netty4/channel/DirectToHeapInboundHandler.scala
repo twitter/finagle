@@ -14,7 +14,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  *       incur a direct buffer leak.
  */
 @Sharable
-object DirectToHeapInboundHandler extends ChannelInboundHandlerAdapter  {
+object DirectToHeapInboundHandler extends ChannelInboundHandlerAdapter {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     case bb: ByteBuf if bb.isDirect =>
       val heapBuf = ctx.alloc().heapBuffer(bb.readableBytes, bb.capacity)

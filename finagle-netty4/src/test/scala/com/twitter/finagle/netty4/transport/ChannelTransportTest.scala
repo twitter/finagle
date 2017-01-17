@@ -1,20 +1,21 @@
 package com.twitter.finagle.netty4.transport
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.util.{Throw, Return, Await, Future}
+import com.twitter.util.{Await, Future, Return, Throw}
 import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
-import javax.net.ssl.{SSLSession, SSLEngine}
+import javax.net.ssl.{SSLEngine, SSLSession}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest extends FunSuite
@@ -226,5 +227,70 @@ class ChannelTransportTest extends FunSuite
     // Called twice to buffer one inbound message to attempt to detect close events
     verify(channel, times(6)).read()
     assert("three" == Await.result(readThree, timeout))
+  }
+
+  test("replacePending fn sees and transforms pending messages on session close") {
+    val seen = collection.mutable.ListBuffer.empty[String]
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport[String, String](em, replacePending = { m => seen.append(m); m.reverse})
+
+    em.writeInbound("one")
+    em.writeInbound("two")
+    em.writeInbound("three")
+
+    Await.ready(ct.close(), 1.second)
+    assert(seen.toList == List("one", "two", "three"))
+
+
+    assert(Await.result(ct.read(), 1.second) == "one".reverse)
+    assert(Await.result(ct.read(), 1.second) == "two".reverse)
+    assert(Await.result(ct.read(), 1.second) == "three".reverse)
+  }
+
+  test("releaseMessage fn sees failed offers") {
+    var failedMsgSeen: String = null
+    val em = new EmbeddedChannel
+    val q = new AsyncQueue[String](maxPendingOffers = 1)
+    val ct = new ChannelTransport[String, String](em, releaseMessage = failedMsgSeen = _) {
+      override val queue = q
+    }
+
+    assert(q.offer("full")) // backing async queue is now full
+
+    em.writeInbound("doomed")
+
+    assert(failedMsgSeen == "doomed")
+
+    // channel transport is consequently failed
+    assert(ct.status == Status.Closed)
+  }
+
+  test("buffered messages are not flushed on transport shutdown") {
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport[String, String](em)
+    em.writeInbound("one")
+    Await.ready(ct.close())
+    assert(Await.result(ct.read(), 1.second) == "one")
+  }
+
+  test("buffered messages are not flushed on exceptions") {
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport[String, String](em)
+    // buffer a message
+    em.writeInbound("one")
+
+    // channel failure -> transport is failed
+    em.pipeline().fireExceptionCaught(new Exception("boom"))
+    assert(ct.status == Status.Closed)
+
+    assert(Await.result(ct.read(), 1.second) == "one")
+  }
+
+  test("pending transport reads are failed on channel close") {
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport[String, String](em)
+    val read = ct.read()
+    Await.ready(ct.close(), 1.second)
+    intercept[ChannelClosedException] { Await.result(read, 1.second) }
   }
 }
