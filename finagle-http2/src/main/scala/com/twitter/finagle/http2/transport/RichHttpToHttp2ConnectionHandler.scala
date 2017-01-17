@@ -4,6 +4,7 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst}
 import com.twitter.logging.Logger
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
 import io.netty.handler.codec.http2._
 import io.netty.util.concurrent.PromiseCombiner
 import scala.util.control.NonFatal
@@ -67,8 +68,9 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         case _ => // nop
       }
     } catch {
+
       case e: Http2Exception =>
-        val status = if (e.getMessage.startsWith("Header list size octets"))
+        val status = if (e.isInstanceOf[HeaderListSizeException])
           HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
         else HttpResponseStatus.BAD_REQUEST
         val rep = new DefaultFullHttpResponse(
