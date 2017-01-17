@@ -1,12 +1,12 @@
 package com.twitter.finagle.memcached.unit
 
 import com.twitter.concurrent.Broker
-import com.twitter.finagle.{CancelledRequestException, Group, MutableGroup, Service, ShardNotAvailableException}
+import com.twitter.finagle._
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Future}
+import com.twitter.util.{ReadWriteVar, Await, Duration, Future}
 import scala.collection.{immutable, mutable}
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.junit.runner.RunWith
@@ -52,7 +52,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     )
 
     def newService(node: CacheNode) = clients.get(node).get
-    val ketamaClient = new KetamaPartitionedClient(Group(clients.keys.toSeq:_*), newService)
+    val name = Name.bound(clients.keys.toSeq.map(CacheNode.toAddress): _*)
+    val ketamaClient = new KetamaPartitionedClient(name.addr, newService)
 
     info("pick the correct node")
     val ipToService = clients.map { case (key, service) => key.host -> service }.toMap
@@ -79,8 +80,9 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     val client1 = CacheNode("10.0.1.1", 11211, 600)
     def newService(node: CacheNode) = mockService
     // create a client with no members (yet)
-    val backends: MutableGroup[CacheNode] = Group.mutable()
-    val ketamaClient = new KetamaPartitionedClient(backends, newService)
+    val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
+    val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
+
 
     // simulate a cancelled request
     val r = ketamaClient.getResult(Seq("key"))
@@ -100,7 +102,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     // resolve the group: request proceeds
     verifyZeroInteractions(mockService)
     when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
-    backends.update(scala.collection.immutable.Set(client1))
+    mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
     assert(Await.result(r2).get == 42)
   }
 
@@ -116,7 +118,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
         nodeA -> serviceA,
         nodeB -> serviceB
       )
-      val mutableGroup = Group.mutable(services.keys.toSeq:_*)
+      val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(
+        Addr.Bound(services.keys.toSeq.map(CacheNode.toAddress): _*))
 
       val key = Buf.Utf8("foo")
       val value = mock[Value](RETURNS_SMART_NULLS)
@@ -125,7 +128,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
       val broker = new Broker[NodeHealth]
       def newService(node: CacheNode) = services.get(node).get
-      val ketamaClient = new KetamaPartitionedClient(mutableGroup, newService, broker)
+      val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService, broker)
 
       Await.result(ketamaClient.get("foo"))
       verify(serviceA, times(1)).apply(any())
@@ -159,12 +162,12 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
     info("primary leaves and rejoins")
     new KetamaClientBuilder {
-      mutableGroup.update(immutable.Set(nodeB)) // nodeA leaves
+      mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeB))) // nodeA leaves
       when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
       Await.result(ketamaClient.get("foo"))
       verify(serviceB, times(1)).apply(any())
 
-      mutableGroup.update(immutable.Set(nodeA, nodeB)) // nodeA joins
+      mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeA), CacheNode.toAddress(nodeB))) // nodeA joins
       when(serviceA(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
       Await.result(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())

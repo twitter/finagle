@@ -8,14 +8,26 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address}
+import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
-import com.twitter.finagle.{Group, Resolver}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable
+
+object CacheNode {
+
+  /**
+   * Utility method for translating a `CacheNode` to an `Address`
+   * (used when constructing a `Name` representing a `Cluster`).
+   */
+  private[memcached] val toAddress: CacheNode => Address = {
+    case CacheNode(host, port, weight, key) =>
+      val metadata = CacheNodeMetadata.toAddrMetadata(CacheNodeMetadata(weight, key))
+      Address.Inet(new InetSocketAddress(host, port), metadata)
+  }
+}
 
 // Type definition representing a cache node
 case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None) extends SocketAddress {
@@ -143,6 +155,7 @@ object CachePoolCluster {
 
   /**
    *  Cache pool based on a static list
+   *
    * @param cacheNodeSet static set of cache nodes to construct the cluster
    */
   def newStaticCluster(cacheNodeSet: Set[CacheNode]) = new StaticCachePoolCluster(cacheNodeSet)
@@ -243,6 +256,7 @@ case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = fal
 
 /**
  *  Cache pool based on a static list
+ *
  * @param cacheNodeSet static set of cache nodes to construct the cluster
  */
 class StaticCachePoolCluster(cacheNodeSet: Set[CacheNode]) extends CachePoolCluster {

@@ -67,8 +67,8 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
     val name = s"twcache!localhost:${address1.getPort}:1:$key1,localhost:${address2.getPort}:1:$key2"
     val client = KetamaClientBuilder().dest(name).build().asInstanceOf[KetamaPartitionedClient]
     
-    assert(client.ketamaNodeGrp().size == 2)
-    assert(client.ketamaNodeGrp().map(_._1) == Set(KetamaClientKey(key1.toString), KetamaClientKey(key2.toString)))
+    assert(client.ketamaNodes.size == 2)
+    assert(client.ketamaNodes.map(_._1) == Set(KetamaClientKey(key1.toString), KetamaClientKey(key2.toString)))
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) == None)
