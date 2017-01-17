@@ -3,7 +3,7 @@ junit_tests(
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
-    'science/src/java/com/twitter/common/metrics:metrics',
+    'src/java/com/twitter/common/metrics:metrics',
     'finagle/finagle-stats/src/main/scala',
     'finagle/finagle-http/src/main/scala:scala',
     'util/util-app/src/main/scala:scala',

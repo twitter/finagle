@@ -8,10 +8,10 @@ target(
 
 target(name='core',
   dependencies=[
-    'science/src/java/com/twitter/common/zookeeper:client',
-    'science/src/java/com/twitter/common/zookeeper:server-set',
-    'science/src/java/com/twitter/common/io:io',
-    'science/src/java/com/twitter/common/quantity:quantity',
+    'src/java/com/twitter/common/zookeeper:client',
+    'src/java/com/twitter/common/zookeeper:server-set',
+    'src/java/com/twitter/common/io:io',
+    'src/java/com/twitter/common/quantity:quantity',
     '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
@@ -35,7 +35,7 @@ junit_tests(name='client',
 )
 
 junit_tests(name='serversets',
-  dependencies=[':core', '3rdparty/jvm/com/google/guava:guava', '3rdparty/jvm/com/google/inject:guice', '3rdparty/jvm/junit:junit', '3rdparty/jvm/org/apache/zookeeper:zookeeper-server', '3rdparty/jvm/org/mockito:mockito-all', '3rdparty/jvm/org/scalatest:scalatest', 'finagle/finagle-core/src/main/scala:scala', 'finagle/finagle-serversets/src/main/scala:scala', 'science/src/java/com/twitter/common/io:io', 'science/src/java/com/twitter/common/io:json', 'science/src/java/com/twitter/common/net:dynamic-host-set', 'science/src/java/com/twitter/common/quantity:quantity', 'science/src/java/com/twitter/common/zookeeper:client', 'science/src/java/com/twitter/common/zookeeper:server-set', 'science/src/thrift/com/twitter/thrift:thrift-java', 'util/util-core/src/main/scala:scala', 'util/util-stats/src/main/scala:scala', 'util/util-zk-test/src/main/scala:scala'],
+  dependencies=[':core', '3rdparty/jvm/com/google/guava:guava', '3rdparty/jvm/com/google/inject:guice', '3rdparty/jvm/junit:junit', '3rdparty/jvm/org/apache/zookeeper:zookeeper-server', '3rdparty/jvm/org/mockito:mockito-all', '3rdparty/jvm/org/scalatest:scalatest', 'finagle/finagle-core/src/main/scala:scala', 'finagle/finagle-serversets/src/main/scala:scala', 'src/java/com/twitter/common/io:io', 'src/java/com/twitter/common/io:json', 'src/java/com/twitter/common/net:dynamic-host-set', 'src/java/com/twitter/common/quantity:quantity', 'src/java/com/twitter/common/zookeeper:client', 'src/java/com/twitter/common/zookeeper:server-set', 'src/thrift/com/twitter/thrift:thrift-java', 'util/util-core/src/main/scala:scala', 'util/util-stats/src/main/scala:scala', 'util/util-zk-test/src/main/scala:scala'],
   resources=[
     'finagle/finagle-serversets/src/test/resources'
   ],
