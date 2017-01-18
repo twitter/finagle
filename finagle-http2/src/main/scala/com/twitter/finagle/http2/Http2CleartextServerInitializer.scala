@@ -47,8 +47,8 @@ private[http2] class Http2CleartextServerInitializer(
   val upgradeCodecFactory: UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-
-        new Http2ServerUpgradeCodec(new Http2Codec(true /* server */, initializer)) {
+        val initialSettings = Settings.fromParams(params)
+        new Http2ServerUpgradeCodec(new Http2Codec(true /* server */, initializer, initialSettings)) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             upgradeCounter.incr()
             // we turn off backpressure because Http2 only works with autoread on for now
