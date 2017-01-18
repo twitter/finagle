@@ -2,6 +2,7 @@ package com.twitter.finagle.context
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
+import com.twitter.logging.Logger
 import com.twitter.util.{Local, Return, Throw, Try}
 
 /**
@@ -13,6 +14,8 @@ import com.twitter.util.{Local, Return, Throw, Try}
  * tree.
  */
 final class MarshalledContext private[context] extends Context {
+
+  private[this] val log = Logger.get()
 
   private[this] val local = new Local[Map[Buf, Cell]]
 
@@ -34,9 +37,14 @@ final class MarshalledContext private[context] extends Context {
             case Return(value) =>
               cachedEnv = Some(value)
               cachedEnv
-            case Throw(_) =>
-              // Should we omit the context altogether when this happens?
-              // Should we log some warnings?
+            case Throw(e) =>
+              val bytesToDisplay = value.slice(0, 10)
+              val bytesString = Buf.slowHexString(bytesToDisplay)
+              val message =
+                s"Failed to deserialize marshalled context entry for key ${key.id}. " +
+                s"Value has length ${value.length}. First ${bytesToDisplay.length} bytes " +
+                s"of the value: 0x$bytesString"
+              log.warning(e, message)
               None
           }
         }
