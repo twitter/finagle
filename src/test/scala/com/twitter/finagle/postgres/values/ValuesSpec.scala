@@ -15,8 +15,10 @@ import com.twitter.finagle.postgres.messages.DataRow
 import com.twitter.finagle.postgres.messages.Field
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
-import org.scalacheck.Arbitrary
+import org.scalacheck.{Arbitrary, Gen}
+import Arbitrary.arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import io.circe.testing.instances.arbitraryJson
 
 class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
 
@@ -156,6 +158,17 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
         val decoded = ValueDecoder[JSONB].decodeBinary("", createBuffer(), Charset.defaultCharset()).get()
         JSONB.stringify(decoded) must equal(json)
       }
+
+      "parse json" in test(ValueDecoder.string, ValueEncoder.string)("json_send", "json")(
+        Arbitrary(
+          Gen.oneOf(
+            arbitraryJson.arbitrary.map(_.noSpaces),
+            arbitraryJson.arbitrary.map(_.spaces4),
+            arbitraryJson.arbitrary.map(_.spaces2)
+          ).map(_.replace("\u0000", "\\u0000"))
+        ),
+        client
+      )
     }
   }
 }

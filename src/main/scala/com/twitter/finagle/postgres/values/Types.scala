@@ -17,6 +17,7 @@ object Types {
   val TID = 27
   val XID = 28
   val CID = 29
+  val JSON = 114
   val XML = 142
   val POINT = 600
   val L_SEG = 601

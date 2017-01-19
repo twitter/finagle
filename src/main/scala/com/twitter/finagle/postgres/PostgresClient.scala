@@ -81,7 +81,7 @@ object PostgresClient {
 
   case class TypeSpecifier(receiveFunction: String, typeName: String, elemOid: Long = 0)
 
-  private[finagle] val defaultTypes = Map(
+  val defaultTypes = Map(
     Types.BOOL -> TypeSpecifier("boolrecv", "bool"),
     Types.BYTE_A -> TypeSpecifier("bytearecv", "bytea"),
     Types.CHAR -> TypeSpecifier("charrecv", "char"),
@@ -95,6 +95,7 @@ object PostgresClient {
     Types.TID -> TypeSpecifier("tidrecv", "tid"),
     Types.XID -> TypeSpecifier("xidrecv", "xid"),
     Types.CID -> TypeSpecifier("cidrecv", "cid"),
+    Types.JSON -> TypeSpecifier("json_recv", "json"),
     Types.XML -> TypeSpecifier("xml_recv", "xml"),
     Types.POINT -> TypeSpecifier("point_recv", "point"),
     Types.L_SEG -> TypeSpecifier("lseg_recv", "lseg"),
