@@ -34,10 +34,7 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   sealed trait Feature
   object MaxHeaderSize extends Feature
-  object Streaming extends Feature
-  object FirstResponseStream extends Feature
   object TooLongStream extends Feature
-  object TooLargePayloads extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -211,7 +208,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
-    testIfImplemented(TooLargePayloads)(implName + ": return 413s for fixed-length requests with too large payloads") {
+    test(implName + ": return 413s for fixed-length requests with too large payloads") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -427,7 +424,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
-    testIfImplemented(FirstResponseStream)(s"$implName (streaming)" + ": stream") {
+    test(s"$implName (streaming)" + ": stream") {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val reader = await(client(Request())).reader
@@ -556,7 +553,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[ChannelClosedException] { await(p) }
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming)" +
+    test(s"$implName (streaming)" +
       ": transport closure propagates to request stream producer") {
       val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
       val client = connect(s)
@@ -567,7 +564,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    testIfImplemented(Streaming)(s"$implName (streaming): " +
+    test(s"$implName (streaming): " +
       "request discard terminates remote stream producer") {
       val s = Service.mk[Request, Response] { req =>
         val res = Response()
@@ -597,7 +594,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    testIfImplemented(FirstResponseStream)(s"$implName (streaming): " +
+    test(s"$implName (streaming): " +
       "client discard terminates stream and frees up the connection") {
       val s = new Service[Request, Response] {
         var rep: Response = null

@@ -22,8 +22,7 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresToBeImplemented = Set[Feature](
-    MaxHeaderSize,
-    Streaming
+    MaxHeaderSize
   )
 
   def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
