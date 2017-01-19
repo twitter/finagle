@@ -1,6 +1,7 @@
 package com.twitter.finagle.postgres
 import java.nio.charset.Charset
 
+import com.twitter.finagle.Status
 import com.twitter.finagle.postgres.messages.SelectResult
 import com.twitter.finagle.postgres.values.Types
 import com.twitter.util.Future
@@ -62,6 +63,17 @@ trait PostgresClient {
     * @return
     */
   def close(): Future[Unit]
+
+  /**
+   * The current availability [[Status]] of this client.
+   */
+  def status: Status
+
+  /**
+   * Determines whether this client is available (can accept requests
+   * with a reasonable likelihood of success).
+   */
+  def isAvailable: Boolean
 }
 
 

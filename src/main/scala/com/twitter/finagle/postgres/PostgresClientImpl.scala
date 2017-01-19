@@ -7,6 +7,7 @@ import scala.collection.immutable.Queue
 import scala.language.implicitConversions
 import scala.util.Random
 
+import com.twitter.finagle.Status
 import com.twitter.finagle.postgres.codec.Errors
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
@@ -175,6 +176,17 @@ class PostgresClientImpl(
   override def close(): Future[Unit] = {
     factory.close()
   }
+
+  /**
+   * The current availability [[Status]] of this client.
+   */
+  override def status: Status = factory.status
+
+  /**
+   * Determines whether this client is available (can accept requests
+   * with a reasonable likelihood of success).
+   */
+  override def isAvailable: Boolean = status == Status.Open
 
   private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = {
     send(PgRequest(Query(sql)))(handler)

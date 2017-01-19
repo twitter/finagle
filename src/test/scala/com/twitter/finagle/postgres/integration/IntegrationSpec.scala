@@ -5,7 +5,7 @@ import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres.{OK, PostgresClient, Row, Spec}
-import com.twitter.finagle.Postgres
+import com.twitter.finagle.{Postgres, Status}
 import com.twitter.util.{Await, Duration}
 
 object IntegrationSpec {
@@ -44,6 +44,15 @@ class IntegrationSpec extends Spec {
         .withSessionPool.maxSize(1)
         .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
         .newRichClient(hostPort)
+    }
+
+    def getBadClient = {
+      Postgres.Client()
+        .withCredentials(user, password)
+        .database(dbname)
+        .withSessionPool.maxSize(1)
+        .conditionally(useSsl, _.withTransport.tlsWithoutValidation)
+        .newRichClient("badhost:5432")
     }
 
     def cleanDb(client: PostgresClient): Unit = {
@@ -391,6 +400,25 @@ class IntegrationSpec extends Spec {
             )
           }
 
+        }
+      }
+
+      "return correct availability information" when {
+        "client is good" in {
+          val client: PostgresClient = getClient
+          client.isAvailable must equal(true)
+          client.status must equal(Status.Open)
+        }
+        "client is bad" in {
+          val badClient: PostgresClient = getBadClient
+          badClient.isAvailable must equal(false)
+          badClient.status must equal(Status.Busy)
+        }
+        "client is closed" in {
+          val client: PostgresClient = getClient
+          client.close()
+          client.isAvailable must equal(false)
+          client.status must equal(Status.Closed)
         }
       }
     }
