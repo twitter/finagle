@@ -27,6 +27,8 @@ class MethodBuilderRetryTest extends FunSuite {
     }
   }
 
+  private val clientName = "some_client"
+
   private def retryMethodBuilder(
     svc: Service[Int, Int],
     stats: StatsReceiver,
@@ -36,6 +38,7 @@ class MethodBuilderRetryTest extends FunSuite {
     val stack = Stack.Leaf(Stack.Role("test"), svcFactory)
     val ps =
       Stack.Params.empty +
+        param.Label(clientName) +
         param.Stats(stats) +
         Retries.Budget(RetryBudget.Infinite) ++
         params
@@ -61,7 +64,7 @@ class MethodBuilderRetryTest extends FunSuite {
     intercept[NullPointerException] {
       Await.result(defaults(1), 5.seconds)
     }
-    assert(stats.stat("defaults", "retries")() == Seq(1))
+    assert(stats.stat(clientName, "defaults", "retries")() == Seq(1))
   }
 
   test("retries can be disabled using `RetryPolicy.none`") {
@@ -77,7 +80,7 @@ class MethodBuilderRetryTest extends FunSuite {
     intercept[IllegalArgumentException] {
       Await.result(noRetries(1), 5.seconds)
     }
-    assert(stats.stat("no_retries", "retries")() == Seq.empty)
+    assert(stats.stat(clientName, "no_retries", "retries")() == Seq.empty)
   }
 
   test("forClassifier") {
@@ -96,7 +99,7 @@ class MethodBuilderRetryTest extends FunSuite {
     intercept[NullPointerException] {
       Await.result(client(1), 5.seconds)
     }
-    assert(stats.stat("client", "retries")() == Seq(1))
+    assert(stats.stat(clientName, "client", "retries")() == Seq(1))
   }
 
   test("retries do not apply to failures handled by the RequeueFilter") {
@@ -114,6 +117,6 @@ class MethodBuilderRetryTest extends FunSuite {
       Await.result(client(1), 5.seconds)
     }
     assert(ex.isFlagged(Failure.Restartable))
-    assert(stats.stat("client", "retries")() == Seq(0))
+    assert(stats.stat(clientName, "client", "retries")() == Seq(0))
   }
 }

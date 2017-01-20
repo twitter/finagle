@@ -1,8 +1,8 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, Stack, Service, ServiceFactory}
+import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack}
 import com.twitter.finagle.param
-import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 
 private[finagle] object MethodBuilder {
 
@@ -19,6 +19,12 @@ private[finagle] object MethodBuilder {
     dest: String,
     stackClient: StackClient[Req, Rep]
   ): MethodBuilder[Req, Rep] = {
+    val params = stackClient.params
+    val clientName = params[param.Label].label match {
+      case param.Label.Default => dest
+      case label => label
+    }
+
     val needsTotalTimeoutModule =
       stackClient.stack.contains(TimeoutFilter.totalTimeoutRole)
     val service: Service[Req, Rep] = stackClient
@@ -27,6 +33,7 @@ private[finagle] object MethodBuilder {
       .newService(dest, param.Label.Default)
     new MethodBuilder[Req, Rep](
       service,
+      clientName,
       stackClient.params,
       Config.create(stackClient.params, needsTotalTimeoutModule))
   }
@@ -63,6 +70,7 @@ private[finagle] object MethodBuilder {
  */
 private[finagle] class MethodBuilder[Req, Rep] private (
     service: Service[Req, Rep],
+    clientName: String,
     private[client] val params: Stack.Params,
     private[client] val config: MethodBuilder.Config[Req, Rep]) { self =>
   import MethodBuilder._
@@ -140,21 +148,32 @@ private[finagle] class MethodBuilder[Req, Rep] private (
   //
 
   private[client] def withConfig(config: Config[Req, Rep]): MethodBuilder[Req, Rep] =
-    new MethodBuilder(self.service, self.params, config)
+    new MethodBuilder(
+      self.service,
+      self.clientName,
+      self.params,
+      config)
 
   private[this] def filter(name: String): Filter[Req, Rep, Req, Rep] = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
     //
-    // - Logical Stats (TODO)
+    // - Logical Stats
     // - Total Timeout
     // - Retries
     // - Service (Finagle client's stack, including Per Request Timeout)
 
-    val stats = params[param.Stats].statsReceiver.scope(name)
+    val stats = params[param.Stats].statsReceiver.scope(clientName, name)
 
-    withTimeout.totalFilter
+    val statsFilter = new StatsFilter[Req, Rep](
+      stats.scope("logical"),
+      params[param.ResponseClassifier].responseClassifier,
+      params[param.ExceptionStatsHandler].categorizer,
+      params[StatsFilter.Param].unit)
+
+    statsFilter
+      .andThen(withTimeout.totalFilter)
       .andThen(withRetry.filter(stats))
       .andThen(withTimeout.perRequestFilter)
   }
