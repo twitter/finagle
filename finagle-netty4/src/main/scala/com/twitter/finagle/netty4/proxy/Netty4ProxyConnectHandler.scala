@@ -2,8 +2,8 @@ package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
 import io.netty.channel.{
-  Channel, ChannelFuture, ChannelFutureListener,
-  ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
+  Channel, ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter
+}
 import io.netty.handler.proxy.ProxyHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 import java.net.SocketAddress
@@ -53,18 +53,6 @@ private[netty4] class Netty4ProxyConnectHandler(
 
     // Fail the original promise if a new one is failed.
     proxyConnectPromise.addListener(proxyFailuresTo(promise))
-
-    // Workaround for https://github.com/netty/netty/issues/5933 (CSL-3451)
-    // If ChannelOption.AUTO_READ is turned off, as it is by default for
-    // Netty4 via the com.twitter.finagle.netty4.Netty4Transporter.Backpressure
-    // param, as of Netty 4.1.4, the read of the Socks 5 proxy server is not
-    // kicked off and so must be done manually.
-    proxyConnectPromise.addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture): Unit = {
-        if (f.isSuccess && !ctx.channel().config().isAutoRead())
-          ctx.read()
-      }
-    })
 
     // React on satisfied proxy handshake promise.
     connectPromise.addListener(new GenericFutureListener[NettyFuture[Channel]] {
