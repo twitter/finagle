@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-commons-stats: Provide a TwitterServer exporter for commons stats.
+    This simplifies migration for folks who don't want to switch to
+    commons metrics and TwitterServer in one go.  It will export stats on the
+    /vars.json endpoint.  ``RB_ID=902921``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

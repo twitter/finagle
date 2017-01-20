@@ -366,10 +366,12 @@ object Finagle extends Build {
     name := "finagle-commons-stats",
     libraryDependencies ++= Seq(
       "com.twitter.common" % "stats" % "0.0.115",
+      util("core"),
       util("registry"),
       util("stats")
-    )
-  ).dependsOn(finagleCore)
+    ),
+    libraryDependencies ++= jacksonLibs
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleServersets = Project(
     id = "finagle-serversets",
