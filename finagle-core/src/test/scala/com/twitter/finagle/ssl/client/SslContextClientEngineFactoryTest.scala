@@ -1,9 +1,7 @@
 package com.twitter.finagle.ssl.client
 
 import com.twitter.finagle.Address
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, KeyCredentials,
-  Protocols, SslConfigurationException, TrustCredentials}
+import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
 import java.net.InetSocketAddress
 import javax.net.ssl.SSLContext
@@ -27,7 +25,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
 
   test("default config with inet address creates client engine with peer") {
     val config = SslClientConfiguration()
-    val engine = factory.mkEngine(address, config)
+    val engine = factory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine.getUseClientMode())
@@ -37,7 +35,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
 
   test("default config without inet address creates client engine without peer") {
     val config = SslClientConfiguration()
-    val engine = factory.mkEngine(other, config)
+    val engine = factory(other, config)
     val sslEngine = engine.self
 
     assert(sslEngine.getUseClientMode())
@@ -56,7 +54,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 
@@ -64,7 +62,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)
 
     intercept[SslConfigurationException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 
@@ -75,14 +73,14 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
 
     intercept[SslConfigurationException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 
   test("config with good cipher suites succeeds") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
-    val engine = factory.mkEngine(address, config)
+    val engine = factory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -96,14 +94,14 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 
   test("config with good enabled protocols succeeds") {
     val protocols = Protocols.Enabled(Seq("TLSv1.2"))
     val config = SslClientConfiguration(protocols = protocols)
-    val engine = factory.mkEngine(address, config)
+    val engine = factory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -117,7 +115,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 
@@ -126,7 +124,7 @@ class SslContextClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = factory.mkEngine(address, config)
+      val engine = factory(address, config)
     }
   }
 

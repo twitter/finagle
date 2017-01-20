@@ -1,12 +1,12 @@
 package com.twitter.finagle.ssl.client
 
 import com.twitter.finagle.Address
-import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.{Engine, SslConfigurations}
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * This class represents a Finagle [[Address]] that doesn't have
- * or contain a corresponding [[java.net.SocketAddress]]
+ * or contain a corresponding `java.net.SocketAddress`
  */
 private[ssl] case object UnknownSocketAddress extends SocketAddress
 
@@ -15,7 +15,7 @@ private[ssl] case object UnknownSocketAddress extends SocketAddress
  * which use a SocketAddress => Engine interface. It should only be used
  * for legacy purposes.
  */
-private[ssl] case class ConstClientEngineFactory(
+private[ssl] class ConstClientEngineFactory(
     newEngine: SocketAddress => Engine)
   extends SslClientEngineFactory {
 
@@ -44,10 +44,13 @@ private[ssl] case class ConstClientEngineFactory(
    * @note [[TrustCredentials]] other than Unspecified are not supported.
    * @note [[ApplicationProtocols]] other than Unspecified are not supported.
    */
-  def mkEngine(address: Address, config: SslClientConfiguration): Engine = {
-    SslClientEngineFactory.checkKeyCredentialsNotSupported("ConstClientEngineFactory", config)
-    SslClientEngineFactory.checkTrustCredentialsNotSupported("ConstClientEngineFactory", config)
-    SslClientEngineFactory.checkApplicationProtocolsNotSupported("ConstClientEngineFactory", config)
+  def apply(address: Address, config: SslClientConfiguration): Engine = {
+    SslConfigurations.checkKeyCredentialsNotSupported(
+      "ConstClientEngineFactory", config.keyCredentials)
+    SslConfigurations.checkTrustCredentialsNotSupported(
+      "ConstClientEngineFactory", config.trustCredentials)
+    SslConfigurations.checkApplicationProtocolsNotSupported(
+      "ConstClientEngineFactory", config.applicationProtocols)
 
     val engine = newEngine(addressToSocketAddress(address, config))
     SslClientEngineFactory.configureEngine(engine, config)

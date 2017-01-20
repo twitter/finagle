@@ -1,53 +1,30 @@
-package com.twitter.finagle.ssl.client
+package com.twitter.finagle.ssl.server
 
-import com.twitter.finagle.Address
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, Engine, KeyCredentials,
-  Protocols, SslConfigurationException, TrustCredentials}
+import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
-import java.net.{InetSocketAddress, SocketAddress}
 import javax.net.ssl.SSLContext
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ConstClientEngineFactoryTest extends FunSuite {
+class ConstServerEngineFactoryTest extends FunSuite {
 
-  private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
-  private[this] val other: Address = Address.Failed(new Exception("testing"))
+  private[this] val factory = new ConstServerEngineFactory(newEngine _)
 
-  private[this] val factory = new ConstClientEngineFactory(newEngine _)
-
-  private[this] def newEngine(socket: SocketAddress): Engine = {
+  private[this] def newEngine(): Engine = {
     val sslContext = SSLContext.getInstance("TLSv1.2")
     sslContext.init(null, null, null)
-
-    val sslEngine = socket match {
-      case isa: InetSocketAddress =>
-        sslContext.createSSLEngine(isa.getHostName(), isa.getPort())
-      case _ => sslContext.createSSLEngine()
-    }
-
+    val sslEngine = sslContext.createSSLEngine()
     new Engine(sslEngine)
   }
 
-  test("default config with inet address creates client engine with peer") {
-    val config = SslClientConfiguration()
-    val engine = factory(address, config)
+  test("default config creates server engine") {
+    val config = SslServerConfiguration()
+    val engine = factory(config)
     val sslEngine = engine.self
 
-    assert(sslEngine.getUseClientMode())
-    assert(sslEngine.getPeerHost() == "localhost")
-    assert(sslEngine.getPeerPort() == 12345)
-  }
-
-  test("default config without inet address creates client engine without peer") {
-    val config = SslClientConfiguration()
-    val engine = factory(other, config)
-    val sslEngine = engine.self
-
-    assert(sslEngine.getUseClientMode())
+    assert(!sslEngine.getUseClientMode())
     assert(sslEngine.getPeerHost() == null)
     assert(sslEngine.getPeerPort() == -1)
   }
@@ -60,18 +37,18 @@ class ConstClientEngineFactoryTest extends FunSuite {
     // deleteOnExit is handled by TempFile
 
     val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
-    val config = SslClientConfiguration(keyCredentials = keyCredentials)
+    val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = factory(config)
     }
   }
 
   test("config with insecure trust credentials fails") {
-    val config = SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)
+    val config = SslServerConfiguration(trustCredentials = TrustCredentials.Insecure)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val egnine = factory(config)
     }
   }
 
@@ -79,17 +56,18 @@ class ConstClientEngineFactoryTest extends FunSuite {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
 
-    val config = SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
+    val trustCredentials = TrustCredentials.CertCollection(tempCertFile)
+    val config = SslServerConfiguration(trustCredentials = trustCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = factory(config)
     }
   }
 
   test("config with good cipher suites succeeds") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))
-    val config = SslClientConfiguration(cipherSuites = cipherSuites)
-    val engine = factory(address, config)
+    val config = SslServerConfiguration(cipherSuites = cipherSuites)
+    val engine = factory(config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -100,17 +78,17 @@ class ConstClientEngineFactoryTest extends FunSuite {
 
   test("config with bad cipher suites fails") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_102_CBC_SHA496"))
-    val config = SslClientConfiguration(cipherSuites = cipherSuites)
+    val config = SslServerConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      val engine = factory(config)
     }
   }
 
   test("config with good enabled protocols succeeds") {
     val protocols = Protocols.Enabled(Seq("TLSv1.2"))
-    val config = SslClientConfiguration(protocols = protocols)
-    val engine = factory(address, config)
+    val config = SslServerConfiguration(protocols = protocols)
+    val engine = factory(config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -121,20 +99,50 @@ class ConstClientEngineFactoryTest extends FunSuite {
 
   test("config with bad enabled protocols fails") {
     val protocols = Protocols.Enabled(Seq("TLSv2.0"))
-    val config = SslClientConfiguration(protocols = protocols)
+    val config = SslServerConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      val engine = factory(config)
     }
   }
 
   test("config with any application protocols fails") {
     val appProtocols = ApplicationProtocols.Supported(Seq("h2"))
-    val config = SslClientConfiguration(applicationProtocols = appProtocols)
+    val config = SslServerConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = factory(config)
     }
+  }
+
+  test("config with client auth Off succeeds") {
+    val config = SslServerConfiguration(clientAuth = ClientAuth.Off)
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+    assert(!sslEngine.getWantClientAuth())
+    assert(!sslEngine.getNeedClientAuth())
+  }
+
+  test("config with client auth Wanted succeeds") {
+    val config = SslServerConfiguration(clientAuth = ClientAuth.Wanted)
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+    assert(sslEngine.getWantClientAuth())
+    assert(!sslEngine.getNeedClientAuth())
+  }
+
+  test("config with client auth Needed succeeds") {
+    val config = SslServerConfiguration(clientAuth = ClientAuth.Needed)
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+    assert(!sslEngine.getWantClientAuth())
+    assert(sslEngine.getNeedClientAuth())
   }
 
 }

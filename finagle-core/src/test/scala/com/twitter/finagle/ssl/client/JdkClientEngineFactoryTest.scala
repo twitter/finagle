@@ -1,40 +1,23 @@
 package com.twitter.finagle.ssl.client
 
 import com.twitter.finagle.Address
-import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, Engine, KeyCredentials,
-  Protocols, SslConfigurationException, TrustCredentials}
+import com.twitter.finagle.ssl._
 import com.twitter.io.TempFile
-import java.net.{InetSocketAddress, SocketAddress}
-import javax.net.ssl.SSLContext
+import java.io.File
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ConstClientEngineFactoryTest extends FunSuite {
+class JdkClientEngineFactoryTest extends FunSuite {
 
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
   private[this] val other: Address = Address.Failed(new Exception("testing"))
 
-  private[this] val factory = new ConstClientEngineFactory(newEngine _)
-
-  private[this] def newEngine(socket: SocketAddress): Engine = {
-    val sslContext = SSLContext.getInstance("TLSv1.2")
-    sslContext.init(null, null, null)
-
-    val sslEngine = socket match {
-      case isa: InetSocketAddress =>
-        sslContext.createSSLEngine(isa.getHostName(), isa.getPort())
-      case _ => sslContext.createSSLEngine()
-    }
-
-    new Engine(sslEngine)
-  }
-
   test("default config with inet address creates client engine with peer") {
     val config = SslClientConfiguration()
-    val engine = factory(address, config)
+    val engine = JdkClientEngineFactory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine.getUseClientMode())
@@ -44,7 +27,7 @@ class ConstClientEngineFactoryTest extends FunSuite {
 
   test("default config without inet address creates client engine without peer") {
     val config = SslClientConfiguration()
-    val engine = factory(other, config)
+    val engine = JdkClientEngineFactory(other, config)
     val sslEngine = engine.self
 
     assert(sslEngine.getUseClientMode())
@@ -52,7 +35,7 @@ class ConstClientEngineFactoryTest extends FunSuite {
     assert(sslEngine.getPeerPort() == -1)
   }
 
-  test("config with any specified key credentials fails") {
+  test("config with good cert and key credentials succeeds") {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
 
@@ -61,35 +44,78 @@ class ConstClientEngineFactoryTest extends FunSuite {
 
     val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
+    val engine = JdkClientEngineFactory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with bad cert or key credential fails") {
+    val tempCertFile = File.createTempFile("test", "crt")
+    tempCertFile.deleteOnExit()
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = JdkClientEngineFactory(address, config)
     }
   }
 
-  test("config with insecure trust credentials fails") {
-    val config = SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)
-
-    intercept[SslConfigurationException] {
-      val engine = factory(address, config)
-    }
-  }
-
-  test("config with cert collection trust credentials fails") {
+  test("config with cert, key, and chain fails") {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
 
-    val config = SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertKeyAndChain(tempCertFile, tempKeyFile, tempCertFile)
+    val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = JdkClientEngineFactory(address, config)
+    }
+  }
+
+  test("config with insecure trust credentials succeeds") {
+    val config = SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)
+    val engine = JdkClientEngineFactory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with good trusted cert collection succeeds") {
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    // deleteOnExit is handled by TempFile
+
+    val trustCredentials = TrustCredentials.CertCollection(tempCertFile)
+    val config = SslClientConfiguration(trustCredentials = trustCredentials)
+    val engine = JdkClientEngineFactory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
+  }
+
+  test("config with bad trusted cert collection fails") {
+    val tempCertFile = File.createTempFile("test", "crt")
+    tempCertFile.deleteOnExit()
+
+    val trustCredentials = TrustCredentials.CertCollection(tempCertFile)
+    val config = SslClientConfiguration(trustCredentials = trustCredentials)
+
+    intercept[SslConfigurationException] {
+      val engine = JdkClientEngineFactory(address, config)
     }
   }
 
   test("config with good cipher suites succeeds") {
     val cipherSuites = CipherSuites.Enabled(Seq("TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"))
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
-    val engine = factory(address, config)
+    val engine = JdkClientEngineFactory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -103,14 +129,14 @@ class ConstClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(cipherSuites = cipherSuites)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      val engine = JdkClientEngineFactory(address, config)
     }
   }
 
   test("config with good enabled protocols succeeds") {
     val protocols = Protocols.Enabled(Seq("TLSv1.2"))
     val config = SslClientConfiguration(protocols = protocols)
-    val engine = factory(address, config)
+    val engine = JdkClientEngineFactory(address, config)
     val sslEngine = engine.self
 
     assert(sslEngine != null)
@@ -124,7 +150,7 @@ class ConstClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(protocols = protocols)
 
     intercept[IllegalArgumentException] {
-      val engine = factory(address, config)
+      val engine = JdkClientEngineFactory(address, config)
     }
   }
 
@@ -133,7 +159,7 @@ class ConstClientEngineFactoryTest extends FunSuite {
     val config = SslClientConfiguration(applicationProtocols = appProtocols)
 
     intercept[SslConfigurationException] {
-      val engine = factory(address, config)
+      val engine = JdkClientEngineFactory(address, config)
     }
   }
 
