@@ -249,16 +249,16 @@ class ExecuteRequest(
       val composite = if (hasNewParams) {
         val types = MysqlBuf.writer(new Array[Byte](params.size * 2))
         params foreach { writeTypeCode(_, types) }
-        bw.owned()
-          .concat(nullBitmap)
-          .concat(newParamsBoundBuf)
-          .concat(types.owned())
-          .concat(values.owned())
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          types.owned(),
+          values.owned()))
       } else {
-        bw.owned()
-          .concat(nullBitmap)
-          .concat(newParamsBoundBuf)
-          .concat(values.owned())
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          values.owned()))
       }
       Packet(seq, composite)
     }

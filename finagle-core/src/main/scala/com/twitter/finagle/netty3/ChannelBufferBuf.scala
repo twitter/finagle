@@ -39,7 +39,7 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
 
   override def equals(other: Any): Boolean = other match {
     case ChannelBufferBuf(otherCB) => underlying.equals(otherCB)
-    case other: Buf =>  Buf.equals(this, other)
+    case other: Buf => Buf.equals(this, other)
     case _ => false
   }
 

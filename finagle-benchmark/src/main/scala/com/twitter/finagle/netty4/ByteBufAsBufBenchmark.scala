@@ -1,20 +1,21 @@
-package com.twitter.finagle.netty3
+package com.twitter.finagle.netty4
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.io.Buf
+import io.netty.buffer.Unpooled
 import java.nio
-import org.jboss.netty.buffer.ChannelBuffers
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 
 @State(Scope.Benchmark)
-class ChannelBufferBufBenchmark extends StdBenchAnnotations {
+class ByteBufAsBufBenchmark extends StdBenchAnnotations {
 
   @Param(Array("1000"))
   var size: Int = 1000
 
   private[this] var bytes: Array[Byte] = _
-  private[this] var channelBufferBuf: Buf = _
+  private[this] var byteBuf: Buf = _
+  private[this] var byteBufDirect: Buf = _
   private[this] var byteArrayBuf: Buf = _
   private[this] var concatBuf: Buf = _
 
@@ -25,38 +26,48 @@ class ChannelBufferBufBenchmark extends StdBenchAnnotations {
     val end = start + size
     bytes = 0.until(cap).map(_.toByte).toArray
 
-    val bb = java.nio.ByteBuffer.wrap(bytes, start, size)
-    val cb = ChannelBuffers.wrappedBuffer(bytes, start, size)
-    channelBufferBuf = ChannelBufferBuf.Owned(cb)
+    byteBuf = ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes, start, size))
     byteArrayBuf = Buf.ByteArray.Owned(bytes, start, end)
     concatBuf = byteArrayBuf.slice(0, size / 2).concat(byteArrayBuf.slice(size / 2, size))
+
+    val direct = Unpooled.directBuffer(cap)
+    direct.writeBytes(bytes, start, size)
+    byteBufDirect = ByteBufAsBuf.Owned(direct)
   }
 
   @Benchmark
-  def equalityChannelBufferBufChannelBufferBuf(): Boolean =
-    channelBufferBuf == channelBufferBuf
+  def equalityByteBufByteBuf(): Boolean =
+    byteBuf == byteBuf
 
   @Benchmark
-  def equalityChannelBufferBufByteArray(): Boolean =
-    channelBufferBuf == byteArrayBuf
+  def equalityByteBufByteArray(): Boolean =
+    byteBuf == byteArrayBuf
 
   @Benchmark
-  def equalityChannelBufferBufConcat(): Boolean =
-    channelBufferBuf == concatBuf
+  def equalityByteBufConcat(): Boolean =
+    byteBuf == concatBuf
 
   @Benchmark
-  def equalityByteArrayChannelBufferBuf(): Boolean =
-    byteArrayBuf == channelBufferBuf
+  def equalityByteArrayByteBuf(): Boolean =
+    byteArrayBuf == byteBuf
 
   @Benchmark
-  def equalityConcatChannelBufferBuf(): Boolean =
-    concatBuf == channelBufferBuf
+  def equalityConcatByteBuf(): Boolean =
+    concatBuf == byteBuf
+
+  @Benchmark
+  def equalityDirectByteBufByteArray(): Boolean =
+    byteBufDirect == byteArrayBuf
+
+  @Benchmark
+  def equalityByteArrayDirectByteBuf(): Boolean =
+    byteArrayBuf == byteBufDirect
 
   @Benchmark
   @Warmup(iterations = 5)
   @Measurement(iterations = 5)
   def hashCodeBaseline(): Buf =
-    ChannelBufferBuf.Owned(ChannelBuffers.wrappedBuffer(bytes, 1, size + 1))
+    ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes, 1, size + 1))
 
   // subtract the results of the Baseline run to get the results
   @Benchmark
@@ -70,18 +81,19 @@ class ChannelBufferBufBenchmark extends StdBenchAnnotations {
 
   @Benchmark
   def slice(): Buf =
-    channelBufferBuf.slice(size / 4, size / 4 + size / 2)
+    byteBuf.slice(size / 4, size / 4 + size / 2)
 
   @Benchmark
   def extractByteBuffer(): nio.ByteBuffer =
-    Buf.ByteBuffer.Owned.extract(channelBufferBuf)
+    Buf.ByteBuffer.Owned.extract(byteBuf)
 
   @Benchmark
   def extractByteArray(): Array[Byte] =
-    Buf.ByteArray.Owned.extract(channelBufferBuf)
+    Buf.ByteArray.Owned.extract(byteBuf)
 
   @Benchmark
   def length(): Int =
-    channelBufferBuf.length
+    byteBuf.length
 
 }
+

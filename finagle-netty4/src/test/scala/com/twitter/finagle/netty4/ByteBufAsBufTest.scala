@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4
 
-
 import com.twitter.io.Buf
 import io.netty.buffer.Unpooled
 import org.junit.runner.RunWith
@@ -15,10 +14,10 @@ class ByteBufAsBufTest
   with GeneratorDrivenPropertyChecks
   with OneInstancePerTest {
 
-  val bytes = Array[Byte](1,2,3,4)
-  val underlying = Unpooled.buffer(100)
+  private val bytes = Array[Byte](1,2,3,4)
+  private val underlying = Unpooled.buffer(100)
   underlying.writeBytes(bytes)
-  val buf = new ByteBufAsBuf(underlying)
+  private val buf = new ByteBufAsBuf(underlying)
 
   test("ByteBufAsBuf.length equals underlying readable bytes") {
     assert(buf.length == 4)

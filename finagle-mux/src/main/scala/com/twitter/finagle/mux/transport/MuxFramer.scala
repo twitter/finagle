@@ -318,7 +318,7 @@ private[finagle] object MuxFramer {
             val head = buf.slice(0, 4)
             val rest = tags(t)
             val last = buf.slice(4, buf.length)
-            head.concat(rest).concat(last)
+            Buf(Seq(head, rest, last))
           }
           readq.offer(Message.decode(resBuf))
           tags - t
