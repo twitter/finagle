@@ -7,7 +7,7 @@ import javax.net.ssl.{SSLContext, SSLEngine}
  * Instances of this class provide a method to create server Finagle
  * [[Engine Engines]] for use with TLS.
  */
-private[ssl] abstract class SslServerEngineFactory {
+private[finagle] abstract class SslServerEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an
@@ -20,7 +20,7 @@ private[ssl] abstract class SslServerEngineFactory {
   def apply(config: SslServerConfiguration): Engine
 }
 
-private[ssl] object SslServerEngineFactory {
+private[finagle] object SslServerEngineFactory {
 
   def configureClientAuth(
     sslEngine: SSLEngine,

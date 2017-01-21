@@ -23,7 +23,7 @@ import com.twitter.finagle.ssl.{
  * @param applicationProtocols The ALPN or NPN protocols which should be supported by a particular
  * server engine.
  */
-private[ssl] case class SslServerConfiguration(
+private[finagle] case class SslServerConfiguration(
     keyCredentials: KeyCredentials = KeyCredentials.Unspecified,
     clientAuth: ClientAuth = ClientAuth.Unspecified,
     trustCredentials: TrustCredentials = TrustCredentials.Unspecified,

@@ -6,12 +6,12 @@ package com.twitter.finagle.ssl
  * support the collection of parameters specified by the
  * [[SslClientConfiguration]] or the [[SslServerConfiguration]].
  */
-private[ssl] case class SslConfigurationException(
+private[finagle] case class SslConfigurationException(
     msg: String,
     cause: Throwable)
   extends Exception(msg, cause)
 
-private[ssl] object SslConfigurationException {
+private[finagle] object SslConfigurationException {
 
   def notSupported(featureName: String, engineFactoryName: String): SslConfigurationException = {
     SslConfigurationException(s"$featureName is not supported at this time for $engineFactoryName", null)

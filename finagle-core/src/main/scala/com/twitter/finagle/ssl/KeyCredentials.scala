@@ -7,9 +7,9 @@ import java.io.File
  * TLS [[Engine]] to authenticate itself to a remote peer. This
  * generally includes an X.509 certificate and a private key.
  */
-private[ssl] sealed trait KeyCredentials
+private[finagle] sealed trait KeyCredentials
 
-private[ssl] object KeyCredentials {
+private[finagle] object KeyCredentials {
 
   /**
    * Indicates that the key credentials to use with the particular

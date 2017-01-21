@@ -5,9 +5,9 @@ package com.twitter.finagle.ssl
  * Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
  * [[Engine]] should support.
  */
-private[ssl] sealed trait ApplicationProtocols
+private[finagle] sealed trait ApplicationProtocols
 
-private[ssl] object ApplicationProtocols {
+private[finagle] object ApplicationProtocols {
 
   /**
    * Indicates that the determination for which values to use for application protocols

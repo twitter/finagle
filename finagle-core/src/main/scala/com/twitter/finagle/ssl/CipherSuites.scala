@@ -6,9 +6,9 @@ package com.twitter.finagle.ssl
  * combination of various algorithms for items such as key exchange, authentication
  * type, bulk encryption algorithm, and message authentication code.
  */
-private[ssl] sealed trait CipherSuites
+private[finagle] sealed trait CipherSuites
 
-private[ssl] object CipherSuites {
+private[finagle] object CipherSuites {
 
   /**
    * Indicates that the determination for which cipher suites to use with the
