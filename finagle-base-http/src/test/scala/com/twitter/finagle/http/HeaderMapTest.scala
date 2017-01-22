@@ -11,6 +11,15 @@ class HeaderMapTest extends FunSuite {
   private[this] val date = new Date(1441322139353L)
   private[this] val formattedDate = "Thu, 03 Sep 2015 23:15:39 GMT"
 
+  test("getOrNull") {
+    val request = Request()
+    request.headers.add("Host", "api.twitter.com")
+
+    assert(request.headerMap.getOrNull("Host") == "api.twitter.com")
+    assert(request.headerMap.getOrNull("HOST")    == "api.twitter.com")
+    assert(request.headerMap.getOrNull("missing") == null)
+  }
+
   test("get") {
     val request = Request()
     request.headers.add("Host", "api.twitter.com")

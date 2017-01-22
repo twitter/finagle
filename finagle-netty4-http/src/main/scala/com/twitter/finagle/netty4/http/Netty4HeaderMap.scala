@@ -14,6 +14,10 @@ private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) e
 
   def getAll(key: String): Iterable[String] = underlying.getAll(key).asScala
 
+  def get(key: String): Option[String] = Option(underlying.get(key))
+
+  override def getOrNull(key: String): String = underlying.get(key)
+
   def set(k: String, v: String): HeaderMap = {
     underlying.set(k, v)
     this
@@ -33,8 +37,6 @@ private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) e
     underlying.remove(key)
     this
   }
-
-  def get(key: String): Option[String] = Option(underlying.get(key))
 
   def iterator: Iterator[(String, String)] =
     underlying.iteratorAsString().asScala.map(entryToTuple)

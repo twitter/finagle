@@ -15,6 +15,9 @@ New Features
     commons metrics and TwitterServer in one go.  It will export stats on the
     /vars.json endpoint.  ``RB_ID=902921``
 
+  * finagle-http: Introduce `HeaderMap.getOrNull(header)`, a Java-friendly variant of
+    `HeaderMap.get(header).orNull`.  ``RB_ID=904093``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

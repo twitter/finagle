@@ -10,6 +10,7 @@ class MapHeaderMapTest extends FunSuite {
   test("empty map") {
     val map = MapHeaderMap()
     assert(map.get("key") == None)
+    assert(map.getOrNull("key") == null)
     assert(map.getAll("key").isEmpty == true)
     assert(map.iterator.isEmpty == true)
   }
@@ -18,6 +19,7 @@ class MapHeaderMapTest extends FunSuite {
     val map = MapHeaderMap("a" -> "1", "b" -> "2", "a" -> "3")
 
     assert(map.get("a") == Some("1"))
+    assert(map.getOrNull("a") == "1")
     assert(map.getAll("a").toSet == Set("1", "3"))
     assert(map.iterator.toSet == Set(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
 

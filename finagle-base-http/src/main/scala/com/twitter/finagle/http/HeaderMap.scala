@@ -20,9 +20,24 @@ abstract class HeaderMap
   extends mutable.Map[String, String]
   with mutable.MapLike[String, String, HeaderMap] {
 
+  /**
+   * Retrieves all values for a given header name.
+   */
   def getAll(key: String): Iterable[String]
 
-  /** Add a header but don't replace existing header(s). */
+  /**
+   * Retrieves the given header value or `null` if it doesn't exit.
+   */
+  def getOrNull(key: String): String = get(key).orNull
+
+  /**
+   * Retrieves the given header value wrapped with `Option`.
+   */
+  def get(key: String): Option[String]
+
+  /**
+   * Adds a header but don't replace existing header(s).
+   */
   def add(k: String, v: String): HeaderMap
 
   /**
@@ -83,9 +98,7 @@ class MapHeaderMap extends HeaderMap {
   }
 
   // For Map/MapLike
-  def get(key: String): Option[String] = {
-    getAll(key).headOption
-  }
+  def get(key: String): Option[String] = getAll(key).headOption
 
   // For Map/MapLike
   def iterator: Iterator[(String, String)] = {
@@ -137,8 +150,11 @@ object MapHeaderMap {
  * Mutable HttpMessage-backed [[HeaderMap]].
  */
 private[finagle] class MessageHeaderMap(httpMessage: Message) extends HeaderMap {
-  def get(key: String): Option[String] =
-    Option(httpMessage.headers.get(key))
+
+  def get(key: String): Option[String] = Option(httpMessage.headers.get(key))
+
+  override def getOrNull(key: String): String =
+    httpMessage.headers.get(key)
 
   def iterator: Iterator[(String, String)] =
     httpMessage.headers.iterator.asScala.map { entry =>

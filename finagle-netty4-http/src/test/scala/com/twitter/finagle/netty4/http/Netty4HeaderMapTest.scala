@@ -24,6 +24,7 @@ class Netty4HeaderMapTest extends FunSuite {
     assert(wrapper.values.toSet == Set("bar", "val", "something"))
     assert(wrapper.getAll("key") == Seq("val"))
     assert(wrapper.getAll("qux") == Seq("something"))
+    assert(wrapper.getOrNull("qux") == "something")
     assert(netty.get("qux") == "something")
 
     assert(wrapper.remove("foo") == Some("bar"))
