@@ -102,7 +102,7 @@ class MethodBuilderTimeoutTest
     // this is the default if a method doesn't override
     val params = perReqTimeoutParams(4.seconds)
 
-    val stackClient = TestStackClient(perReqTimeoutStack, params)
+    val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("dest_paradise", stackClient)
 
     val fourSecs = methodBuilder.newService("4_secs")

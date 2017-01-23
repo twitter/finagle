@@ -2,6 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.{Filter, Service, SimpleFilter}
 import com.twitter.util.{Duration, Future}
+import scala.collection.mutable
 
 /**
  * '''Experimental:''' This API is under construction.
@@ -119,6 +120,19 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
         }
       }
     }
+  }
+
+  private[client] def registryEntries: Iterable[(Seq[String], String)] = {
+    val entries = new mutable.ListBuffer[(Seq[String], String)]()
+
+    val perReq = mb.config.timeout.perRequest
+    if (perReq.isFinite)
+      entries += ((Seq("timeout", "per_request"), perReq.toString))
+    val total = mb.config.timeout.total
+    if (total.isFinite)
+      entries += ((Seq("timeout", "total"), total.toString))
+
+    entries
   }
 
 }

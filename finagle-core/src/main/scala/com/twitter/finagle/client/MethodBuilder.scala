@@ -3,6 +3,9 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack}
 import com.twitter.finagle.param
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.StackRegistry
+import com.twitter.util.registry.GlobalRegistry
 
 private[finagle] object MethodBuilder {
 
@@ -34,7 +37,8 @@ private[finagle] object MethodBuilder {
     new MethodBuilder[Req, Rep](
       service,
       clientName,
-      stackClient.params,
+      dest,
+      stackClient,
       Config.create(stackClient.params, needsTotalTimeoutModule))
   }
 
@@ -71,9 +75,13 @@ private[finagle] object MethodBuilder {
 private[finagle] class MethodBuilder[Req, Rep] private (
     service: Service[Req, Rep],
     clientName: String,
-    private[client] val params: Stack.Params,
+    dest: String,
+    stackClient: StackClient[Req, Rep],
     private[client] val config: MethodBuilder.Config[Req, Rep]) { self =>
   import MethodBuilder._
+
+  private[client] def params: Stack.Params =
+    stackClient.params
 
   //
   // Configuration
@@ -100,7 +108,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    *
    * @see [[MethodBuilderRetry]]
    */
-  val withRetry: MethodBuilderRetry[Req, Rep] =
+  def withRetry: MethodBuilderRetry[Req, Rep] =
     new MethodBuilderRetry[Req, Rep](this)
 
   /**
@@ -128,7 +136,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    *
    * @see [[MethodBuilderTimeout]]
    */
-  val withTimeout: MethodBuilderTimeout[Req, Rep] =
+  def withTimeout: MethodBuilderTimeout[Req, Rep] =
     new MethodBuilderTimeout[Req, Rep](this)
 
   //
@@ -140,8 +148,10 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    *
    * @param name used for scoping metrics
    */
-  def newService(name: String): Service[Req, Rep] =
+  def newService(name: String): Service[Req, Rep] = {
+    addToRegisty(name)
     filter(name).andThen(service)
+  }
 
   //
   // Internals
@@ -151,8 +161,13 @@ private[finagle] class MethodBuilder[Req, Rep] private (
     new MethodBuilder(
       self.service,
       self.clientName,
-      self.params,
+      self.dest,
+      self.stackClient,
       config)
+
+  private[this] def statsReceiver(name: String): StatsReceiver = {
+    params[param.Stats].statsReceiver.scope(clientName, name)
+  }
 
   private[this] def filter(name: String): Filter[Req, Rep, Req, Rep] = {
     // Ordering of filters:
@@ -164,7 +179,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
     // - Retries
     // - Service (Finagle client's stack, including Per Request Timeout)
 
-    val stats = params[param.Stats].statsReceiver.scope(clientName, name)
+    val stats = statsReceiver(name)
 
     val statsFilter = new StatsFilter[Req, Rep](
       stats.scope("logical"),
@@ -176,6 +191,31 @@ private[finagle] class MethodBuilder[Req, Rep] private (
       .andThen(withTimeout.totalFilter)
       .andThen(withRetry.filter(stats))
       .andThen(withTimeout.perRequestFilter)
+  }
+
+  // clients get registered at:
+  // client/$protocol_lib/$client_name/$dest_addr
+  //
+  // methodbuilders are registered at:
+  // client/$protocol_lib/$client_name/$dest_addr/methods/$method_name
+  //
+  // with the suffixes looking something like:
+  //   stats_receiver: StatsReceiver/scope
+  //   retry: DefaultResponseClassifier
+  //   timeout/total: 100.milliseconds
+  //   timeout/per_request: 30.milliseconds
+  private[this] def addToRegisty(name: String): Unit = {
+    val registry = GlobalRegistry.get
+    val entry = StackRegistry.Entry(dest, stackClient.stack, params)
+    val methodPrefix = ClientRegistry.registryPrefix(entry) ++ Seq("methods", name)
+
+    registry.put(methodPrefix :+ "statsReceiver", statsReceiver(name).toString)
+    withTimeout.registryEntries.foreach { case (suffix, value) =>
+      registry.put(methodPrefix ++ suffix, value)
+    }
+    withRetry.registryEntries.foreach { case (suffix, value) =>
+      registry.put(methodPrefix ++ suffix, value)
+    }
   }
 
 }

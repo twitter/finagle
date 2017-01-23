@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.{Stack, StackBuilder, Stackable, param}
-import com.twitter.util.registry.{SimpleRegistry, GlobalRegistry, Entry}
+import com.twitter.finagle.{Stack, StackBuilder, Stackable, param, stack}
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -44,6 +44,17 @@ class StackRegistryTest extends FunSuite {
     stack.push(stackable)
 
     stack.result
+  }
+
+  test("StackRegistry registryPrefix includes expected keys") {
+    val reg = new StackRegistry { def registryName: String = "reg_name" }
+    val params = Stack.Params.empty +
+      param.Label("a_label") +
+      param.ProtocolLibrary("a_protocol_lib")
+    val entry = StackRegistry.Entry("an_addr", stack.nilStack, params)
+    val prefix = reg.registryPrefix(entry)
+    assert(prefix ==
+      Seq("reg_name", "a_protocol_lib", "a_label", "an_addr"))
   }
 
   test("StackRegistry should register stacks and params properly") {
@@ -90,12 +101,6 @@ class StackRegistryTest extends FunSuite {
     val simple = new SimpleRegistry()
     GlobalRegistry.withRegistry(simple) {
       reg.register("bar", stk, params)
-      val expected = {
-        Set(
-          Entry(Seq("test", "foo", "bar", "name", "p1"), "999"),
-          Entry(Seq("test", "foo", "bar", "head", "p2"), "1")
-        )
-      }
       assert(GlobalRegistry.get.size == reg.size)
 
       reg.unregister("bar", stk, params)

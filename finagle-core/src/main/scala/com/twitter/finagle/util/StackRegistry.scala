@@ -83,6 +83,12 @@ trait StackRegistry {
     }
   }
 
+  /**
+   * Utility for getting the registry key's prefix for an [[Entry]].
+   */
+  def registryPrefix(entry: Entry): Seq[String] =
+    Seq(registryName, entry.protocolLibrary, entry.name, entry.addr)
+
   /** Unregisters an `addr` and `stk`. */
   def unregister(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
@@ -104,10 +110,11 @@ trait StackRegistry {
   }
 
   private[this] def addEntries(entry: Entry): Unit = {
+    val prefix = registryPrefix(entry)
     val gRegistry = GlobalRegistry.get
     entry.modules.foreach { case Module(paramName, _, reflected) =>
       reflected.foreach { case (field, value) =>
-        val key = Seq(registryName, entry.protocolLibrary, entry.name, entry.addr, paramName, field)
+        val key = prefix ++ Seq(paramName, field)
         if (gRegistry.put(key, value).isEmpty)
           numEntries.incrementAndGet()
       }
@@ -115,11 +122,12 @@ trait StackRegistry {
   }
 
   private[this] def removeEntries(entry: Entry): Unit = {
+    val prefix = registryPrefix(entry)
     val gRegistry = GlobalRegistry.get
     val name = entry.name
     entry.modules.foreach { case Module(paramName, _, reflected) =>
       reflected.foreach { case (field, value) =>
-        val key = Seq(registryName, entry.protocolLibrary, name, entry.addr, paramName, field)
+        val key = prefix ++ Seq(paramName, field)
         if (gRegistry.remove(key).isDefined)
           numEntries.decrementAndGet()
       }

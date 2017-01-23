@@ -3,9 +3,10 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{NoOpModule, Params}
 import com.twitter.finagle._
-import com.twitter.finagle.service.{ReqRep, ResponseClass, Retries, RetryBudget, TimeoutFilter}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, Retries, RetryBudget, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -24,7 +25,7 @@ private object MethodBuilderTest {
     totalModule.toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
   }
 
-  val perReqTimeoutStack: Stack[ServiceFactory[Int, Int]] = {
+  val stack: Stack[ServiceFactory[Int, Int]] = {
     val svcFactory = ServiceFactory.const(neverSvc)
     TimeoutFilter.clientModule[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
@@ -226,4 +227,52 @@ class MethodBuilderTest
       }
     }
   }
+
+  test("newService's are added to the Registry") {
+    val registry = new SimpleRegistry()
+    GlobalRegistry.withRegistry(registry) {
+      val protocolLib = "test_lib"
+      val clientName = "some_svc"
+      val addr = "test_addr"
+      val stats = new InMemoryStatsReceiver()
+      val params =
+        Stack.Params.empty +
+          param.Stats(stats) +
+          param.Label(clientName) +
+          param.ProtocolLibrary(protocolLib)
+      val stackClient = TestStackClient(stack, params)
+      val methodBuilder = MethodBuilder.from(addr, stackClient)
+
+      def key(name: String, suffix: String*): Seq[String] =
+        Seq("client", protocolLib, clientName, addr, "methods", name) ++ suffix
+
+      def filteredRegistry: Set[Entry] =
+        registry.filter { entry =>
+          entry.key.head == "client"
+        }.toSet
+
+      // test a "vanilla" one
+      methodBuilder.newService("vanilla")
+      val vanillaEntries = Set(
+        Entry(key("vanilla", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/vanilla"),
+        Entry(key("vanilla", "retry"), "DefaultResponseClassifier")
+      )
+      assert(filteredRegistry == vanillaEntries)
+
+      // test with a retry policy and timeouts
+      methodBuilder
+        .withTimeout.total(10.seconds)
+        .withTimeout.perRequest(1.second)
+        .withRetry.forPolicy(RetryPolicy.none)
+        .newService("sundae")
+      val sundaeEntries = Set(
+        Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
+        Entry(key("sundae", "retry"), "RetryPolicy.none"),
+        Entry(key("sundae", "timeout", "total"), "10.seconds"),
+        Entry(key("sundae", "timeout", "per_request"), "1.seconds")
+      )
+      filteredRegistry should contain theSameElementsAs (vanillaEntries ++ sundaeEntries)
+    }
+  }
+
 }

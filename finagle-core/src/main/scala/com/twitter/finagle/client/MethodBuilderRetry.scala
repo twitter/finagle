@@ -80,8 +80,12 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
    */
   def forClassifier(
     classifier: ResponseClassifier
-  ): MethodBuilder[Req, Rep] =
-    forPolicy(policyForReqRep(shouldRetry(classifier)))
+  ): MethodBuilder[Req, Rep] = {
+    val retryPolicy = policyForReqRep(shouldRetry(classifier))
+    val withoutRequeues = filteredPolicy(retryPolicy)
+    val retries = Config[Req, Rep](classifier.toString, withoutRequeues)
+    mb.withConfig(mb.config.copy(retry = retries))
+  }
 
   /**
    * '''Expert API:''' For most users, the default policy which uses
@@ -104,7 +108,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
     retryPolicy: RetryPolicy[(Req, Try[Rep])]
   ): MethodBuilder[Req, Rep] = {
     val withoutRequeues = filteredPolicy(retryPolicy)
-    val retries = mb.config.retry.copy(retryPolicy = withoutRequeues)
+    val retries = Config(retryPolicy.toString, withoutRequeues)
     mb.withConfig(mb.config.copy(retry = retries))
   }
 
@@ -120,6 +124,12 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
         mb.params[param.HighResTimer].timer,
         scopedStats,
         mb.params[Retries.Budget].retryBudget)
+  }
+
+  private[client] def registryEntries: Iterable[(Seq[String], String)] = {
+    Seq(
+      (Seq("retry"), mb.config.retry.toString)
+    )
   }
 
 }
@@ -174,7 +184,7 @@ private[client] object MethodBuilderRetry {
     val classifier = params[param.ResponseClassifier].responseClassifier
     val should = shouldRetry(classifier)
     val policy = filteredPolicy(policyForReqRep(should))
-    Config(policy)
+    Config(classifier.toString, policy)
   }
 
   /**
@@ -183,6 +193,7 @@ private[client] object MethodBuilderRetry {
    * @param retryPolicy which request/response pairs should be retried.
    */
   case class Config[Req, Rep] private (
+      override val toString: String,
       retryPolicy: RetryPolicy[(Req, Try[Rep])])
 
 }
