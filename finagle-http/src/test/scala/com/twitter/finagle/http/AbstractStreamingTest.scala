@@ -328,6 +328,27 @@ abstract class AbstractStreamingTest extends FunSuite {
     Closable.all(server, client1, client2).close()
   }
 
+  test("end-to-end: server gets content for chunked request made to client with content length") {
+    val svc = Service.mk[Request, Response] { req =>
+      assert(req.contentString == "hello")
+      Future.value(Response(req))
+    }
+
+    val server = startServer(svc, identity)
+
+    val writer = Reader.writable()
+    val req = Request(Version.Http11, Method.Post, "/foo", writer)
+    req.headerMap.put("Content-Length", "5")
+    req.setChunked(true)
+
+    val client = connect(server.boundAddress, identity, "client")
+    val res = client(req)
+    await(writer.write(Buf.Utf8("hello")))
+    writer.close()
+    await(res)
+    Closable.all(server, client).close()
+  }
+
   test("end-to-end: client may process multiple streaming requests simultaneously") {
     val service = Service.mk[Request, Response] { req =>
       val writable = Reader.writable() // never gets closed

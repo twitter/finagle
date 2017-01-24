@@ -197,4 +197,23 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       }
     }
   }
+
+  test("finagle http request with chunked and content-length set -> netty") {
+    val in = Request()
+    in.setChunked(true)
+    in.contentLength = 10
+
+    val out = Bijections.finagle.requestToNetty(in)
+    assert(!HttpUtil.isTransferEncodingChunked(out))
+    assert(out.headers.get(Fields.ContentLength) == "10")
+  }
+
+  test("finagle http request with chunked and no content-length set -> netty") {
+    val in = Request()
+    in.setChunked(true)
+
+    val out = Bijections.finagle.requestToNetty(in)
+    assert(HttpUtil.isTransferEncodingChunked(out))
+    assert(!out.headers.contains(Fields.ContentLength))
+  }
 }
