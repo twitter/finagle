@@ -15,10 +15,31 @@ import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
  * @param underlying The [[org.jboss.netty.buffer.ChannelBuffer]] to be wrapped in a
  * [[com.twitter.io.Buf]] interface.
  */
-class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
+class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf.Indexed {
   def length: Int = underlying.readableBytes
 
   override def toString: String = s"ChannelBufferBuf($underlying)"
+
+  private[twitter] def apply(index: Int): Byte = {
+    val pos = underlying.readerIndex + index
+    underlying.getByte(pos)
+  }
+
+  private[twitter] def process(processor: Buf.Indexed.Processor): Int = {
+    val offset = underlying.readerIndex
+    val len = length
+    var i = 0
+    var continue = true
+    while (continue && i < len) {
+      val byte = underlying.getByte(offset + i)
+      if (processor(byte))
+        i += 1
+      else
+        continue = false
+    }
+    if (continue) -1
+    else i
+  }
 
   def write(bytes: Array[Byte], off: Int): Unit = {
     checkWriteArgs(bytes.length, off)

@@ -3,6 +3,7 @@ package com.twitter.finagle.netty4
 import com.twitter.io.Buf
 import com.twitter.io.Buf.ByteArray
 import io.netty.buffer._
+import io.netty.util.ByteProcessor
 
 private[finagle] object ByteBufAsBuf {
 
@@ -59,8 +60,18 @@ private[finagle] object ByteBufAsBuf {
  */
 private[finagle] class ByteBufAsBuf(
     private[finagle] val underlying: ByteBuf)
-  extends Buf {
+  extends Buf.Indexed {
   // nb: `underlying` is exposed for testing
+
+  private[twitter] def apply(index: Int): Byte =
+    underlying.getByte(index)
+
+  private[twitter] def process(processor: Buf.Indexed.Processor): Int = {
+    val byteProcessor = new ByteProcessor {
+      def process(value: Byte): Boolean = processor(value)
+    }
+    underlying.forEachByte(byteProcessor)
+  }
 
   def write(bytes: Array[Byte], off: Int): Unit = {
     checkWriteArgs(bytes.length, off)

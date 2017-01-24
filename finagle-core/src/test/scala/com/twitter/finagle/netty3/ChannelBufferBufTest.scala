@@ -5,9 +5,12 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.jboss.netty.buffer.ChannelBuffers
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class ChannelBufferBufTest extends FunSuite {
+class ChannelBufferBufTest
+  extends FunSuite
+  with GeneratorDrivenPropertyChecks {
 
   test("ChannelBufferBuf.slice: slices according to the underlying ChannelBuffer") {
     val cb = ChannelBuffers.buffer(128)
@@ -84,5 +87,75 @@ class ChannelBufferBufTest extends FunSuite {
     assert(bytes.length == 9)
     assert(begin == 2)
     assert(end == 6)
+  }
+
+  test("apply(Int)") {
+    val out = new Array[Byte](1)
+    forAll { bytes: Array[Byte] =>
+      if (bytes.length >= 2) {
+        val cb = ChannelBuffers.wrappedBuffer(bytes)
+        cb.readByte()
+        val buf = new ChannelBufferBuf(cb)
+
+        // compare slice/write to apply
+        buf.slice(0, 1).write(out, 0)
+        assert(out(0) == buf(0))
+
+        buf.slice(buf.length - 1, buf.length).write(out, 0)
+        assert(out(0) == buf(buf.length - 1))
+      }
+    }
+  }
+
+  test("apply(Int) over the length") {
+    forAll { bytes: Array[Byte] =>
+      val cb = ChannelBuffers.wrappedBuffer(bytes)
+      val buf = new ChannelBufferBuf(cb)
+      intercept[IndexOutOfBoundsException] {
+        buf(buf.length)
+      }
+    }
+  }
+
+  test("process returns -1 when fully processed") {
+    forAll { bytes: Array[Byte] =>
+      val cb = ChannelBuffers.wrappedBuffer(bytes)
+      val buf = new ChannelBufferBuf(cb)
+
+      var n = 0
+      val processor = new Buf.Indexed.Processor {
+        def apply(byte: Byte): Boolean = {
+          n += 1
+          true
+        }
+      }
+      assert(-1 == buf.process(processor))
+      assert(buf.length == n)
+    }
+  }
+
+  test("process returns index where processing stopped") {
+    val processor = new Buf.Indexed.Processor {
+      def apply(byte: Byte): Boolean = false
+    }
+    forAll { bytes: Array[Byte] =>
+      val cb = ChannelBuffers.wrappedBuffer(bytes)
+      val buf = new ChannelBufferBuf(cb)
+      assert(buf.process(processor) == (if (buf.isEmpty) -1 else 0))
+
+      var n = 0
+      val maxThree = new Buf.Indexed.Processor {
+        def apply(byte: Byte): Boolean = {
+          n += 1
+          n <= 3
+        }
+      }
+
+      val res = buf.process(maxThree)
+      if (bytes.length <= 3)
+        assert(-1 == res)
+      else
+        assert(3 == res)
+    }
   }
 }
