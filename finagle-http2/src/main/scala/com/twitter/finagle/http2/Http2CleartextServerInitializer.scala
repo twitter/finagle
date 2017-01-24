@@ -13,7 +13,15 @@ import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   SourceCodec, UpgradeCodec, UpgradeCodecFactory}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2.{
-  Http2Codec, Http2CodecUtil, Http2ServerDowngrader, Http2ServerUpgradeCodec, Http2ResetFrame}
+  Http2Codec,
+  Http2CodecUtil,
+  Http2FrameLogger,
+  Http2ResetFrame,
+  Http2ServerDowngrader,
+  Http2ServerUpgradeCodec,
+  Http2StreamChannelBootstrap
+}
+import io.netty.handler.logging.LogLevel
 import io.netty.util.AsciiString
 
 /**
@@ -48,7 +56,10 @@ private[http2] class Http2CleartextServerInitializer(
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
         val initialSettings = Settings.fromParams(params)
-        new Http2ServerUpgradeCodec(new Http2Codec(true /* server */, initializer, initialSettings)) {
+        val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
+        val bootstrap = (new Http2StreamChannelBootstrap()).handler(initializer)
+        val codec = new Http2Codec(true /* server */, bootstrap, logger, initialSettings)
+        new Http2ServerUpgradeCodec(codec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             upgradeCounter.incr()
             // we turn off backpressure because Http2 only works with autoread on for now

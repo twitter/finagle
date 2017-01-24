@@ -8,7 +8,8 @@ import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBufUtil, ByteBuf}
 import io.netty.channel.{Channel, ChannelInitializer, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
-import io.netty.handler.codec.http2.Http2Codec
+import io.netty.handler.codec.http2.{Http2Codec, Http2FrameLogger, Http2StreamChannelBootstrap}
+import io.netty.handler.logging.LogLevel
 
 /**
  * This handler allows an instant upgrade to HTTP/2 if the first bytes received from the client
@@ -70,7 +71,10 @@ private[http2] class PriorKnowledgeHandler(
 
           // we have read a complete preface. Setup HTTP/2 pipeline.
           val initialSettings = Settings.fromParams(params)
-          p.replace(HttpCodecName, "http2Codec", new Http2Codec(true /* server */ , initializer, initialSettings))
+          val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
+          val bootstrap = (new Http2StreamChannelBootstrap()).handler(initializer)
+          val codec = new Http2Codec(true /* server */ , bootstrap, logger, initialSettings)
+          p.replace(HttpCodecName, "http2Codec", codec)
           p.remove("upgradeHandler")
 
           // Since we changed the pipeline, our current ctx points to the wrong handler
