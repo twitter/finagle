@@ -44,8 +44,9 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     channel.writeOutbound("pending write")
     assert(channel.outboundMessages().size() == 0)
 
-    channel.writeInbound(
-      new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
+    // Let's chunk the response. Netty loves doing that.
+    channel.writeInbound(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
+    channel.writeInbound(LastHttpContent.EMPTY_LAST_CONTENT)
 
     assert(connectPromise.isSuccess)
 

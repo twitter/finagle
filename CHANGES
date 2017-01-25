@@ -89,6 +89,9 @@ Bug Fixes
   * finagle-memcached: AtomicMap change lock function to synchronize on map
     object. ``DIFF_ID=D18735``
 
+  * finagle-netty4: Fixed connection stall in Finagle clients configured with
+    both HTTP proxy (`Transporter.HttpProxyTo`) and TLS/SSL enabled. ``RB_ID=904831``
+
 6.41.0
 ------
 

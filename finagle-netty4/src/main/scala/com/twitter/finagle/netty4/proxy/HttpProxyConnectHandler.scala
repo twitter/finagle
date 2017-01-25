@@ -44,7 +44,8 @@ private[netty4] class HttpProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] val httpCodecKey: String = "http proxy client codec"
+  private[this] val httpCodecKey: String = "httpProxyClientCodec"
+  private[this] val httpObjectAggregatorKey: String = "httpProxyObjectAggregator"
   private[this] var connectPromise: ChannelPromise = _
 
   private[this] def proxyAuthorizationHeader(c: Credentials): String = {
@@ -76,6 +77,10 @@ private[netty4] class HttpProxyConnectHandler(
         if (f.isSuccess) {
           // Add HTTP client codec so we can talk to an HTTP proxy.
           ctx.pipeline().addBefore(ctx.name(), httpCodecKey, httpClientCodec)
+          // We don't expect any payload coming back in the response from the HTTP proxy
+          // so no need to aggregate the content (maxContentLength = 0).
+          ctx.pipeline().addBefore(ctx.name(), httpObjectAggregatorKey,
+            new HttpObjectAggregator(0))
 
           // Create new connect HTTP proxy connect request.
           val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, host)
@@ -106,11 +111,14 @@ private[netty4] class HttpProxyConnectHandler(
   }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
+    // We only need to match against FullHttpResponse given that the HttpObjectAggregator
+    // will collapse all HTTP pieces into a full response.
     case rep: FullHttpResponse =>
       // A remote HTTP proxy is ready to proxy traffic to an ultimate destination. We no longer
       // need HTTP proxy pieces in the pipeline.
       if (rep.status() == HttpResponseStatus.OK) {
         ctx.pipeline().remove(httpCodecKey)
+        ctx.pipeline().remove(httpObjectAggregatorKey)
         ctx.pipeline().remove(self) // drains pending writes when removed
 
         connectPromise.trySuccess()
