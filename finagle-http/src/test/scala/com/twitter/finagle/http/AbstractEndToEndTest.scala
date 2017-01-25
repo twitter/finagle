@@ -410,6 +410,38 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
       await(client.close())
     }
+
+    test(implName + ": interrupt requests") {
+      val p = Promise[Unit]()
+      val interrupted = Promise[Unit]()
+
+      val service = new HttpService {
+        def apply(request: Request) = {
+          p.setDone()
+          val interruptee = Promise[Response]()
+          interruptee.setInterruptHandler { case exn: Throwable =>
+            interrupted.setDone()
+          }
+          interruptee
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.content = Buf.Utf8("." * 10)
+      val f = client(req)
+      await(p)
+      assert(!f.isDefined)
+
+      val e = new Exception("boom!")
+      f.raise(e)
+      val actual = intercept[Exception] {
+        await(f)
+      }
+      assert(actual == e)
+
+      await(client.close())
+    }
   }
 
   def streaming(connect: HttpService => HttpService) {

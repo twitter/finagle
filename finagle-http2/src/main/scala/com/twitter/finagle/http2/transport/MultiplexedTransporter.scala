@@ -105,7 +105,6 @@ private[http2] class MultiplexedTransporter(
     .transform(handleRead)
     .before(loop())
 
-  // TODO: clean this up when we figure out the semantics of closing a connection
   loop()
 
   /**
@@ -253,7 +252,6 @@ private[http2] class MultiplexedTransporter(
       val p = Promise[HttpObject]
       result.proxyTo(p)
 
-      // we can improve interrupt behavior here
       p.setInterruptHandler(closeOnInterrupt)
       p
     }
