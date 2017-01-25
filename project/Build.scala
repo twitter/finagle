@@ -180,7 +180,6 @@ object Finagle extends Build {
     finagleHttp,
     finagleBaseHttp,
     finagleHttp2,
-    finagleHttpCompat,
     finagleStream,
     finagleNative,
     finagleThrift,
@@ -469,15 +468,6 @@ object Finagle extends Build {
       nettyLib
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleHttp % "test->test;compile->compile", finagleNetty4, finagleNetty4Http)
-
-  lazy val finagleHttpCompat = Project(
-    id = "finagle-http-compat",
-    base = file("finagle-http-compat"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-http-compat"
-  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleNative = Project(
     id = "finagle-native",

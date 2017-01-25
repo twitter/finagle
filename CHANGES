@@ -27,6 +27,9 @@ Breaking API Changes
     always throwing an `IllegalStateException`. Existing users of the `write(..)` methods
     on chunked messages should use the `Writer` directly. ``RB_ID=900091``
 
+  * finagle: finagle-http-compat has been removed as part of migration off Netty 3. Use
+    finagle-http types/APIs directly.  ``RB_ID=903647``
+
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
       - `apply(group: Group[SocketAddress])`
       - `apply(cluster: Cluster[SocketAddress])`
