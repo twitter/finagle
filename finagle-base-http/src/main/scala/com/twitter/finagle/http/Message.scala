@@ -42,9 +42,37 @@ abstract class Message {
   def isRequest: Boolean
   def isResponse = !isRequest
 
-  // XXX should we may be using the Shared variants here?
+  /**
+   * Retrieve the current content of this `Message`.
+   *
+   * If this message is chunked, the resulting `Buf` will always be empty.
+   */
   def content: Buf = ChannelBufferBuf.Owned(getContent())
-  def content_=(content: Buf) { setContent(BufChannelBuffer(content)) }
+
+  /**
+   * Set the content of this `Message`.
+   *
+   * Any existing content is discarded. If this `Message` is set to chunked,
+   * an `IllegalStateException` is thrown.
+   *
+   * @see [[content(Buf)]] for Java users
+   */
+  @throws[IllegalStateException]
+  def content_=(content: Buf): Unit = { setContent(BufChannelBuffer(content)) }
+
+  /**
+   * Set the content of this `Message`.
+   *
+   * Any existing content is discarded. If this `Message` is set to chunked,
+   * an `IllegalStateException` is thrown.
+   *
+   * @see [[content_=(Buf)]] for Scala users
+   */
+  @throws[IllegalStateException]
+  final def content(content: Buf): this.type = {
+    this.content = content
+    this
+  }
 
   def version: Version = from(httpMessage.getProtocolVersion())
   def version_=(version: Version) { httpMessage.setProtocolVersion(from(version)) }
@@ -358,14 +386,11 @@ abstract class Message {
    */
   @throws(classOf[IllegalStateException])
   def write(buf: Buf): Unit = {
-    if (isChunked) throw new IllegalStateException("Cannot write bytes to chunked message")
-    else  {
-      val channelBuffer = buf match {
-        case ChannelBufferBuf(channelBuffer) => channelBuffer
-        case _ => BufChannelBuffer(buf)
-      }
-      setContent(ChannelBuffers.wrappedBuffer(getContent(), channelBuffer))
+    val channelBuffer = buf match {
+      case ChannelBufferBuf(channelBuffer) => channelBuffer
+      case _ => BufChannelBuffer(buf)
     }
+    setContent(ChannelBuffers.wrappedBuffer(getContent(), channelBuffer))
   }
 
   /**
@@ -427,14 +452,30 @@ abstract class Message {
   protected[finagle] def headers(): HttpHeaders =
     httpMessage.headers()
 
+  @deprecated("Use content instead", "2017-01-23")
   protected[finagle] def getContent(): ChannelBuffer =
     httpMessage.getContent()
 
-  protected[finagle] def setContent(content: ChannelBuffer): Unit =
-    httpMessage.setContent(content)
+  @deprecated("Use content(Buf) instead", "2017-01-23")
+  @throws[IllegalStateException]
+  protected[finagle] def setContent(content: ChannelBuffer): Unit = {
+    // To preserve netty3 behavior, we only throw an exception if the content is non-empty
+    if (isChunked && content.readable())
+      throw new IllegalStateException("Cannot set non-empty content on chunked message")
+    else httpMessage.setContent(content)
+  }
 
   def isChunked: Boolean = httpMessage.isChunked()
 
+  /**
+   * Manipulate the `Message` content mode.
+   *
+   * If `chunked` is `true`, any existing content will be discarded and further attempts
+   * to manipulate the synchronous content will result in an `IllegalStateException`.
+   *
+   * If `chunked` is `false`, the synchronous content methods will become available
+   * and the `Reader`/`Writer` of the message will be ignored by finagle.
+   */
   def setChunked(chunked: Boolean): Unit =
     httpMessage.setChunked(chunked)
 }

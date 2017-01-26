@@ -8,6 +8,9 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class MessageTest extends FunSuite {
+
+  private def defaultMessages(): Seq[Message] = Seq(Request(), Response())
+
   test("empty message") {
     val response = Response()
     assert(response.length == 0)
@@ -118,6 +121,74 @@ class MessageTest extends FunSuite {
     assert(response.length        == 0)
   }
 
+  test("set content") {
+    val buf = Buf.ByteArray(0,1,2,3)
+    defaultMessages().foreach { msg =>
+      assert(msg.content.isEmpty)
+      msg.content = buf
+      assert(msg.content == buf)
+    }
+  }
+
+  test("content(Buf)") {
+    val buf = Buf.ByteArray(0,1,2,3)
+    defaultMessages().foreach { msg =>
+      assert(msg.content.isEmpty)
+      msg.content(buf)
+      assert(msg.content == buf)
+    }
+  }
+
+  test("set non-empty content when chunked throws IllegalStateException") {
+    defaultMessages().foreach { msg =>
+      msg.setChunked(true)
+      assert(msg.content.isEmpty)
+
+      msg.content(Buf.Empty) // It's fine to set 0 length content
+
+      intercept[IllegalStateException] {
+        msg.content = Buf.ByteArray(1)
+      }
+
+      intercept[IllegalStateException] {
+        msg.content(Buf.ByteArray(1))
+      }
+    }
+  }
+
+  test("setting message to chunked will remove message content") {
+    defaultMessages().foreach { msg =>
+      msg.content = Buf.ByteArray(1,2,3,4)
+      msg.setChunked(true)
+      assert(msg.content.isEmpty)
+    }
+  }
+
+  test("setting message from chunked to not chunked will allow manipulation of the content") {
+    val buf = Buf.ByteArray(1,2,3,4)
+    defaultMessages().foreach { msg =>
+      msg.setChunked(true)
+      intercept[IllegalStateException] {
+        msg.content(Buf.ByteArray(1))
+      }
+
+      msg.setChunked(false)
+      msg.content = buf   // Now legal
+      assert(buf == msg.content)
+    }
+  }
+
+  test("the `content` of a chunked Message is always empty") {
+    val buf = Buf.ByteArray(1,2,3,4)
+    defaultMessages().foreach { msg =>
+      msg.content = buf
+      msg.setChunked(true)
+      assert(msg.content.isEmpty)
+      msg.writer.write(buf) // don't care to wait
+      assert(msg.content.isEmpty)
+    }
+  }
+
   test("contentString") {
     val response = Response()
     response.content = Buf.Utf8("hello")
@@ -157,6 +228,24 @@ class MessageTest extends FunSuite {
     response.write("hello")
     assert(response.length        == 5)
     assert(response.contentString == "hello")
+  }
+
+  test("write(..) on chunked message throws and IllegalStateException") {
+    defaultMessages().foreach { msg =>
+      msg.setChunked(true)
+
+      intercept[IllegalStateException] {
+        msg.write("illegal")
+      }
+
+      intercept[IllegalStateException] {
+        msg.write(Array[Byte](0,1,2,3))
+      }
+
+      intercept[IllegalStateException] {
+        msg.write(Buf.ByteArray(0,1,2,3))
+      }
+    }
   }
 
   test("write(String), multiple writes") {
