@@ -13,7 +13,6 @@ env:
     - PROJECT=finagle-exception
     - PROJECT=finagle-exp
     - PROJECT=finagle-http
-    - PROJECT=finagle-http-compat
     - PROJECT=finagle-http2
     - PROJECT=finagle-integration
     - PROJECT=finagle-kestrel
