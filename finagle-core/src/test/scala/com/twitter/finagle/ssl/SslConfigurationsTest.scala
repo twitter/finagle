@@ -119,4 +119,36 @@ class SslConfigurationsTest extends FunSuite {
       ex.getMessage)
   }
 
+  test("checkProtocolsNotSupported throws for Enabled") {
+    val protocols = Protocols.Enabled(Seq("TLSv1.2"))
+    val ex = intercept[SslConfigurationException] {
+      SslConfigurations.checkProtocolsNotSupported("TestFactory", protocols)
+    }
+    assert("Protocols.Enabled is not supported at this time for TestFactory" == ex.getMessage)
+  }
+
+  test("checkClientAuthNotSupported throws for Off") {
+    val clientAuth = ClientAuth.Off
+    val ex = intercept[SslConfigurationException] {
+      SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
+    }
+    assert("ClientAuth.Off is not supported at this time for TestFactory" == ex.getMessage)
+  }
+
+  test("checkClientAuthNotSupported throws for Wanted") {
+    val clientAuth = ClientAuth.Wanted
+    val ex = intercept[SslConfigurationException] {
+      SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
+    }
+    assert("ClientAuth.Wanted is not supported at this time for TestFactory" == ex.getMessage)
+  }
+
+  test("checkClientAuthNotSupported throws for Needed") {
+    val clientAuth = ClientAuth.Needed
+    val ex = intercept[SslConfigurationException] {
+      SslConfigurations.checkClientAuthNotSupported("TestFactory", clientAuth)
+    }
+    assert("ClientAuth.Needed is not supported at this time for TestFactory" == ex.getMessage)
+  }
+
 }

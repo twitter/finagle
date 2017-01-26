@@ -18,7 +18,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  private def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] = {
+  private def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
     keyCredentials match {
       case KeyCredentials.Unspecified => None
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
@@ -32,7 +32,7 @@ private[ssl] object SslConfigurations {
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain", "SslConfigurations")
     }
-  }
+
 
   /**
    * Creates an optional array of `javax.net.ssl.TrustManager` based on the [[TrustCredentials]]
@@ -46,7 +46,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  private def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] = {
+  private def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] =
     trustCredentials match {
       case TrustCredentials.Unspecified => None
       case TrustCredentials.Insecure => Some(Array(new IgnorantTrustManager))
@@ -58,7 +58,6 @@ private[ssl] object SslConfigurations {
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
         }
     }
-  }
 
   /**
    * Creates an SSLContext and initializes it with `javax.net.ssl.KeyManager` and
@@ -93,13 +92,12 @@ private[ssl] object SslConfigurations {
   def configureCipherSuites(
     sslEngine: SSLEngine,
     cipherSuites: CipherSuites
-  ): Unit = {
+  ): Unit =
     cipherSuites match {
       case CipherSuites.Unspecified => // Do Nothing
       case CipherSuites.Enabled(ciphers) =>
         sslEngine.setEnabledCipherSuites(ciphers.toArray)
     }
-  }
 
   /**
    * Sets the enabled protocols of the supplied
@@ -108,13 +106,12 @@ private[ssl] object SslConfigurations {
   def configureProtocols(
     sslEngine: SSLEngine,
     protocols: Protocols
-  ): Unit = {
+  ): Unit =
     protocols match {
       case Protocols.Unspecified => // Do Nothing
       case Protocols.Enabled(protocols) =>
         sslEngine.setEnabledProtocols(protocols.toArray)
     }
-  }
 
   /**
    * Guard method for failing fast inside of a factory's apply method when
@@ -123,7 +120,7 @@ private[ssl] object SslConfigurations {
   def checkKeyCredentialsNotSupported(
     engineFactoryName: String,
     keyCredentials: KeyCredentials
-  ): Unit = {
+  ): Unit =
     keyCredentials match {
       case KeyCredentials.Unspecified => // Do Nothing
       case KeyCredentials.CertAndKey(_, _) =>
@@ -133,7 +130,6 @@ private[ssl] object SslConfigurations {
         throw SslConfigurationException.notSupported(
           "KeyCredentials.CertKeyAndChain", engineFactoryName)
     }
-  }
 
   /**
    * Guard method for failing fast inside of a factory's apply method when
@@ -142,7 +138,7 @@ private[ssl] object SslConfigurations {
   def checkTrustCredentialsNotSupported(
     engineFactoryName: String,
     trustCredentials: TrustCredentials
-  ): Unit = {
+  ): Unit =
     trustCredentials match {
       case TrustCredentials.Unspecified => // Do Nothing
       case TrustCredentials.Insecure =>
@@ -152,7 +148,21 @@ private[ssl] object SslConfigurations {
         throw SslConfigurationException.notSupported(
           "TrustCredentials.CertCollection", engineFactoryName)
     }
-  }
+
+  /**
+   * Guard method for failing fast inside of a factory's apply method when
+   * [[Protocols]] are not supported.
+   */
+  def checkProtocolsNotSupported(
+    engineFactoryName: String,
+    protocols: Protocols
+  ): Unit =
+    protocols match {
+      case Protocols.Unspecified => // Do Nothing
+      case Protocols.Enabled(_) =>
+        throw SslConfigurationException.notSupported(
+          "Protocols.Enabled", engineFactoryName)
+    }
 
   /**
    * Guard method for failing fast inside of a factory's apply method when
@@ -161,13 +171,33 @@ private[ssl] object SslConfigurations {
   def checkApplicationProtocolsNotSupported(
     engineFactoryName: String,
     applicationProtocols: ApplicationProtocols
-  ): Unit = {
+  ): Unit =
     applicationProtocols match {
       case ApplicationProtocols.Unspecified => // Do Nothing
       case ApplicationProtocols.Supported(_) =>
         throw SslConfigurationException.notSupported(
           "ApplicationProtocols.Supported", engineFactoryName)
     }
-  }
+
+  /**
+   * Guart method for failing fast inside of a server factory's apply method when
+   * [[ClientAuth]] is not supported.
+   */
+  def checkClientAuthNotSupported(
+    engineFactoryName: String,
+    clientAuth: ClientAuth
+  ): Unit =
+    clientAuth match {
+      case ClientAuth.Unspecified => // Do Nothing
+      case ClientAuth.Off =>
+        throw SslConfigurationException.notSupported(
+          "ClientAuth.Off", engineFactoryName)
+      case ClientAuth.Wanted =>
+        throw SslConfigurationException.notSupported(
+          "ClientAuth.Wanted", engineFactoryName)
+      case ClientAuth.Needed =>
+        throw SslConfigurationException.notSupported(
+          "ClientAuth.Needed", engineFactoryName)
+    }
 
 }
