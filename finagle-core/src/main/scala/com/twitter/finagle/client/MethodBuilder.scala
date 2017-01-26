@@ -1,9 +1,8 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack}
-import com.twitter.finagle.param
+import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack, param}
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.registry.GlobalRegistry
 
@@ -66,6 +65,15 @@ private[finagle] object MethodBuilder {
   private[client] case class Config[Req, Rep](
       retry: MethodBuilderRetry.Config[Req, Rep],
       timeout: MethodBuilderTimeout.Config)
+
+  private val LogicalScope = "logical"
+
+  // the `StatsReceiver` used is already scoped to `$clientName/$methodName/logical`.
+  // this omits the pending gauge as well as failures/sourcedfailures details.
+  private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
+    val head = segments.head
+    head == "pending" || head == "failures" || head == "sourcedfailures"
+  }
 
 }
 
@@ -181,13 +189,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
 
     val stats = statsReceiver(name)
 
-    val statsFilter = new StatsFilter[Req, Rep](
-      stats.scope("logical"),
-      params[param.ResponseClassifier].responseClassifier,
-      params[param.ExceptionStatsHandler].categorizer,
-      params[StatsFilter.Param].unit)
-
-    statsFilter
+    statsFilter(name, stats)
       .andThen(withTimeout.totalFilter)
       .andThen(withRetry.filter(stats))
       .andThen(withTimeout.perRequestFilter)
@@ -217,5 +219,12 @@ private[finagle] class MethodBuilder[Req, Rep] private (
       registry.put(methodPrefix ++ suffix, value)
     }
   }
+
+  private[this] def statsFilter(name: String, stats: StatsReceiver): StatsFilter[Req, Rep] =
+    new StatsFilter[Req, Rep](
+      new BlacklistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
+      params[param.ResponseClassifier].responseClassifier,
+      ExceptionStatsHandler.Null,
+      params[StatsFilter.Param].unit)
 
 }

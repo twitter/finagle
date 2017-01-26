@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{NoOpModule, Params}
 import com.twitter.finagle._
-import com.twitter.finagle.service.{ReqRep, ResponseClass, Retries, RetryBudget, RetryPolicy, TimeoutFilter}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
@@ -273,6 +273,43 @@ class MethodBuilderTest
       )
       filteredRegistry should contain theSameElementsAs (vanillaEntries ++ sundaeEntries)
     }
+  }
+
+  test("stats are filtered") {
+    val stats = new InMemoryStatsReceiver()
+    val clientLabel = "the_client"
+    val params =
+      Stack.Params.empty +
+        param.Label(clientLabel) +
+        param.Stats(stats)
+
+    val failure = Failure.apply("some reason", new RuntimeException("welp"))
+      .withSource(Failure.Source.Service, "test_service")
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    // the first attempts will hit the per-request timeout and will be
+    // retried. then the retry should succeed.
+    val methodName = "a_method"
+    val client = methodBuilder.newService(methodName)
+
+    // issue a failing request
+    intercept[Failure] {
+      Await.result(client(1), 5.seconds)
+    }
+
+    // verify the metrics are getting filtered down
+    assert(!stats.gauges.contains(Seq(clientLabel, methodName, "logical", "pending")))
+
+    val failureCounters = stats.counters.exists { case (names, _) =>
+      names.containsSlice(Seq(clientLabel, methodName, "logical", "failures")) ||
+        names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
+    }
+    assert(!failureCounters)
   }
 
 }
