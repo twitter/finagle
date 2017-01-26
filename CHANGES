@@ -118,7 +118,7 @@ Breaking API Changes
     ``RB_ID=896524``
 
   * finagle-core: `CancelledWriteException` was removed as it is no longer used.
-  ``RB_ID=896757``
+    ``RB_ID=896757``
 
   * finagle-core: The structure of Context and its subtypes, LocalContext and
     MarshalledContext, have been significantly refined, eliminating StackOverflowErrors
@@ -314,7 +314,7 @@ Breaking API Changes
     - `Command.toByteArray` is removed.
 
     - Both `Command.key` and `Command.value` now implemented in terms of `Buf`s
-      (no `ChannelBuffer`s).
+      (no `ChannelBuffers`).
 
   * finagle-redis: An API around `c.t.f.redis.protocol.Command` was modernized as part of
     major restructuring required for the Netty 4 adoption. ``RB_ID=885811``
@@ -341,7 +341,7 @@ Bug Fixes
     was being attempted instead of bypassed. ``RB_ID=881660``
 
   * finagle-http: The toggle implementation for `com.twitter.finagle.http.serverErrorsAsFailures`
-     had a bug when toggled on. That toggle is no longer used and is superseded by
+    had a bug when toggled on. That toggle is no longer used and is superseded by
     `com.twitter.finagle.http.serverErrorsAsFailuresV2`. ``RB_ID=882151``
 
   * finagle-netty4: Connecting to a Socks 5 proxy using Finagle with Netty 4
