@@ -37,9 +37,13 @@ private[netty4] class SslConnectHandler(
     val sslConnectPromise = ctx.newPromise()
 
     // Cancel new promise if the original one is canceled.
+    // NOTE: We don't worry about cancelling/failing pending writes here since it will happen
+    // automatically on channel closure.
     promise.addListener(proxyCancellationsTo(sslConnectPromise, ctx))
 
     // Fail the original promise if a new one is failed.
+    // NOTE: If the connect request fails the channel was never active. Since no
+    // writes are expected from the previous handler, no need to fail the pending writes.
     sslConnectPromise.addListener(proxyFailuresTo(promise))
 
     // React on satisfied handshake promise.

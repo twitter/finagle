@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
+import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners
 import io.netty.channel.{
   Channel, ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter
 }
@@ -19,15 +19,16 @@ import java.net.SocketAddress
  * is designed and implemented exclusively for testing/development, not for production usage.
  *
  * For production traffic, an HTTP proxy (see [[HttpProxyConnectHandler]]) should be used instead.
+ *
+ * @note This handler doesn't buffer any writes assuming that this is done by [[ProxyHandler]] that
+ *       is placed before.
  */
 private[netty4] class Netty4ProxyConnectHandler(
     proxyHandler: ProxyHandler)
-  extends ChannelOutboundHandlerAdapter
-  with BufferingChannelOutboundHandler
-  with ConnectPromiseDelayListeners { self =>
+  extends ChannelOutboundHandlerAdapter with ConnectPromiseDelayListeners { self =>
 
-  private[this] val proxyCodecKey: String = "proxy codec"
-  private[proxy] var connectPromise: NettyFuture[Channel] = _ // exposed for testing
+  private[this] val proxyCodecKey: String = "netty4ProxyCodec"
+  private[this] var connectPromise: NettyFuture[Channel] = _
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     connectPromise = proxyHandler.connectFuture()
@@ -49,9 +50,13 @@ private[netty4] class Netty4ProxyConnectHandler(
     val proxyConnectPromise = ctx.newPromise()
 
     // Cancel new promise if an original one is canceled.
+    // NOTE: We don't worry about cancelling/failing pending writes here since it will happen
+    // automatically on channel closure.
     promise.addListener(proxyCancellationsTo(proxyConnectPromise, ctx))
 
     // Fail the original promise if a new one is failed.
+    // NOTE: If the connect request fails the channel was never active. Since no
+    // writes are expected from the previous handler, no need to fail the pending writes.
     proxyConnectPromise.addListener(proxyFailuresTo(promise))
 
     // React on satisfied proxy handshake promise.
@@ -62,13 +67,12 @@ private[netty4] class Netty4ProxyConnectHandler(
           // cancellations here - it's already done by `proxyCancellationsTo`.
           // Same thing about `tryFailure` below.
           if (promise.trySuccess()) {
-            ctx.pipeline().remove(self) // drains pending writes when removed
+            ctx.pipeline().remove(self)
           }
         } else {
           // SOCKS/HTTP proxy handshake promise is failed so given `ProxyHandler` is going to
-          // close the channel, we only need to fail pending writes and the connect promise.
+          // close the channel and fail pending writes, we only need to fail the connect promise.
           promise.tryFailure(future.cause())
-          failPendingWrites(ctx, future.cause())
         }
       }
     })

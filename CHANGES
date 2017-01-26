@@ -95,6 +95,9 @@ Bug Fixes
   * finagle-netty4: Fixed connection stall in Finagle clients configured with
     both HTTP proxy (`Transporter.HttpProxyTo`) and TLS/SSL enabled. ``RB_ID=904831``
 
+  * finagle-netty4: Fixed connection stall in Finagle clients configured with
+    both HTTP proxy (`Transporter.HttpProxy`) and TLS/SSL enabled. ``RB_ID=904803``
+
 6.41.0
 ------
 

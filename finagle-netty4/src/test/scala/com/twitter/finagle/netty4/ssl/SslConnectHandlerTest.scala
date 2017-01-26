@@ -1,17 +1,16 @@
 package com.twitter.finagle.netty4.ssl
 
-import com.twitter.finagle.CancelledConnectionException
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import java.net.InetSocketAddress
-import javax.net.ssl.{SSLSession, SSLEngine}
+import javax.net.ssl.{SSLEngine, SSLSession}
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
@@ -66,12 +65,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
-    channel.writeOutbound("pending write")
-    assert(channel.outboundMessages().size() == 0)
-
     assert(connectPromise.cancel(true))
     assert(!channel.isActive)
-    assert(intercept[Exception](channel.checkException()).isInstanceOf[CancelledConnectionException])
 
     channel.finishAndReleaseAll()
   }

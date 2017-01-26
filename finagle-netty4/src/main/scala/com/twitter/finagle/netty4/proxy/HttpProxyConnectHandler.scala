@@ -69,6 +69,8 @@ private[netty4] class HttpProxyConnectHandler(
     val proxyConnectPromise = ctx.newPromise()
 
     // Cancel new promise if an original one is canceled.
+    // NOTE: We don't worry about cancelling/failing pending writes here since it will happen
+    // automatically on channel closure.
     promise.addListener(proxyCancellationsTo(proxyConnectPromise, ctx))
 
     // Fail old promise if a new one is failed.
