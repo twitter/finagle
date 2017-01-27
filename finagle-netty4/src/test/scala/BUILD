@@ -12,6 +12,9 @@ junit_tests(
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
-  fatal_warnings=True,
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  resources=[
+    'finagle/finagle-netty4/src/test/resources'
+  ],
+  fatal_warnings=True
 )
