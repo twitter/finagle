@@ -98,7 +98,25 @@ private[finagle] class ByteBufAsBuf(
 
   override def equals(other: Any): Boolean = other match {
     case ByteBufAsBuf.Owned(otherBB) => underlying.equals(otherBB)
-    case other: Buf => Buf.equals(this, other)
+    case composite: Buf.Composite =>
+      // Composite.apply has a relatively high overhead, so let it probe
+      // back into this Buf.
+      composite == this
+    case other: Buf if other.length == length =>
+      val otherIdx = Buf.Indexed.coerce(other)
+      val proc = new ByteProcessor {
+        private[this] var pos = 0
+        def process(value: Byte): Boolean = {
+          if (otherIdx(pos) == value) {
+            pos += 1
+            true
+          } else {
+            false
+          }
+        }
+      }
+      underlying.forEachByte(proc) == -1
+
     case _ => false
   }
 }

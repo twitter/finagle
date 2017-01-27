@@ -70,6 +70,13 @@ Deprecations
   * finagle-memcached: Deprecate `c.t.f.memcached.protocol.text.Memcached` object.
     Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=899009``
 
+  * finagle-memcached: Deprecations on `c.t.f.memcached.util.ParserUtils`:
+      - For `isDigits(ChannelBuffer)` use `ParserUtils.isDigits(Buf)` instead.
+      - `DIGITS`
+      - `DigitsPattern`
+
+    ``RB_ID=905253``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

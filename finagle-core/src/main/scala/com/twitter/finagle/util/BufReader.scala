@@ -21,8 +21,8 @@ private[finagle] trait BufReader {
    * The remainder of bytes until the first occurrence of `byte` (exclusive).
    * Returns `-1` when `byte` is not found on the underlying [[Buf]].
    *
-   * @note Depending on the implementation, this may copy (usually partially) the
-   *       underlying direct buffer onto the heap.
+   * @note All util and finagle Buf implementations will not copy onto
+   *       the heap, but for other implementations, it may trigger a copy.
    */
   def remainingUntil(byte: Byte): Int
 
@@ -220,11 +220,8 @@ private[finagle] object BufReader {
   private[util] val SignedMediumMax = 0x800000
 }
 
-private class BufReaderImpl(underlying: Buf) extends BufReader {
+private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
   import BufReader._
-
-  // stores a reference to the remainder `underlying`.
-  private[this] var buf: Buf = underlying
 
   // temporarily stores numeric values which can be extracted
   // from `buf` via the `read*` methods.
@@ -232,34 +229,15 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
 
   def remaining: Int = buf.length
 
+  private[this] def byteFinder(target: Byte): Buf.Indexed.Processor =
+    new Buf.Indexed.Processor {
+      def apply(byte: Byte): Boolean = byte != target
+    }
+
   // Time - O(n), Memory - O(1)
   def remainingUntil(byte: Byte): Int =
     if (buf.isEmpty) -1
-    else {
-      val maxChunkLength = 1024
-      val chunk = new Array[Byte](math.min(maxChunkLength, remaining))
-      var i = 0
-      var found = false
-
-      while (i < remaining && !found) {
-        val chunkLength = math.min(maxChunkLength, remaining - i)
-        buf.slice(i, chunkLength).write(chunk, 0)
-
-        var j = 0
-        while (j < chunkLength && chunk(j) != byte) { j += 1 }
-
-        if (j == chunkLength) {
-          // We reached the end of the chunk and found nothing.
-          // Trying the next chunk.
-          i += chunkLength
-        } else {
-          i += j
-          found = true
-        }
-      }
-
-      if (found) i else -1
-    }
+    else Buf.Indexed.coerce(buf).process(byteFinder(byte))
 
   def readByte(): Byte = {
     if (remaining < 1) {

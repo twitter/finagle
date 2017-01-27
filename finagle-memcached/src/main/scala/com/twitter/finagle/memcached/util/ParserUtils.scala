@@ -1,5 +1,6 @@
 package com.twitter.finagle.memcached.util
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
 import java.util.regex.Pattern
 import org.jboss.netty.buffer.ChannelBuffer
@@ -10,9 +11,11 @@ object ParserUtils {
   /**
    * Prefer using `isDigits(ChannelBuffer)` or `DigitsPattern.matcher(input).matches()`
    */
+  @deprecated("""Use "^\\d+$" if needed""", "2017-01-24")
   val DIGITS = "^\\d+$"
 
-  val DigitsPattern = Pattern.compile(DIGITS)
+  @deprecated("""Use Pattern.compile(^\\d+$) instead""", "2017-01-24")
+  val DigitsPattern: Pattern = Pattern.compile(DIGITS)
 
   // Used by byteArrayStringToInt. The maximum length of a non-negative Int in chars
   private[this] val MaxLengthOfIntString = Int.MaxValue.toString.length
@@ -21,21 +24,12 @@ object ParserUtils {
    * Returns true if every readable byte in the ChannelBuffer is a digit,
    * false otherwise.
    */
-  def isDigits(cb: ChannelBuffer): Boolean = {
-    val len = cb.readableBytes()
-    if (len == 0)
-      return false
+  @deprecated("Use isDigits(Buf) instead", "2017-01-24")
+  def isDigits(cb: ChannelBuffer): Boolean =
+    isDigits(new ChannelBufferBuf(cb))
 
-    val start = cb.readerIndex()
-    val end = start + len
-    var i = start
-    while (i < end) {
-      val b = cb.getByte(i)
-      if (b < '0' || b > '9')
-        return false
-      i += 1
-    }
-    true
+  private[this] val isDigitProcessor = new Buf.Indexed.Processor {
+    def apply(byte: Byte): Boolean = byte >= '0' && byte <= '9'
   }
 
   /**
@@ -43,16 +37,7 @@ object ParserUtils {
    */
   def isDigits(buf: Buf): Boolean =
     if (buf.isEmpty) false
-    else {
-      val Buf.ByteArray.Owned(bytes, begin, end) = Buf.ByteArray.coerce(buf)
-      var i = begin
-      while (i < end) {
-        if (bytes(i) < '0' || bytes(i) > '9')
-          return false
-        i += 1
-      }
-      true
-    }
+    else -1 == Buf.Indexed.coerce(buf).process(isDigitProcessor)
 
   private[memcached] def split(bytes: Array[Byte], delimiter: Byte): IndexedSeq[Buf] = {
     val split = new ArrayBuffer[Buf](6)

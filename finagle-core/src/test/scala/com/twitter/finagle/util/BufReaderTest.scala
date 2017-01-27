@@ -204,7 +204,10 @@ class BufReaderTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val buf = Buf.ByteArray.Owned(bytes ++ Array(byte) ++ bytes)
       val br = BufReader(buf)
 
-      val before = br.readBytes(br.remainingUntil(byte))
+      val remainingBefore = br.remaining
+      val until = br.remainingUntil(byte)
+      assert(remainingBefore == br.remaining)
+      val before = br.readBytes(until)
       val pivot = br.readByte()
       val after = br.readAll()
 
