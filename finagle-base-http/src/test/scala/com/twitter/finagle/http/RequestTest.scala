@@ -55,6 +55,17 @@ class RequestTest extends FunSuite {
     assert(response.status  == Status.Ok)
   }
 
+  test("uri") {
+    val req = Request("/foo1")
+    assert(req.uri == "/foo1")
+
+    req.uri = "/foo2"
+    assert(req.uri == "/foo2")
+
+    req.uri("/foo3")
+    assert(req.uri == "/foo3")
+  }
+
   test("toHttpString") {
     val request = Request("/search.json", "q" -> "twitter")
     request.headers.set("Host", "search.twitter.com")

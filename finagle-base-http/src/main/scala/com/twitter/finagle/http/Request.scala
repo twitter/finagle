@@ -75,7 +75,19 @@ abstract class Request extends Message {
   def uri: String = getUri()
 
   /**
+   * Set the URI of this request.
+   *
+   * @see [[uri_=(String)]] for Scala users.
+   */
+  final def uri(value: String): this.type = {
+    uri = value
+    this
+  }
+
+  /**
    * Set the URI of this request to the given `uri`.
+   *
+   * @see [[uri(String)]] for Java users.
    */
   def uri_=(uri: String): Unit = setUri(uri)
 
@@ -213,13 +225,25 @@ abstract class Request extends Message {
   override def toString: String =
     s"""Request("$method $uri", from $remoteSocketAddress)"""
 
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def httpRequest: HttpRequest
+
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def getHttpRequest(): HttpRequest = httpRequest
+
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def httpMessage: HttpMessage = httpRequest
 
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def getMethod(): HttpMethod = httpRequest.getMethod
+
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def setMethod(method: HttpMethod): Unit = httpRequest.setMethod(method)
+
+  @deprecated("Use `uri` instead.", "2017-01-26")
   protected[finagle] def getUri(): String = httpRequest.getUri()
+
+  @deprecated("Use `uri(String)` instead.", "2017-01-26")
   protected[finagle] def setUri(uri: String): Unit = httpRequest.setUri(uri)
 }
 

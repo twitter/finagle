@@ -53,6 +53,10 @@ Deprecations
     be returned by a Service but it is often used as such. Construct a Response using
     the static constructor methods. ``RB_ID=899983``
 
+  * finagle-base-http: Numerous protected[finagle] methods on `http.Request` and
+    `http.Response` that deal in Netty 3 types have been deprecated as part of the
+    migration to Netty 4. ``RB_ID=905761``
+
   * finagle-http: Deprecate ValidateRequestFilter which now has limited utility.
     See entry in Runtime Behavior Changes. If this is still needed, copy the remaining
     behavior into a new filter. ``RB_ID=899895``

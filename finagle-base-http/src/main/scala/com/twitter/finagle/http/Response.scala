@@ -45,12 +45,19 @@ abstract class Response extends Message {
   override def toString =
     "Response(\"" + version + " " + status + "\")"
 
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def httpResponse: HttpResponse
 
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def getHttpResponse(): HttpResponse = httpResponse
+
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def httpMessage: HttpMessage = httpResponse
 
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def getStatus(): HttpResponseStatus = httpResponse.getStatus()
+
+  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def setStatus(status: HttpResponseStatus): Unit = {
     httpResponse.setStatus(status)
   }
