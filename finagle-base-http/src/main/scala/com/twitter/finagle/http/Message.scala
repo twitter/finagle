@@ -453,12 +453,12 @@ abstract class Message {
     httpMessage.headers()
 
   @deprecated("Use content instead", "2017-01-23")
-  protected[finagle] def getContent(): ChannelBuffer =
+  protected def getContent(): ChannelBuffer =
     httpMessage.getContent()
 
   @deprecated("Use content(Buf) instead", "2017-01-23")
   @throws[IllegalStateException]
-  protected[finagle] def setContent(content: ChannelBuffer): Unit = {
+  protected def setContent(content: ChannelBuffer): Unit = {
     // To preserve netty3 behavior, we only throw an exception if the content is non-empty
     if (isChunked && content.readable())
       throw new IllegalStateException("Cannot set non-empty content on chunked message")

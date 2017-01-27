@@ -70,7 +70,7 @@ private[finagle] class HttpClientDispatcher(
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
-      val len = req.getContent().readableBytes
+      val len = req.content.length
       // Only set the content length if we are sure there is content. This
       // behavior complies with the specification that user agents should not
       // set the content length header for messages without a payload body.

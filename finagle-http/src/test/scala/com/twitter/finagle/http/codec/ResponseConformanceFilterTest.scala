@@ -38,7 +38,7 @@ class ResponseConformanceFilterTest extends FunSuite {
 
     val resp = fetchHeadResponse(res)
     assert(resp.getStatus == HttpResponseStatus.OK)
-    assert(resp.getContent.readableBytes() == 0)
+    assert(resp.content.length == 0)
     assert(!resp.isChunked)
     assert(resp.headers().get(Fields.ContentLength) == "1")
   }
@@ -46,7 +46,7 @@ class ResponseConformanceFilterTest extends FunSuite {
   test("response to HEAD request without content-length") {
     val response = fetchHeadResponse(Response())
     assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.content.length == 0)
     assert(!response.isChunked)
     assert(response.headers().get(Fields.ContentLength) == null)
   }
@@ -58,7 +58,7 @@ class ResponseConformanceFilterTest extends FunSuite {
 
     val response = fetchHeadResponse(res)
     assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.content.length == 0)
     assert(!response.isChunked)
     assert(response.headers().get(Fields.ContentLength) == body.length.toString)
   }
@@ -70,7 +70,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     val response = fetchHeadResponse(res)
 
     assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.content.length == 0)
     assert(!response.isChunked) // the pipeline will clear the chunked flag
     assert(response.headers().get(Fields.ContentLength) == null)
 
