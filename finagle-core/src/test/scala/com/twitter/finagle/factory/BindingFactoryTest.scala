@@ -86,6 +86,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     lazy val factory = new BindingFactory(
       path,
       newFactory,
+      Timer.Nil,
       statsReceiver = imsr,
       maxNamerCacheSize = 2,
       maxNameCacheSize = 2)
@@ -198,7 +199,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
           def close(deadline: Time) = Future.Done
         }
-      })
+      },
+      Timer.Nil)
 
     val noBrokers = intercept[NoBrokersAvailableException] {
       Dtab.unwind {
@@ -271,7 +273,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
             def close(deadline: Time) = Future.Done
           }
-        })
+        },
+        Timer.Nil)
 
       intercept[NoBrokersAvailableException] {
         Dtab.unwind {
@@ -517,7 +520,8 @@ class NameTreeFactoryTest extends FunSuite {
           Future.value(null)
         }
         def close(deadline: Time) = Future.Done
-      })
+      },
+      Timer.Nil)
 
     // not the world's greatest test since it depends on the
     // implementation of Drv
@@ -565,7 +569,8 @@ class NameTreeFactoryTest extends FunSuite {
             def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
             def close(deadline: Time) = Future.Done
             override def status = key
-          })
+          },
+          Timer.Nil)
         ).isAvailable
 
     assert(isAvailable(

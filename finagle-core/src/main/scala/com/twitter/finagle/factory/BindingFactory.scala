@@ -1,9 +1,10 @@
 package com.twitter.finagle.factory
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.NameInterpreter
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{Drv, Rng, Showable}
@@ -228,14 +229,14 @@ private[finagle] object NameTreeFactory {
 private[finagle] class BindingFactory[Req, Rep](
     path: Path,
     newFactory: Name.Bound => ServiceFactory[Req, Rep],
+    timer: Timer,
     baseDtab: () => Dtab = BindingFactory.DefaultBaseDtab,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
     maxNameTreeCacheSize: Int = 8,
-    maxNamerCacheSize: Int = 4)
+    maxNamerCacheSize: Int = 4,
+    cacheTti: Duration = 10.minutes)
   extends ServiceFactory[Req, Rep] {
-
-  private[this] val tree = NameTree.Leaf(path)
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
@@ -246,8 +247,10 @@ private[finagle] class BindingFactory[Req, Rep](
           super.apply(conn)
         }
       },
+      timer,
       statsReceiver.scope("namecache"),
-      maxNameCacheSize)
+      maxNameCacheSize,
+      cacheTti)
 
   private[this] val nameTreeCache =
     new ServiceFactoryCache[NameTree[Name.Bound], Req, Rep](
@@ -258,8 +261,10 @@ private[finagle] class BindingFactory[Req, Rep](
           super.apply(conn)
         }
       },
+      timer,
       statsReceiver.scope("nametreecache"),
-      maxNameTreeCacheSize)
+      maxNameTreeCacheSize,
+      cacheTti)
 
   private[this] val dtabCache = {
     val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
@@ -288,8 +293,10 @@ private[finagle] class BindingFactory[Req, Rep](
 
     new ServiceFactoryCache[(Dtab, Dtab), Req, Rep](
       newFactory,
+      timer,
       statsReceiver.scope("dtabcache"),
-      maxNamerCacheSize)
+      maxNamerCacheSize,
+      cacheTti)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
@@ -351,8 +358,9 @@ object BindingFactory {
     val parameters = Seq(
       implicitly[Stack.Param[BaseDtab]],
       implicitly[Stack.Param[Dest]],
-      implicitly[Stack.Param[Label]],
-      implicitly[Stack.Param[Stats]])
+      implicitly[Stack.Param[param.Label]],
+      implicitly[Stack.Param[param.Stats]],
+      implicitly[Stack.Param[param.Timer]])
 
     /**
      * A request filter that is aware of the bound residual path.
@@ -362,9 +370,10 @@ object BindingFactory {
     protected[this] def boundPathFilter(path: Path): Filter[Req, Rep, Req, Rep]
 
     def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-      val Label(label) = params[Label]
-      val Stats(stats) = params[Stats]
+      val param.Label(label) = params[param.Label]
+      val param.Stats(stats) = params[param.Stats]
       val Dest(dest) = params[Dest]
+      val param.Timer(timer) = params[param.Timer]
 
       def newStack(errorLabel: String, bound: Name.Bound) = {
         val client = next.make(
@@ -384,7 +393,7 @@ object BindingFactory {
 
         case Name.Path(path) =>
           val BaseDtab(baseDtab) = params[BaseDtab]
-          new BindingFactory(path, newStack(path.show, _), baseDtab, stats.scope("namer"))
+          new BindingFactory(path, newStack(path.show, _), timer, baseDtab, stats.scope("namer"))
       }
 
       Stack.Leaf(role, factory)

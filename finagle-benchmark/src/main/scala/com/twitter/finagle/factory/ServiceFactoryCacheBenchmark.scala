@@ -3,7 +3,7 @@ package com.twitter.finagle.factory
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.Future
+import com.twitter.util.{Future, Timer}
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
 import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
@@ -36,6 +36,7 @@ object ServiceFactoryCacheBenchmark {
 
     val cache = new ServiceFactoryCache[Int, Int, Int](
       newFactory,
+      Timer.Nil,
       NullStatsReceiver,
       MaxCacheSize)
 
