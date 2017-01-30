@@ -7,7 +7,7 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{BadMessageConverter, Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{BadMessageConverter, ClientExceptionMapper, Netty3ClientStreamTransport, Netty3ServerStreamTransport}
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
@@ -144,10 +144,12 @@ case class Http(
             "httpCodec", new HttpClientCodec(
               maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
 
-          if (!_streaming)
+          if (!_streaming) {
             pipeline.addLast(
               "httpDechunker",
               new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
+            pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
+          }
 
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)

@@ -83,6 +83,10 @@ Deprecations
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-http: The HTTP client will no longer emit a Netty 3/4 `TooLongFrameException` when
+    a response exceeds the specified MaxResponseSize parameter, and instead emits a Finagle
+    specific `TooLongMessageException` which wraps the Netty exception. ``RB_ID=905567``
+
   * finagle-http: ValidateRequestFilter doesn't look for the uri "/bad-http-request" which
     had been indicative of the netty3 http codec giving up on decoding a http request. These
     events are caught lower in the pipeline and should not bubble up to the level of this

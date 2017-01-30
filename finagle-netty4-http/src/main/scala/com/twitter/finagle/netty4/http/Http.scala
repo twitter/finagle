@@ -3,11 +3,10 @@ package com.twitter.finagle.netty4.http
 import com.twitter.finagle.http
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
+import com.twitter.finagle.netty4.{
+  DirectToHeapInboundHandlerName, Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
-import com.twitter.finagle.netty4.http.handler.{
-  BadRequestHandler, FixedLengthMessageAggregator, PayloadSizeHandler, RespondToExpectContinue}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.http.handler._
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.server.Listener
 import io.netty.channel._
@@ -26,7 +25,6 @@ object exp {
   private[finagle] val HttpCodecName = "httpCodec"
 
   private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = {
-    val maxChunkSize = params[http.param.MaxChunkSize].size
     val maxResponseSize = params[http.param.MaxResponseSize].size
     val decompressionEnabled = params[http.param.Decompression].enabled
     val streaming = params[http.param.Streaming].enabled
@@ -36,13 +34,15 @@ object exp {
         pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
 
       if (streaming)
-        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxChunkSize))
+        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxResponseSize))
       else {
         pipeline.addLast(
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxResponseSize.inBytes.toInt)
         )
       }
+      // Map some client related channel exceptions to something meaningful to finagle
+      pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
 
     }
   }

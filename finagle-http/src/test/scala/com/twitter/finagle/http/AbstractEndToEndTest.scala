@@ -812,6 +812,34 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
+  test("client respects MaxResponseSize") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "*" * 600.kilobytes.bytes.toInt
+        Future.value(response)
+      }
+    }
+
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withMaxResponseSize(500.kilobytes) // wontfix: doesn't work on netty3 with limit <= 8 KB
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    intercept[TooLongMessageException] {
+      await(client(req))
+    }
+
+    await(client.close())
+    await(server.close())
+  }
+
   test("non-streaming clients can decompress content") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {
