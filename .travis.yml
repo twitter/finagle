@@ -25,7 +25,6 @@ env:
     - PROJECT=finagle-ostrich4
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
-    - PROJECT=finagle-spdy
     - PROJECT=finagle-stats
     - PROJECT=finagle-stream
     - PROJECT=finagle-thrift

@@ -188,7 +188,6 @@ object Finagle extends Build {
     finagleMux,
     finagleThriftMux,
     finagleMySQL,
-    finagleSpdy,
     finagleRedis,
     finagleNetty4Http
   )
@@ -717,15 +716,6 @@ object Finagle extends Build {
     finagleThriftMux,
     finagleZipkin
   ).aggregate(finagleBenchmarkThrift)
-
-  lazy val finagleSpdy = Project(
-    id = "finagle-spdy",
-    base = file("finagle-spdy"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-spdy"
-  ).dependsOn(finagleCore)
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

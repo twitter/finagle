@@ -21,14 +21,17 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle: finagle-http-compat has been removed as part of migration off Netty 3. Use
+    finagle-http types/APIs directly. ``RB_ID=903647``
+
+  * finagle: finagle-spdy has been removed as part of the migration off Netty 3. Please
+    use finagle-http2 as a replacement. ``RB_ID=906033``
+
   * finagle-base-http: `Message.write(ChannelBuffer)` has been replaced with a method that
     receives a `Buf`. The semantics of calling the `write` method on chunked messages has
     changed from potentially throwing an exception based on the state of the `Writer` to
     always throwing an `IllegalStateException`. Existing users of the `write(..)` methods
     on chunked messages should use the `Writer` directly. ``RB_ID=900091``
-
-  * finagle: finagle-http-compat has been removed as part of migration off Netty 3. Use
-    finagle-http types/APIs directly.  ``RB_ID=903647``
 
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
       - `apply(group: Group[SocketAddress])`
