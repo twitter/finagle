@@ -978,9 +978,11 @@ class EndToEndTest extends FunSuite
     }
   }
 
-  test("thriftmux server + thriftmux client: pass mux-supported c.t.f.Failure flags") {
+  test("thriftmux server + thriftmux client: pass mux-supported c.t.f.FailureFlags") {
 
-    var failure: Failure = null
+    import FailureFlags._
+
+    var failure: FailureFlags[_] = null
 
     val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
@@ -1001,19 +1003,26 @@ class EndToEndTest extends FunSuite
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client"
       )
 
-    def check(f: Failure) = {
+    def check(f: FailureFlags[_]) = {
       failure = f
       await(client.query(":(").liftToTry) match {
-        case Throw(res: Failure) => assert(res.flags == f.flags)
+        case Throw(res: FailureFlags[_]) => assert(res.flags == f.flags)
         case other => fail(s"Unexpected response: $other")
       }
     }
 
+    class CustomException(val flags: Long) extends FailureFlags[CustomException] {
+      def copyWithFlags(newFlags: Long): CustomException = new CustomException(newFlags)
+    }
+
     val failures = Seq(
-      Failure("Rejected", Failure.Rejected),
-      Failure("Restartable", Failure.Restartable),
-      Failure("NonRetryable", Failure.NonRetryable),
-      Failure.rejected("Rejected/Retryable")
+      Failure("Rejected", Rejected),
+      Failure("Restartable", Retryable),
+      Failure("NonRetryable", NonRetryable),
+      Failure.rejected("Rejected/Retryable"),
+      new CustomException(Rejected),
+      new CustomException(Retryable),
+      new CustomException(NonRetryable)
     )
     failures.foreach(check _)
     await(server.close())

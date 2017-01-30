@@ -392,7 +392,7 @@ object ThriftMux
       }
 
     // Convert unhandled exceptions to TApplicationExceptions, but pass
-    // com.twitter.finagle.Failures to mux for transmission.
+    // com.twitter.finagle.FailureFlags to mux for transmission.
     private[this] class ExnFilter(protocolFactory: TProtocolFactory)
       extends SimpleFilter[mux.Request, mux.Response]
     {
@@ -401,7 +401,7 @@ object ThriftMux
         service: Service[mux.Request, mux.Response]
       ): Future[mux.Response] =
         service(request).rescue {
-          case f: Failure => Future.exception(f)
+          case f: FailureFlags[_] => Future.exception(f)
           case e if !e.isInstanceOf[TException] =>
             val msg = UncaughtAppExceptionFilter.writeExceptionMessage(
               request.body, e, protocolFactory)
