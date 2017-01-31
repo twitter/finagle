@@ -46,7 +46,7 @@ import scala.util.control.NonFatal
  *       In the other cases this transport can release buffers as needed either when
  *       the session closes (case #2) or when an error state is detected (case #3).
  */
-private[netty4] class ChannelTransport(
+private[finagle] class ChannelTransport(
     ch: nchan.Channel,
     releaseMessage: Any => Unit = { _: Any => () },
     replacePending: Any => Any = identity[Any]_)

@@ -18,7 +18,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 /**
- * Protocols must release inbound direct buffers
+ * The majority of finagle protocols manage inbound direct buffers in their netty pipeline.
  *
  * Covered protocols:
  *
@@ -26,9 +26,10 @@ import org.scalatest.junit.JUnitRunner
  *  todo: http2
  *  kestrel (implicitly via memcached)
  *  memcached
+ *  mux (copying framer only)
  *  mysql (coverage from c.t.f.netty4.channel.Netty4ClientChannelInitializerTest)
  *  thrift
- *  thriftmux
+ *
  */
 @RunWith(classOf[JUnitRunner])
 class DirectBufferLifecycleTest extends FunSuite {
@@ -57,7 +58,7 @@ class DirectBufferLifecycleTest extends FunSuite {
   testDirect[ByteBufAsBuf](
     protocol = "mux client/server",
     msg = Buf.U32BE(4).concat(mux.Message.encode(mux.Message.Tping(123))),
-    pipelineInit = mux.Netty4Framer,
+    pipelineInit = mux.CopyingFramer,
     framedCB = { x => assert(!x.underlying.isDirect) }
   )
 

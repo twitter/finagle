@@ -123,9 +123,10 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
   }
 
   test("not decode invalid messages") {
-    assert(intercept[Failure] {
-      decode(Buf.Empty)
-    } == Failure.wrap(BadMessageException("short message")))
+    val short = intercept[Failure] { decode(Buf.Empty) }
+    assert(short.why.startsWith("short message"))
+    assert(short.cause.get.isInstanceOf[BadMessageException])
+
     assert(intercept[Failure] {
       decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1)))
     } == Failure.wrap(BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 0. First 0 bytes of the payload: ''")))

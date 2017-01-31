@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
+import com.twitter.finagle.netty4.Bufs
+import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
 import com.twitter.io.Buf
@@ -34,7 +35,16 @@ private[twitter] sealed trait Message {
 }
 
 private[twitter] object Message {
+
+
   object Types {
+
+    private[mux] def isRefCounted(typ: Byte): Boolean =
+      (typ == Types.Tping || typ == Types.Rping
+        || typ == Types.Tdiscarded || typ == Types.Rdiscarded
+        || typ == Types.Tdrain || typ == Types.Rdrain
+        || typ == Types.Tlease)
+
     // Application messages:
     val Treq = 1: Byte
     val Rreq = -1: Byte
@@ -601,36 +611,47 @@ private[twitter] object Message {
     Tlease(unit, howMuch)
   }
 
+
+  /**
+   * Try to decode a `buf` to [[Message]]. If [[Buf]] is backed
+   * by a direct buffer then that buffer will be released after decode.
+   *
+   * @note may throw a [[Failure]] wrapped [[BadMessageException]]
+   */
   def decode(buf: Buf): Message = {
-    if (buf.length < 4)
-      throwBadMessageException("short message")
-    val br = BufReader(buf)
-    val head = br.readIntBE()
-    val rest = br.readAll()
-    val typ = Tags.extractType(head)
-    val tag = Tags.extractTag(head)
-    if (Tags.isFragment(tag))
-      Fragment(typ, tag, rest)
-    else typ match {
-      case Types.Tinit =>
-        val (version, ctx) = Init.decode(rest)
-        Tinit(tag, version, ctx)
-      case Types.Rinit =>
-        val (version, ctx) = Init.decode(rest)
-        Rinit(tag, version, ctx)
-      case Types.Treq => decodeTreq(tag, rest)
-      case Types.Rreq => decodeRreq(tag, rest)
-      case Types.Tdispatch => decodeTdispatch(tag, rest)
-      case Types.Rdispatch => decodeRdispatch(tag, rest)
-      case Types.Tdrain => Tdrain(tag)
-      case Types.Rdrain => Rdrain(tag)
-      case Types.Tping => Tping(tag)
-      case Types.Rping => Rping(tag)
-      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(rest))
-      case Types.Rdiscarded => Rdiscarded(tag)
-      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(rest)
-      case Types.Tlease => decodeTlease(rest)
-      case unknown => throwBadMessageException(unknownMessageDescription(unknown, tag, rest))
+    try {
+      if (buf.length < 4) throwBadMessageException(s"short message: ${Buf.slowHexString(buf)}")
+      val br = BufReader(buf)
+      val head = br.readIntBE()
+      val rest = br.readAll()
+      val typ = Tags.extractType(head)
+      val tag = Tags.extractTag(head)
+      val res = if (Tags.isFragment(tag))
+        Fragment(typ, tag, rest)
+      else typ match {
+        case Types.Tinit =>
+          val (version, ctx) = Init.decode(rest)
+          Tinit(tag, version, ctx)
+        case Types.Rinit =>
+          val (version, ctx) = Init.decode(rest)
+          Rinit(tag, version, ctx)
+        case Types.Treq => decodeTreq(tag, rest)
+        case Types.Rreq => decodeRreq(tag, rest)
+        case Types.Tdispatch => decodeTdispatch(tag, rest)
+        case Types.Rdispatch => decodeRdispatch(tag, rest)
+        case Types.Tdrain => Tdrain(tag)
+        case Types.Rdrain => Rdrain(tag)
+        case Types.Tping => Tping(tag)
+        case Types.Rping => Rping(tag)
+        case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(rest))
+        case Types.Rdiscarded => Rdiscarded(tag)
+        case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(rest)
+        case Types.Tlease => decodeTlease(rest)
+        case unknown => throwBadMessageException(unknownMessageDescription(unknown, tag, rest))
+      }
+      res
+    } finally {
+      Bufs.releaseDirect(buf)
     }
   }
 

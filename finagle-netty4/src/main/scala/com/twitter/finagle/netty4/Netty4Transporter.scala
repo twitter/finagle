@@ -40,7 +40,8 @@ private[finagle] object Netty4Transporter {
 
   private[this] def build[In, Out](
     init: ChannelInitializer[Channel],
-    params: Stack.Params
+    params: Stack.Params,
+    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = new Transporter[In, Out] {
 
     // Exports N4-related metrics under `finagle/netty4`.
@@ -93,7 +94,7 @@ private[finagle] object Netty4Transporter {
             case e: UnresolvedAddressException => e
             case NonFatal(e) => Failure.rejected(e)
           })
-          else transportP.setValue(Transport.cast[In, Out](new ChannelTransport(channelF.channel())))
+          else transportP.setValue(Transport.cast[In, Out](transportFactory(channelF.channel())))
         }
       })
 
@@ -109,11 +110,12 @@ private[finagle] object Netty4Transporter {
    */
   def apply[In, Out](
     pipelineInit: ChannelPipeline => Unit,
-    params: Stack.Params
+    params: Stack.Params,
+    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
-    build[In, Out](init, params)
+    build[In, Out](init, params, transportFactory)
   }
 
   /**
