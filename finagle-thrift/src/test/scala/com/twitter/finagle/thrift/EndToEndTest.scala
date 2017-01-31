@@ -12,9 +12,10 @@ import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.io.TempFile
 import com.twitter.test._
 import com.twitter.util._
-import java.io.{File, PrintWriter, StringWriter}
+import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TCompactProtocol, TProtocolFactory}
@@ -287,20 +288,22 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   test("Configuring SSL over stack param") {
-    object SslFile {
-      val cert = new File(getClass.getResource("/cert.pem").toURI).getAbsolutePath
-      val key = new File(getClass.getResource("/key.pem").toURI).getAbsolutePath
-    }
+    def mkThriftTlsServer(sr: StatsReceiver) = {
+      val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
+      // deleteOnExit is handled by TempFile
 
-    def mkThriftTlsServer(sr: StatsReceiver) =
+      val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
+      // deleteOnExit is handled by TempFile
+
       Thrift.server
         .configured(Stats(sr))
         .configured(Transport.TLSServerEngine(Some {
-        () =>  Ssl.server(SslFile.cert, SslFile.key, null, null, null)
+        () =>  Ssl.server(certFile.getAbsolutePath, keyFile.getAbsolutePath, null, null, null)
       }))
         .serve(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
           ifaceToService(processor, Protocols.binaryFactory()))
+    }
 
     def mkThriftTlsClient(server: ListeningServer) =
       Thrift.client
