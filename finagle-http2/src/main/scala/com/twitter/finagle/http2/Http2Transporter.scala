@@ -11,7 +11,7 @@ import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Throw, Return, Promise, Try}
+import com.twitter.util.{Future, Throw, Return, Promise, Try, Time}
 import io.netty.channel.{
   ChannelHandlerContext,
   ChannelInboundHandlerAdapter,
@@ -21,6 +21,7 @@ import io.netty.channel.{
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
+import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
 
 private[http2] object Http2Transporter {
@@ -162,6 +163,17 @@ private[http2] class Http2Transporter(
     underlyingHttp11: Transporter[Any, Any])
   extends Transporter[Any, Any] {
 
+  private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
+    def read(): Future[Any] = Future.never
+    def write(msg: Any): Future[Unit] = Future.never
+    val status: Status = Status.Closed
+    def onClose: Future[Throwable] = Future.value(exn)
+    def remoteAddress: SocketAddress = new SocketAddress {}
+    def localAddress: SocketAddress = new SocketAddress {}
+    def peerCertificate: Option[Certificate] = None
+    def close(deadline: Time): Future[Unit] = Future.Done
+  }
+
   private[this] val log = Logger.get()
 
   import Http2Transporter._
@@ -173,17 +185,21 @@ private[http2] class Http2Transporter(
     f: Future[Option[() => Try[Transport[HttpObject, HttpObject]]]],
     addr: SocketAddress
   ): Future[Transport[Any, Any]] = f.transform {
-    // we rescue here to ensure our future is failed *after* we evict from the cache.
-    case Return(Some(fn)) => Future.const(fn().map(unsafeCast)).rescue { case exn: Throwable =>
-      log.warning(
-        exn,
-        s"A previously successful connection to address $addr stopped being successful."
-      )
+    case Return(Some(fn)) =>
+      Future.value(fn() match {
+        case Return(transport) => unsafeCast(transport)
+        case Throw(exn) =>
+          log.warning(
+            exn,
+            s"A previously successful connection to address $addr stopped being successful."
+          )
 
-      // kick us out of the cache so we can try to reestablish the connection
-      transporterCache.remove(addr, f)
-      Future.exception(exn)
-    }
+          // kick us out of the cache so we can try to reestablish the connection
+          transporterCache.remove(addr, f)
+
+          // we expect finagle to treat this specially and retry if possible
+          deadTransport(exn)
+      })
     case Return(None) =>
       // we didn't upgrade
       underlyingHttp11(addr)

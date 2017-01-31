@@ -222,8 +222,8 @@ object Retries {
        * some exceptions to acquire a service are considered fatal.
        */
       private[this] def applySelf(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] =
-        self(conn).rescue {
-          case e@RetryPolicy.RetryableWriteException(_) if n > 0 =>
+        self(conn).transform {
+          case Throw(e@RetryPolicy.RetryableWriteException(_)) if n > 0 =>
             if (status == Status.Open) {
               requeuesCounter.incr()
               applySelf(conn, n-1)
@@ -231,6 +231,15 @@ object Retries {
               notOpenCounter.incr()
               Future.exception(e)
             }
+
+          // this indicates that there isn't a problem with the remote peer but
+          // the returned service is unusable, which allows a protocol
+          // to point out when a connection is dead for a reason that shouldn't
+          // trigger circuit breaking
+          case Return(deadSvc) if deadSvc.status == Status.Closed && n > 0 =>
+            requeuesCounter.incr()
+            applySelf(conn, n-1)
+          case t => Future.const(t)
         }
 
       /**
