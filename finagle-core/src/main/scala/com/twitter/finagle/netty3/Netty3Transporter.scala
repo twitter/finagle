@@ -246,7 +246,7 @@ class Netty3Transporter[In, Out](
 
   private[this] def makeNewTransport(params: Stack.Params): Channel => Transport[In, Out] = {
     val TransportFactory(newTransport) = params[TransportFactory]
-    (ch: Channel) => Transport.cast[In, Out](newTransport(ch))
+    (ch: Channel) => Transport.cast[In, Out](classOf[Any].asInstanceOf[Class[Out]], newTransport(ch))  // We are lying about this type
   }
 
   private[this] def addFirstStatsHandlers(

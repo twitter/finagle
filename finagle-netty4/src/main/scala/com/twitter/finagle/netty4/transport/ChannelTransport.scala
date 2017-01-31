@@ -46,11 +46,11 @@ import scala.util.control.NonFatal
  *       In the other cases this transport can release buffers as needed either when
  *       the session closes (case #2) or when an error state is detected (case #3).
  */
-private[netty4] class ChannelTransport[In, Out](
+private[netty4] class ChannelTransport(
     ch: nchan.Channel,
-    releaseMessage: Out => Unit = { _: Out => () },
-    replacePending: Out => Out = identity[Out]_)
-  extends Transport[In, Out] {
+    releaseMessage: Any => Unit = { _: Any => () },
+    replacePending: Any => Any = identity[Any]_)
+  extends Transport[Any, Any] {
 
   import ChannelTransport._
 
@@ -63,7 +63,7 @@ private[netty4] class ChannelTransport[In, Out](
   private[this] val qLock = new Object
 
   // Exposed as protected for testing
-  protected[this] val queue = new AsyncQueue[Out]
+  protected[this] val queue = new AsyncQueue[Any]
 
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
@@ -136,7 +136,7 @@ private[netty4] class ChannelTransport[In, Out](
     closed.updateIfEmpty(Return(exc))
   }
 
-  def write(msg: In): Future[Unit] = {
+  def write(msg: Any): Future[Unit] = {
     val op = ch.writeAndFlush(msg)
 
     val p = new Promise[Unit]
@@ -150,8 +150,7 @@ private[netty4] class ChannelTransport[In, Out](
     p
   }
 
-
-  def read(): Future[Out] = {
+  def read(): Future[Any] = {
     // We are going take one message from the queue so we increment our need by
     // one and potentially ask the channel to read based on the number of
     // buffered messages or pending read requests.
@@ -160,7 +159,7 @@ private[netty4] class ChannelTransport[In, Out](
     // This is fine, but we should consider being a little more fine-grained
     // here. For example, if a read behind another read interrupts, perhaps the
     // transport shouldn't be failed, only the read dequeued.
-    val p = new Promise[Out]
+    val p = new Promise[Any]
 
     // Note: We use `become` instead of `proxyTo` here even though `become` is
     // not recommended when `p` has interrupt handlers. `become` merges the
@@ -205,7 +204,7 @@ private[netty4] class ChannelTransport[In, Out](
 
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
-  ch.pipeline.addLast(HandlerName, new nchan.SimpleChannelInboundHandler[Out](false /* autoRelease */) {
+  ch.pipeline.addLast(HandlerName, new nchan.ChannelInboundHandlerAdapter {
 
     override def channelActive(ctx: nchan.ChannelHandlerContext): Unit = {
       // Upon startup we immediately begin the process of buffering at most one inbound
@@ -221,7 +220,7 @@ private[netty4] class ChannelTransport[In, Out](
       super.channelReadComplete(ctx)
     }
 
-    override def channelRead0(ctx: nchan.ChannelHandlerContext, msg: Out): Unit = {
+    override def channelRead(ctx: nchan.ChannelHandlerContext, msg: Any): Unit = {
       ReadManager.decrementIfNeeded()
 
       // `offer` can fail in races between messages arriving and the transport shutting down

@@ -33,6 +33,13 @@ Breaking API Changes
     always throwing an `IllegalStateException`. Existing users of the `write(..)` methods
     on chunked messages should use the `Writer` directly. ``RB_ID=900091``
 
+  * finagle-core: The ChannelTransport implementations which transforms a Netty pipeline into
+    a finagle Transport[Req, Rep] have been specialized to Transport[Any, Any] to avoid the
+    illusion of a runtime checked cast. Transport.cast has been changed to receive either a
+    Class[T] or an implicit Manifest[T] in order to check the inbound cast at runtime. For users
+    of the ChannelTransport types, use the Transport.cast method to get a Transport of the right
+    type. ``RB_ID=902053``
+
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
       - `apply(group: Group[SocketAddress])`
       - `apply(cluster: Cluster[SocketAddress])`
@@ -94,12 +101,6 @@ Runtime Behavior Changes
 
   * finagle-redis: Transport implementation is now based on Netty 4 (instead of Netty 3).
     ``RB_ID=895728``
-
-  * finagle-toggle: `ToggleMap` `Toggles` now rehash the inputs to
-    `apply` and `isDefinedAt` in order to promote a relatively even
-    distribution even when the inputs do not have a good distribution.
-    This allows users to get away with using a poor hashing function
-    such as `String.hashCode`. ``RB_ID=899195``
 
 Bug Fixes
 ~~~~~~~~~

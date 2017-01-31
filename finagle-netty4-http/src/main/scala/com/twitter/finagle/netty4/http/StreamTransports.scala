@@ -101,7 +101,7 @@ private[http] object StreamTransports {
     }
   }
 
-  val isLast: NettyHttp.HttpObject => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
+  val isLast: Any => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
 }
 
 private[finagle] class Netty4ServerStreamTransport(
@@ -140,7 +140,7 @@ private[finagle] class Netty4ServerStreamTransport(
         assert(!req.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
         assert(NettyHttp.HttpUtil.isTransferEncodingChunked(req))
 
-        val coll = collate(transport, readChunk)(isLast)
+        val coll = collate(rawTransport, readChunk)(isLast)
         val finagleReq = Bijections.netty.chunkedRequestToFinagle(
           req,
           coll,
@@ -185,7 +185,7 @@ private[finagle] class Netty4ClientStreamTransport(
       case rep: NettyHttp.HttpResponse =>
         assert(!rep.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
         assert(NettyHttp.HttpUtil.isTransferEncodingChunked(rep))
-        val coll = collate(transport, readChunk)(isLast)
+        val coll = collate(rawTransport, readChunk)(isLast)
         val finagleRep: Response = Bijections.netty.chunkedResponseToFinagle(rep, coll)
         Future.value(Multi(finagleRep, coll))
 

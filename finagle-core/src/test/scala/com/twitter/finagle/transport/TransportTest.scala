@@ -19,6 +19,49 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     Await.result(f, 5.seconds)
   }
 
+  test("transport.cast of invalid type") {
+    val q = new AsyncQueue[Any]
+    val writeQueue = new AsyncQueue[Any]
+    val t0 = new QueueTransport[Any, Any](writeQueue, q)
+    val trans: Transport[Int, String] = Transport.cast[Int, String](t0)
+
+    val s = "a string"
+    q.offer(s)
+
+    val sOut: String = awaitResult(trans.read())
+    assert(s == sOut)
+
+    q.offer(0)
+
+    intercept[ClassCastException] {
+      // Fails because the Transport was cast from Any to String, which is enforced
+      // at runtime, even if we lower the static type to Any.
+      val s2Out: Any = awaitResult(trans.read())
+    }
+
+    // write Ints out of the transport
+    awaitResult(trans.write(1)) // should finish immediately
+    awaitResult(writeQueue.poll()) match {
+      case i: Int => assert(i == 1)
+      case other => fail(s"Expected Int(1), received: $other")
+    }
+  }
+
+  test("transport.cast of sub types") {
+    trait Foo
+    case class Bar(i: Int) extends Foo
+
+    val q = new AsyncQueue[Any]
+    val unused = new AsyncQueue[Any]
+    val t0 = new QueueTransport[Any, Any](unused, q)
+    val trans: Transport[Any, Foo] = Transport.cast[Any, Foo](t0)
+
+    q.offer(Bar(1))
+
+    val foo = awaitResult(trans.read())
+    assert(foo == Bar(1))
+  }
+
   test("transport.map") {
     val q = new AsyncQueue[Any]
     val t0 = new QueueTransport[Any, Any](q, q)

@@ -282,18 +282,55 @@ object Transport {
     }
   }
 
-  private[this] val castMapFn: Any => Any = Predef.identity
+  /**
+   * Casts an object transport to `Transport[In1, Out1]`. Note that this is
+   * generally unsafe: only do this when you know the cast is guaranteed safe.
+   * This is useful when coercing a netty object pipeline into a typed transport,
+   * for example.
+   *
+   * @see [[Transport.cast(Class[Out], transport)]] for Java users.
+   */
+  def cast[In1, Out1](trans: Transport[Any, Any])(implicit m: Manifest[Out1]): Transport[In1, Out1] = {
+    val cls = m.runtimeClass.asInstanceOf[Class[Out1]]
+    cast[In1, Out1](cls, trans)
+  }
+
 
   /**
    * Casts an object transport to `Transport[In1, Out1]`. Note that this is
    * generally unsafe: only do this when you know the cast is guaranteed safe.
    * This is useful when coercing a netty object pipeline into a typed transport,
    * for example.
+   *
+   * @see [[Transport.cast(trans)]] for Scala users.
    */
-  def cast[In1, Out1](trans: Transport[Any, Any]): Transport[In1, Out1] =
-    trans.map(
-      castMapFn.asInstanceOf[In1 => Any],
-      castMapFn.asInstanceOf[Any => Out1])
+  def cast[In1, Out1](cls: Class[Out1], trans: Transport[Any, Any]): Transport[In1, Out1] = {
+
+    if (cls.isAssignableFrom(classOf[Any])) {
+      // No need to do any dynamic type checks on Any!
+      trans.asInstanceOf[Transport[In1, Out1]]
+    } else new Transport[In1, Out1] {
+      def write(req: In1): Future[Unit] = trans.write(req)
+      def read(): Future[Out1] = trans.read().flatMap(readFn)
+      def status: Status = trans.status
+      def onClose: Future[Throwable] = trans.onClose
+      def localAddress: SocketAddress = trans.localAddress
+      def remoteAddress: SocketAddress = trans.remoteAddress
+      def peerCertificate: Option[Certificate] = trans.peerCertificate
+      def close(deadline: Time): Future[Unit] = trans.close(deadline)
+      override def toString: String = trans.toString
+
+      private val readFn: Any => Future[Out1] = {
+        case out1 if cls.isAssignableFrom(out1.getClass) => Future.value(out1.asInstanceOf[Out1])
+        case other =>
+          val msg = s"Transport.cast failed. Expected type ${cls.getName} " +
+            s"but found ${other.getClass.getName}"
+          val ex = new ClassCastException(msg)
+          Future.exception(ex)
+      }
+    }
+  }
+
 }
 
 /**

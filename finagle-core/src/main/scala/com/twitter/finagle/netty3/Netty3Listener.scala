@@ -383,7 +383,7 @@ private[netty3] class ServerBridge[In, Out](
     val channel = e.getChannel
     channels.add(channel)
 
-    val transport = Transport.cast[In, Out](new ChannelTransport[Any, Any](channel))
+    val transport = Transport.cast[In, Out](classOf[Any].asInstanceOf[Class[Out]], new ChannelTransport[Any, Any](channel))  // We are lying about this type
     serveTransport(transport)
     super.channelOpen(ctx, e)
   }

@@ -51,8 +51,9 @@ private[finagle] object Netty4Listener {
 private[finagle] case class Netty4Listener[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
-    transportFactory: Channel => Transport[In, Out] = { ch: Channel => new ChannelTransport[In, Out](ch) },
+    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) },
     setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity)
+  (implicit mIn: Manifest[In], mOut: Manifest[Out])
   extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
@@ -86,7 +87,7 @@ private[finagle] case class Netty4Listener[In, Out](
     new ListeningServer with CloseAwaitably {
 
       val bridge = new ServerBridge(
-        transportFactory,
+        transportFactory.andThen(Transport.cast[In, Out](_)),
         serveTransport
       )
 

@@ -27,7 +27,8 @@ private[http2] object Http2Listener {
     )
   }
 
-  private[this] def cleartextListener[In, Out](params: Stack.Params): Listener[In, Out] = {
+  private[this] def cleartextListener[In, Out](params: Stack.Params)
+    (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
         pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
@@ -43,7 +44,8 @@ private[http2] object Http2Listener {
     )
   }
 
-  private[this] def tlsListener[In, Out](params: Stack.Params): Listener[In, Out] = {
+  private[this] def tlsListener[In, Out](params: Stack.Params)
+    (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
         pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
@@ -57,7 +59,8 @@ private[http2] object Http2Listener {
     )
   }
 
-  def apply[In, Out](params: Stack.Params): Listener[In, Out] = {
+  def apply[In, Out](params: Stack.Params)
+    (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
     val Transport.Tls(tlsConfig) = params[Transport.Tls]
 
     if (tlsConfig != TlsConfig.Disabled) tlsListener(params)
