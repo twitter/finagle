@@ -20,12 +20,7 @@ class PriorKnowledgeTest extends AbstractEndToEndTest {
     finagle.Http.server
       .configuredParams(Http2)
 
-  // must be lazy for initialization order reasons
-  private[this] lazy val featuresToBeImplemented = Set[Feature](
-    MaxHeaderSize
-  )
-
-  def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
+  def featureImplemented(feature: Feature): Boolean = true
 
   test("A prior knowledge connection counts as one upgrade for stats") {
     val client = nonStreamingConnect(Service.mk { req: Request =>

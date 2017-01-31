@@ -33,7 +33,6 @@ abstract class AbstractEndToEndTest extends FunSuite
   with OneInstancePerTest {
 
   sealed trait Feature
-  object MaxHeaderSize extends Feature
   object TooLongStream extends Feature
 
   var saveBase: Dtab = Dtab.empty
@@ -247,7 +246,7 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   def standardBehaviour(connect: HttpService => HttpService) {
 
-    testIfImplemented(MaxHeaderSize)(implName + ": client stack observes max header size") {
+    test(implName + ": client stack observes max header size") {
       val service = new HttpService {
         def apply(req: Request) = {
           val res = Response()

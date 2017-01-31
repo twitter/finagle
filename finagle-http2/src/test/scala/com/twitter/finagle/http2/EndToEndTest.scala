@@ -39,12 +39,7 @@ class EndToEndTest extends AbstractEndToEndTest {
     Future.value(Response())
   }
 
-  // must be lazy for initialization order reasons
-  private[this] lazy val featuresToBeImplemented = Set[Feature](
-    MaxHeaderSize // blocked by https://github.com/netty/netty/issues/5952
-  )
-
-  def featureImplemented(feature: Feature): Boolean = !featuresToBeImplemented(feature)
+  def featureImplemented(feature: Feature): Boolean = true
 
   test("Upgrade stats are properly recorded") {
     shouldUpgrade.set(false)
