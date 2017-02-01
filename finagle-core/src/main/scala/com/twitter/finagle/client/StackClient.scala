@@ -5,9 +5,10 @@ import com.twitter.finagle.context
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
-import com.twitter.finagle.filter.{ClearContextValueFilter, DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
+import com.twitter.finagle.filter._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param._
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stack.nilStack
@@ -30,6 +31,12 @@ object StackClient {
     val prepConn = Stack.Role("PrepConn")
     val protoTracing = Stack.Role("protoTracing")
   }
+
+  /**
+   * For feature roll out only.
+   */
+  private val EnableNackACID: String = "com.twitter.finagle.core.UseClientNackAdmissionFilter"
+  private def enableNackAC: Boolean = CoreToggles(EnableNackACID)(ServerInfo().id.hashCode)
 
   /**
    * A [[com.twitter.finagle.Stack]] representing an endpoint.
@@ -262,6 +269,13 @@ object StackClient {
      *    load balancer on each request (and closes it after the
      *    response completes).
      *
+     *  * `NackAdmissionFilter` probabilistically drops requests if the client
+     *     is receiving a large fraction of nack responses. This indicates an
+     *     overload situation. Since this filter should operate on all requests
+     *     sent over the wire, it must be below `Retries`. Since it
+     *     aggregates the status of the entire cluster, it must be above the
+     *     `LoadBalancerFactory`.
+     *
      *  * `Retries` retries `RetryPolicy.RetryableWriteException`s
      *    automatically. It must appear above `FactoryToService` so
      *    that service acquisition failures are retried.
@@ -282,6 +296,7 @@ object StackClient {
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
+    if (enableNackAC) stk.push(NackAdmissionFilter.module) // Rollout Only
     stk.push(Retries.moduleRequeueable)
     stk.push(ClearContextValueFilter.module(context.Retries))
 

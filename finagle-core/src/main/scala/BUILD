@@ -8,6 +8,7 @@ scala_library(
     '3rdparty/jvm/com/github/ben-manes/caffeine',
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/io/netty',
+    'finagle/finagle-toggle',
     'util/util-app',
     'util/util-cache',
     'util/util-codec',
@@ -22,5 +23,5 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  strict_deps=True,
+  resources=['finagle/finagle-core/src/main/resources'],
 )

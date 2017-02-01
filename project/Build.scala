@@ -261,7 +261,7 @@ object Finagle extends Build {
       caffeineLib,
       jsr305Lib,
       nettyLib)
-  )
+  ).dependsOn(finagleToggle)
 
   lazy val finagleNetty4 = Project(
     id = "finagle-netty4",

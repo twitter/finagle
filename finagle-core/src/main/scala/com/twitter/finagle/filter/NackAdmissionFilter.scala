@@ -8,7 +8,7 @@ import com.twitter.util._
 
 private[finagle] object NackAdmissionFilter {
   private val OverloadFailure = Future.exception(Failure("Failed fast because service is overloaded", Failure.Rejected|Failure.NonRetryable))
-  private val role = new Stack.Role("NackAdmissionFilter")
+  val role = new Stack.Role("NackAdmissionFilter")
 
   /**
    * An upper bound on what percentage of requests this filter will drop.

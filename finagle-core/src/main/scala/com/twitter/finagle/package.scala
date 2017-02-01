@@ -1,5 +1,8 @@
 package com.twitter
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
 
 Finagle is an extensible RPC system.
@@ -73,4 +76,12 @@ package object finagle {
       new com.twitter.finagle.service.FailingFactory[Req, Rep](
         new IllegalArgumentException("Unterminated stack")))
   }
+
+  private[this] val LibraryName: String = "com.twitter.finagle.core"
+
+  /**
+   * The [[ToggleMap]] used for finagle-core
+   */
+  private[finagle] val CoreToggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
 }

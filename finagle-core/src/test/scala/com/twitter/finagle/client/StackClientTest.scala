@@ -6,6 +6,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -13,11 +14,12 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
-import com.twitter.finagle.{param, Name}
+import com.twitter.finagle.{Name, param}
 import com.twitter.util._
-import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
@@ -75,6 +77,13 @@ class StackClientTest extends FunSuite
 
   after {
     NameInterpreter.global = DefaultInterpreter
+  }
+
+  test("NackAdmissionFilter is controlled by toggle, default off") {
+    assert(!StackClient.newStack[Int, Int].contains(NackAdmissionFilter.role))
+    flag.overrides.let("com.twitter.finagle.core.UseClientNackAdmissionFilter", 1.0) {
+      assert(StackClient.newStack[Int, Int].contains(NackAdmissionFilter.role))
+    }
   }
 
   test("client stats are scoped to label")(new Ctx {
@@ -470,7 +479,6 @@ class StackClientTest extends FunSuite
     val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
     assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
   }
-
 
   test("endpointer clears Contexts") {
     import StackClientTest._
