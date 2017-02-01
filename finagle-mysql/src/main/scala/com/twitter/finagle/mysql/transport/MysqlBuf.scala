@@ -10,7 +10,7 @@ import scala.collection.mutable.{Buffer => MutableBuffer}
  * exchanged between a mysql client and server. All data is little endian ordered.
  */
 object MysqlBuf {
-  val NullLength = -1 // denotes a SQL NULL value when reading a length coded binary.
+  val NullLength: Int = -1 // denotes a SQL NULL value when reading a length coded binary.
 
   def reader(buf: Buf): MysqlBufReader = new MysqlBufReader(buf)
 
@@ -61,7 +61,7 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
     do {
       val b = readByte()
       if (b == 0x00) {
-        eof = true;
+        eof = true
       } else {
         bytes += b
       }
@@ -130,7 +130,7 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
           throw new IllegalStateException(s"Negative length-encoded value: $longValue")
         longValue
 
-      case _ => throw new IllegalStateException("Invalid length byte")
+      case len => throw new IllegalStateException(s"Invalid length byte: $len")
     }
   }
 }

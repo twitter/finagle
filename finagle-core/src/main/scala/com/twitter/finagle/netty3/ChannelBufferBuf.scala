@@ -25,20 +25,22 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf.Inde
     underlying.getByte(pos)
   }
 
-  private[twitter] def process(processor: Buf.Indexed.Processor): Int = {
-    val offset = underlying.readerIndex
-    val len = length
+  private[twitter] def process(from: Int, until: Int, processor: Buf.Indexed.Processor): Int = {
+    checkSliceArgs(from, until)
+    if (isSliceEmpty(from, until)) return -1
+    val off = underlying.readerIndex + from
+    val endAt = math.min(length, underlying.readerIndex + until)
     var i = 0
     var continue = true
-    while (continue && i < len) {
-      val byte = underlying.getByte(offset + i)
+    while (continue && i < endAt) {
+      val byte = underlying.getByte(off + i)
       if (processor(byte))
         i += 1
       else
         continue = false
     }
     if (continue) -1
-    else i
+    else from + i
   }
 
   def write(bytes: Array[Byte], off: Int): Unit = {

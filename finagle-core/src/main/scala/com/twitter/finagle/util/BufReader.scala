@@ -204,10 +204,10 @@ private[finagle] trait ProxyBufReader extends BufReader {
 
 private[finagle] object BufReader {
   /**
-   * Creates a [[BufReader]] that is capable of extracting
-   * numeric values in big endian order.
+   * Creates a [[BufReader]].
    */
-  def apply(buf: Buf): BufReader = new BufReaderImpl(buf)
+  def apply(buf: Buf): BufReader =
+    new BufReaderImpl(Buf.Indexed.coerce(buf))
 
   /**
    * Indicates there aren't sufficient bytes to be read.
@@ -220,14 +220,20 @@ private[finagle] object BufReader {
   private[util] val SignedMediumMax = 0x800000
 }
 
-private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
+private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   import BufReader._
 
-  // temporarily stores numeric values which can be extracted
-  // from `buf` via the `read*` methods.
-  private[this] val nums = new Array[Byte](8)
+  private[this] val len = buf.length
 
-  def remaining: Int = buf.length
+  private[this] var pos = 0
+
+  def remaining: Int = len - pos
+
+  private[this] def checkRemaining(needed: Int): Unit =
+    if (remaining < needed) {
+      throw new UnderflowException(
+        s"tried to read $needed byte(s) when remaining bytes was $remaining")
+    }
 
   private[this] def byteFinder(target: Byte): Buf.Indexed.Processor =
     new Buf.Indexed.Processor {
@@ -236,42 +242,39 @@ private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
 
   // Time - O(n), Memory - O(1)
   def remainingUntil(byte: Byte): Int =
-    if (buf.isEmpty) -1
-    else Buf.Indexed.coerce(buf).process(byteFinder(byte))
-
-  def readByte(): Byte = {
-    if (remaining < 1) {
-      throw new UnderflowException(
-        s"tried to read a byte when remaining bytes was ${remaining}")
+    if (remaining == 0) -1
+    else {
+      val index = buf.process(pos, len, byteFinder(byte))
+      if (index == -1) -1
+      else index - pos
     }
 
-    readBytes(1).write(nums, 0)
-    nums(0)
+  def readByte(): Byte = {
+    checkRemaining(1)
+    val ret = buf(pos)
+    pos += 1
+    ret
   }
 
   def readUnsignedByte(): Short = (readByte() & 0xff).toShort
 
   // - Short -
   def readShortBE(): Short = {
-    if (remaining < 2) {
-      throw new UnderflowException(
-        s"tried to read 2 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(2).write(nums, 0)
-    (((nums(0) & 0xff) <<  8) |
-    ((nums(1) & 0xff)      )).toShort
+    checkRemaining(2)
+    val ret =
+      (buf(pos    ) & 0xff) << 8 |
+      (buf(pos + 1) & 0xff)
+    pos += 2
+    ret.toShort
   }
 
   def readShortLE(): Short = {
-    if (remaining < 2) {
-      throw new UnderflowException(
-        s"tried to read 2 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(2).write(nums, 0)
-    (((nums(0) & 0xff)      ) |
-    ((nums(1) & 0xff) <<  8)).toShort
+    checkRemaining(2)
+    val ret =
+      (buf(pos    ) & 0xff) |
+      (buf(pos + 1) & 0xff) << 8
+    pos += 2
+    ret.toShort
   }
 
   def readUnsignedShortBE(): Int = readShortBE() & 0xffff
@@ -298,54 +301,46 @@ private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
   }
 
   def readUnsignedMediumBE(): Int = {
-    if (remaining < 3) {
-      throw new UnderflowException(
-        s"tried to read 3 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(3).write(nums, 0)
-    ((nums(0) & 0xff) << 16) |
-    ((nums(1) & 0xff) <<  8) |
-    ((nums(2) & 0xff)      )
+    checkRemaining(3)
+    val ret =
+      (buf(pos    ) & 0xff) << 16 |
+      (buf(pos + 1) & 0xff) <<  8 |
+      (buf(pos + 2) & 0xff)
+    pos += 3
+    ret
   }
 
   def readUnsignedMediumLE(): Int = {
-    if (remaining < 3) {
-      throw new UnderflowException(
-        s"tried to read 3 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(3).write(nums, 0)
-    ((nums(0) & 0xff)      ) |
-    ((nums(1) & 0xff) <<  8) |
-    ((nums(2) & 0xff) << 16)
+    checkRemaining(3)
+    val ret =
+      (buf(pos    ) & 0xff)       |
+      (buf(pos + 1) & 0xff) <<  8 |
+      (buf(pos + 2) & 0xff) << 16
+    pos += 3
+    ret
   }
 
   // - Int -
   def readIntBE(): Int = {
-    if (remaining < 4) {
-      throw new UnderflowException(
-        s"tried to read 4 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(4).write(nums, 0)
-    ((nums(0) & 0xff) << 24) |
-    ((nums(1) & 0xff) << 16) |
-    ((nums(2) & 0xff) <<  8) |
-    ((nums(3) & 0xff)      )
+    checkRemaining(4)
+    val ret =
+      (buf(pos    ) & 0xff) << 24 |
+      (buf(pos + 1) & 0xff) << 16 |
+      (buf(pos + 2) & 0xff) <<  8 |
+      (buf(pos + 3) & 0xff)
+    pos += 4
+    ret
   }
 
   def readIntLE(): Int = {
-    if (remaining < 4) {
-      throw new UnderflowException(
-        s"tried to read 4 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(4).write(nums, 0)
-    ((nums(0) & 0xff)      ) |
-    ((nums(1) & 0xff) <<  8) |
-    ((nums(2) & 0xff) << 16) |
-    ((nums(3) & 0xff) << 24)
+    checkRemaining(4)
+    val ret =
+      (buf(pos    ) & 0xff)       |
+      (buf(pos + 1) & 0xff) <<  8 |
+      (buf(pos + 2) & 0xff) << 16 |
+      (buf(pos + 3) & 0xff) << 24
+    pos += 4
+    ret
   }
 
   def readUnsignedIntBE(): Long = readIntBE() & 0xffffffffL
@@ -354,37 +349,33 @@ private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
 
   // - Long -
   def readLongBE(): Long = {
-    if (remaining < 8) {
-      throw new UnderflowException(
-        s"tried to read 8 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(8).write(nums, 0)
-    ((nums(0) & 0xff).toLong << 56) |
-    ((nums(1) & 0xff).toLong << 48) |
-    ((nums(2) & 0xff).toLong << 40) |
-    ((nums(3) & 0xff).toLong << 32) |
-    ((nums(4) & 0xff).toLong << 24) |
-    ((nums(5) & 0xff).toLong << 16) |
-    ((nums(6) & 0xff).toLong <<  8) |
-    ((nums(7) & 0xff).toLong      )
+    checkRemaining(8)
+    val ret =
+      (buf(pos    ) & 0xff).toLong << 56 |
+      (buf(pos + 1) & 0xff).toLong << 48 |
+      (buf(pos + 2) & 0xff).toLong << 40 |
+      (buf(pos + 3) & 0xff).toLong << 32 |
+      (buf(pos + 4) & 0xff).toLong << 24 |
+      (buf(pos + 5) & 0xff).toLong << 16 |
+      (buf(pos + 6) & 0xff).toLong <<  8 |
+      (buf(pos + 7) & 0xff).toLong
+    pos += 8
+    ret
   }
 
   def readLongLE(): Long = {
-    if (remaining < 8) {
-      throw new UnderflowException(
-        s"tried to read 8 bytes when remaining bytes was ${remaining}")
-    }
-
-    readBytes(8).write(nums, 0)
-    ((nums(0) & 0xff).toLong      ) |
-    ((nums(1) & 0xff).toLong <<  8) |
-    ((nums(2) & 0xff).toLong << 16) |
-    ((nums(3) & 0xff).toLong << 24) |
-    ((nums(4) & 0xff).toLong << 32) |
-    ((nums(5) & 0xff).toLong << 40) |
-    ((nums(6) & 0xff).toLong << 48) |
-    ((nums(7) & 0xff).toLong << 56)
+    checkRemaining(8)
+    val ret =
+      (buf(pos    ) & 0xff).toLong       |
+      (buf(pos + 1) & 0xff).toLong <<  8 |
+      (buf(pos + 2) & 0xff).toLong << 16 |
+      (buf(pos + 3) & 0xff).toLong << 24 |
+      (buf(pos + 4) & 0xff).toLong << 32 |
+      (buf(pos + 5) & 0xff).toLong << 40 |
+      (buf(pos + 6) & 0xff).toLong << 48 |
+      (buf(pos + 7) & 0xff).toLong << 56
+    pos += 8
+    ret
   }
 
   // - Floating Point -
@@ -397,27 +388,26 @@ private class BufReaderImpl(private[this] var buf: Buf) extends BufReader {
   def readDoubleLE(): Double = JDouble.longBitsToDouble(readLongLE())
 
   def readBytes(n: Int): Buf = {
-    val b = buf.slice(0, n)
-    buf = buf.slice(n, buf.length)
-    b
+    if (n < 0) {
+      throw new IllegalArgumentException(s"'n' must be non-negative: $n")
+    } else {
+      val ret = buf.slice(pos, pos + n)
+      pos += n
+      ret
+    }
   }
 
   def skip(n: Int): Unit = {
     if (n < 0) {
-      throw new IllegalArgumentException(s"Invalid number of bytes to skip: $n. Must be >= 0")
+      throw new IllegalArgumentException(s"'n' must be non-negative: $n")
     }
-    if (remaining < n) {
-      throw new UnderflowException(
-        s"Tried to skip $n bytes when remaining bytes was $remaining")
-    }
-    if (n > 0) {
-      buf = buf.slice(n, buf.length)
-    }
+    checkRemaining(n)
+    pos += n
   }
 
   def readAll(): Buf = {
-    val b = buf
-    buf = Buf.Empty
-    b
+    val ret = buf.slice(pos, len)
+    pos = len
+    ret
   }
 }

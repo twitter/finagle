@@ -35,6 +35,10 @@ class ByteBufAsBufBenchmark extends StdBenchAnnotations {
     byteBufDirect = ByteBufAsBuf.Owned(direct)
   }
 
+  @TearDown(Level.Iteration)
+  def tearDown(): Unit =
+    ByteBufAsBuf.Owned.extract(byteBufDirect).release()
+
   @Benchmark
   def equalityByteBufByteBuf(): Boolean =
     byteBuf == byteBuf

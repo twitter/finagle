@@ -92,7 +92,7 @@ class ChannelBufferBufTest
   test("apply(Int)") {
     val out = new Array[Byte](1)
     forAll { bytes: Array[Byte] =>
-      if (bytes.length >= 2) {
+      whenever(bytes.length >= 2) {
         val cb = ChannelBuffers.wrappedBuffer(bytes)
         cb.readByte()
         val buf = new ChannelBufferBuf(cb)
@@ -134,6 +134,7 @@ class ChannelBufferBufTest
     }
   }
 
+
   test("process returns index where processing stopped") {
     val processor = new Buf.Indexed.Processor {
       def apply(byte: Byte): Boolean = false
@@ -143,19 +144,49 @@ class ChannelBufferBufTest
       val buf = new ChannelBufferBuf(cb)
       assert(buf.process(processor) == (if (buf.isEmpty) -1 else 0))
 
-      var n = 0
-      val maxThree = new Buf.Indexed.Processor {
+      def maxThree() = new Buf.Indexed.Processor {
+        private[this] var n = 0
         def apply(byte: Byte): Boolean = {
           n += 1
           n <= 3
         }
       }
 
-      val res = buf.process(maxThree)
-      if (bytes.length <= 3)
-        assert(-1 == res)
-      else
-        assert(3 == res)
+      if (bytes.length <= 3) {
+        assert(-1 == buf.process(maxThree()))
+      } else {
+        assert(3 == buf.process(maxThree()))
+        if (bytes.length > 10) {
+          assert(4 == buf.process(1, 5, maxThree()))
+          assert(5 == buf.process(2, 9, maxThree()))
+          assert(-1 == buf.process(0, 3, maxThree()))
+        }
+      }
     }
   }
+
+  test("process handles empty inputs") {
+    val processor = new Buf.Indexed.Processor {
+      def apply(byte: Byte): Boolean = false
+    }
+    forAll { bytes: Array[Byte] =>
+      val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
+      val indexed = Buf.Indexed.coerce(buf)
+      assert(-1 == indexed.process(1, 0, processor))
+      assert(-1 == indexed.process(buf.length, buf.length + 1, processor))
+    }
+  }
+
+  test("process handles large until") {
+    val processor = new Buf.Indexed.Processor {
+      def apply(byte: Byte): Boolean = true
+    }
+    forAll { bytes: Array[Byte] =>
+      val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
+      val indexed = Buf.Indexed.coerce(buf)
+      assert(-1 == indexed.process(0, buf.length, processor))
+      assert(-1 == indexed.process(0, buf.length + 1, processor))
+    }
+  }
+
 }

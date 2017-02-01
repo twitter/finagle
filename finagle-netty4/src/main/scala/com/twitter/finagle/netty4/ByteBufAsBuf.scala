@@ -64,13 +64,20 @@ private[finagle] class ByteBufAsBuf(
   // nb: `underlying` is exposed for testing
 
   private[twitter] def apply(index: Int): Byte =
-    underlying.getByte(index)
+    underlying.getByte(underlying.readerIndex() + index)
 
-  private[twitter] def process(processor: Buf.Indexed.Processor): Int = {
+  private[twitter] def process(from: Int, until: Int, processor: Buf.Indexed.Processor): Int = {
+    checkSliceArgs(from, until)
+    if (isSliceEmpty(from, until)) return -1
     val byteProcessor = new ByteProcessor {
       def process(value: Byte): Boolean = processor(value)
     }
-    underlying.forEachByte(byteProcessor)
+    val readerIndex = underlying.readerIndex()
+    val off = readerIndex + from
+    val len = math.min(length, until - from)
+    val index = underlying.forEachByte(off, len, byteProcessor)
+    if (index == -1) -1
+    else index - readerIndex
   }
 
   def write(bytes: Array[Byte], off: Int): Unit = {
@@ -93,7 +100,11 @@ private[finagle] class ByteBufAsBuf(
     checkSliceArgs(from, until)
     if (isSliceEmpty(from, until)) Buf.Empty
     else if (isSliceIdentity(from, until)) this
-    else new ByteBufAsBuf(underlying.slice(from, Math.min(until - from, length - from)))
+    else {
+      val off = underlying.readerIndex() + from
+      val len = Math.min(length - from, until - from)
+      new ByteBufAsBuf(underlying.slice(off, len))
+    }
   }
 
   override def equals(other: Any): Boolean = other match {
@@ -115,7 +126,7 @@ private[finagle] class ByteBufAsBuf(
           }
         }
       }
-      underlying.forEachByte(proc) == -1
+      underlying.forEachByte(underlying.readerIndex(), length, proc) == -1
 
     case _ => false
   }
