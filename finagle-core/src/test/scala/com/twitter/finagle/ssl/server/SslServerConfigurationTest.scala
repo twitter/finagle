@@ -61,9 +61,9 @@ class SslServerConfigurationTest extends FunSuite {
   }
 
   test("application protocols can be set independently") {
-    val appProtos = ApplicationProtocols.Supported(Seq("made-up-app-protocol"))
+    val appProtos = ApplicationProtocols.Supported(Seq("h2"))
     val config = SslServerConfiguration(applicationProtocols = appProtos)
-    assert(config.applicationProtocols == ApplicationProtocols.Supported(Seq("made-up-app-protocol")))
+    assert(config.applicationProtocols == ApplicationProtocols.Supported(Seq("h2")))
   }
 
 }
