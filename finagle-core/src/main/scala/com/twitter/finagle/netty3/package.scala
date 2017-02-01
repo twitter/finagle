@@ -1,8 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.util.ProxyThreadFactory
-import com.twitter.util.Awaitable
+import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
 import java.util.concurrent.{ExecutorService, Executors}
 import org.jboss.netty.channel.socket.nio.NioWorkerPool
 import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
@@ -23,13 +22,10 @@ package object netty3 {
   ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT)
 
   val Executor: ExecutorService = {
-    val threadFactory = new ProxyThreadFactory(
-      new NamedPoolThreadFactory("finagle/netty3", makeDaemons = true),
-      ProxyThreadFactory.newProxiedRunnable(
-        () => Awaitable.enableBlockingTimeTracking(),
-        () => Awaitable.disableBlockingTimeTracking()
-      )
+    val threadFactory = new BlockingTimeTrackingThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty3", makeDaemons = true)
     )
+
     Executors.newCachedThreadPool(threadFactory)
   }
 

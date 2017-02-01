@@ -3,8 +3,7 @@ package com.twitter.finagle.netty4.param
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.numWorkers
-import com.twitter.finagle.util.ProxyThreadFactory
-import com.twitter.util.Awaitable
+import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
@@ -21,13 +20,10 @@ import java.util.concurrent.Executors
 case class WorkerPool(eventLoopGroup: EventLoopGroup)
 object WorkerPool {
   implicit val workerPoolParam: Stack.Param[WorkerPool] = Stack.Param {
-    val threadFactory = new ProxyThreadFactory(
-      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true),
-      ProxyThreadFactory.newProxiedRunnable(
-        () => Awaitable.enableBlockingTimeTracking(),
-        () => Awaitable.disableBlockingTimeTracking()
-      )
+    val threadFactory = new BlockingTimeTrackingThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true)
     )
+
     // Netty will create `numWorkers` children in the `NioEventLoopGroup` (which
     // in this case are of type `NioEventLoop`). Each `NioEventLoop` will pin itself
     // to a thread acquired from the `executor` and will multiplex over channels.
