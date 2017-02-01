@@ -40,7 +40,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     assert(resp.getStatus == HttpResponseStatus.OK)
     assert(resp.content.length == 0)
     assert(!resp.isChunked)
-    assert(resp.headers().get(Fields.ContentLength) == "1")
+    assert(resp.headerMap.get(Fields.ContentLength) == Some("1"))
   }
 
   test("response to HEAD request without content-length") {
@@ -48,7 +48,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     assert(response.getStatus == HttpResponseStatus.OK)
     assert(response.content.length == 0)
     assert(!response.isChunked)
-    assert(response.headers().get(Fields.ContentLength) == null)
+    assert(response.headerMap.get(Fields.ContentLength) == None)
   }
 
   test("response to HEAD request that contains a body") {
@@ -60,7 +60,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     assert(response.getStatus == HttpResponseStatus.OK)
     assert(response.content.length == 0)
     assert(!response.isChunked)
-    assert(response.headers().get(Fields.ContentLength) == body.length.toString)
+    assert(response.headerMap.get(Fields.ContentLength) == Some(body.length.toString))
   }
 
   test("response to HEAD request with chunked response lacking a body") {
@@ -72,7 +72,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     assert(response.getStatus == HttpResponseStatus.OK)
     assert(response.content.length == 0)
     assert(!response.isChunked) // the pipeline will clear the chunked flag
-    assert(response.headers().get(Fields.ContentLength) == null)
+    assert(response.headerMap.get(Fields.ContentLength) == None)
 
     // Make sure to close the Reader/Writer pair, just in case someone is listening
     intercept[ReaderDiscarded] { Await.result(res.writer.write(Buf.Empty), 5.seconds) }

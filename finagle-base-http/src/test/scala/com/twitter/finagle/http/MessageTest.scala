@@ -46,7 +46,7 @@ class MessageTest extends FunSuite {
     )
     tests.foreach { case (header, expected) =>
       val request = Request()
-      request.headers.set("Content-Type", header)
+      request.headerMap.set("Content-Type", header)
       assert(request.charset == Option(expected))
     }
   }
@@ -64,9 +64,9 @@ class MessageTest extends FunSuite {
     )
     tests.foreach { case ((header, charset), expected) =>
       val request = Request()
-      request.headers.set("Content-Type", header)
+      request.headerMap.set("Content-Type", header)
       request.charset = charset
-      assert(request.headers.get("Content-Type") == expected)
+      assert(request.headerMap("Content-Type") == expected)
     }
   }
 
@@ -83,7 +83,7 @@ class MessageTest extends FunSuite {
     )
     tests.foreach { case (header, expected) =>
       val request = Request()
-      request.headers.set("Content-Type", header)
+      request.headerMap.set("Content-Type", header)
       // shorthand for empty mediaTypes really being returned as None after being parsed.
       assert(request.mediaType == (if (expected.isEmpty) None else Some(expected)))
     }
@@ -105,9 +105,9 @@ class MessageTest extends FunSuite {
     )
     tests.foreach { case ((header, mediaType), expected) =>
       val request = Request()
-      request.headers.set("Content-Type", header)
+      request.headerMap.set("Content-Type", header)
       request.mediaType = mediaType
-      assert(request.headers.get("Content-Type") == expected)
+      assert(request.headerMap("Content-Type") == expected)
     }
   }
 

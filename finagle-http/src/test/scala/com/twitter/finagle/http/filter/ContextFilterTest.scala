@@ -55,7 +55,7 @@ class ContextFilterTest extends FunSuite {
       }
 
     val req = Request()
-    req.headers().add("Finagle-Ctx-com.twitter.finagle.Deadline", "foo")
+    req.headerMap.add("Finagle-Ctx-com.twitter.finagle.Deadline", "foo")
 
     val rsp = Await.result(service(req))
     assert(rsp.status == Status.Ok)

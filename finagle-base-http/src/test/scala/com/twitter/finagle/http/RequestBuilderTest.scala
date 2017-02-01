@@ -5,7 +5,6 @@ import java.net.URL
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class RequestBuilderTest extends FunSuite {
@@ -56,11 +55,11 @@ v3
     val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
     val expected = "www.google.com:77"
-    assert(get.headers.get(Fields.Host) == expected)
-    assert(head.headers.get(Fields.Host) == expected)
-    assert(delete.headers.get(Fields.Host) == expected)
-    assert(put.headers.get(Fields.Host) == expected)
-    assert(post.headers.get(Fields.Host) == expected)
+    assert(get.headerMap(Fields.Host) == expected)
+    assert(head.headerMap(Fields.Host) == expected)
+    assert(delete.headerMap(Fields.Host) == expected)
+    assert(put.headerMap(Fields.Host) == expected)
+    assert(post.headerMap(Fields.Host) == expected)
   }
 
   test("set the HOST header when the HOST contains underscores") {
@@ -71,11 +70,11 @@ v3
     val post = RequestBuilder().url(URL3).buildPost(BODY0)
 
     val expected = "foo_bar_prod.www.address.com"
-    assert(get.headers.get(Fields.Host) == expected)
-    assert(head.headers.get(Fields.Host) == expected)
-    assert(delete.headers.get(Fields.Host) == expected)
-    assert(put.headers.get(Fields.Host) == expected)
-    assert(post.headers.get(Fields.Host) == expected)
+    assert(get.headerMap(Fields.Host) == expected)
+    assert(head.headerMap(Fields.Host) == expected)
+    assert(delete.headerMap(Fields.Host) == expected)
+    assert(put.headerMap(Fields.Host) == expected)
+    assert(post.headerMap(Fields.Host) == expected)
   }
 
   test("set the Authorization header when userInfo is present") {
@@ -93,17 +92,17 @@ v3
 
     val expected = "Basic am9lOmJsb3c="
     val expectedSpecial = "Basic am9lQGhvc3QuY29tOmJsb3c="
-    assert(req0.headers.get(Fields.Authorization) == expected)
-    assert(req1.headers.get(Fields.Authorization) == null)
-    assert(req2.headers.get(Fields.Authorization) == expected)
-    assert(req3.headers.get(Fields.Authorization) == null)
-    assert(req4.headers.get(Fields.Authorization) == expected)
-    assert(req5.headers.get(Fields.Authorization) == null)
-    assert(req6.headers.get(Fields.Authorization) == expected)
-    assert(req7.headers.get(Fields.Authorization) == null)
-    assert(req8.headers.get(Fields.Authorization) == expected)
-    assert(req9.headers.get(Fields.Authorization) == null)
-    assert(req10.headers.get(Fields.Authorization) == expectedSpecial)
+    assert(req0.headerMap.get(Fields.Authorization) == Some(expected))
+    assert(req1.headerMap.get(Fields.Authorization) == None)
+    assert(req2.headerMap.get(Fields.Authorization) == Some(expected))
+    assert(req3.headerMap.get(Fields.Authorization) == None)
+    assert(req4.headerMap.get(Fields.Authorization) == Some(expected))
+    assert(req5.headerMap.get(Fields.Authorization) == None)
+    assert(req6.headerMap.get(Fields.Authorization) == Some(expected))
+    assert(req7.headerMap.get(Fields.Authorization) == None)
+    assert(req8.headerMap.get(Fields.Authorization) == Some(expected))
+    assert(req9.headerMap.get(Fields.Authorization) == None)
+    assert(req10.headerMap.get(Fields.Authorization) == Some(expectedSpecial))
   }
 
   test("replace the empty path with /") {
@@ -237,49 +236,49 @@ v3
       .url(URL0)
       .setHeader(A, B)
 
-    assert(builder0.buildGet.headers.get(A) == B)
-    assert(builder0.buildHead.headers.get(A) == B)
-    assert(builder0.buildDelete.headers.get(A) == B)
-    assert(builder0.buildPut(BODY0).headers.get(A) == B)
-    assert(builder0.buildPost(BODY0).headers.get(A) == B)
+    assert(builder0.buildGet.headerMap(A) == B)
+    assert(builder0.buildHead.headerMap(A) == B)
+    assert(builder0.buildDelete.headerMap(A) == B)
+    assert(builder0.buildPut(BODY0).headerMap(A) == B)
+    assert(builder0.buildPost(BODY0).headerMap(A) == B)
 
     val builder1 = builder0
       .setHeader(A, C)
 
-    assert(builder1.buildGet.headers.get(A) == C)
-    assert(builder1.buildHead.headers.get(A) == C)
-    assert(builder1.buildDelete.headers.get(A) == C)
-    assert(builder1.buildPut(BODY0).headers.get(A) == C)
-    assert(builder1.buildPost(BODY0).headers.get(A) == C)
+    assert(builder1.buildGet.headerMap(A) == C)
+    assert(builder1.buildHead.headerMap(A) == C)
+    assert(builder1.buildDelete.headerMap(A) == C)
+    assert(builder1.buildPut(BODY0).headerMap(A) == C)
+    assert(builder1.buildPost(BODY0).headerMap(A) == C)
 
     val builder2 = builder1
       .setHeader(A, Seq())
 
-    assert(builder2.buildGet.headers.get(A) == null)
-    assert(builder2.buildHead.headers.get(A) == null)
-    assert(builder2.buildDelete.headers.get(A) == null)
-    assert(builder2.buildPut(BODY0).headers.get(A) == null)
-    assert(builder2.buildPost(BODY0).headers.get(A) == null)
+    assert(builder2.buildGet.headerMap.get(A) == None)
+    assert(builder2.buildHead.headerMap.get(A) == None)
+    assert(builder2.buildDelete.headerMap.get(A) == None)
+    assert(builder2.buildPut(BODY0).headerMap.get(A) == None)
+    assert(builder2.buildPost(BODY0).headerMap.get(A) == None)
 
     val builder3 = builder2
       .setHeader(A, Seq(B, C))
 
-    val pair = Seq(B,C).asJava
-    assert(builder3.buildGet.headers.getAll(A) == pair)
-    assert(builder3.buildHead.headers.getAll(A) == pair)
-    assert(builder3.buildDelete.headers.getAll(A) == pair)
-    assert(builder3.buildPut(BODY0).headers.getAll(A) == pair)
-    assert(builder3.buildPost(BODY0).headers.getAll(A) == pair)
+    val pair = Seq(B,C)
+    assert(builder3.buildGet.headerMap.getAll(A) == pair)
+    assert(builder3.buildHead.headerMap.getAll(A) == pair)
+    assert(builder3.buildDelete.headerMap.getAll(A) == pair)
+    assert(builder3.buildPut(BODY0).headerMap.getAll(A) == pair)
+    assert(builder3.buildPost(BODY0).headerMap.getAll(A) == pair)
 
     val builder4 = builder3
       .addHeader(A, D)
 
-    val triple = Seq(B,C, D).asJava
-    assert(builder4.buildGet.headers.getAll(A) == triple)
-    assert(builder4.buildHead.headers.getAll(A) == triple)
-    assert(builder4.buildDelete.headers.getAll(A) == triple)
-    assert(builder4.buildPut(BODY0).headers.getAll(A) == triple)
-    assert(builder4.buildPost(BODY0).headers.getAll(A) == triple)
+    val triple = Seq(B,C, D)
+    assert(builder4.buildGet.headerMap.getAll(A) == triple)
+    assert(builder4.buildHead.headerMap.getAll(A) == triple)
+    assert(builder4.buildDelete.headerMap.getAll(A) == triple)
+    assert(builder4.buildPut(BODY0).headerMap.getAll(A) == triple)
+    assert(builder4.buildPost(BODY0).headerMap.getAll(A) == triple)
   }
 
   test("build form") {

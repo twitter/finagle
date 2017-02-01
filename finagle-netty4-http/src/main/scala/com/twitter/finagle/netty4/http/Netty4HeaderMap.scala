@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) extends HeaderMap {
   import Netty4HeaderMap._
 
-  def getAll(key: String): Iterable[String] = underlying.getAll(key).asScala
+  def getAll(key: String): Seq[String] = underlying.getAll(key).asScala
 
   def get(key: String): Option[String] = Option(underlying.get(key))
 

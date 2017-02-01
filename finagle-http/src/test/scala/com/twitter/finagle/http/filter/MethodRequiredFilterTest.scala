@@ -32,7 +32,7 @@ class MethodRequiredFilterTest extends FunSuite {
     request.method = Method.Get
     val response = Await.result(filter(request, dummyService))
     assert(response.status == Status.MethodNotAllowed)
-    assert(response.headers.get("Allow") == "POST")
+    assert(response.headerMap.get("Allow") == Some("POST"))
   }
 
   test("return 200 when allowed method is used") {

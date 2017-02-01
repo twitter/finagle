@@ -320,22 +320,22 @@ object SpnegoAuthenticator {
 
   implicit val httpResponseSupport = new RspSupport[Response] {
     def status(rsp: Response) = rsp.status
-    def wwwAuthenticateHeader(rsp: Response) =
-      Option(rsp.headers.get(Fields.WwwAuthenticate))
-    def wwwAuthenticateHeader(rsp: Response, auth: String) =
-      rsp.headers.set(Fields.WwwAuthenticate, auth)
+    def wwwAuthenticateHeader(rsp: Response): Option[String] =
+      rsp.headerMap.get(Fields.WwwAuthenticate)
+    def wwwAuthenticateHeader(rsp: Response, auth: String): Unit =
+      rsp.headerMap.set(Fields.WwwAuthenticate, auth)
     def unauthorized(version: Version) =  Response(version, Status.Unauthorized)
   }
 
   implicit val httpRequestSupport = new ReqSupport[Request] {
-    def authorizationHeader(req: Request) =
-      Option(req.headers.get(Fields.Authorization))
-    def authorizationHeader(req: Request, token: Token) =
+    def authorizationHeader(req: Request): Option[String] =
+      req.headerMap.get(Fields.Authorization)
+    def authorizationHeader(req: Request, token: Token): Unit =
       AuthHeader(Some(token)).foreach { header =>
-        req.headers.set(Fields.Authorization, header)
+        req.headerMap.set(Fields.Authorization, header)
       }
-    def protocolVersion(req: Request) = req.version
-    def authenticated(req: Request, context: GSSContext) =
+    def protocolVersion(req: Request): Version = req.version
+    def authenticated(req: Request, context: GSSContext): Authenticated[Request] =
       Authenticated.Http(req, context)
   }
 

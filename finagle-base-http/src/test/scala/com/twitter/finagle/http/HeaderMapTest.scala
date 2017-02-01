@@ -13,7 +13,7 @@ class HeaderMapTest extends FunSuite {
 
   test("getOrNull") {
     val request = Request()
-    request.headers.add("Host", "api.twitter.com")
+    request.headerMap.add("Host", "api.twitter.com")
 
     assert(request.headerMap.getOrNull("Host") == "api.twitter.com")
     assert(request.headerMap.getOrNull("HOST")    == "api.twitter.com")
@@ -22,7 +22,7 @@ class HeaderMapTest extends FunSuite {
 
   test("get") {
     val request = Request()
-    request.headers.add("Host", "api.twitter.com")
+    request.headerMap.add("Host", "api.twitter.com")
 
     assert(request.headerMap.get("Host")    == Some("api.twitter.com"))
     assert(request.headerMap.get("HOST")    == Some("api.twitter.com"))
@@ -31,10 +31,10 @@ class HeaderMapTest extends FunSuite {
 
   test("set") {
     val request = Request()
-    request.headers.set("key", "initial value")
+    request.headerMap.set("key", "initial value")
     assert(request.headerMap.get("key") == Some("initial value"))
 
-    request.headers.set("key", "replacement value")
+    request.headerMap.set("key", "replacement value")
     assert(request.headerMap.get("key") == Some("replacement value"))
     assert(request.headerMap.getAll("key").toList == List("replacement value"))
 
@@ -44,8 +44,8 @@ class HeaderMapTest extends FunSuite {
 
   test("getAll") {
     val request = Request()
-    request.headers.add("Cookie", "1")
-    request.headers.add("Cookie", "2")
+    request.headerMap.add("Cookie", "1")
+    request.headerMap.add("Cookie", "2")
 
     assert(request.headerMap.getAll("Cookie").toList.sorted == List("1", "2"))
     assert(request.headerMap.getAll("COOKIE").toList.sorted == List("1", "2"))
@@ -54,16 +54,16 @@ class HeaderMapTest extends FunSuite {
 
   test("iterator") {
     val request = Request()
-    request.headers.add("Cookie", "1")
-    request.headers.add("Cookie", "2")
+    request.headerMap.add("Cookie", "1")
+    request.headerMap.add("Cookie", "2")
 
     assert(request.headerMap.iterator.toList.sorted == ("Cookie", "1") :: ("Cookie", "2") :: Nil)
   }
 
   test("keys") {
     val request = Request()
-    request.headers.add("Cookie", "1")
-    request.headers.add("Cookie", "2")
+    request.headerMap.add("Cookie", "1")
+    request.headerMap.add("Cookie", "2")
 
     assert(request.headerMap.keys.toList == List("Cookie"))
     assert(request.headerMap.keySet.toList == List("Cookie"))
@@ -72,7 +72,7 @@ class HeaderMapTest extends FunSuite {
 
   test("contains") {
     val request = Request()
-    request.headers.add("Cookie", "1")
+    request.headerMap.add("Cookie", "1")
 
     assert(request.headerMap.contains("Cookie") == true)
     assert(request.headerMap.contains("COOKIE") == true)
@@ -81,7 +81,7 @@ class HeaderMapTest extends FunSuite {
 
   test("add") {
     val request = Request()
-    request.headers.add("Cookie", "1")
+    request.headerMap.add("Cookie", "1")
 
     request.headerMap.add("Cookie", "2")
     assert(request.headerMap.getAll("Cookie").toList.sorted == List("1", "2"))
@@ -92,7 +92,7 @@ class HeaderMapTest extends FunSuite {
 
   test("+=") {
     val request = Request()
-    request.headers.add("Cookie", "1")
+    request.headerMap.add("Cookie", "1")
 
     request.headerMap += "Cookie" -> "2"
     assert(request.headerMap.getAll("Cookie").toList.sorted == List("2"))
@@ -103,7 +103,7 @@ class HeaderMapTest extends FunSuite {
 
   test("-=") {
     val request = Request()
-    request.headers.add("Cookie", "1")
+    request.headerMap.add("Cookie", "1")
 
     request.headerMap -= "Cookie"
     assert(request.headerMap.contains("Cookie") == false)

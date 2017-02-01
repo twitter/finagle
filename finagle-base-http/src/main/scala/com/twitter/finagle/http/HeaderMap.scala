@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.util.TwitterDateFormat
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, TimeZone}
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -23,7 +24,7 @@ abstract class HeaderMap
   /**
    * Retrieves all values for a given header name.
    */
-  def getAll(key: String): Iterable[String]
+  def getAll(key: String): Seq[String]
 
   /**
    * Retrieves the given header value or `null` if it doesn't exit.
@@ -82,7 +83,7 @@ class MapHeaderMap extends HeaderMap {
 
   private[this] val underlying = mutable.Map.empty[String, Vector[HeaderValuePair]]
 
-  def getAll(key: String): Iterable[String] =
+  def getAll(key: String): Seq[String] =
     underlying.getOrElse(HeaderValuePair.canonicalName(key), Vector.empty).map(_.value)
 
   def add(k: String, v: String): MapHeaderMap = {
@@ -149,20 +150,21 @@ object MapHeaderMap {
 /**
  * Mutable HttpMessage-backed [[HeaderMap]].
  */
-private[finagle] class MessageHeaderMap(httpMessage: Message) extends HeaderMap {
+private[finagle] final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
 
-  def get(key: String): Option[String] = Option(httpMessage.headers.get(key))
+  def get(key: String): Option[String] =
+    Option(headers.get(key))
 
   override def getOrNull(key: String): String =
-    httpMessage.headers.get(key)
+    headers.get(key)
 
   def iterator: Iterator[(String, String)] =
-    httpMessage.headers.iterator.asScala.map { entry =>
+    headers.iterator.asScala.map { entry =>
       (entry.getKey, entry.getValue)
     }
 
   override def keys: Iterable[String] =
-    httpMessage.headers.names.asScala
+    headers.names.asScala
 
   override def keySet: Set[String] =
     keys.toSet
@@ -171,28 +173,28 @@ private[finagle] class MessageHeaderMap(httpMessage: Message) extends HeaderMap 
     keySet.iterator
 
   override def contains(key: String): Boolean =
-    httpMessage.headers.contains(key)
+    headers.contains(key)
 
-  def += (kv: (String, String)): MessageHeaderMap.this.type = {
-    httpMessage.headers.set(kv._1, kv._2)
+  def += (kv: (String, String)): this.type = {
+    headers.set(kv._1, kv._2)
     this
   }
 
-  def -= (key: String): MessageHeaderMap.this.type = {
-    httpMessage.headers.remove(key)
+  def -= (key: String): this.type = {
+    headers.remove(key)
     this
   }
 
-  def getAll(key: String): Iterable[String] =
-    httpMessage.headers.getAll(key).asScala
+  def getAll(key: String): Seq[String] =
+    headers.getAll(key).asScala
 
   def set(k: String, v: String): HeaderMap = {
-    httpMessage.headers.set(k,v)
+    headers.set(k,v)
     this
   }
 
-  def add(k: String, v: String): MessageHeaderMap = {
-    httpMessage.headers.add(k, v)
+  def add(k: String, v: String): HeaderMap = {
+    headers.add(k, v)
     this
   }
 }
@@ -216,5 +218,4 @@ object HeaderMap {
   private def format(date: Date): String =
     if (date == null) null
     else formatter.get().format(date)
-
 }

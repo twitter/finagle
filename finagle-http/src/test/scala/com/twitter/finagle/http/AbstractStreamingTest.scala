@@ -430,7 +430,7 @@ object StreamingTest {
 
   def ok(readerIn: Reader) = {
     val res = Response(Version.Http11, Status.Ok, readerIn)
-    res.headers.set("Connection", "close")
+    res.headerMap.set("Connection", "close")
     res
   }
 

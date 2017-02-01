@@ -22,7 +22,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   def makeRequest(version: Version, headers: (String, String)*) = {
     val request = Request(version, Method.Get, "/")
     headers.foreach { case (k, v) =>
-      request.headers.set(k, v)
+      request.headerMap.set(k, v)
     }
     request
   }
@@ -30,7 +30,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   def makeResponse(version: Version, headers: (String, String)*) = {
     val response = Response(version, Status.Ok)
     headers.foreach { case (k, v) =>
-      response.headers.set(k, v)
+      response.headerMap.set(k, v)
     }
     response
   }

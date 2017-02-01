@@ -68,7 +68,7 @@ class RequestTest extends FunSuite {
 
   test("toHttpString") {
     val request = Request("/search.json", "q" -> "twitter")
-    request.headers.set("Host", "search.twitter.com")
+    request.headerMap.set("Host", "search.twitter.com")
 
     val expected = "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
 
@@ -81,7 +81,7 @@ class RequestTest extends FunSuite {
       "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n")
     assert(request.path                == "/search.json")
     assert(request.params("q")         == "twitter")
-    assert(request.headers.get("Host") == "search.twitter.com")
+    assert(request.headerMap.get("Host") == Some("search.twitter.com"))
   }
 
   test("decodeBytes") {

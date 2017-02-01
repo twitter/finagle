@@ -9,7 +9,7 @@ import com.twitter.util.Future
  */
 class TlsFilter(host: String) extends SimpleFilter[Request, Response] {
   def apply(req: Request, svc: Service[Request, Response]): Future[Response] = {
-    req.headers.set(Fields.Host, host)
+    req.headerMap.set(Fields.Host, host)
     svc(req)
   }
 }

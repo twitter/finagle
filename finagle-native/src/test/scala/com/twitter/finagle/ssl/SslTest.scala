@@ -112,9 +112,9 @@ class SslTest extends FunSuite {
       }
 
       if (responseSize > 0)
-        request.headers.set("Requested-Bytes", responseSize)
+        request.headerMap.set("Requested-Bytes", responseSize.toString)
       else
-        request.headers.set("Requested-Bytes", 0)
+        request.headerMap.set("Requested-Bytes", 0.toString)
 
       val response = Await.result(client(request))
       assert(response.status == Status.Ok)
@@ -125,8 +125,8 @@ class SslTest extends FunSuite {
 
       assert(content == makeContent(responseSize))
 
-      val cipher = response.headers.get("X-Transport-Cipher")
-      assert(cipher != "null")
+      val cipher = response.headerMap.get("X-Transport-Cipher")
+      assert(cipher != Some("null"))
     }
 
     check(   0 * 1024, 16   * 1024)

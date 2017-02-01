@@ -429,7 +429,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
   private[http] def withoutContent(method: Method): Request = {
     val req = Request(config.version, method, resource)
     config.headers foreach { case (field, values) =>
-      values foreach { v => req.headers.add(field, v) }
+      values.foreach { v => req.headerMap.add(field, v) }
     }
     req
   }
@@ -438,7 +438,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     require(content != null)
     val req = withoutContent(method)
     req.content = content
-    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.length.toString)
+    req.headerMap.set(HttpHeaders.Names.CONTENT_LENGTH, content.length.toString)
     req
   }
 }

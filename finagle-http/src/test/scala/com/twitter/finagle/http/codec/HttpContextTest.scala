@@ -56,7 +56,7 @@ class HttpContextTest extends FunSuite {
 
   test("invalid context header value causes context to not be set") {
     val m = newMsg()
-    m.headers.set("Finagle-Ctx-com.twitter.finagle.foo", ",,,")
+    m.headerMap.set("Finagle-Ctx-com.twitter.finagle.foo", ",,,")
     HttpContext.read(m) {
       assert(Contexts.broadcast.marshal.isEmpty)
     }

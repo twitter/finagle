@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
 class CookieMap(message: Message)
   extends mutable.Map[String, Cookie]
   with mutable.MapLike[String, Cookie, CookieMap] {
+
   override def empty: CookieMap = new CookieMap(Request())
 
   private[this] val underlying = mutable.Map[String, Set[Cookie]]().withDefaultValue(Set.empty)
@@ -49,7 +50,7 @@ class CookieMap(message: Message)
 
   protected def rewriteCookieHeaders() {
     // Clear all cookies - there may be more than one with this name.
-    message.headers.remove(cookieHeaderName)
+    message.headerMap.remove(cookieHeaderName)
 
     // Add cookies back again
     if (message.isRequest) {
@@ -57,12 +58,12 @@ class CookieMap(message: Message)
       foreach { case (_, cookie) =>
         encoder.addCookie(cookie.underlying)
       }
-      message.headers.set(cookieHeaderName, encoder.encode())
+      message.headerMap.set(cookieHeaderName, encoder.encode())
     } else {
       val encoder = new NettyCookieEncoder(true)
       foreach { case (_, cookie) =>
         encoder.addCookie(cookie.underlying)
-        message.headers.add(cookieHeaderName, encoder.encode())
+        message.headerMap.add(cookieHeaderName, encoder.encode())
       }
     }
   }
@@ -168,7 +169,7 @@ class CookieMap(message: Message)
   }
 
   for {
-    cookieHeader <- message.headers.getAll(cookieHeaderName).asScala
+    cookieHeader <- message.headerMap.getAll(cookieHeaderName)
     cookie <- decodeCookies(cookieHeader)
   } {
     add(cookie)

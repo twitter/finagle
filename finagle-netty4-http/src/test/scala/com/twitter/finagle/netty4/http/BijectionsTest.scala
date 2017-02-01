@@ -58,10 +58,10 @@ object BijectionsTest {
   } yield {
 
     val req = Request.apply(version, method, uri, BufReader(Buf.Utf8(body)))
-    headers.foreach { case (k, v) => req.headers.add(k, v) }
+    headers.foreach { case (k, v) => req.headerMap.add(k, v) }
     req.setChunked(false)
     req.contentString = body
-    req.headers.set(Fields.ContentLength, body.length.toString)
+    req.headerMap.set(Fields.ContentLength, body.length.toString)
     (req, body)
   }
 

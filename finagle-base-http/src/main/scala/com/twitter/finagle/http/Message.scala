@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.util.{Closable, Duration}
+import com.twitter.util.{Closable, Duration, Future}
 import java.io._
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
@@ -75,40 +75,40 @@ abstract class Message {
   }
 
   def version: Version = from(httpMessage.getProtocolVersion())
-  def version_=(version: Version) { httpMessage.setProtocolVersion(from(version)) }
+  def version_=(version: Version): Unit = httpMessage.setProtocolVersion(from(version))
 
-  lazy val headerMap: HeaderMap = new MessageHeaderMap(this)
+  lazy val headerMap: HeaderMap = new Netty3HeaderMap(httpMessage.headers)
 
   /**
    * Cookies. In a request, this uses the Cookie headers.
    * In a response, it uses the Set-Cookie headers.
    */
-  lazy val cookies = new CookieMap(this)
+  lazy val cookies: CookieMap = new CookieMap(this)
   // Java users: use the interface below for cookies
 
   /** Get iterator over Cookies */
   def getCookies(): JIterator[Cookie] = cookies.valuesIterator.asJava
 
   /** Add a cookie */
-  def addCookie(cookie: Cookie) {
+  def addCookie(cookie: Cookie): Unit = {
     cookies += cookie
   }
 
   /** Remove a cookie */
-  def removeCookie(name: String) {
+  def removeCookie(name: String): Unit = {
     cookies -= name
   }
 
   /** Accept header */
   def accept: Seq[String] =
-    Option(headers.get(Fields.Accept)) match {
+    headerMap.get(Fields.Accept) match {
       case Some(s) => s.split(",").map(_.trim).filter(_.nonEmpty)
       case None    => Seq()
     }
   /** Set Accept header */
-  def accept_=(value: String) { headers.set(Fields.Accept, value) }
+  def accept_=(value: String): Unit = headerMap.set(Fields.Accept, value)
   /** Set Accept header with list of values */
-  def accept_=(values: Iterable[String]) { accept = values.mkString(", ") }
+  def accept_=(values: Iterable[String]): Unit = accept = values.mkString(", ")
 
   /** Accept header media types (normalized, no parameters) */
   def acceptMediaTypes: Seq[String] =
@@ -119,25 +119,26 @@ abstract class Message {
     }.flatten
 
   /** Allow header */
-  def allow: Option[String] = Option(headers.get(Fields.Allow))
+  def allow: Option[String] = headerMap.get(Fields.Allow)
   /** Set Authorization header */
-  def allow_=(value: String) { headers.set(Fields.Allow, value) }
+  def allow_=(value: String): Unit = headerMap.set(Fields.Allow, value)
   /** Set Authorization header */
-  def allow_=(values: Iterable[Method]) { allow = values.mkString(",").toUpperCase }
+  def allow_=(values: Iterable[Method]): Unit = {
+    allow = values.mkString(",").toUpperCase
+  }
 
   /** Get Authorization header */
-  def authorization: Option[String] = Option(headers.get(Fields.Authorization))
+  def authorization: Option[String] = headerMap.get(Fields.Authorization)
   /** Set Authorization header */
-  def authorization_=(value: String) { headers.set(Fields.Authorization, value) }
+  def authorization_=(value: String): Unit = headerMap.set(Fields.Authorization, value)
 
   /** Get Cache-Control header */
-  def cacheControl: Option[String] = Option(headers.get(Fields.CacheControl))
+  def cacheControl: Option[String] = headerMap.get(Fields.CacheControl)
   /** Set Cache-Control header */
-  def cacheControl_=(value: String) { headers.set(Fields.CacheControl, value) }
+  def cacheControl_=(value: String): Unit = headerMap.set(Fields.CacheControl, value)
   /** Set Cache-Control header with a max-age (and must-revalidate). */
-  def cacheControl_=(maxAge: Duration) {
+  def cacheControl_=(maxAge: Duration): Unit =
     cacheControl = "max-age=" + maxAge.inSeconds.toString + ", must-revalidate"
-  }
 
   /** Get charset from Content-Type header */
   def charset: Option[String] = {
@@ -155,7 +156,7 @@ abstract class Message {
     None
   }
   /** Set charset in Content-Type header.  This does not change the content. */
-  def charset_=(value: String) {
+  def charset_=(value: String): Unit = {
     val contentType = this.contentType.getOrElse("")
     val parts = StringUtils.split(contentType, ';')
     if (parts.isEmpty) {
@@ -191,54 +192,58 @@ abstract class Message {
 
   /** Get Content-Length header.  Use length to get the length of actual content. */
   def contentLength: Option[Long] =
-    Option(headers.get(Fields.ContentLength)).map { _.toLong }
+    headerMap.get(Fields.ContentLength).map(_.toLong)
   /** Set Content-Length header.  Normally, this is automatically set by the
     * Codec, but this method allows you to override that. */
-  def contentLength_=(value: Long) {
-    headers.set(Fields.ContentLength, value.toString)
-  }
+  def contentLength_=(value: Long): Unit =
+    headerMap.set(Fields.ContentLength, value.toString)
 
   /** Get Content-Type header */
-  def contentType: Option[String] = Option(headers.get(Fields.ContentType))
+  def contentType: Option[String] = headerMap.get(Fields.ContentType)
   /** Set Content-Type header */
-  def contentType_=(value: String) { headers.set(Fields.ContentType, value) }
+  def contentType_=(value: String): Unit = headerMap.set(Fields.ContentType, value)
   /** Set Content-Type header by media-type and charset */
-  def setContentType(mediaType: String, charset: String = "utf-8") {
-    headers.set(Fields.ContentType, mediaType + ";charset=" + charset)
-  }
+  def setContentType(mediaType: String, charset: String = "utf-8"): Unit =
+    headerMap.set(Fields.ContentType, mediaType + ";charset=" + charset)
   /** Set Content-Type header to application/json;charset=utf-8 */
-  def setContentTypeJson() { headers.set(Fields.ContentType, Message.ContentTypeJson) }
+  def setContentTypeJson(): Unit = headerMap.set(Fields.ContentType, Message.ContentTypeJson)
 
   /** Get Date header */
-  def date: Option[String] = Option(headers.get(Fields.Date))
+  def date: Option[String] = headerMap.get(Fields.Date)
   /** Set Date header */
-  def date_=(value: String) { headers.set(Fields.Date, value) }
+  def date_=(value: String): Unit = headerMap.set(Fields.Date, value)
   /** Set Date header by Date */
-  def date_=(value: Date) { date = Message.httpDateFormat(value) }
+  def date_=(value: Date): Unit = {
+    date = Message.httpDateFormat(value)
+  }
 
   /** Get Expires header */
-  def expires: Option[String] = Option(headers.get(Fields.Expires))
+  def expires: Option[String] = headerMap.get(Fields.Expires)
   /** Set Expires header */
-  def expires_=(value: String) { headers.set(Fields.Expires, value) }
+  def expires_=(value: String): Unit = headerMap.set(Fields.Expires, value)
   /** Set Expires header by Date */
-  def expires_=(value: Date) { expires = Message.httpDateFormat(value) }
+  def expires_=(value: Date): Unit = {
+    expires = Message.httpDateFormat(value)
+  }
 
   /** Get Host header */
-  def host: Option[String] =  Option(headers.get(Fields.Host))
+  def host: Option[String] = headerMap.get(Fields.Host)
   /** Set Host header */
-  def host_=(value: String) { headers.set(Fields.Host, value) }
+  def host_=(value: String): Unit = headerMap.set(Fields.Host, value)
 
   /** Get Last-Modified header */
-  def lastModified: Option[String] = Option(headers.get(Fields.LastModified))
+  def lastModified: Option[String] = headerMap.get(Fields.LastModified)
   /** Set Last-Modified header */
-  def lastModified_=(value: String) { headers.set(Fields.LastModified, value) }
+  def lastModified_=(value: String): Unit = headerMap.set(Fields.LastModified, value)
   /** Set Last-Modified header by Date */
-  def lastModified_=(value: Date) { lastModified = Message.httpDateFormat(value) }
+  def lastModified_=(value: Date): Unit = {
+    lastModified = Message.httpDateFormat(value)
+  }
 
   /** Get Location header */
-  def location: Option[String] = Option(headers.get(Fields.Location))
+  def location: Option[String] = headerMap.get(Fields.Location)
   /** Set Location header */
-  def location_=(value: String) { headers.set(Fields.Location, value) }
+  def location_=(value: String): Unit = headerMap.set(Fields.Location, value)
 
   /** Get media-type from Content-Type header */
   def mediaType: Option[String] =
@@ -258,7 +263,7 @@ abstract class Message {
    * Set media-type in Content-Type header.  Charset and parameter values are
    * preserved, though may not be appropriate for the new media type.
    */
-  def mediaType_=(value: String) {
+  def mediaType_=(value: String): Unit = {
     contentType match {
       case Some(contentType) =>
         val parts = StringUtils.split(contentType, ";", 2)
@@ -273,36 +278,38 @@ abstract class Message {
   }
 
   /** Get Referer [sic] header */
-  def referer: Option[String] = Option(headers.get(Fields.Referer))
+  def referer: Option[String] = headerMap.get(Fields.Referer)
   /** Set Referer [sic] header */
-  def referer_=(value: String) { headers.set(Fields.Referer, value) }
+  def referer_=(value: String): Unit = headerMap.set(Fields.Referer, value)
 
   /** Get Retry-After header */
-  def retryAfter: Option[String] = Option(headers.get(Fields.RetryAfter))
+  def retryAfter: Option[String] = headerMap.get(Fields.RetryAfter)
   /** Set Retry-After header */
-  def retryAfter_=(value: String) { headers.set(Fields.RetryAfter, value) }
+  def retryAfter_=(value: String): Unit = headerMap.set(Fields.RetryAfter, value)
   /** Set Retry-After header by seconds */
-  def retryAfter_=(value: Long) { retryAfter = value.toString }
+  def retryAfter_=(value: Long): Unit = {
+    retryAfter = value.toString
+  }
 
   /** Get Server header */
-  def server: Option[String] = Option(headers.get(Fields.Server))
+  def server: Option[String] = headerMap.get(Fields.Server)
   /** Set Server header */
-  def server_=(value: String) { headers.set(Fields.Server, value) }
+  def server_=(value: String): Unit = headerMap.set(Fields.Server, value)
 
   /** Get User-Agent header */
-  def userAgent: Option[String] = Option(headers.get(Fields.UserAgent))
+  def userAgent: Option[String] = headerMap.get(Fields.UserAgent)
   /** Set User-Agent header */
-  def userAgent_=(value: String) { headers.set(Fields.UserAgent, value) }
+  def userAgent_=(value: String): Unit = headerMap.set(Fields.UserAgent, value)
 
   /** Get WWW-Authenticate header */
-  def wwwAuthenticate: Option[String] = Option(headers.get(Fields.WwwAuthenticate))
+  def wwwAuthenticate: Option[String] = headerMap.get(Fields.WwwAuthenticate)
   /** Set WWW-Authenticate header */
-  def wwwAuthenticate_=(value: String) { headers.set(Fields.WwwAuthenticate, value) }
+  def wwwAuthenticate_=(value: String): Unit = headerMap.set(Fields.WwwAuthenticate, value)
 
   /** Get X-Forwarded-For header */
-  def xForwardedFor: Option[String] = Option(headers.get("X-Forwarded-For"))
+  def xForwardedFor: Option[String] = headerMap.get("X-Forwarded-For")
   /** Set X-Forwarded-For header */
-  def xForwardedFor_=(value: String) { headers.set("X-Forwarded-For", value) }
+  def xForwardedFor_=(value: String): Unit = headerMap.set("X-Forwarded-For", value)
 
   /**
    * Check if X-Requested-With contains XMLHttpRequest, usually signalling a
@@ -310,9 +317,8 @@ abstract class Message {
    * requests specially.  For example, an endpoint might render JSON or XML
    * instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
    */
-  def isXmlHttpRequest = {
-    Option(headers.get("X-Requested-With")) exists { _.toLowerCase.contains("xmlhttprequest") }
-  }
+  def isXmlHttpRequest: Boolean =
+    headerMap.get("X-Requested-With").exists { _.toLowerCase.contains("xmlhttprequest") }
 
   /** Get length of content. */
   def length: Int = getContent.readableBytes
@@ -331,13 +337,13 @@ abstract class Message {
   def getContentString(): String = contentString
 
   /** Set the content as a string. */
-  def contentString_=(value: String) {
+  def contentString_=(value: String): Unit = {
     if (value != "")
       setContent(BufChannelBuffer(Buf.Utf8(value)))
     else
       setContent(ChannelBuffers.EMPTY_BUFFER)
   }
-  def setContentString(value: String) { contentString = value }
+  def setContentString(value: String): Unit = contentString = value
 
   /**
    * Use content as InputStream.  The underlying channel buffer's reader
@@ -375,9 +381,7 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def write(string: String): Unit = {
-    write(Buf.Utf8(string))
-  }
+  def write(string: String): Unit = write(Buf.Utf8(string))
 
   /**
    * Append a Buf to content.
@@ -403,9 +407,7 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def write(bytes: Array[Byte]): Unit = {
-    write(Buf.ByteArray.Shared(bytes))
-  }
+  def write(bytes: Array[Byte]): Unit = write(Buf.ByteArray.Shared(bytes))
 
   /**
    * Append content via an OutputStream.
@@ -440,16 +442,15 @@ abstract class Message {
   }
 
   /** Clear content (set to ""). */
-  def clearContent() {
-    setContent(ChannelBuffers.EMPTY_BUFFER)
-  }
+  def clearContent(): Unit = setContent(ChannelBuffers.EMPTY_BUFFER)
 
   /** End the response stream. */
-  def close() = writer.close()
+  def close(): Future[Unit] = writer.close()
 
   private[http] def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
 
-  protected[finagle] def headers(): HttpHeaders =
+  @deprecated("Use headerMap instead", "2017-01-24")
+  protected def headers(): HttpHeaders =
     httpMessage.headers()
 
   @deprecated("Use content instead", "2017-01-23")

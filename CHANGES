@@ -33,6 +33,9 @@ Breaking API Changes
     always throwing an `IllegalStateException`. Existing users of the `write(..)` methods
     on chunked messages should use the `Writer` directly. ``RB_ID=900091``
 
+  * fingle-base-http: `HeaderMap.getAll(key)` now returns a `Seq[String]` as opposed to a
+    `Iterable[String]`. ``RB_ID=905019``
+
   * finagle-core: The ChannelTransport implementations which transforms a Netty pipeline into
     a finagle Transport[Req, Rep] have been specialized to Transport[Any, Any] to avoid the
     illusion of a runtime checked cast. Transport.cast has been changed to receive either a
@@ -57,6 +60,9 @@ Deprecations
 
   * finagle-base-http: Deprecate `c.t.f.http.Message.ContentTypeWwwFrom`.
     Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=901041``
+
+  * finagle-base-http: Deprecate `c.t.f.http.Message.headers()`. Use
+    `c.t.f.http.Message.headerMap` instead. ``RB_ID=905019``
 
   * finagle-base-http: Deprecate the lazy `response: Response` field on the Request type.
     This field is potentially hazardous as it's not necessarily the Response that will
