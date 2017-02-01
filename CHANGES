@@ -58,6 +58,13 @@ Breaking API Changes
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-base-http: Deprecate `c.t.f.http.MapHeaderMap` as it will
+    soon be private. Use `c.t.f.http.HeaderMap.apply(..)` to get a HeaderMap
+    instance. ``RB_ID=906497``
+
+  * finagle-base-http: Deprecate `c.t.f.http.HeaderMap += (String, Date)`.
+    Use `c.t.f.http.HeaderMap.set(String, Date)` instead. ``RB_ID=906497``
+
   * finagle-base-http: Deprecate `c.t.f.http.Message.ContentTypeWwwFrom`.
     Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=901041``
 

@@ -64,6 +64,7 @@ abstract class HeaderMap
    * Set or replace a header, as in [[+=((String, String))]],
    * but with standard formatting for dates in HTTP headers.
    */
+  @deprecated("Use `.set(String, Date)` instead", "2017-02-01")
   def += (kv: (String, Date)): HeaderMap =
     += ((kv._1, HeaderMap.format(kv._2)))
 
@@ -79,6 +80,7 @@ private[finagle] object HeaderValuePair {
 }
 
 /** Mutable-Map-backed [[HeaderMap]] */
+@deprecated("This is becoming private. Use `HeaderMap.apply(..)` instead.", "2017-02-01")
 class MapHeaderMap extends HeaderMap {
 
   private[this] val underlying = mutable.Map.empty[String, Vector[HeaderValuePair]]
@@ -139,6 +141,7 @@ class MapHeaderMap extends HeaderMap {
 }
 
 object MapHeaderMap {
+  @deprecated("This is becoming private. Use `HeaderMap.apply(..)` instead.", "2017-02-01")
   def apply(headers: Tuple2[String, String]*): MapHeaderMap = {
     val tmp = new MapHeaderMap
     headers.foreach(t => tmp.add(t._1, t._2))
