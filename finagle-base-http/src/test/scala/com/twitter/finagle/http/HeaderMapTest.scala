@@ -4,7 +4,6 @@ import java.util.Date
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
 @RunWith(classOf[JUnitRunner])
 class HeaderMapTest extends FunSuite {
 
@@ -22,7 +21,7 @@ class HeaderMapTest extends FunSuite {
 
   test("get") {
     val request = Request()
-    request.headers.add("Host", "api.twitter.com")
+    request.headers.set("Host", "api.twitter.com")
 
     assert(request.headerMap.get("Host")    == Some("api.twitter.com"))
     assert(request.headerMap.get("HOST")    == Some("api.twitter.com"))
@@ -57,17 +56,21 @@ class HeaderMapTest extends FunSuite {
     request.headers.add("Cookie", "1")
     request.headers.add("Cookie", "2")
 
-    assert(request.headerMap.iterator.toList.sorted == ("Cookie", "1") :: ("Cookie", "2") :: Nil)
+    assert(
+      request.headerMap.iterator.toList.sorted ==
+        ("Cookie", "1") :: ("Cookie", "2") :: ("Host", "") :: Nil
+    )
   }
 
   test("keys") {
     val request = Request()
     request.headers.add("Cookie", "1")
     request.headers.add("Cookie", "2")
+    val expectedHeadersList = List("Host", "Cookie")
 
-    assert(request.headerMap.keys.toList == List("Cookie"))
-    assert(request.headerMap.keySet.toList == List("Cookie"))
-    assert(request.headerMap.keysIterator.toList == List("Cookie"))
+    assert(request.headerMap.keys.toList == expectedHeadersList)
+    assert(request.headerMap.keySet.toList == expectedHeadersList)
+    assert(request.headerMap.keysIterator.toList == expectedHeadersList)
   }
 
   test("contains") {

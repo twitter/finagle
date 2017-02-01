@@ -1,5 +1,9 @@
 package com.twitter.finagle.http
 
+import java.net.InetSocketAddress
+
+import com.twitter.io.{Buf, BufReader}
+import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMethod, HttpVersion}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -74,6 +78,27 @@ class RequestTest extends FunSuite {
 
     val actual = request.encodeString()
     assert(actual == expected)
+  }
+
+  test("Default Host header for HTTP_1.1") {
+    Seq(Request(),
+      Request(Version.Http11, Method.Get, "/"),
+      Request(Method.Get, "/"),
+      Request("/"),
+      Request("/", "the_best_framework" -> "finagle"),
+      Request("the_best_framework" -> "finagle")
+    ).foreach { request =>
+      assert(request.headers.get("Host") == "")
+    }
+  }
+
+  test("Host header must not be rewritten by constructor") {
+    val httpReq = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    val expectedHeader = "twitter.com"
+    httpReq.headers().set("Host", expectedHeader)
+
+    val request = Request(httpReq, BufReader(Buf.Empty), new InetSocketAddress(0))
+    assert(request.headers().get("Host") == expectedHeader)
   }
 
   test("decode") {
