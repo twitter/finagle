@@ -6,6 +6,10 @@ import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import org.openjdk.jmh.annotations.{BenchmarkMode, Measurement, Warmup, _}
 
+/**
+ * Note: These tests use JMH's single shot because a BufReader
+ * is stateful.
+ */
 @State(Scope.Benchmark)
 class BufReaderBenchmark extends StdBenchAnnotations {
 
