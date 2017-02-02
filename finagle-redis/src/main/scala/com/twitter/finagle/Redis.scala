@@ -68,7 +68,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected type Out = Buf
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty4Transporter(None /* no Framer */, params)
+      Netty4Transporter.framedBuf(None /* no Framer */, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(

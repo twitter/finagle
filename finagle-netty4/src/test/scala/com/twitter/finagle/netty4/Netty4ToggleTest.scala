@@ -20,7 +20,7 @@ class Netty4ToggleTest extends FunSuite {
     Netty4Listener(pipeline =>
       checkReceiveBuffer(pipeline, isPooled = false), Stack.Params.empty)
 
-    Netty4Transporter(pipeline =>
+    Netty4Transporter.raw(pipeline =>
       checkReceiveBuffer(pipeline, isPooled = false), Stack.Params.empty)
   }
 
@@ -29,7 +29,7 @@ class Netty4ToggleTest extends FunSuite {
       Netty4Listener(pipeline =>
         checkReceiveBuffer(pipeline, isPooled = true), Stack.Params.empty)
 
-      Netty4Transporter(pipeline =>
+      Netty4Transporter.raw(pipeline =>
         checkReceiveBuffer(pipeline, isPooled = true), Stack.Params.empty)
     }
   }

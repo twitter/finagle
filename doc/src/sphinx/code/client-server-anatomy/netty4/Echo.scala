@@ -27,7 +27,7 @@ object Echo extends Client[String, String] with Server[String, String] {
 
     //#transporter
     protected def newTransporter(): Transporter[String, String] =
-      Netty4Transporter(StringClientPipeline, params)
+      Netty4Transporter.rawTransporter(StringClientPipeline, params)
     //#transporter
 
     protected def newDispatcher(

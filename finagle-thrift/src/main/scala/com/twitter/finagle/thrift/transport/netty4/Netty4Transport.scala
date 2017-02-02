@@ -29,7 +29,7 @@ private[finagle] object Netty4Transport {
     }
 
   val Client: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]] = { params =>
-    Netty4Transporter(ClientPipelineInit(params), params)
+    Netty4Transporter.raw(ClientPipelineInit(params), params)
   }
 
   val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit =

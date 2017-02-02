@@ -28,7 +28,9 @@ object TransportImpl {
 
   val Netty4: TransportImpl = TransportImpl { params =>
     new Transporter[Packet, Packet] {
-      private[this] val bufTransporter = Netty4Transporter(Some(framerFactory), params)
+      private[this] val bufTransporter =
+        Netty4Transporter.framedBuf(Some(framerFactory), params)
+
       def apply(addr: SocketAddress): Future[Transport[Packet, Packet]] = {
         bufTransporter(addr).map { bufTransport =>
           bufTransport.map(_.toBuf, Packet.fromBuf)

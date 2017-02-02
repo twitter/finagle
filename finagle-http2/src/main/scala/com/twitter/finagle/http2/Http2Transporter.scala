@@ -30,7 +30,7 @@ private[http2] object Http2Transporter {
     // current http2 client implementation doesn't support
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
-    val underlying = Netty4Transporter[Any, Any](
+    val underlying = Netty4Transporter.raw[Any, Any](
       init(params),
       params + Netty4Transporter.Backpressure(false)
     )

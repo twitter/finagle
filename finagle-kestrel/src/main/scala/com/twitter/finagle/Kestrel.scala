@@ -47,7 +47,7 @@ object Kestrel {
        * @note Important! This is experimental and not yet tested in production!
        */
       val Netty4 = KestrelImpl(
-        params => Netty4Transporter[Buf, Buf](Netty4ClientFramer, params))
+        params => Netty4Transporter.raw(Netty4ClientFramer, params))
 
       private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.kestrel.UseNetty4"
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)

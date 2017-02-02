@@ -105,10 +105,13 @@ private[finagle] object Netty4Transporter {
   }
 
   /**
-   * transporter constructor for protocols that need direct access to the netty pipeline
+   * `Transporter` constructor for protocols that need direct access to the netty pipeline
    * (ie; finagle-http)
+   *
+   * @note this factory method makes no assumptions about reference counting
+   *       of `ByteBuf` instances.
    */
-  def apply[In, Out](
+  def raw[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
     transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
@@ -119,10 +122,14 @@ private[finagle] object Netty4Transporter {
   }
 
   /**
-   * transporter constructor for protocols which are entirely implemented in
+   * `Transporter` constructor for protocols which are entirely implemented in
    * dispatchers (ie; finagle-mux, finagle-mysql) and expect c.t.io.Bufs
+   *
+   * @note this factory method will install the `DirectToHeapInboundHandler` which
+   *       copies all direct `ByteBuf`s to heap allocated `ByteBuf`s and frees the
+   *       direct buffer.
    */
-  def apply(
+  def framedBuf(
     framerFactory: Option[() => Framer],
     params: Stack.Params
   ): Transporter[Buf, Buf] = {

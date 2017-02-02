@@ -189,7 +189,7 @@ object Memcached extends finagle.Client[Command, Response]
        * @note Important! This is experimental and not yet tested in production!
        */
       val Netty4 = MemcachedImpl(
-        params => Netty4Transporter[Buf, Buf](Netty4ClientFramer, params),
+        params => Netty4Transporter.raw(Netty4ClientFramer, params),
         params => Netty4Listener[Buf, Buf](Netty4ServerFramer, params))
 
       private[this] val UseNetty4ToggleId: String =

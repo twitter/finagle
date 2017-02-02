@@ -48,7 +48,7 @@ object exp {
   }
 
   private[finagle] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
-    (params: Stack.Params) => { Netty4Transporter(ClientPipelineInit(params), params) }
+    (params: Stack.Params) => Netty4Transporter.raw(ClientPipelineInit(params), params)
 
   private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
     params: Stack.Params =>

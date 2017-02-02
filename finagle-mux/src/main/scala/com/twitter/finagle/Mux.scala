@@ -90,7 +90,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4 = MuxImpl(
-        params => Netty4Transporter(CopyingFramer, params),
+        params => Netty4Transporter.raw(CopyingFramer, params),
         params => Netty4Listener(CopyingFramer, params))
 
       /**
@@ -101,7 +101,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4RefCountingControl = MuxImpl(
-        params => Netty4Transporter(
+        params => Netty4Transporter.raw(
           RefcountControlPlaneFramer,
           params,
           transportFactory = new RefCountingTransport(_)
