@@ -199,7 +199,11 @@ object Finagle extends Build {
       sharedSettings ++
       unidocSettings ++ Seq(
         unidocProjectFilter in (ScalaUnidoc, unidoc) :=
-          inAnyProject -- inProjects(finagleExample)
+          inAnyProject -- inProjects(
+            finagleBenchmark, 
+            finagleBenchmarkThrift, 
+            finagleExample
+          )
       )
   ).aggregate(projectList: _*)
 
