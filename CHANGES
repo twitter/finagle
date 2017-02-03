@@ -112,6 +112,9 @@ Runtime Behavior Changes
     events are caught lower in the pipeline and should not bubble up to the level of this
     filter. ``RB_ID=899895``
 
+  * finagle-netty4: DirectToHeapHandler is now aware of `ByteBufHolder` types hence can copy
+    them on to heap. ``RB_ID=906602``
+
   * finagle-redis: Transport implementation is now based on Netty 4 (instead of Netty 3).
     ``RB_ID=895728``
 
