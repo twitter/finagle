@@ -67,7 +67,7 @@ trait StackRegistry {
     duplicates.values.flatten.toSeq
   }
 
-  /** Registers an `addr` and `stk`. */
+  /** Registers an `addr`, `Stack`, and `Params`. */
   def register(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
     addEntries(entry)
@@ -86,10 +86,10 @@ trait StackRegistry {
   /**
    * Utility for getting the registry key's prefix for an [[Entry]].
    */
-  def registryPrefix(entry: Entry): Seq[String] =
+  protected def registryPrefix(entry: Entry): Seq[String] =
     Seq(registryName, entry.protocolLibrary, entry.name, entry.addr)
 
-  /** Unregisters an `addr` and `stk`. */
+  /** Unregisters an `addr`, `Stack`, and `Params`. */
   def unregister(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
     synchronized {
@@ -111,27 +111,33 @@ trait StackRegistry {
 
   private[this] def addEntries(entry: Entry): Unit = {
     val prefix = registryPrefix(entry)
-    val gRegistry = GlobalRegistry.get
     entry.modules.foreach { case Module(paramName, _, reflected) =>
       reflected.foreach { case (field, value) =>
         val key = prefix ++ Seq(paramName, field)
-        if (gRegistry.put(key, value).isEmpty)
-          numEntries.incrementAndGet()
+        add(key, value)
       }
     }
   }
 
+  protected[this] def add(key: Seq[String], value: String): Unit = {
+    if (GlobalRegistry.get.put(key, value).isEmpty)
+      numEntries.incrementAndGet()
+  }
+
   private[this] def removeEntries(entry: Entry): Unit = {
     val prefix = registryPrefix(entry)
-    val gRegistry = GlobalRegistry.get
     val name = entry.name
     entry.modules.foreach { case Module(paramName, _, reflected) =>
-      reflected.foreach { case (field, value) =>
+      reflected.foreach { case (field, _) =>
         val key = prefix ++ Seq(paramName, field)
-        if (gRegistry.remove(key).isDefined)
-          numEntries.decrementAndGet()
+        remove(key)
       }
     }
+  }
+
+  protected[this] def remove(key: Seq[String]): Unit = {
+    if (GlobalRegistry.get.remove(key).isDefined)
+      numEntries.decrementAndGet()
   }
 
   /** Returns the number of entries */

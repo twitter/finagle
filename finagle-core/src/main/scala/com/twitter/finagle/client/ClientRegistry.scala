@@ -1,10 +1,12 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import com.twitter.finagle.util.{StackRegistry, Showable}
-import com.twitter.finagle._
+import com.twitter.finagle.util.StackRegistry.Entry
+import com.twitter.finagle.util.{Showable, StackRegistry}
+import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.Level
 
@@ -56,12 +58,34 @@ private[twitter] object ClientRegistry extends StackRegistry {
       initialResolutionTime.incr((Time.now - start).inMilliseconds.toInt)
     }
   }
+
+  /**
+   * @param key will be appended to the prefix created by [[registryPrefix]].
+   *            Cannot be empty.
+   */
+  private[client] def register(entry: Entry, key: Seq[String], value: String): Unit = {
+    require(key.nonEmpty, "key cannot be empty")
+    add(registryPrefix(entry) ++ key, value)
+  }
+
+  /**
+   * @param key will be appended to the prefix created by [[registryPrefix]].
+   */
+  private[client] def unregisterPrefixes(entry: Entry, key: Seq[String]): Unit = {
+    if (key.isEmpty) return
+    val prefix = registryPrefix(entry) ++ key
+    val registry = GlobalRegistry.get
+    registry.iterator.foreach { entry =>
+      if (entry.key.startsWith(prefix))
+        remove(entry.key)
+    }
+  }
 }
 
 private[finagle] object RegistryEntryLifecycle {
   val role = Stack.Role("RegistryEntryLifecycle")
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Stack.Module[ServiceFactory[Req, Rep]] {
-    val role = RegistryEntryLifecycle.role
+    val role: Stack.Role = RegistryEntryLifecycle.role
 
     val description: String = "Maintains the ClientRegistry for the stack"
     def parameters: Seq[Stack.Param[_]] = Seq(

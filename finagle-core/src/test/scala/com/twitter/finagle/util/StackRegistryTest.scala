@@ -47,14 +47,19 @@ class StackRegistryTest extends FunSuite {
   }
 
   test("StackRegistry registryPrefix includes expected keys") {
-    val reg = new StackRegistry { def registryName: String = "reg_name" }
-    val params = Stack.Params.empty +
-      param.Label("a_label") +
-      param.ProtocolLibrary("a_protocol_lib")
-    val entry = StackRegistry.Entry("an_addr", stack.nilStack, params)
-    val prefix = reg.registryPrefix(entry)
-    assert(prefix ==
-      Seq("reg_name", "a_protocol_lib", "a_label", "an_addr"))
+    new StackRegistry {
+      def registryName: String = "reg_name"
+
+      // we run the test inside a subclass to have access to the protected
+      // `registryPrefix` method.
+      private val params = Stack.Params.empty +
+        param.Label("a_label") +
+        param.ProtocolLibrary("a_protocol_lib")
+      private val entry = StackRegistry.Entry("an_addr", stack.nilStack, params)
+      private val prefix = registryPrefix(entry)
+      assert(prefix ==
+        Seq("reg_name", "a_protocol_lib", "a_label", "an_addr"))
+    }
   }
 
   test("StackRegistry should register stacks and params properly") {

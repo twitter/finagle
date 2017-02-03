@@ -252,7 +252,7 @@ class MethodBuilderTest
         }.toSet
 
       // test a "vanilla" one
-      methodBuilder.newService("vanilla")
+      val vanillaSvc = methodBuilder.newService("vanilla")
       val vanillaEntries = Set(
         Entry(key("vanilla", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/vanilla"),
         Entry(key("vanilla", "retry"), "DefaultResponseClassifier")
@@ -260,7 +260,7 @@ class MethodBuilderTest
       assert(filteredRegistry == vanillaEntries)
 
       // test with a retry policy and timeouts
-      methodBuilder
+      val sundaeSvc = methodBuilder
         .withTimeout.total(10.seconds)
         .withTimeout.perRequest(1.second)
         .withRetry.forPolicy(RetryPolicy.none)
@@ -272,6 +272,14 @@ class MethodBuilderTest
         Entry(key("sundae", "timeout", "per_request"), "1.seconds")
       )
       filteredRegistry should contain theSameElementsAs (vanillaEntries ++ sundaeEntries)
+
+      val vanillaClose = vanillaSvc.close()
+      assert(!vanillaClose.isDefined)
+      filteredRegistry should contain theSameElementsAs sundaeEntries
+
+      Await.ready(sundaeSvc.close(), 5.seconds)
+      assert(vanillaClose.isDefined)
+      assert(Set.empty == filteredRegistry)
     }
   }
 
@@ -310,6 +318,56 @@ class MethodBuilderTest
         names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
     }
     assert(!failureCounters)
+  }
+
+  test("underlying service is reference counted") {
+    val svc: Service[Int, Int] = new Service[Int, Int] {
+      private[this] var closed = false
+      def apply(req: Int): Future[Int] = ???
+      override def close(deadline: Time): Future[Unit] = {
+        closed = true
+        Future.Done
+      }
+      override def status: Status =
+        if (closed) Status.Closed else Status.Open
+    }
+    val svcFac: ServiceFactory[Int, Int] = new ServiceFactory[Int, Int] {
+      def apply(conn: ClientConnection): Future[Service[Int, Int]] =
+        Future.value(svc)
+      def close(deadline: Time): Future[Unit] =
+        svc.close(deadline)
+    }
+    val stk = Stack.Leaf(Stack.Role("test"), svcFac)
+    val stackClient = TestStackClient(stk, Stack.Params.empty)
+    val methodBuilder = MethodBuilder.from("refcounts", stackClient)
+
+    val m1 = methodBuilder.newService("method1")
+    val m2 = methodBuilder.newService("method2")
+    assert(m1.isAvailable)
+    assert(m2.isAvailable)
+    assert(svc.isAvailable)
+
+    // closing 1 method should not touch the other
+    val m1Close = m1.close()
+    assert(!m1Close.isDefined)
+    assert(!m1.isAvailable)
+    intercept[ServiceClosedException] { Await.result(m1(1), 5.seconds) }
+    assert(m2.isAvailable)
+    assert(svc.isAvailable)
+
+    // validate that a second close of the same method does nothing
+    assert(!m1Close.isDefined)
+    assert(!m1.isAvailable)
+    assert(m2.isAvailable)
+    assert(svc.isAvailable)
+
+    // validate that closing the last method closes the underlying service.
+    Await.ready(m2.close(), 5.seconds)
+    assert(m1Close.isDefined)
+    assert(!m1.isAvailable)
+    assert(!m2.isAvailable)
+    intercept[ServiceClosedException] { Await.result(m2(1), 5.seconds) }
+    assert(!svc.isAvailable)
   }
 
 }

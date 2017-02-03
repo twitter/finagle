@@ -54,8 +54,9 @@ class MethodBuilderTest extends FunSuite {
     // check we get a response for a client with a long timeout
     await(long(req))
 
-    await(short.close())
+    val shortClose = short.close()
     await(long.close())
+    await(shortClose)
     await(server.close())
   }
 
@@ -116,8 +117,9 @@ class MethodBuilderTest extends FunSuite {
     // check we get a response for a client with a long timeout
     await(long(req))
 
-    await(short.close())
+    val shortClose = short.close()
     await(long.close())
+    await(shortClose)
     await(server.close())
   }
 

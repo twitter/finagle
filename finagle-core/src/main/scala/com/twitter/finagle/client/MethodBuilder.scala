@@ -1,10 +1,11 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Filter, Service, ServiceFactory, Stack, param}
+import com.twitter.finagle._
 import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.util.StackRegistry
-import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.{Future, Promise, Time}
+import java.util.concurrent.atomic.AtomicBoolean
 
 private[finagle] object MethodBuilder {
 
@@ -29,12 +30,18 @@ private[finagle] object MethodBuilder {
 
     val needsTotalTimeoutModule =
       stackClient.stack.contains(TimeoutFilter.totalTimeoutRole)
+
     val service: Service[Req, Rep] = stackClient
       .withStack(modified(stackClient.stack))
       .withParams(stackClient.params)
       .newService(dest, param.Label.Default)
+    // use reference counting so that the underlying Service can
+    // be safely shared across methods and a close of one doesn't
+    // effect the others.
+    val refCounted = new RefcountedClosable(service)
+
     new MethodBuilder[Req, Rep](
-      service,
+      refCounted,
       clientName,
       dest,
       stackClient,
@@ -68,6 +75,9 @@ private[finagle] object MethodBuilder {
 
   private val LogicalScope = "logical"
 
+  /** Used by the `ClientRegistry` */
+  private[client] val RegistryKey = "methods"
+
   // the `StatsReceiver` used is already scoped to `$clientName/$methodName/logical`.
   // this omits the pending gauge as well as failures/sourcedfailures details.
   private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
@@ -81,7 +91,7 @@ private[finagle] object MethodBuilder {
  * '''Experimental:''' This API is under construction.
  */
 private[finagle] class MethodBuilder[Req, Rep] private (
-    service: Service[Req, Rep],
+    refCounted: RefcountedClosable[Service[Req, Rep]],
     clientName: String,
     dest: String,
     stackClient: StackClient[Req, Rep],
@@ -158,7 +168,9 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    */
   def newService(name: String): Service[Req, Rep] = {
     addToRegisty(name)
-    filter(name).andThen(service)
+    val ret = filter(name).andThen(wrappedService(name))
+    refCounted.open()
+    ret
   }
 
   //
@@ -167,7 +179,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
 
   private[client] def withConfig(config: Config[Req, Rep]): MethodBuilder[Req, Rep] =
     new MethodBuilder(
-      self.service,
+      self.refCounted,
       self.clientName,
       self.dest,
       self.stackClient,
@@ -195,6 +207,12 @@ private[finagle] class MethodBuilder[Req, Rep] private (
       .andThen(withTimeout.perRequestFilter)
   }
 
+  private[this] def registryEntry(): StackRegistry.Entry =
+    StackRegistry.Entry(dest, stackClient.stack, params)
+
+  private[this] def registryKeyPrefix(name: String): Seq[String] =
+    Seq(RegistryKey, name)
+
   // clients get registered at:
   // client/$protocol_lib/$client_name/$dest_addr
   //
@@ -207,18 +225,40 @@ private[finagle] class MethodBuilder[Req, Rep] private (
   //   timeout/total: 100.milliseconds
   //   timeout/per_request: 30.milliseconds
   private[this] def addToRegisty(name: String): Unit = {
-    val registry = GlobalRegistry.get
-    val entry = StackRegistry.Entry(dest, stackClient.stack, params)
-    val methodPrefix = ClientRegistry.registryPrefix(entry) ++ Seq("methods", name)
-
-    registry.put(methodPrefix :+ "statsReceiver", statsReceiver(name).toString)
+    val entry = registryEntry()
+    val keyPrefix = registryKeyPrefix(name)
+    ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
     withTimeout.registryEntries.foreach { case (suffix, value) =>
-      registry.put(methodPrefix ++ suffix, value)
+      ClientRegistry.register(entry, keyPrefix ++ suffix, value)
     }
     withRetry.registryEntries.foreach { case (suffix, value) =>
-      registry.put(methodPrefix ++ suffix, value)
+      ClientRegistry.register(entry, keyPrefix ++ suffix, value)
     }
   }
+
+  private[this] def wrappedService(name: String): Service[Req, Rep] =
+    new ServiceProxy[Req, Rep](refCounted.get) {
+      private[this] val isClosed = new AtomicBoolean(false)
+      private[this] val closedP = new Promise[Unit]()
+
+      override def apply(request: Req): Future[Rep] =
+        if (isClosed.get) Future.exception(new ServiceClosedException())
+        else super.apply(request)
+
+      override def status: Status =
+        if (isClosed.get) Status.Closed
+        else refCounted.get.status
+
+      override def close(deadline: Time): Future[Unit] = {
+        if (isClosed.compareAndSet(false, true)) {
+          // remove our method builder's entries from the registry
+          ClientRegistry.unregisterPrefixes(registryEntry(), registryKeyPrefix(name))
+          // and decrease the ref count
+          closedP.become(refCounted.close())
+        }
+        closedP
+      }
+    }
 
   private[this] def statsFilter(name: String, stats: StatsReceiver): StatsFilter[Req, Rep] =
     new StatsFilter[Req, Rep](
