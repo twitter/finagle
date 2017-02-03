@@ -6,6 +6,8 @@ import java.io.File
  * KeyCredentials represent the items necessary for this configured
  * TLS [[Engine]] to authenticate itself to a remote peer. This
  * generally includes an X.509 certificate and a private key.
+ *
+ * @note Java users: See [[KeyCredentialsConfig]].
  */
 private[finagle] sealed trait KeyCredentials
 

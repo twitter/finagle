@@ -12,6 +12,8 @@ package com.twitter.finagle.ssl
  *
  * @note Not all engine factories provide support for client
  * authentication, especially with some underlying native engines.
+ *
+ * @note Java users: See [[ClientAuthConfig]].
  */
 private[finagle] sealed trait ClientAuth
 

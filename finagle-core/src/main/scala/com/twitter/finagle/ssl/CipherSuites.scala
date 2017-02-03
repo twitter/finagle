@@ -5,6 +5,8 @@ package com.twitter.finagle.ssl
  * enabled for a TLS [[Engine]]. A cipher suite, for protocols prior to TLSv1.3, is a
  * combination of various algorithms for items such as key exchange, authentication
  * type, bulk encryption algorithm, and message authentication code.
+ *
+ * @note Java users: See [[CipherSuitesConfig]].
  */
 private[finagle] sealed trait CipherSuites
 

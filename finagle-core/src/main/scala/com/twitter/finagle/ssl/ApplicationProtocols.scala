@@ -8,6 +8,7 @@ package com.twitter.finagle.ssl
  * @note Currently supported values include IANA Registered Application-Layer Protocol
  * Negotiation (ALPN) IDs and "spdy/3.1" which is commonly used with Next Protocol
  * Negotiation (NPN).
+ * @note Java users: See [[ApplicationProtocolsConfig]].
  */
 private[finagle] sealed trait ApplicationProtocols
 
