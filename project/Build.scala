@@ -426,7 +426,7 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       guavaLib
     )
-  ).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleToggle)
+  ).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleHttp2, finagleToggle)
 
   lazy val finagleBaseHttp = Project(
     id = "finagle-base-http",
@@ -470,7 +470,7 @@ object Finagle extends Build {
       util("logging"),
       nettyLib
     ) ++ netty4Libs
-  ).dependsOn(finagleCore, finagleHttp % "test->test;compile->compile", finagleNetty4, finagleNetty4Http)
+  ).dependsOn(finagleCore, finagleNetty4, finagleNetty4Http, finagleBaseHttp)
 
   lazy val finagleNative = Project(
     id = "finagle-native",

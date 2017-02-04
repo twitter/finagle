@@ -2,7 +2,7 @@ package com.twitter.finagle.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.{DynamicTimeout, StackClient}
-import com.twitter.finagle.http2.Http2
+import com.twitter.finagle.Http.Http2
 import com.twitter.finagle.memcached.protocol.{NoOp, Quit}
 import com.twitter.finagle.mux
 import com.twitter.finagle.server.StackServer

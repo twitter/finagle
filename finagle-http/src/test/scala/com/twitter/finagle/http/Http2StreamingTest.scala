@@ -1,23 +1,19 @@
-package com.twitter.finagle.http2
+package com.twitter.finagle.http
 
-import com.twitter.finagle.Http
+import com.twitter.finagle
 import com.twitter.finagle.Http.HttpImpl
-import com.twitter.finagle.http.AbstractStreamingTest
 import com.twitter.finagle.http.StreamingTest.Modifier
 import com.twitter.finagle.http2.param.PriorKnowledge
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Closable, Promise}
 import java.util.concurrent.atomic.AtomicBoolean
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class Http2StreamingTest extends AbstractStreamingTest {
-  def impl: HttpImpl = Http2[HttpImpl]
-  override def configureClient: Http.Client => Http.Client  = { client =>
+  def impl: HttpImpl = finagle.Http.Http2[HttpImpl]
+  override def configureClient: finagle.Http.Client => finagle.Http.Client  = { client =>
     client.configured(PriorKnowledge(true))
   }
-  override def configureServer: Http.Server => Http.Server  = { server =>
+  override def configureServer: finagle.Http.Server => finagle.Http.Server  = { server =>
     server.configured(PriorKnowledge(true))
   }
 

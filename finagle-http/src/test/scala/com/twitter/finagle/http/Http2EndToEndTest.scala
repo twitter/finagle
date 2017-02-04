@@ -1,7 +1,6 @@
-package com.twitter.finagle.http2
+package com.twitter.finagle.http
 
 import com.twitter.finagle
-import com.twitter.finagle.http.{AbstractEndToEndTest, Request, Response}
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.util.concurrent.atomic.AtomicBoolean
@@ -9,15 +8,11 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends AbstractEndToEndTest {
+class Http2EndToEndTest extends AbstractEndToEndTest {
   def implName: String = "netty4 http/2"
-  def clientImpl(): finagle.Http.Client =
-    finagle.Http.client
-      .configuredParams(Http2)
+  def clientImpl(): finagle.Http.Client = finagle.Http.client.configuredParams(finagle.Http.Http2)
 
-  def serverImpl(): finagle.Http.Server =
-    finagle.Http.server
-      .configuredParams(Http2)
+  def serverImpl(): finagle.Http.Server = finagle.Http.server.configuredParams(finagle.Http.Http2)
 
   // Stats test requires examining the upgrade itself.
   val shouldUpgrade = new AtomicBoolean(true)

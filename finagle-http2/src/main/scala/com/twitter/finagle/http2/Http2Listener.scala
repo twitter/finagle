@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.HttpServerCodec
 /**
  * Please note that the listener cannot be used for TLS yet.
  */
-private[http2] object Http2Listener {
+private[finagle] object Http2Listener {
 
   private[this] def sourceCodec(params: Stack.Params) = {
     val maxInitialLineSize = params[http.param.MaxInitialLineSize].size

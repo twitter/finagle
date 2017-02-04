@@ -12,7 +12,6 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4-http2',
     'finagle/finagle-core',
     'finagle/finagle-base-http',
-    'finagle/finagle-http',
     'finagle/finagle-netty4',
     'finagle/finagle-netty4-http',
     'util/util-cache',

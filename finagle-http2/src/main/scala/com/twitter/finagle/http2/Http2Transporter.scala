@@ -24,7 +24,7 @@ import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
 
-private[http2] object Http2Transporter {
+private[finagle] object Http2Transporter {
 
   def apply(params: Stack.Params): Transporter[Any, Any] = {
     // current http2 client implementation doesn't support

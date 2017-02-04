@@ -12,6 +12,7 @@ import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, Ser
 import com.twitter.finagle.http.netty.{
   Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter,Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.http2.{Http2Transporter, Http2Listener}
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -90,6 +91,15 @@ object Http extends Client[Request, Response] with HttpRichClient
       new Netty4ServerStreamTransport(_),
       Netty4HttpTransporter,
       Netty4HttpListener)
+
+  val Http2: Stack.Params = Stack.Params.empty + Http.HttpImpl(
+    new Netty4ClientStreamTransport(_),
+    new Netty4ServerStreamTransport(_),
+    Http2Transporter.apply _,
+    Http2Listener.apply _
+  ) + param.ProtocolLibrary("http/2")
+  // we disable failfast so that we can use regular requeueing on http2 stream
+  // acquisition failures
 
   private val protocolLibrary = param.ProtocolLibrary("http")
 

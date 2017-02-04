@@ -6,11 +6,8 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class HttpTest extends FunSuite {
 
   private def classifier(params: Stack.Params): ResponseClassifier =
