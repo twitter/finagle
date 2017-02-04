@@ -173,24 +173,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="benchmark"></a><a id="benchmark:benchmark"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#benchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../benchmark/index.html">
-              <span class="name">benchmark</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="builder"></a><a id="builder:builder"></a>
       <span class="permalink">
@@ -880,12 +862,6 @@ finagle clients and servers.
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerSetResolver.html" title="Investigate serverset resolver allocations when members are thrashing in zookeeper."></a>
-                        <a href="ServerSetResolver.html" title="Investigate serverset resolver allocations when members are thrashing in zookeeper.">
-                          ServerSetResolver
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="UserIdentity.html" title="Identity that represents the user a process is running as."></a>
                         <a href="UserIdentity.html" title="Identity that represents the user a process is running as.">
                           UserIdentity
@@ -940,24 +916,6 @@ finagle clients and servers.
       <span class="symbol">
         <a title="" href="../socks/index.html">
               <span class="name">socks</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../spdy/index.html">
-              <span class="name">spdy</span>
             </a>
       </span>
       
@@ -1339,42 +1297,6 @@ documentation for further details.
       </span>
       
       
-    </li><li name="com.twitter.finagle.serverset2.ServerSetResolver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ServerSetResolverextendsAnyRef"></a><a id="ServerSetResolver:ServerSetResolver"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/serverset2/index.html#ServerSetResolverextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Investigate serverset resolver allocations when members are thrashing in zookeeper." href="ServerSetResolver.html">
-              <span class="name">ServerSetResolver</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Investigate serverset resolver allocations when members are thrashing in zookeeper.</p><div class="fullcomment"><div class="comment cmt"><p>Investigate serverset resolver allocations when members are thrashing in zookeeper. Intended to
-be run before and after making a change to detect memory leaks or large differences in allocation
-patterns.</p><p>1. Run the server separately to isolate client allocations:
- ./pants run finagle/finagle-benchmark/src/main/scala:serverset-service</p><p>2. Run this client in sbt
-$ ./sbt
-&gt; project finagle-benchmark
-&gt; run ServerSetResolver -prof gc
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@State</span><span class="args">()</span>
-              
-                <span class="name">@Fork</span><span class="args">()</span>
-              
-                <span class="name">@OutputTimeUnit</span><span class="args">()</span>
-              
-                <span class="name">@Warmup</span><span class="args">()</span>
-              
-                <span class="name">@BenchmarkMode</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="com.twitter.finagle.serverset2.UserIdentity" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="UserIdentityextendsIdentity"></a><a id="UserIdentity:UserIdentity"></a>
       <span class="permalink">

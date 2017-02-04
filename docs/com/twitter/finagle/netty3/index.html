@@ -173,24 +173,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="benchmark"></a><a id="benchmark:benchmark"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#benchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../benchmark/index.html">
-              <span class="name">benchmark</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="builder"></a><a id="builder:builder"></a>
       <span class="permalink">
@@ -766,26 +748,12 @@ creates read-only ChannelBuffers based on Bufs.">
                           BufChannelBufferFactory
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="BufCodecBenchmark$.html" title=""></a>
-                        <a class="class" href="BufCodecBenchmark.html" title="Benchmarks various buffer wrappers in the presence of length
-encoded fields."></a>
-                        <a href="BufCodecBenchmark.html" title="Benchmarks various buffer wrappers in the presence of length
-encoded fields.">
-                          BufCodecBenchmark
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="ChannelBufferBuf$.html" title=""></a>
                         <a class="class" href="ChannelBufferBuf.html" title="A com.twitter.io.Buf wrapper for
 Netty ChannelBuffers."></a>
                         <a href="ChannelBufferBuf.html" title="A com.twitter.io.Buf wrapper for
 Netty ChannelBuffers.">
                           ChannelBufferBuf
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ChannelBufferBufBenchmark.html" title=""></a>
-                        <a href="ChannelBufferBufBenchmark.html" title="">
-                          ChannelBufferBufBenchmark
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -982,24 +950,6 @@ finagle clients and servers.
       <span class="symbol">
         <a title="" href="../socks/index.html">
               <span class="name">socks</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../spdy/index.html">
-              <span class="name">spdy</span>
             </a>
       </span>
       
@@ -1316,36 +1266,10 @@ package netty3 can move into its own package, so that only the
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.netty3.BufCodecBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="BufCodecBenchmarkextendsStdBenchAnnotations"></a><a id="BufCodecBenchmark:BufCodecBenchmark"></a>
+              <ol><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ChannelBufferBufextendsBufwithBuf.Indexed"></a><a id="ChannelBufferBuf:ChannelBufferBuf"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#BufCodecBenchmarkextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Benchmarks various buffer wrappers in the presence of length
-encoded fields." href="BufCodecBenchmark.html">
-              <span class="name">BufCodecBenchmark</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Benchmarks various buffer wrappers in the presence of length
-encoded fields.</p><div class="fullcomment"><div class="comment cmt"><p>Benchmarks various buffer wrappers in the presence of length
-encoded fields. This is useful since many of our protocols
-(e.g. Mux) make heavy use of length encoding.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@State</span><span class="args">()</span>
-              
-        </dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ChannelBufferBufextendsBuf"></a><a id="ChannelBufferBuf:ChannelBufferBuf"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#ChannelBufferBufextendsBuf" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#ChannelBufferBufextendsBufwithBuf.Indexed" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1357,7 +1281,7 @@ encoded fields. This is useful since many of our protocols
         <a title="A com.twitter.io.Buf wrapper for
 Netty ChannelBuffers." href="ChannelBufferBuf.html">
               <span class="name">ChannelBufferBuf</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> with <span class="extype" name="com.twitter.io.Buf.Indexed">Indexed</span></span>
       </span>
       
       <p class="shortcomment cmt">A <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a> wrapper for
@@ -1367,27 +1291,6 @@ Netty <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBu
 within <code>slice</code>s of a <code>ChannelBufferBuf</code> will modify the original wrapped
 <code>ChannelBuffer</code>. Similarly, modifications to the original buffer will be
 reflected in slices.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.ChannelBufferBufBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ChannelBufferBufBenchmarkextendsStdBenchAnnotations"></a><a id="ChannelBufferBufBenchmark:ChannelBufferBufBenchmark"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#ChannelBufferBufBenchmarkextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ChannelBufferBufBenchmark.html">
-              <span class="name">ChannelBufferBufBenchmark</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@State</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.ChannelBufferSnooper" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ChannelBufferSnooperextendsChannelSnooper"></a><a id="ChannelBufferSnooper:ChannelBufferSnooper"></a>
       <span class="permalink">
@@ -1576,24 +1479,6 @@ creates read-only ChannelBuffers based on <span class="extype" name="com.twitter
 <span class="extype" name="com.twitter.util.Buf">Buf</span>; no additional allocations are
 performed.
 </p></div></div>
-    </li><li name="com.twitter.finagle.netty3.BufCodecBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BufCodecBenchmark"></a><a id="BufCodecBenchmark:BufCodecBenchmark"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#BufCodecBenchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="BufCodecBenchmark$.html">
-              <span class="name">BufCodecBenchmark</span>
-            </a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ChannelBufferBuf"></a><a id="ChannelBufferBuf:ChannelBufferBuf"></a>
       <span class="permalink">

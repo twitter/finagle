@@ -242,7 +242,8 @@ and gives them a deterministic lifecycle.
         </dd><dt>Note</dt><dd><span class="cmt"><p>If your protocol manages ref-counting or if you are delegating ref-counting
       to application space you don't need this handler in your pipeline. Every
       other use case needs this handler or you will with very high probability
-      incur a direct buffer leak.</p></span></dd></dl><div class="toggleContainer block">
+      incur a direct buffer leak.</p></span>, <span class="cmt"><p>This handler recognizes both ByteBuf's and ByteBufHolder's (think of HTTP
+      messages extending ByteBufHolder's in Netty).</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

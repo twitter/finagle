@@ -191,24 +191,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.compat" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="compat"></a><a id="compat:compat"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#compat" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="compat/index.html">
-              <span class="name">compat</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -516,12 +498,6 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SafeHttpServerCodec.html" title="Convert exceptions to BadHttpRequests"></a>
-                        <a href="SafeHttpServerCodec.html" title="Convert exceptions to BadHttpRequests">
-                          SafeHttpServerCodec
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="SimpleElement.html" title=""></a>
                         <a href="SimpleElement.html" title="">
                           SimpleElement
@@ -551,6 +527,12 @@ its credentials from a provided CredentialSource...">
                         <a class="class" href="TlsFilter.html" title="Adds the host headers to for TLS-enabled requests."></a>
                         <a href="TlsFilter.html" title="Adds the host headers to for TLS-enabled requests.">
                           TlsFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="TooLongMessageException$.html" title=""></a>
+                        <a class="class" href="TooLongMessageException.html" title="The Message was too long to be handled correctly"></a>
+                        <a href="TooLongMessageException.html" title="The Message was too long to be handled correctly">
+                          TooLongMessageException
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
@@ -589,12 +571,15 @@ its credentials from a provided CredentialSource...">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MapHeaderMap</span><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 2017-02-01) This is becoming private. Use HeaderMap.apply(..) instead.">MapHeaderMap</span><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-01)</i> This is becoming private. Use <code>HeaderMap.apply(..)</code> instead.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -938,25 +923,6 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → MapLike → Builder → Growable</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.HeaderMap#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="+=(kv:(String,java.util.Date)):com.twitter.finagle.http.HeaderMap"></a><a id="+=((String,Date)):HeaderMap"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/MapHeaderMap.html#+=(kv:(String,java.util.Date)):com.twitter.finagle.http.HeaderMap" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="kv">kv: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.util.Date">Date</span>)</span>)</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Set or replace a header, as in <span class="extype" name="+=((String,">String))</span>,
-but with standard formatting for dates in HTTP headers.</p><div class="fullcomment"><div class="comment cmt"><p>Set or replace a header, as in <span class="extype" name="+=((String,">String))</span>,
-but with standard formatting for dates in HTTP headers.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
     </li><li name="scala.collection.generic.Growable#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="+=(elem1:A,elem2:A,elems:A*):Growable.this.type"></a><a id="+=((String,String),(String,String),(String,String)*):MapHeaderMap.this.type"></a>
       <span class="permalink">
@@ -1141,7 +1107,8 @@ but with standard formatting for dates in HTTP headers.
         <span class="name">add</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">Add a header but don't replace existing header(s).</p><div class="fullcomment"><div class="comment cmt"><p>Add a header but don't replace existing header(s).</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
+      <p class="shortcomment cmt">Adds a header but don't replace existing header(s).</p><div class="fullcomment"><div class="comment cmt"><p>Adds a header but don't replace existing header(s).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.HeaderMap#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap"></a><a id="add(String,Date):HeaderMap"></a>
       <span class="permalink">
@@ -1857,11 +1824,12 @@ but with standard formatting for dates in HTTP headers.
         <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → MapLike → GenMapLike</dd></dl></div>
+      <p class="shortcomment cmt">Retrieves the given header value wrapped with <code>Option</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the given header value wrapped with <code>Option</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a> → MapLike → GenMapLike</dd></dl></div>
     </li><li name="com.twitter.finagle.http.MapHeaderMap#getAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getAll(key:String):Iterable[String]"></a><a id="getAll(String):Iterable[String]"></a>
+      <a id="getAll(key:String):Seq[String]"></a><a id="getAll(String):Seq[String]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/MapHeaderMap.html#getAll(key:String):Iterable[String]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/MapHeaderMap.html#getAll(key:String):Seq[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1870,10 +1838,11 @@ but with standard formatting for dates in HTTP headers.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getAll</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">getAll</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
+      <p class="shortcomment cmt">Retrieves all values for a given header name.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves all values for a given header name.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.MapHeaderMap">MapHeaderMap</a> → <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -1922,6 +1891,23 @@ but with standard formatting for dates in HTTP headers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MapLike</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HeaderMap#getOrNull" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getOrNull(key:String):String"></a><a id="getOrNull(String):String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MapHeaderMap.html#getOrNull(key:String):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getOrNull</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Retrieves the given header value or <code>null</code> if it doesn't exit.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieves the given header value or <code>null</code> if it doesn't exit.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd></dl></div>
     </li><li name="scala.collection.TraversableLike#groupBy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]"></a><a id="groupBy[K](((String,String))⇒K):Map[K,HeaderMap]"></a>
       <span class="permalink">
@@ -3785,7 +3771,32 @@ but with standard formatting for dates in HTTP headers.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.http.HeaderMap#+=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="+=(kv:(String,java.util.Date)):com.twitter.finagle.http.HeaderMap"></a><a id="+=((String,Date)):HeaderMap"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/MapHeaderMap.html#+=(kv:(String,java.util.Date)):com.twitter.finagle.http.HeaderMap" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $plus$eq. Deprecated: (Since version 2017-02-01) Use .set(String, Date) instead" class="name deprecated">+=</span><span class="params">(<span name="kv">kv: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.util.Date">Date</span>)</span>)</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set or replace a header, as in <span class="extype" name="+=((String,">String))</span>,
+but with standard formatting for dates in HTTP headers.</p><div class="fullcomment"><div class="comment cmt"><p>Set or replace a header, as in <span class="extype" name="+=((String,">String))</span>,
+but with standard formatting for dates in HTTP headers.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-01)</i> Use <code>.set(String, Date)</code> instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

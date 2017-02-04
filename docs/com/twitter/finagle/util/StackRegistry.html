@@ -201,12 +201,6 @@ functions.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ConcurrentRingBufferBench.html" title=""></a>
-                        <a href="ConcurrentRingBufferBench.html" title="">
-                          ConcurrentRingBufferBench
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="DefaultTimer$.html" title="Retained for compatibility."></a>
                         <a href="DefaultTimer$.html" title="Retained for compatibility.">
                           DefaultTimer
@@ -232,12 +226,6 @@ the hood."></a>
                         <a href="HashedWheelTimer$.html" title="A HashedWheelTimer that uses org.jboss.netty.util.HashedWheelTimer under
 the hood.">
                           HashedWheelTimer
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="InetAddressUtilBench.html" title=""></a>
-                        <a href="InetAddressUtilBench.html" title="">
-                          InetAddressUtilBench
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -473,6 +461,22 @@ dynamic introspection.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.StackRegistry#add" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="add(key:Seq[String],value:String):Unit"></a><a id="add(Seq[String],String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/StackRegistry.html#add(key:Seq[String],value:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -676,7 +680,7 @@ dynamic introspection.
         <span class="name">register</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stk">stk: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[_]</span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Registers an <code>addr</code> and <code>stk</code>.</p>
+      <p class="shortcomment cmt">Registers an <code>addr</code>, <code>Stack</code>, and <code>Params</code>.</p>
     </li><li name="com.twitter.finagle.util.StackRegistry#registeredDuplicates" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="registeredDuplicates:Seq[com.twitter.finagle.util.StackRegistry.Entry]"></a><a id="registeredDuplicates:Seq[Entry]"></a>
       <span class="permalink">
@@ -709,6 +713,39 @@ dynamic introspection.
       </span>
       
       <p class="shortcomment cmt">Returns a list of all entries.</p>
+    </li><li name="com.twitter.finagle.util.StackRegistry#registryPrefix" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registryPrefix(entry:com.twitter.finagle.util.StackRegistry.Entry):Seq[String]"></a><a id="registryPrefix(Entry):Seq[String]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/StackRegistry.html#registryPrefix(entry:com.twitter.finagle.util.StackRegistry.Entry):Seq[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registryPrefix</span><span class="params">(<span name="entry">entry: <a href="StackRegistry$$Entry.html" class="extype" name="com.twitter.finagle.util.StackRegistry.Entry">Entry</a></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Utility for getting the registry key's prefix for an <span class="extype" name="Entry">Entry</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Utility for getting the registry key's prefix for an <span class="extype" name="Entry">Entry</span>.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.util.StackRegistry#remove" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remove(key:Seq[String]):Unit"></a><a id="remove(Seq[String]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/StackRegistry.html#remove(key:Seq[String]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remove</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="com.twitter.finagle.util.StackRegistry#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="size:Int"></a>
       <span class="permalink">
@@ -772,7 +809,7 @@ dynamic introspection.
         <span class="name">unregister</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="stk">stk: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[_]</span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Unregisters an <code>addr</code> and <code>stk</code>.</p>
+      <p class="shortcomment cmt">Unregisters an <code>addr</code>, <code>Stack</code>, and <code>Params</code>.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

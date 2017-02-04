@@ -173,24 +173,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="benchmark"></a><a id="benchmark:benchmark"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#benchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../benchmark/index.html">
-              <span class="name">benchmark</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="builder"></a><a id="builder:builder"></a>
       <span class="permalink">
@@ -843,12 +825,6 @@ finagle clients and servers.
                           Backoff
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="BackoffBenchmark$.html" title=""></a>
-                        <a class="class" href="BackoffBenchmark.html" title=""></a>
-                        <a href="BackoffBenchmark.html" title="">
-                          BackoffBenchmark
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result."></a>
                         <a href="ConstantService.html" title="A com.twitter.finagle.Service that returns a constant result.">
@@ -951,6 +927,12 @@ rate limiting strategy.">
                         <a class="class" href="ReqRep.html" title="Represents a request/response pair."></a>
                         <a href="ReqRep.html" title="Represents a request/response pair.">
                           ReqRep
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="RequeueFilter$.html" title=""></a>
+                        <a href="RequeueFilter$.html" title="">
+                          RequeueFilter
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ResponseClass$.html" title=""></a>
@@ -1082,24 +1064,6 @@ number successful and request latency to the given StatsReceiver.">
       <span class="symbol">
         <a title="" href="../socks/index.html">
               <span class="name">socks</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../spdy/index.html">
-              <span class="name">spdy</span>
             </a>
       </span>
       
@@ -1410,25 +1374,7 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.service.BackoffBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BackoffBenchmarkextendsStdBenchAnnotations"></a><a id="BackoffBenchmark:BackoffBenchmark"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/index.html#BackoffBenchmarkextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="BackoffBenchmark.html">
-              <span class="name">BackoffBenchmark</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.service.ConstantService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.ConstantService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ConstantService[Req,Rep]extendsService[Req,Rep]"></a><a id="ConstantService[Req,Rep]:ConstantService[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/service/index.html#ConstantService[Req,Rep]extendsService[Req,Rep]" title="Permalink">
@@ -2042,24 +1988,6 @@ the <span class="extype" name="Future">Future</span> will be interrupted via <sp
 is to be retried.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>All backoffs created by factory methods on this object are infinite. Use <code>Stream.take</code> to
       make them terminate.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.BackoffBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BackoffBenchmark"></a><a id="BackoffBenchmark:BackoffBenchmark"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/service/index.html#BackoffBenchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="BackoffBenchmark$.html">
-              <span class="name">BackoffBenchmark</span>
-            </a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.service.DeadlineFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DeadlineFilter"></a><a id="DeadlineFilter:DeadlineFilter"></a>
       <span class="permalink">
@@ -2207,6 +2135,24 @@ configured as L and there are N per-host connections,
 greater than L * N because requests can be between c.t.f.StatsFilter and
 c.t.f.PendingRequestFilter when the stat is read.
 </p></div></div>
+    </li><li name="com.twitter.finagle.service.RequeueFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RequeueFilter"></a><a id="RequeueFilter:RequeueFilter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/index.html#RequeueFilter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="RequeueFilter$.html">
+              <span class="name">RequeueFilter</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.service.ResponseClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ResponseClass"></a><a id="ResponseClass:ResponseClass"></a>
       <span class="permalink">

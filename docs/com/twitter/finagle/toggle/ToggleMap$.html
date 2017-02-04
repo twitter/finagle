@@ -604,7 +604,8 @@ assert(<span class="std">Seq</span>(toggleMap1, toggleMap2) == ToggleMap.compone
 <a href="flag/overrides$.html" class="extype" name="com.twitter.finagle.toggle.flag.overrides">flag.overrides</a>.</p><p>Its <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggles</a> will reflect changes to the underlying <code>Flag</code> which
 enables usage in tests.</p><p>Fractions that are out of range (outside of <code>[0.0-1.0]</code>) will be
 ignored.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>that inputs to <a href="Toggle.html#apply(v1:T1):R" class="extmbr" name="com.twitter.finagle.toggle.Toggle#apply">Toggle.apply</a> will be modified to promote
+      better distributions in the face of low entropy inputs.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -669,7 +670,7 @@ ignored.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.toggle.ToggleMap#newMutable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.toggle.ToggleMap#newMutable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newMutable(source:String):com.twitter.finagle.toggle.ToggleMap.Mutable"></a><a id="newMutable(String):Mutable"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/toggle/ToggleMap$.html#newMutable(source:String):com.twitter.finagle.toggle.ToggleMap.Mutable" title="Permalink">
@@ -684,8 +685,10 @@ ignored.
         <span class="name">newMutable</span><span class="params">(<span name="source">source: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create an empty <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a> instance with the given <span class="extype" name="Metadata.source">Metadata.source</span>.</p>
-    </li><li name="com.twitter.finagle.toggle.ToggleMap#newMutable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Create an empty <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a> instance with the given <span class="extype" name="Metadata.source">Metadata.source</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Create an empty <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a> instance with the given <span class="extype" name="Metadata.source">Metadata.source</span>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>that inputs to <a href="Toggle.html#apply(v1:T1):R" class="extmbr" name="com.twitter.finagle.toggle.Toggle#apply">Toggle.apply</a> will be modified to promote
+      better distributions in the face of low entropy inputs.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.ToggleMap#newMutable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newMutable():com.twitter.finagle.toggle.ToggleMap.Mutable"></a><a id="newMutable():Mutable"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/toggle/ToggleMap$.html#newMutable():com.twitter.finagle.toggle.ToggleMap.Mutable" title="Permalink">
@@ -701,7 +704,10 @@ ignored.
       </span>
       
       <p class="shortcomment cmt">Create an empty <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a> instance with a default <span class="extype" name="Metadata.source">Metadata.source</span>
-specified.</p>
+specified.</p><div class="fullcomment"><div class="comment cmt"><p>Create an empty <a href="ToggleMap$$Mutable.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap.Mutable">Mutable</a> instance with a default <span class="extype" name="Metadata.source">Metadata.source</span>
+specified.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>that inputs to <a href="Toggle.html#apply(v1:T1):R" class="extmbr" name="com.twitter.finagle.toggle.Toggle#apply">Toggle.apply</a> will be modified to promote
+      better distributions in the face of low entropy inputs.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">

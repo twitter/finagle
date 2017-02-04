@@ -199,18 +199,6 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ApertureBalancerBench.html" title=""></a>
-                        <a href="ApertureBalancerBench.html" title="">
-                          ApertureBalancerBench
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="BalancerBench$.html" title=""></a>
-                        <a class="class" href="BalancerBench.html" title=""></a>
-                        <a href="BalancerBench.html" title="">
-                          BalancerBench
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="Balancers$.html" title="Constructor methods for various load balancers."></a>
                         <a href="Balancers$.html" title="Constructor methods for various load balancers.">
                           Balancers
@@ -242,12 +230,6 @@ useful for managing concurrency in pipelining protocols.">
                           HeapBalancer
                         </a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="HeapBalancerBench.html" title=""></a>
-                        <a href="HeapBalancerBench.html" title="">
-                          HeapBalancerBench
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="LoadBalancerFactory$.html" title=""></a>
                         <a class="class" href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in
 context from the stack to the balancers at construction time."></a>
@@ -260,12 +242,6 @@ context from the stack to the balancers at construction time.">
                         <a class="trait" href="" title="The base type of nodes over which load is balanced."></a>
                         <a href="" title="The base type of nodes over which load is balanced.">
                           NodeT
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="P2CBalancerBench.html" title=""></a>
-                        <a href="P2CBalancerBench.html" title="">
-                          P2CBalancerBench
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -328,7 +304,7 @@ the next request.
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="BalancerBench$$NullNode.html" class="extype" name="com.twitter.finagle.loadbalancer.BalancerBench.NullNode">NullNode</a>, <a href="RoundRobinBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Node">Node</a></div>
+            <div class="subClasses hiddenContent"><a href="RoundRobinBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Node">Node</a></div>
           </div></div>
         
 
@@ -415,7 +391,7 @@ the next request.
       <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
 underlying channel and the returned service has exclusive use of
 its underlying connection. To relinquish the use of the reserved
-Service, the user must call Service.close().
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
@@ -587,7 +563,11 @@ It persists through node updates.
         <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.NodeT.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.NodeT.Rep">Rep</span>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.
+This pins the underlying resources and the returned service has exclusive use
+of its underlying connection. To relinquish the use of the reserved
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -798,7 +778,8 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">Return <code>true</code> if and only if <a href="../ServiceFactory.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactory#status">status</a> is currently <a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Status.Open</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Return <code>true</code> if and only if <a href="../ServiceFactory.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactory#status">status</a> is currently <a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Status.Open</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

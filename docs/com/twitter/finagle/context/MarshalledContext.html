@@ -297,33 +297,14 @@ tree.
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.context.MarshalledContext#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():com.twitter.finagle.context.MarshalledContext"></a><a id="&lt;init&gt;:MarshalledContext"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#&lt;init&gt;():com.twitter.finagle.context.MarshalledContext" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">MarshalledContext</span><span class="params">()</span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.context.Context.Bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Bound[A]extendsContext.this.EnvwithProductwithSerializable"></a><a id="Bound[A]:Bound[A]"></a>
+              <ol><li name="com.twitter.finagle.context.Context.KeyValuePair" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="KeyValuePair[T]extendsProductwithSerializable"></a><a id="KeyValuePair[T]:KeyValuePair[T]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/Context.html#Bound[A]extendsContext.this.EnvwithProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context.html#KeyValuePair[T]extendsProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -332,74 +313,17 @@ tree.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="An environment with key bound to value; lookups for other keys
-are forwarded to next." href="Context$Bound.html">
-              <span class="name">Bound</span>
-            </a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a title="Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context." href="Context$KeyValuePair.html">
+              <span class="name">KeyValuePair</span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
-are forwarded to <code>next</code>.</p><div class="fullcomment"><div class="comment cmt"><p>An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
-are forwarded to <code>next</code>.
+      <p class="shortcomment cmt">Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context.</p><div class="fullcomment"><div class="comment cmt"><p>Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context.Cleared" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Cleared[A]extendsContext.this.EnvwithProductwithSerializable"></a><a id="Cleared[A]:Cleared[A]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/Context.html#Cleared[A]extendsContext.this.EnvwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="An environment without key." href="Context$Cleared.html">
-              <span class="name">Cleared</span>
-            </a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Cleared.A">A</span>]</span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An environment without <code>key</code>.</p><div class="fullcomment"><div class="comment cmt"><p>An environment without <code>key</code>. Lookups for other keys
-are forwarded to <code>next</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context.Env" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="EnvextendsAnyRef"></a><a id="Env:Env"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/Context.html#EnvextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Context$Env.html">
-              <span class="name">Env</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context.OrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="OrElseextendsContext.this.EnvwithProductwithSerializable"></a><a id="OrElse:OrElse"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/Context.html#OrElseextendsContext.this.EnvwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Concatenate two environments with left-hand side precedence." href="Context$OrElse.html">
-              <span class="name">OrElse</span>
-            </a><span class="params">(<span name="left">left: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="right">right: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Concatenate two environments with left-hand side precedence.</p><div class="fullcomment"><div class="comment cmt"><p>Concatenate two environments with left-hand side precedence.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.MarshalledContext.Key" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.context.MarshalledContext.Key" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Key[A]extendsAnyRef"></a><a id="Key[A]:Key[A]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#Key[A]extendsAnyRef" title="Permalink">
@@ -418,47 +342,12 @@ and unmarshaller." href="MarshalledContext$Key.html">
       </span>
       
       <p class="shortcomment cmt">Keys in MarshalledContext must provide a marshaller
-and unmarshaller.</p>
-    </li><li name="com.twitter.finagle.context.MarshalledContext.Translucent" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TranslucentextendsMarshalledContext.this.EnvwithProductwithSerializable"></a><a id="Translucent:Translucent"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#TranslucentextendsMarshalledContext.this.EnvwithProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="A translucent environment is capable of storing key/value pairs
-to be (possibly) unmarshalled later." href="MarshalledContext$Translucent.html">
-              <span class="name">Translucent</span>
-            </a><span class="params">(<span name="next">next: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">MarshalledContext.Env</a></span>, <span name="marshalId">marshalId: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="marshalled">marshalled: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A translucent environment is capable of storing key/value pairs
-to be (possibly) unmarshalled later.</p>
-    </li><li name="com.twitter.finagle.context.MarshalledContext.Unmarshaller" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="UnmarshallerextendsAnyRef"></a><a id="Unmarshaller:Unmarshaller"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#UnmarshallerextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="An Unmarshaller gradually builds up an environment from
-a set of (id, value) pairs." href="MarshalledContext$Unmarshaller.html">
-              <span class="name">Unmarshaller</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An Unmarshaller gradually builds up an environment from
-a set of (id, value) pairs.</p>
+and unmarshaller.</p><div class="fullcomment"><div class="comment cmt"><p>Keys in MarshalledContext must provide a marshaller
+and unmarshaller. The key <code>id</code> is used for marshalling and
+unmarshalling and thus must be unique. The behavior of the
+MarshalledContext when using two keys with the same key <code>id</code>
+is undefined.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -467,26 +356,7 @@ a set of (id, value) pairs.</p>
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.context.Context.Empty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Empty"></a><a id="Empty:Empty"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/Context.html#Empty" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="An empty environment." href="Context$Empty$.html">
-              <span class="name">Empty</span>
-            </a><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An empty environment.</p><div class="fullcomment"><div class="comment cmt"><p>An empty environment. No keys are present.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#!=(x$1:Any):Boolean" title="Permalink">
@@ -669,10 +539,10 @@ context.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get[A](key:Context.this.Key[A]):Option[A]"></a><a id="get[A](Key[A]):Option[A]"></a>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get[A](key:MarshalledContext.this.Key[A]):Option[A]"></a><a id="get[A](Key[A]):Option[A]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#get[A](key:Context.this.Key[A]):Option[A]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#get[A](key:MarshalledContext.this.Key[A]):Option[A]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -681,13 +551,13 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>
+        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.MarshalledContext.get.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.finagle.context.MarshalledContext.get.A">A</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Retrieve the current definition of a key, but only
 if it is defined in the current request-local context.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current definition of a key, but only
 if it is defined in the current request-local context.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -754,10 +624,10 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="let[A,B,R](key1:Context.this.Key[A],value1:A,key2:Context.this.Key[B],value2:B)(fn:=&gt;R):R"></a><a id="let[A,B,R](Key[A],A,Key[B],B)(⇒R):R"></a>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="let[R](pairs:Iterable[MarshalledContext.this.KeyValuePair[_]])(fn:=&gt;R):R"></a><a id="let[R](Iterable[KeyValuePair[_]])(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#let[A,B,R](key1:Context.this.Key[A],value1:A,key2:Context.this.Key[B],value2:B)(fn:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#let[R](pairs:Iterable[MarshalledContext.this.KeyValuePair[_]])(fn:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -766,15 +636,33 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>, <span name="R">R</span>]</span><span class="params">(<span name="key1">key1: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span>]</span>, <span name="value1">value1: <span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span></span>, <span name="key2">key2: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.B">B</span>]</span>, <span name="value2">value2: <span class="extype" name="com.twitter.finagle.context.Context.let.B">B</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>
+        <span class="name">let</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="pairs">pairs: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="#KeyValuePair[T]extendsProductwithSerializable" class="extmbr" name="com.twitter.finagle.context.Context.KeyValuePair">KeyValuePair</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Bind multiple key-value pairs.</p><div class="fullcomment"><div class="comment cmt"><p>Bind multiple key-value pairs. Keys later in the collection take
+precedent over keys earlier in the collection.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="let[A,B,R](key1:MarshalledContext.this.Key[A],value1:A,key2:MarshalledContext.this.Key[B],value2:B)(fn:=&gt;R):R"></a><a id="let[A,B,R](Key[A],A,Key[B],B)(⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#let[A,B,R](key1:MarshalledContext.this.Key[A],value1:A,key2:MarshalledContext.this.Key[B],value2:B)(fn:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>, <span name="R">R</span>]</span><span class="params">(<span name="key1">key1: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.A">A</span>]</span>, <span name="value1">value1: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.A">A</span></span>, <span name="key2">key2: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.B">B</span>]</span>, <span name="value2">value2: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.B">B</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Bind two keys and values in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Bind two keys and values in the scope of <code>fn</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="let[A,R](key:Context.this.Key[A],value:A)(fn:=&gt;R):R"></a><a id="let[A,R](Key[A],A)(⇒R):R"></a>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#let" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="let[A,R](key:MarshalledContext.this.Key[A],value:A)(fn:=&gt;R):R"></a><a id="let[A,R](Key[A],A)(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#let[A,R](key:Context.this.Key[A],value:A)(fn:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#let[A,R](key:MarshalledContext.this.Key[A],value:A)(fn:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -783,15 +671,15 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="R">R</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>
+        <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="R">R</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.A">A</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.let.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Bind <code>value</code> to <code>key</code> in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Bind <code>value</code> to <code>key</code> in the scope of <code>fn</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="letClear[R]()(fn:=&gt;R):R"></a><a id="letClear[R]()(⇒R):R"></a>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClear[R](keys:Iterable[MarshalledContext.this.Key[_]])(fn:=&gt;R):R"></a><a id="letClear[R](Iterable[Key[_]])(⇒R):R"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#letClear[R]()(fn:=&gt;R):R" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#letClear[R](keys:Iterable[MarshalledContext.this.Key[_]])(fn:=&gt;R):R" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -800,36 +688,53 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">()</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[_]]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClear.R">R</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Unbind the passed-in keys, in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Unbind the passed-in keys, in the scope of <code>fn</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClear[R](key:MarshalledContext.this.Key[_])(fn:=&gt;R):R"></a><a id="letClear[R](Key[_])(⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#letClear[R](key:MarshalledContext.this.Key[_])(fn:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="key">key: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[_]</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClear.R">R</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Unbind the passed-in key, in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Unbind the passed-in key, in the scope of <code>fn</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext#letClearAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClearAll[R](fn:=&gt;R):R"></a><a id="letClearAll[R](⇒R):R"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#letClearAll[R](fn:=&gt;R):R" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClearAll</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClearAll.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.MarshalledContext.letClearAll.R">R</span></span>
       </span>
       
       <p class="shortcomment cmt">Clears all bindings in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Clears all bindings in the scope of <code>fn</code>.</p><p>For example:</p><pre>context.let(Key1, <span class="lit">"value1"</span>) {
   context.let(Key2, <span class="lit">"something else"</span>) {
-    context.letClear() {
+    context.letClearAll {
       <span class="cmt">// context.contains(Key1) == false</span>
       <span class="cmt">// context.contains(Key2) == false</span>
     }
     <span class="cmt">// context(Key1) == "value1"</span>
     <span class="cmt">// context(Key2) == "something else"</span>
   }
-}</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context#letClear" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="letClear[R](keys:Context.this.Key[_]*)(fn:=&gt;R):R"></a><a id="letClear[R](Key[_]*)(⇒R):R"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#letClear[R](keys:Context.this.Key[_]*)(fn:=&gt;R):R" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="keys">keys: <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[_]*</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Unbind the passed-in keys, in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Unbind the passed-in keys, in the scope of <code>fn</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+}</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.MarshalledContext">MarshalledContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.MarshalledContext#letUnmarshal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="letUnmarshal[R](contexts:Iterable[(com.twitter.io.Buf,com.twitter.io.Buf)])(fn:=&gt;R):R"></a><a id="letUnmarshal[R](Iterable[(Buf,Buf)])(⇒R):R"></a>
       <span class="permalink">
@@ -865,22 +770,6 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
       </span>
       
       <p class="shortcomment cmt">Marshal the current environment into a set of (id, value) pairs.</p>
-    </li><li name="com.twitter.finagle.context.MarshalledContext#marshal" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="marshal(env:MarshalledContext.this.Env):Iterable[(com.twitter.io.Buf,com.twitter.io.Buf)]"></a><a id="marshal(Env):Iterable[(Buf,Buf)]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#marshal(env:MarshalledContext.this.Env):Iterable[(com.twitter.io.Buf,com.twitter.io.Buf)]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">marshal</span><span class="params">(<span name="env">env: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result">: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Marshal the <code>env</code> into a set of (id, value) pairs.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -961,25 +850,6 @@ bindings and run <code>fn</code>. Bindings are unmarshalled on demand.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.context.MarshalledContext#unmarshal" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="unmarshal(contexts:Iterable[(com.twitter.io.Buf,com.twitter.io.Buf)]):MarshalledContext.this.Env"></a><a id="unmarshal(Iterable[(Buf,Buf)]):Env"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/MarshalledContext.html#unmarshal(contexts:Iterable[(com.twitter.io.Buf,com.twitter.io.Buf)]):MarshalledContext.this.Env" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">unmarshal</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>)]</span>)</span><span class="result">: <a href="#EnvextendsAnyRef" class="extmbr" name="com.twitter.finagle.context.Context.Env">Env</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Produce an environment consisting of the given marshalled
-(id, value) pairs.</p><div class="fullcomment"><div class="comment cmt"><p>Produce an environment consisting of the given marshalled
-(id, value) pairs. They are unmarshalled on demand.
-</p></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

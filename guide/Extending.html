@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &#8212; Finagle 6.41.0 documentation</title>
+    <title>Extending Finagle &#8212; Finagle 6.42.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.41.0',
+        VERSION:     '6.42.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,9 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -483,7 +484,7 @@ a <a class="reference external" href="https://github.com/twitter/finagle/blob/ma
 however the use of other Transporters is fully supported.</p>
 <p>Using a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-  <span class="nc">Netty4Transporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+  <span class="nc">Netty4Transporter</span><span class="o">.</span><span class="n">rawTransporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 </pre></div>
 </div>
 </div>
@@ -608,7 +609,7 @@ on <a class="reference internal" href="Clients.html#client-modules"><span class=
     <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
   <span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Netty4Transporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
+    <span class="nc">Netty4Transporter</span><span class="o">.</span><span class="n">rawTransporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
   <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
       <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
@@ -689,7 +690,7 @@ allowing concurrent dispatches.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
   
   </body>
 </html>

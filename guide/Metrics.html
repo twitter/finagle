@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 6.41.0 documentation</title>
+    <title>Metrics &#8212; Finagle 6.42.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.41.0',
+        VERSION:     '6.42.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,9 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.41.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -712,6 +713,9 @@ visibility into this caching.</p>
 <dd>A counter of the number of cache misses.</dd>
 <dt><strong>evicts</strong></dt>
 <dd>A counter of the number of cache evictions.</dd>
+<dt><strong>expires</strong></dt>
+<dd>A counter of the number of idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s
+that were actively evicted.</dd>
 <dt><strong>idle</strong></dt>
 <dd>A gauge of the number of cached idle <code class="docutils literal"><span class="pre">ServiceFactory</span></code>s.</dd>
 <dt><strong>oneshots</strong></dt>
@@ -868,6 +872,16 @@ count as 5XX for this counter.</dd>
 <dd>A histogram on duration in milliseconds per HTTP status code.</dd>
 <dt><strong>time/&lt;statusCategory&gt;</strong></dt>
 <dd>A histogram on duration in milliseconds per HTTP status code category.</dd>
+</dl>
+</div>
+<div class="section" id="http2">
+<h2>HTTP2<a class="headerlink" href="#http2" title="Permalink to this headline">¶</a></h2>
+<p>These stats pertain to HTTP2 only.</p>
+<dl class="docutils">
+<dt><strong>&lt;server_label&gt;/upgrade/success</strong></dt>
+<dd>A counter of http2 upgrades and new prior knowledge connections server side.</dd>
+<dt><strong>&lt;client_label&gt;/upgrade/success</strong></dt>
+<dd>A counter of http2 upgrades and new prior knowledge connections client side.</dd>
 </dl>
 </div>
 <div class="section" id="memcached">
@@ -1055,6 +1069,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </li>
 <li><a class="reference internal" href="#toggles">Toggles</a></li>
 <li><a class="reference internal" href="#http">HTTP</a></li>
+<li><a class="reference internal" href="#http2">HTTP2</a></li>
 <li><a class="reference internal" href="#memcached">Memcached</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>
@@ -1085,7 +1100,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
   
   </body>
 </html>

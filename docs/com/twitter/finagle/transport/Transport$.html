@@ -516,9 +516,9 @@ written to <a href="../param/Logger.html" class="extype" name="com.twitter.finag
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.transport.Transport#cast" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]"></a><a id="cast[In1,Out1](Transport[Any,Any]):Transport[In1,Out1]"></a>
+      <a id="cast[In1,Out1](cls:Class[Out1],trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]"></a><a id="cast[In1,Out1](Class[Out1],Transport[Any,Any]):Transport[In1,Out1]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#cast[In1,Out1](cls:Class[Out1],trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -527,14 +527,34 @@ written to <a href="../param/Logger.html" class="extype" name="com.twitter.finag
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="params">(<span name="trans">trans: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result">: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>
+        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="params">(<span name="cls">cls: <span class="extype" name="scala.Predef.Class">Class</span>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>, <span name="trans">trans: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result">: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Casts an object transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Casts an object transport to <code>Transport[In1, Out1]</code>. Note that this is
 generally unsafe: only do this when you know the cast is guaranteed safe.
 This is useful when coercing a netty object pipeline into a typed transport,
 for example.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Transport.cast(trans)">Transport.cast(trans)</span> for Scala users.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#cast" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any])(implicitm:Manifest[Out1]):com.twitter.finagle.transport.Transport[In1,Out1]"></a><a id="cast[In1,Out1](Transport[Any,Any])(Manifest[Out1]):Transport[In1,Out1]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any])(implicitm:Manifest[Out1]):com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="params">(<span name="trans">trans: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>)</span><span class="result">: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Casts an object transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Casts an object transport to <code>Transport[In1, Out1]</code>. Note that this is
+generally unsafe: only do this when you know the cast is guaranteed safe.
+This is useful when coercing a netty object pipeline into a typed transport,
+for example.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Transport.cast(Class[Out],">transport)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">

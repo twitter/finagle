@@ -448,7 +448,8 @@ as a decimal representation of a 64-bit unsigned integer.</p><p>This operation h
         <span class="name">delete</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Remove a key.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a key.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if deleted, false if not found</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Remove a key.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a key.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if deleted, false if not found</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#incr" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="incr(key:String,delta:Long):com.twitter.util.Future[Option[Long]]"></a><a id="incr(String,Long):Future[Option[Long]]"></a>
       <span class="permalink">
@@ -562,7 +563,8 @@ operation has no effect.</p><p><code>flags</code> is an arbitrary integer that t
         <span class="name">stats</span><span class="params">(<span name="args">args: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Send a stats command with optional arguments to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with optional arguments to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command with optional arguments to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with optional arguments to the server.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -666,7 +668,8 @@ operation has no effect.</p><p><code>flags</code> is an arbitrary integer that t
       </span>
       
       <p class="shortcomment cmt">Append a set of bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append a set of bytes to the end of an existing key. If the key doesn't
-exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+exist, the operation has no effect.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -1163,7 +1166,8 @@ effect.</p><p>Neither flags nor expiry are supplied.
         <span class="name">stats</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Send a stats command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command to the server.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#stats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats(args:String):com.twitter.util.Future[Seq[String]]"></a><a id="stats(String):Future[Seq[String]]"></a>
       <span class="permalink">
@@ -1179,7 +1183,8 @@ effect.</p><p>Neither flags nor expiry are supplied.
         <span class="name">stats</span><span class="params">(<span name="args">args: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">Send a stats command with the given <code>args</code> to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with the given <code>args</code> to the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Send a stats command with the given <code>args</code> to the server.</p><div class="fullcomment"><div class="comment cmt"><p>Send a stats command with the given <code>args</code> to the server.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a sequence of strings, each of which is a line of output</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

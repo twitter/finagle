@@ -191,24 +191,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.compat" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="compat"></a><a id="compat:compat"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#compat" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="compat/index.html">
-              <span class="name">compat</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -516,12 +498,6 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="" title="Convert exceptions to BadHttpRequests"></a>
-                        <a href="" title="Convert exceptions to BadHttpRequests">
-                          SafeHttpServerCodec
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="SimpleElement.html" title=""></a>
                         <a href="SimpleElement.html" title="">
                           SimpleElement
@@ -553,6 +529,12 @@ its credentials from a provided CredentialSource...">
                           TlsFilter
                         </a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="TooLongMessageException$.html" title=""></a>
+                        <a class="class" href="" title="The Message was too long to be handled correctly"></a>
+                        <a href="" title="The Message was too long to be handled correctly">
+                          TooLongMessageException
+                        </a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
                         <a class="class" href="Version.html" title="Represents the HTTP version."></a>
                         <a href="Version.html" title="Represents the HTTP version.">
@@ -571,32 +553,34 @@ its credentials from a provided CredentialSource...">
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="TooLongMessageException$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.http">http</a></p>
-        <h1>SafeHttpServerCodec<span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html" title="Permalink">
+        <h1><a href="TooLongMessageException$.html" title="See companion object">TooLongMessageException</a><span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="TooLongMessageException$.html" title="See companion object">object TooLongMessageException</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SafeHttpServerCodec</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpServerCodec">HttpServerCodec</span></span>
+        <span class="name">TooLongMessageException</span><span class="result"> extends <a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Convert exceptions to BadHttpRequests</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The Message was too long to be handled correctly</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.handler.codec.http.HttpServerCodec">HttpServerCodec</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a>], <a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -622,7 +606,7 @@ its credentials from a provided CredentialSource...">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http.SafeHttpServerCodec"><span>SafeHttpServerCodec</span></li><li class="in" name="org.jboss.netty.handler.codec.http.HttpServerCodec"><span>HttpServerCodec</span></li><li class="in" name="org.jboss.netty.channel.ChannelDownstreamHandler"><span>ChannelDownstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelUpstreamHandler"><span>ChannelUpstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.TooLongMessageException"><span>TooLongMessageException</span></li><li class="in" name="com.twitter.finagle.FailureFlags"><span>FailureFlags</span></li><li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="com.twitter.finagle.HasRemoteInfo"><span>HasRemoteInfo</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -640,26 +624,7 @@ its credentials from a provided CredentialSource...">
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.http.SafeHttpServerCodec#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(maxInitialLineLength:Int,maxHeaderSize:Int,maxChunkSize:Int):com.twitter.finagle.http.SafeHttpServerCodec"></a><a id="&lt;init&gt;:SafeHttpServerCodec"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#&lt;init&gt;(maxInitialLineLength:Int,maxHeaderSize:Int,maxChunkSize:Int):com.twitter.finagle.http.SafeHttpServerCodec" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">SafeHttpServerCodec</span><span class="params">(<span name="maxInitialLineLength">maxInitialLineLength: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="maxHeaderSize">maxHeaderSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="maxChunkSize">maxChunkSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         
 
@@ -671,7 +636,7 @@ its credentials from a provided CredentialSource...">
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -687,7 +652,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -703,7 +668,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -716,10 +681,26 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="java.lang.Throwable#addSuppressed" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addSuppressed(x$1:Throwable):Unit"></a><a id="addSuppressed(Throwable):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#addSuppressed(x$1:Throwable):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addSuppressed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -732,10 +713,44 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asNonRetryable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asNonRetryable:T"></a><a id="asNonRetryable:TooLongMessageException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#asNonRetryable:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asNonRetryable</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a non-retryable failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a non-retryable failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#asRejected" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asRejected:T"></a><a id="asRejected:TooLongMessageException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#asRejected:T" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asRejected</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">This as a rejected failure.</p><div class="fullcomment"><div class="comment cmt"><p>This as a rejected failure. This does not mutate.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -754,10 +769,29 @@ its credentials from a provided CredentialSource...">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.TooLongMessageException#copyWithFlags" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="copyWithFlags(flags:Long):com.twitter.finagle.http.TooLongMessageException"></a><a id="copyWithFlags(Long):TooLongMessageException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#copyWithFlags(flags:Long):com.twitter.finagle.http.TooLongMessageException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">copyWithFlags</span><span class="params">(<span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A copy of this object with the given flags replacing the current flags.</p><div class="fullcomment"><div class="comment cmt"><p>A copy of this object with the given flags replacing the current flags. The
+caller of this method should check to see if a copy is necessary before
+calling.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a> → FailureFlags</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -773,7 +807,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -786,10 +820,42 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.ChannelException#exceptionMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exceptionMessage():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#exceptionMessage():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exceptionMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> → <a href="../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></dd></dl></div>
+    </li><li name="java.lang.Throwable#fillInStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fillInStackTrace():Throwable"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#fillInStackTrace():Throwable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fillInStackTrace</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Throwable">Throwable</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -808,10 +874,26 @@ its credentials from a provided CredentialSource...">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="java.lang.Throwable#getCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getCause():Throwable"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getCause():Throwable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getCause</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Throwable">Throwable</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -824,10 +906,10 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.jboss.netty.handler.codec.http.HttpServerCodec#handleDownstream" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="handleDownstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit"></a><a id="handleDownstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
+    </li><li name="java.lang.Throwable#getLocalizedMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getLocalizedMessage():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#handleDownstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getLocalizedMessage():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -836,20 +918,14 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleDownstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">getLocalizedMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>HttpServerCodec → ChannelDownstreamHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.SafeHttpServerCodec#handleUpstream" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="handleUpstream(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelEvent):Unit"></a><a id="handleUpstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.HasRemoteInfo#getMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getMessage():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#handleUpstream(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelEvent):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getMessage():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -858,14 +934,46 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleUpstream</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">getMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.SafeHttpServerCodec">SafeHttpServerCodec</a> → HttpServerCodec → ChannelUpstreamHandler</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a> → Throwable</dd></dl></div>
+    </li><li name="java.lang.Throwable#getStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getStackTrace():Array[StackTraceElement]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getStackTrace():Array[StackTraceElement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getStackTrace</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="java.lang.Throwable#getSuppressed" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSuppressed():Array[Throwable]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#getSuppressed():Array[Throwable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSuppressed</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -878,10 +986,44 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="java.lang.Throwable#initCause" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="initCause(x$1:Throwable):Throwable"></a><a id="initCause(Throwable):Throwable"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#initCause(x$1:Throwable):Throwable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">initCause</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="java.lang.Throwable">Throwable</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.FailureFlags#isFlagged" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isFlagged(which:Long):Boolean"></a><a id="isFlagged(Long):Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#isFlagged(which:Long):Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isFlagged</span><span class="params">(<span name="which">which: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Test if this is flagged with a particular set of flags
+</p><div class="fullcomment"><div class="comment cmt"><p>Test if this is flagged with a particular set of flags
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>FailureFlags</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -894,10 +1036,26 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.ChannelException#logLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logLevel:com.twitter.logging.Level"></a><a id="logLevel:Level"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#logLevel:com.twitter.logging.Level" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logLevel</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> → HasLogLevel</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -913,7 +1071,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -929,7 +1087,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -942,10 +1100,122 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="java.lang.Throwable#printStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="printStackTrace(x$1:java.io.PrintWriter):Unit"></a><a id="printStackTrace(PrintWriter):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#printStackTrace(x$1:java.io.PrintWriter):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">printStackTrace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="java.lang.Throwable#printStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="printStackTrace(x$1:java.io.PrintStream):Unit"></a><a id="printStackTrace(PrintStream):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#printStackTrace(x$1:java.io.PrintStream):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">printStackTrace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.io.PrintStream">PrintStream</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="java.lang.Throwable#printStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="printStackTrace():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#printStackTrace():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">printStackTrace</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
+    </li><li name="com.twitter.finagle.ChannelException#remoteAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#remoteAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.HasRemoteInfo#remoteInfo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="remoteInfo():com.twitter.finagle.context.RemoteInfo"></a><a id="remoteInfo():RemoteInfo"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#remoteInfo():com.twitter.finagle.context.RemoteInfo" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remoteInfo</span><span class="params">()</span><span class="result">: <a href="../context/RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.SourcedException#serviceName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serviceName:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#serviceName:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serviceName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></dd></dl></div>
+    </li><li name="java.lang.Throwable#setStackTrace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setStackTrace(x$1:Array[StackTraceElement]):Unit"></a><a id="setStackTrace(Array[StackTraceElement]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#setStackTrace(x$1:Array[StackTraceElement]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setStackTrace</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="java.lang.StackTraceElement">StackTraceElement</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -958,10 +1228,10 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="java.lang.Throwable#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#toString():String" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -973,11 +1243,11 @@ its credentials from a provided CredentialSource...">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Throwable → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -999,7 +1269,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1021,7 +1291,7 @@ its credentials from a provided CredentialSource...">
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/SafeHttpServerCodec.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/TooLongMessageException.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1050,14 +1320,22 @@ its credentials from a provided CredentialSource...">
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.jboss.netty.handler.codec.http.HttpServerCodec">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.http.HttpServerCodec">HttpServerCodec</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.ChannelDownstreamHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.ChannelUpstreamHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.ChannelHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></h3>
+        <div class="parent" name="com.twitter.finagle.FailureFlags">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.ChannelException">
+              <h3>Inherited from <a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></h3>
+            </div><div class="parent" name="com.twitter.logging.HasLogLevel">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.SourcedException">
+              <h3>Inherited from <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.HasRemoteInfo">
+              <h3>Inherited from <a href="../HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a></h3>
+            </div><div class="parent" name="java.lang.Exception">
+              <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>
+            </div><div class="parent" name="java.lang.Throwable">
+              <h3>Inherited from <span class="extype" name="java.lang.Throwable">Throwable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

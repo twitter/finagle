@@ -266,11 +266,9 @@ resources for using Finagle.
                       </li><li class="current-entities indented5">
                         <a class="object" href="ValidateRequestFilter$.html" title=""></a>
                         <a class="class" href="" title="Validate request filter:
-  400 Bad Request is the request is /bad-http-request - Finagle sets this if the
-     request is malformed."></a>
+  400 Bad Request if the parameters are invalid."></a>
                         <a href="" title="Validate request filter:
-  400 Bad Request is the request is /bad-http-request - Finagle sets this if the
-     request is malformed.">
+  400 Bad Request if the parameters are invalid.">
                           ValidateRequestFilter
                         </a>
                       </li>
@@ -298,16 +296,17 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ValidateRequestFilter</span><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.http.filter.ValidateRequestFilter.REQUEST">REQUEST</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2017-01-11) Being removed due to its limited utility">ValidateRequestFilter</span><span class="tparams">[<span name="REQUEST">REQUEST &lt;: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>]</span><span class="result"> extends <a href="../../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.http.filter.ValidateRequestFilter.REQUEST">REQUEST</span>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Validate request filter:
-  400 Bad Request is the request is /bad-http-request - Finagle sets this if the
-     request is malformed.
   400 Bad Request if the parameters are invalid.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-11)</i> Being removed due to its limited utility</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

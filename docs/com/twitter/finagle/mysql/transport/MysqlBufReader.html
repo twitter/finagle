@@ -1114,8 +1114,8 @@ bytes expected to follow.</p></dd></dl></div>
       
       <p class="shortcomment cmt">The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).</p><div class="fullcomment"><div class="comment cmt"><p>The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).
 Returns <code>-1</code> when <code>byte</code> is not found on the underlying <span class="extype" name="Buf">Buf</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd><dt>Note</dt><dd><span class="cmt"><p>Depending on the implementation, this may copy (usually partially) the
-      underlying direct buffer onto the heap.</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd><dt>Note</dt><dd><span class="cmt"><p>All util and finagle Buf implementations will not copy onto
+      the heap, but for other implementations, it may trigger a copy.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.util.ProxyBufReader#skip" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="skip(n:Int):Unit"></a><a id="skip(Int):Unit"></a>
       <span class="permalink">

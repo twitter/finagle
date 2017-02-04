@@ -180,12 +180,6 @@ resources for using Finagle.
                           BufferingPool
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="PoolBench$.html" title=""></a>
-                        <a class="class" href="PoolBench.html" title=""></a>
-                        <a href="PoolBench.html" title="">
-                          PoolBench
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SingletonPool.html" title="A pool that maintains at most one service from the underlying
 ServiceFactory -- concurrent leases share the same, cached
@@ -194,12 +188,6 @@ service."></a>
 ServiceFactory -- concurrent leases share the same, cached
 service.">
                           SingletonPool
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="SingletonPoolBench.html" title=""></a>
-                        <a href="SingletonPoolBench.html" title="">
-                          SingletonPoolBench
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="WatermarkPool$.html" title=""></a>
@@ -400,7 +388,7 @@ watermarks.">
       <p class="shortcomment cmt">Reserve the use of a given service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance. This pins the
 underlying channel and the returned service has exclusive use of
 its underlying connection. To relinquish the use of the reserved
-Service, the user must call Service.close().
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a> → <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceFactory#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a><a id="apply():Future[Service[Req,Rep]]"></a>
@@ -417,7 +405,11 @@ Service, the user must call Service.close().
         <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Reserve the use of a given service instance using <a href="../ClientConnection$.html#nil:com.twitter.finagle.ClientConnection" class="extmbr" name="com.twitter.finagle.ClientConnection#nil">ClientConnection.nil</a>.
+This pins the underlying resources and the returned service has exclusive use
+of its underlying connection. To relinquish the use of the reserved
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, the user must call <span class="extype" name="Service.close()">Service.close()</span>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -644,7 +636,8 @@ only need to modify or operate on the underlying service.
         <span class="name">isAvailable</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+      <p class="shortcomment cmt">Return <code>true</code> if and only if <a href="../ServiceFactory.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactory#status">status</a> is currently <a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Status.Open</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Return <code>true</code> if and only if <a href="../ServiceFactory.html#status:com.twitter.finagle.Status" class="extmbr" name="com.twitter.finagle.ServiceFactory#status">status</a> is currently <a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Status.Open</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">

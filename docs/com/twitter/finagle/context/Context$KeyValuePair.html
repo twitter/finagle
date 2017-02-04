@@ -155,10 +155,10 @@ returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.ut
 future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
+    </li><li name="com.twitter.finagle.context" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="context"></a><a id="context:context"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#context" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -168,40 +168,46 @@ resources for using Finagle.
       </span>
       <span class="symbol">
         <a title="" href="index.html">
-              <span class="name">spdy</span>
+              <span class="name">context</span>
             </a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li class="current-entities indented4">
+    </li><li name="com.twitter.finagle.context.Context" visbl="pub" class="indented5 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ContextextendsAnyRef"></a><a id="Context:Context"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/index.html#ContextextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A context contains a number of let-delimited bindings." href="Context.html">
+              <span class="name">Context</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A context contains a number of let-delimited bindings.</p><div class="fullcomment"><div class="comment cmt"><p>A context contains a number of let-delimited bindings. Bindings
+are indexed by type Key[A] in a typesafe manner. Later bindings
+shadow earlier ones.</p><p>Note that the implementation of context maintains all bindings
+in a linked list; context lookup requires a linear search.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.context">context</a></dd></dl></div>
+    </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="AnnotateSpdyStreamId.html" title=""></a>
-                        <a href="AnnotateSpdyStreamId.html" title="">
-                          AnnotateSpdyStreamId
+                        <a class="abstract type" href="Context$Key.html" title=""></a>
+                        <a href="Context$Key.html" title="">
+                          Key
                         </a>
-                      </li><li class="current-entities indented4">
+                      </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="GenerateSpdyStreamId.html" title=""></a>
-                        <a href="GenerateSpdyStreamId.html" title="">
-                          GenerateSpdyStreamId
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Spdy$.html" title=""></a>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">
-                          Spdy
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="SpdyClientDispatcher.html" title=""></a>
-                        <a href="SpdyClientDispatcher.html" title="">
-                          SpdyClientDispatcher
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="SpdyServerDispatcher.html" title=""></a>
-                        <a href="SpdyServerDispatcher.html" title="">
-                          SpdyServerDispatcher
+                        <a class="class" href="" title="Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context."></a>
+                        <a href="" title="Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context.">
+                          KeyValuePair
                         </a>
                       </li>
               </ul>
@@ -210,16 +216,14 @@ resources for using Finagle.
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <a href="Spdy$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.spdy">spdy</a></p>
-        <h1><a href="Spdy$.html" title="See companion object">Spdy</a><span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html" title="Permalink">
+        <div class="big-circle class">c</div>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.context">context</a>.<a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></p>
+        <h1>KeyValuePair<span class="permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="Spdy$.html" title="See companion object">object Spdy</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -228,16 +232,18 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="symbol">SpdyVersion.SPDY_3_1</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">16384.bytes</a></span></span></span>, <span name="_maxRequestSize">_maxRequestSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>, <span name="_maxResponseSize">_maxResponseSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">KeyValuePair</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -263,7 +269,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.spdy.Spdy"><span>Spdy</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.CodecFactory"><span>CodecFactory</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.context.Context.KeyValuePair"><span>KeyValuePair</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -283,10 +289,10 @@ resources for using Finagle.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.spdy.Spdy#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(_version:org.jboss.netty.handler.codec.spdy.SpdyVersion,_enableHeaderCompression:Boolean,_maxHeaderSize:com.twitter.util.StorageUnit,_maxRequestSize:com.twitter.util.StorageUnit,_maxResponseSize:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a><a id="&lt;init&gt;:Spdy"></a>
+              <ol><li name="com.twitter.finagle.context.Context.KeyValuePair#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(key:Context.this.Key[T],value:T):Context.this.KeyValuePair[T]"></a><a id="&lt;init&gt;:KeyValuePair[T]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#&lt;init&gt;(_version:org.jboss.netty.handler.codec.spdy.SpdyVersion,_enableHeaderCompression:Boolean,_maxHeaderSize:com.twitter.util.StorageUnit,_maxRequestSize:com.twitter.util.StorageUnit,_maxResponseSize:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#&lt;init&gt;(key:Context.this.Key[T],value:T):Context.this.KeyValuePair[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -295,49 +301,14 @@ resources for using Finagle.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Spdy</span><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="symbol">SpdyVersion.SPDY_3_1</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">16384.bytes</a></span></span></span>, <span name="_maxRequestSize">_maxRequestSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>, <span name="_maxResponseSize">_maxResponseSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>)</span>
+        <span class="name">KeyValuePair</span><span class="params">(<span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span></span>)</span>
       </span>
       
       
     </li></ol>
             </div>
 
-        <div id="types" class="types members">
-              <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.CodecFactory.Client" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Client=com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]"></a><a id="Client:Client"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#Client=com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Client</span><span class="result alias"> = (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.CodecFactory.Server" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Server=com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]"></a><a id="Server:Server"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#Server=com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Server</span><span class="result alias"> = (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         
 
@@ -347,7 +318,7 @@ resources for using Finagle.
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -363,7 +334,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html###():Int" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -379,7 +350,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -392,90 +363,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#_enableHeaderCompression" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_enableHeaderCompression:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#_enableHeaderCompression:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_enableHeaderCompression</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#_maxHeaderSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_maxHeaderSize:com.twitter.util.StorageUnit"></a><a id="_maxHeaderSize:StorageUnit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#_maxHeaderSize:com.twitter.util.StorageUnit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_maxHeaderSize</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#_maxRequestSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_maxRequestSize:com.twitter.util.StorageUnit"></a><a id="_maxRequestSize:StorageUnit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#_maxRequestSize:com.twitter.util.StorageUnit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_maxRequestSize</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#_maxResponseSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_maxResponseSize:com.twitter.util.StorageUnit"></a><a id="_maxResponseSize:StorageUnit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#_maxResponseSize:com.twitter.util.StorageUnit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_maxResponseSize</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#_version" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="_version:org.jboss.netty.handler.codec.spdy.SpdyVersion"></a><a id="_version:SpdyVersion"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#_version:org.jboss.netty.handler.codec.spdy.SpdyVersion" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">_version</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span></span>
-      </span>
-      
-      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -488,26 +379,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#client" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="client:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]{defnewClientDispatcher(transport:com.twitter.finagle.transport.Transport[Any,Any],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.spdy.SpdyClientDispatcher}"></a><a id="client:(ClientCodecConfig)⇒Codec[HttpRequest,HttpResponse]{defnewClientDispatcher(transport:com.twitter.finagle.transport.Transport[Any,Any],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.spdy.SpdyClientDispatcher}"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#client:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]{defnewClientDispatcher(transport:com.twitter.finagle.transport.Transport[Any,Any],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.spdy.SpdyClientDispatcher}" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">client</span><span class="result">: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] { def newClientDispatcher(transport: com.twitter.finagle.transport.Transport[Any,Any],params: com.twitter.finagle.Stack.Params): com.twitter.finagle.spdy.SpdyClientDispatcher }</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#clone():Object" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -526,26 +401,10 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#enableHeaderCompression" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="enableHeaderCompression(enable:Boolean):com.twitter.finagle.spdy.Spdy"></a><a id="enableHeaderCompression(Boolean):Spdy"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#enableHeaderCompression(enable:Boolean):com.twitter.finagle.spdy.Spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">enableHeaderCompression</span><span class="params">(<span name="enable">enable: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -561,7 +420,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -583,7 +442,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -599,7 +458,7 @@ resources for using Finagle.
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -612,58 +471,26 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#maxHeaderSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxHeaderSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a><a id="maxHeaderSize(StorageUnit):Spdy"></a>
+    </li><li name="com.twitter.finagle.context.Context.KeyValuePair#key" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="key:Context.this.Key[T]"></a><a id="key:Key[T]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#maxHeaderSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#key:Context.this.Key[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">maxHeaderSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#maxRequestSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxRequestSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a><a id="maxRequestSize(StorageUnit):Spdy"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#maxRequestSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxRequestSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.spdy.Spdy#maxResponseSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="maxResponseSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy"></a><a id="maxResponseSize(StorageUnit):Spdy"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#maxResponseSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.spdy.Spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">maxResponseSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
+        <span class="name">key</span><span class="result">: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span>]</span>
       </span>
       
       
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -679,7 +506,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -695,7 +522,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -708,42 +535,10 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#protocolLibraryName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="protocolLibraryName:String"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#protocolLibraryName:String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">protocolLibraryName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#server" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="server:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a><a id="server:(ServerCodecConfig)⇒Codec[HttpRequest,HttpResponse]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#server:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">server</span><span class="result">: (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -756,26 +551,26 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy.Spdy#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="version(version:org.jboss.netty.handler.codec.spdy.SpdyVersion):com.twitter.finagle.spdy.Spdy"></a><a id="version(SpdyVersion):Spdy"></a>
+    </li><li name="com.twitter.finagle.context.Context.KeyValuePair#value" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="value:T"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#version(version:org.jboss.netty.handler.codec.spdy.SpdyVersion):com.twitter.finagle.spdy.Spdy" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#value:T" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">version</span><span class="params">(<span name="version">version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.spdy.Spdy">Spdy</a></span>
+        <span class="name">value</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.KeyValuePair.T">T</span></span>
       </span>
       
       
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -797,7 +592,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -819,7 +614,7 @@ resources for using Finagle.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/spdy/Spdy.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/Context$KeyValuePair.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -856,8 +651,6 @@ resources for using Finagle.
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.CodecFactory">
-              <h3>Inherited from <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

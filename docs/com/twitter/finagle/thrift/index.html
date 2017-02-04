@@ -173,24 +173,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="benchmark"></a><a id="benchmark:benchmark"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#benchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../benchmark/index.html">
-              <span class="name">benchmark</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="builder"></a><a id="builder:builder"></a>
       <span class="permalink">
@@ -838,24 +820,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../spdy/index.html">
-              <span class="name">spdy</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ssl" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ssl"></a><a id="ssl:ssl"></a>
       <span class="permalink">
@@ -1051,18 +1015,6 @@ Thrift requests and responses.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="HelloClient.html" title="Thrift client allocations benchmark."></a>
-                        <a href="HelloClient.html" title="Thrift client allocations benchmark.">
-                          HelloClient
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="HelloServer$.html" title="Thrift server for HelloClient (thrift allocations benchmark)."></a>
-                        <a href="HelloServer$.html" title="Thrift server for HelloClient (thrift allocations benchmark).">
-                          HelloServer
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="InputBuffers$.html" title=""></a>
                         <a href="InputBuffers$.html" title="">
                           InputBuffers
@@ -1096,12 +1048,6 @@ was issued to a server that requires them.">
                         <a class="object" href="Protocols$.html" title=""></a>
                         <a href="Protocols$.html" title="">
                           Protocols
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ProtocolsBenchmark.html" title=""></a>
-                        <a href="ProtocolsBenchmark.html" title="">
-                          ProtocolsBenchmark
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="SeqIdFilter$.html" title=""></a>
@@ -1150,12 +1096,6 @@ not."></a>
 message and a boolean indicating whether it is a one-shot message or
 not.">
                           ThriftClientRequest
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ThriftDispatchBench$.html" title=""></a>
-                        <a class="class" href="ThriftDispatchBench.html" title=""></a>
-                        <a href="ThriftDispatchBench.html" title="">
-                          ThriftDispatchBench
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ThriftMethodStats$.html" title=""></a>
@@ -1486,32 +1426,6 @@ generation, a proper <code>DeserializationCtx</code> will be available
 to code via <code>Contexts.local(DeserializeCtx.Key)</code>.</p><p>While this is thread-safe, it should only be used for the life
 of a single request/response pair.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.HelloClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HelloClientextendsStdBenchAnnotations"></a><a id="HelloClient:HelloClient"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#HelloClientextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Thrift client allocations benchmark." href="HelloClient.html">
-              <span class="name">HelloClient</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Thrift client allocations benchmark.</p><div class="fullcomment"><div class="comment cmt"><p>Thrift client allocations benchmark.</p><p>Usage</p><p>1. Run <a href="HelloServer$.html" class="extype" name="com.twitter.finagle.thrift.HelloServer">HelloServer</a> as a separate process to isolate client performance:
-$ pants run finagle/finagle-benchmark/src/main/scala:hello-server</p><p>2. Run the client benchmark in sbt:
-$ ./sbt
-&gt; project finagle-benchmark
-&gt; run HelloClient -prof gc [-wi 20 -f 4]
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@State</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.InvalidThriftConnectionException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InvalidThriftConnectionExceptionextendsExceptionwithServiceExceptionwithProductwithSerializable"></a><a id="InvalidThriftConnectionException:InvalidThriftConnectionException"></a>
       <span class="permalink">
@@ -1578,27 +1492,6 @@ was issued to a server that requires them.</p><div class="fullcomment"><div clas
 was issued to a server that requires them. See
 <a href="ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">com.twitter.finagle.thrift.ClientIdRequiredFilter</a> for details.
 </p></div></div>
-    </li><li name="com.twitter.finagle.thrift.ProtocolsBenchmark" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ProtocolsBenchmarkextendsStdBenchAnnotations"></a><a id="ProtocolsBenchmark:ProtocolsBenchmark"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ProtocolsBenchmarkextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ProtocolsBenchmark.html">
-              <span class="name">ProtocolsBenchmark</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@State</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.SeqIdFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SeqIdFilterextendsSimpleFilter[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]"></a><a id="SeqIdFilter:SeqIdFilter"></a>
       <span class="permalink">
@@ -1687,29 +1580,6 @@ not." href="ThriftClientRequest.html">
       <p class="shortcomment cmt">Defines a (framed) thrift request, simply composed of the raw
 message and a boolean indicating whether it is a one-shot message or
 not.</p>
-    </li><li name="com.twitter.finagle.thrift.ThriftDispatchBench" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftDispatchBenchextendsStdBenchAnnotations"></a><a id="ThriftDispatchBench:ThriftDispatchBench"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftDispatchBenchextendsStdBenchAnnotations" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftDispatchBench.html">
-              <span class="name">ThriftDispatchBench</span>
-            </a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@Threads</span><span class="args">()</span>
-              
-                <span class="name">@State</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftMethodStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftMethodStatsextendsProductwithSerializable"></a><a id="ThriftMethodStats:ThriftMethodStats"></a>
       <span class="permalink">
@@ -1879,24 +1749,6 @@ to specify the client ID in their codec.
       </span>
       
       
-    </li><li name="com.twitter.finagle.thrift.HelloServer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HelloServer"></a><a id="HelloServer:HelloServer"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#HelloServer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Thrift server for HelloClient (thrift allocations benchmark)." href="HelloServer$.html">
-              <span class="name">HelloServer</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Thrift server for <a href="HelloClient.html" class="extype" name="com.twitter.finagle.thrift.HelloClient">HelloClient</a> (thrift allocations benchmark).</p>
     </li><li name="com.twitter.finagle.thrift.InputBuffers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InputBuffers"></a><a id="InputBuffers:InputBuffers"></a>
       <span class="permalink">
@@ -1947,24 +1799,6 @@ to specify the client ID in their codec.
       <span class="symbol">
         <a title="" href="SeqIdFilter$.html">
               <span class="name">SeqIdFilter</span>
-            </a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.thrift.ThriftDispatchBench" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftDispatchBench"></a><a id="ThriftDispatchBench:ThriftDispatchBench"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftDispatchBench" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftDispatchBench$.html">
-              <span class="name">ThriftDispatchBench</span>
             </a>
       </span>
       

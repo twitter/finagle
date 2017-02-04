@@ -201,32 +201,6 @@ tree.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.context">context</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Context$Bound.html" title="An environment with key bound to value; lookups for other keys
-are forwarded to next."></a>
-                        <a href="Context$Bound.html" title="An environment with key bound to value; lookups for other keys
-are forwarded to next.">
-                          Bound
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="Context$Cleared.html" title="An environment without key."></a>
-                        <a href="Context$Cleared.html" title="An environment without key.">
-                          Cleared
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="Context$Empty$.html" title="An empty environment."></a>
-                        <a href="Context$Empty$.html" title="An empty environment.">
-                          Empty
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="trait" href="Context$Env.html" title=""></a>
-                        <a href="Context$Env.html" title="">
-                          Env
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
                         <a class="class" href="" title="Keys in MarshalledContext must provide a marshaller
 and unmarshaller."></a>
                         <a href="" title="Keys in MarshalledContext must provide a marshaller
@@ -235,25 +209,11 @@ and unmarshaller.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Context$OrElse.html" title="Concatenate two environments with left-hand side precedence."></a>
-                        <a href="Context$OrElse.html" title="Concatenate two environments with left-hand side precedence.">
-                          OrElse
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="MarshalledContext$Translucent.html" title="A translucent environment is capable of storing key/value pairs
-to be (possibly) unmarshalled later."></a>
-                        <a href="MarshalledContext$Translucent.html" title="A translucent environment is capable of storing key/value pairs
-to be (possibly) unmarshalled later.">
-                          Translucent
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="MarshalledContext$Unmarshaller.html" title="An Unmarshaller gradually builds up an environment from
-a set of (id, value) pairs."></a>
-                        <a href="MarshalledContext$Unmarshaller.html" title="An Unmarshaller gradually builds up an environment from
-a set of (id, value) pairs.">
-                          Unmarshaller
+                        <a class="class" href="Context$KeyValuePair.html" title="Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context."></a>
+                        <a href="Context$KeyValuePair.html" title="Represents an opaque type that consists of a key-value pair
+which can be used to set multiple keys in the context.">
+                          KeyValuePair
                         </a>
                       </li>
               </ul>
@@ -284,7 +244,10 @@ a set of (id, value) pairs.">
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Keys in MarshalledContext must provide a marshaller
-and unmarshaller.
+and unmarshaller. The key <code>id</code> is used for marshalling and
+unmarshalling and thus must be unique. The behavior of the
+MarshalledContext when using two keys with the same key <code>id</code>
+is undefined.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes

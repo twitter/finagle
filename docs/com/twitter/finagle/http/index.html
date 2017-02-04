@@ -173,24 +173,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="benchmark"></a><a id="benchmark:benchmark"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#benchmark" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../benchmark/index.html">
-              <span class="name">benchmark</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="builder"></a><a id="builder:builder"></a>
       <span class="permalink">
@@ -403,24 +385,6 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="codec/index.html">
               <span class="name">codec</span>
-            </a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.http.compat" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="compat"></a><a id="compat:compat"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#compat" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="compat/index.html">
-              <span class="name">compat</span>
             </a>
       </span>
       
@@ -732,12 +696,6 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SafeHttpServerCodec.html" title="Convert exceptions to BadHttpRequests"></a>
-                        <a href="SafeHttpServerCodec.html" title="Convert exceptions to BadHttpRequests">
-                          SafeHttpServerCodec
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="SimpleElement.html" title=""></a>
                         <a href="SimpleElement.html" title="">
                           SimpleElement
@@ -767,6 +725,12 @@ its credentials from a provided CredentialSource...">
                         <a class="class" href="TlsFilter.html" title="Adds the host headers to for TLS-enabled requests."></a>
                         <a href="TlsFilter.html" title="Adds the host headers to for TLS-enabled requests.">
                           TlsFilter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="TooLongMessageException$.html" title=""></a>
+                        <a class="class" href="TooLongMessageException.html" title="The Message was too long to be handled correctly"></a>
+                        <a href="TooLongMessageException.html" title="The Message was too long to be handled correctly">
+                          TooLongMessageException
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Version$.html" title=""></a>
@@ -1227,24 +1191,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.spdy" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="spdy"></a><a id="spdy:spdy"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#spdy" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../spdy/index.html">
-              <span class="name">spdy</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ssl" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ssl"></a><a id="ssl:ssl"></a>
       <span class="permalink">
@@ -1650,7 +1596,7 @@ the <i>message</i>
       </span>
       
       <p class="shortcomment cmt">Mutable message headers map.</p><div class="fullcomment"><div class="comment cmt"><p>Mutable message headers map.</p><p>Header names are case-insensitive.  For example, <code>get(&quot;accept&quot;)</code> is the same as
-get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="HeaderMap.html#getAll(key:String):Iterable[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="HeaderMap.html#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
+get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="HeaderMap.html#getAll(key:String):Seq[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="HeaderMap.html#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
 to append a key-value.
 </p></div></div>
     </li><li name="com.twitter.finagle.http.Http" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1726,24 +1672,6 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
            &quot;foo/bar&quot;</li><li>Special case:
      The pattern &quot;&quot; matches only &quot;/&quot; and &quot;&quot;</li></ul><p> NOTE: When multiple pattern matches exist, the longest pattern wins.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MapHeaderMapextendsHeaderMap"></a><a id="MapHeaderMap:MapHeaderMap"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#MapHeaderMapextendsHeaderMap" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Mutable-Map-backed HeaderMap" href="MapHeaderMap.html">
-              <span class="name">MapHeaderMap</span>
-            </a><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p>
     </li><li name="com.twitter.finagle.http.MapParamMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MapParamMapextendsParamMap"></a><a id="MapParamMap:MapParamMap"></a>
       <span class="permalink">
@@ -2018,24 +1946,6 @@ spec. The path only needs to be specified if the URL accessed in the
 admin interface is different from the pattern provided in <a href="Route.html#pattern:String" class="extmbr" name="com.twitter.finagle.http.Route#pattern">Route.pattern</a>.</p></dd><dt class="param">method</dt><dd class="cmt"><p>Specifies which HTTP Method to use from
 <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a>. The default is <a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a>. Only
 <a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a> and <a href="Method$$Post$.html" class="extype" name="com.twitter.finagle.http.Method.Post">Method.Post</a> are supported.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.SafeHttpServerCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SafeHttpServerCodecextendsHttpServerCodec"></a><a id="SafeHttpServerCodec:SafeHttpServerCodec"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#SafeHttpServerCodecextendsHttpServerCodec" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Convert exceptions to BadHttpRequests" href="SafeHttpServerCodec.html">
-              <span class="name">SafeHttpServerCodec</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpServerCodec">HttpServerCodec</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Convert exceptions to BadHttpRequests</p>
     </li><li name="com.twitter.finagle.http.SimpleElement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleElementextendsFormElementwithProductwithSerializable"></a><a id="SimpleElement:SimpleElement"></a>
       <span class="permalink">
@@ -2113,6 +2023,24 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       
       <p class="shortcomment cmt">Adds the host headers to for TLS-enabled requests.</p>
+    </li><li name="com.twitter.finagle.http.TooLongMessageException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TooLongMessageExceptionextendsChannelExceptionwithFailureFlags[com.twitter.finagle.http.TooLongMessageException]"></a><a id="TooLongMessageException:TooLongMessageException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#TooLongMessageExceptionextendsChannelExceptionwithFailureFlags[com.twitter.finagle.http.TooLongMessageException]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="The Message was too long to be handled correctly" href="TooLongMessageException.html">
+              <span class="name">TooLongMessageException</span>
+            </a><span class="result"> extends <a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="TooLongMessageException.html" class="extype" name="com.twitter.finagle.http.TooLongMessageException">TooLongMessageException</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The Message was too long to be handled correctly</p>
     </li><li name="com.twitter.finagle.http.Version" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="VersionextendsAnyRef"></a><a id="Version:Version"></a>
       <span class="permalink">
@@ -2150,6 +2078,27 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       
       <p class="shortcomment cmt">Java friendly versions of <code><a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">com.twitter.finagle.http.Version</a></code>.</p>
+    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MapHeaderMapextendsHeaderMap"></a><a id="MapHeaderMap:MapHeaderMap"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#MapHeaderMapextendsHeaderMap" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Mutable-Map-backed HeaderMap" href="MapHeaderMap.html">
+              <span class="name deprecated" title="Deprecated: (Since version 2017-02-01) This is becoming private. Use HeaderMap.apply(..) instead.">MapHeaderMap</span>
+            </a><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p><div class="fullcomment"><div class="comment cmt"><p>Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-01)</i> This is becoming private. Use <code>HeaderMap.apply(..)</code> instead.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -2540,6 +2489,24 @@ its credentials from a provided CredentialSource... usually JAAS.
         <a title="" href="TlsFilter$.html">
               <span class="name">TlsFilter</span>
             </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.TooLongMessageException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TooLongMessageException"></a><a id="TooLongMessageException:TooLongMessageException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#TooLongMessageException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TooLongMessageException$.html">
+              <span class="name">TooLongMessageException</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       
