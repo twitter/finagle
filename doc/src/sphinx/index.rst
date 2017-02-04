@@ -55,6 +55,7 @@ User's guide
    Protocols
    Extending
    Metrics
+   HttpStreaming
    FAQ
 
 Notes
