@@ -6,15 +6,15 @@ package com.twitter.finagle.http;
 public final class Methods {
   private Methods() { }
 
-  public static final Method GET = Method.Get$.MODULE$;
-  public static final Method POST = Method.Post$.MODULE$;
-  public static final Method PUT = Method.Put$.MODULE$;
-  public static final Method HEAD = Method.Head$.MODULE$;
-  public static final Method PATCH = Method.Patch$.MODULE$;
-  public static final Method DELETE = Method.Delete$.MODULE$;
-  public static final Method TRACE = Method.Trace$.MODULE$;
-  public static final Method CONNECT = Method.Connect$.MODULE$;
-  public static final Method OPTIONS = Method.Options$.MODULE$;
+  public static final Method GET = Method.Get();
+  public static final Method POST = Method.Post();
+  public static final Method PUT = Method.Put();
+  public static final Method HEAD = Method.Head();
+  public static final Method PATCH = Method.Patch();
+  public static final Method DELETE = Method.Delete();
+  public static final Method TRACE = Method.Trace();
+  public static final Method CONNECT = Method.Connect();
+  public static final Method OPTIONS = Method.Options();
 
   /**
    * Construct a new {@link com.twitter.finagle.http.Method}.
