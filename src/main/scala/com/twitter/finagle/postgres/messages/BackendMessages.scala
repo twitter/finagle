@@ -53,6 +53,12 @@ case object CreateType extends CommandCompleteStatus
 
 case object CreateExtension extends CommandCompleteStatus
 
+case object CreateFunction extends CommandCompleteStatus
+
+case object CreateIndex extends CommandCompleteStatus
+
+case object CreateTrigger extends CommandCompleteStatus
+
 case object DropTable extends CommandCompleteStatus
 
 case object DiscardAll extends CommandCompleteStatus

@@ -223,6 +223,9 @@ class BackendMessageParser {
       case "CREATE TABLE" => CreateTable
       case "CREATE EXTENSION"=> CreateExtension
       case "CREATE TYPE" => CreateType
+      case "CREATE FUNCTION" => CreateFunction
+      case "CREATE INDEX" => CreateIndex
+      case "CREATE TRIGGER" => CreateTrigger
       case "DO" => Do
       case "DISCARD ALL" => DiscardAll
       case "DROP TABLE" => DropTable

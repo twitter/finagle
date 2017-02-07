@@ -88,9 +88,8 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
 
   transition {
     case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(Array.empty, List())))
-    case (CommandComplete(CreateTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(CreateType), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(CreateExtension), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(CreateExtension | CreateFunction | CreateIndex | CreateTable | CreateTrigger | CreateType), SimpleQuery) =>
+      (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(DropTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(Insert(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(Update(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
@@ -114,9 +113,8 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
 
   transition {
     case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(Array.empty, List())), Connected)
-    case (CommandComplete(CreateTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
-    case (CommandComplete(CreateType), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
-    case (CommandComplete(CreateExtension), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(CreateExtension | CreateFunction | CreateIndex | CreateTable | CreateType | CreateTrigger), ExecutePreparedStatement) =>
+      (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(DropTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(Insert(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
     case (CommandComplete(Update(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
