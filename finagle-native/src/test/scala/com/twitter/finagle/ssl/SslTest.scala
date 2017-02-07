@@ -1,71 +1,28 @@
 package com.twitter.finagle.ssl
 
-import com.google.common.io.{Files => GuavaFiles, Resources}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http._
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, TempFile}
 import com.twitter.util.{Await, Future}
-import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
-import java.nio.file.{Path, Files}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class SslTest extends FunSuite {
-  val certChainInput = new CertChainInput(
-    "setup-chain",                 // directory that contains the files below
-    "setupCA.sh",
-    "makecert.sh",
-    "openssl-intermediate.conf",
-    "openssl-root.conf"
-  )
-
-  // before we run any tests, construct the chain
-  try {
-    // would prefer to have an abstraction for what's below, but
-    // Shell.run doesn't give you back the process
-    certChainInput.setupCAFile.setExecutable(true)
-    certChainInput.makeCertFile.setExecutable(true)
-    // this process requires an openssl executable
-    val process = Runtime.getRuntime.exec(
-      Array[String](
-        certChainInput.setupCAPath,
-        certChainInput.makeCertPath,
-        certChainInput.openSSLIntConfPath,
-        certChainInput.openSSLRootConfPath
-      ), // command
-      null, // null == inherit the environment of the current process
-      certChainInput.setupCADirPath.toFile // working dir
-    )
-    process.waitFor()
-    assert(process.exitValue == 0)
-  } catch {
-    case e: java.io.IOException =>
-      println("IOException: I/O error in running setupCA script: " +
-        e.getMessage())
-        throw e
-    case NonFatal(e) => println("Unknown exception in running setupCA script: " +
-        e.getMessage())
-        throw e
-  }
-
-  // the chain should have generated the files below
-  val certChain = new CertChainOutput(
-    "test.example.com.chain",
-    "test.example.com.cert",
-    "test.example.com.key",
-    "cacert.pem",
-    certChainInput.setupCADirPath.toString
-  )
 
   // now let's run some tests
   test("be able to send and receive various sized content") {
     def makeContent(length: Int): Buf =
       Buf.ByteArray.Owned(Array.fill(length)('Z'.toByte))
+
+    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
+    // deleteOnExit is handled by TempFile
 
     val service = new Service[Request, Response] {
       def apply(request: Request) = Future {
@@ -90,7 +47,7 @@ class SslTest extends FunSuite {
       ServerBuilder()
         .codec(codec)
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .tls(certChain.certPath, certChain.keyPath)
+        .tls(certFile.getAbsolutePath(), keyFile.getAbsolutePath())
         .name("SSLServer")
         .build(service)
 
@@ -136,6 +93,18 @@ class SslTest extends FunSuite {
   }
 
   test("be able to validate a properly constructed authentication chain") {
+    val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
+    // deleteOnExit is handled by TempFile
+
+    val chainFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server-chain.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val rootFile = TempFile.fromResourcePath("/ssl/certs/ca.cert.pem")
+    // deleteOnExit is handled by TempFile
+
     // ... spin up an SSL server ...
     val service = new Service[Request, Response] {
       def apply(request: Request) = Future {
@@ -163,9 +132,9 @@ class SslTest extends FunSuite {
     val server = ServerBuilder()
       .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-      .tls(certChain.certPath,
-        certChain.keyPath,
-        certChain.validChainPath)
+      .tls(certFile.getAbsolutePath(),
+        keyFile.getAbsolutePath(),
+        chainFile.getAbsolutePath())
       .name("SSL server with valid certificate chain")
       .build(service)
 
@@ -177,7 +146,7 @@ class SslTest extends FunSuite {
       "openssl", "s_client",
       "-connect",
       "localhost:" + addr.getPort.toString,
-      "-CAfile",  certChain.rootCertOnlyPath, // cacert.pem
+      "-CAfile",  rootFile.getAbsolutePath(),
       "-verify", "9", "-showcerts"
     )
 
@@ -203,66 +172,4 @@ class SslTest extends FunSuite {
           " (openssl executable might be absent?)")
     }
   }
-}
-
-// converts filenames to File objects and absolute-path filenames,
-// which are then used as inputs to generate the certificate chain
-class CertChainInput(
-  setupCADirName: String,
-  setupCAFilename: String,
-  makeCertFilename: String,
-  openSSLIntConfFilename: String,
-  openSSLRootConfFilename: String
-) {
-  val setupCADirPath: Path = Files.createTempDirectory(setupCADirName)
-  def writeResourceToDir(klass: Class[_], name: String, directory: Path): File = {
-    val fullName = File.separator + setupCADirName + File.separator + name
-    val url = Resources.getResource(klass, fullName)
-    val newFile = new File(setupCADirPath.toFile, name)
-    Resources.asByteSource(url).copyTo(GuavaFiles.asByteSink(newFile))
-    newFile
-  }
-  val setupCAFile =
-    writeResourceToDir(getClass, setupCAFilename, setupCADirPath)
-  val makeCertFile =
-    writeResourceToDir(getClass, makeCertFilename, setupCADirPath)
-  val openSSLIntConfFile =
-    writeResourceToDir(getClass, openSSLIntConfFilename, setupCADirPath)
-  val openSSLRootConfFile =
-    writeResourceToDir(getClass, openSSLRootConfFilename, setupCADirPath)
-
-  val setupCAPath: String         = setupCAFile.getAbsolutePath
-  val makeCertPath: String        = makeCertFile.getAbsolutePath
-  val openSSLIntConfPath: String  = openSSLIntConfFile.getAbsolutePath
-  val openSSLRootConfPath: String = openSSLRootConfFile.getAbsolutePath
-}
-
-// converts filenames to File objects and absolute-path filenames
-// for the generated certificate chain
-class CertChainOutput(
-  validChainFilename: String,
-  certFilename: String,
-  keyFilename: String,
-  rootCertOnlyFilename: String,
-  setupCADirPath: String
-) {
-  val validChainFile = new File(setupCADirPath, validChainFilename)
-  val validChainPath = validChainFile.getAbsolutePath
-  if (!validChainFile.canRead())
-    throw new java.io.FileNotFoundException("Cannot read valid chain file")
-
-  val certFile = new File(setupCADirPath, certFilename)
-  val certPath = certFile.getAbsolutePath
-  if (!certFile.canRead())
-    throw new java.io.FileNotFoundException("Cannot read cert file")
-
-  val keyFile = new File(setupCADirPath, keyFilename)
-  val keyPath = keyFile.getAbsolutePath
-  if (!keyFile.canRead())
-    throw new java.io.FileNotFoundException("Cannot read key file")
-
-  val rootCertOnlyFile = new File(setupCADirPath, rootCertOnlyFilename)
-  val rootCertOnlyPath = rootCertOnlyFile.getAbsolutePath
-  if (!rootCertOnlyFile.canRead())
-    throw new java.io.FileNotFoundException("Cannot read root cert only file")
 }
