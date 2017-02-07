@@ -2,9 +2,10 @@ package com.twitter.finagle.netty4.param
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.numWorkers
+import com.twitter.finagle.netty4.{nativeEpoll, numWorkers}
 import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
 import io.netty.channel.EventLoopGroup
+import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.Executors
 
@@ -24,13 +25,14 @@ object WorkerPool {
       new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true)
     )
 
-    // Netty will create `numWorkers` children in the `NioEventLoopGroup` (which
-    // in this case are of type `NioEventLoop`). Each `NioEventLoop` will pin itself
-    // to a thread acquired from the `executor` and will multiplex over channels.
+    // Netty will create `numWorkers` children in the `EventLoopGroup`. Each `EventLoop` will
+    // pin itself to a thread acquired from the `executor` and will multiplex over channels.
     // Thus, with this configuration, we should not acquire more than `numWorkers`
     // threads from the `executor`.
     val executor = Executors.newCachedThreadPool(threadFactory)
-    val eventLoopGroup = new NioEventLoopGroup(numWorkers(), executor)
+    val eventLoopGroup =
+      if (nativeEpoll.enabled) new EpollEventLoopGroup(numWorkers(), executor)
+      else new NioEventLoopGroup(numWorkers(), executor)
     WorkerPool(eventLoopGroup)
   }
 }

@@ -11,6 +11,7 @@ import com.twitter.util.{Future, Promise}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
+import io.netty.channel.epoll.EpollSocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
@@ -59,10 +60,14 @@ private[finagle] object Netty4Transporter {
       val compensatedConnectTimeoutMs =
         (compensation + connectTimeout).inMillis.min(Int.MaxValue)
 
+      val channelClass =
+        if (nativeEpoll.enabled) classOf[EpollSocketChannel]
+        else classOf[NioSocketChannel]
+
       val bootstrap =
         new Bootstrap()
           .group(params[param.WorkerPool].eventLoopGroup)
-          .channel(classOf[NioSocketChannel])
+          .channel(channelClass)
           .option(ChannelOption.ALLOCATOR, allocator)
           .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
           .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)

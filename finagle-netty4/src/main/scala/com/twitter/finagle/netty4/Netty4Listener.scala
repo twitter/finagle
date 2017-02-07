@@ -14,6 +14,7 @@ import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
+import io.netty.channel.epoll.{EpollEventLoopGroup, EpollServerSocketChannel}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.{FutureListener, Future => NettyFuture}
@@ -92,13 +93,23 @@ private[finagle] case class Netty4Listener[In, Out](
       )
 
       val bossLoop: EventLoopGroup =
-        new NioEventLoopGroup(
-          1 /*nThreads*/ ,
-          new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
-        )
+        if (nativeEpoll.enabled)
+          new EpollEventLoopGroup(
+            1 /*nThreads*/ ,
+            new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
+          )
+        else
+          new NioEventLoopGroup(
+            1 /*nThreads*/ ,
+            new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
+          )
 
       val bootstrap = new ServerBootstrap()
-      bootstrap.channel(classOf[NioServerSocketChannel])
+      if (nativeEpoll.enabled)
+        bootstrap.channel(classOf[EpollServerSocketChannel])
+      else
+        bootstrap.channel(classOf[NioServerSocketChannel])
+
       bootstrap.group(bossLoop, params[param.WorkerPool].eventLoopGroup)
       bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
 
