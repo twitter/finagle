@@ -17,8 +17,8 @@ class DirectToHeapInboundHandlerTest extends FunSuite
 
   // Generates random ByteBufs with:
   //  - Capacity: [1..100]
-  //  - Write-Index: [1..Capacity]
-  //  - Read-Index: [1..Write-Index]
+  //  - Write-Index: [0..Capacity]
+  //  - Read-Index: [0..Write-Index]
   def genDirectBuffer: Gen[ByteBuf] = for {
     capacity <- Gen.choose(1, 100)
     bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
@@ -78,6 +78,17 @@ class DirectToHeapInboundHandlerTest extends FunSuite
   test("bypass non-ByteBufs/non-ByteBufHolders") {
     channel.writeInbound("foo")
     assert(channel.readInbound[String] == "foo")
+  }
+
+  test("bypass empty byte bufs") {
+    channel.writeInbound(Unpooled.EMPTY_BUFFER)
+    assert(channel.readInbound[ByteBuf] eq Unpooled.EMPTY_BUFFER)
+  }
+
+  test("bypass empty byte buf holders") {
+    val in = new DefaultByteBufHolder(Unpooled.EMPTY_BUFFER)
+    channel.writeInbound(in)
+    assert(channel.readInbound[ByteBufHolder] eq in)
   }
 }
 
