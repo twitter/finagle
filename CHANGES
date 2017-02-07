@@ -23,6 +23,10 @@ Breaking API Changes
     as instances of a single c.t.f.http.Method class. The string representation of the HTTP
     method is now available via the `Method.name` method. ``RB_ID=906697``
 
+  * finagle-kestrel: Remove the deprecated `codec` method on `c.t.f.kestrel.MultiReaderMemcache`.
+    Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
+    ``RB_ID=907184``
+
 6.42.0
 ------
 

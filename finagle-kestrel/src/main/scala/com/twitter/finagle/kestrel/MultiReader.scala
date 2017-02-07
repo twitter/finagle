@@ -4,7 +4,7 @@ import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder._
-import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
+import com.twitter.finagle.kestrel.protocol.{Response, Command}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
@@ -227,14 +227,6 @@ object MultiReaderMemcache {
     val config = MultiReaderConfig[Command, Response](va, queueName)
     new MultiReaderBuilderMemcache(config)
   }
-
-  /**
-   * Helper for getting the right codec for the memcache protocol
-   *
-   * @return the Kestrel codec
-   */
-  @deprecated("Use `.stack(Kestrel.client)` on the configured com.twitter.finagle.builder.ClientBuilder instead", "2016-12-6")
-  def codec = KestrelCodec()
 }
 
 /**
