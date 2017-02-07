@@ -262,6 +262,7 @@ object Finagle extends Build {
       util("registry"),
       util("security"),
       util("stats"),
+      util("tunable"),
       caffeineLib,
       jsr305Lib,
       nettyLib)

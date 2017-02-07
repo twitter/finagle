@@ -7,6 +7,7 @@ junit_tests(
     'util/util-core',
     'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
+    'util/util-tunable/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
   fatal_warnings=True,

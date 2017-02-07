@@ -48,6 +48,7 @@ import com.twitter.util.Duration;
 import com.twitter.util.Function0;
 import com.twitter.util.NullMonitor;
 import com.twitter.util.RootMonitor;
+import com.twitter.util.tunable.Tunable;
 
 public class StackParamCompilationTest {
 
@@ -109,6 +110,7 @@ public class StackParamCompilationTest {
           }
         }).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
+        .configured(new TimeoutFilter.Param(new Tunable.Const<Duration>("id", Duration.Top())).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
         .configured(new Transport.Verbose(false).mk())

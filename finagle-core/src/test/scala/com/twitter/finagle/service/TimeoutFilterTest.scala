@@ -4,6 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
+import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.runner.RunWith
 import org.scalatest.{FunSuite, Matchers}
@@ -137,7 +138,7 @@ class TimeoutFilterTest extends FunSuite
       val made = stack.make(params)
       // this relies on the fact that we do not compose
       // with a TimeoutFilter if the duration is not appropriate.
-      assert(svcFactory == made)
+      assert(svcFactory eq made)
     }
     assertNoTimeoutFilter(Duration.Bottom)
     assertNoTimeoutFilter(Duration.Top)
@@ -145,14 +146,33 @@ class TimeoutFilterTest extends FunSuite
     assertNoTimeoutFilter(Duration.Zero)
     assertNoTimeoutFilter(-1.second)
 
+    def assertNoTimeoutFilterTunable(tunable: Tunable[Duration]): Unit = {
+      val params = Stack.Params.empty + TimeoutFilter.Param(tunable)
+      val made = stack.make(params)
+      assert(svcFactory eq made)
+    }
+
+    assertNoTimeoutFilterTunable(Tunable.const("id", Duration.Bottom))
+    assertNoTimeoutFilterTunable(Tunable.const("id", Duration.Top))
+    assertNoTimeoutFilterTunable(Tunable.const("id", Duration.Undefined))
+    assertNoTimeoutFilterTunable(Tunable.const("id", Duration.Zero))
+    assertNoTimeoutFilterTunable(Tunable.const("id", -1.second))
+
     def assertTimeoutFilter(duration: Duration): Unit = {
       val params = Stack.Params.empty + TimeoutFilter.Param(duration)
       val made = stack.make(params)
       // this relies on the fact that we do compose
       // with a TimeoutFilter if the duration is appropriate.
-      assert(svcFactory != made)
+      assert(svcFactory ne made)
     }
     assertTimeoutFilter(10.seconds)
+
+    def assertTimeoutFilterTunable(tunable: Tunable[Duration]): Unit = {
+      val params = Stack.Params.empty + TimeoutFilter.Param(tunable)
+      val made = stack.make(params)
+      assert(svcFactory ne made)
+    }
+    assertTimeoutFilterTunable(Tunable.const("id", 10.seconds))
   }
 
   test("filter added or not to clientModule based on duration") {

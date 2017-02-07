@@ -5,6 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.LatencyCompensation
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.tracing.Trace
+import com.twitter.util.tunable.Tunable
 import com.twitter.util.{Duration, Future, Timer}
 
 object TimeoutFilter {
@@ -24,13 +25,33 @@ object TimeoutFilter {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.service.TimeoutFilter]] module.
    */
-  case class Param(timeout: Duration) {
+ class Param private[twitter](val tunableTimeout: Tunable[Duration]) {
+
+    def this(timeout: Duration) =
+      this(Tunable.const(role.name, timeout))
+
+    def timeout: Duration = tunableTimeout() match {
+      case Some(duration) => duration
+      case None => Param.Default
+    }
+
     def mk(): (Param, Stack.Param[Param]) =
       (this, Param.param)
   }
+
   object Param {
+    def apply(timeout: Duration): Param =
+      new Param(timeout)
+
+    def apply(tunableTimeout: Tunable[Duration]) =
+      new Param(tunableTimeout)
+
+    def unapply(param: Param): Option[Duration] = param.tunableTimeout()
+
+    private[twitter] val Default = Duration.Top
+
     implicit val param: Stack.Param[TimeoutFilter.Param] =
-      Stack.Param(Param(Duration.Top))
+      Stack.Param(Param(Default))
   }
 
   /**
@@ -38,13 +59,28 @@ object TimeoutFilter {
    * [[com.twitter.finagle.service.TimeoutFilter]] module when used for
    * a total timeout of a logical request, including retries.
    */
-  private[finagle] case class TotalTimeout(timeout: Duration) {
+  private[finagle] class TotalTimeout private[twitter](val tunableTimeout: Tunable[Duration]) {
+
+    def this(timeout: Duration) =
+      this(Tunable.const(role.name, timeout))
+
+    def timeout: Duration = tunableTimeout() match {
+      case Some(duration) => duration
+      case None => Param.Default
+    }
+
     def mk(): (TotalTimeout, Stack.Param[Param]) =
       (this, Param.param)
   }
+
   private[finagle] object TotalTimeout {
+    def apply(timeout: Duration): TotalTimeout =
+      new TotalTimeout(timeout)
+
+    private[finagle] val Default = Duration.Top
+
     implicit val param: Stack.Param[TotalTimeout] =
-      Stack.Param(TotalTimeout(Duration.Top))
+      Stack.Param(TotalTimeout(Default))
   }
 
   /**
@@ -66,18 +102,23 @@ object TimeoutFilter {
         _timer: param.Timer,
         _compensation: LatencyCompensation.Compensation,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = {
-        val timeout = _param.timeout + _compensation.howlong
-
-        if (!timeout.isFinite || timeout <= Duration.Zero) {
+      ): ServiceFactory[Req, Rep] = _param.tunableTimeout match {
+        case Tunable.Const(duration)
+          if !(duration + _compensation.howlong).isFinite ||
+             (duration + _compensation.howlong) <= Duration.Zero =>
           next
-        } else {
-          val filter = new TimeoutFilter[Req, Rep](
-            () => timeout,
+
+        case tunable =>
+          val timeoutFn: () => Duration = () => _compensation.howlong + (tunable() match {
+            case Some(duration) => duration
+            case None => TimeoutFilter.Param.Default
+          })
+
+          new TimeoutFilter[Req, Rep](
+            timeoutFn,
             timeout => new IndividualRequestTimeoutException(timeout),
-            _timer.timer)
-          filter.andThen(next)
-        }
+            _timer.timer
+          ).andThen(next)
       }
     }
 
@@ -97,14 +138,20 @@ object TimeoutFilter {
         _param: Param,
         _timer: param.Timer,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = {
-        val Param(timeout) = _param
-        val param.Timer(timer) = _timer
-        if (!timeout.isFinite || timeout <= Duration.Zero) next else {
-          val exc = new IndividualRequestTimeoutException(timeout)
-          val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
-          filter.andThen(next)
-        }
+      ): ServiceFactory[Req, Rep] = _param.tunableTimeout match {
+        case Tunable.Const(duration) if !duration.isFinite || duration <= Duration.Zero =>
+          next
+        case tunable =>
+          val timeoutFn: () => Duration = () => tunable() match {
+            case Some(duration) => duration
+            case None => TimeoutFilter.Param.Default
+          }
+
+          new TimeoutFilter[Req, Rep](
+            timeoutFn,
+            timeout => new IndividualRequestTimeoutException(timeout),
+            _timer.timer
+          ).andThen(next)
       }
     }
 
