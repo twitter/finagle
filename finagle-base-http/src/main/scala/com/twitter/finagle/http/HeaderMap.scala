@@ -111,16 +111,7 @@ class MapHeaderMap extends HeaderMap {
 
   // For Map/MapLike
   def +=(kv: (String, String)): MapHeaderMap.this.type = {
-    val t = HeaderValuePair(kv._1, kv._2)
-
-    // this slightly complicated logic is here to be backward compatible
-    // such that if your denormalized header names differ, you can append
-    // to the list for that canonical header name. header values with same
-    // denormalized name are replaced.
-    // see `add()` to always append to the list of values.
-    underlying(t.canonicalName) =
-      underlying.getOrElse(t.canonicalName, Vector.empty)
-        .filterNot(_.header == t.header) :+ t
+    set(kv._1, kv._2)
     this
   }
 
@@ -153,7 +144,7 @@ object MapHeaderMap {
 /**
  * Mutable HttpMessage-backed [[HeaderMap]].
  */
-private[finagle] final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
+private final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
 
   def get(key: String): Option[String] =
     Option(headers.get(key))
@@ -173,13 +164,13 @@ private[finagle] final class Netty3HeaderMap(headers: HttpHeaders) extends Heade
     keys.toSet
 
   override def keysIterator: Iterator[String] =
-    keySet.iterator
+    keys.iterator
 
   override def contains(key: String): Boolean =
     headers.contains(key)
 
   def += (kv: (String, String)): this.type = {
-    headers.set(kv._1, kv._2)
+    set(kv._1, kv._2)
     this
   }
 

@@ -1,20 +1,19 @@
-package com.twitter.finagle.netty4.http
+package com.twitter.finagle.http
 
-import com.twitter.finagle.http.{AbstractHeaderMapTest, HeaderMap => FinagleHeaders}
-import io.netty.handler.codec.http.{DefaultHttpHeaders => NettyHeaders}
+import org.jboss.netty.handler.codec.http.DefaultHttpHeaders
 import scala.collection.JavaConverters._
 
-class Netty4HeaderMapTest extends AbstractHeaderMapTest {
+class Netty3HeaderMapTest extends AbstractHeaderMapTest {
 
-  override def newHeaderMap(headers: (String, String)*): FinagleHeaders = {
-    val netty = new NettyHeaders()
-    headers.foreach { case (k, v) => netty.add(k, v) }
-    new Netty4HeaderMap(netty)
+  def newHeaderMap(headers: (String, String)*): HeaderMap = {
+    val result = Request().headerMap
+    headers.foreach { case (k, v) => result.add(k, v) }
+    result
   }
 
-  test("Netty4HeaderMap proxies updates and reads to netty headers") {
-    val netty = new NettyHeaders()
-    val wrapper: FinagleHeaders = new Netty4HeaderMap(netty)
+  test("Netty3HeaderMap proxies updates and reads to netty headers") {
+    val netty = new DefaultHttpHeaders()
+    val wrapper: HeaderMap = new Netty3HeaderMap(netty)
     netty.add("foo", "bar")
     netty.add("key", "val")
     wrapper.add("qux", "something")

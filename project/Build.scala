@@ -454,7 +454,7 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       netty4Http
     )
-  ).dependsOn(finagleNetty4, finagleBaseHttp)
+  ).dependsOn(finagleNetty4, finagleBaseHttp % "test->test;compile->compile")
 
   lazy val finagleHttp2 = Project(
     id = "finagle-http2",

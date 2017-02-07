@@ -8,6 +8,7 @@ junit_tests(
     '3rdparty/jvm/io/netty:netty4',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
+    'finagle/finagle-base-http:tests',
     'finagle/finagle-netty4-http',
     'finagle/finagle-netty4',
   ],
