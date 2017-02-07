@@ -6,6 +6,6 @@ package com.twitter.finagle.http;
 public final class Versions {
   private Versions() { }
 
-  public static final Version HTTP_1_1 = Version.Http11$.MODULE$;
-  public static final Version HTTP_1_0 = Version.Http10$.MODULE$;
+  public static final Version HTTP_1_1 = Version.Http11();
+  public static final Version HTTP_1_0 = Version.Http10();
 }

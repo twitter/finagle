@@ -17,6 +17,22 @@ class MessageTest extends FunSuite {
     assert(response.contentString == "")
   }
 
+  test("version") {
+    Seq(
+      Request(Version.Http10, Method.Get, ""),
+      Response(Version.Http10, Status.Ok)
+    ).foreach { message =>
+
+      assert(message.version == Version.Http10)
+
+      message.version = Version.Http11
+      assert(message.version == Version.Http11)
+
+      message.version(Version.Http10)
+      assert(message.version == Version.Http10)
+    }
+  }
+
   test("headers") {
     val response = Request()
     response.allow.toList == Nil

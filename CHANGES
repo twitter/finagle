@@ -7,8 +7,17 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-base-http: `c.t.f.http.Message` now has a Java friendly method to set the
+    HTTP version: `Message.version(Version)`. ``RB_ID=906946``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-base-http: `c.t.f.http.Version` is no longer represented by case objects
+    and has been replaced by val instances of a case class. ``RB_ID=906946``
 
   * finagle-base-http: The common HTTP methods are no longer modeled by case objects but
     as instances of a single c.t.f.http.Method class. The string representation of the HTTP

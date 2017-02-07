@@ -123,6 +123,7 @@ private[finagle] object Bijections {
     def versionToNetty(v: FinagleHttp.Version): NettyHttp.HttpVersion = v match {
       case FinagleHttp.Version.Http10 => NettyHttp.HttpVersion.HTTP_1_0
       case FinagleHttp.Version.Http11 => NettyHttp.HttpVersion.HTTP_1_1
+      case _ => NettyHttp.HttpVersion.HTTP_1_1
     }
 
     def responseHeadersToNetty(r: FinagleHttp.Response): NettyHttp.HttpResponse =

@@ -74,8 +74,23 @@ abstract class Message {
     this
   }
 
+  /** Get the HTTP version */
   def version: Version = from(httpMessage.getProtocolVersion())
+
+  /** Set the HTTP version
+   *
+   * @see [[version(Version)]] for Java users
+   */
   def version_=(version: Version): Unit = httpMessage.setProtocolVersion(from(version))
+
+  /** Set the HTTP version
+   *
+   * * @see [[version_=(Version)]] for Scala users
+   */
+  final def version(version: Version): this.type = {
+    this.version = version
+    this
+  }
 
   lazy val headerMap: HeaderMap = new Netty3HeaderMap(httpMessage.headers)
 
