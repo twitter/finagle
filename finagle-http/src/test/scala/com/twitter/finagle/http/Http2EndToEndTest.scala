@@ -34,7 +34,7 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     Future.value(Response())
   }
 
-  def featureImplemented(feature: Feature): Boolean = true
+  def featureImplemented(feature: Feature): Boolean = feature != MaxHeaderSize
 
   test("Upgrade stats are properly recorded") {
     shouldUpgrade.set(false)

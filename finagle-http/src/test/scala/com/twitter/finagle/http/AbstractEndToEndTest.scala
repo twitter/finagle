@@ -34,6 +34,7 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   sealed trait Feature
   object TooLongStream extends Feature
+  object MaxHeaderSize extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -827,6 +828,34 @@ abstract class AbstractEndToEndTest extends FunSuite
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = clientImpl()
       .withMaxResponseSize(500.kilobytes) // wontfix: doesn't work on netty3 with limit <= 8 KB
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    intercept[TooLongMessageException] {
+      await(client(req))
+    }
+
+    await(client.close())
+    await(server.close())
+  }
+
+  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.headerMap.set("foo", "*" * 1.kilobytes.bytes.toInt)
+        Future.value(response)
+      }
+    }
+
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withMaxHeaderSize(1.kilobyte)
       .withStatsReceiver(NullStatsReceiver)
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
