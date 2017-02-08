@@ -27,6 +27,11 @@ Breaking API Changes
     Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
     ``RB_ID=907184``
 
+  * finagle-stats: Remove the `com.twitter.finagle.stats.exportEmptyHistograms` toggle
+    which has defaulted to 0.0 for quite some time. Change the default value of the
+    `com.twitter.finagle.stats.includeEmptyHistograms` flag to false to retain the
+    behavior. ``RB_ID=907186``
+
 6.42.0
 ------
 
