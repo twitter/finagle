@@ -439,6 +439,53 @@ abstract class AbstractEndToEndTest extends FunSuite
         await(f)
       }
       assert(actual == e)
+      await(interrupted)
+
+      await(client.close())
+    }
+
+    test(implName + ": interrupting requests doesn't interfere with others") {
+      val p = Promise[Unit]()
+      val interrupted = Promise[Unit]()
+
+      val second = Promise[Response]
+      val service = new HttpService {
+        def apply(request: Request) = {
+          if (!p.isDefined) {
+            p.setDone()
+            val interruptee = Promise[Response]()
+            interruptee.setInterruptHandler { case exn: Throwable =>
+              interrupted.setDone()
+            }
+            interruptee
+          } else {
+            second
+          }
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.content = Buf.Utf8("." * 10)
+      val f1 = client(req)
+      await(p)
+      val f2 = client(req)
+      assert(!f1.isDefined)
+      assert(!f2.isDefined)
+
+      val e = new Exception("boom!")
+      f1.raise(e)
+      val actual = intercept[Exception] {
+        await(f1)
+      }
+      assert(actual == e)
+      await(interrupted)
+
+      assert(!f2.isDefined)
+
+      second.setValue(req.response)
+      assert(await(f2).status == Status.Ok)
+
 
       await(client.close())
     }
