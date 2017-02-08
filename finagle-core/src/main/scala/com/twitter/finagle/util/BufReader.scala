@@ -207,7 +207,7 @@ private[finagle] object BufReader {
    * Creates a [[BufReader]].
    */
   def apply(buf: Buf): BufReader =
-    new BufReaderImpl(Buf.Indexed.coerce(buf))
+    new BufReaderImpl(buf)
 
   /**
    * Indicates there aren't sufficient bytes to be read.
@@ -220,7 +220,7 @@ private[finagle] object BufReader {
   private[util] val SignedMediumMax = 0x800000
 }
 
-private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
+private class BufReaderImpl(buf: Buf) extends BufReader {
   import BufReader._
 
   private[this] val len = buf.length
@@ -235,8 +235,8 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
         s"tried to read $needed byte(s) when remaining bytes was $remaining")
     }
 
-  private[this] def byteFinder(target: Byte): Buf.Indexed.Processor =
-    new Buf.Indexed.Processor {
+  private[this] def byteFinder(target: Byte): Buf.Processor =
+    new Buf.Processor {
       def apply(byte: Byte): Boolean = byte != target
     }
 
@@ -251,7 +251,7 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
 
   def readByte(): Byte = {
     checkRemaining(1)
-    val ret = buf(pos)
+    val ret = buf.get(pos)
     pos += 1
     ret
   }
@@ -262,8 +262,8 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readShortBE(): Short = {
     checkRemaining(2)
     val ret =
-      (buf(pos    ) & 0xff) << 8 |
-      (buf(pos + 1) & 0xff)
+      (buf.get(pos    ) & 0xff) << 8 |
+      (buf.get(pos + 1) & 0xff)
     pos += 2
     ret.toShort
   }
@@ -271,8 +271,8 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readShortLE(): Short = {
     checkRemaining(2)
     val ret =
-      (buf(pos    ) & 0xff) |
-      (buf(pos + 1) & 0xff) << 8
+      (buf.get(pos    ) & 0xff) |
+      (buf.get(pos + 1) & 0xff) << 8
     pos += 2
     ret.toShort
   }
@@ -303,9 +303,9 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readUnsignedMediumBE(): Int = {
     checkRemaining(3)
     val ret =
-      (buf(pos    ) & 0xff) << 16 |
-      (buf(pos + 1) & 0xff) <<  8 |
-      (buf(pos + 2) & 0xff)
+      (buf.get(pos    ) & 0xff) << 16 |
+      (buf.get(pos + 1) & 0xff) <<  8 |
+      (buf.get(pos + 2) & 0xff)
     pos += 3
     ret
   }
@@ -313,9 +313,9 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readUnsignedMediumLE(): Int = {
     checkRemaining(3)
     val ret =
-      (buf(pos    ) & 0xff)       |
-      (buf(pos + 1) & 0xff) <<  8 |
-      (buf(pos + 2) & 0xff) << 16
+      (buf.get(pos    ) & 0xff)       |
+      (buf.get(pos + 1) & 0xff) <<  8 |
+      (buf.get(pos + 2) & 0xff) << 16
     pos += 3
     ret
   }
@@ -324,10 +324,10 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readIntBE(): Int = {
     checkRemaining(4)
     val ret =
-      (buf(pos    ) & 0xff) << 24 |
-      (buf(pos + 1) & 0xff) << 16 |
-      (buf(pos + 2) & 0xff) <<  8 |
-      (buf(pos + 3) & 0xff)
+      (buf.get(pos    ) & 0xff) << 24 |
+      (buf.get(pos + 1) & 0xff) << 16 |
+      (buf.get(pos + 2) & 0xff) <<  8 |
+      (buf.get(pos + 3) & 0xff)
     pos += 4
     ret
   }
@@ -335,10 +335,10 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readIntLE(): Int = {
     checkRemaining(4)
     val ret =
-      (buf(pos    ) & 0xff)       |
-      (buf(pos + 1) & 0xff) <<  8 |
-      (buf(pos + 2) & 0xff) << 16 |
-      (buf(pos + 3) & 0xff) << 24
+      (buf.get(pos    ) & 0xff)       |
+      (buf.get(pos + 1) & 0xff) <<  8 |
+      (buf.get(pos + 2) & 0xff) << 16 |
+      (buf.get(pos + 3) & 0xff) << 24
     pos += 4
     ret
   }
@@ -351,14 +351,14 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readLongBE(): Long = {
     checkRemaining(8)
     val ret =
-      (buf(pos    ) & 0xff).toLong << 56 |
-      (buf(pos + 1) & 0xff).toLong << 48 |
-      (buf(pos + 2) & 0xff).toLong << 40 |
-      (buf(pos + 3) & 0xff).toLong << 32 |
-      (buf(pos + 4) & 0xff).toLong << 24 |
-      (buf(pos + 5) & 0xff).toLong << 16 |
-      (buf(pos + 6) & 0xff).toLong <<  8 |
-      (buf(pos + 7) & 0xff).toLong
+      (buf.get(pos    ) & 0xff).toLong << 56 |
+      (buf.get(pos + 1) & 0xff).toLong << 48 |
+      (buf.get(pos + 2) & 0xff).toLong << 40 |
+      (buf.get(pos + 3) & 0xff).toLong << 32 |
+      (buf.get(pos + 4) & 0xff).toLong << 24 |
+      (buf.get(pos + 5) & 0xff).toLong << 16 |
+      (buf.get(pos + 6) & 0xff).toLong <<  8 |
+      (buf.get(pos + 7) & 0xff).toLong
     pos += 8
     ret
   }
@@ -366,14 +366,14 @@ private class BufReaderImpl(buf: Buf.Indexed) extends BufReader {
   def readLongLE(): Long = {
     checkRemaining(8)
     val ret =
-      (buf(pos    ) & 0xff).toLong       |
-      (buf(pos + 1) & 0xff).toLong <<  8 |
-      (buf(pos + 2) & 0xff).toLong << 16 |
-      (buf(pos + 3) & 0xff).toLong << 24 |
-      (buf(pos + 4) & 0xff).toLong << 32 |
-      (buf(pos + 5) & 0xff).toLong << 40 |
-      (buf(pos + 6) & 0xff).toLong << 48 |
-      (buf(pos + 7) & 0xff).toLong << 56
+      (buf.get(pos    ) & 0xff).toLong       |
+      (buf.get(pos + 1) & 0xff).toLong <<  8 |
+      (buf.get(pos + 2) & 0xff).toLong << 16 |
+      (buf.get(pos + 3) & 0xff).toLong << 24 |
+      (buf.get(pos + 4) & 0xff).toLong << 32 |
+      (buf.get(pos + 5) & 0xff).toLong << 40 |
+      (buf.get(pos + 6) & 0xff).toLong << 48 |
+      (buf.get(pos + 7) & 0xff).toLong << 56
     pos += 8
     ret
   }

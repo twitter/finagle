@@ -117,62 +117,62 @@ class BufReaderTest extends FunSuite with GeneratorDrivenPropertyChecks {
   })
 
   test("readUnsignedByte") (forAll { b: Byte =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readByte() = b }
+    val br = new BufReaderImpl(Buf.Empty) { override def readByte() = b }
     assert(br.readUnsignedByte() == (b & 0xff))
   })
 
   test("readUnsignedShortBE") (forAll { s: Short =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readShortBE() = s }
+    val br = new BufReaderImpl(Buf.Empty) { override def readShortBE() = s }
     assert(br.readUnsignedShortBE() == (s & 0xffff))
   })
 
   test("readUnsignedShortLE") (forAll { s: Short =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readShortLE() = s }
+    val br = new BufReaderImpl(Buf.Empty) { override def readShortLE() = s }
     assert(br.readUnsignedShortLE() == (s & 0xffff))
   })
 
   test("readMediumBE") (forAll { i: Int =>
     val m = maskMedium(i)
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readUnsignedMediumBE() = m }
+    val br = new BufReaderImpl(Buf.Empty) { override def readUnsignedMediumBE() = m }
     val expected = if (m > SignedMediumMax) m | 0xff000000 else m
     assert(br.readMediumBE() == expected)
   })
 
   test("readMediumLE") (forAll { i: Int =>
     val m = maskMedium(i)
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readUnsignedMediumLE() = m }
+    val br = new BufReaderImpl(Buf.Empty) { override def readUnsignedMediumLE() = m }
     val expected = if (m > SignedMediumMax) m | 0xff000000 else m
     assert(br.readMediumLE() == expected)
   })
 
   test("readUnsignedIntBE") (forAll { i: Int =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readIntBE() = i }
+    val br = new BufReaderImpl(Buf.Empty) { override def readIntBE() = i }
     assert(br.readUnsignedIntBE() == (i & 0xffffffffl))
   })
 
   test("readUnsignedIntLE") (forAll { i: Int =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readIntLE() = i }
+    val br = new BufReaderImpl(Buf.Empty) { override def readIntLE() = i }
     assert(br.readUnsignedIntLE() == (i & 0xffffffffl))
   })
 
   // .equals is required to handle NaN
   test("readFloatBE") (forAll { i: Int =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readIntBE() = i }
+    val br = new BufReaderImpl(Buf.Empty) { override def readIntBE() = i }
     assert(br.readFloatBE().equals(JFloat.intBitsToFloat(i)))
   })
 
   test("readFloatLE") (forAll { i: Int =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readIntLE() = i }
+    val br = new BufReaderImpl(Buf.Empty) { override def readIntLE() = i }
     assert(br.readFloatLE().equals(JFloat.intBitsToFloat(i)))
   })
 
   test("readDoubleBE") (forAll { l: Long =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readLongBE() = l }
+    val br = new BufReaderImpl(Buf.Empty) { override def readLongBE() = l }
     assert(br.readDoubleBE().equals(JDouble.longBitsToDouble(l)))
   })
 
   test("readDoubleLE") (forAll { l: Long =>
-    val br = new BufReaderImpl(Buf.Indexed.coerce(Buf.Empty)) { override def readLongLE() = l }
+    val br = new BufReaderImpl(Buf.Empty) { override def readLongLE() = l }
     assert(br.readDoubleLE().equals(JDouble.longBitsToDouble(l)))
   })
 

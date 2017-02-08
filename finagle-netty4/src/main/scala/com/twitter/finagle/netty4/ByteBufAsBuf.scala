@@ -60,13 +60,13 @@ private[finagle] object ByteBufAsBuf {
  */
 private[finagle] class ByteBufAsBuf(
     private[finagle] val underlying: ByteBuf)
-  extends Buf.Indexed {
+  extends Buf {
   // nb: `underlying` is exposed for testing
 
-  private[twitter] def apply(index: Int): Byte =
+  def get(index: Int): Byte =
     underlying.getByte(underlying.readerIndex() + index)
 
-  private[twitter] def process(from: Int, until: Int, processor: Buf.Indexed.Processor): Int = {
+  def process(from: Int, until: Int, processor: Buf.Processor): Int = {
     checkSliceArgs(from, until)
     if (isSliceEmpty(from, until)) return -1
     val byteProcessor = new ByteProcessor {
@@ -114,11 +114,10 @@ private[finagle] class ByteBufAsBuf(
       // back into this Buf.
       composite == this
     case other: Buf if other.length == length =>
-      val otherIdx = Buf.Indexed.coerce(other)
       val proc = new ByteProcessor {
         private[this] var pos = 0
         def process(value: Byte): Boolean = {
-          if (otherIdx(pos) == value) {
+          if (other.get(pos) == value) {
             pos += 1
             true
           } else {

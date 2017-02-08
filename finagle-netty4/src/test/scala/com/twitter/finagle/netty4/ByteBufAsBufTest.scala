@@ -84,7 +84,7 @@ class ByteBufAsBufTest
     }
   }
 
-  test("apply(Int)") {
+  test("get(Int)") {
     val out = new Array[Byte](1)
     forAll { bytes: Array[Byte] =>
       whenever(bytes.length >= 2) {
@@ -92,22 +92,22 @@ class ByteBufAsBufTest
         byteBuf.readByte()
         val buf = new ByteBufAsBuf(byteBuf)
 
-        // compare slice/write to apply
+        // compare slice/write to get()
         buf.slice(0, 1).write(out, 0)
-        assert(out(0) == buf(0))
+        assert(out(0) == buf.get(0))
 
         buf.slice(buf.length-1, buf.length).write(out, 0)
-        assert(out(0) == buf(buf.length - 1))
+        assert(out(0) == buf.get(buf.length - 1))
       }
     }
   }
 
-  test("apply(Int) over the length") {
+  test("get(Int) over the length") {
     forAll { bytes: Array[Byte] =>
       val byteBuf = Unpooled.wrappedBuffer(bytes)
       val buf = new ByteBufAsBuf(byteBuf)
       intercept[IndexOutOfBoundsException] {
-        buf(bytes.length)
+        buf.get(bytes.length)
       }
     }
   }
@@ -117,7 +117,7 @@ class ByteBufAsBufTest
       val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
 
       var n = 0
-      val processor = new Buf.Indexed.Processor {
+      val processor = new Buf.Processor {
         def apply(byte: Byte): Boolean = {
           n += 1
           true
@@ -129,14 +129,14 @@ class ByteBufAsBufTest
   }
 
   test("process returns index where processing stopped") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = false
     }
     forAll { bytes: Array[Byte] =>
       val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
       assert(buf.process(processor) == (if (buf.isEmpty) -1 else 0))
 
-      def maxThree() = new Buf.Indexed.Processor {
+      def maxThree() = new Buf.Processor {
         private[this] var n = 0
         def apply(byte: Byte): Boolean = {
           n += 1
@@ -158,31 +158,29 @@ class ByteBufAsBufTest
   }
 
   test("process handles empty inputs") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = false
     }
     forAll { bytes: Array[Byte] =>
       val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      val indexed = Buf.Indexed.coerce(buf)
-      assert(-1 == indexed.process(1, 0, processor))
-      assert(-1 == indexed.process(buf.length, buf.length + 1, processor))
+      assert(-1 == buf.process(1, 0, processor))
+      assert(-1 == buf.process(buf.length, buf.length + 1, processor))
     }
   }
 
   test("process handles large until") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = true
     }
     forAll { bytes: Array[Byte] =>
       val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      val indexed = Buf.Indexed.coerce(buf)
-      assert(-1 == indexed.process(0, buf.length, processor))
-      assert(-1 == indexed.process(0, buf.length + 1, processor))
+      assert(-1 == buf.process(0, buf.length, processor))
+      assert(-1 == buf.process(0, buf.length + 1, processor))
     }
   }
 
   test("process handles readerIndex") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = false
     }
     forAll { bytes: Array[Byte] =>
@@ -190,10 +188,9 @@ class ByteBufAsBufTest
         val bb = Unpooled.wrappedBuffer(bytes)
         bb.readByte()
         val buf = new ByteBufAsBuf(bb)
-        val indexed = Buf.Indexed.coerce(buf)
-        assert(0 == indexed.process(processor))
+        assert(0 == buf.process(processor))
         if (buf.length >= 2) {
-          assert(1 == indexed.process(1, 2, processor))
+          assert(1 == buf.process(1, 2, processor))
         }
       }
     }

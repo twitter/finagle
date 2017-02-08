@@ -61,15 +61,15 @@ object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.De
     Buf.ByteArray.Owned(bytes)
   }
 
-  private[this] def readBigEndianLong(b: Buf.Indexed, offset: Int): Long = {
-    ((b(offset)     & 0xff).toLong << 56) |
-    ((b(offset + 1) & 0xff).toLong << 48) |
-    ((b(offset + 2) & 0xff).toLong << 40) |
-    ((b(offset + 3) & 0xff).toLong << 32) |
-    ((b(offset + 4) & 0xff).toLong << 24) |
-    ((b(offset + 5) & 0xff).toLong << 16) |
-    ((b(offset + 6) & 0xff).toLong <<  8) |
-     (b(offset + 7) & 0xff).toLong
+  private[this] def readBigEndianLong(b: Buf, offset: Int): Long = {
+    ((b.get(offset)     & 0xff).toLong << 56) |
+    ((b.get(offset + 1) & 0xff).toLong << 48) |
+    ((b.get(offset + 2) & 0xff).toLong << 40) |
+    ((b.get(offset + 3) & 0xff).toLong << 32) |
+    ((b.get(offset + 4) & 0xff).toLong << 24) |
+    ((b.get(offset + 5) & 0xff).toLong << 16) |
+    ((b.get(offset + 6) & 0xff).toLong <<  8) |
+     (b.get(offset + 7) & 0xff).toLong
   }
 
   def tryUnmarshal(body: Buf): Try[Deadline] = {
@@ -77,9 +77,8 @@ object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.De
       return Throw(new IllegalArgumentException(
         s"Invalid body. Length ${body.length} but required 16"))
 
-    val b = Buf.Indexed.coerce(body)
-    val timestamp = readBigEndianLong(b, 0)
-    val deadline = readBigEndianLong(b, 8)
+    val timestamp = readBigEndianLong(body, 0)
+    val deadline = readBigEndianLong(body, 8)
 
     Return(Deadline(Time.fromNanoseconds(timestamp), Time.fromNanoseconds(deadline)))
   }

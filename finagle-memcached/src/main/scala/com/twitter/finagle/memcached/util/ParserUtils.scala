@@ -28,7 +28,7 @@ object ParserUtils {
   def isDigits(cb: ChannelBuffer): Boolean =
     isDigits(new ChannelBufferBuf(cb))
 
-  private[this] val isDigitProcessor = new Buf.Indexed.Processor {
+  private[this] val isDigitProcessor = new Buf.Processor {
     def apply(byte: Byte): Boolean = byte >= '0' && byte <= '9'
   }
 
@@ -37,7 +37,7 @@ object ParserUtils {
    */
   def isDigits(buf: Buf): Boolean =
     if (buf.isEmpty) false
-    else -1 == Buf.Indexed.coerce(buf).process(isDigitProcessor)
+    else -1 == buf.process(isDigitProcessor)
 
   private[memcached] def split(bytes: Array[Byte], delimiter: Byte): IndexedSeq[Buf] = {
     val split = new ArrayBuffer[Buf](6)

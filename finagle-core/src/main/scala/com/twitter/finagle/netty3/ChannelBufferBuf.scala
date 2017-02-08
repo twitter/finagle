@@ -15,17 +15,17 @@ import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
  * @param underlying The [[org.jboss.netty.buffer.ChannelBuffer]] to be wrapped in a
  * [[com.twitter.io.Buf]] interface.
  */
-class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf.Indexed {
+class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
   def length: Int = underlying.readableBytes
 
   override def toString: String = s"ChannelBufferBuf($underlying)"
 
-  private[twitter] def apply(index: Int): Byte = {
+  def get(index: Int): Byte = {
     val pos = underlying.readerIndex + index
     underlying.getByte(pos)
   }
 
-  private[twitter] def process(from: Int, until: Int, processor: Buf.Indexed.Processor): Int = {
+  def process(from: Int, until: Int, processor: Buf.Processor): Int = {
     checkSliceArgs(from, until)
     if (isSliceEmpty(from, until)) return -1
     val off = underlying.readerIndex + from

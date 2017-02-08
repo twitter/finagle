@@ -89,7 +89,7 @@ class ChannelBufferBufTest
     assert(end == 6)
   }
 
-  test("apply(Int)") {
+  test("get(Int)") {
     val out = new Array[Byte](1)
     forAll { bytes: Array[Byte] =>
       whenever(bytes.length >= 2) {
@@ -97,22 +97,22 @@ class ChannelBufferBufTest
         cb.readByte()
         val buf = new ChannelBufferBuf(cb)
 
-        // compare slice/write to apply
+        // compare slice/write to get
         buf.slice(0, 1).write(out, 0)
-        assert(out(0) == buf(0))
+        assert(out(0) == buf.get(0))
 
         buf.slice(buf.length - 1, buf.length).write(out, 0)
-        assert(out(0) == buf(buf.length - 1))
+        assert(out(0) == buf.get(buf.length - 1))
       }
     }
   }
 
-  test("apply(Int) over the length") {
+  test("get(Int) over the length") {
     forAll { bytes: Array[Byte] =>
       val cb = ChannelBuffers.wrappedBuffer(bytes)
       val buf = new ChannelBufferBuf(cb)
       intercept[IndexOutOfBoundsException] {
-        buf(buf.length)
+        buf.get(buf.length)
       }
     }
   }
@@ -123,7 +123,7 @@ class ChannelBufferBufTest
       val buf = new ChannelBufferBuf(cb)
 
       var n = 0
-      val processor = new Buf.Indexed.Processor {
+      val processor = new Buf.Processor {
         def apply(byte: Byte): Boolean = {
           n += 1
           true
@@ -136,7 +136,7 @@ class ChannelBufferBufTest
 
 
   test("process returns index where processing stopped") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = false
     }
     forAll { bytes: Array[Byte] =>
@@ -144,7 +144,7 @@ class ChannelBufferBufTest
       val buf = new ChannelBufferBuf(cb)
       assert(buf.process(processor) == (if (buf.isEmpty) -1 else 0))
 
-      def maxThree() = new Buf.Indexed.Processor {
+      def maxThree() = new Buf.Processor {
         private[this] var n = 0
         def apply(byte: Byte): Boolean = {
           n += 1
@@ -166,26 +166,24 @@ class ChannelBufferBufTest
   }
 
   test("process handles empty inputs") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = false
     }
     forAll { bytes: Array[Byte] =>
       val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
-      val indexed = Buf.Indexed.coerce(buf)
-      assert(-1 == indexed.process(1, 0, processor))
-      assert(-1 == indexed.process(buf.length, buf.length + 1, processor))
+      assert(-1 == buf.process(1, 0, processor))
+      assert(-1 == buf.process(buf.length, buf.length + 1, processor))
     }
   }
 
   test("process handles large until") {
-    val processor = new Buf.Indexed.Processor {
+    val processor = new Buf.Processor {
       def apply(byte: Byte): Boolean = true
     }
     forAll { bytes: Array[Byte] =>
       val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
-      val indexed = Buf.Indexed.coerce(buf)
-      assert(-1 == indexed.process(0, buf.length, processor))
-      assert(-1 == indexed.process(0, buf.length + 1, processor))
+      assert(-1 == buf.process(0, buf.length, processor))
+      assert(-1 == buf.process(0, buf.length + 1, processor))
     }
   }
 
