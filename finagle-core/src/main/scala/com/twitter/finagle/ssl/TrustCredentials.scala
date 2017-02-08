@@ -8,9 +8,9 @@ import java.io.File
  *
  * @note Java users: See [[TrustCredentialsConfig]].
  */
-private[finagle] sealed trait TrustCredentials
+sealed trait TrustCredentials
 
-private[finagle] object TrustCredentials {
+object TrustCredentials {
 
   /**
    * Indicates that the trust credentials to use with a particular

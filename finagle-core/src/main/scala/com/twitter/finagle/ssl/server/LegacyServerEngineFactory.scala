@@ -9,7 +9,8 @@ import com.twitter.finagle.ssl._
  * step. If using [[OpenSSL]], then `Netty4ServerEngineFactory` should be the next
  * step, as it will be the supported path forward for using native engines with Finagle.
  */
-private[ssl] object LegacyServerEngineFactory extends SslServerEngineFactory {
+@deprecated("Use Netty4ServerEngineFactory instead", "2017-02-07")
+object LegacyServerEngineFactory extends SslServerEngineFactory {
 
   private[this] def cipherSuitesToString(cipherSuites: CipherSuites): Option[String] = {
     cipherSuites match {

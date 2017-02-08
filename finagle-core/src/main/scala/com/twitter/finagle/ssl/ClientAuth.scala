@@ -15,9 +15,9 @@ package com.twitter.finagle.ssl
  *
  * @note Java users: See [[ClientAuthConfig]].
  */
-private[finagle] sealed trait ClientAuth
+sealed trait ClientAuth
 
-private[finagle] object ClientAuth {
+object ClientAuth {
 
   /**
    * Indicates that the determination for whether to use client

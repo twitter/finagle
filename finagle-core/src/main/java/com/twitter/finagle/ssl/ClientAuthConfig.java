@@ -3,7 +3,7 @@ package com.twitter.finagle.ssl;
 /**
  * Java APIs for {@link ClientAuth}.
  */
-final class ClientAuthConfig {
+public final class ClientAuthConfig {
 
   private ClientAuthConfig() {
     throw new IllegalStateException();

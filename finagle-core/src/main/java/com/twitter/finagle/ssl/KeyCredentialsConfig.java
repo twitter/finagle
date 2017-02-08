@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * Java APIs for {@link KeyCredentials}.
  */
-final class KeyCredentialsConfig {
+public final class KeyCredentialsConfig {
 
   private KeyCredentialsConfig() {
     throw new IllegalStateException();

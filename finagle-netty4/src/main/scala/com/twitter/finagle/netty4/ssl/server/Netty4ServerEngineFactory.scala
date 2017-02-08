@@ -11,7 +11,7 @@ import io.netty.handler.ssl.SslContextBuilder
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
  * recommended path for using native SSL/TLS engines within Finagle.
  */
-private[ssl] class Netty4ServerEngineFactory(allocator: ByteBufAllocator)
+class Netty4ServerEngineFactory(allocator: ByteBufAllocator)
   extends SslServerEngineFactory {
 
   private[this] def startWithKey(keyCredentials: KeyCredentials): SslContextBuilder =
@@ -54,7 +54,7 @@ private[ssl] class Netty4ServerEngineFactory(allocator: ByteBufAllocator)
 
 }
 
-private[ssl] object Netty4ServerEngineFactory {
+object Netty4ServerEngineFactory {
 
   /**
    * Creates an instance of the Netty4ServerEngineFactory using the

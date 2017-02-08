@@ -7,7 +7,7 @@ import javax.net.ssl.SSLContext
  * This class provides an ability to use an initialized supplied
  * `javax.net.ssl.SSLContext` as the basis for creating [[Engine Engines]].
  */
-private[ssl] class SslContextServerEngineFactory(
+class SslContextServerEngineFactory(
     sslContext: SSLContext)
   extends SslServerEngineFactory {
 

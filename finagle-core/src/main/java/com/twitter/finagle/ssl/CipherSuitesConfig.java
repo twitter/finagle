@@ -7,7 +7,7 @@ import com.twitter.util.javainterop.Scala;
 /**
  * Java APIs for {@link CipherSuites}.
  */
-final class CipherSuitesConfig {
+public final class CipherSuitesConfig {
 
   private CipherSuitesConfig() {
     throw new IllegalStateException();

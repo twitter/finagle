@@ -10,9 +10,9 @@ package com.twitter.finagle.ssl
  * Negotiation (NPN).
  * @note Java users: See [[ApplicationProtocolsConfig]].
  */
-private[finagle] sealed trait ApplicationProtocols
+sealed trait ApplicationProtocols
 
-private[finagle] object ApplicationProtocols {
+object ApplicationProtocols {
 
   // IANA Application-Layer Protocol Negotiation (ALPN) IDs
   // From: http://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids

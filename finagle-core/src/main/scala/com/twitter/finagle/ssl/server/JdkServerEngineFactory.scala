@@ -6,7 +6,7 @@ import com.twitter.finagle.ssl.{Engine, SslConfigurations}
  * This engine factory is a default JVM-based implementation, intended to provide
  * coverage for a wide array of configurations.
  */
-private[ssl] object JdkServerEngineFactory extends SslServerEngineFactory {
+object JdkServerEngineFactory extends SslServerEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an [[SslServerConfiguration]].

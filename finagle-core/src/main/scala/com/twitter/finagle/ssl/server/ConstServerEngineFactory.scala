@@ -7,7 +7,7 @@ import com.twitter.finagle.ssl.{Engine, SslConfigurations}
  * which use a () => Engine interface. It should only be used for legacy
  * purposes.
  */
-private[ssl] class ConstServerEngineFactory(
+class ConstServerEngineFactory(
     newEngine: () => Engine)
   extends SslServerEngineFactory {
 

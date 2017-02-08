@@ -8,14 +8,14 @@ import java.net.{InetSocketAddress, SocketAddress}
  * This class represents a Finagle [[Address]] that doesn't have
  * or contain a corresponding `java.net.SocketAddress`
  */
-private[ssl] case object UnknownSocketAddress extends SocketAddress
+case object UnknownSocketAddress extends SocketAddress
 
 /**
  * This engine factory is a bridge for TLSClientEngine param configurations
  * which use a SocketAddress => Engine interface. It should only be used
  * for legacy purposes.
  */
-private[ssl] class ConstClientEngineFactory(
+class ConstClientEngineFactory(
     newEngine: SocketAddress => Engine)
   extends SslClientEngineFactory {
 

@@ -9,9 +9,9 @@ import java.io.File
  *
  * @note Java users: See [[KeyCredentialsConfig]].
  */
-private[finagle] sealed trait KeyCredentials
+sealed trait KeyCredentials
 
-private[finagle] object KeyCredentials {
+object KeyCredentials {
 
   /**
    * Indicates that the key credentials to use with the particular

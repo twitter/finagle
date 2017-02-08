@@ -13,7 +13,7 @@ import javax.net.ssl.SSLEngine
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
  * recommended path for using native SSL/TLS engines with Finagle.
  */
-private[ssl] class Netty4ClientEngineFactory(allocator: ByteBufAllocator)
+class Netty4ClientEngineFactory(allocator: ByteBufAllocator)
   extends SslClientEngineFactory {
 
   private[this] def mkSslEngine(
@@ -70,7 +70,7 @@ private[ssl] class Netty4ClientEngineFactory(allocator: ByteBufAllocator)
 
 }
 
-private[ssl] object Netty4ClientEngineFactory {
+object Netty4ClientEngineFactory {
 
   /**
    * Creates an instance of the Netty4ClientEngineFactory using the

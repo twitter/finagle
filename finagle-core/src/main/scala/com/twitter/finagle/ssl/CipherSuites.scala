@@ -8,9 +8,9 @@ package com.twitter.finagle.ssl
  *
  * @note Java users: See [[CipherSuitesConfig]].
  */
-private[finagle] sealed trait CipherSuites
+sealed trait CipherSuites
 
-private[finagle] object CipherSuites {
+object CipherSuites {
 
   /**
    * Indicates that the determination for which cipher suites to use with the

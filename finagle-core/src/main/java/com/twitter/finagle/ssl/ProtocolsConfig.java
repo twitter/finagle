@@ -7,7 +7,7 @@ import com.twitter.util.javainterop.Scala;
 /**
  * Java APIs for {@link Protocols}.
  */
-final class ProtocolsConfig {
+public final class ProtocolsConfig {
 
   private ProtocolsConfig() {
     throw new IllegalStateException();

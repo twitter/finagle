@@ -6,7 +6,7 @@ package com.twitter.finagle.ssl
  * support the collection of parameters specified by the
  * [[SslClientConfiguration]] or the [[SslServerConfiguration]].
  */
-private[finagle] case class SslConfigurationException(
+case class SslConfigurationException(
     msg: String,
     cause: Throwable)
   extends Exception(msg, cause)

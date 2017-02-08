@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * Java APIs for {@link TrustCredentials}.
  */
-final class TrustCredentialsConfig {
+public final class TrustCredentialsConfig {
 
   private TrustCredentialsConfig() {
     throw new IllegalStateException();
