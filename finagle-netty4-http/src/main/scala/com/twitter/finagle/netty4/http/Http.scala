@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.http
 
+import com.twitter.conversions.storage._
 import com.twitter.finagle.http
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
@@ -33,9 +34,12 @@ object exp {
       if (decompressionEnabled)
         pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
 
-      if (streaming)
-        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxResponseSize))
-      else {
+      if (streaming) {
+        // 8 KB is the size of the maxChunkSize parameter used in netty3,
+        // which is where it stops attempting to aggregate messages that lack
+        // a 'Transfer-Encoding: chunked' header.
+        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
+      } else {
         pipeline.addLast(
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxResponseSize.inBytes.toInt)

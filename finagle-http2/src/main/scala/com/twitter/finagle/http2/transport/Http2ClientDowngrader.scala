@@ -3,18 +3,26 @@ package com.twitter.finagle.http2.transport
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http._
-import io.netty.handler.codec.http2.{Http2EventAdapter, HttpConversionUtil, Http2Headers,
-  DefaultHttp2Headers, Http2Connection}
+import io.netty.handler.codec.http2.{Http2EventAdapter, Http2Headers, HttpConversionUtil}
 import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * `Http2ClientDowngrader` wraps RSTs, GOAWAYs, HEADERS, and DATA in thin finagle wrappers.
  */
-private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends Http2EventAdapter {
+private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
 
-  private[this] val headersKey: Http2Connection.PropertyKey = connection.newKey()
+  // this is a magic string from the netty server implementation.  it's the debug
+  // data it includes in the GOAWAY when the headers are too long.
+  val HeaderTooLargeBytes =
+    Unpooled.copiedBuffer("Header size exceeded max allowed bytes", UTF_8)
 
-  import Http2ClientDowngrader._
+  // Objects that are emitted from this Listener
+  sealed trait StreamMessage
+  case class Message(obj: HttpObject, streamId: Int) extends StreamMessage
+  case class GoAway(obj: HttpObject) extends StreamMessage
+  case class Rst(streamId: Int, errorCode: Long) extends StreamMessage
+
+  // Http2EventAdapter overrides
 
   override def onDataRead(
     ctx: ChannelHandlerContext,
@@ -24,53 +32,15 @@ private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends 
     endOfStream: Boolean
   ): Int = {
     val length = data.readableBytes
-    val stream = connection.stream(streamId)
-    val headers = stream.getProperty(headersKey).asInstanceOf[Http2Headers]
 
     // we retain this because the ref count it comes in with is
     // actually a residual one from ByteToMessageDecoder, and will be
     // decremented later by ByteToMessageDecoder when we return
-    // control up the stack to the decoder.  This means that if we
+    // control up the stack to the decoder. This means that if we
     // want to use this message after, we need to retain it ourselves.
     data.retain()
-    val msg = if (headers == null) {
-      if (endOfStream) new DefaultLastHttpContent(data) else new DefaultHttpContent(data)
-    } else {
-      if (endOfStream) {
-        val rep = new DefaultFullHttpResponse(
-          HttpVersion.HTTP_1_1,
-          HttpConversionUtil.parseStatus(headers.status),
-          data,
-          false /* validateHeaders */
-        )
-        HttpConversionUtil.addHttp2ToHttpHeaders(
-          streamId,
-          headers,
-          rep,
-          false /* validateHeaders */
-        )
-        stream.removeProperty(headersKey)
-        rep
-      } else {
-        val rep = new DefaultHttpResponse(
-          HttpVersion.HTTP_1_1,
-          HttpConversionUtil.parseStatus(headers.status),
-          false /* validateHeaders */
-        )
-        HttpConversionUtil.addHttp2ToHttpHeaders(
-          streamId,
-          headers,
-          rep.headers,
-          HttpVersion.HTTP_1_1,
-          false /* isTrailer */,
-          false /* isRequest */
-        )
-        HttpUtil.setTransferEncodingChunked(rep, true)
-        ctx.fireChannelRead(Message(rep, streamId))
-        stream.removeProperty(headersKey)
-        new DefaultHttpContent(data)
-      }
-    }
+    val msg = if (endOfStream) new DefaultLastHttpContent(data) else new DefaultHttpContent(data)
+
     ctx.fireChannelRead(Message(msg, streamId))
     length + padding
     // returning this means that we've already processed all of the bytes, and
@@ -80,34 +50,39 @@ private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends 
     // simpler to implement.
   }
 
+  // Called when a full HEADERS sequence has been received that does not contain priority info.
+  // If this is the last message for the stream we can build a FullHttpResponse.
+  // TODO: this doesn't consider trailers.
   override def onHeadersRead(
     ctx: ChannelHandlerContext,
     streamId: Int,
-    newHeaders: Http2Headers,
+    headers: Http2Headers,
     padding: Int,
     endOfStream: Boolean
   ): Unit = {
-    val stream = connection.stream(streamId)
-    val prop = stream.getProperty(headersKey).asInstanceOf[Http2Headers]
-    val headers = if (prop == null) new DefaultHttp2Headers() else prop
-    headers.add(newHeaders)
-
-    if (endOfStream) {
-      val req = HttpConversionUtil.toHttpResponse(
+    val msg = if (endOfStream) {
+      HttpConversionUtil.toHttpResponse(
         streamId,
         headers,
         ctx.alloc(),
         false /* validateHttpHeaders */
       )
-      ctx.fireChannelRead(Message(req, streamId))
-      stream.removeProperty(headersKey)
     } else {
-      stream.setProperty(headersKey, headers)
+      // Unfortunately Netty doesn't have tools for converting to a non-full
+      // HttpResponse so we just do it ourselves: it's not that hard anyway.
+      val status = HttpConversionUtil.parseStatus(headers.status)
+      val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
+      HttpConversionUtil.addHttp2ToHttpHeaders(
+        streamId, headers, msg.headers, HttpVersion.HTTP_1_1,
+        /*isTrailer*/ false, /*isRequest*/ false)
+      msg
     }
+    ctx.fireChannelRead(Message(msg, streamId))
   }
 
-  // this one is only called on END_HEADERS, so it's safe to decide as an HttpResponse
-  // or to collate into a FullHttpResponse.
+  // Called when a full HEADERS sequence has been received that does contain priority info.
+  // Since we don't care about priority info, we just ignore the priority info and delegate
+  // to the other `onHeadersRead` method.
   override def onHeadersRead(
     ctx: ChannelHandlerContext,
     streamId: Int,
@@ -119,26 +94,6 @@ private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends 
     endOfStream: Boolean
   ): Unit = {
     onHeadersRead(ctx, streamId, newHeaders, padding, endOfStream)
-    val stream = connection.stream(streamId)
-    val headers = stream.getProperty(headersKey).asInstanceOf[Http2Headers]
-    if (headers != null && !headers.contains(HttpHeaderNames.CONTENT_LENGTH)) {
-      val rep = new DefaultHttpResponse(
-        HttpVersion.HTTP_1_1,
-        HttpConversionUtil.parseStatus(headers.status),
-        false /* validateHeaders */
-      )
-      HttpConversionUtil.addHttp2ToHttpHeaders(
-        streamId,
-        headers,
-        rep.headers,
-        HttpVersion.HTTP_1_1,
-        false /* isTrailer */,
-        false /* isRequest */
-      )
-      HttpUtil.setTransferEncodingChunked(rep, true)
-      ctx.fireChannelRead(Message(rep, streamId))
-      stream.removeProperty(headersKey)
-    }
   }
 
   override def onRstStreamRead(ctx: ChannelHandlerContext, streamId: Int, errorCode: Long): Unit = {
@@ -166,17 +121,4 @@ private[http2] class Http2ClientDowngrader(connection: Http2Connection) extends 
     val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status)
     ctx.fireChannelRead(GoAway(rep))
   }
-}
-
-private[http2] object Http2ClientDowngrader {
-
-  // this is a magic string from the netty server implementation.  it's the debug
-  // data it includes in the GOAWAY when the headers are too long.
-  val HeaderTooLargeBytes =
-    Unpooled.copiedBuffer("Header size exceeded max allowed bytes", UTF_8)
-
-  sealed trait StreamMessage
-  case class Message(obj: HttpObject, streamId: Int) extends StreamMessage
-  case class GoAway(obj: HttpObject) extends StreamMessage
-  case class Rst(streamId: Int, errorCode: Long) extends StreamMessage
 }

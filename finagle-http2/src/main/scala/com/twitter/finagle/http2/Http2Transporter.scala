@@ -95,7 +95,7 @@ private[finagle] object Http2Transporter {
       val adapter = new DelegatingDecompressorFrameListener(
         connection,
         // adapts http2 to http 1.1
-        new Http2ClientDowngrader(connection)
+        Http2ClientDowngrader
       )
 
       val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
@@ -126,6 +126,7 @@ private[finagle] object Http2Transporter {
           maxHeaderSize.inBytes.toInt,
           maxChunkSize.inBytes.toInt
         )
+
         val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
         val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
         pipeline.addLast("httpCodec", sourceCodec)

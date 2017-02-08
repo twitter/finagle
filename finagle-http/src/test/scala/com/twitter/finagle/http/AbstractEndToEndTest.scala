@@ -721,6 +721,42 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
       await(client.close())
     }
+
+    def makeService(size: Int): Service[Request, Response] = {
+      Service.mk[Request, Response] { req =>
+        val resp = Response()
+        resp.contentString = "*" * size
+        resp.contentLength = size
+        Future.value(resp)
+      }
+    }
+
+    test("Responses with Content-length header larger than 8 KB are not aggregated") {
+      val svc = makeService(8*1024 + 1)
+      val client = connect(svc)
+      val resp = await(client(Request()))
+      assert(resp.isChunked)
+      assert(resp.content.isEmpty)
+      assert(resp.contentLength == Some(8*1024 + 1))
+    }
+
+    test("Responses with Content-length header equal to 8 KB are aggregated") {
+      val svc = makeService(8*1024)
+      val client = connect(svc)
+      val resp = await(client(Request()))
+      assert(!resp.isChunked)
+      assert(!resp.content.isEmpty)
+      assert(resp.contentLength == Some(8*1024))
+    }
+
+    test("Responses with Content-length header smaller than 8 KB are aggregated") {
+      val svc = makeService(8*1024 - 1)
+      val client = connect(svc)
+      val resp = await(client(Request()))
+      assert(!resp.isChunked)
+      assert(!resp.content.isEmpty)
+      assert(resp.contentLength == Some(8*1024 - 1))
+    }
   }
 
   def tracing(connect: HttpService => HttpService) {

@@ -213,7 +213,11 @@ case class Http(
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
-          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
+          pipeline.addLast("httpCodec",
+            new SafeHttpServerCodec(
+              maxInitialLineLengthInBytes,
+              maxHeaderSizeInBytes,
+              maxRequestSizeInBytes /* maxChunkSize */))
 
           if (_compressionLevel > 0) {
             pipeline.addLast("httpCompressor", new HttpContentCompressor(_compressionLevel))
