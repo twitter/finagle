@@ -38,6 +38,11 @@ Breaking API Changes
     `com.twitter.finagle.stats.includeEmptyHistograms` flag to false to retain the
     behavior. ``RB_ID=907186``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-netty4: Servers no longer set SO_LINGER=0 on sockets. ``RB_ID=907325``
+
 6.42.0
 ------
 

@@ -2,10 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.netty4.channel.{
-  Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer,
-  RecvByteBufAllocatorProxy, ServerBridge
-}
+import com.twitter.finagle.netty4.channel.{Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer, RecvByteBufAllocatorProxy, ServerBridge}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
@@ -53,8 +50,8 @@ private[finagle] case class Netty4Listener[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
     transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) },
-    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity)
-  (implicit mIn: Manifest[In], mOut: Manifest[Out])
+    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out])
   extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
@@ -76,7 +73,8 @@ private[finagle] case class Netty4Listener[In, Out](
   private[this] val param.Allocator(allocator) = params[param.Allocator]
 
   /**
-   * Listen for connections and apply the `serveTransport` callback on connected [[Transport transports]].
+   * Listen for connections and apply the `serveTransport` callback on
+   * connected [[Transport transports]].
    *
    * @param addr socket address for listening.
    * @param serveTransport a call-back for newly created transports which in turn are
@@ -87,12 +85,12 @@ private[finagle] case class Netty4Listener[In, Out](
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
     new ListeningServer with CloseAwaitably {
 
-      val bridge = new ServerBridge(
-        transportFactory.andThen(Transport.cast[In, Out](_)),
+      private[this] val bridge = new ServerBridge(
+        transportFactory.andThen(Transport.cast[In, Out]),
         serveTransport
       )
 
-      val bossLoop: EventLoopGroup =
+      private[this] val bossLoop: EventLoopGroup =
         if (nativeEpoll.enabled)
           new EpollEventLoopGroup(
             1 /*nThreads*/ ,
@@ -104,7 +102,7 @@ private[finagle] case class Netty4Listener[In, Out](
             new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
           )
 
-      val bootstrap = new ServerBootstrap()
+      private[this] val bootstrap = new ServerBootstrap()
       if (nativeEpoll.enabled)
         bootstrap.channel(classOf[EpollServerSocketChannel])
       else
@@ -125,7 +123,6 @@ private[finagle] case class Netty4Listener[In, Out](
       }
 
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
-      bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))
       sendBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_SNDBUF, _))
       recvBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_RCVBUF, _))
@@ -136,8 +133,8 @@ private[finagle] case class Netty4Listener[In, Out](
         bootstrap.childOption[JInt](Netty4Listener.TrafficClass, tc)
       }
 
-      val rawInitializer = new Netty4RawServerChannelInitializer(params)
-      val framedInitializer = new Netty4FramedServerChannelInitializer(params)
+      private[this] val rawInitializer = new Netty4RawServerChannelInitializer(params)
+      private[this] val framedInitializer = new Netty4FramedServerChannelInitializer(params)
 
       // our netty pipeline is divided into four chunks:
       // raw => marshalling => framed => bridge
@@ -187,11 +184,12 @@ private[finagle] case class Netty4Listener[In, Out](
       // Block until listening socket is bound. `ListeningServer`
       // represents a bound server and if we don't block here there's
       // a race between #listen and #boundAddress being available.
-      val bound = bootstrap.bind(addr).awaitUninterruptibly()
+      private[this] val bound = bootstrap.bind(addr).awaitUninterruptibly()
       if (!bound.isSuccess)
-        throw new java.net.BindException(s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}")
+        throw new java.net.BindException(
+          s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}")
 
-      val ch = bound.channel()
+      private[this] val ch = bound.channel()
 
       /**
        * Immediately close the listening socket then shutdown the netty
@@ -199,7 +197,7 @@ private[finagle] case class Netty4Listener[In, Out](
        *
        * @return a [[Future]] representing the shutdown of the boss threadpool.
        */
-      def closeServer(deadline: Time) = closeAwaitably {
+      def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
         // note: this ultimately calls close(2) on
         // a non-blocking socket so it should not block.
         ch.close().awaitUninterruptibly()
@@ -214,7 +212,7 @@ private[finagle] case class Netty4Listener[In, Out](
         bossLoop
           .shutdownGracefully(0 /* quietPeriod */ , timeoutMs.max(0), TimeUnit.MILLISECONDS)
           .addListener(new FutureListener[Any] {
-            def operationComplete(future: NettyFuture[Any]) = p.setDone()
+            def operationComplete(future: NettyFuture[Any]): Unit = p.setDone()
           })
 
         // Don't rely on netty to satisfy the promise and transform all results to
