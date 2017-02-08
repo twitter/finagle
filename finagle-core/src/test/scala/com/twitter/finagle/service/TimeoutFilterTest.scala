@@ -1,5 +1,6 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.util.TimeConversions._
@@ -181,6 +182,50 @@ class TimeoutFilterTest extends FunSuite
 
   test("filter added or not to serverModule based on duration") {
     verifyFilterAddedOrNot(TimeoutFilter.serverModule[Int, Int])
+  }
+
+  def testTypeAgnostic(filter: TypeAgnostic, timer: MockTimer) = {
+    val h = new TimeoutFilterHelper()
+    val svc = filter.andThen(h.service)
+
+    Time.withCurrentTimeFrozen { tc =>
+      val res = svc("hello")
+      assert(!res.isDefined)
+
+      // not yet at the timeout
+      tc.advance(4.seconds)
+      timer.tick()
+      assert(!res.isDefined)
+
+      // go past the timeout
+      tc.advance(2.seconds)
+      timer.tick()
+      intercept[IndividualRequestTimeoutException] {
+        Await.result(res, 1.second)
+      }
+    }
+  }
+
+  test("typeAgnostic using timeout") {
+    val timer = new MockTimer()
+    val timeout = 5.seconds
+    val filter = TimeoutFilter.typeAgnostic(
+      timeout,
+      new IndividualRequestTimeoutException(timeout),
+      timer)
+
+    testTypeAgnostic(filter, timer)
+  }
+
+  test("typeAgnostic using tunable timeout") {
+    val timer = new MockTimer()
+    val timeoutTunable = Tunable.const("myTimeout", 5.seconds)
+    val filter = TimeoutFilter.typeAgnostic(
+      timeoutTunable,
+      timeout => new IndividualRequestTimeoutException(timeout),
+      timer)
+
+    testTypeAgnostic(filter, timer)
   }
 
   test("variable timeouts") {
