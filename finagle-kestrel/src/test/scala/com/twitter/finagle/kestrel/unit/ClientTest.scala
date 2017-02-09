@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Kestrel
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
-import com.twitter.finagle.kestrel.protocol.{Command, Kestrel => _, _}
+import com.twitter.finagle.kestrel.protocol.{Command, _}
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util._

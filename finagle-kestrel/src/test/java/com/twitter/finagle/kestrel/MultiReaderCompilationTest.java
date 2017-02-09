@@ -11,8 +11,8 @@ import com.twitter.finagle.Addr;
 import com.twitter.finagle.Address;
 import com.twitter.finagle.Addresses;
 import com.twitter.finagle.Addrs;
+import com.twitter.finagle.Kestrel;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.kestrel.protocol.Kestrel;
 import com.twitter.util.Duration;
 import com.twitter.util.Var;
 import com.twitter.util.Vars;
@@ -33,9 +33,9 @@ public class MultiReaderCompilationTest {
     MultiReader.apply(cluster, "the-queue")
       .clientBuilder(
         ClientBuilder.get()
-        .codec(new Kestrel())
-        .hostConnectionLimit(1)
-        .requestTimeout(Duration.fromTimeUnit(30, TimeUnit.SECONDS)));
+          .stack(Kestrel.client())
+          .hostConnectionLimit(1)
+          .requestTimeout(Duration.fromTimeUnit(30, TimeUnit.SECONDS)));
   }
 
   @Test
