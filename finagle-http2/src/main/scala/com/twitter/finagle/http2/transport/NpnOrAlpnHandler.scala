@@ -28,6 +28,7 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         // Http2 has been negotiated, replace the HttpCodec with an Http2Codec
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
+            ch.pipeline.addLast(new Http2NackHandler)
             ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)

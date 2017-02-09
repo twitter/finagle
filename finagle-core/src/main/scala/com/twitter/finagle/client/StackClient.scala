@@ -16,7 +16,7 @@ import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time}
 import com.twitter.util.registry.GlobalRegistry
 
 object StackClient {
@@ -556,15 +556,18 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
               endpointClient.params[Label].label,
               "Transporter")
             GlobalRegistry.get.put(transporterImplKey, transporter.toString)
-            val mkFutureSvc: () => Future[Service[Req, Rep]] =
-              () => transporter(ia).map { trans =>
-                // we do not want to capture and request specific Locals
-                // that would live for the life of the session.
-                Contexts.letClearAll {
-                  endpointClient.newDispatcher(trans)
+            new ServiceFactory[Req, Rep] {
+              def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+                transporter(ia).map { trans =>
+                  // we do not want to capture and request specific Locals
+                  // that would live for the life of the session.
+                  Contexts.letClearAll {
+                    endpointClient.newDispatcher(trans)
+                  }
                 }
-              }
-            ServiceFactory(mkFutureSvc)
+
+              def close(deadline: Time): Future[Unit] = transporter.close(deadline)
+            }
         }
         Stack.Leaf(this, factory)
       }

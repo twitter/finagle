@@ -3,8 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Duration
-import com.twitter.util.Future
+import com.twitter.util.{Duration, Future, Time, Closable}
 import java.net.SocketAddress
 
 /**
@@ -12,9 +11,14 @@ import java.net.SocketAddress
  * `Future[Transport[In, Out]]`. They represent a transport layer session from a
  * client to a server. Transporters are symmetric to the server-side
  * [[com.twitter.finagle.server.Listener]].
+ *
+ * Note that although Transporters take a SocketAddress, we actually construct a new
+ * Transporter per SocketAddress.  We will be changing this API to be more consistent
+ * in the near future.
  */
-trait Transporter[In, Out] {
+trait Transporter[In, Out] extends Closable {
   def apply(addr: SocketAddress): Future[Transport[In, Out]]
+  def close(deadline: Time): Future[Unit] = Future.Done
 }
 
 /**

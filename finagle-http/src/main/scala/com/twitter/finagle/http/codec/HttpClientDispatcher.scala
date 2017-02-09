@@ -1,6 +1,5 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.Failure
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
@@ -11,10 +10,6 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 private[http] object HttpClientDispatcher {
-  val RetryableNackFailure = Failure.rejected("The request was nacked by the server")
-
-  val NonRetryableNackFailure =
-    Failure("The request was nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
 
   private val log = Logger(getClass.getName)
 
@@ -83,11 +78,11 @@ private[finagle] class HttpClientDispatcher(
       // Drain the Transport into Response body.
       trans.read().flatMap {
         case Multi(res, readFinished) if HttpNackFilter.isRetryableNack(res) =>
-          p.updateIfEmpty(Throw(RetryableNackFailure))
+          p.updateIfEmpty(Throw(HttpNackFilter.RetryableNackFailure))
           swallowNackBody(res).before(readFinished)
 
         case Multi(res, readFinished) if HttpNackFilter.isNonRetryableNack(res) =>
-          p.updateIfEmpty(Throw(NonRetryableNackFailure))
+          p.updateIfEmpty(Throw(HttpNackFilter.NonRetryableNackFailure))
           swallowNackBody(res).before(readFinished)
 
         case Multi(res, readFinished) =>

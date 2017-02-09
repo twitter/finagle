@@ -20,6 +20,11 @@ import com.twitter.util.Future
 private[finagle] object HttpNackFilter {
   val role: Stack.Role = Stack.Role("HttpNack")
 
+  val RetryableNackFailure = Failure.rejected("The request was nacked by the server")
+
+  val NonRetryableNackFailure =
+    Failure("The request was nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
+
   val RetryableNackHeader: String = "finagle-http-nack"
   val NonRetryableNackHeader: String = "finagle-http-nonretryable-nack"
   val ResponseStatus: Status = Status.ServiceUnavailable

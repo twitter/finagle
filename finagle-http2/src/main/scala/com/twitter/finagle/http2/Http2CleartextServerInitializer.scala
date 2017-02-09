@@ -1,8 +1,8 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.http
 import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.transport.PriorKnowledgeHandler
+import com.twitter.finagle.http
+import com.twitter.finagle.http2.transport.{PriorKnowledgeHandler, Http2NackHandler}
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
@@ -37,6 +37,8 @@ private[http2] class Http2CleartextServerInitializer(
 
   val initializer = new ChannelInitializer[Channel] {
     def initChannel(ch: Channel): Unit = {
+      ch.pipeline.addLast(new Http2NackHandler)
+
       ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
 
       // we want to drop reset frames because the Http2ServerDowngrader doesn't know what to

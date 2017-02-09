@@ -2,11 +2,12 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{Status, StreamClosedException, FailureFlags}
+import com.twitter.finagle.http.filter.HttpNackFilter.{RetryableNackFailure, NonRetryableNackFailure}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Logger, HasLogLevel, Level}
-import com.twitter.util.{Future, Time, Promise, Return, Throw, Try}
+import com.twitter.util.{Future, Time, Promise, Return, Throw, Try, Closable}
 import io.netty.handler.codec.http.{HttpObject, LastHttpContent}
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
@@ -28,7 +29,7 @@ import scala.collection.JavaConverters._
 private[http2] class MultiplexedTransporter(
     underlying: Transport[StreamMessage, StreamMessage],
     addr: SocketAddress)
-  extends (() => Try[Transport[HttpObject, HttpObject]]) { self =>
+  extends (() => Try[Transport[HttpObject, HttpObject]]) with Closable { self =>
 
   import MultiplexedTransporter._
 
@@ -38,7 +39,6 @@ private[http2] class MultiplexedTransporter(
   private[this] val id = new AtomicInteger(1)
 
   // synchronized by this
-  private[this] var curStreams = 0
   private[this] var dead = false
 
   // exposed for testing
@@ -79,9 +79,12 @@ private[http2] class MultiplexedTransporter(
   private[this] def handleSuccessfulRead(sm: StreamMessage): Unit = sm match {
     case Message(msg, streamId) => tryToInitializeQueue(streamId).offer(msg)
     case GoAway(response) => failEverything(response)
-    case Rst(streamId, _) =>
-      // TODO clean up handling for various rsts
-      tryToInitializeQueue(streamId).fail(new StreamClosedException(addr, streamId.toString))
+    case Rst(streamId, errorCode) =>
+      val error = if (errorCode == Http2Error.REFUSED_STREAM.code) RetryableNackFailure
+      else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) NonRetryableNackFailure
+      else new StreamClosedException(addr, streamId.toString)
+
+      tryToInitializeQueue(streamId).fail(error)
     case rep =>
       val name = rep.getClass.getName
       log.error(s"we only support Message, GoAway, Rst right now but got $name. "
@@ -112,7 +115,7 @@ private[http2] class MultiplexedTransporter(
    * just need a response to advance to the next stream.
    */
   def first(): Transport[HttpObject, HttpObject] = {
-    val ct = createChildTransport()
+    val ct = new ChildTransport()
 
     ct.synchronized {
       ct.finishedWriting = true
@@ -121,28 +124,14 @@ private[http2] class MultiplexedTransporter(
     ct
   }
 
-  private[this] def createChildTransport(): ChildTransport = self.synchronized {
-    val ct = new ChildTransport()
-    curStreams += 1
-    ct.onClose.ensure {
-      self.synchronized {
-        curStreams -= 1
-        if (curStreams == 0) {
-          dead = true
-          underlying.close()
-        }
-      }
-    }
-
-    ct
-  }
-
   def apply(): Try[Transport[HttpObject, HttpObject]] = self.synchronized {
     if (dead) Throw(new DeadConnectionException(addr, FailureFlags.Retryable))
-    else Return(createChildTransport())
+    else Return(new ChildTransport())
   }
 
   def onClose: Future[Throwable] = underlying.onClose
+
+  def close(deadline: Time): Future[Unit] = underlying.close(deadline)
 
   /**
    * ChildTransport represents a single http/2 stream at a time.  Once the stream

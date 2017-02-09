@@ -1,17 +1,18 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.http
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.http
 import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
 import com.twitter.finagle.netty4.channel.{DirectToHeapInboundHandler, BufferingChannelOutboundHandler}
 import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
+import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Throw, Return, Promise, Try, Time}
+import com.twitter.util._
 import io.netty.channel.{
   ChannelHandlerContext,
   ChannelInboundHandlerAdapter,
@@ -23,6 +24,7 @@ import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
+import scala.collection.JavaConverters.collectionAsScalaIterableConverter
 
 private[finagle] object Http2Transporter {
 
@@ -41,8 +43,9 @@ private[finagle] object Http2Transporter {
       new PriorKnowledgeTransporter(underlying, params)
     } else {
       val underlyingHttp11 = Netty4HttpTransporter(params)
+      val TimerParam(timer) = params[TimerParam]
 
-      new Http2Transporter(underlying, underlyingHttp11)
+      new Http2Transporter(underlying, underlyingHttp11, timer)
     }
   }
 
@@ -161,7 +164,8 @@ private[finagle] object Http2Transporter {
  */
 private[http2] class Http2Transporter(
     underlying: Transporter[Any, Any],
-    underlyingHttp11: Transporter[Any, Any])
+    underlyingHttp11: Transporter[Any, Any],
+    implicit val timer: Timer)
   extends Transporter[Any, Any] {
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
@@ -180,10 +184,10 @@ private[http2] class Http2Transporter(
   import Http2Transporter._
 
   protected[this] val transporterCache =
-    new ConcurrentHashMap[SocketAddress, Future[Option[() => Try[Transport[HttpObject, HttpObject]]]]]()
+    new ConcurrentHashMap[SocketAddress, Future[Option[MultiplexedTransporter]]]()
 
   private[this] def onUpgradeFinished(
-    f: Future[Option[() => Try[Transport[HttpObject, HttpObject]]]],
+    f: Future[Option[MultiplexedTransporter]],
     addr: SocketAddress
   ): Future[Transport[Any, Any]] = f.transform {
     case Return(Some(fn)) =>
@@ -238,7 +242,7 @@ private[http2] class Http2Transporter(
 
   private[this] def upgrade(addr: SocketAddress): Future[Transport[Any, Any]] = {
     val conn: Future[Transport[Any, Any]] = underlying(addr)
-    val p = Promise[Option[() => Try[Transport[HttpObject, HttpObject]]]]()
+    val p = Promise[Option[MultiplexedTransporter]]()
     if (transporterCache.putIfAbsent(addr, p) == null) {
       conn.transform {
         case Return(trans) =>
@@ -271,4 +275,15 @@ private[http2] class Http2Transporter(
       case None =>
         upgrade(addr)
     }
+
+  override def close(deadline: Time): Future[Unit] = {
+    val maybeClose: Option[Closable] => Future[Unit] = {
+      case Some(closable) => closable.close(deadline)
+      case None => Future.Done
+    }
+    val closings = transporterCache.values.asScala.toSeq.map(_.flatMap(maybeClose))
+
+    // TODO: shouldn't rescue on timeout
+    Future.join(closings).by(deadline).rescue { case exn: Throwable => Future.Done }
+  }
 }

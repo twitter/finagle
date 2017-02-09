@@ -1,21 +1,17 @@
-package com.twitter.finagle.http.filter
+package com.twitter.finagle.http
 
-import com.twitter.finagle.{Address, Failure, Http, Name, Service}
+import com.twitter.finagle.{Address, Failure, Name, Service, Http => FHttp}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.http
-import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.StackServer
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Closable, Duration, Future, Throw}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class HttpNackFilterTest extends FunSuite {
+class NackTest extends FunSuite {
   class ClientCtx {
     val n = new AtomicInteger()
     var response = Failure.rejected("unhappy")
@@ -42,12 +38,12 @@ class HttpNackFilterTest extends FunSuite {
   test("automatically retries with HttpNack if restartable") {
     new ClientCtx {
       val server =
-        Http.server
+        FHttp.server
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
       val client =
-        Http.client
+        FHttp.client
           .configured(Stats(clientSr))
           .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
 
@@ -67,12 +63,12 @@ class HttpNackFilterTest extends FunSuite {
   test("converts non-restartable/non-retryable Failures") {
     new ClientCtx {
       val server =
-        Http.server
+        FHttp.server
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
       val client =
-        Http.client
+        FHttp.client
           .configured(Stats(clientSr))
           .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
 
@@ -92,7 +88,7 @@ class HttpNackFilterTest extends FunSuite {
   test("HttpNack works with ClientBuilder") {
     new ClientCtx {
       val server =
-        Http.server
+        FHttp.server
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
@@ -118,13 +114,13 @@ class HttpNackFilterTest extends FunSuite {
       val serverLabel = "myservice"
       val server =
         ServerBuilder()
-          .codec(http.Http(_statsReceiver = serverSr.scope(serverLabel)))
+          .codec(Http(_statsReceiver = serverSr.scope(serverLabel)))
           .bindTo(new InetSocketAddress(0))
           .name(serverLabel)
           .reportTo(serverSr)
           .build(flakyService)
       val client =
-        Http.client
+        FHttp.client
           .configured(Stats(clientSr))
           .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
 
@@ -144,14 +140,14 @@ class HttpNackFilterTest extends FunSuite {
   test("a server that doesn't support HttpNack fails the request") {
     new ClientCtx {
       val server =
-        Http.server
+        FHttp.server
           .withStack(StackServer.newStack)
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
 
       val client =
-        Http.client
+        FHttp.client
           .configured(Stats(clientSr))
           .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http-client")
 
@@ -177,12 +173,12 @@ class HttpNackFilterTest extends FunSuite {
     new ClientCtx {
       n.set(-2)
       val server =
-        Http.server
+        FHttp.server
           .configured(Stats(serverSr))
           .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
       val client =
-        Http.client
+        FHttp.client
           .configured(Stats(clientSr))
           .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http-client")
 
@@ -199,46 +195,5 @@ class HttpNackFilterTest extends FunSuite {
 
       Closable.all(client, server).close()
     }
-  }
-
-  test("HttpNackFilter returns a body when rejecting a request that isn't a HEAD request") {
-    val stats = new NullStatsReceiver
-    val service = new HttpNackFilter(stats) andThen Service.mk { _: Request => Future.exception(Failure.rejected("sadface")) }
-
-    val canHaveBodies = Set(
-      Method.Get,
-      Method.Post,
-      Method.Put,
-      Method.Patch,
-      Method.Delete,
-      Method.Trace,
-      Method.Connect,
-      Method.Options
-    )
-
-    canHaveBodies.foreach { method =>
-      val request = Request()
-      request.method = method
-
-      val rep = Await.result(service(request), timeout)
-      assert(rep.status == Status.ServiceUnavailable)
-      assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == Some("true"))
-      assert(rep.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
-      assert(!rep.content.isEmpty)
-    }
-  }
-
-  test("HttpNackFilter does not return a body when rejecting a HEAD request") {
-    val stats = new NullStatsReceiver
-    val service = new HttpNackFilter(stats) andThen Service.mk { _: Request => Future.exception(Failure.rejected("sadface")) }
-
-    val request = Request()
-    request.method = Method.Head
-
-    val rep = Await.result(service(request), timeout)
-    assert(rep.status == Status.ServiceUnavailable)
-    assert(rep.headerMap.get(HttpNackFilter.RetryableNackHeader) == Some("true"))
-    assert(rep.headerMap.get(HttpNackFilter.NonRetryableNackHeader) == None)
-    assert(rep.content.isEmpty)
   }
 }
