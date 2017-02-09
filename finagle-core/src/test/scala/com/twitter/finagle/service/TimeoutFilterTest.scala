@@ -3,6 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.service.TimeoutFilterTest.TunableTimeoutHelper
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import com.twitter.util.tunable.Tunable
@@ -30,6 +31,19 @@ private object TimeoutFilterTest {
     val exception = new IndividualRequestTimeoutException(timeout)
     val timeoutFilter = new TimeoutFilter[String, String](timeout, exception, timer)
     val timeoutService = timeoutFilter.andThen(service)
+  }
+
+  class TunableTimeoutHelper {
+    val timer = new MockTimer()
+    val tunable = Tunable.emptyMutable[Duration]("id")
+
+    val svc = Service.mk { _: String => Future.never }
+    val svcFactory = ServiceFactory.const(svc)
+    val stack = TimeoutFilter.clientModule[String, String]
+      .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
+
+    val params = Stack.Params.empty + param.Timer(timer) + TimeoutFilter.Param(tunable)
+    val service = stack.make(params).toService
   }
 }
 
@@ -174,6 +188,10 @@ class TimeoutFilterTest extends FunSuite
       assert(svcFactory ne made)
     }
     assertTimeoutFilterTunable(Tunable.const("id", 10.seconds))
+
+    assertTimeoutFilterTunable(Tunable.emptyMutable[Duration]("undefined"))
+    assertTimeoutFilterTunable(Tunable.mutable[Duration]("id", 10.seconds))
+    assertTimeoutFilterTunable(Tunable.mutable[Duration]("id", Duration.Top))
   }
 
   test("filter added or not to clientModule based on duration") {
@@ -292,6 +310,78 @@ class TimeoutFilterTest extends FunSuite
       timer.tick()
 
       assert(!res.isDefined)
+    }
+  }
+
+  test("Tunable timeout: No timeout if Tunable not set") {
+    val h = new TunableTimeoutHelper
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+
+      // No timeout because Tunable uses Duration.Top if applying it produces `None`
+      val res = service("hello")
+      assert(!res.isDefined)
+      tc.advance(1.hour)
+      timer.tick()
+      intercept[com.twitter.util.TimeoutException] {
+        Await.result(res, 1.second)
+      }
+    }
+  }
+
+  test("Tunable timeouts: Timeout if tunable is set") {
+    val h = new TunableTimeoutHelper
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+      // set a timeout
+      tunable.set(5.seconds)
+      val res = service("hello")
+      assert(!res.isDefined)
+
+      // not yet at the timeout
+      tc.advance(4.seconds)
+      timer.tick()
+      assert(!res.isDefined)
+
+      // go past the timeout
+      tc.advance(2.seconds)
+      timer.tick()
+      val ex = intercept[IndividualRequestTimeoutException] {
+        Await.result(res, 1.second)
+      }
+      ex.getMessage should include(tunable().get.toString)
+    }
+  }
+
+  test("Tunable timeouts: No timeout if Tunable cleared") {
+    val h = new TunableTimeoutHelper
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+
+      // set the timeout
+      tunable.set(3.seconds)
+      val res = service("hello")
+      assert(!res.isDefined)
+
+      // 4 seconds pushes us past
+      tc.advance(4.seconds)
+      timer.tick()
+      intercept[IndividualRequestTimeoutException] {
+        Await.result(res, 1.second)
+      }
+
+      // clear the tunable; should use Duration.Top again
+      tunable.clear()
+      val res2 = service("hello")
+      assert(!res2.isDefined)
+      tc.advance(1.hour)
+      timer.tick()
+      intercept[com.twitter.util.TimeoutException] {
+        Await.result(res2, 1.second)
+      }
     }
   }
 }
