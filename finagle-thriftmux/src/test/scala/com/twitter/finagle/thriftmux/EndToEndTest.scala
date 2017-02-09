@@ -51,8 +51,8 @@ class EndToEndTest extends FunSuite
   case class TestContext(buf: Buf)
 
   val testContext = new Contexts.broadcast.Key[TestContext]("com.twitter.finagle.mux.MuxContext") {
-    def marshal(tc: TestContext) = tc.buf
-    def tryUnmarshal(buf: Buf) = Return(TestContext(buf))
+    def marshal(tc: TestContext): Buf = tc.buf
+    def tryUnmarshal(buf: Buf): Try[TestContext] = Return(TestContext(buf))
   }
 
   trait ThriftMuxTestServer {
@@ -893,10 +893,10 @@ class EndToEndTest extends FunSuite
       Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     val f = client.query("ok")
-    intercept[Exception] { await(f) }
+    intercept[Exception] { await(f, 10.milliseconds) }
 
     val close = server.close(1.minute) // up to a minute
-    intercept[Exception] { await(close) }
+    intercept[Exception] { await(close, 10.milliseconds) }
 
     response.setValue("done")
 
