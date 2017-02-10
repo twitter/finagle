@@ -64,7 +64,10 @@ abstract class AbstractStreamingTest extends FunSuite {
     shouldFail = false
     val req2 = get("abc")
     val res2 = client(req2)
-    assert(!res2.isDefined)
+
+    // This is flaky. The assertion has been moved to the tests which use res2, and those have been
+    // marked as flaky.
+    //assert(!res2.isDefined)
 
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
@@ -92,7 +95,9 @@ abstract class AbstractStreamingTest extends FunSuite {
     assertSecondRequestOk()
   })
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("client: response stream fails on read") (new ClientCtx {
+    assert(!res2.isDefined)
     // Reader should be suspended in a reading state.
     val f = res.reader.read(1)
     assert(!f.isDefined)
@@ -142,16 +147,20 @@ abstract class AbstractStreamingTest extends FunSuite {
     await(closable.close())
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("client: fail request writer") (new ClientCtx {
+    assert(!res2.isDefined)
     val exc = new Exception
     req.writer.fail(exc)
-    assert(!res2.isDefined)
+
     res.reader.discard()
 
     assertSecondRequestOk()
   })
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("client: discard respond reader") (new ClientCtx {
+    assert(!res2.isDefined)
     res.reader.discard()
     assertSecondRequestOk()
   })
@@ -202,6 +211,7 @@ abstract class AbstractStreamingTest extends FunSuite {
     Closable.all(server, client1, client2, closable).close()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("server: response stream fails write") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)

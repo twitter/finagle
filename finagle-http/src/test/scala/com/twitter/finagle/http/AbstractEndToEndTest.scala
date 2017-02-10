@@ -225,6 +225,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     testIfImplemented(TooLongStream)(implName +
       ": return 413s for chunked requests which stream too much data") {
       val service = new HttpService {
@@ -369,6 +370,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     test(implName + ": client abort") {
       import com.twitter.conversions.time._
       val timer = new JavaTimer
@@ -638,7 +640,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       val client = connect(s)
       val req = Request()
       req.setChunked(true)
-      client(req)
+      await(client(req))
       await(client.close())
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }

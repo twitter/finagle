@@ -87,7 +87,7 @@ class HttpClientDispatcherTest extends FunSuite {
     new DefaultHttpChunk(
       ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
 
-  private val timeout = Duration.fromSeconds(2)
+  private val timeout = Duration.fromSeconds(15)
 
   test("streaming request body") {
     val (in, out) = mkPair()
