@@ -46,6 +46,13 @@ Runtime Behavior Changes
 
   * finagle-netty4: Servers no longer set SO_LINGER=0 on sockets. ``RB_ID=907325``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-memcached: `c.t.f.memcached.replication.ReplicationClient` is now deprecated.  Use
+    `c.t.f.memcached.replication.BaseReplicationClient` with clients created using
+    `c.t.f.Memcached.client`. ``RB_ID=907384``
+
 6.42.0
 ------
 

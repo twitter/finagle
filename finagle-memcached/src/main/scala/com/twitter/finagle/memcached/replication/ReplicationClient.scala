@@ -42,6 +42,7 @@ case class SCasUnique(casUnique: Buf) extends ReplicaCasUnique
 /**
  * Replication client helper
  */
+@deprecated("Use BaseReplicationClient with clients created using `c.t.f.Memcached.client`", "2017-02-08")
 object ReplicationClient {
   def newBaseReplicationClient(
     pools: Seq[Cluster[CacheNode]],
