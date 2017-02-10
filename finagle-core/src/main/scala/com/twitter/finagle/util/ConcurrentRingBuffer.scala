@@ -7,11 +7,6 @@ import scala.reflect.ClassTag
 /**
  * A simple, lock-free, non-blocking ring buffer.
  *
- * This differs from [[com.twitter.util.RingBuffer]] in that it is
- * simpler (fewer features), and is fully concurrent (and hence also
- * threadsafe). This should probably be  moved into util at some
- * point.
- *
  * '''Note:''' For very high-rate usages, sizing buffers by powers of
  * two may be advantageous.
  *
