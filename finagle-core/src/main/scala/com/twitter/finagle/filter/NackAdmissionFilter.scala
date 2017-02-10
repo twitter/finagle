@@ -136,11 +136,14 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   // EMA representing the rate of responses that are not nacks. We update it
   // whenever we get a response from the cluster with 0 when the service responds
   // with a nack and 1 otherwise.
+  // NB: Usage of the ema must be synchronized with the generation of the timestamp.
+  //     and neither the Ema nor Monotime class is threadsafe.
   private[this] val ema = new Ema(windowInNs)
-  ema.update(monoTime.nanos(), 1) // Start the ema at 1.0
+  // Start the ema at 1.0. No need for synchronization during construction.
+  ema.update(monoTime.nanos(), 1)
 
-  // for testing
-  private[filter] def emaValue: Double = ema.last
+  // visible for testing. Synchronized as Ema is not threadsafe
+  private[filter] def emaValue: Double = synchronized { ema.last }
 
   // Decrease the EMA if the response is a Nack, increase otherwise. Update the
   // acceptFraction & last update time
@@ -149,14 +152,17 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
       case Throw(f: Failure) if f.isFlagged(Failure.Rejected) => 0
       case _ => 1
     }
-    ema.update(monoTime.nanos(), value)
+
+    // Avoid a race condition where another update occurs between the call to
+    // nanos and the update.
+    synchronized { ema.update(monoTime.nanos(), value) }
   }
 
   // Drop the current request if:
   // 1. The accept fraction is under the threshold
   // 2. A random value is < the calculated drop probability
   private[this] def shouldDropRequest(): Boolean = {
-    val acceptFraction = ema.last
+    val acceptFraction = emaValue
     acceptFraction < acceptRateThreshold &&
       random.nextDouble() < math.min(MaxDropProbability, 1.0 - multiplier * acceptFraction)
   }
