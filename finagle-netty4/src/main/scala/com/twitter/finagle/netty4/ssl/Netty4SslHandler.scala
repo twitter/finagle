@@ -40,9 +40,11 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
     new GenericFutureListener[NettyFuture[Channel]] {
       def operationComplete(f: NettyFuture[Channel]): Unit = {
         val channel = f.getNow
-        channel.eventLoop().execute(new Runnable {
-          def run(): Unit = channel.close()
-        })
+        if (channel != null && f.isSuccess) {
+          channel.eventLoop().execute(new Runnable {
+            def run(): Unit = channel.close()
+          })
+        }
       }
     }
 
