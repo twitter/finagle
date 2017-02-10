@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.StackRegistry.Entry
 import com.twitter.finagle.util.{Showable, StackRegistry}
@@ -57,6 +58,27 @@ private[twitter] object ClientRegistry extends StackRegistry {
     Future.collect(fs.toSeq).map(_.toSet).ensure {
       initialResolutionTime.incr((Time.now - start).inMilliseconds.toInt)
     }
+  }
+
+  /**
+   * Exports given `value` into a client registry prefixed with client label and protocol.
+   *
+   * A typical export path looks as follows:
+   *
+   * {{{
+   *   client/$protocolLibrary/$label/$value
+   * }}}
+   *
+   * Where both `$protocolLibrary` and `$label` are retrieved from the stack `params`.
+   */
+  def export(params: Stack.Params, value: String*): Unit = {
+    val prefix = Seq(
+      ClientRegistry.registryName,
+      params[ProtocolLibrary].name,
+      params[Label].label
+    )
+
+    GlobalRegistry.get.put(prefix ++ value: _*)
   }
 
   /**

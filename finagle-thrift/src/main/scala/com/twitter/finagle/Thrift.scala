@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
@@ -293,8 +293,10 @@ object Thrift
     override def newClient(
       dest: Name,
       label: String
-    ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    ): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
+      clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
       deserializingClassifier.superNewClient(dest, label)
+    }
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

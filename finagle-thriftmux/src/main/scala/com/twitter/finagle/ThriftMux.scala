@@ -1,15 +1,15 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StackBasedClient}
+import com.twitter.finagle.client.{ClientRegistry, StackBasedClient, StackClient}
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
-import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ClientStatsReceiver, ExceptionStatsHandler, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.{Tracer, Trace}
-import com.twitter.finagle.transport.{Transport, StatsTransport}
+import com.twitter.finagle.tracing.{Trace, Tracer}
+import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -202,7 +202,7 @@ object ThriftMux
       withStack(stackable +: stack)
     }
 
-    private[this] val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
+    private[this] def clientId: Option[ClientId] = params[Thrift.param.ClientId].clientId
 
     private[this] object ThriftMuxToMux extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
       def apply(req: ThriftClientRequest, service: Service[mux.Request, mux.Response]): Future[Array[Byte]] = {
@@ -238,11 +238,15 @@ object ThriftMux
       muxer.configured(param.ResponseClassifier(classifier))
     }
 
-    def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
+    def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] = {
+      clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
       ThriftMuxToMux andThen deserializingClassifier.newService(dest, label)
+    }
 
-    def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
+      clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
       ThriftMuxToMux andThen deserializingClassifier.newClient(dest, label)
+    }
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
