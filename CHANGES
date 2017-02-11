@@ -49,9 +49,13 @@ Runtime Behavior Changes
 Deprecations
 ~~~~~~~~~~~~
 
-  * finagle-memcached: `c.t.f.memcached.replication.ReplicationClient` is now deprecated.  Use
+  * finagle-memcached: `c.t.f.memcached.replication.ReplicationClient` is now deprecated. Use
     `c.t.f.memcached.replication.BaseReplicationClient` with clients created using
     `c.t.f.Memcached.client`. ``RB_ID=907384``
+
+  * finagle-thrift: As part of the Netty 4 migration, all `c.t.f.Codec` and `c.t.f.CodecFactory`
+    types in finagle-thrift are now deprecated. Use the `c.t.f.Thrift` object to make clients
+    and servers. ``RB_ID=907626``
 
 6.42.0
 ------

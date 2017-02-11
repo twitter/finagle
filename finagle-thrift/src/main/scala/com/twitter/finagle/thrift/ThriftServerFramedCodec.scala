@@ -7,6 +7,7 @@ import com.twitter.finagle.tracing.TraceInitializerFilter
 import org.apache.thrift.protocol.TProtocolFactory
 import org.jboss.netty.channel.ChannelPipelineFactory
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 object ThriftServerFramedCodec {
   def apply(statsReceiver: StatsReceiver = NullStatsReceiver): ThriftServerFramedCodecFactory =
     new ThriftServerFramedCodecFactory(statsReceiver)
@@ -17,6 +18,7 @@ object ThriftServerFramedCodec {
   def get(): ThriftServerFramedCodecFactory = apply()
 }
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
     extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
@@ -29,6 +31,7 @@ class ThriftServerFramedCodecFactory(protocolFactory: TProtocolFactory)
     new ThriftServerFramedCodec(config, protocolFactory)
 }
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 class ThriftServerFramedCodec(
     config: ServerCodecConfig,
     protocolFactory: TProtocolFactory = Protocols.binaryFactory()

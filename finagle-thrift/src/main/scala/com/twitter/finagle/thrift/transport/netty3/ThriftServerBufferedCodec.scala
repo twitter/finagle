@@ -21,6 +21,7 @@ case class ThriftServerBufferedPipelineFactory(protocolFactory: TProtocolFactory
 /**
  * ThriftServerBufferedCodec implements a buffered thrift transport.
  */
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 object ThriftServerBufferedCodec {
   /**
    * Create a
@@ -37,6 +38,7 @@ object ThriftServerBufferedCodec {
     new ThriftServerBufferedCodecFactory(protocolFactory)
 }
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
   extends CodecFactory[Array[Byte], Array[Byte]]#Server
 {
@@ -50,6 +52,7 @@ class ThriftServerBufferedCodecFactory(protocolFactory: TProtocolFactory)
   }
 }
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a server", "2017-02-10")
 class ThriftServerBufferedCodec(protocolFactory: TProtocolFactory, config: ServerCodecConfig)
     extends ThriftServerFramedCodec(config) {
   override def pipelineFactory = ThriftServerBufferedPipelineFactory(protocolFactory)
