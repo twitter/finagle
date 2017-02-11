@@ -18,7 +18,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  private def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
+  def getKeyManagers(keyCredentials: KeyCredentials): Option[Array[KeyManager]] =
     keyCredentials match {
       case KeyCredentials.Unspecified => None
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
@@ -46,7 +46,7 @@ private[ssl] object SslConfigurations {
    * See the `init` method of https://docs.oracle.com/javase/8/docs/api/javax/net/ssl/SSLContext.html
    * for more information.
    */
-  private def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] =
+  def getTrustManagers(trustCredentials: TrustCredentials): Option[Array[TrustManager]] =
     trustCredentials match {
       case TrustCredentials.Unspecified => None
       case TrustCredentials.Insecure => Some(Array(new IgnorantTrustManager))
