@@ -57,6 +57,12 @@ Deprecations
     types in finagle-thrift are now deprecated. Use the `c.t.f.Thrift` object to make clients
     and servers. ``RB_ID=907626``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-thrift: Properly locate sub-classed MethodIface services to instantiate for serving
+    BaseServiceIface implemented thrift services. ``RB_ID=907608``
+
 6.42.0
 ------
 

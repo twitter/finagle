@@ -188,6 +188,8 @@ private[twitter] object ThriftUtil {
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       (for {
         baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
+          // for handling MethodIface service subclasses
+          findRootWithSuffix(iface.getName, "$MethodIface") orElse
           Some(iface.getName)
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
           findClass[BinaryService](baseName + "$FinagledService")
