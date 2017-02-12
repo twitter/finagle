@@ -226,7 +226,7 @@ The ``RetryBudget`` factory method takes three arguments:
 
 While the :src:`RequeueFilter <com/twitter/finagle/service/RequeueFilter.scala>` (configured via ``Retries``)
 is inserted into every client's stack by default so all the failures from the underlying modules will be
-retried, the :src:`RetryFilter <com/twitter/finagle/service/RetryFilter.scala>` handling application level
+retried, the :src:`RetryExceptionsFilter <com/twitter/finagle/service/RetryFilter.scala>` handling application level
 exceptions from the remote server should be applied explicitly.
 
 .. code-block:: scala
@@ -234,7 +234,7 @@ exceptions from the remote server should be applied explicitly.
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
   import com.twitter.finagle.util.DefaultTimer
-  import com.twitter.finagle.service.{RetryBudget, RetryFilter, RetryPolicy}
+  import com.twitter.finagle.service.{RetryBudget, RetryExceptionsFilter, RetryPolicy}
   import com.twitter.finagle.stats.NullStatsReceiver
   import com.twitter.util.Try
 
@@ -242,7 +242,7 @@ exceptions from the remote server should be applied explicitly.
   val budget: RetryBudget = RetryBudget()
   val policy: RetryPolicy[Try[Nothing]] = ???
 
-  val retry = new RetryFilter(
+  val retry = new RetryExceptionsFilter(
     retryPolicy = policy,
     timer = DefaultTimer.twitter,
     statsReceiver = NullStatsReceiver,
