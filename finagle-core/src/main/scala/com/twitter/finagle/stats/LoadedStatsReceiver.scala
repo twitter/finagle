@@ -7,6 +7,13 @@ import com.twitter.finagle.util.LoadService
  * all service-loadable receivers and broadcasts stats to them.
  */
 object LoadedStatsReceiver extends {
+  /**
+   * Mutating this value at runtime after it has been initialized should be done
+   * with great care. If metrics have been created using the prior
+   * [[StatsReceiver]], updates to those metrics may not be reflected in the
+   * [[StatsReceiver]] that replaces it. In addition, histograms created with
+   * the prior [[StatsReceiver]] will not be available.
+   */
   @volatile var self: StatsReceiver = {
     val receivers = LoadService[StatsReceiver]()
     BroadcastStatsReceiver(receivers)
@@ -19,7 +26,18 @@ object LoadedStatsReceiver extends {
  */
 object DefaultStatsReceiver extends {
   val self: StatsReceiver = LoadedStatsReceiver
-} with StatsReceiverProxy
+} with StatsReceiverProxy {
+  val get = this
+}
+
+/**
+ * A global StatsReceiver for generic finagle metrics.
+ */
+private[finagle] object FinagleStatsReceiver extends {
+  val self: StatsReceiver = LoadedStatsReceiver.scope("finagle")
+} with StatsReceiverProxy {
+  val get: StatsReceiver = this
+}
 
 /**
  * A client-specific StatsReceiver. All stats recorded using this receiver
@@ -43,4 +61,16 @@ object ServerStatsReceiver extends StatsReceiverProxy {
   def setRootScope(rootScope: String) {
     _self = LoadedStatsReceiver.scope(rootScope)
   }
+}
+
+/**
+ * A [[com.twitter.finagle.stats.HostStatsReceiver]] that loads
+ * all service-loadable receivers and broadcasts stats to them.
+ */
+object LoadedHostStatsReceiver extends HostStatsReceiver {
+  @volatile var _self: StatsReceiver = {
+    val receivers = LoadService[HostStatsReceiver]()
+    BroadcastStatsReceiver(receivers)
+  }
+  def self = _self
 }

@@ -37,12 +37,12 @@ class ByteArraysTest extends FunSuite {
   test("ByteArrays.put64be, ByteArrays.get64be: write a long and read it back again") {
     val a = new Array[Byte](8)
     ByteArrays.put64be(a, 0, Long.MaxValue)
-    assert(ByteArrays.get64be(a, 0) === Long.MaxValue)
+    assert(ByteArrays.get64be(a, 0) == Long.MaxValue)
   }
 
   test("ByteArrays.put64be, ByteArrays.get64be: write a long at non-zero offset and read it back again") {
     val a = new Array[Byte](9)
     ByteArrays.put64be(a, 1, Long.MaxValue)
-    assert(ByteArrays.get64be(a, 1) === Long.MaxValue)
+    assert(ByteArrays.get64be(a, 1) == Long.MaxValue)
   }
 }

@@ -1,21 +1,18 @@
 package com.twitter.finagle
 
-/**
- * Codecs provide protocol encoding and decoding via netty pipelines
- * as well as a standard filter stack that are applied to services
- * from this codec.
- */
-
-import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.tracing.TraceInitializerFilter
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
 
 /**
- * Superclass for all codecs.
+ * Codecs provide protocol encoding and decoding via netty pipelines
+ * as well as a standard filter stack that is applied to services
+ * from this codec.
  */
 trait Codec[Req, Rep] {
   /**
@@ -40,28 +37,47 @@ trait Codec[Req, Rep] {
    * Prepare a connection factory. Used to allow codec modifications
    * to the service at the bottom of the stack (connection level).
    */
+  final def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    prepareConnFactory(underlying, Stack.Params.empty)
+
   def prepareConnFactory(
-    underlying: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] =
-    underlying
+    underlying: ServiceFactory[Req, Rep],
+    params: Stack.Params
+  ): ServiceFactory[Req, Rep] = underlying
 
   /**
    * Note: the below ("raw") interfaces are low level, and require a
    * good understanding of finagle internals to implement correctly.
    * Proceed with care.
    */
-
   def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
     new ChannelTransport(ch)
 
-  def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
-    new SerialClientDispatcher(transport.cast[Req, Rep])
+  final def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
+    newClientDispatcher(transport, Stack.Params.empty)
+
+  def newClientDispatcher(
+    transport: Transport[Any, Any],
+    params: Stack.Params
+  ): Service[Req, Rep] = {
+    // In order to not break the Netty 3 API, we provide some 'alternative facts'
+    // and continue without our dynamic check
+    val clazz = classOf[Any].asInstanceOf[Class[Rep]]
+    new SerialClientDispatcher(
+      Transport.cast[Req, Rep](clazz, transport),
+      params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+    )
+  }
 
   def newServerDispatcher(
     transport: Transport[Any, Any],
     service: Service[Req, Rep]
-  ): Closable =
-    new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
+  ): Closable = {
+    // In order to not break the Netty 3 API, we provide some 'alternative facts'
+    // and continue without our dynamic check
+    val clazz = classOf[Any].asInstanceOf[Class[Req]]
+    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](clazz, transport), service)
+  }
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to
@@ -74,6 +90,11 @@ trait Codec[Req, Rep] {
    * Client/Server Builders rather than stacks.
    */
   def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }
 
 /**
@@ -125,4 +146,9 @@ trait CodecFactory[Req, Rep] {
 
   def client: Client
   def server: Server
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }

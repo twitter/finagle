@@ -1,6 +1,15 @@
-java_library(name='java',
+java_library(
+  provides = artifact(
+    org = 'com.twitter',
+    name = 'finagle-core-java',
+    repo = artifactory,
+  ),
   sources=rglobs('*.java'),
-  provides=artifact(org='com.twitter',
-                    name='finagle-jsr166y',
-                    repo = artifactory,),
+  dependencies=[
+    'finagle/finagle-core/src/main/scala',
+    'util/util-core/src/main/java',
+    'util/util-core/src/main/scala'
+  ],
+  fatal_warnings=True,
+  strict_deps=True,
 )

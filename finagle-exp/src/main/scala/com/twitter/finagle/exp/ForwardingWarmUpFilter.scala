@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver, Stat}
 import com.twitter.finagle.{SimpleFilter, Service}
 import com.twitter.util.{Future, Duration, Promise, Time}
 import scala.util.Random
@@ -26,9 +26,11 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
   private[this] val scopedStatsReceiver = statsReceiver.scope("warmup")
 
   private[this] val localScope = scopedStatsReceiver.scope("local")
+  private[this] val localLatency = localScope.stat("latency_ms")
   private[this] val localFailureCounter = localScope.counter("failures")
 
   private[this] val forwardScope = scopedStatsReceiver.scope("forward")
+  private[this] val forwardLatency = forwardScope.stat("latency_ms")
   private[this] val forwardFailureCounter = forwardScope.counter("failures")
 
   private[this] val onWarmp: Promise[Unit] = Promise[Unit]()
@@ -36,12 +38,13 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
   val onWarm: Future[Unit] = onWarmp
 
   /**
-   * Indicates whether the request should be forwarded.
+   * Indicates whether the request may be forwarded (i.e. in the case where
+   * `bypassForward` is false) or must be handled locally (`bypassForward` is true).
    */
-  def shouldForward: Boolean
+  def bypassForward: Boolean
 
   final override def apply(request: Req, service: Service[Req, Rep]) = {
-    if (warmupComplete || shouldForward) {
+    if (warmupComplete || bypassForward) {
       service(request)
     } else {
       val start = startTime.inMillis
@@ -56,11 +59,11 @@ abstract class ForwardingWarmUpFilter[Req, Rep](
       } else {
         val r = rng.nextFloat()
         if (percentWarm > r) {
-          localScope.timeFuture("latency_ms")(service(request)) onFailure { _ =>
+          Stat.timeFuture(localLatency)(service(request)) onFailure { _ =>
             localFailureCounter.incr()
           }
         } else {
-          forwardScope.timeFuture("latency_ms")(forwardTo(request)) onFailure { _ =>
+          Stat.timeFuture(forwardLatency)(forwardTo(request)) onFailure { _ =>
             forwardFailureCounter.incr()
           }
         }

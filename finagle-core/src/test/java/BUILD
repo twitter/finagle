@@ -1,9 +1,13 @@
-java_library(name='java',
+junit_tests(
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:netty',
+    '3rdparty/jvm/com/google/guava:guava',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/junit',
     'finagle/finagle-core',
     'util/util-core',
+    'util/util-logging/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
+  fatal_warnings=True,
 )

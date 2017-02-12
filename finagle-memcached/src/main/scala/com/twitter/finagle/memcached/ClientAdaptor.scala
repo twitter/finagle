@@ -1,14 +1,16 @@
 package com.twitter.finagle.memcached
 
-import com.twitter.util.{Time, Future, Bijection}
-import org.jboss.netty.buffer.ChannelBuffer
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+
+import com.twitter.bijection.Bijection
+import com.twitter.io.Buf
+import com.twitter.util.{Time, Future}
 
 class ClientAdaptor[T](
   val self: Client,
-  bijection: Bijection[ChannelBuffer, T]
+  bijection: Bijection[Buf, T]
 ) extends BaseClient[T] with Proxy {
-  def channelBufferToType(a: ChannelBuffer): T = bijection(a)
+  def bufferToType(a: Buf): T = bijection(a)
 
   def set(key: String, flags: Int, expiry: Time, value: T): Future[Unit] =
     self.set(key, flags, expiry, bijection.inverse(value))
@@ -20,8 +22,8 @@ class ClientAdaptor[T](
     self.prepend(key, flags, expiry, bijection.inverse(value))
   def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean] =
     self.replace(key, flags, expiry, bijection.inverse(value))
-  def cas(key: String, flags: Int, expiry: Time, value: T, casUnique: ChannelBuffer): Future[JBoolean] =
-    self.cas(key, flags, expiry, bijection.inverse(value), casUnique)
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: T, casUnique: Buf): Future[CasResult] =
+    self.checkAndSet(key, flags, expiry, bijection.inverse(value), casUnique)
 
   def getResult(keys: Iterable[String]): Future[GetResult]   = self.getResult(keys)
   def getsResult(keys: Iterable[String]): Future[GetsResult] = self.getsResult(keys)

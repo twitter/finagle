@@ -1,5 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
  * Package mux implements a generic RPC multiplexer with a rich protocol.
  * Mux is itself encoding independent, so it is meant to use as the
@@ -10,9 +13,9 @@ package com.twitter.finagle
  * big-endian byte order. The schema ''size:4 body:10'' defines the
  * field size to be 4 bytes, followed by 10 bytes of the field body. The
  * schema ''key~4'' defines the field key to be defined by 4 bytes
- * intepreted as the size of the field, followed by that many bytes
+ * interpreted as the size of the field, followed by that many bytes
  * comprising the field itself--it is shorthand for ''keysize:4 key:keysize''.
- * Groups are denoted by parenthesis; ''*'' denotes reptition of the
+ * Groups are denoted by parenthesis; ''*'' denotes repetition of the
  * previous schema 0 or more times, while `{n}` indicates repetition
  * exactly ''n'' times. Unspecified sizes consume the rest of the frame:
  * they may be specified only as the last field in the message.
@@ -41,7 +44,7 @@ package com.twitter.finagle
  * numbered as follows: positive numbers are T-messages; their negative
  * complement is the corresponding R message. T-messages greater than 63
  * (correspondingly R-messages smaller than -63) are session messages.
- * The message number -128 is reserved for Rerr. All other messsages are
+ * The message number -128 is reserved for Rerr. All other messages are
  * application messages. Middle boxes may forward application messages
  * indiscriminately. Because of an early implementation bug, two aliases
  * exist: 127 is Rerr, and -62 is Tdiscarded.
@@ -87,7 +90,7 @@ package com.twitter.finagle
  * only defined flag is bit 0 which enables "debug mode", asking the
  * server to force trace sampling.
  *
- * ''size:4 Tdispatch:1 tag:3 nc:2 (ckey~2 cval~2){nc} dst~2 nd:2
+ * ''size:4 Tdispatch:1 tag:3 nctx:2 (ckey~2 cval~2){nc} dst~2 nd:2
  * (from~2 to~2){nd} body:'' implements ''destination dispatch''.
  * Tdispatch messages carry a set of keyed request contexts, followed by
  * a logical destination encoded as a UTF-8 string. A delegation table
@@ -100,7 +103,8 @@ package com.twitter.finagle
  *
  * ''size:4 Rdispatch:1 tag:3 status:1 nctx:2 (key~2 value~2){nctx} body:'' replies
  * to a Tdispatch request. Status codes are as in Rreq. Replies can include
- * request contexts.
+ * request contexts. MuxFailure flags are currently sent via Rdispatch contexts
+ * under the "MuxFailure" key. See the MuxFailure flags section below.
  *
  * ''size:4 Rerr:1 tag:3 why:'' indicates that the corresponding T message
  * produced an error. Rerr is specifically for server errors: the server
@@ -115,19 +119,42 @@ package com.twitter.finagle
  * its peer; these should be responded to immediately with a Rping
  * message.
  *
- * ''size:4 Tdiscarded:1 tag:3 why:'' is a marker message
- * indicating that the Treq with the given tag has been discarded by the
- * client. This can be used as a hint for early termination. Why is a
- * string describing why the request was discarded. Note that it does
- * *not* free the server from the obligation of replying to the original
- * Treq.
+ * ''size:4 Tdiscarded:1 tag:3 discard_tag:3 why:'' is a marker message and therefore
+ * has a tag value of 0. ''discard_tag'' indicates the tag of the Tdispatch to be
+ * discarded by the client. This can be used as a hint for early termination. Why is
+ * a string describing why the request was discarded. Note that it does *not* free
+ * the server from the obligation of replying to the original Treq.
  *
  * ''size:4 Tlease:1 tag:3 unit:1 howmuch:8'' is a marker message indicating that a
- * lease has been issued for ''howmuch'' unit. Unit '0' is reserved for duration in
- * milliseconds. Whenever a lease has not been issued, a client can assume it holds
- * an indefinite lease. Adhering to the lease is optional, but the server may
- * reject requests or provide degraded service should the lease expire. This is
- * used by servers to implement features like garbage collection avoidance.
+ * lease has been issued for ''howmuch'' units. As a marker message, its tag value must
+ * be 0. Unit '0' is reserved for duration in milliseconds. Whenever a lease has not been
+ * issued, a client can assume it holds an indefinite lease. Adhering to the lease is
+ * optional, but the server may reject requests or provide degraded service should the
+ * lease expire. This is used by servers to implement features like garbage collection
+ * avoidance.
+ *
+ * =MuxFailure Flags=
+ *
+ * Failure flags are read and written as an 8 byte integer. Unrecognized flags
+ * will be ignored silently, but should all be considered reserved for future
+ * use.
+ *
+ *  Flag          Value     Meaning
+ *  Restartable   1 << 0    Request is safe to re-issue
+ *  Rejected      1 << 1    Request was rejected/Nacked by the server
+ *  NonRetryable  1 << 2    Request should not be retried
  *
  */
-package object mux
+package object mux {
+  /**
+   * The name of the finagle-mux [[ToggleMap]].
+   */
+  private val LibraryName: String =
+    "com.twitter.finagle.mux"
+
+  /**
+   * The [[ToggleMap]] used for finagle-mux.
+   */
+  private[finagle] val Toggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
+}

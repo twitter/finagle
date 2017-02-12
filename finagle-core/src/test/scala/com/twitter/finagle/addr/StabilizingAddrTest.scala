@@ -2,14 +2,13 @@ package com.twitter.finagle.addr
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, MockTimer}
+import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.Time
+import com.twitter.util.{MockTimer, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import StabilizingAddr.State._
-import java.net.SocketAddress
 
 class MockHealth {
   val pulse = new Broker[Health]()
@@ -18,16 +17,25 @@ class MockHealth {
 }
 
 class Context {
-  val s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 = new SocketAddress {}
+  val s1 = Address(1)
+  val s2 = Address(2)
+  val s3 = Address(3)
+  val s4 = Address(4)
+  val s5 = Address(5)
+  val s6 = Address(6)
+  val s7 = Address(7)
+  val s8 = Address(8)
+  val s9 = Address(9)
+  val s10 = Address(10)
   val allAddrs = Set(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
 
   object addrs {
     val broker = new Broker[Addr]
     val offer = broker.recv
-    @volatile var set = Set.empty[SocketAddress]
+    @volatile var set = Set.empty[Address]
 
     def apply() = set
-    def update(newSet: Set[SocketAddress]) {
+    def update(newSet: Set[Address]) {
       set = newSet
       broker !! Addr.Bound(set)
     }
@@ -67,18 +75,18 @@ class StabilizingAddrTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(stabilized === Addr.Bound(addrs()))
+      assert(stabilized == Addr.Bound(addrs()))
 
       addrs() -= s9
 
-      assert(limboSize === 1)
+      assert(limboSize == 1)
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Bound(addrs()))
+      assert(stabilized == Addr.Bound(addrs()))
 
       addrs() = addrs() - s1 - s2 - s3 - s4
-      assert(limboSize === 4)
-      assert(stabilized === Addr.Bound(addrs() + s1 + s2 + s3 + s4))
+      assert(limboSize == 4)
+      assert(stabilized == Addr.Bound(addrs() + s1 + s2 + s3 + s4))
       tc.advance(grace)
       timer.tick()
       assertStable()
@@ -97,12 +105,12 @@ class StabilizingAddrTest extends FunSuite {
       assertStable()
       addrs() -= s10
       assert(stabilized != Addr.Bound(addrs()))
-      assert(stabilized === Addr.Bound(allAddrs))
-      assert(limboSize === 1)
+      assert(stabilized == Addr.Bound(allAddrs))
+      assert(limboSize == 1)
       addrs() = addrs() -- Set(s1, s2, s3, s4)
       assert(stabilized != Addr.Bound(addrs()))
-      assert(stabilized === Addr.Bound(allAddrs))
-      assert(limboSize === 5)
+      assert(stabilized == Addr.Bound(allAddrs))
+      assert(limboSize == 5)
 
       healthStatus.mkHealthy()
       tc.advance(grace)
@@ -117,19 +125,19 @@ class StabilizingAddrTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
+      assert(healthStat == Healthy.id)
       assertStable()
 
       healthStatus.mkUnhealthy()
-      assert(healthStat === Unhealthy.id)
+      assert(healthStat == Unhealthy.id)
       addrs() = Set.empty
 
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
+      assert(healthStat == Healthy.id)
       addrs() = Set(s1, s2, s3, s4)
 
       tc.advance(grace)
@@ -163,10 +171,10 @@ class StabilizingAddrTest extends FunSuite {
 
       assertStable()
       addrs.broker !! Addr.Neg
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Neg)
+      assert(stabilized == Addr.Neg)
     }
   }
 
@@ -181,15 +189,15 @@ class StabilizingAddrTest extends FunSuite {
       addrs() = Set(s1, s2)
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       addrs.broker !! Addr.Neg
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Bound(Set(s1, s2)))
+      assert(stabilized == Addr.Bound(Set(s1, s2)))
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Neg)
+      assert(stabilized == Addr.Neg)
 
       addrs() = Set(s1, s2)
       assertStable()

@@ -1,11 +1,10 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
-import org.apache.thrift.protocol.{TMessageType, TMessage, TBinaryProtocol}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
-import java.net.InetSocketAddress
+import com.twitter.util.Future
+import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
 import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.when
@@ -50,8 +49,8 @@ class ThriftServerFramedCodecTest extends FunSuite with MockitoSugar {
       filter(ByteArrays.concat(OutputBuffer.messageToArray(header, protocolFactory), ignoreMsg.toArray), service)
   
       bufferingTracer.iterator foreach { record =>
-        assert(record.traceId === traceId)
-        assert(record.traceId.flags === traceId.flags)
+        assert(record.traceId == traceId)
+        assert(record.traceId.flags == traceId.flags)
       }
     }
   }

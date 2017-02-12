@@ -3,14 +3,13 @@ package com.twitter.finagle.netty3
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
+import java.net.{InetSocketAddress, InetAddress}
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.{ServerBootstrap, ClientBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
-import Conversions._
-
-import com.twitter.util.{CountDownLatch, RandomSocket}
+import com.twitter.util.CountDownLatch
 import com.twitter.conversions.time._
 
 @RunWith(classOf[JUnitRunner])
@@ -31,7 +30,7 @@ class Netty3AssumptionsTest extends FunSuite {
         pipeline
       }
     })
-    bootstrap.bind(RandomSocket())
+    bootstrap.bind(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
   }
 
 
@@ -53,16 +52,18 @@ class Netty3AssumptionsTest extends FunSuite {
 
     val latch = new CountDownLatch(1)
 
-    bootstrap.connect(addr) {
-      case Ok(channel) =>
-        assert(channel.isOpen)
-        Channels.close(channel)
-        assert(!channel.isOpen)
-        latch.countDown()
-
-      case wtf =>
-        throw new Exception("connect attempt failed: " + wtf)
-    }
+    bootstrap.connect(addr).addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (f.isSuccess) {
+          val channel = f.getChannel
+          assert(channel.isOpen)
+          Channels.close(channel)
+          assert(!channel.isOpen)
+          latch.countDown()
+        } else {
+          throw new Exception("connect attempt failed: " + f)
+        }
+    })
 
     assert(latch.await(1.second))
 

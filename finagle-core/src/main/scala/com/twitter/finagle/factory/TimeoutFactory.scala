@@ -10,9 +10,12 @@ object TimeoutFactory {
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.factory.TimeoutFactory]].
    */
-  case class Param(timeout: Duration)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(Duration.Top)
+  case class Param(timeout: Duration) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(Duration.Top))
   }
 
   /**
@@ -42,21 +45,25 @@ object TimeoutFactory {
 /**
  * A factory wrapper that times out the service acquisition after the
  * given time.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 class TimeoutFactory[Req, Rep](
     self: ServiceFactory[Req, Rep],
     timeout: Duration,
     exception: ServiceTimeoutException,
     timer: Timer)
-  extends ServiceFactoryProxy[Req, Rep](self)
-{
+  extends ServiceFactoryProxy[Req, Rep](self) {
+  private[this] val failure = Future.exception(Failure.adapt(exception, Failure.Restartable))
+
   override def apply(conn: ClientConnection) = {
     val res = super.apply(conn)
     res.within(timer, timeout) rescue {
       case exc: java.util.concurrent.TimeoutException =>
         res.raise(exc)
         res onSuccess { _.close() }
-        Future.exception(exception)
+        failure
     }
   }
 }

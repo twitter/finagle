@@ -1,10 +1,10 @@
 package com.twitter.finagle.example.kestrel
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Kestrel
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.kestrel.protocol.Kestrel
 import com.twitter.finagle.kestrel.{ReadHandle, Client}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.JavaTimer
 import com.twitter.finagle.service.Backoff
 import java.util.concurrent.atomic.AtomicBoolean
@@ -28,9 +28,9 @@ object KestrelClient {
     val hosts = Seq("localhost:22133")
     val stopped = new AtomicBoolean(false)
 
-    val clients: Seq[Client] = hosts map { host =>
+    val clients: Seq[Client] = hosts.map { host =>
       Client(ClientBuilder()
-        .codec(Kestrel())
+        .stack(Kestrel.client)
         .hosts(host)
         .hostConnectionLimit(1) // process at most 1 item per connection concurrently
         .buildFactory())
@@ -40,20 +40,21 @@ object KestrelClient {
       val queueName = "queue"
       val timer = new JavaTimer(isDaemon = true)
       val retryBackoffs = Backoff.const(10.milliseconds)
-      clients map { _.readReliably(queueName, timer, retryBackoffs) }
+      clients.map { _.readReliably(queueName, timer, retryBackoffs) }
     }
 
     val readHandle: ReadHandle = ReadHandle.merged(readHandles)
 
     // Attach an async error handler that prints to stderr
-    readHandle.error foreach { e =>
+    readHandle.error.foreach { e =>
       if (!stopped.get) System.err.println("zomg! got an error " + e)
     }
 
     // Attach an async message handler that prints the messages to stdout
-    readHandle.messages foreach { msg =>
+    readHandle.messages.foreach { msg =>
       try {
-        println(msg.bytes.toString(Charsets.Utf8))
+        val Buf.Utf8(str) = msg.bytes
+        println(str)
       } finally {
         msg.ack.sync() // if we don't do this, no more msgs will come to us
       }
@@ -66,7 +67,7 @@ object KestrelClient {
 
     println("stopping")
     readHandle.close()
-    clients foreach { _.close() }
+    clients.foreach { _.close() }
     println("done")
   }
 

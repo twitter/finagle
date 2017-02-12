@@ -1,7 +1,7 @@
-package com.twitter.finagle.exp.mysql.integration
+package com.twitter.finagle.mysql.integration
 
-import com.twitter.finagle.exp.Mysql
-import com.twitter.finagle.exp.mysql._
+import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql._
 import com.twitter.util.Await
 import java.sql.Date
 import org.junit.runner.RunWith
@@ -73,7 +73,7 @@ class ClientTest extends FunSuite with IntegrationClient {
       val insertResult = Await.result(c.query(sql))
       val OK(_, insertid, _, _, _) = insertResult.asInstanceOf[OK]
       assert(insertResult.isInstanceOf[OK])
-      assert(insertid === 1)
+      assert(insertid == 1)
     }
 
     test("query: select values") {
@@ -88,7 +88,7 @@ class ClientTest extends FunSuite with IntegrationClient {
 
       var i = 0
       for (res <- selectResult) {
-        assert(allRecords(i) === res)
+        assert(allRecords(i) == res)
         i += 1
       }
     }
@@ -103,8 +103,27 @@ class ClientTest extends FunSuite with IntegrationClient {
         val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
         val res = ps.select(recordName)(identity)
         val row = Await.result(res)(0)
-        assert(row("numRecords").get === expectedRes)
+        assert(row("numRecords").get == expectedRes)
       }
+    }
+
+    test("cursored statement") {
+      val query = "select * from `finagle-mysql-test` where `event` = ?"
+      val cursoredStatement = c.cursor(query)
+      val cursorResult = Await.result(cursoredStatement(1, "50 m freestyle")(r => r))
+      val rows = Await.result(cursorResult.stream.toSeq())
+
+      assert(rows.size == 1)
+      assert(rows(0)("event").get == StringValue("50 m freestyle"))
+    }
+
+    test("CursorResult does not store head of stream") {
+      val query = "select * from `finagle-mysql-test`"
+      val cursoredStatement = c.cursor(query)
+      val cursorResult = Await.result(cursoredStatement(1)(r => r))
+      val first = cursorResult.stream.take(1)
+      val second = cursorResult.stream.take(1)
+      assert(first != second)
     }
   }
 }

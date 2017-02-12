@@ -1,171 +1,158 @@
 package com.twitter.finagle.redis
 
 import com.twitter.finagle.redis.protocol._
+import com.twitter.io.Buf
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffer
-import _root_.java.lang.{Long => JLong}
+import java.lang.{Long => JLong}
 import com.twitter.finagle.redis.util.ReplyFormat
 
-trait Lists { self: BaseClient =>
+private[redis] trait ListCommands { self: BaseClient =>
+
   /**
-   * Gets the length of the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @return the length of the list.  Unassigned keys are considered empty
-   * lists, and return 0.
+   * Gets the length of the list stored at the hash `key`. If the key is a
+   * non-list element, an exception will be thrown. Unassigned keys are
+   * considered empty lists (has size 0).
    */
-  def lLen(key: ChannelBuffer): Future[JLong] =
+  def lLen(key: Buf): Future[JLong] =
     doRequest(LLen(key)) {
       case IntegerReply(n) => Future.value(n)
     }
 
   /**
-   * Gets the value of the element at the indexth position in the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param index
-   * @return an option of the value of the element at the indexth position in the list.
-   * Nothing if the index is out of range.
+   * Gets the value of the element at the `index` position in the list stored
+   * at the hash `key`. If the key is a non-list element, an exception will be
+   * thrown.
+   *
+   * @return `Some` if the given element exists, `None` otherwise.
    */
-  def lIndex(key: ChannelBuffer, index: JLong): Future[Option[ChannelBuffer]] =
+  def lIndex(key: Buf, index: JLong): Future[Option[Buf]] =
     doRequest(LIndex(key, index)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply     => Future.None
     }
 
   /**
-   * Inserts a value after another pivot value in the list.
-   * If the key is a non-list element,
-   * an exception will be thrown.
-   * @param key
-   * @param pivot
-   * @param value
-   * @return an option of the new length of the list, or nothing if the pivot is not found, or
-   * the list is empty.
+   * Inserts a given `value` after another `pivot` value in the list stored
+   * at the hash `key`. If the key is a non-list element, an exception will
+   * be thrown.
+   *
+   * @return `Some` of the new length of the list. `None` if the pivot is not
+   *        found, or the list is empty.
    */
   def lInsertAfter(
-    key: ChannelBuffer,
-    pivot: ChannelBuffer,
-    value: ChannelBuffer
+    key: Buf,
+    pivot: Buf,
+    value: Buf
   ): Future[Option[JLong]] =
     doRequest(LInsert(key, "AFTER", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }
 
   /**
-   * Inserts a value before another pivot value in the list.
-   * If the key is a non-list element,
-   * an exception will be thrown.
-   * @param key
-   * @param pivot
-   * @param value
-   * @return an option of the new length of the list, or nothing if the pivot is not found, or the
-   * list is empty.
+   * Inserts a `value` before another `pivot` value in the list stored at the
+   * hash `key`. If the key is a non-list element, an exception will be thrown.
+   *
+   * @return `Some` of the new length of the list, or `None` if the pivot is
+   *        not found, or the list is empty.
    */
   def lInsertBefore(
-    key: ChannelBuffer,
-    pivot: ChannelBuffer,
-    value: ChannelBuffer
+    key: Buf,
+    pivot: Buf,
+    value: Buf
   ): Future[Option[JLong]] =
     doRequest(LInsert(key, "BEFORE", pivot, value)) {
       case IntegerReply(n) => Future.value(if (n == -1) None else Some(n))
     }
 
   /**
-   * Pops a value off the front of the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @return an option of the value of the popped element, or nothing if the list is empty.
+   * Pops a value off the front of the list stored at the hash `key`. If the key
+   * is a non-list element, an exception will be thrown.
+   *
+   * @return `Some` of the value of the popped element, or `None` if the list is
+   *        empty.
    */
-  def lPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
+  def lPop(key: Buf): Future[Option[Buf]] =
     doRequest(LPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
+      case EmptyBulkReply     => Future.None
     }
 
   /**
-   * Pushes a value onto the front of the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param value
-   * @return the length of the list
+   * Pushes a list of `value` onto the front of the list stored at the hash
+   * `key`. If the key is a non-list element, an exception will be thrown.
+   *
+   * @return The length of the list.
    */
-  def lPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
-    doRequest(LPush(key, value)) {
+  def lPush(key: Buf, values: List[Buf]): Future[JLong] =
+    doRequest(LPush(key, values)) {
       case IntegerReply(n) => Future.value(n)
     }
 
   /**
-   * Removes count elements matching value from the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param count
+   * Removes `count` elements matching `value` from the list stored
+   * at the hash `key`. If the key is a non-list element, an exception will
+   * be thrown.
+   *
    * @note The sign of `count` describes whether it will remove them from the
-   * back or the front of the list.  If count is 0, it will remove all instances, value
-   * @return the number of removed elements.
+   *       back or the front of the list.  If `count` is 0, it will remove all
+   *       instances.
+   *
+   * @return The number of removed elements.
    */
-  def lRem(key: ChannelBuffer, count: JLong, value: ChannelBuffer): Future[JLong] =
+  def lRem(key: Buf, count: JLong, value: Buf): Future[JLong] =
     doRequest(LRem(key, count, value)) {
       case IntegerReply(n) => Future.value(n)
     }
 
   /**
-   * Sets the indexth element to be value.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param index
-   * @param value
+   * Sets the element at `index` in the list stored under the hash `key` to a
+   * given `value`. If the key is a non-list element, an exception will be thrown.
    */
-  def lSet(key: ChannelBuffer, index: JLong, value: ChannelBuffer): Future[Unit] =
+  def lSet(key: Buf, index: JLong, value: Buf): Future[Unit] =
     doRequest(LSet(key, index, value)) {
       case StatusReply(message) => Future.Unit
     }
 
   /**
-   * Gets the values in the range supplied.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param start (inclusive)
-   * @param end (inclusive)
-   * @return a list of the value
+   * Gets the values in the given range `start` - `end` (inclusive) of the list
+   * stored at the hash `key`. If the key is a non-list element, an exception will
+   * be thrown.
    */
-  def lRange(key: ChannelBuffer, start: JLong, end: JLong): Future[List[ChannelBuffer]] =
+  def lRange(key: Buf, start: JLong, end: JLong): Future[List[Buf]] =
     doRequest(LRange(key, start, end)) {
-      case MBulkReply(message) => Future.value(ReplyFormat.toChannelBuffers(message))
-      case EmptyMBulkReply() => Future.value(List())
+      case MBulkReply(message) => Future.value(ReplyFormat.toBuf(message))
+      case EmptyMBulkReply    => Future.value(List.empty)
     }
 
   /**
-   * Pops a value off the end of the list.
-   * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @return an option of the value of the popped element, or nothing if the list is empty.
+   * Pops a value off the end of the list stored at hash `key`. If the key is a
+   * non-list element, an exception will be thrown.
+   *
+   * @return `Some` of the value of the popped element, or `None` if the list is
+   *         empty.
    */
-  def rPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
+  def rPop(key: Buf): Future[Option[Buf]] =
     doRequest(RPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
+      case EmptyBulkReply     => Future.None
     }
 
   /**
-   * Pushes a value onto the end of the list.
+   * Pushes given `values` onto the end of the list stored at the hash `key`.
    * If the key is a non-list element, an exception will be thrown.
-   * @param key
-   * @param value
-   * @return the length of the list
+   *
+   * @return The length of the list.
    */
-  def rPush(key: ChannelBuffer, value: List[ChannelBuffer]): Future[JLong] =
-    doRequest(RPush(key, value)) {
+  def rPush(key: Buf, values: List[Buf]): Future[JLong] =
+    doRequest(RPush(key, values)) {
       case IntegerReply(n) => Future.value(n)
     }
 
   /**
-   * Removes all of the elements from the list except for those in the range.
-   * @param key
-   * @param start (inclusive)
-   * @param end (exclusive)
+   * Removes all of the elements from the list stored at hash `key`, except for
+   * those in the range: `start` - `end` (inclusive).
    */
-  def lTrim(key: ChannelBuffer, start: JLong, end: JLong): Future[Unit] =
+  def lTrim(key: Buf, start: JLong, end: JLong): Future[Unit] =
     doRequest(LTrim(key, start, end)) {
       case StatusReply(message) => Future.Unit
     }

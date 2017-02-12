@@ -20,7 +20,7 @@ import scala.reflect.ClassTag
  * references (though this would require another allocation for each
  * item).
  */
-class ConcurrentRingBuffer[T : ClassTag](capacity: Int) {
+private[finagle] class ConcurrentRingBuffer[T : ClassTag](capacity: Int) {
   assert(capacity > 0)
 
   private[this] val nextRead, nextWrite = new AtomicLong(0)

@@ -1,8 +1,6 @@
 package com.twitter.finagle
 
-import java.util.{List => JList, Collection => JCollection}
-import java.net.SocketAddress
-
+import java.util.{Collection => JCollection, Map => JMap}
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.immutable
@@ -10,8 +8,10 @@ import scala.collection.immutable
 /**
  * An address identifies the location of an object--it is a bound
  * name. An object may be replicated, and thus bound to multiple
- * physical locations; it may be delegated to an unbound name.
- * (Similar to a symbolic link in Unix.)
+ * physical locations (see [[com.twitter.finagle.Address]]).
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Names.html#addr user guide]]
+ *      for further details.
  */
 sealed trait Addr
 
@@ -19,16 +19,30 @@ sealed trait Addr
  * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.Addrs]].
  */
 object Addr {
+
+  /** Address metadata */
+  type Metadata = Map[String, Any]
+  object Metadata {
+    def apply(pairs: (String, Any)*): Metadata = Map(pairs:_*)
+    val empty: Metadata = Map.empty
+  }
+
   /**
-   * A bound name. The object is replicated
-   * at each of the given socket addresses.
+   * A bound name. The object is replicated at each of the given
+   * endpoint addresses.
+   *
+   * Bound addresses include an arbitrary Map of metadata that
+   * Namers or Resolvers may set to provide additional configuration
+   * (e.g. geographical information) to client stacks.
    *
    * Note: This currently protects the underlying addresses
    * from access since we want to add partially resolved addresses
    * in the future. At this point, the API will be fixed.
    */
-  case class Bound(addrs: immutable.Set[SocketAddress])
-    extends Addr
+  case class Bound(
+    addrs: immutable.Set[Address],
+    metadata: Metadata
+  ) extends Addr
 
   /**
    * The address is failed: binding failed with
@@ -52,13 +66,9 @@ object Addr {
 
   object Bound {
     @varargs
-    def apply(addrs: SocketAddress*): Addr =
-      Bound(Set(addrs:_*))
+    def apply(addrs: Address*): Addr = Bound(Set(addrs:_*), Metadata.empty)
 
-    /**
-     * Provided for Java compatibility.
-     */
-    def apply(addrs: JList[SocketAddress]): Addr = Addrs.newBoundAddr(addrs)
+    def apply(addrs: Set[Address]): Addr = Bound(addrs, Metadata.empty)
   }
 
   object Failed {
@@ -75,13 +85,19 @@ object Addrs {
    * @see com.twitter.finagle.Addr.Bound
    */
   @varargs
-  def newBoundAddr(addrs: SocketAddress*): Addr = Addr.Bound(addrs: _*)
+  def newBoundAddr(addrs: Address*): Addr = Addr.Bound(addrs: _*)
 
   /**
    * @see com.twitter.finagle.Addr.Bound
    */
-  def newBoundAddr(addrs: JCollection[SocketAddress]): Addr =
-    Addr.Bound(addrs.asScala.toSet)
+  def newBoundAddr(addrs: JCollection[Address]): Addr =
+    Addr.Bound(addrs.asScala.toSet, Addr.Metadata.empty)
+
+  /**
+   * @see com.twitter.finagle.Addr.Bound
+   */
+  def newBoundAddr(addrs: JCollection[Address], metadata: JMap[String, Any]): Addr =
+    Addr.Bound(addrs.asScala.toSet, metadata.asScala.toMap)
 
   /**
    * @see com.twitter.finagle.Addr.Failed

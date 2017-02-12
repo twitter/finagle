@@ -1,0 +1,15 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.service-overrides-on",
+      "description": "Will be overriden to 1.0 by service config",
+      "fraction": 1.0,
+      "comment": "This corresponds to StandardToggleMapTest.apply with resource-based configs"
+    },
+    {
+      "id": "com.twitter.service-overrides-off",
+      "description": "Will be overriden to 0.0 by service config",
+      "fraction": 0.0
+    }
+  ]
+}

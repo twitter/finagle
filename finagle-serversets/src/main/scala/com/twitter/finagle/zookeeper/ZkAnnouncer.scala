@@ -3,11 +3,12 @@ package com.twitter.finagle.zookeeper
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus
 import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl, ZooKeeperClient}
 import com.twitter.finagle.{Announcer, Announcement}
-import com.twitter.util.{Future, NonFatal, Promise}
+import com.twitter.util.{Future, Promise}
 import java.net.InetSocketAddress
-import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
+import java.util.concurrent.LinkedBlockingQueue
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.util.control.NonFatal
 
 /**
  * Indicates that a failure occurred while attempting to announce the server

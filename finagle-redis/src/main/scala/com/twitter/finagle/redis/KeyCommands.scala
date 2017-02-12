@@ -1,19 +1,19 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+import java.lang.{Boolean => JBoolean, Long => JLong}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.ChannelBuffer
 
-trait Keys { self: BaseClient =>
+private[redis] trait KeyCommands { self: BaseClient =>
 
   /**
    * Removes keys
    * @param keys list of keys to remove
    * @return Number of keys removed
    */
-  def del(keys: Seq[ChannelBuffer]): Future[JLong] =
+  def dels(keys: Seq[Buf]): Future[JLong] =
     doRequest(Del(keys)) {
       case IntegerReply(n) => Future.value(n)
     }
@@ -24,10 +24,10 @@ trait Keys { self: BaseClient =>
    * @param key
    * @return bytes, or none if the key did not exist
    */
-  def dump(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
+  def dump(key: Buf): Future[Option[Buf]] =
     doRequest(Dump(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply     => Future.None
     }
 
   /**
@@ -35,9 +35,9 @@ trait Keys { self: BaseClient =>
    * @param key
    * @return true if key exists, false otherwise
    */
-  def exists(key: ChannelBuffer): Future[JBoolean] =
+  def exists(key: Buf): Future[JBoolean] =
     doRequest(Exists(key)) {
-      case IntegerReply(n) => Future.value((n == 1))
+      case IntegerReply(n) => Future.value(n == 1)
     }
 
   /**
@@ -47,7 +47,7 @@ trait Keys { self: BaseClient =>
    * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
    * false otherwise.
    */
-  def expire(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
+  def expire(key: Buf, ttl: JLong): Future[JBoolean] =
     doRequest(Expire(key, ttl)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
@@ -59,7 +59,7 @@ trait Keys { self: BaseClient =>
    * @return boolean, true if it successfully set the ttl (time to live) on a valid key,
    * false otherwise.
    */
-  def expireAt(key: ChannelBuffer, ttl: JLong): Future[JBoolean] =
+  def expireAt(key: Buf, ttl: JLong): Future[JBoolean] =
     doRequest(ExpireAt(key, Time.fromMilliseconds(ttl))) {
       case IntegerReply(n) => Future.value(n == 1)
     }
@@ -69,10 +69,10 @@ trait Keys { self: BaseClient =>
    * @param pattern
    * @return list of keys matching pattern
    */
-  def keys(pattern: ChannelBuffer): Future[Seq[ChannelBuffer]] =
+  def keys(pattern: Buf): Future[Seq[Buf]] =
     doRequest(Keys(pattern)) {
-      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
+      case EmptyMBulkReply      => Future.Nil
     }
 
   /**
@@ -84,10 +84,10 @@ trait Keys { self: BaseClient =>
    * @return true if key was moved.
    *         false if key was not moved for any reason.
    */
-   def move(key: ChannelBuffer, db: ChannelBuffer): Future[JBoolean] =
-     doRequest(Move(key, db)) {
-       case IntegerReply(n) => Future.value(n == 1)
-     }
+  def move(key: Buf, db: Buf): Future[JBoolean] =
+    doRequest(Move(key, db)) {
+      case IntegerReply(n) => Future.value(n == 1)
+    }
 
   /**
    * Set a key's time to live in milliseconds.
@@ -97,7 +97,7 @@ trait Keys { self: BaseClient =>
    *         false if key does not exist or the timeout could not be set.
    * @see http://redis.io/commands/pexpire
    */
-  def pExpire(key: ChannelBuffer, milliseconds: JLong): Future[JBoolean] =
+  def pExpire(key: Buf, milliseconds: JLong): Future[JBoolean] =
     doRequest(PExpire(key, milliseconds)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
@@ -111,7 +111,7 @@ trait Keys { self: BaseClient =>
    *         (see: EXPIRE).
    * @see http://redis.io/commands/pexpireat
    */
-  def pExpireAt(key: ChannelBuffer, timestamp: JLong): Future[JBoolean] =
+  def pExpireAt(key: Buf, timestamp: JLong): Future[JBoolean] =
     doRequest(PExpireAt(key, Time.fromMilliseconds(timestamp))) {
       case IntegerReply(n) => Future.value(n == 1)
     }
@@ -124,7 +124,7 @@ trait Keys { self: BaseClient =>
    *         does not have a timeout.
    * @see
    */
-  def pTtl(key: ChannelBuffer): Future[Option[JLong]] =
+  def pTtl(key: Buf): Future[Option[JLong]] =
     doRequest(PTtl(key)) {
       case IntegerReply(n) =>
         if (n != -1) Future.value(Some(n))
@@ -136,11 +136,10 @@ trait Keys { self: BaseClient =>
    * @param cursor, count, pattern
    * @return cursor followed by matching keys
    */
-  def scan(cursor: JLong, count: Option[JLong], pattern: Option[ChannelBuffer]
-  ): Future[Seq[ChannelBuffer]] =
+  def scans(cursor: JLong, count: Option[JLong], pattern: Option[Buf]): Future[Seq[Buf]] =
     doRequest(Scan(cursor, count, pattern)) {
-      case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
+      case EmptyMBulkReply      => Future.Nil
     }
 
   /**
@@ -149,16 +148,10 @@ trait Keys { self: BaseClient =>
    * @return Option containing either the ttl in seconds if the key exists
    * and has a timeout, or else nothing.
    */
-  def ttl(key: ChannelBuffer): Future[Option[JLong]] =
+  def ttl(key: Buf): Future[Option[JLong]] =
     doRequest(Ttl(key)) {
-      case IntegerReply(n) => {
-        if (n != -1) {
-          Future.value(Some(n))
-        }
-        else {
-          Future.value(None)
-        }
-      }
+      case IntegerReply(n) =>
+        if (n != -1) Future.value(Some(n))
+        else Future.None
     }
-
 }

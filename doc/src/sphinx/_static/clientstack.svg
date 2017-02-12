@@ -54,17 +54,22 @@
       <text class="node-label" x="50" y="17.5" text-anchor="middle">Observe</text>
     </g>
 
-    <g id="serviceTimeout" transform="translate(50, 220) rotate(-90)">
+    <g id="retries" transform="translate(50, 220) rotate(-90)">
       <rect class="node" width="100" height="25"/>
-      <text class="node-label" x="50" y="17.5" text-anchor="middle">Service Timeout</text>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Retries</text>
     </g>
 
-    <g id="refcounted" transform="translate(75, 220) rotate(-90)">
+    <g id="serviceTimeout" transform="translate(75, 220) rotate(-90)">
+      <rect class="node" width="100" height="25"/>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Session Timeout</text>
+    </g>
+
+    <g id="refcounted" transform="translate(100, 220) rotate(-90)">
       <rect class="node" width="100" height="25"/>
       <text class="node-label" x="50" y="17.5" text-anchor="middle">Request Draining</text>
     </g>
 
-    <g id="loadbalancer" transform="translate(100, 220) rotate(-90)">
+    <g id="loadbalancer" transform="translate(125, 220) rotate(-90)">
       <rect class="node" width="100" height="100"/>
       <text class="heavy-label node-label" x="50" y="-50" text-anchor="middle"
         transform="rotate(90)">Load Balancer</text>

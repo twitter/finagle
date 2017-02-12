@@ -1,10 +1,11 @@
 package com.twitter.finagle
 
-import com.twitter.util.NonFatal
+import com.twitter.finagle.naming.DefaultInterpreter
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.util.Random
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class NameTreeTest extends FunSuite {
@@ -62,7 +63,7 @@ class NameTreeTest extends FunSuite {
     val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
       try {
-        assert(NameTree.read(tree.show) === tree)
+        assert(NameTree.read(tree.show) == tree)
       } catch {
         case NonFatal(exc) =>
           fail("Exception %s while parsing %s: %s".format(
@@ -76,11 +77,9 @@ class NameTreeTest extends FunSuite {
       /bar/foo => /foo/bar""")
 
     intercept[IllegalArgumentException] {
-      dtab.bind(NameTree.read("/foo/bar")).sample()
+      DefaultInterpreter.bind(dtab, Path.read("/foo/bar")).sample()
     }
   }
-
-
 
   test("NameTree.eval/simplified") {
     val cases = Seq[(String, Option[Set[String]])](
@@ -104,8 +103,8 @@ class NameTreeTest extends FunSuite {
         set map { el: String => Path.read(el) }
       }
 
-      assert(NameTree.read(tree).eval === expect)
-      assert(NameTree.read(tree).simplified.eval === expect)
+      assert(NameTree.read(tree).eval == expect)
+      assert(NameTree.read(tree).simplified.eval == expect)
     }
   }
 }

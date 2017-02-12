@@ -2,13 +2,13 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Stack, ServiceFactory}
-import com.twitter.io.Charsets
-import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
-  SimpleChannelHandler}
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
+import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
+import com.twitter.util.Future
+import java.nio.charset.StandardCharsets.UTF_8
+import org.jboss.netty.channel.{ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, SimpleChannelHandler}
+import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
 
 private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
   override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
@@ -24,18 +24,44 @@ private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
 private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
-    pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
-    pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
+    pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
+    pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
     pipeline.addLast("line", new DelimEncoder('\n'))
     pipeline
   }
 }
 
+private[finagle] object NoDelimStringPipeline extends ChannelPipelineFactory {
+  def getPipeline = {
+    val pipeline = Channels.pipeline()
+    pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
+    pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
+    pipeline
+  }
+}
+
+private[finagle] object StringClient {
+  val protocolLibrary = "string"
+}
 
 private[finagle] trait StringClient {
-  case class Client(stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = StackClient.defaultParams)
-   extends StdStackClient[String, String, Client] {
+  import StringClient._
+
+  case class RichClient(underlying: Service[String, String]) {
+    def ping(): Future[String] = underlying("ping")
+  }
+
+  trait StringRichClient { self: com.twitter.finagle.Client[String, String] =>
+    def newRichClient(dest: Name, label: String): RichClient =
+      RichClient(newService(dest, label))
+  }
+
+  case class Client(
+      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
+      params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
+      appendDelimeter: Boolean = true)
+    extends StdStackClient[String, String, Client]
+    with StringRichClient {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params
@@ -45,9 +71,12 @@ private[finagle] trait StringClient {
     protected type Out = String
 
     protected def newTransporter(): Transporter[String, String] =
-      Netty3Transporter(StringClientPipeline, params)
+      if (appendDelimeter) Netty3Transporter(StringClientPipeline, params)
+      else Netty3Transporter(NoDelimStringPipeline, params)
 
-    protected def newDispatcher(transport: Transport[In, Out]) =
+    protected def newDispatcher(
+      transport: Transport[In, Out]
+    ): Service[String, String] =
       new SerialClientDispatcher(transport)
   }
 

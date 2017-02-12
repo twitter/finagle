@@ -1,41 +1,44 @@
 package com.twitter.finagle.factory
 
-import java.util.concurrent.locks.ReentrantReadWriteLock
+import com.twitter.conversions.time._
+import com.twitter.finagle._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.util._
+import java.util
 import java.util.concurrent.atomic.AtomicInteger
-import com.twitter.finagle.{Status, Service, ServiceFactory, ClientConnection, ServiceProxy, ServiceFactoryProxy}
-import com.twitter.util.{Closable, Future, Stopwatch, Throw, Return, Time, Duration}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.tracing.Trace
-import scala.collection.immutable
+import java.util.concurrent.locks.StampedLock
+import scala.collection.JavaConverters._
 
 /**
  * A service factory that keeps track of idling times to implement
  * cache eviction.
  */
-private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
+private class IdlingFactory[Req, Rep](
+    self: ServiceFactory[Req, Rep])
   extends ServiceFactoryProxy[Req, Rep](self) {
   @volatile private[this] var watch = Stopwatch.start()
   private[this] val n = new AtomicInteger(0)
 
-  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    n.getAndIncrement()
+  private[this] val svcProxyFn: Try[Service[Req, Rep]] => Future[Service[Req, Rep]] = {
+    case Throw(exc) =>
+      decr()
+      Future.exception(exc)
 
-    self(conn) transform {
-      case Throw(exc) =>
-        decr()
-        Future.exception(exc)
-
-      case Return(service) =>
-        Future.value(new ServiceProxy(service) {
-          override def close(deadline: Time) = {
-            decr()
-            super.close(deadline)
-          }
-        })
-    }
+    case Return(service) =>
+      Future.value(new ServiceProxy(service) {
+        override def close(deadline: Time): Future[Unit] = {
+          decr()
+          super.close(deadline)
+        }
+      })
   }
 
-  @inline private[this] def decr() {
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    n.getAndIncrement()
+    self(conn).transform(svcProxyFn)
+  }
+
+  @inline private[this] def decr(): Unit = {
     if (n.decrementAndGet() == 0)
       watch = Stopwatch.start()
   }
@@ -44,42 +47,75 @@ private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
    * Returns the duration of time for which this factory has been
    * idle--i.e. has no outstanding services.
    *
-   * @bug There is a small race here between checking n.get and
+   * '''Bug:''' There is a small race here between checking n.get and
    * reading from the watch. (I.e. the factory can become nonidle
    * between the checks). This is fine.
    */
-  def idleFor = if (n.get > 0) Duration.Zero else watch()
+  def idleFor: Duration = if (n.get > 0) Duration.Zero else watch()
 }
 
 /**
- * A "read-through" cache of service factories. Eviction is based on
- * idle time -- when no underlying factories are idle, one-shot
- * factories are created. This doesn't necessarily guarantee good
- * performance: one-shots could be created constantly for a hot cache
- * key, but should work well when there are a few hot keys.
+ * A "read-through" cache of service factories.
+ * 
+ * Eviction is based on cache size and idle time:
+ * 
+ * 1. When the cache is full, a miss evicts the most idle factory.
+ * When no underlying factories are idle, a one-shot factory is created.
+ * This doesn't necessarily guarantee good performance: one-shots could
+ * be created constantly for a hot cache key, but should work well
+ * when there are a few hot keys.
+ * 
+ * 2. Periodically evict factories that are idle for at least one TTI
+ * (time-to-idle) period. An idle factory could remain in the cache
+ * for up to (TTI * 2) minutes, with the caveat that we never expire
+ * the last, least-idle entry.
  */
-private class ServiceFactoryCache[Key, Req, Rep](
+private[finagle] class ServiceFactoryCache[Key, Req, Rep](
     newFactory: Key => ServiceFactory[Req, Rep],
+    timer: Timer,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    maxCacheSize: Int = 8)
+    maxCacheSize: Int = 8,
+    tti: Duration = 10.minutes)
   extends Closable {
   assert(maxCacheSize > 0)
 
-  @volatile private[this] var cache =
-    immutable.Map.empty: immutable.Map[Key, IdlingFactory[Req, Rep]]
+  private[this] val cache = new util.HashMap[Key, IdlingFactory[Req, Rep]]()
 
-  private[this] val (readLock, writeLock) = {
-    val rw = new ReentrantReadWriteLock()
-    (rw.readLock(), rw.writeLock())
-  }
+  private[this] val lock = new StampedLock()
 
   private[this] val nmiss = statsReceiver.counter("misses")
   private[this] val nevict = statsReceiver.counter("evicts")
+  private[this] val nexpires = statsReceiver.counter("expires")
   private[this] val noneshot = statsReceiver.counter("oneshots")
-  private[this] val nidle = statsReceiver.addGauge("idle") {
-    cache count { case (_, f) => f.idleFor > Duration.Zero }
+
+  /**
+   * Evict entries that have been idle for longer than `tti`. If this
+   * would empty the cache, instead evict all but the least idle entry.
+   */
+  private[this] def expireIdle(): Unit = {
+    val writeStamp = lock.writeLock()
+    try {
+      val expired = cache.asScala.filter { case (_, fac) => fac.idleFor > tti }
+      if (expired.nonEmpty) {
+        val evictees = if (expired.size == cache.size) {
+          expired - expired.minBy { case (_, fac) => fac.idleFor }._1
+        } else {
+          expired
+        }
+        evictees.foreach { case (key, _) =>
+          val removed = cache.remove(key)
+          removed.close()
+        }
+        nexpires.incr(evictees.size)
+      }
+    } finally {
+      lock.unlockWrite(writeStamp)
+    }
   }
-  private[this] val misstime = statsReceiver.stat("misstime_ms")
+
+  private[this] val expiryTask: Closable = {
+    timer.schedule(tti) { expireIdle() }
+  }
 
   /*
    * This returns a Service rather than a ServiceFactory to avoid
@@ -90,93 +126,120 @@ private class ServiceFactoryCache[Key, Req, Rep](
    * of ServiceFactoryCache.
    */
   def apply(key: Key, conn: ClientConnection): Future[Service[Req, Rep]] = {
-    readLock.lock()
+    val readStamp = lock.readLock()
     try {
-      if (cache contains key)
-        return cache(key).apply(conn)
+      val svcFac = cache.get(key)
+      if (svcFac != null)
+        return svcFac(conn)
     } finally {
-      readLock.unlock()
+      lock.unlockRead(readStamp)
     }
 
     miss(key, conn)
   }
 
   private[this] def miss(key: Key, conn: ClientConnection): Future[Service[Req, Rep]] = {
-    writeLock.lock()
+    val writeStamp = lock.writeLock()
 
-    if (cache contains key) {
-      readLock.lock()
-      writeLock.unlock()
+    val svcFac = cache.get(key)
+    if (svcFac != null) {
+      val readStamp = lock.tryConvertToReadLock(writeStamp)
       try {
-        return cache(key).apply(conn)
+        svcFac(conn)
       } finally {
-        readLock.unlock()
+        lock.unlockRead(readStamp)
       }
-    }
+    } else {
+      try {
+        nmiss.incr()
 
-    val watch = Stopwatch.start()
+        val factory = new IdlingFactory(newFactory(key))
 
-    val svc = try {
-      nmiss.incr()
-
-      val factory = new IdlingFactory(newFactory(key))
-
-      if (cache.size < maxCacheSize) {
-        cache += (key -> factory)
-        cache(key).apply(conn)
-      } else {
-        findEvictee() match {
-          case Some(evicted) =>
-            nevict.incr()
-            cache(evicted).close()
-            cache = cache - evicted + (key -> factory)
-            cache(key).apply(conn)
-          case None =>
-            noneshot.incr()
-            oneshot(factory, conn)
+        if (cache.size < maxCacheSize) {
+          cache.put(key, factory)
+          factory(conn)
+        } else {
+          findEvictee match {
+            case Some(evicted) =>
+              nevict.incr()
+              val removed = cache.remove(evicted)
+              removed.close()
+              cache.put(key, factory)
+              factory(conn)
+            case None =>
+              noneshot.incr()
+              oneshot(factory, conn)
+          }
         }
+      } finally {
+        lock.unlockWrite(writeStamp)
       }
-    } finally {
-      writeLock.unlock()
-    }
-
-    svc onSuccess { _ =>
-      val d = watch()
-        // generalize message
-      Trace.record("Interpreter cache miss with key "+key+": "+d, d)
-      misstime.add(d.inMilliseconds)
     }
   }
 
-  private[this] def oneshot(factory: ServiceFactory[Req, Rep], conn: ClientConnection)
-  : Future[Service[Req, Rep]] =
-    factory(conn) map { service =>
+  private[this] def oneshot(
+    factory: ServiceFactory[Req, Rep],
+    conn: ClientConnection
+  ): Future[Service[Req, Rep]] =
+    factory(conn).map { service =>
       new ServiceProxy(service) {
-        override def close(deadline: Time) =
-          super.close(deadline) transform { case _ =>
+        override def close(deadline: Time): Future[Unit] =
+          super.close(deadline).transform { _ =>
             factory.close(deadline)
           }
       }
     }
 
-  private[this] def findEvictee(): Option[Key] = {
-    val (evictNamer, evictFactory) = cache maxBy { case (_, fac) => fac.idleFor }
-    if (evictFactory.idleFor > Duration.Zero) Some(evictNamer)
+  /** Must be called with the "write lock" held. */
+  private[this] def findEvictee: Option[Key] = {
+    var maxIdleFor = Duration.Bottom
+    var maxKey: Any = null
+
+    val iter = cache.entrySet.iterator
+    while (iter.hasNext) {
+      val entry = iter.next()
+      val idleFor = entry.getValue.idleFor
+      if (idleFor > maxIdleFor) {
+        maxIdleFor = idleFor
+        maxKey = entry.getKey
+      }
+    }
+    if (maxIdleFor > Duration.Zero) Some(maxKey.asInstanceOf[Key])
     else None
   }
 
-  def close(deadline: Time) = Closable.all(cache.values.toSeq:_*).close(deadline)
-  def status = Status.bestOf[IdlingFactory[Req, Rep]](cache.values, _.status)
+  def close(deadline: Time): Future[Unit] = {
+    val writeStamp = lock.writeLock()
+    val svcFacs = try {
+      val values = cache.values.asScala.toSeq
+      // Clear the cache to avoid racing with the timer task. If the
+      // task is invoked after releasing this lock but before it has
+      // a chance to close, it will be a noop.
+      cache.clear()
+      values
+    } finally {
+      lock.unlockWrite(writeStamp)
+    }
+    val closables = svcFacs :+ expiryTask
+    Closable.all(closables: _*).close(deadline)
+  }
+
+  private[this] val svcFacStatusFn: ServiceFactory[Req, Rep] => Status =
+    svcFac => svcFac.status
+
+  def status: Status =
+    Status.bestOf(cache.values.asScala, svcFacStatusFn)
 
   def status(key: Key): Status = {
-    readLock.lock()
+    val readStamp = lock.readLock()
     try {
-      if (cache.contains(key))
-        return cache(key).status
+      val svcFac = cache.get(key)
+      if (svcFac != null)
+        return svcFac.status
     } finally {
-      readLock.unlock()
+      lock.unlockRead(readStamp)
     }
-    
+
     // This is somewhat dubious, as the status is outdated
     // pretty much right after we query it.
     val factory = newFactory(key)

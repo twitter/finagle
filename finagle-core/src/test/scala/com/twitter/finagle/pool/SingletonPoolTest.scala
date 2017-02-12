@@ -28,10 +28,8 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val pool = new SingletonPool(underlying, NullStatsReceiver)
 
     def assertClosed() {
-      pool().poll match {
-        case Some(Throw(Failure.Cause(_: ServiceClosedException))) =>
-        case _ => fail()
-      }
+      val Some(Throw(Failure(Some(cause)))) = pool().poll
+      assert(cause.isInstanceOf[ServiceClosedException])
     }
   }
 
@@ -70,14 +68,14 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     verify(underlying, never).apply(any[ClientConnection])
     val f = pool()
-    assert(f.poll === None)
+    assert(f.poll == None)
     verify(underlying, times(1)).apply(any[ClientConnection])
     val g = pool()
-    assert(g.poll === None)
+    assert(g.poll == None)
     verify(underlying, times(1)).apply(any[ClientConnection])
     underlyingP.setValue(service)
-    assert(f.poll === Some(Return(service)))
-    assert(g.poll === Some(Return(service)))
+    assert(f.poll == Some(Return(service)))
+    assert(g.poll == Some(Return(service)))
   }
 
   test("reestablish connections when the service becomes unavailable, releasing dead service") {
@@ -86,7 +84,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     underlyingP.setValue(service)
     val fst = pool()
-    assert(fst.poll === Some(Return(service)))
+    assert(fst.poll == Some(Return(service)))
     verify(underlying, times(1)).apply(any[ClientConnection])
 
     when(service.status).thenReturn(Status.Closed)
@@ -95,7 +93,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     verify(service, times(2)).status
 
     val snd = pool()
-    assert(snd.poll === Some(Return(service2)))
+    assert(snd.poll == Some(Return(service2)))
     verify(service, times(3)).status
 
     verify(service, never).close(any[Time])
@@ -113,9 +111,9 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     val exc = new Exception
     underlyingP.setException(exc)
-    assert(pool().poll === Some(Throw(exc)))
+    assert(pool().poll == Some(Throw(exc)))
     verify(underlying, times(1)).apply(any[ClientConnection])
-    assert(pool().poll === Some(Throw(exc)))
+    assert(pool().poll == Some(Throw(exc)))
     verify(underlying, times(2)).apply(any[ClientConnection])
   }
 
@@ -130,14 +128,14 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     underlyingP.setValue(service)
     f.poll match {
       case Some(Throw(exc: Failure)) =>
-        assert(exc.getMessage === "Returned unavailable service")
+        assert(exc.getMessage == "Returned unavailable service")
       case _ => fail()
     }
     verify(service, times(1)).close(any[Time])
 
     assert(pool.isAvailable)
     when(service.status).thenReturn(Status.Open)
-    assert(pool().poll === Some(Return(service)))
+    assert(pool().poll == Some(Return(service)))
     verify(service, times(1)).close(any[Time])
   }
 
@@ -147,7 +145,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
 
     closeP.setDone()
 
-    assert(pool.close().poll === Some(Return.Unit))
+    assert(pool.close().poll == Some(Return.Unit))
     assertClosed()
 
     verify(underlying, never).apply(any[ClientConnection])
@@ -168,7 +166,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
       case exc1 => exc = Some(exc1)
     }
 
-    assert(pool.close().poll === Some(Return.Unit))
+    assert(pool.close().poll == Some(Return.Unit))
     assert(!f.isDefined)
     exc match {
       case Some(_: ServiceClosedException) =>
@@ -191,13 +189,13 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val f = pool()
     assert(!f.isDefined)
     underlyingP.setValue(service)
-    assert(f.poll === Some(Return(service)))
+    assert(f.poll == Some(Return(service)))
     verify(service, never).close(any[Time])
 
-    assert(pool.close().poll === Some(Return.Unit))
+    assert(pool.close().poll == Some(Return.Unit))
     assertClosed()
     verify(service, never).close(any[Time])
-    assert(Await.result(f).close().poll === Some(Return.Unit))
+    assert(Await.result(f).close().poll == Some(Return.Unit))
     verify(service, times(1)).close(any[Time])
   }
 
@@ -232,14 +230,62 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     val f = pool()
     assert(!f.isDefined)
     underlyingP.setValue(service)
-    assert(f.poll === Some(Return(service)))
+    assert(f.poll == Some(Return(service)))
     Await.result(Await.result(f).close())
 
     val g = pool()
-    assert(g.poll === Some(Return(service)))
+    assert(g.poll == Some(Return(service)))
     Await.result(Await.result(g).close())
 
     verify(underlying, times(1)).apply(any[ClientConnection])
     verify(service, never).close(any[Time])
+  }
+
+  test("composes pool and service status") {
+    val ctx = new Ctx
+    import ctx._
+    
+    // Not yet initialized.
+    assert(pool.status == Status.Open)
+    verify(underlying, times(1)).status
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status == Status.Closed)
+
+    when(underlying.status).thenReturn(Status.Open)
+    underlyingP.setValue(service)
+
+    val s = Await.result(pool())
+    assert(pool.status == Status.Open)
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status == Status.Busy)
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status == Status.Closed)
+    when(underlying.status).thenReturn(Status.Busy)
+    
+    when(service.status).thenReturn(Status.Open)
+    assert(pool.status == Status.Busy)
+    when(pool.status).thenReturn(Status.Open)
+    assert(pool.status == Status.Open)
+    
+    // After close, we're forever Closed.
+    pool.close()
+    assert(pool.status == Status.Closed)
+  }
+
+  test("ignore cached but Closed service status") {
+    val ctx = new Ctx
+    import ctx._
+    
+    underlyingP.setValue(service)
+    val s = Await.result(pool())
+    
+    // We're checked out; reflect the service status
+    when(service.status).thenReturn(Status.Busy)
+    assert(pool.status == Status.Busy)
+    
+    when(service.status).thenReturn(Status.Closed)
+    assert(pool.status == Status.Open)
+    when(underlying.status).thenReturn(Status.Closed)
+    assert(pool.status == Status.Closed)
   }
 }

@@ -1,19 +1,22 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
-import com.twitter.finagle.tracing.{DefaultTracer, BufferingTracer, Trace}
-import java.net.{SocketAddress, InetSocketAddress, InetAddress}
+import com.twitter.finagle.Thrift.ThriftImpl
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.tracing.{BufferingTracer, DefaultTracer, Trace}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
 import scala.collection.mutable
+import scala.language.reflectiveCalls
+import scala.reflect.ClassTag
 
 /**
  * A test mixin to test all combinations of servers, clients and protocols.
  */
 trait ThriftTest { self: FunSuite =>
   type Iface <: AnyRef
-  def ifaceManifest: ClassManifest[Iface]
+  def ifaceManifest: ClassTag[Iface]
   val processor: Iface
   val ifaceToService: (Iface, TProtocolFactory) => Service[Array[Byte], Array[Byte]]
   val serviceToIface: (Service[ThriftClientRequest, Array[Byte]], TProtocolFactory) => Iface
@@ -57,7 +60,7 @@ trait ThriftTest { self: FunSuite =>
       .tracer(DefaultTracer)
       .build(ifaceToService(processor, protocolFactory))
 
-    val boundAddr = server.localAddress
+    val boundAddr = server.boundAddress
 
     def close() {
       server.close()
@@ -70,7 +73,7 @@ trait ThriftTest { self: FunSuite =>
     clientIdOpt: Option[ClientId]
   ) => new {
     val serviceFactory = ClientBuilder()
-      .hosts(Seq(addr))
+      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
       .codec(ThriftClientFramedCodec(clientIdOpt).protocolFactory(protocolFactory))
       .name("thriftclient")
       .hostConnectionLimit(2)
@@ -84,10 +87,13 @@ trait ThriftTest { self: FunSuite =>
     }
   }
 
-  private val newAPIServer = (protocolFactory: TProtocolFactory) => new {
+  private def newAPIServer(impl: ThriftImpl): NewServer =
+    (protocolFactory: TProtocolFactory) => new {
     val server = Thrift.server
+      .withLabel("thriftserver")
+      .configured(impl)
       .withProtocolFactory(protocolFactory)
-      .serveIface("thriftserver=:*", processor)
+      .serveIface("localhost:*", processor)
     val boundAddr = server.boundAddress
 
     def close() {
@@ -95,7 +101,7 @@ trait ThriftTest { self: FunSuite =>
     }
   }
 
-  private val newAPIClient = (
+  private def newAPIClient(impl: ThriftImpl): NewClient = (
     protocolFactory: TProtocolFactory,
     addr: SocketAddress,
     clientIdOpt: Option[ClientId]
@@ -106,7 +112,11 @@ trait ThriftTest { self: FunSuite =>
         case (thrift, clientId) => thrift.withClientId(clientId)
       }
 
-      thrift.newIface[Iface](Group(addr).named("thriftclient"))
+      thrift
+        .configured(impl)
+        .newIface[Iface](
+          Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
+          "thriftclient")
     }
 
     def close() = ()
@@ -134,12 +144,14 @@ trait ThriftTest { self: FunSuite =>
 
   private val clients = Map[String, NewClient](
     "builder" -> newBuilderClient,
-    "api" -> newAPIClient
+    "api-netty3" -> newAPIClient(Thrift.ThriftImpl.Netty3),
+    "api-netty4" -> newAPIClient(Thrift.ThriftImpl.Netty4)
   )
 
   private val servers = Map[String, NewServer](
     "builder" -> newBuilderServer,
-    "api" -> newAPIServer
+    "api-netty3" -> newAPIServer(Thrift.ThriftImpl.Netty3),
+    "api-netty4" -> newAPIServer(Thrift.ThriftImpl.Netty4)
   )
 
   /** Invoke this in your test to run all defined thrift tests */

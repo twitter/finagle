@@ -1,11 +1,12 @@
-package com.twitter.finagle.redis
-package util
+package com.twitter.finagle.redis.util
 
 import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
+import com.twitter.finagle.Redis
+import com.twitter.finagle.redis.Client
 import com.twitter.util.RandomSocket
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.Random
 
 // Helper classes for spinning up a little redis cluster
@@ -17,24 +18,32 @@ object RedisCluster { self =>
   def address(i: Int) = instanceStack(i).address
   def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i => i.address }
 
-  def hostAddresses(): String = {
+  def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
     require(instanceStack.length > 0)
-    addresses.map { address =>
+    addresses.slice(from, until).map { address =>
       val addy = address.get
-      "%s:%d".format(addy.getHostName(), addy.getPort())
+      "%s:%d".format("127.0.0.1", addy.getPort())
     }.sorted.mkString(",")
   }
 
-  def start(count: Int = 1) {
-    0 until count foreach { i =>
-      val instance = new ExternalRedis()
-      instance.start()
-      instanceStack.push(instance)
+  def start(count: Int = 1, mode: RedisMode = RedisMode.Standalone): Seq[ExternalRedis] = {
+    (0 until count).map { i =>
+      start(new ExternalRedis(mode))
     }
   }
-  def stop() {
-    instanceStack.pop().stop()
+
+  def start(instance: ExternalRedis): ExternalRedis = {
+    instance.start()
+    instanceStack.push(instance)
+    instance
   }
+
+  def stop(): ExternalRedis = {
+    val instance = instanceStack.pop()
+    instance.stop()
+    instance
+  }
+
   def stopAll() {
     instanceStack.foreach { i => i.stop() }
     instanceStack.clear
@@ -48,7 +57,13 @@ object RedisCluster { self =>
   });
 }
 
-class ExternalRedis() {
+sealed trait RedisMode
+object RedisMode {
+  case object Standalone extends RedisMode
+  case object Sentinel extends RedisMode
+  case object Cluster extends RedisMode
+}
+class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   private[this] val rand = new Random
   private[this] var process: Option[Process] = None
   private[this] val forbiddenPorts = 6300.until(7300)
@@ -88,8 +103,12 @@ class ExternalRedis() {
   def start() {
     val port = address.get.getPort()
     val conf = createConfigFile(port).getAbsolutePath
-    val cmd: Seq[String] = Seq("redis-server", conf)
-    val builder = new ProcessBuilder(cmd.toList)
+    val cmd: Seq[String] = if (mode == RedisMode.Sentinel) {
+      Seq("redis-server", conf, "--sentinel")
+    } else {
+      Seq("redis-server", conf)
+    }
+    val builder = new ProcessBuilder(cmd.asJava)
     process = Some(builder.start())
     Thread.sleep(200)
   }
@@ -104,6 +123,13 @@ class ExternalRedis() {
   def restart() {
     stop()
     start()
+  }
+
+  def newClient(): Client = Redis.newRichClient(s"127.0.0.1:${address.get.getPort}")
+
+  def withClient[T](f: Client => T): T = {
+    val client = newClient
+    try f(client) finally client.close()
   }
 
   assertRedisBinaryPresent()

@@ -3,12 +3,12 @@ package com.twitter.finagle.memcached.migration
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.common.zookeeper.ZooKeeperClient
-import com.twitter.finagle.MemcachedClient
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.DefaultZkClientFactory
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * migration config data
@@ -36,7 +36,7 @@ private[memcached] object MigrationConstants {
  * Migration client. This client manages a two cache clients representing source and
  * destination cache pool. Depending on the migration state, this client may send dark traffic
  * to destination pool to warm up the cache, or send light traffic to destination pool and fall
- * back to original pool for cache misses. The state transitioning is controlled by opeartor
+ * back to original pool for cache misses. The state transitioning is controlled by operator
  * by setting corresponding metadata in zookeeper.
  */
 class MigrationClient(
@@ -164,31 +164,31 @@ trait ReadWarmup { self: DarkRead =>
 trait DarkWrite extends Client {
   protected val backendClient: Client
 
-  abstract override def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  abstract override def set(key: String, flags: Int, expiry: Time, value: Buf) = {
     val result = super.set(key, flags, expiry, value)
     backendClient.set(key, flags, expiry, value)
     result
   }
 
-  abstract override def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  abstract override def add(key: String, flags: Int, expiry: Time, value: Buf) = {
     val result = super.add(key, flags, expiry, value)
     backendClient.add(key, flags, expiry, value)
     result
   }
 
-  abstract override def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  abstract override def append(key: String, flags: Int, expiry: Time, value: Buf) = {
     val result = super.append(key, flags, expiry, value)
     backendClient.append(key, flags, expiry, value)
     result
   }
 
-  abstract override def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  abstract override def prepend(key: String, flags: Int, expiry: Time, value: Buf) = {
     val result = super.prepend(key, flags, expiry, value)
     backendClient.prepend(key, flags, expiry, value)
     result
   }
 
-  abstract override def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  abstract override def replace(key: String, flags: Int, expiry: Time, value: Buf) = {
     val result = super.replace(key, flags, expiry, value)
     backendClient.replace(key, flags, expiry, value)
     result
@@ -207,8 +207,8 @@ trait DarkWrite extends Client {
   }
 
   // cas operation does not migrate
-  abstract override def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
-    super.cas(key, flags, expiry, value, casUnique)
+  abstract override def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+    super.checkAndSet(key, flags, expiry, value, casUnique)
 
   abstract override def delete(key: String) = {
     val result = super.delete(key)
@@ -288,8 +288,12 @@ object MigrationClient {
     assert(zkClient.get().exists(newPoolPath, false) != null)
 
     // create client for old and new pool
-    val oldClient = MemcachedClient.newKetamaClient("twcache!"+zkHosts+"!"+oldPoolPath, ejectFailedHost = false)
-    val newClient = MemcachedClient.newKetamaClient("twcache!"+zkHosts+"!"+newPoolPath, ejectFailedHost = false)
+    val oldClient = Memcached.client
+      .configured(Memcached.param.EjectFailedHost(false))
+      .newRichClient("twcache!"+zkHosts+"!"+oldPoolPath)
+    val newClient = Memcached.client
+      .configured(Memcached.param.EjectFailedHost(false))
+      .newRichClient("twcache!"+zkHosts+"!"+newPoolPath)
 
     val migrationStatsReceiver = ClientStatsReceiver.scope("migrationclient")
 

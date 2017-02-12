@@ -2,9 +2,10 @@ package com.twitter.finagle.memcached.integration
 
 import collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.util.{Stopwatch, Duration, RandomSocket, NonFatal}
+import com.twitter.util.{Stopwatch, Duration, RandomSocket}
 import java.net.{InetAddress, BindException, ServerSocket, InetSocketAddress}
 import scala.collection._
+import scala.util.control.NonFatal
 
 object TestMemcachedServer {
   def start(): Option[TestMemcachedServer] = start(None)
@@ -27,7 +28,7 @@ private[memcached] object InternalMemcached {
         address.getOrElse(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       )
       Some(new TestMemcachedServer {
-        val address = server.start().localAddress.asInstanceOf[InetSocketAddress]
+        val address = server.start().boundAddress.asInstanceOf[InetSocketAddress]
         def stop() { server.stop(true) }
       })
     } catch {
@@ -57,9 +58,9 @@ private[memcached] object ExternalMemcached { self =>
     }
     if (address==None) sys.error("Couldn't get an address for the external memcached")
 
-    takenPorts += address.getOrElse {
+    takenPorts += address.getOrElse(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    }.getPort
+    ).getPort
     address
   }
 

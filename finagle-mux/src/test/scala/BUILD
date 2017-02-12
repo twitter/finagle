@@ -1,15 +1,19 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:mockito-all',
-    '3rdparty:netty',
-    '3rdparty:scalatest',
-    'finagle/finagle-core',
-    'finagle/finagle-mux',
-    'util/util-core'
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/org/scalacheck',
+    '3rdparty/jvm/org/scalatest',
+    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-mux/src/main/scala:scala',
+    'finagle/finagle-toggle',
+    'util/util-app/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-mux/src/test/resources'
-  ]
+  ],
+  fatal_warnings=True,
 )

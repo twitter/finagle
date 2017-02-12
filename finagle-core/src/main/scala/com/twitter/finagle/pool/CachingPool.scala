@@ -3,7 +3,7 @@ package com.twitter.finagle.pool
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Cache
 import com.twitter.finagle.{
-  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy, 
+  ClientConnection, Service, ServiceClosedException, ServiceFactory, ServiceProxy,
   Status}
 import com.twitter.util.{Future, Time, Duration, Timer}
 import scala.annotation.tailrec
@@ -11,6 +11,9 @@ import scala.annotation.tailrec
 /**
  * A pool that temporarily caches items from the underlying one, up to
  * the given timeout amount of time.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#caching-pool user guide]]
+ *      for more details.
  */
 private[finagle] class CachingPool[Req, Rep](
   factory: ServiceFactory[Req, Rep],
@@ -64,7 +67,7 @@ private[finagle] class CachingPool[Req, Rep](
     factory.close(deadline)
   }
 
-  override def status = 
+  override def status =
     if (isOpen) factory.status
     else Status.Closed
 

@@ -1,12 +1,18 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{MetricCollisionException, Metrics}
+import com.twitter.util.Time
+import com.twitter.util.events
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalacheck.{Gen, Arbitrary}
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class MetricsStatsReceiverTest extends FunSuite {
+class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChecks {
+  import MetricsStatsReceiverTest._
+
   private[this] val rootReceiver = new MetricsStatsReceiver()
 
   private[this] def read(metrics: MetricsStatsReceiver, name: String): Number =
@@ -18,7 +24,7 @@ class MetricsStatsReceiverTest extends FunSuite {
     val x = 1.5f
     // gauges are weakly referenced by the registry so we need to keep a strong reference
     val g = rootReceiver.addGauge("my_gauge")(x)
-    assert(readInRoot("my_gauge") === x)
+    assert(readInRoot("my_gauge") == x)
   }
 
   test("cumulative gauge is working") {
@@ -28,7 +34,7 @@ class MetricsStatsReceiverTest extends FunSuite {
     val g1 = rootReceiver.addGauge("my_cumulative_gauge")(x)
     val g2 = rootReceiver.addGauge("my_cumulative_gauge")(y)
     val g3 = rootReceiver.addGauge("my_cumulative_gauge")(z)
-    assert(readInRoot("my_cumulative_gauge") === x + y + z)
+    assert(readInRoot("my_cumulative_gauge") == x + y + z)
   }
 
   test("Ensure that we throw an exception with a counter and a gauge when rollup collides") {
@@ -48,9 +54,24 @@ class MetricsStatsReceiverTest extends FunSuite {
     }
   }
 
+  test("toString") {
+    val sr = new MetricsStatsReceiver(Metrics.createDetached())
+    assert("MetricsStatsReceiver" == sr.toString)
+    assert("MetricsStatsReceiver/s1" == sr.scope("s1").toString)
+    assert("MetricsStatsReceiver/s1/s2" == sr.scope("s1").scope("s2").toString)
+  }
+
+  test("reading histograms initializes correctly") {
+    val sr = new MetricsStatsReceiver(Metrics.createDetached())
+    val stat = sr.stat("my_cool_stat")
+
+    val reader = sr.histogramDetails.get("my_cool_stat")
+    assert(!reader.isEmpty && reader.get.counts == Nil)
+  }
+
   test("store and read counter into the root StatsReceiver") {
     rootReceiver.counter("my_counter").incr()
-    assert(readInRoot("my_counter") === 1)
+    assert(readInRoot("my_counter") == 1)
   }
 
   test("separate gauge/stat/metric between detached Metrics and root Metrics") {
@@ -58,5 +79,42 @@ class MetricsStatsReceiverTest extends FunSuite {
     val g1 = detachedReceiver.addGauge("xxx")(1.0f)
     val g2 = rootReceiver.addGauge("xxx")(2.0f)
     assert(read(detachedReceiver, "xxx") != read(rootReceiver, "xxx"))
+  }
+
+  test("CounterIncr: serialize andThen deserialize = identity") {
+    import MetricsStatsReceiver.CounterIncr
+    def id(e: events.Event) = CounterIncr.serialize(e).flatMap(CounterIncr.deserialize).get
+    forAll(genCounterIncr) { event => assert(id(event) == event) }
+  }
+
+  test("StatAdd: serialize andThen deserialize = identity") {
+    import MetricsStatsReceiver.StatAdd
+    def id(e: events.Event) = StatAdd.serialize(e).flatMap(StatAdd.deserialize).get
+    forAll(genStatAdd) { event => assert(id(event) == event) }
+  }
+}
+
+private[twitter] object MetricsStatsReceiverTest {
+  import MetricsStatsReceiver.{CounterIncr, StatAdd}
+  import Arbitrary.arbitrary
+
+  val genCounterIncr = for {
+    name <- Gen.alphaStr
+    value <- arbitrary[Long]
+    tid <- arbitrary[Long]
+    sid <- arbitrary[Long]
+  } yield {
+    events.Event(CounterIncr, Time.now, longVal = value, objectVal = name,
+      traceIdVal = tid, spanIdVal = sid)
+  }
+
+  val genStatAdd = for {
+    name <- Gen.alphaStr
+    delta <- arbitrary[Long]
+    tid <- arbitrary[Long]
+    sid <- arbitrary[Long]
+  } yield {
+    events.Event(StatAdd, Time.now, longVal = delta, objectVal = name,
+      traceIdVal = tid, spanIdVal = sid)
   }
 }

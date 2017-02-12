@@ -1,37 +1,40 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.util.InetSocketAddressUtil.parseHostPorts
-import com.twitter.util.NonFatal
+import scala.util.control.NonFatal
 
 private[serverset2] sealed trait Selector {
   def matches(e: Entry): Boolean
 }
 
 private[serverset2] object Selector {
-  case class Host(hp: HostPort) extends Selector {
+  case class Host(host: String, port: Int) extends Selector {
     def matches(e: Entry) = e match {
-      case Endpoint(_, Some(addr), _, _, _) => addr == hp
+      case Endpoint(_, host2, port2, _, _, _) => host2 == host && port2 == port
       case _ => false
     }
   }
 
   case class Member(which: String) extends Selector {
     def matches(e: Entry) = e match {
-      case Endpoint(_, _, _, _, id) => which == id
+      case Endpoint(_, _, _, _, _, id) => which == id
       case _ => false
     }
   }
 
   case class Shard(which: Int) extends Selector {
     def matches(e: Entry) = e match {
-      case Endpoint(_, _, Some(id), _, _) => which == id
+      case Endpoint(_, _, _, id, _, _) => which == id
       case _ => false
     }
   }
 
   def parse(select: String) = select.split("=", 2) match {
     case Array("inet", arg) =>
-      try Some(Host(HostPort.tupled(parseHostPorts(arg).head))) catch {
+      try {
+        val (host, port) = parseHostPorts(arg).head
+        Some(Host(host, port))
+      } catch {
         case NonFatal(_) => None
       }
     case Array("member", which) => Some(Member(which))

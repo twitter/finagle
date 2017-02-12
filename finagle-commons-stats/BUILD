@@ -1,12 +1,10 @@
-maven_layout()
-
-jar_library(name='finagle-commons-stats',
+target(
   dependencies=[
     'finagle/finagle-commons-stats/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-commons-stats/src/test/scala'
   ]

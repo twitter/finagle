@@ -87,7 +87,7 @@ trait ZookeeperStateMonitor {
    * blocking on zookeeper IO work. Multiple ZK connection events or cache pool change events would only
    * queue up the work, and each work will be picked up only after the previous one finished successfully
    */
-  private[this] def loopZookeeperWork {
+  private[this] def loopZookeeperWork(): Unit = {
     def scheduleReadCachePoolConfig(
         op: () => Unit,
         backoff: Stream[Duration] = DefaultZkConnectionRetryBackoff
@@ -171,5 +171,5 @@ trait ZookeeperStateMonitor {
   zookeeperWorkQueue ! loadZKChildren
 
   // Kick off the loop to process zookeeper work queue
-  loopZookeeperWork
+  loopZookeeperWork()
 }

@@ -6,8 +6,6 @@ import java.net.{InetAddress, Inet4Address}
 
 object InetAddressUtil {
 
-  val Loopback = InetAddress.getByAddress(Array[Byte](127,0,0,1))
-
   /** Check if string is an IPv4 private address. */
   def isPrivateAddress(ip: InetAddress): Boolean =
     ip match {

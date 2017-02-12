@@ -11,7 +11,6 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, BeforeAndAfter, FunSuite}
 import scala.util.Random
-import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneInstancePerTest {
@@ -32,27 +31,27 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
     assert(Trace.tracers.isEmpty)
     Trace.letTracer(tracer) {
-      assert(Trace.tracers === List(tracer))
+      assert(Trace.tracers == List(tracer))
       runs += 1
     }
     
-    assert(runs === 1)
+    assert(runs == 1)
   }
 
   test("Trace.letId") {
     var didRun = false
     val priorId = Trace.id
     Trace.letId(id0) {
-      assert(Trace.id === id0)
+      assert(Trace.id == id0)
       didRun = true
     }
     assert(didRun)
-    assert(Trace.id === priorId)
+    assert(Trace.id == priorId)
   }
 
 
   test("Trace.letId: set a fresh id when none exist") {
-    assert(Trace.idOption === None)
+    assert(Trace.idOption == None)
 
     val defaultId = Trace.id
     Trace.letId(Trace.nextId) {
@@ -82,7 +81,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.letId(Trace.nextId, true) {
       val topId = Trace.id
       Trace.letId(Trace.nextId, true) {
-        assert(Trace.id === topId)
+        assert(Trace.id == topId)
       }
     }
   }
@@ -91,13 +90,16 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Trace.letId(Trace.nextId, true) {
       val topId = Trace.id
       Trace.letId(Trace.nextId) {
-        assert(Trace.id === topId)
+        assert(Trace.id == topId)
       }
     }
   }
 
   val tracer1 = mock[Tracer]
   val tracer2 = mock[Tracer]
+
+  when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(true)
+  when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(true)
 
   test("Trace.traceService") {
     var didRun = false
@@ -111,7 +113,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       }
   
       verify(tracer1, atLeast(3)).record(any[Record])
-      assert(Trace.id === priorId)
+      assert(Trace.id == priorId)
     }
     assert(didRun)
   }
@@ -212,19 +214,20 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     val id = TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), None, flags)
     Trace.letId(id) {
       val nextId = Trace.nextId
-      assert(id.flags === nextId.flags)
+      assert(id.flags == nextId.flags)
     }
   }
 
   test("set empty flags in next id if no current id set") {
     val nextId = Trace.nextId
-    assert(nextId.flags === Flags())
+    assert(nextId.flags == Flags())
   }
 
   test("Trace.letTracerAndNextId: start with a default TraceId") {
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
       when(tracer.sampleTrace(any[TraceId])).thenReturn(None)
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
 
       Trace.letTracerAndNextId(tracer) {
         val currentId = Trace.id
@@ -232,11 +235,11 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           case TraceId(None, None, _, None, Flags(0)) => true
           case _ => false
         })
-        assert(Trace.isTerminal === false)
-        assert(Trace.tracers === List(tracer))
+        assert(Trace.isTerminal == false)
+        assert(Trace.tracers == List(tracer))
         Trace.record("Hello world")
         verify(tracer, times(1)).sampleTrace(currentId)
-        verify(tracer, times(1)).record(Record(currentId, Time.now, 
+        verify(tracer, times(1)).record(Record(currentId, Time.now,
           Annotation.Message("Hello world"), None))
       }
     }
@@ -247,7 +250,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       val tracer = mock[Tracer]
       when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
 
-      val parentId = TraceId(Some(SpanId(123)), 
+      val parentId = TraceId(Some(SpanId(123)),
         Some(SpanId(456)), SpanId(789), Some(false), Flags(0))
       Trace.letId(parentId) {
         Trace.letTracerAndNextId(tracer) {
@@ -258,8 +261,10 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
                 (_sampled == parentId.sampled.get) => true
             case _ => false
           })
-          assert(Trace.isTerminal === false)
-          assert(Trace.tracers === List(tracer))
+
+          when(tracer.isActivelyTracing(currentId)).thenReturn(currentId.sampled.getOrElse(true))
+          assert(Trace.isTerminal == false)
+          assert(Trace.tracers == List(tracer))
           verify(tracer, never()).sampleTrace(currentId)
           Trace.record("Hello world")
           verify(tracer, never()).record(any[Record])
@@ -272,6 +277,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
       when(tracer.sampleTrace(any[TraceId])).thenReturn(None)
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
 
       Trace.letTracerAndNextId(tracer, true) {
         val currentId = Trace.id
@@ -279,11 +285,11 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
           case TraceId(None, None, _, None, Flags(0)) => true
           case _ => false
         })
-        assert(Trace.isTerminal === true)
-        assert(Trace.tracers === List(tracer))
+        assert(Trace.isTerminal == true)
+        assert(Trace.tracers == List(tracer))
         verify(tracer, times(1)).sampleTrace(currentId)
         Trace.record("Hello world")
-        verify(tracer, times(1)).record(Record(currentId, 
+        verify(tracer, times(1)).record(Record(currentId,
           Time.now, Annotation.Message("Hello world"), None))
       }
     }
@@ -293,18 +299,19 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     Time.withCurrentTimeFrozen { tc =>
       val tracer = mock[Tracer]
       when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
 
       val parentId = TraceId(Some(SpanId(123)), 
         Some(SpanId(456)), SpanId(789), Some(true), Flags(0))
       Trace.letId(parentId, terminal=true) {
         Trace.letTracerAndNextId(tracer) {
           val currentId = Trace.id
-          assert(currentId === parentId)
-          assert(Trace.isTerminal === true)
-          assert(Trace.tracers === List(tracer))
+          assert(currentId == parentId)
+          assert(Trace.isTerminal == true)
+          assert(Trace.tracers == List(tracer))
           verify(tracer, never()).sampleTrace(currentId)
           Trace.record("Hello world")
-          verify(tracer, times(1)).record(Record(currentId, Time.now, 
+          verify(tracer, times(1)).record(Record(currentId, Time.now,
             Annotation.Message("Hello world"), None))
         }
       }
@@ -313,7 +320,9 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
 
   test("Trace.isActivelyTracing") {
     val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), SpanId(14), None, Flags(0L))
-    val tracer = mock[Tracer]
+    val tracer1 = mock[Tracer]
+    val tracer2 = mock[Tracer]
+    val tracer = BroadcastTracer(Seq(tracer1, tracer2))
     
     // no tracers, not tracing
     assert(!Trace.isActivelyTracing) 
@@ -323,40 +332,30 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
       assert(!Trace.isActivelyTracing) 
     }
 
-    // tracer/id is None/None, default to trace
-    when(tracer.sampleTrace(any[TraceId])).thenReturn(None)
     Trace.letTracer(tracer) {
       Trace.letId(id) {
-        assert(Trace.isActivelyTracing) 
-      }
-  
-      // tracer/id is None/false, don't trace
-      // false/false, better not
-      Trace.letId(id.copy(_sampled = Some(false))) {
-        assert(!Trace.isActivelyTracing) 
-        when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
-        assert(!Trace.isActivelyTracing) 
-      }
-  
-      // debug should force its way through
-      Trace.letId(id.copy(_sampled = Some(false), flags = Flags().setDebug)) {
+        // Even if one tracer returns, then true
+        when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(false)
+        when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(true)
         assert(Trace.isActivelyTracing)
-      }
-  
-      // true/false, prefer the trace id's opinion
-      when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(true))
-      Trace.letId(id.copy(_sampled = Some(false))) {
-        assert(!Trace.isActivelyTracing) 
-      }
-  
-      // true/true better be true, unless disabled
-      Trace.letId(id.copy(_sampled = Some(true))) {
-        assert(Trace.isActivelyTracing) 
+
+        // when everything returns true, then true
+        when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(true)
+        when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(true)
+        assert(Trace.isActivelyTracing)
+
+        // tracing enabled flag overrides individual tracer decisions
+        when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(true)
+        when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(true)
         Trace.disable()
         assert(!Trace.isActivelyTracing)
         Trace.enable()
-        when(tracer.sampleTrace(any[TraceId])).thenReturn(Some(false))
-        assert(Trace.isActivelyTracing) // false/true again prefer the id's opinion
+        assert(Trace.isActivelyTracing)
+
+        // when everything returns false, then false
+        when(tracer1.isActivelyTracing(any[TraceId])).thenReturn(false)
+        when(tracer2.isActivelyTracing(any[TraceId])).thenReturn(false)
+        assert(!Trace.isActivelyTracing)
       }
     }
   }
@@ -381,27 +380,15 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
     } yield TraceId(traceId, parentId, spanId, sampled, flags)
     
     for (id <- traceIds)
-      assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(id)) === Return(id))
+      assert(Trace.idCtx.tryUnmarshal(Trace.idCtx.marshal(id)) == Return(id))
   }
   
   test("trace ID serialization: throw in handle on invalid size") {
     val bytes = new Array[Byte](33)
     
-    Trace.idCtx.tryUnmarshal(Buf.ByteArray(bytes)) match {
+    Trace.idCtx.tryUnmarshal(Buf.ByteArray.Owned(bytes)) match {
       case Throw(_: IllegalArgumentException) =>
       case rv => fail(s"Got $rv")
     }
   }
-  
-  test("Trace.isActivelyTracing: trace id with SamplingKnown flag set") {
-    val id = TraceId(Some(SpanId(12)), Some(SpanId(13)), 
-      SpanId(14), Some(true), Flags(Flags.SamplingKnown | Flags.Sampled))
-    val tracer = mock[Tracer]
-    Trace.letTracerAndId(tracer, id) {
-      assert(Trace.isActivelyTracing === true)
-      Trace.letId(id.copy(_sampled = Some(false), flags = Flags(Flags.SamplingKnown))) {
-        assert(Trace.isActivelyTracing === false)
-      }
-    }
-   }
 }

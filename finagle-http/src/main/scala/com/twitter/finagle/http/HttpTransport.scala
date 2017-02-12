@@ -1,46 +1,50 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.finagle.http.codec.ConnectionManager
-import com.twitter.util.{Future, Time}
-import java.net.SocketAddress
+import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy, StreamTransport}
+import com.twitter.util.{Future, Promise}
 import scala.util.control.NonFatal
 
 /**
  * A Transport with close behavior managed by ConnectionManager.
+ *
+ * @note the connection manager will close connections as required by RFC 2616 § 8
+ *       irrespective of any pending requests in the dispatcher.
  */
-class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
-  extends Transport[Any, Any] {
+private[finagle] class HttpTransport[A <: Message, B <: Message](
+    self: StreamTransport[A, B],
+    manager: ConnectionManager)
+  extends StreamTransportProxy[A, B](self) {
 
-  def this(self: Transport[Any, Any]) = this(self, new ConnectionManager)
+  def this(self: StreamTransport[A, B]) =
+    this(self, new ConnectionManager)
 
-  def close(deadline: Time): Future[Unit] = self.close(deadline)
+  // Servers don't use `status` to determine when they should
+  // close a transport, so we close the transport when the connection
+  // is ready to be closed.
+  manager.onClose.before(self.close())
 
-  def read(): Future[Any] =
-    self.read() onSuccess { m =>
-      manager.observeMessage(m)
-      if (manager.shouldClose)
-        self.close()
-    }
 
-  def write(m: Any): Future[Unit] =
+  def read(): Future[Multi[B]] =
+    self.read().onSuccess(readFn)
+
+  private[this] val readFn: Multi[B] => Unit = { case Multi(m, onFinish) =>
+    manager.observeMessage(m, onFinish)
+  }
+
+
+  def write(m: A): Future[Unit] =
     try {
-      manager.observeMessage(m)
+      val p = Promise[Unit]
+      manager.observeMessage(m, p)
       val f = self.write(m)
-      if (manager.shouldClose) f before self.close()
-      else f
+      p.become(f)
+      f
     } catch {
       case NonFatal(e) => Future.exception(e)
     }
 
-  def status: finagle.Status = 
-    if (manager.shouldClose) finagle.Status.Closed
-    else self.status
 
-  def localAddress: SocketAddress = self.localAddress
-
-  def remoteAddress: SocketAddress = self.remoteAddress
-
-  val onClose: Future[Throwable] = self.onClose
+  override def status: CoreStatus = if (manager.shouldClose) CoreStatus.Closed else self.status
 }

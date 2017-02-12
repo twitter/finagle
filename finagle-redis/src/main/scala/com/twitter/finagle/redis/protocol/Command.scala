@@ -1,445 +1,202 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 
 object RequireClientProtocol extends ErrorConversion {
-  override def getException(msg: String) = new ClientError(msg)
+  override def getException(msg: String): Exception = ClientError(msg)
 }
 
-abstract class Command extends RedisMessage {
-  def command: String
+/**
+ * Redis command.
+ *
+ * @see http://redis.io/commands
+ */
+abstract class Command {
+  def name: Buf
+  def body: Seq[Buf] = Seq.empty
 }
 
-object Commands {
-  // Key Commands
-  val DEL       = "DEL"
-  val DUMP      = "DUMP"
-  val EXISTS    = "EXISTS"
-  val EXPIRE    = "EXPIRE"
-  val EXPIREAT  = "EXPIREAT"
-  val KEYS      = "KEYS"
-  val MOVE      = "MOVE"
-  val PERSIST   = "PERSIST"
-  val PEXPIRE   = "PEXPIRE"
-  val PEXPIREAT = "PEXPIREAT"
-  val PTTL      = "PTTL"
-  val RANDOMKEY = "RANDOMKEY"
-  val RENAME    = "RENAME"
-  val RENAMENX  = "RENAMENX"
-  val SCAN      = "SCAN"
-  val TTL       = "TTL"
-  val TYPE      = "TYPE"
+object Command {
 
-  // String Commands
-  val APPEND    = "APPEND"
-  val BITCOUNT  = "BITCOUNT"
-  val BITOP     = "BITOP"
-  val DECR      = "DECR"
-  val DECRBY    = "DECRBY"
-  val GET       = "GET"
-  val GETBIT    = "GETBIT"
-  val GETRANGE  = "GETRANGE"
-  val GETSET    = "GETSET"
-  val INCR      = "INCR"
-  val INCRBY    = "INCRBY"
-  val MGET      = "MGET"
-  val MSET      = "MSET"
-  val MSETNX    = "MSETNX"
-  val PSETEX    = "PSETEX"
-  val SET       = "SET"
-  val SETBIT    = "SETBIT"
-  val SETEX     = "SETEX"
-  val SETNX     = "SETNX"
-  val SETRANGE  = "SETRANGE"
-  val STRLEN    = "STRLEN"
+  // Common constants
+  val EOL               = Buf.Utf8("\r\n")
+  val ARG_COUNT         = Buf.Utf8("*")
+  val ARG_SIZE          = Buf.Utf8("$")
 
-  // Sorted Sets
-  val ZADD              = "ZADD"
-  val ZCARD             = "ZCARD"
-  val ZCOUNT            = "ZCOUNT"
-  val ZINCRBY           = "ZINCRBY"
-  val ZINTERSTORE       = "ZINTERSTORE"
-  val ZRANGE            = "ZRANGE"
-  val ZRANGEBYSCORE     = "ZRANGEBYSCORE"
-  val ZRANK             = "ZRANK"
-  val ZREM              = "ZREM"
-  val ZREMRANGEBYRANK   = "ZREMRANGEBYRANK"
-  val ZREMRANGEBYSCORE  = "ZREMRANGEBYSCORE"
-  val ZREVRANGE         = "ZREVRANGE"
-  val ZREVRANGEBYSCORE  = "ZREVRANGEBYSCORE"
-  val ZREVRANK          = "ZREVRANK"
-  val ZSCORE            = "ZSCORE"
-  val ZUNIONSTORE       = "ZUNIONSTORE"
-
-  // Btree Sorted Set
-  val BADD              = "BADD"
-  val BCARD             = "BCARD"
-  val BREM              = "BREM"
-  val BGET              = "BGET"
-  val BRANGE            = "BRANGE"
-
-  // Miscellaneous
-  val FLUSHDB           = "FLUSHDB"
-  val SELECT            = "SELECT"
-  val AUTH              = "AUTH"
-  val INFO              = "INFO"
-  val QUIT              = "QUIT"
-  val SLAVEOF           = "SLAVEOF"
-  val CONFIG            = "CONFIG"
-
-  // Hash Sets
-  val HDEL              = "HDEL"
-  val HEXISTS           = "HEXISTS"
-  val HGET              = "HGET"
-  val HGETALL           = "HGETALL"
-  val HINCRBY           = "HINCRBY"
-  val HKEYS             = "HKEYS"
-  val HLEN              = "HLEN"
-  val HMGET             = "HMGET"
-  val HMSET             = "HMSET"
-  val HSCAN             = "HSCAN"
-  val HSET              = "HSET"
-  val HSETNX            = "HSETNX"
-  val HVALS             = "HVALS"
-
-  // Lists
-  val LLEN              = "LLEN"
-  val LINDEX            = "LINDEX"
-  val LINSERT           = "LINSERT"
-  val LPOP              = "LPOP"
-  val LPUSH             = "LPUSH"
-  val LREM              = "LREM"
-  val LSET              = "LSET"
-  val LRANGE            = "LRANGE"
-  val RPOP              = "RPOP"
-  val RPUSH             = "RPUSH"
-  val LTRIM             = "LTRIM"
-
-  // Sets
-  val SADD              = "SADD"
-  val SMEMBERS          = "SMEMBERS"
-  val SISMEMBER         = "SISMEMBER"
-  val SCARD             = "SCARD"
-  val SREM              = "SREM"
-  val SPOP              = "SPOP"
-  val SRANDMEMBER       = "SRANDMEMBER"
-  val SINTER            = "SINTER"
+  // BTreeSorterSets
+  val BADD              = Buf.Utf8("BADD")
+  val BCARD             = Buf.Utf8("BCARD")
+  val BREM              = Buf.Utf8("BREM")
+  val BGET              = Buf.Utf8("BGET")
+  val BRANGE            = Buf.Utf8("BRANGE")
 
   // Transactions
-  val DISCARD           = "DISCARD"
-  val EXEC              = "EXEC"
-  val MULTI             = "MULTI"
-  val UNWATCH           = "UNWATCH"
-  val WATCH             = "WATCH"
+  val DISCARD           = Buf.Utf8("DISCARD")
+  val EXEC              = Buf.Utf8("EXEC")
+  val MULTI             = Buf.Utf8("MULTI")
+  val UNWATCH           = Buf.Utf8("UNWATCH")
+  val WATCH             = Buf.Utf8("WATCH")
 
-  val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
-    // key commands
-    DEL               -> {Del(_)},
-    DUMP              -> {Dump(_)},
-    EXISTS            -> {Exists(_)},
-    EXPIRE            -> {Expire(_)},
-    EXPIREAT          -> {ExpireAt(_)},
-    KEYS              -> {Keys(_)},
-    MOVE              -> {Move(_)},
-    PERSIST           -> {Persist(_)},
-    PEXPIRE           -> {PExpire(_)},
-    PEXPIREAT         -> {PExpireAt(_)},
-    PTTL              -> {PTtl(_)},
-    RANDOMKEY         -> {_ => Randomkey()},
-    RENAME            -> {Rename(_)},
-    RENAMENX          -> {RenameNx(_)},
-    SCAN              -> {Scan(_)},
-    TTL               -> {Ttl(_)},
-    TYPE              -> {Type(_)},
-
-    // string commands
-    APPEND            -> {Append(_)},
-    BITCOUNT          -> {BitCount(_)},
-    BITOP             -> {BitOp(_)},
-    DECR              -> {Decr(_)},
-    DECRBY            -> {DecrBy(_)},
-    GET               -> {Get(_)},
-    GETBIT            -> {GetBit(_)},
-    GETRANGE          -> {GetRange(_)},
-    GETSET            -> {GetSet(_)},
-    INCR              -> {Incr(_)},
-    INCRBY            -> {IncrBy(_)},
-    MGET              -> {MGet(_)},
-    MSET              -> {MSet(_)},
-    MSETNX            -> {MSetNx(_)},
-    PSETEX            -> {PSetEx(_)},
-    SET               -> {Set(_)},
-    SETBIT            -> {SetBit(_)},
-    SETEX             -> {SetEx(_)},
-    SETNX             -> {SetNx(_)},
-    SETRANGE          -> {SetRange(_)},
-    STRLEN            -> {Strlen(_)},
-
-    // sorted sets
-    ZADD              -> {ZAdd(_)},
-    ZCARD             -> {ZCard(_)},
-    ZCOUNT            -> {ZCount(_)},
-    ZINCRBY           -> {ZIncrBy(_)},
-    ZINTERSTORE       -> {ZInterStore(_)},
-    ZRANGE            -> {ZRange(_)},
-    ZRANGEBYSCORE     -> {ZRangeByScore(_)},
-    ZRANK             -> {ZRank(_)},
-    ZREM              -> {ZRem(_)},
-    ZREMRANGEBYRANK   -> {ZRemRangeByRank(_)},
-    ZREMRANGEBYSCORE  -> {ZRemRangeByScore(_)},
-    ZREVRANGE         -> {ZRevRange(_)},
-    ZREVRANGEBYSCORE  -> {ZRevRangeByScore(_)},
-    ZREVRANK          -> {ZRevRank(_)},
-    ZSCORE            -> {ZScore(_)},
-    ZUNIONSTORE       -> {ZUnionStore(_)},
-
-    // Btree Sorted Set
-    BADD              -> {BAdd(_)},
-    BCARD             -> {BCard(_)},
-    BREM              -> {BRem(_)},
-    BGET              -> {BGet(_)},
-
-    // miscellaneous
-    FLUSHDB           -> {_ => FlushDB},
-    SELECT            -> {Select(_)},
-    AUTH              -> {Auth(_)},
-    INFO              -> {Info(_)},
-    QUIT              -> {_ => Quit},
-    SLAVEOF           -> {SlaveOf(_)},
-    CONFIG            -> {Config(_)},
-
-    // hash sets
-    HDEL              -> {HDel(_)},
-    HEXISTS           -> {HExists(_)},
-    HGET              -> {HGet(_)},
-    HGETALL           -> {HGetAll(_)},
-    HINCRBY           -> {HIncrBy(_)},
-    HKEYS             -> {HKeys(_)},
-    HMGET             -> {HMGet(_)},
-    HMSET             -> {HMSet(_)},
-    HSCAN             -> {HScan(_)},
-    HSET              -> {HSet(_)},
-    HSETNX            -> {HSetNx(_)},
-    HVALS             -> {HVals(_)},
-
-    // Lists
-    LLEN              -> {LLen(_)},
-    LINDEX            -> {LIndex(_)},
-    LINSERT           -> {LInsert(_)},
-    LPOP              -> {LPop(_)},
-    LPUSH             -> {LPush(_)},
-    LREM              -> {LRem(_)},
-    LSET              -> {LSet(_)},
-    LRANGE            -> {LRange(_)},
-    RPUSH             -> {RPush(_)},
-    RPOP              -> {RPop(_)},
-    LTRIM             -> {LTrim(_)},
-
-    // Sets
-    SADD              -> {SAdd(_)},
-    SMEMBERS          -> {SMembers(_)},
-    SISMEMBER         -> {SIsMember(_)},
-    SCARD             -> {SCard(_)},
-    SREM              -> {SRem(_)},
-    SPOP              -> {SPop(_)},
-    SRANDMEMBER       -> {SRandMember(_)},
-    SINTER            -> {SInter(_)},
-
-    // transactions
-    DISCARD           -> {_ => Discard},
-    EXEC              -> {_ => Exec},
-    MULTI             -> {_ => Multi},
-    UNWATCH           -> {_ => UnWatch},
-    WATCH             -> {Watch(_)}
-
-  )
-
-  def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd.toUpperCase).map {
-    _(args)
-  }.getOrElse(throw ClientError("Unsupported command: " + cmd))
-
-  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
-    RequireClientProtocol(list != null, "%s Empty list found".format(from))
-    RequireClientProtocol(
-      list.length == count,
-      "%s Expected %d elements, found %d".format(from, count, list.length))
-    val newList = list.take(count)
-    newList.foreach { item => RequireClientProtocol(item != null, "Found empty item in list") }
-    newList
-  }
-}
-
-object CommandBytes {
-  // Key Commands
-  val DEL               = StringToChannelBuffer("DEL")
-  val DUMP              = StringToChannelBuffer("DUMP")
-  val EXISTS            = StringToChannelBuffer("EXISTS")
-  val EXPIRE            = StringToChannelBuffer("EXPIRE")
-  val EXPIREAT          = StringToChannelBuffer("EXPIREAT")
-  val KEYS              = StringToChannelBuffer("KEYS")
-  val MOVE              = StringToChannelBuffer("MOVE")
-  val PERSIST           = StringToChannelBuffer("PERSIST")
-  val PEXPIRE           = StringToChannelBuffer("PEXPIRE")
-  val PEXPIREAT         = StringToChannelBuffer("PEXPIREAT")
-  val PTTL              = StringToChannelBuffer("PTTL")
-  val RANDOMKEY         = StringToChannelBuffer("RANDOMKEY")
-  val RENAME            = StringToChannelBuffer("RENAME")
-  val RENAMENX          = StringToChannelBuffer("RENAMENX")
-  val SCAN              = StringToChannelBuffer("SCAN")
-  val TTL               = StringToChannelBuffer("TTL")
-  val TYPE              = StringToChannelBuffer("TYPE")
+  // Topology
+  // These are twitter-internal commands and will be removed eventually
+  val TOPOLOGYADD       = Buf.Utf8("TOPOLOGYADD")
+  val TOPOLOGYGET       = Buf.Utf8("TOPOLOGYGET")
+  val TOPOLOGYDELETE    = Buf.Utf8("TOPOLOGYDELETE")
 
   // String Commands
-  val APPEND            = StringToChannelBuffer("APPEND")
-  val BITCOUNT          = StringToChannelBuffer("BITCOUNT")
-  val BITOP             = StringToChannelBuffer("BITOP")
-  val DECR              = StringToChannelBuffer("DECR")
-  val DECRBY            = StringToChannelBuffer("DECRBY")
-  val GET               = StringToChannelBuffer("GET")
-  val GETBIT            = StringToChannelBuffer("GETBIT")
-  val GETRANGE          = StringToChannelBuffer("GETRANGE")
-  val GETSET            = StringToChannelBuffer("GETSET")
-  val INCR              = StringToChannelBuffer("INCR")
-  val INCRBY            = StringToChannelBuffer("INCRBY")
-  val MGET              = StringToChannelBuffer("MGET")
-  val MSET              = StringToChannelBuffer("MSET")
-  val MSETNX            = StringToChannelBuffer("MSETNX")
-  val PSETEX            = StringToChannelBuffer("PSETEX")
-  val SET               = StringToChannelBuffer("SET")
-  val SETBIT            = StringToChannelBuffer("SETBIT")
-  val SETEX             = StringToChannelBuffer("SETEX")
-  val SETNX             = StringToChannelBuffer("SETNX")
-  val SETRANGE          = StringToChannelBuffer("SETRANGE")
-  val STRLEN            = StringToChannelBuffer("STRLEN")
+  val APPEND            = Buf.Utf8("APPEND")
+  val BITCOUNT          = Buf.Utf8("BITCOUNT")
+  val BITOP             = Buf.Utf8("BITOP")
+  val DECR              = Buf.Utf8("DECR")
+  val DECRBY            = Buf.Utf8("DECRBY")
+  val GET               = Buf.Utf8("GET")
+  val GETBIT            = Buf.Utf8("GETBIT")
+  val GETRANGE          = Buf.Utf8("GETRANGE")
+  val GETSET            = Buf.Utf8("GETSET")
+  val INCR              = Buf.Utf8("INCR")
+  val INCRBY            = Buf.Utf8("INCRBY")
+  val MGET              = Buf.Utf8("MGET")
+  val MSET              = Buf.Utf8("MSET")
+  val MSETNX            = Buf.Utf8("MSETNX")
+  val PSETEX            = Buf.Utf8("PSETEX")
+  val SET               = Buf.Utf8("SET")
+  val SETBIT            = Buf.Utf8("SETBIT")
+  val SETEX             = Buf.Utf8("SETEX")
+  val SETNX             = Buf.Utf8("SETNX")
+  val SETRANGE          = Buf.Utf8("SETRANGE")
+  val STRLEN            = Buf.Utf8("STRLEN")
 
   // Sorted Sets
-  val ZADD              = StringToChannelBuffer("ZADD")
-  val ZCARD             = StringToChannelBuffer("ZCARD")
-  val ZCOUNT            = StringToChannelBuffer("ZCOUNT")
-  val ZINCRBY           = StringToChannelBuffer("ZINCRBY")
-  val ZINTERSTORE       = StringToChannelBuffer("ZINTERSTORE")
-  val ZRANGE            = StringToChannelBuffer("ZRANGE")
-  val ZRANGEBYSCORE     = StringToChannelBuffer("ZRANGEBYSCORE")
-  val ZRANK             = StringToChannelBuffer("ZRANK")
-  val ZREM              = StringToChannelBuffer("ZREM")
-  val ZREMRANGEBYRANK   = StringToChannelBuffer("ZREMRANGEBYRANK")
-  val ZREMRANGEBYSCORE  = StringToChannelBuffer("ZREMRANGEBYSCORE")
-  val ZREVRANGE         = StringToChannelBuffer("ZREVRANGE")
-  val ZREVRANGEBYSCORE  = StringToChannelBuffer("ZREVRANGEBYSCORE")
-  val ZREVRANK          = StringToChannelBuffer("ZREVRANK")
-  val ZSCORE            = StringToChannelBuffer("ZSCORE")
-  val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
-
-  // Btree Sorted Set
-  val BADD              = StringToChannelBuffer("BADD")
-  val BCARD             = StringToChannelBuffer("BCARD")
-  val BREM              = StringToChannelBuffer("BREM")
-  val BGET              = StringToChannelBuffer("BGET")
-  val BRANGE            = StringToChannelBuffer("BRANGE")
-
-  // Miscellaneous
-  val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
-  val SELECT            = StringToChannelBuffer("SELECT")
-  val AUTH              = StringToChannelBuffer("AUTH")
-  val INFO              = StringToChannelBuffer("INFO")
-  val QUIT              = StringToChannelBuffer("QUIT")
-  val SLAVEOF           = StringToChannelBuffer("SLAVEOF")
-  val CONFIG            = StringToChannelBuffer("CONFIG")
-
-  // Hash Sets
-  val HDEL              = StringToChannelBuffer("HDEL")
-  val HEXISTS           = StringToChannelBuffer("HEXISTS")
-  val HGET              = StringToChannelBuffer("HGET")
-  val HGETALL           = StringToChannelBuffer("HGETALL")
-  val HINCRBY           = StringToChannelBuffer("HINCRBY")
-  val HKEYS             = StringToChannelBuffer("HKEYS")
-  val HMGET             = StringToChannelBuffer("HMGET")
-  val HMSET             = StringToChannelBuffer("HMSET")
-  val HSCAN             = StringToChannelBuffer("HSCAN")
-  val HSET              = StringToChannelBuffer("HSET")
-  val HSETNX            = StringToChannelBuffer("HSETNX")
-  val HVALS             = StringToChannelBuffer("HVALS")
-
-  // Lists
-  val LLEN              = StringToChannelBuffer("LLEN")
-  val LINDEX            = StringToChannelBuffer("LINDEX")
-  val LINSERT           = StringToChannelBuffer("LINSERT")
-  val LPOP              = StringToChannelBuffer("LPOP")
-  val LPUSH             = StringToChannelBuffer("LPUSH")
-  val LREM              = StringToChannelBuffer("LREM")
-  val LSET              = StringToChannelBuffer("LSET")
-  val LRANGE            = StringToChannelBuffer("LRANGE")
-  val RPOP              = StringToChannelBuffer("RPOP")
-  val RPUSH             = StringToChannelBuffer("RPUSH")
-  val LTRIM             = StringToChannelBuffer("LTRIM")
+  // Only supported in Twitter's internal Redis fork.
+  val ZADD              = Buf.Utf8("ZADD")
+  val ZCARD             = Buf.Utf8("ZCARD")
+  val ZCOUNT            = Buf.Utf8("ZCOUNT")
+  val ZINCRBY           = Buf.Utf8("ZINCRBY")
+  val ZINTERSTORE       = Buf.Utf8("ZINTERSTORE")
+  val ZRANGE            = Buf.Utf8("ZRANGE")
+  val ZRANGEBYSCORE     = Buf.Utf8("ZRANGEBYSCORE")
+  val ZRANK             = Buf.Utf8("ZRANK")
+  val ZREM              = Buf.Utf8("ZREM")
+  val ZREMRANGEBYRANK   = Buf.Utf8("ZREMRANGEBYRANK")
+  val ZREMRANGEBYSCORE  = Buf.Utf8("ZREMRANGEBYSCORE")
+  val ZREVRANGE         = Buf.Utf8("ZREVRANGE")
+  val ZREVRANGEBYSCORE  = Buf.Utf8("ZREVRANGEBYSCORE")
+  val ZREVRANK          = Buf.Utf8("ZREVRANK")
+  val ZSCORE            = Buf.Utf8("ZSCORE")
+  val ZUNIONSTORE       = Buf.Utf8("ZUNIONSTORE")
 
   // Sets
-  val SADD              = StringToChannelBuffer("SADD")
-  val SMEMBERS          = StringToChannelBuffer("SMEMBERS")
-  val SISMEMBER         = StringToChannelBuffer("SISMEMBER")
-  val SCARD             = StringToChannelBuffer("SCARD")
-  val SREM              = StringToChannelBuffer("SREM")
-  val SPOP              = StringToChannelBuffer("SPOP")
-  val SRANDMEMBER       = StringToChannelBuffer("SRANDMEMBER")
-  val SINTER            = StringToChannelBuffer("SINTER")
+  val SADD              = Buf.Utf8("SADD")
+  val SMEMBERS          = Buf.Utf8("SMEMBERS")
+  val SISMEMBER         = Buf.Utf8("SISMEMBER")
+  val SCARD             = Buf.Utf8("SCARD")
+  val SREM              = Buf.Utf8("SREM")
+  val SPOP              = Buf.Utf8("SPOP")
+  val SRANDMEMBER       = Buf.Utf8("SRANDMEMBER")
+  val SINTER            = Buf.Utf8("SINTER")
 
-  // Transactions
-  val DISCARD           = StringToChannelBuffer("DISCARD")
-  val EXEC              = StringToChannelBuffer("EXEC")
-  val MULTI             = StringToChannelBuffer("MULTI")
-  val UNWATCH           = StringToChannelBuffer("UNWATCH")
-  val WATCH             = StringToChannelBuffer("WATCH")
-}
+  // Miscellaneous
+  val PING              = Buf.Utf8("PING")
+  val FLUSHALL          = Buf.Utf8("FLUSHALL")
+  val FLUSHDB           = Buf.Utf8("FLUSHDB")
+  val SELECT            = Buf.Utf8("SELECT")
+  val AUTH              = Buf.Utf8("AUTH")
+  val INFO              = Buf.Utf8("INFO")
+  val QUIT              = Buf.Utf8("QUIT")
+  val SLAVEOF           = Buf.Utf8("SLAVEOF")
+  val CONFIG            = Buf.Utf8("CONFIG")
+  val SENTINEL          = Buf.Utf8("SENTINEL")
 
+  // Scripts
+  val EVAL              = Buf.Utf8("EVAL")
+  val EVALSHA           = Buf.Utf8("EVALSHA")
+  val SCRIPT            = Buf.Utf8("SCRIPT")
+  val FLUSH             = Buf.Utf8("FLUSH")
+  val LOAD              = Buf.Utf8("LOAD")
 
-class CommandCodec extends UnifiedProtocolCodec {
+  // PubSub
+  val PUBLISH           =  Buf.Utf8("PUBLISH")
+  val SUBSCRIBE         =  Buf.Utf8("SUBSCRIBE")
+  val UNSUBSCRIBE       =  Buf.Utf8("UNSUBSCRIBE")
+  val PSUBSCRIBE        =  Buf.Utf8("PSUBSCRIBE")
+  val PUNSUBSCRIBE      =  Buf.Utf8("PUNSUBSCRIBE")
+  val PUBSUB            =  Buf.Utf8("PUBSUB")
 
-  import RedisCodec._
-  import com.twitter.finagle.redis.naggati.Encoder
-  import com.twitter.finagle.redis.naggati.Stages._
-  import com.twitter.logging.Logger
+  // Lists
+  val LLEN              = Buf.Utf8("LLEN")
+  val LINDEX            = Buf.Utf8("LINDEX")
+  val LINSERT           = Buf.Utf8("LINSERT")
+  val LPOP              = Buf.Utf8("LPOP")
+  val LPUSH             = Buf.Utf8("LPUSH")
+  val LREM              = Buf.Utf8("LREM")
+  val LSET              = Buf.Utf8("LSET")
+  val LRANGE            = Buf.Utf8("LRANGE")
+  val RPOP              = Buf.Utf8("RPOP")
+  val RPUSH             = Buf.Utf8("RPUSH")
+  val LTRIM             = Buf.Utf8("LTRIM")
 
-  val log = Logger(getClass)
+  // Key Commands
+  val DEL              = Buf.Utf8("DEL")
+  val DUMP             = Buf.Utf8("DUMP")
+  val EXISTS           = Buf.Utf8("EXISTS")
+  val EXPIRE           = Buf.Utf8("EXPIRE")
+  val EXPIREAT         = Buf.Utf8("EXPIREAT")
+  val KEYS             = Buf.Utf8("KEYS")
+  val MOVE             = Buf.Utf8("MOVE")
+  val PERSIST          = Buf.Utf8("PERSIST")
+  val PEXPIRE          = Buf.Utf8("PEXPIRE")
+  val PEXPIREAT        = Buf.Utf8("PEXPIREAT")
+  val PTTL             = Buf.Utf8("PTTL")
+  val RANDOMKEY        = Buf.Utf8("RANDOMKEY")
+  val RENAME           = Buf.Utf8("RENAME")
+  val RENAMENX         = Buf.Utf8("RENAMENX")
+  val SCAN             = Buf.Utf8("SCAN")
+  val TTL              = Buf.Utf8("TTL")
+  val TYPE             = Buf.Utf8("TYPE")
 
-  val encode = new Encoder[Command] {
-    def encode(obj: Command) = Some(obj.toChannelBuffer)
-  }
+  // HyperLogLogs
+  val PFADD            = Buf.Utf8("PFADD")
+  val PFCOUNT          = Buf.Utf8("PFCOUNT")
+  val PFMERGE          = Buf.Utf8("PFMERGE")
 
-  val decode = readBytes(1) { bytes =>
-    bytes(0) match {
-      case ARG_COUNT_MARKER =>
-        val doneFn = { lines => commandDecode(lines) }
-        RequireClientProtocol.safe {
-          readLine { line => decodeUnifiedFormat(NumberFormat.toLong(line), doneFn) }
-        }
-      case b: Byte =>
-        decodeInlineRequest(b.asInstanceOf[Char])
+  // Hash Sets
+  val HDEL             = Buf.Utf8("HDEL")
+  val HEXISTS          = Buf.Utf8("HEXISTS")
+  val HGET             = Buf.Utf8("HGET")
+  val HGETALL          = Buf.Utf8("HGETALL")
+  val HINCRBY          = Buf.Utf8("HINCRBY")
+  val HKEYS            = Buf.Utf8("HKEYS")
+  val HLEN             = Buf.Utf8("HLEN")
+  val HMGET            = Buf.Utf8("HMGET")
+  val HMSET            = Buf.Utf8("HMSET")
+  val HSCAN            = Buf.Utf8("HSCAN")
+  val HSET             = Buf.Utf8("HSET")
+  val HSETNX           = Buf.Utf8("HSETNX")
+  val HVALS            = Buf.Utf8("HVALS")
+
+  // Command Arguments
+  val WITHSCORES       = Buf.Utf8("WITHSCORES")
+  val LIMIT            = Buf.Utf8("LIMIT")
+  val WEIGHTS          = Buf.Utf8("WEIGHTS")
+  val AGGREGATE        = Buf.Utf8("AGGREGATE")
+  val COUNT            = Buf.Utf8("COUNT")
+  val PATTERN          = Buf.Utf8("PATTERN")
+
+  /**
+   * Encodes a given [[Command]] as [[Buf]].
+   */
+  private[redis] def encode(c: Command): Buf = {
+    val args = c.name +: c.body
+
+    val header: Vector[Buf] = Vector(
+      ARG_COUNT, Buf.Utf8(args.length.toString), EOL)
+
+    val bufs = args.flatMap { arg =>
+      Vector(ARG_SIZE, Buf.Utf8(arg.length.toString), EOL, arg, EOL)
     }
-  }
 
-  def decodeInlineRequest(c: Char) = readLine { line =>
-    val listOfArrays = (c + line).split(' ').toList.map {
-      args => args.getBytes(Charsets.Utf8)
-    }
-    val cmd = commandDecode(listOfArrays)
-    emit(cmd)
+    Buf(header ++ bufs)
   }
-
-  def commandDecode(lines: List[Array[Byte]]): Command = {
-    RequireClientProtocol(lines != null && lines.length > 0, "Invalid client command protocol")
-    val cmd = BytesToString(lines.head)
-    val args = lines.tail
-    try {
-      Commands.doMatch(cmd, args)
-    } catch {
-      case e: ClientError => throw e
-      case t: Throwable =>
-        log.warning(t, "Unhandled exception %s(%s)".format(t.getClass.toString, t.getMessage))
-        throw new ClientError(t.getMessage)
-    }
-  }
-
 }

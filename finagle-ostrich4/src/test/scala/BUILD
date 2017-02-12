@@ -1,13 +1,14 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:mockito-all',
-    '3rdparty:netty',
-    '3rdparty:scalatest',
-    'finagle/finagle-core',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/org/scalatest',
     'finagle/finagle-ostrich4',
     'ostrich',
-    'util/util-core'
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

@@ -1,17 +1,18 @@
 package com.twitter.finagle.ssl
 
+import com.google.common.io.{Files => GuavaFiles, Resources}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.http.Http
-import com.twitter.io.TempFile
-import com.twitter.util.{Await, Future, NonFatal}
+import com.twitter.finagle.http._
+import com.twitter.io.Buf
+import com.twitter.util.{Await, Future}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
-import org.jboss.netty.buffer._
-import org.jboss.netty.handler.codec.http._
+import java.nio.file.{Path, Files}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class SslTest extends FunSuite {
@@ -38,10 +39,10 @@ class SslTest extends FunSuite {
         certChainInput.openSSLRootConfPath
       ), // command
       null, // null == inherit the environment of the current process
-      certChainInput.setupCADir // working dir
+      certChainInput.setupCADirPath.toFile // working dir
     )
     process.waitFor()
-    assert(process.exitValue === 0)
+    assert(process.exitValue == 0)
   } catch {
     case e: java.io.IOException =>
       println("IOException: I/O error in running setupCA script: " +
@@ -58,33 +59,26 @@ class SslTest extends FunSuite {
     "test.example.com.cert",
     "test.example.com.key",
     "cacert.pem",
-    certChainInput.setupCADirPath
+    certChainInput.setupCADirPath.toString
   )
 
   // now let's run some tests
   test("be able to send and receive various sized content") {
-    def makeContent(length: Int) = {
-      val buf = ChannelBuffers.directBuffer(length)
-      while (buf.writableBytes() > 0)
-        buf.writeByte('Z')
-      buf
-    }
+    def makeContent(length: Int): Buf =
+      Buf.ByteArray.Owned(Array.fill(length)('Z'.toByte))
 
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
-        val requestedBytes = request.getHeader("Requested-Bytes")
-          match {
-          case s: String => s.toInt
-          case _ => 17280
+    val service = new Service[Request, Response] {
+      def apply(request: Request) = Future {
+        val requestedBytes = request.headerMap.get("Requested-Bytes") match {
+          case Some(s) => s.toInt
+          case None => 17280
         }
-        val response = new DefaultHttpResponse(
-          HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.getHeader("X-Transport-Cipher")) foreach
-        { cipher: String => response.setHeader("X-Transport-Cipher",
-          cipher) }
-        response.setContent(makeContent(requestedBytes))
-        HttpHeaders.setContentLength(response, requestedBytes)
-
+        val response = Response(Version.Http11, Status.Ok)
+        request.headerMap.get("X-Transport-Cipher").foreach { cipher =>
+          response.headerMap.set("X-Transport-Cipher", cipher)
+        }
+        response.content = makeContent(requestedBytes)
+        response.contentLength = requestedBytes
         response
       }
     }
@@ -103,39 +97,36 @@ class SslTest extends FunSuite {
     def client =
       ClientBuilder()
         .name("http-client")
-        .hosts(server.localAddress)
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(codec)
         .hostConnectionLimit(1)
         .tlsWithoutValidation()
         .build()
 
     def check(requestSize: Int, responseSize: Int) {
-      val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-        HttpMethod.GET, "/")
+      val request = Request(Version.Http11, Method.Get, "/")
 
       if (requestSize > 0) {
-        request.setContent(makeContent(requestSize))
-        HttpHeaders.setContentLength(request, requestSize)
+        request.content = makeContent(requestSize)
+        request.contentLength = requestSize
       }
 
       if (responseSize > 0)
-        request.setHeader("Requested-Bytes", responseSize)
+        request.headerMap.set("Requested-Bytes", responseSize.toString)
       else
-        request.setHeader("Requested-Bytes", 0)
+        request.headerMap.set("Requested-Bytes", 0.toString)
 
       val response = Await.result(client(request))
-      assert(response.getStatus === HttpResponseStatus.OK)
-      assert(HttpHeaders.getContentLength(response) === responseSize)
-      val content = response.getContent()
+      assert(response.status == Status.Ok)
+      assert(response.contentLength == Some(responseSize))
+      val content = response.content
 
-      assert(content.readableBytes() === responseSize)
+      assert(content.length == responseSize)
 
-      while (content.readableBytes() > 0) {
-        assert(content.readByte() === 'Z')
-      }
+      assert(content == makeContent(responseSize))
 
-      val cipher = response.getHeader("X-Transport-Cipher")
-      assert(cipher != "null")
+      val cipher = response.headerMap.get("X-Transport-Cipher")
+      assert(cipher != Some("null"))
     }
 
     check(   0 * 1024, 16   * 1024)
@@ -146,27 +137,21 @@ class SslTest extends FunSuite {
 
   test("be able to validate a properly constructed authentication chain") {
     // ... spin up an SSL server ...
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
-        def makeContent(length: Int) = {
-          val buf = ChannelBuffers.directBuffer(length)
-          while (buf.writableBytes() > 0)
-            buf.writeByte('Z')
-          buf
+    val service = new Service[Request, Response] {
+      def apply(request: Request) = Future {
+        def makeContent(length: Int): Buf =
+          Buf.ByteArray.Owned(Array.fill(length)('Z'.toByte))
+
+        val requestedBytes = request.headerMap.get("Requested-Bytes") match {
+          case Some(s) => s.toInt
+          case None => 17280
         }
-        val requestedBytes = request.getHeader("Requested-Bytes")
-          match {
-          case s: String => s.toInt
-          case _ => 17280
+        val response = Response(Version.Http11, Status.Ok)
+        request.headerMap.get("X-Transport-Cipher").foreach { cipher =>
+          response.headerMap.set("X-Transport-Cipher", cipher)
         }
-        val response = new DefaultHttpResponse(
-          HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.getHeader("X-Transport-Cipher")) foreach {
-          cipher: String =>
-          response.setHeader("X-Transport-Cipher", cipher)
-        }
-        response.setContent(makeContent(requestedBytes))
-        HttpHeaders.setContentLength(response, requestedBytes)
+        response.content = makeContent(requestedBytes)
+        response.contentLength = requestedBytes
 
         response
       }
@@ -184,7 +169,7 @@ class SslTest extends FunSuite {
       .name("SSL server with valid certificate chain")
       .build(service)
 
-    val addr = server.localAddress.asInstanceOf[InetSocketAddress]
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
     // ... then connect to that service using openssl and ensure that
     // the chain is correct
@@ -204,14 +189,14 @@ class SslTest extends FunSuite {
       process.getOutputStream.close()
 
       process.waitFor()
-      assert(process.exitValue === 0)
+      assert(process.exitValue == 0)
 
       // look for text "Verify return code: 0 (ok)" on stdout
       val out = process.getInputStream
       val outBuf = new Array[Byte](out.available)
       out.read(outBuf)
       val outBufStr = new String(outBuf)
-      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) === Some("""Verify return code: 0 (ok)"""))
+      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) == Some("""Verify return code: 0 (ok)"""))
     } catch {
       case ex: java.io.IOException =>
         println("Test skipped: running openssl failed" +
@@ -229,20 +214,23 @@ class CertChainInput(
   openSSLIntConfFilename: String,
   openSSLRootConfFilename: String
 ) {
-  val root = File.separator + setupCADirName
-  def fileInRoot(file: String) = root + File.separator + file
-  val setupCADir                  =
-    TempFile.fromResourcePath(getClass, root).getParentFile()
-  val setupCAFile                 =
-    TempFile.fromResourcePath(getClass, fileInRoot(setupCAFilename))
-  val makeCertFile                =
-    TempFile.fromResourcePath(getClass, fileInRoot(makeCertFilename))
-  val openSSLIntConfFile          =
-    TempFile.fromResourcePath(getClass, fileInRoot(openSSLIntConfFilename))
-  val openSSLRootConfFile         =
-    TempFile.fromResourcePath(getClass, fileInRoot(openSSLRootConfFilename))
+  val setupCADirPath: Path = Files.createTempDirectory(setupCADirName)
+  def writeResourceToDir(klass: Class[_], name: String, directory: Path): File = {
+    val fullName = File.separator + setupCADirName + File.separator + name
+    val url = Resources.getResource(klass, fullName)
+    val newFile = new File(setupCADirPath.toFile, name)
+    Resources.asByteSource(url).copyTo(GuavaFiles.asByteSink(newFile))
+    newFile
+  }
+  val setupCAFile =
+    writeResourceToDir(getClass, setupCAFilename, setupCADirPath)
+  val makeCertFile =
+    writeResourceToDir(getClass, makeCertFilename, setupCADirPath)
+  val openSSLIntConfFile =
+    writeResourceToDir(getClass, openSSLIntConfFilename, setupCADirPath)
+  val openSSLRootConfFile =
+    writeResourceToDir(getClass, openSSLRootConfFilename, setupCADirPath)
 
-  val setupCADirPath: String      = setupCADir.getAbsolutePath
   val setupCAPath: String         = setupCAFile.getAbsolutePath
   val makeCertPath: String        = makeCertFile.getAbsolutePath
   val openSSLIntConfPath: String  = openSSLIntConfFile.getAbsolutePath

@@ -1,9 +1,9 @@
 package com.twitter.finagle.serverset2
 
-import collection.immutable
 import com.twitter.conversions.time._
-import com.twitter.finagle.MockTimer
 import com.twitter.finagle.serverset2.client._
+import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.collection.immutable
 
 sealed private trait ZkOp { type Res; val res = new Promise[Res] }
 private object ZkOp {
@@ -104,29 +105,31 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._
 
+  val retryStream = RetryStream()
+
   test("ops retry safely") { Time.withCurrentTimeFrozen { tc =>
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new ZkSession(watchedZk)
+    val zk = new ZkSession(retryStream, watchedZk, NullStatsReceiver)
 
     val v = zk.existsOf("/foo/bar")
     // An unobserved Var makes no side effect.
     assert(watchedZk.value.opq.isEmpty)
     val ref = new AtomicReference[Activity.State[Option[Data.Stat]]]
     val o = v.states.register(Witness(ref))
-    assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
-    assert(ref.get === Activity.Pending)
+    assert(watchedZk.value.opq == Seq(ExistsWatch("/foo/bar")))
+    assert(ref.get == Activity.Pending)
 
     assert(timer.tasks.isEmpty)
     watchedZk.value.opq(0).res() = Throw(new KeeperException.ConnectionLoss(None))
-    assert(timer.tasks.size === 1)
+    assert(timer.tasks.size == 1)
     tc.advance(20.milliseconds)
     timer.tick()
-    assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
-    assert(ref.get === Activity.Pending)
+    assert(watchedZk.value.opq == Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
+    assert(ref.get == Activity.Pending)
 
     watchedZk.value.opq(1).res() = Throw(new KeeperException.SessionExpired(None))
-    assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
+    assert(watchedZk.value.opq == Seq(ExistsWatch("/foo/bar"), ExistsWatch("/foo/bar")))
     val Activity.Failed(exc) = ref.get
     assert(exc.isInstanceOf[KeeperException.SessionExpired])
   }}
@@ -134,34 +137,34 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
   test("ZkSession.globOf") { Time.withCurrentTimeFrozen { tc =>
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new ZkSession(watchedZk)
+    val zk = new ZkSession(retryStream, watchedZk, NullStatsReceiver)
 
     val v = zk.globOf("/foo/bar/")
-    val ref = new AtomicReference[Activity.State[Seq[String]]]
+    val ref = new AtomicReference[Activity.State[Set[String]]]
     v.states.register(Witness(ref))
-    assert(ref.get === Activity.Pending)
+    assert(ref.get == Activity.Pending)
 
     val Seq(ew@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(None, ewwatchv))
-    assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(watchedZk.value.opq == Seq(ExistsWatch("/foo/bar")))
+    assert(ref.get == Activity.Ok(Set.empty))
 
     ewwatchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, ew2@ExistsWatch("/foo/bar")) = watchedZk.value.opq
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(ref.get == Activity.Ok(Set.empty))
     val ew2watchv = Var[WatchState](WatchState.Pending)
     ew2.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ew2watchv))
     val Seq(`ew`, `ew2`, gw@GetChildrenWatch("/foo/bar")) = watchedZk.value.opq
-    assert(ref.get === Activity.Pending)
+    assert(ref.get == Activity.Pending)
     gw.res() = Return(Watched(Node.Children(Seq("a", "b", "c"), null), Var.value(WatchState.Pending)))
-    assert(ref.get === Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
-    assert(watchedZk.value.opq === Seq(ew, ew2, gw))
+    assert(ref.get == Activity.Ok(Set("a", "b", "c")))
+    assert(watchedZk.value.opq == Seq(ew, ew2, gw))
 
     ew2watchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, `ew2`, `gw`, ew3@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     ew3.res() = Return(Watched(None, Var.value(WatchState.Pending)))
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(ref.get == Activity.Ok(Set.empty))
   }}
 
   test("factory authenticates and closes on expiry") { Time.withCurrentTimeFrozen { tc =>
@@ -170,7 +173,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     implicit val timer = new MockTimer
     val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
     val watchedZk = Watched(new OpqueueZkReader(), zkState)
-    val zk = ZkSession.retrying(5.seconds, () => new ZkSession(watchedZk))
+    val zk = ZkSession.retrying(retryStream, () => new ZkSession(retryStream, watchedZk, NullStatsReceiver))
 
     zk.changes.respond {
       case _ => ()
@@ -178,14 +181,14 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
     zkState() = WatchState.SessionState(SessionState.SyncConnected)
     eventually {
-      assert(watchedZk.value.opq === Seq(AddAuthInfo("digest", Buf.Utf8(authInfo))))
+      assert(watchedZk.value.opq == Seq(AddAuthInfo("digest", Buf.Utf8(authInfo))))
     }
 
     zkState() = WatchState.SessionState(SessionState.Expired)
     tc.advance(10.seconds)
     timer.tick()
     eventually {
-      assert(watchedZk.value.opq === Seq(
+      assert(watchedZk.value.opq == Seq(
         AddAuthInfo("digest", Buf.Utf8(authInfo)),
         Close(Time.Bottom)
       ))
@@ -193,7 +196,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
     zkState() = WatchState.SessionState(SessionState.SyncConnected)
     eventually {
-      assert(watchedZk.value.opq === Seq(
+      assert(watchedZk.value.opq == Seq(
         AddAuthInfo("digest", Buf.Utf8(authInfo)),
         Close(Time.Bottom),
         AddAuthInfo("digest", Buf.Utf8(authInfo))

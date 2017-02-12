@@ -1,6 +1,6 @@
 package com.twitter.finagle.integration
 
-import com.twitter.finagle.CancelledConnectionException
+import com.twitter.finagle.{Failure, CancelledConnectionException}
 import com.twitter.util.Await
 import org.jboss.netty.channel._
 import org.mockito.ArgumentCaptor
@@ -29,9 +29,9 @@ class CancellationTest extends FunSuite with IntegrationBase with MockitoSugar {
     verify(m.channelPipeline).sendDownstream(meCaptor.capture)
     assert(meCaptor.getValue match {
       case event: DownstreamMessageEvent => {
-        assert(event.getChannel === m.channel)
+        assert(event.getChannel == m.channel)
         assert(event.getMessage match {
-          case s: String => s === "123"
+          case s: String => s == "123"
         })
         true
       }
@@ -42,9 +42,9 @@ class CancellationTest extends FunSuite with IntegrationBase with MockitoSugar {
     verify(m.channelPipeline, times(2)).sendDownstream(seCaptor.capture)
     assert(seCaptor.getValue match {
       case event: DownstreamChannelStateEvent => {
-        assert(event.getChannel === m.channel)
-        assert(event.getState === ChannelState.OPEN)
-        assert(event.getValue === java.lang.Boolean.FALSE)
+        assert(event.getChannel == m.channel)
+        assert(event.getState == ChannelState.OPEN)
+        assert(event.getValue == java.lang.Boolean.FALSE)
         true
       }
     })
@@ -65,9 +65,11 @@ class CancellationTest extends FunSuite with IntegrationBase with MockitoSugar {
 
     f1.raise(new Exception)
     assert(f1.isDefined)
-    intercept[CancelledConnectionException] {
+    val failure = intercept[Failure] {
       Await.result(f1)
     }
+    
+    assert(failure.getCause.isInstanceOf[CancelledConnectionException])
   }
 
 }

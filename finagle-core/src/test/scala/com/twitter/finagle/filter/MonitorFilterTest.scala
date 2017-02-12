@@ -1,18 +1,19 @@
 package com.twitter.finagle.filter
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.{Matchers, Mockito}
-import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
-import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service}
+import com.twitter.conversions.time._
+import com.twitter.finagle._
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
-import java.util.logging.{Level, StreamHandler, Logger}
 import java.net.{InetAddress, InetSocketAddress}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import java.util.logging.{Level, StreamHandler, Logger}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.{Matchers, Mockito}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase {
@@ -36,10 +37,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     import h._
 
     val f = service(123)
-    assert(f.poll === None)
+    assert(f.poll == None)
 
     reply() = Throw(exc)
-    assert(f.poll === Some(Throw(exc)))
+    assert(f.poll == Some(Throw(exc)))
     verify(monitor).handle(exc)
   }
 
@@ -50,8 +51,34 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     when(underlying(any[Int])) thenThrow exc
 
     val f = service(123)
-    assert(f.poll === Some(Throw(exc)))
+    assert(f.poll == Some(Throw(exc)))
     verify(monitor).handle(exc)
+  }
+
+  test("MonitorFilter should not fail on exceptions thrown in callbacks") {
+    var handled = false
+    val monitor = Monitor.mk {
+      case _ =>
+        handled = true
+        true
+    }
+    val p1 = Promise[Unit]
+    val p2 = Promise[Int]
+    val svc = Service.mk[Int, Int] { num: Int =>
+      p1.onSuccess { _ =>
+        throw new Exception("boom!")
+      }
+      p1.before(p2)
+    }
+    val filter = new MonitorFilter[Int, Int](monitor)
+    val filteredSvc = filter.andThen(svc)
+
+    val f = filteredSvc(0)
+    p1.setDone()
+    assert(handled)
+    assert(!f.isDefined)
+    p2.setValue(1)
+    assert(Await.result(f, 2.seconds) == 1)
   }
 
   class MockSourcedException(underlying: Throwable, name: String)
@@ -90,7 +117,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     // that sits on top of "service". Therefore we need to create a client to initiates the requests.
     val client = ClientBuilder()
       .codec(StringCodec)
-      .hosts(Seq(server.localAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -107,8 +134,12 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     verify(monitor).handle(outer)
     verify(mockLogger).log(
       Matchers.eq(Level.SEVERE),
-      Matchers.eq("A server service FakeService2 on behalf of FakeService1 threw an exception"),
+      Matchers.eq("The 'FakeService2' service FakeService2 on behalf of FakeService1 threw an exception"),
       Matchers.eq(outer))
+
+    // need to properly close the client and the server, otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
+    Await.ready(server.close(), 1.second)
   }
 
   test("MonitorFilter should when attached to a client, report source for sourced exceptions") {
@@ -122,9 +153,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     when(preparedFactory.close(any[Time])) thenReturn Future.Done
     when(preparedFactory.map(Matchers.any())) thenReturn
       preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
+    when(preparedFactory.status) thenReturn(Status.Open)
 
     val m = new MockChannel
-    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory
+    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]], any[Stack.Params])) thenReturn preparedFactory
 
     val client = m.clientBuilder
       .monitor(_ => monitor)
@@ -139,11 +171,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     }
 
     preparedServicePromise() = Return(mockService)
-    assert(requestFuture.poll === Some(Throw(outer)))
+    assert(requestFuture.poll == Some(Throw(outer)))
 
     verify(monitor, times(0)).handle(inner)
     verify(monitor).handle(outer)
   }
-
 
 }

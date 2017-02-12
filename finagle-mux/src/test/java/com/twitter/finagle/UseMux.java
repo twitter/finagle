@@ -4,7 +4,7 @@ import com.twitter.finagle.mux.Request;
 import com.twitter.finagle.mux.Requests;
 import com.twitter.finagle.mux.Response;
 import com.twitter.finagle.mux.Responses;
-import com.twitter.io.Buf$;
+import com.twitter.io.Bufs;
 import com.twitter.util.Future;
 
 // A compilation test for the Mux API.
@@ -18,12 +18,10 @@ public class UseMux {
       }
     });
 
-    // TODO Buf$ should be replaced by Bufs.
-
     Request request = Requests.empty();
-    request = Requests.make(Path.empty(), Buf$.MODULE$.Empty());
+    request = Requests.make(Path.empty(), Bufs.EMPTY);
 
     Response response = Responses.empty();
-    response = Responses.make(Buf$.MODULE$.Empty());
+    response = Responses.make(Bufs.EMPTY);
   }
 }

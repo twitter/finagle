@@ -37,9 +37,12 @@ object DefaultPool {
    * are queued when the connection concurrency exceeds the high
    * watermark.
    */
-  case class Param(low: Int, high: Int, bufferSize: Int, idleTime: Duration, maxWaiters: Int)
-  implicit object Param extends Stack.Param[Param] {
-    val default = Param(0, Int.MaxValue, 0, Duration.Top, Int.MaxValue)
+  case class Param(low: Int, high: Int, bufferSize: Int, idleTime: Duration, maxWaiters: Int) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(0, Int.MaxValue, 0, Duration.Top, Int.MaxValue))
   }
 
   /**

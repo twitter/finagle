@@ -19,7 +19,7 @@ object SeqIdFilter {
 }
 
 /**
- * A [[com.twitter.finagle.Filter]] that overrides Thrift request sequence IDs,
+ * A `Filter` that overrides Thrift request sequence IDs,
  * replacing them with our own randomly-assigned i32s. Upon response receipt,
  * this filter ensures that responses have the correct corresponding sequence ID,
  * failing any requests that do not.
@@ -50,7 +50,7 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
   private[this] def badMsg(why: String) = Throw(new IllegalArgumentException(why))
 
   private[this] def getAndSetId(buf: Array[Byte], newId: Int): Try[Int] = {
-    if (buf.size < 4) return badMsg("short header")
+    if (buf.length < 4) return badMsg("short header")
     val header = get32(buf, 0)
     val off = if (header < 0) {
       // [4]header
@@ -59,7 +59,7 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
       // [4]seqid
       if ((header&VersionMask) != Version1)
         return badMsg("bad version %d".format(header&VersionMask))
-      if (buf.size < 8) return badMsg("short name size")
+      if (buf.length < 8) return badMsg("short name size")
       4+4+get32(buf, 4)
     } else {
       // [4]n
@@ -69,7 +69,7 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
       4+header+1
     }
 
-    if (buf.size < off+4) return badMsg("short buffer")
+    if (buf.length < off+4) return badMsg("short buffer")
 
     val currentId = get32(buf, off)
     put32(buf, off, newId)

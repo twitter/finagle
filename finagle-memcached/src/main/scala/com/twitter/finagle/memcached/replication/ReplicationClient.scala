@@ -1,16 +1,16 @@
 package com.twitter.finagle.memcached.replication
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+
 import com.twitter.conversions.time._
+import com.twitter.finagle.Addr
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
-import com.twitter.finagle.Group
+import com.twitter.finagle.{Name, Group}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.io.Buf
 import com.twitter.util._
-import org.jboss.netty.buffer.ChannelBuffer
-import scala.collection.JavaConversions._
 import scala.util.Random
 
 sealed trait ReplicationStatus[T]
@@ -36,8 +36,8 @@ case class FailedReplication[T](failureSeq: Seq[Throw[T]]) extends ReplicationSt
  * Wrapping underlying replicas cas unique values for replication purpose.
  */
 trait ReplicaCasUnique
-case class RCasUnique(uniques: Seq[ChannelBuffer]) extends ReplicaCasUnique
-case class SCasUnique(casUnique: ChannelBuffer) extends ReplicaCasUnique
+case class RCasUnique(uniques: Seq[Buf]) extends ReplicaCasUnique
+case class SCasUnique(casUnique: Buf) extends ReplicaCasUnique
 
 /**
  * Replication client helper
@@ -47,11 +47,14 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     val underlyingClients = pools map { pool =>
-      Await.result(pool.ready)
-      KetamaClientBuilder(Group.fromCluster(pool), hashName, clientBuilder, failureAccrualParams).build()
+      val group = Group.fromCluster(pool)
+      // Must use `set` method on Group so we get updates
+      val va: Var[Addr] = group.set.map(_.map(CacheNode.toAddress)).map(Addr.Bound(_))
+      val name = Name.Bound.singleton(va)
+      KetamaClientBuilder(name, hashName, clientBuilder, failureAccrualParams).build()
     }
     val repStatsReceiver =
       clientBuilder map { _.statsReceiver.scope("cache_replication") } getOrElse(NullStatsReceiver)
@@ -62,7 +65,7 @@ object ReplicationClient {
     pools: Seq[Cluster[CacheNode]],
     clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
     hashName: Option[String] = None,
-    failureAccrualParams: (Int, Duration) = (5, 30.seconds)
+    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
   ) = {
     new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, failureAccrualParams))
   }
@@ -72,6 +75,7 @@ object ReplicationClient {
  * Base replication client. This client manages a list of base memcached clients representing
  * cache replicas. All replication API returns ReplicationStatus object indicating the underlying
  * replicas consistency state.
+ *
  * @param clients list of memcached clients with each one representing to a single cache pool
  * @param statsReceiver
  */
@@ -103,7 +107,7 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
         }
     }
 
-    loopGet(clientsInOrder, GetResult(Map.empty, keys toSet))
+    loopGet(clientsInOrder, GetResult(Map.empty, keys.toSet))
   }
 
   /**
@@ -111,10 +115,10 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    * For each input key, this operation searches all replicas in an order until it finds the
    * first hit result, or return the last replica's result.
    */
-  def getOne(key: String, useRandomOrder: Boolean = false): Future[Option[ChannelBuffer]] =
+  def getOne(key: String, useRandomOrder: Boolean = false): Future[Option[Buf]] =
     getOne(Seq(key), useRandomOrder) map { _.values.headOption }
 
-  def getOne(keys: Iterable[String], useRandomOrder: Boolean): Future[Map[String, ChannelBuffer]] =
+  def getOne(keys: Iterable[String], useRandomOrder: Boolean): Future[Map[String, Buf]] =
     getResult(keys, useRandomOrder) flatMap { result =>
       if (result.failures.nonEmpty)
         Future.exception(result.failures.values.head)
@@ -127,10 +131,10 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    * For each input key, this operation returns the aggregated replication status after requesting
    * all replicas.
    */
-  def getAll(key: String): Future[ReplicationStatus[Option[ChannelBuffer]]] =
+  def getAll(key: String): Future[ReplicationStatus[Option[Buf]]] =
     getAll(Seq(key)) map { _.values.head }
 
-  def getAll(keys: Iterable[String]): Future[Map[String, ReplicationStatus[Option[ChannelBuffer]]]] = {
+  def getAll(keys: Iterable[String]): Future[Map[String, ReplicationStatus[Option[Buf]]]] = {
     val keySet = keys.toSet
     Future.collect(clients map { _.getResult(keySet) }) map {
       results: Seq[GetResult] =>
@@ -156,10 +160,10 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    *
    * - FailedReplication, indicating failures from all replicas;
    */
-  def getsAll(key: String): Future[ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]]] =
+  def getsAll(key: String): Future[ReplicationStatus[Option[(Buf, ReplicaCasUnique)]]] =
     getsAll(Seq(key)) map { _.values.head }
 
-  def getsAll(keys: Iterable[String]): Future[Map[String, ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]]]] = {
+  def getsAll(keys: Iterable[String]): Future[Map[String, ReplicationStatus[Option[(Buf, ReplicaCasUnique)]]]] = {
     val keySet = keys.toSet
     Future.collect(clients map { _.getsResult(keySet) }) map {
       results: Seq[GetsResult] =>
@@ -179,10 +183,10 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
   // if all replicas are consistent, a RCasUnique is attached,
   // otherwise individual SCasUnique is attached
   private[this] def attachCas(
-    valueStatus: ReplicationStatus[Option[ChannelBuffer]],
+    valueStatus: ReplicationStatus[Option[Buf]],
     underlyingResults: Seq[GetsResult],
     key: String
-  ): ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]] =
+  ): ReplicationStatus[Option[(Buf, ReplicaCasUnique)]] =
     valueStatus match {
       case ConsistentReplication(Some(v)) =>
         val allReplicasCas = underlyingResults map {_.hits.get(key).get.casUnique.get}
@@ -204,25 +208,25 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
   /**
    * Stores a key in all replicas and returns the aggregated replication status.
    */
-  def set(key: String, value: ChannelBuffer): Future[ReplicationStatus[Unit]] =
+  def set(key: String, value: Buf): Future[ReplicationStatus[Unit]] =
     set(key, 0, Time.epoch, value)
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[ReplicationStatus[Unit]] =
+  def set(key: String, flags: Int, expiry: Time, value: Buf): Future[ReplicationStatus[Unit]] =
     collectAndResolve[Unit](_.set(key, flags, expiry, value))
 
   /**
    * Attempts to perform a CAS operation on all replicas, and returns the aggregated replication status.
    */
-  def cas(key: String, value: ChannelBuffer, casUniques: Seq[ChannelBuffer]): Future[ReplicationStatus[JBoolean]] =
-    cas(key, 0, Time.epoch, value, casUniques)
+  def checkAndSet(key: String, value: Buf, casUniques: Seq[Buf]): Future[ReplicationStatus[CasResult]] =
+    checkAndSet(key, 0, Time.epoch, value, casUniques)
 
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUniques: Seq[ChannelBuffer]): Future[ReplicationStatus[JBoolean]] = {
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUniques: Seq[Buf]): Future[ReplicationStatus[CasResult]] = {
     assert(clients.size == casUniques.size)
 
     // cannot use collectAndResolve helper here as this is the only case where there's no common op
     Future.collect((clients zip casUniques) map {
       case (c, u) =>
-        c.cas(key, flags, expiry, value, u).transform(Future.value)
+        c.checkAndSet(key, flags, expiry, value, u).transform(Future.value)
     }) map { toReplicationStatus }
   }
 
@@ -236,19 +240,19 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    * Store a key in all replicas but only if it doesn't already exist on the server, and returns
    * the aggregated replication status.
    */
-  def add(key: String, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def add(key: String, value: Buf): Future[ReplicationStatus[JBoolean]] =
     add(key, 0, Time.epoch, value)
 
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def add(key: String, flags: Int, expiry: Time, value: Buf): Future[ReplicationStatus[JBoolean]] =
     collectAndResolve[JBoolean](_.add(key, flags, expiry, value))
 
   /**
    * Replace existing key in all replicas, and returns the aggregated replication status.
    */
-  def replace(key: String, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def replace(key: String, value: Buf): Future[ReplicationStatus[JBoolean]] =
     replace(key, 0, Time.epoch, value)
 
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[ReplicationStatus[JBoolean]] =
     collectAndResolve[JBoolean](_.replace(key, flags, expiry, value))
 
   /**
@@ -270,17 +274,17 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
   /**
    * Unsupported operation yet
    */
-  def append(key: String, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def append(key: String, value: Buf): Future[ReplicationStatus[JBoolean]] =
     append(key, 0, Time.epoch, value)
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[ReplicationStatus[JBoolean]] =
     throw new UnsupportedOperationException("append is not supported for cache replication client.")
 
   /**
    * Unsupported operation yet
    */
-  def prepend(key: String, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def prepend(key: String, value: Buf): Future[ReplicationStatus[JBoolean]] =
     prepend(key, 0, Time.epoch, value)
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[ReplicationStatus[JBoolean]] =
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[ReplicationStatus[JBoolean]] =
     throw new UnsupportedOperationException("prepend is not supported for cache replication client.")
 
   /**
@@ -361,8 +365,8 @@ class SimpleReplicationClient(underlying: BaseReplicationClient) extends Client 
       resultsMap =>
         val getsResultSeq = resultsMap map {
           case (key, ConsistentReplication(Some((value, RCasUnique(uniques))))) =>
-            val newCas = uniques map {channelBufferToString(_)} mkString("|")
-            val newValue = Value(key, value, Some(newCas))
+            val newCas = uniques map { case Buf.Utf8(s) => s } mkString("|")
+            val newValue = Value(Buf.Utf8(key), value, Some(Buf.Utf8(newCas)))
             GetsResult(GetResult(hits = Map(key -> newValue)))
           case (key, ConsistentReplication(None)) =>
             GetsResult(GetResult(misses = Set(key)))
@@ -371,20 +375,24 @@ class SimpleReplicationClient(underlying: BaseReplicationClient) extends Client 
           case (key, _) =>
             GetsResult(GetResult(failures = Map(key -> SimpleReplicationFailure("One or more underlying replica failed gets"))))
         }
-        GetResult.merged(getsResultSeq toSeq)
+        GetResult.merged(getsResultSeq.toSeq)
     }
 
   /**
    * Store a key in all replicas, succeed only if all replicas succeed.
    */
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def set(key: String, flags: Int, expiry: Time, value: Buf) =
     resolve[Unit]("set", _.set(key, flags, expiry, value), ())
 
   /**
    * Check and set a key, succeed only if all replicas succeed.
    */
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer): Future[JBoolean] =
-    resolve[JBoolean]("cas", _.cas(key, flags, expiry, value, channelBufferToString(casUnique).split('|').toSeq), false)
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[CasResult] =
+  {
+    val Buf.Utf8(casUniqueStr) = casUnique
+    val casUniqueBufs = casUniqueStr.split('|') map { Buf.Utf8(_) }
+    resolve[CasResult]("checkAndSet", _.checkAndSet(key, flags, expiry, value, casUniqueBufs), CasResult.Stored)
+  }
 
   /**
    * Delete a key from all replicas, succeed only if all replicas succeed.
@@ -395,13 +403,13 @@ class SimpleReplicationClient(underlying: BaseReplicationClient) extends Client 
   /**
    * Add a new key to all replicas, succeed only if all replicas succeed.
    */
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def add(key: String, flags: Int, expiry: Time, value: Buf) =
     resolve[JBoolean]("add", _.add(key, flags, expiry, value), false)
 
   /**
    * Replace an existing key in all replicas, succeed only if all replicas succeed.
    */
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def replace(key: String, flags: Int, expiry: Time, value: Buf) =
     resolve[JBoolean]("replace", _.replace(key, flags, expiry, value), false)
 
   /**
@@ -427,10 +435,10 @@ class SimpleReplicationClient(underlying: BaseReplicationClient) extends Client 
       case _ => Future.exception(SimpleReplicationFailure("One or more underlying replica failed op: " + name))
     }
 
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     throw new UnsupportedOperationException("append is not supported for replication cache client yet.")
 
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     throw new UnsupportedOperationException("prepend is not supported for replication cache client yet.")
 
   def stats(args: Option[String]): Future[Seq[String]] =

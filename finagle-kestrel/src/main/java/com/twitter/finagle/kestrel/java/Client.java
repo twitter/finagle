@@ -4,14 +4,12 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import com.twitter.concurrent.Offer;
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.finagle.kestrel.ReadHandle;
 import com.twitter.finagle.kestrel.protocol.Command;
 import com.twitter.finagle.kestrel.protocol.Response;
+import com.twitter.io.Buf;
 import com.twitter.util.Duration;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
@@ -32,9 +30,9 @@ public abstract class Client {
    *
    * @param key the name of the queue.
    * @param waitFor if the queue is empty, wait up to this duration for an item to arrive.
-   * @return A Future<ChannelBuffer>
+   * @return A Future<Buf>
    */
-  abstract public Future<ChannelBuffer> get(String key, Duration waitFor);
+  public abstract Future<Buf> get(String key, Duration waitFor);
 
   /**
    * Enqueue an item.
@@ -44,15 +42,16 @@ public abstract class Client {
    * @param expiry indicates to Kestrel to discard the item if it isn't dequeued in time.
    * @return a Future<Response> indicating success for failure.
    */
-  abstract public Future<Response> set(String key, ChannelBuffer value, Time expiry);
+  public abstract Future<Response> set(String key, Buf value, Time expiry);
 
   /**
-   * Delete a queue. Kestrel will actually delete the queue's journal file and all items in the queue.
+   * Delete a queue. Kestrel will actually delete the queue's journal file and
+   * all items in the queue.
    *
    * @param key the queue name.
    * @return a Future<Response> indicating success if the queue already exists
    */
-  abstract public Future<Response> delete(String key);
+  public abstract Future<Response> delete(String key);
 
   /**
    * Flush/empty a queue. The journal file is preserved
@@ -60,7 +59,7 @@ public abstract class Client {
    * @param key the queue name
    * @return a Future<Response> indicating success if the queue already exists
    */
-  abstract public Future<Response> flush(String key);
+  public abstract Future<Response> flush(String key);
 
   /**
    * Write indefinitely to the given queue.  The given offer is
@@ -70,18 +69,18 @@ public abstract class Client {
    *
    * @return a Future indicating client failure.
    */
-  abstract public Future<Throwable> write(String queueName, Offer<ChannelBuffer> offer);
+  public abstract Future<Throwable> write(String queueName, Offer<Buf> offer);
 
   /**
    * Read indefinitely from the given queue with transactions.  Note
    * that {{read}} will reserve a connection for the duration of the
-   * read.  Note that this does no buffering: we await acknowledment
+   * read.  Note that this does no buffering: we await acknowledgment
    * (through synchronizing on ReadMessage.ack) before acknowledging
    * that message to the kestrel server & reading the next one.
    *
    * @return A read handle.
    */
-  abstract public ReadHandle read(String queueName);
+  public abstract ReadHandle read(String queueName);
 
   /**
    * Read from a queue reliably: retry streaming reads on failure
@@ -91,28 +90,31 @@ public abstract class Client {
    *
    * @param queueName the queue to read from
    * @param timer a timer used to delay retries
-   * @param retryBackoffs a (possibly infinite) stream of durations
+   * @param backoffs a (possibly infinite) stream of durations
    * comprising a backoff policy
    */
-  abstract public ReadHandle readReliably(String queueName, Timer timer, Callable<Iterator<Duration>> backoffs);
+  public abstract ReadHandle readReliably(
+      String queueName,
+      Timer timer,
+      Callable<Iterator<Duration>> backoffs);
 
   /**
    * {{readReliably}} with infinite, 0-second backoff retries.
    */
-  abstract public ReadHandle readReliably(String queueName);
+  public abstract ReadHandle readReliably(String queueName);
 
   /**
    * Release any resources (like threadpools) used by this client.
    */
-  abstract public void close();
+  public abstract void close();
 
   /**
    * Dequeue an item
    *
    * @param key the queue name
-   * @return a Channel buffer if the item exists, null otherwise.
+   * @return a Buf if the item exists, null otherwise.
    */
-  public Future<ChannelBuffer> get(String key) {
+  public Future<Buf> get(String key) {
     return this.get(key, Duration.apply(0, TimeUnit.SECONDS));
   }
 
@@ -120,10 +122,10 @@ public abstract class Client {
    * Enqueue an item with no expiry.
    *
    * @param key the queue
-   * @param value the item as a ChannelBuffer
+   * @param value the item as a Buf
    * @return a Future<Reponse> indicating success or failure.
    */
-  public Future<Response> set(String key, ChannelBuffer value) {
+  public Future<Response> set(String key, Buf value) {
     return this.set(key, value, Time.fromMilliseconds(0));
   }
 
@@ -135,7 +137,7 @@ public abstract class Client {
    * @return a Future<Response> indicating success or failutre.
    */
   public Future<Response> set(String key, String value) {
-    return this.set(key, toChannelBuffer(value));
+    return this.set(key, toBuffer(value));
   }
 
   /**
@@ -147,10 +149,10 @@ public abstract class Client {
    * @return a Future<Response> indicating success or failure.
    */
   public Future<Response> set(String key, String value, Time expiry) {
-    return this.set(key, toChannelBuffer(value), expiry);
+    return this.set(key, toBuffer(value), expiry);
   }
 
-  private ChannelBuffer toChannelBuffer(String value) {
-    return ChannelBuffers.wrappedBuffer(value.getBytes());
+  private Buf toBuffer(String value) {
+    return Buf.Utf8$.MODULE$.apply(value);
   }
 }

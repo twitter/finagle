@@ -12,7 +12,7 @@ class FlagsTest extends FunSuite {
 
     val changed = flags.setFlag(Flags.Debug)
     assert(changed.isFlagSet(Flags.Debug))
-    assert(changed.toLong === Flags.Debug)
+    assert(changed.toLong == Flags.Debug)
 
     assert(!flags.isFlagSet(Flags.Debug))
   }
@@ -25,7 +25,7 @@ class FlagsTest extends FunSuite {
     val changed = flags.setFlags(Seq(1L, 2L))
     assert(changed.isFlagSet(1L))
     assert(changed.isFlagSet(2L))
-    assert(changed.toLong === 3L)
+    assert(changed.toLong == 3L)
 
     assert(!flags.isFlagSet(1L))
     assert(!flags.isFlagSet(2L))

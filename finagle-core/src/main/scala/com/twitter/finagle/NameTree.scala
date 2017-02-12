@@ -1,10 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Activity, Var}
 import com.twitter.finagle.util.Showable
 import scala.annotation.tailrec
-import java.net.{InetSocketAddress, SocketAddress}
-import scala.collection.breakOut
 
 /**
  * Name trees represent a composite T-typed name whose interpretation
@@ -34,7 +31,7 @@ sealed trait NameTree[+T] {
     NameTree.map(f)(this)
 
    /**
-    * A parsable representation of the name tree; a
+    * A parseable representation of the name tree; a
     * [[com.twitter.finagle.NameTree NameTree]] is recovered
     * from this string by
     * [[com.twitter.finagle.NameTree.read NameTree.read]].
@@ -308,7 +305,7 @@ object NameTree {
    *
    * name       ::= path | '!' | '~' | '$'
    *
-   * weight     ::= -?([0-9]++(\.[0-9]+*)?|[0-9]+*\.[0-9]++)([eE][+-]?[0-9]++)?[fFdD]?
+   * weight     ::= [0-9]*\.?[0-9]+
    * }}}
    *
    * For example:
@@ -323,7 +320,7 @@ object NameTree {
    * Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)
    * }}}
    *
-   * The production ``path`` is documented at [[com.twitter.finagle.Path$ Path.read]].
+   * The production `path` is documented at [[com.twitter.finagle.Path$ Path.read]].
    *
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.

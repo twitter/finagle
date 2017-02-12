@@ -1,12 +1,13 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
-    '3rdparty:junit',
-    '3rdparty:netty',
-    '3rdparty:scala-library',
-    'finagle/finagle-core',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/scala-lang:scala-library',
     'finagle/finagle-memcached',
     'finagle/finagle-memcached/src/test/scala:external',
-    'util/util-core',
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-hashing/src/main/scala:scala',
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )

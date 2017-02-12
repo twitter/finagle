@@ -1,26 +1,26 @@
 package com.twitter.finagle.memcached.unit.protocol
 
-import com.twitter.finagle.memcached.protocol.KeyValidation
-import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
+import com.twitter.finagle.memcached.protocol.KeyValidation
+import com.twitter.io.Buf
+
 @RunWith(classOf[JUnitRunner])
 class KeyValidationTest extends FunSuite {
 
   private class BasicKeyValidation(
-    override val keys: Seq[ChannelBuffer]
+    override val keys: Seq[Buf]
   ) extends KeyValidation
 
   test("reject invalid key that is too long") {
     val length = 251
     val key = "x" * length
-    val cb = ChannelBuffers.copiedBuffer(key, Charsets.Utf8)
 
     val x = intercept[IllegalArgumentException] {
-      new BasicKeyValidation(Seq(cb))
+      new BasicKeyValidation(Seq(Buf.Utf8(key)))
     }
     assert(x.getMessage.contains("key cannot be longer than"))
     assert(x.getMessage.contains("(" + length + ")"))
@@ -32,7 +32,7 @@ class KeyValidationTest extends FunSuite {
       "anda\rcarraigereturn",
       "yo\u0000ihaveacontrolchar",
       "andheres\nanewline"
-    ) map { ChannelBuffers.copiedBuffer(_, Charsets.Utf8) }
+    ) map { Buf.Utf8(_) }
 
     bads foreach { bad =>
       val x = intercept[IllegalArgumentException] {
@@ -41,5 +41,4 @@ class KeyValidationTest extends FunSuite {
       assert(x.getMessage.contains("key cannot have whitespace or control characters"))
     }
   }
-
 }

@@ -2,19 +2,17 @@ package com.twitter.finagle.example.mysql
 
 import com.twitter.app.App
 import com.twitter.util.{Await, Future}
-import com.twitter.finagle.exp.Mysql
-import com.twitter.finagle.exp.mysql._
+import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql._
 import java.net.InetSocketAddress
 import java.sql.Date
-import java.util.logging.{Logger, Level}
 
 case class SwimmingRecord(
-  event: String,
-  time: Float,
-  name: String,
-  nationality: String,
-  date: Date
-)
+    event: String,
+    time: Float,
+    name: String,
+    nationality: String,
+    date: Date)
 
 object SwimmingRecord {
   val createTableSQL =
@@ -56,11 +54,11 @@ object Example extends App {
       r <- selectQuery(client)
     } yield r
 
-    resultFuture onSuccess { seq =>
-      seq foreach println
-    } onFailure { e =>
+    resultFuture.onSuccess { seq =>
+      seq.foreach(println)
+    }.onFailure { e =>
       println(e)
-    } ensure {
+    }.ensure {
       client.query("DROP TABLE IF EXISTS `finagle-mysql-example`") ensure {
         client.close()
       }
@@ -88,10 +86,10 @@ object Example extends App {
       val StringValue(event) = row("event").get
       val DateValue(date) = row("date").get
       val StringValue(name) = row("name").get
-      val time = row("time") map {
+      val time = row("time").map {
         case FloatValue(f) => f
         case _ => 0.0F
-      } get
+      }.get
 
       (name, time, date)
     }

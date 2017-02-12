@@ -1,16 +1,17 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
+import com.twitter.test._
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import com.twitter.finagle.Service
-import com.twitter.test._
+import scala.reflect.ClassTag
 
 @RunWith(classOf[JUnitRunner])
 class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   type Iface = B.ServiceIface
-  def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
+  def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   val processor = new B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)
@@ -33,14 +34,14 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
 
   testThrift("end-to-end ClientId propagation", Some(ClientId(clientId))) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
-    val result = Await.result(client.complex_return("")).arg_two
-    assert(result === clientId)
+    val result = Await.result(client.complex_return(""), 10.seconds).arg_two
+    assert(result == clientId)
   }
 
   testThrift("end-to-end empty ClientId propagation", None) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
-    val result = Await.result(client.complex_return("")).arg_two
-    assert(result === "")
+    val result = Await.result(client.complex_return(""), 10.seconds).arg_two
+    assert(result == "")
   }
 
   runThriftTests()

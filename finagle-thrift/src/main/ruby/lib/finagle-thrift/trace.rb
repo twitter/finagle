@@ -2,6 +2,7 @@ module Trace
   extend self
   DEFAULT_SAMPLE_RATE = 0.001
   TRACE_ID_UPPER_BOUND = 2 ** 64
+  TRACE_STACK = :trace_stack
 
   def id
     if stack.empty?
@@ -33,7 +34,7 @@ module Trace
         saved_stack = stack.dup
         yield
       ensure
-        @stack = saved_stack
+        stack = saved_stack
       end
     end
   end
@@ -85,11 +86,11 @@ module Trace
       "TraceId(trace_id = #{@trace_id.to_s}, parent_id = #{@parent_id.to_s}, span_id = #{@span_id.to_s}, sampled = #{@sampled.to_s}, flags = #{@flags.to_s})"
     end
   end
-  
+
   # there are a total of 64 flags that can be passed down with the various tracing headers
   # at the time of writing only one is used (debug).
   #
-  # Note that using the 64th bit in Ruby requires some sign conversion since Thrift i64s are signed 
+  # Note that using the 64th bit in Ruby requires some sign conversion since Thrift i64s are signed
   # but Ruby won't do the right thing if you try to set 1 << 64
   class Flags
     # no flags set
@@ -99,13 +100,14 @@ module Trace
   end
 
   class SpanId
-    HEX_REGEX = /^[a-f0-9]{16}$/i
+    HEX_REGEX = /^[a-f0-9]{16,32}$/i
     MAX_SIGNED_I64 = 9223372036854775807
     MASK = (2 ** 64) - 1
 
     def self.from_value(v)
       if v.is_a?(String) && v =~ HEX_REGEX
-        new(v.hex)
+        # drops any bits higher than 64 by selecting right-most 16 characters
+        new(v.length > 16 ? v[v.length - 16, 16].hex : v.hex)
       elsif v.is_a?(Numeric)
         new(v)
       elsif v.is_a?(SpanId)
@@ -146,8 +148,14 @@ module Trace
 
   private
 
+  # "stack" acts as a thread local variable and cannot be shared between
+  # threads.
+  def stack=(stack)
+    Thread.current[TRACE_STACK] = stack
+  end
+
   def stack
-    @stack ||= []
+    Thread.current[TRACE_STACK] ||= []
   end
 
   def tracer

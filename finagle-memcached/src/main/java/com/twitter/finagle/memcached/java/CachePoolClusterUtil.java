@@ -14,7 +14,9 @@ import com.twitter.finagle.stats.StatsReceiver;
 /**
  * A Java-friendly CachePoolCluster.
  */
-public class CachePoolClusterUtil {
+public final class CachePoolClusterUtil {
+
+  private CachePoolClusterUtil() { }
 
   /**
    * Cache pool based on a static list.
@@ -56,9 +58,9 @@ public class CachePoolClusterUtil {
 
   /**
    * Zookeeper based cache pool cluster.
-   * The cluster will monitor the underlying serverset changes and report the detected underlying
-   * pool size. The cluster snapshot is unmanaged in a way that any serverset change will be immediately
-   * reflected.
+   * The cluster will monitor the underlying serverset changes and report the detected
+   * underlying pool size. The cluster snapshot is unmanaged in a way that any serverset
+   * change will be immediately reflected.
    *
    * @param zkPath the zookeeper path representing the cache pool
    * @param zkClient zookeeper client to read zookeeper

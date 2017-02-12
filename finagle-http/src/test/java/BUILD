@@ -1,9 +1,13 @@
-java_library(name='java',
+junit_tests(
   dependencies=[
-    '3rdparty:netty',
-    'finagle/finagle-core',
+    '3rdparty/jvm/io/netty:netty',
+    '3rdparty/jvm/junit',
+    'finagle/finagle-base-http/src/main/scala:scala',
+    'finagle/finagle-core/src/main/java:java',
+    'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http',
-    'util/util-core'
+    'util/util-core/src/main/scala:scala',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

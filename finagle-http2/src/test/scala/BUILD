@@ -1,0 +1,23 @@
+junit_tests(
+  dependencies=[
+    '3rdparty/jvm/io/netty:netty4-http',
+    scoped('3rdparty/jvm/io/netty', scope='forced'),
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/org/scalatest',
+    '3rdparty/jvm/io/netty:netty4-handler-proxy',
+    '3rdparty/jvm/io/netty:netty4-http2',
+    'finagle/finagle-http:tests',
+    'finagle/finagle-http2',
+    'finagle/finagle-base-http',
+    'finagle/finagle-netty4-http',
+    'finagle/finagle-core',
+    'finagle/finagle-http',
+    'util/util-core',
+    'util/util-logging',
+    'util/util-stats',
+  ],
+  strict_deps=True,
+  fatal_warnings=True,
+  sources=rglobs('*.scala')
+)

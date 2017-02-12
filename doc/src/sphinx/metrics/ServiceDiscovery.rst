@@ -3,33 +3,47 @@ Name Resolution
 
 Finagle clients resolve :doc:`names <Names>` into sets of network
 addresses to which sockets can be opened. A number of the moving parts
-involved in this process are cached (i.e. `Dtab`\s, `Name`\s, and
-`NameTree`\s). The following stats are recorded under the
-`interpreter/{dtabcache,namecache,nametreecache}` scopes to provide
+involved in this process are cached (i.e.
+:src:`Dtabs <com/twitter/finagle/Dtab.scala>`,
+:src:`Names <com/twitter/finagle/Name.scala>`, and
+:src:`NameTrees <com/twitter/finagle/NameTree.scala>`).
+The following stats are recorded under the
+`namer/{dtabcache,namecache,nametreecache}` scopes to provide
 visibility into this caching.
 
 **misses**
-  A counter of the number of cache misses
-
-**misstime_ms**
-  A histogram of the latency, in milliseconds, of invocation of
-  `Service`\s created on misses
+  A counter of the number of cache misses.
 
 **evicts**
-  A counter of the number of cache evictions
+  A counter of the number of cache evictions.
+
+**expires**
+  A counter of the number of idle ``ServiceFactory``\s
+  that were actively evicted.
 
 **idle**
-  A gauge of the number of cached idle `ServiceFactory`\s
+  A gauge of the number of cached idle ``ServiceFactory``\s.
 
 **oneshots**
-  A counter of the number of "one-off" `ServiceFactory`\s that are
-  created in the event that no idle `ServiceFactory`\s are cached
+  A counter of the number of "one-off" ``ServiceFactory``\s that are
+  created in the event that no idle ``ServiceFactory``\s are cached.
+
+**namer/bind_latency_us**
+  A stat of the total time spent resolving ``Name``\s.
+
+Initial Resolution
+<<<<<<<<<<<<<<<<<<
+
+**finagle/clientregistry/initialresolution_ms**
+
+  A counter of the time spent waiting for client resolution via
+  :src:`ClientRegistry.expAllRegisteredClientsResolved <com/twitter/finagle/client/ClientRegistry.scala>`.
 
 Address Stabilization
 <<<<<<<<<<<<<<<<<<<<<
 
 Resolved addresses (represented as an instance of
-`com.twitter.finagle.Addr`) are stabilized in two ways:
+:src:`Addr <com/twitter/finagle/Addr.scala>`) are stabilized in two ways:
 
 1. ZooKeeper failures will not cause a previously bound address to fail.
 2. When a member leaves a cluster, its removal is delayed.
@@ -49,6 +63,10 @@ the ServerSet's ZooKeeper path.
 **size**
   A gauge tracking the total size of the live cluster, not including
   members in limbo.
+
+**zkHealth**
+  A gauge tracking the health of the underlying zk client as seen by the resolver.
+  Unknown(0), Healthy(1), Unhealthy(2), Probation(3)
 
 **observed_serversets**
   A gauge tracking the number of clusters whose membership status is
@@ -70,80 +88,86 @@ Under the \`zk2\` scope
   membership status has been tracked within the process.
 
 **entries/read_ms**
-  A histogram of the latency, in milliseconds, of reading entry znodes
+  A histogram of the latency, in milliseconds, of reading entry znodes.
 
 **entries/parse_ms**
   A histogram of the latency, in milliseconds, of parsing the data
-  within entry znodes
+  within entry znodes.
 
 **vectors/read_ms**
-  A histogram of the latency, in milliseconds, of reading vector znodes
+  A histogram of the latency, in milliseconds, of reading vector znodes.
 
 **vectors/parse_ms**
   A histogram of the latency, in milliseconds, of parsing the data
-  within vector znodes
+  within vector znodes.
 
 Under the \`zkclient\` scope
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **ephemeral_successes**
-  A counter of the number successful ephemeral node creations
+  A counter of the number successful ephemeral node creations.
 
 **ephemeral_failures**
-  A counter of the number failed ephemeral node creations
+  A counter of the number failed ephemeral node creations.
 
 **ephemeral_latency_ms**
-  A histogram of the latency, in milliseconds, of ephemeral node creation
+  A histogram of the latency, in milliseconds, of ephemeral node creation.
 
 **watch_successes**
   A counter of the number successful watch-related operations
   (i.e. "watch exists", "get watch data", and "get child watches"
-  operations)
+  operations).
 
 **watch_failures**
-  A counter of the number failed watch-related operations
+  A counter of the number failed watch-related operations.
 
 **watch_latency_ms**
-  A histogram of the latency, in milliseconds, of watch-related operations
+  A histogram of the latency, in milliseconds, of watch-related operations.
 
 **read_successes**
-  A counter of the number successful ZooKeeper reads
+  A counter of the number successful ZooKeeper reads.
 
 **read_failures**
-  A counter of the number failed ZooKeeper reads
+  A counter of the number failed ZooKeeper reads.
 
 **read_latency_ms**
-  A histogram of the latency, in milliseconds, of ZooKeeper reads
+  A histogram of the latency, in milliseconds, of ZooKeeper reads.
 
 **write_successes**
-  A counter of the number successful ZooKeeper writes
+  A counter of the number successful ZooKeeper writes.
 
 **write_failures**
-  A counter of the number failed ZooKeeper writes
+  A counter of the number failed ZooKeeper writes.
 
 **write_latency_ms**
-  A histogram of the latency, in milliseconds, of ZooKeeper writes
+  A histogram of the latency, in milliseconds, of ZooKeeper writes.
 
 **multi_successes**
-  A counter of the number successful transactional operations
+  A counter of the number successful transactional operations.
 
 **multi_failures**
-  A counter of the number failed transactional operations
+  A counter of the number failed transactional operations.
 
 **multi_latency_ms**
-  A histogram of the latency, in milliseconds, of transactional operations
+  A histogram of the latency, in milliseconds, of transactional operations.
 
-**session_connects**
-  A counter of the number of successful session connection operations
+**session_sync_connected**
+  A counter of the number of read-write session transitions.
 
-**session_connects_readonly**
-  A counter of the number of successful read-only session connection operations
+**session_connected_read_only**
+  A counter of the number of read-only session transitions.
 
-**session_auth_failures**
-  A counter of the number of session authentication failures
+**session_no_sync_connected**
+  Unused (should always be 0).
 
-**session_disconnects**
-  A counter of the number of session disconnections
+**session_sasl_authenticated**
+  A counter of the number of sessions upgraded to SASL.
 
-**session_expirations**
-  A counter of the number of session expirations
+**session_auth_failed**
+  A counter of the number of session authentication failures.
+
+**session_disconnected**
+  A counter of the number of temporary session disconnects.
+
+**session_expired**
+  A counter of the number of session expirations.

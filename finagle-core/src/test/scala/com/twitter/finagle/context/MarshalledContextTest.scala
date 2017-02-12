@@ -1,17 +1,15 @@
 package com.twitter.finagle.context
 
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import com.twitter.util.{Await, Future, Promise, Return, Throw}
 import com.twitter.io.Buf
+import com.twitter.util.{Return, Throw}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
+class MarshalledContextTest extends AbstractContextTest {
   val ctx = new MarshalledContext
 
-  val a = new ctx.Key[String] {
-    val marshalId = Buf.Utf8("a.key")
+  val a = new ctx.Key[String]("a.key") {
     def marshal(value: String) = Buf.Utf8(value)
     def tryUnmarshal(buf: Buf) = buf match {
       case Buf.Utf8(value) => Return(value)
@@ -19,8 +17,7 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
-  val b = new ctx.Key[Int] {
-    val marshalId = Buf.Utf8("b.key")
+  val b = new ctx.Key[Int]("b.key") {
     def marshal(value: Int) = Buf.U32BE(value)
     def tryUnmarshal(buf: Buf) = buf match {
       case Buf.U32BE(value, Buf.Empty) => Return(value)
@@ -28,71 +25,80 @@ class MarshalledContextTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
+  test("Translucency: pass through, replace") {
+    ctx.let(b, 333) {
+      ctx.letUnmarshal(Seq(Buf.Utf8("bleep") -> Buf.Utf8("bloop"))) {
+        assert(ctx.contains(b))
+        assert(ctx.marshal().toMap ==  Map(
+          Buf.Utf8("b.key") -> Buf.U32BE(333),
+          Buf.Utf8("bleep") -> Buf.Utf8("bloop")))
+      }
+
+      ctx.letUnmarshal(Seq(Buf.Utf8("bleep") -> Buf.Utf8("NOPE"))) {
+        assert(ctx.marshal().toMap ==  Map(
+          Buf.Utf8("b.key") -> Buf.U32BE(333),
+          Buf.Utf8("bleep") -> Buf.Utf8("NOPE")))
+      }
+    }
+  }
+
+
+
   test("Only marshal the most recent binding for a given key") {
-   var env = ctx.Empty: ctx.Env
-   env = env.bound(a, "ok")
-   assert(ctx.marshal(env).toMap === Map(
-     Buf.Utf8("a.key") -> Buf.Utf8("ok")))
 
-   env = env.bound(b, 123)
-   assert(ctx.marshal(env).toMap === Map(
-     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
-     Buf.Utf8("b.key") -> Buf.U32BE(123)))
-   env = env.bound(b, 321)
-   assert(ctx.marshal(env).toMap === Map(
-     Buf.Utf8("a.key") -> Buf.Utf8("ok"),
-     Buf.Utf8("b.key") -> Buf.U32BE(321)))
+    ctx.letUnmarshal(Seq(a.marshalId -> Buf.Utf8("bloop"))) {
+      assert(ctx.get(a) == Some("bloop"))
+      assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("bloop")))
+
+      ctx.letUnmarshal(Seq(a.marshalId -> Buf.Utf8("ok"))) {
+        assert(ctx.get(a) == Some("ok"))
+        assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("ok")))
+      }
+
+      ctx.let(a, "ok") {
+        assert(ctx.get(a) == Some("ok"))
+        assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("ok")))
+      }
+    }
   }
 
-  test("Translucency: pass through, shadow") {
-    var env = ctx.Empty: ctx.Env
-    
-    env = env.bound(b, 333)
-    env = ctx.Translucent(env, Buf.Utf8("bleep"), Buf.Utf8("bloop"))
-    assert(env.contains(b))
-    assert(ctx.marshal(env).toMap === Map(
-      Buf.Utf8("b.key") -> Buf.U32BE(333),
-      Buf.Utf8("bleep") -> Buf.Utf8("bloop")))
-
-    env = ctx.Translucent(env, Buf.Utf8("bleep"), Buf.Utf8("NOPE"))
-    assert(ctx.marshal(env).toMap === Map(
-      Buf.Utf8("b.key") -> Buf.U32BE(333),
-      Buf.Utf8("bleep") -> Buf.Utf8("NOPE")))
-  }
-  
   test("Translucency: convert ok") {
-    var env = ctx.Empty: ctx.Env
-    
-    env = ctx.Translucent(env, Buf.Utf8("b.key"), Buf.U32BE(30301952))
-    assert(env.contains(b))
-    assert(env(b) === 30301952)
-    assert(ctx.marshal(env).toMap === Map(
-      Buf.Utf8("b.key") -> Buf.U32BE(30301952)))
+    val number = 30301952
+    ctx.letUnmarshal(Seq(Buf.Utf8("b.key") -> Buf.U32BE(number))) {
+      assert(ctx.contains(b))
+      assert(ctx.get(b) == Some(number))
+
+      assert(ctx.marshal().toMap == Map(
+        Buf.Utf8("b.key") -> Buf.U32BE(30301952)))
+    }
   }
-  
+
   test("Translucency: convert fail") {
-    var env = ctx.Empty: ctx.Env
-    
-    env = ctx.Translucent(env, Buf.Utf8("b.key"), Buf.U64BE(30301952))
-    assert(!env.contains(b))
-    // We still pass the context through unmolested; I'm not sure this
-    // is the right thing to do.
-    assert(ctx.marshal(env).toMap === Map(
-      Buf.Utf8("b.key") -> Buf.U64BE(30301952)))
+    val number = 30301952
+    // This fails because the buffer will be 8 bytes and
+    // the unmarshal logic requires strictly 4 bytes.
+    ctx.letUnmarshal(Seq(Buf.Utf8("b.key") -> Buf.U64BE(number))) {
+      assert(!ctx.contains(b))
+      assert(ctx.marshal().toMap == Map(
+        Buf.Utf8("b.key") -> Buf.U64BE(number)))
+    }
   }
 
   test("Unmarshal") {
-    var env = ctx.Empty
-      .bound(a, "ok")
-      .bound(b, 123)
-      .bound(a, "notok")
+    ctx.let(Seq(ctx.KeyValuePair(a, "ok"), ctx.KeyValuePair(b, 123), ctx.KeyValuePair(a, "notok"))) {
+      val roundTrip = ctx.doUnmarshal(Map.empty, ctx.marshal())
 
-    val env2 = ctx.unmarshal(ctx.marshal(env))
+      def checkKey(key: ctx.Key[_]): Unit = {
+        roundTrip(key.marshalId) match {
+          case t: ctx.Translucent => assert(t.unmarshal(key) == ctx.get(key))
+          case other => fail(s"Unexpected structure: $other")
+        }
+      }
 
-    assert(env(a) === env2(a))
-    assert(env(b) === env2(b))
+      checkKey(a)
+      checkKey(b)
 
-    assert(ctx.marshal(env) === ctx.marshal(env2))
+      assert(ctx.marshal(roundTrip) == ctx.marshal())
+    }
   }
-
 }

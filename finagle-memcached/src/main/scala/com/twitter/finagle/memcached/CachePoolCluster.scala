@@ -8,15 +8,26 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, Resolver, Addr, WeightedInetSocketAddress}
+import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
-import com.twitter.finagle.{Group, Resolver}
-import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable
+
+object CacheNode {
+
+  /**
+   * Utility method for translating a `CacheNode` to an `Address`
+   * (used when constructing a `Name` representing a `Cluster`).
+   */
+  private[memcached] val toAddress: CacheNode => Address = {
+    case CacheNode(host, port, weight, key) =>
+      val metadata = CacheNodeMetadata.toAddrMetadata(CacheNodeMetadata(weight, key))
+      Address.Inet(new InetSocketAddress(host, port), metadata)
+  }
+}
 
 // Type definition representing a cache node
 case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None) extends SocketAddress {
@@ -41,23 +52,33 @@ class TwitterCacheResolver extends Resolver {
     arg.split("!") match {
       // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
-        val group = CacheNodeGroup(hosts) map {
-          case node: CacheNode => node: SocketAddress
-        }
-        group.set map { newSet => Addr.Bound(newSet) }
+        CacheNodeGroup(hosts).set.map(toUnresolvedAddr)
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
       case Array(zkHosts, path) =>
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
         val group = CacheNodeGroup.newZkCacheNodeGroup(
-          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path)
-        ) map { case c: CacheNode => c: SocketAddress }
-        group.set map { newSet => Addr.Bound(newSet) }
+          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path))
+
+        val underlyingSizeGauge = ClientStatsReceiver.scope(scheme).scope(path).addGauge("underlyingPoolSize") {
+          group.members.size
+        }
+        group.set.map(toUnresolvedAddr)
 
       case _ =>
         throw new TwitterCacheResolverException(
           "Invalid twcache format \"%s\"".format(arg))
     }
+  }
+
+  private def toUnresolvedAddr(g: Set[CacheNode]): Addr = {
+    val set: Set[Address] = g.map {
+      case CacheNode(host, port, weight, key) =>
+        val ia = InetSocketAddress.createUnresolved(host, port)
+        val metadata = CacheNodeMetadata(weight, key)
+        Address.Inet(ia, CacheNodeMetadata.toAddrMetadata(metadata))
+    }
+    Addr.Bound(set)
   }
 }
 
@@ -75,31 +96,51 @@ object CacheNodeGroup {
         case Array(host, port, weight, key) => (host, port.toInt, weight.toInt, Some(key))
       }
 
-    newStaticGroup(hostSeq map {
+    newStaticGroup(hostSeq.map {
       case (host, port, weight, key) => new CacheNode(host, port, weight, key)
-    } toSet)
+    }.toSet)
   }
 
   def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
     case node: CacheNode => node
-
-    // TODO: should we use the weights propagated here? The weights passed
-    // by WeightedInetSocketAddress are doubles -- should we discretize these?
-    case WeightedInetSocketAddress(ia, weight)
-    if useOnlyResolvedAddress && !ia.isUnresolved =>
+    // Note: we ignore weights here
+    case ia: InetSocketAddress if useOnlyResolvedAddress && !ia.isUnresolved =>
       //Note: unresolvedAddresses won't be added even if they are able
       // to be resolved after added
-      new CacheNode(ia.getHostName, ia.getPort, 1,
-        Some(ia.getAddress.getHostAddress + ":" + ia.getPort))
-    case WeightedInetSocketAddress(ia, weight) if !useOnlyResolvedAddress =>
+      val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+      new CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+    case ia: InetSocketAddress if !useOnlyResolvedAddress =>
       new CacheNode(ia.getHostName, ia.getPort, 1, None)
   }
 
-  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet toSeq:_*)
+  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet.toSeq:_*)
 
   def newZkCacheNodeGroup(
     path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver
-  ) = new ZookeeperCacheNodeGroup(zkPath = path, zkClient = zkClient, statsReceiver = statsReceiver)
+  ): Group[CacheNode] = {
+    new ZkGroup(new ServerSetImpl(zkClient, path), path) collect {
+      case inst if inst.getStatus == ALIVE =>
+        val ep = inst.getServiceEndpoint
+        val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
+        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
+    }
+  }
+
+  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) = new Group[CacheNode] {
+    protected[finagle] val set: Var[Set[CacheNode]] = va map {
+      case Addr.Bound(addrs, _) =>
+        addrs.collect {
+          case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
+            CacheNode(ia.getHostName, ia.getPort, weight, key)
+          case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
+            val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+            CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+          case Address.Inet(ia, _) if !useOnlyResolvedAddress=>
+            CacheNode(ia.getHostName, ia.getPort, 1, None)
+        }
+      case _ => Set[CacheNode]()
+    }
+  }
 }
 
 /**
@@ -114,6 +155,7 @@ object CachePoolCluster {
 
   /**
    *  Cache pool based on a static list
+   *
    * @param cacheNodeSet static set of cache nodes to construct the cluster
    */
   def newStaticCluster(cacheNodeSet: Set[CacheNode]) = new StaticCachePoolCluster(cacheNodeSet)
@@ -194,7 +236,6 @@ trait CachePoolCluster extends Cluster[CacheNode] {
   }
 }
 
-
 /**
  * Cache pool config data object
  */
@@ -215,6 +256,7 @@ case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = fal
 
 /**
  *  Cache pool based on a static list
+ *
  * @param cacheNodeSet static set of cache nodes to construct the cluster
  */
 class StaticCachePoolCluster(cacheNodeSet: Set[CacheNode]) extends CachePoolCluster {
@@ -332,73 +374,6 @@ class ZookeeperCachePoolCluster private[memcached](
           // this should not happen in general as this code generally is only for first time pool
           // manager initialization
           waitForClusterComplete(currentSet - node, expectedSize, tail)
-      }
-    }
-  }
-}
-
-/**
- * Zookeeper based cache node group with a serverset as the underlying pool.
- * It will monitor the underlying serverset changes and report the detected underlying pool size.
- * It will monitor the serverset parent node for cache pool config data, cache node group
- * update will be triggered whenever cache config data change event happens.
- *
- * @param zkPath the zookeeper path representing the cache pool
- * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
- * @param statsReceiver Optional, the destination to report the stats to
- */
-class ZookeeperCacheNodeGroup(
-  protected val zkPath: String,
-  protected val zkClient: ZooKeeperClient,
-  protected val statsReceiver: StatsReceiver = NullStatsReceiver
-) extends Group[CacheNode] with ZookeeperStateMonitor {
-
-  protected[finagle] val set = Var(Set[CacheNode]())
-
-  @volatile private var detectKeyRemapping = false
-
-  private val zkGroup =
-    new ZkGroup(new ServerSetImpl(zkClient, zkPath), zkPath) collect {
-      case inst if inst.getStatus == ALIVE =>
-        val ep = inst.getServiceEndpoint
-        val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
-        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
-    }
-
-  private[this] val underlyingSizeGauge = statsReceiver.addGauge("underlyingPoolSize") {
-    zkGroup.members.size
-  }
-
-  def applyZKData(data: Array[Byte]) {
-    if(data != null) {
-      val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
-
-      detectKeyRemapping = cachePoolConfig.detectKeyRemapping
-
-      // apply the cache pool config to the cluster
-      val expectedGroupSize = cachePoolConfig.cachePoolSize
-      if (expectedGroupSize != zkGroup.members.size)
-        throw new IllegalStateException("Underlying group size not equal to expected size")
-
-      set() = zkGroup.members
-    }
-  }
-
-  // when enabled, monitor and apply new members in case of pure cache node key remapping
-  override def applyZKChildren(children: List[String]) = if (detectKeyRemapping) {
-    val newMembers = zkGroup.members
-    if (newMembers.size != children.size)
-      throw new IllegalStateException("Underlying children size not equal to expected children size")
-
-    if (newMembers.size == members.size) {
-      val removed = (members &~ newMembers)
-      val added = (newMembers &~ members)
-
-      // pick up the diff only if new members contains exactly the same set of cache node keys,
-      // e.g. certain cache node key is re-assigned to another host
-      if (removed.forall(_.key.isDefined) && added.forall(_.key.isDefined) &&
-          removed.size == added.size && removed.map(_.key.get) == added.map(_.key.get)) {
-        set() = newMembers
       }
     }
   }

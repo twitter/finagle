@@ -36,8 +36,26 @@ object Listener {
    * @param value An option indicating the backlog size. If None,
    * the implementation default is used.
    */
-  case class Backlog(value: Option[Int])
-  implicit object Backlog extends Stack.Param[Backlog] {
-    val default = Backlog(None)
+  case class Backlog(value: Option[Int]) {
+    def mk(): (Backlog, Stack.Param[Backlog]) =
+      (this, Backlog.param)
+  }
+  object Backlog {
+    implicit val param = Stack.Param(Backlog(None))
+  }
+
+  /**
+   * Configures the traffic class to be used servers.
+   *
+   * @param value `None` indicates no class specified. When `Some`, is an opaque
+   * identifier and its meaning and interpretation are implementation specific.
+   * Currently used to configure [[java.net.StandardSocketOptions.IP_TOS]].
+   */
+  case class TrafficClass(value: Option[Int]) {
+    def mk(): (TrafficClass, Stack.Param[TrafficClass]) =
+      (this, TrafficClass.param)
+  }
+  object TrafficClass {
+    implicit val param = Stack.Param(TrafficClass(None))
   }
 }

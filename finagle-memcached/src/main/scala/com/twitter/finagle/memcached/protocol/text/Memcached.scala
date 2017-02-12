@@ -1,29 +1,29 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import client.DecodingToResponse
-import client.{Decoder => ClientDecoder}
-import server.DecodingToCommand
-import server.{Decoder => ServerDecoder}
-import com.twitter.io.Charsets.Utf8
+import com.twitter.finagle.netty3.codec.{FrameDecoderHandler, BufCodec}
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.io.Buf
 import org.jboss.netty.channel._
 import scala.collection.immutable
 
+@deprecated(message = "Use `com.twitter.finagle.Memcached.client to create clients`", since = "2016-12-22")
 object Memcached {
-  def apply(stats: StatsReceiver = NullStatsReceiver) = new Memcached(stats)
+  def apply(): Memcached = new Memcached()
   def get() = apply()
 }
 
 object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
+  import com.twitter.finagle.memcached.protocol.text.client._
+
   def getPipeline() = {
     val pipeline = Channels.pipeline()
 
-    pipeline.addLast("decoder", new ClientDecoder)
+    pipeline.addLast("bufCodec", new BufCodec)
+    pipeline.addLast("framer", new FrameDecoderHandler(new ClientFramer))
+    pipeline.addLast("decoder", new DecodingHandler(new ClientDecoder))
     pipeline.addLast("decoding2response", new DecodingToResponse)
 
     pipeline.addLast("encoder", new Encoder)
@@ -33,15 +33,15 @@ object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
 }
 
 object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
-  private val storageCommands = collection.Set[ChannelBuffer](
-    "set", "add", "replace", "append", "prepend")
+  import com.twitter.finagle.memcached.protocol.text.server._
+  import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 
   def getPipeline() = {
     val pipeline = Channels.pipeline()
 
-  //        pipeline.addLast("exceptionHandler", new ExceptionHandler)
-
-    pipeline.addLast("decoder", new ServerDecoder(storageCommands))
+    pipeline.addLast("bufCodec", new BufCodec)
+    pipeline.addLast("framer", new FrameDecoderHandler(new ServerFramer(StorageCommands)))
+    pipeline.addLast("decoder", new DecodingHandler(new ServerDecoder(StorageCommands)))
     pipeline.addLast("decoding2command", new DecodingToCommand)
 
     pipeline.addLast("encoder", new Encoder)
@@ -49,9 +49,10 @@ object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
     pipeline
   }
 }
-class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
 
-  def this() = this(NullStatsReceiver)
+@deprecated(message = "Use `com.twitter.finagle.Memcached.client to create clients`", since = "2016-12-22")
+class Memcached extends CodecFactory[Command, Response] {
+
   def server = Function.const {
     new Codec[Command, Response] {
       def pipelineFactory = MemcachedServerPipelineFactory
@@ -63,12 +64,14 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
       def pipelineFactory = MemcachedClientPipelineFactory
 
       // pass every request through a filter to create trace data
-      override def prepareConnFactory(underlying: ServiceFactory[Command, Response]) =
-        new MemcachedLoggingFilter(stats) andThen underlying
+      override def prepareConnFactory(underlying: ServiceFactory[Command, Response], params: Stack.Params) =
+        new MemcachedLoggingFilter(params[param.Stats].statsReceiver).andThen(underlying)
 
-      override def newTraceInitializer = MemcachedTraceInitializer.Module
+      override def protocolLibraryName: String = Memcached.this.protocolLibraryName
     }
   }
+
+  override val protocolLibraryName: String = "memcached"
 }
 
 /**
@@ -87,16 +90,15 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
         case Values(values) =>
           command match {
             case cmd: RetrievalCommand =>
-              val keys = immutable.Set(cmd.keys map { _.toString(Utf8) }: _*)
+              val keys: immutable.Set[String] = immutable.Set(cmd.keys map { case Buf.Utf8(s) => s }: _*)
               val hits = values.map {
                 case value =>
-                  Trace.recordBinary(value.key.toString(Utf8), "Hit")
-                  value.key.toString(Utf8)
+                  val Buf.Utf8(keyStr) = value.key
+                  Trace.recordBinary(keyStr, "Hit")
+                  keyStr
               }
-              val misses = keys -- hits
-              misses foreach { k =>
-                Trace.recordBinary(k.toString(Utf8), "Miss")
-              }
+              val misses: immutable.Set[String] = keys -- hits
+              misses foreach { k: String => Trace.recordBinary(k, "Miss") }
               case _ =>
           }
         case _  =>

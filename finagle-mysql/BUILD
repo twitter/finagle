@@ -1,13 +1,12 @@
-maven_layout()
-
-jar_library(name='finagle-mysql',
+target(
   dependencies=[
     'finagle/finagle-mysql/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
+    'finagle/finagle-mysql/src/test/java',
     'finagle/finagle-mysql/src/test/scala'
   ]
 )

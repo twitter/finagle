@@ -2,8 +2,9 @@ package com.twitter.finagle.memcached.util
 
 import collection.mutable.ArrayBuffer
 import com.google.common.base.Strings
-import com.twitter.io.Charsets
+import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ChannelBufferIndexFinder}
+import scala.language.implicitConversions
 
 private[finagle] object ChannelBufferUtils {
   private val FIND_SPACE = new ChannelBufferIndexFinder() {
@@ -19,7 +20,7 @@ private[finagle] object ChannelBufferUtils {
   // Per memcached protocol, control characters and whitespace cannot be in the key
   // https://github.com/memcached/memcached/blob/master/doc/protocol.txt
   // But both memcached and twemcache are not strictly enforcing this rule currently,
-  // we are relaxing the rules here to only eliminita ' '(ws), \r, \n and \0, to
+  // we are relaxing the rules here to only eliminate ' '(ws), \r, \n and \0, to
   // make it compatible with our previous validation logic
   val FIND_INVALID_KEY_CHARACTER = new ChannelBufferIndexFinder() {
     def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
@@ -27,32 +28,59 @@ private[finagle] object ChannelBufferUtils {
       if (buffer.writerIndex < enoughBytesForDelimeter) return false
 
       val control = buffer.getByte(guessedIndex)
-      control == '\0' || control == '\n' || control == '\r' || control == ' '
+      control == '\u0000' || control == '\n' || control == '\r' || control == ' '
     }
   }
 
-  class RichChannelBuffer(buffer: ChannelBuffer) {
-    def matches(string: String) = buffer.toString(Charsets.Utf8).matches(string)
-    def toInt = toString.toInt
-    def toLong = toString.toLong
-    override def toString = buffer.toString(Charsets.Utf8)
-    def size = buffer.writerIndex() - buffer.readerIndex()
+  private val Byte0 = '0'.toByte
+
+  class RichChannelBuffer(val buffer: ChannelBuffer) extends AnyVal {
+    /**
+     * Converts `buffer` to a positive integer.
+     *
+     * We assume an encoding which corresponds with ASCII for the valid range
+     * `'0'.toByte` (48) through `'9'.toByte` (57).
+     *
+     * This conversion can fail if: the buffer is empty, too long,
+     * or the buffer contains a byte `b` where `48 <= b <= 57` is false.
+     */
+    def toInt: Int = {
+      val off = buffer.readerIndex()
+      val len = buffer.readableBytes()
+      if (len == 0)
+        throw new NumberFormatException("No readable bytes")
+      if (len > 10)
+        throw new NumberFormatException("Buffer is larger than max int value")
+
+      var sum = 0
+      var i = 0
+      while (i < len) {
+        val digit = buffer.getByte(off + i) - Byte0
+        if (digit < 0 || digit > 9)
+          throw new NumberFormatException(s"Not an int: $toString")
+        sum *= 10
+        sum += digit
+        i += 1
+      }
+      if (sum < 0)
+        throw new NumberFormatException(s"Int overflow: $toString")
+      sum
+    }
+
+    override def toString: String = buffer.toString(UTF_8)
 
     def split: Seq[ChannelBuffer] =
       split(FIND_SPACE, 1)
 
-    def split(delimiter: String): Seq[ChannelBuffer] =
-      split(stringToChannelBufferIndexFinder(delimiter), delimiter.size)
-
     def split(indexFinder: ChannelBufferIndexFinder, delimiterLength: Int): Seq[ChannelBuffer] = {
-      val tokens = new ArrayBuffer[ChannelBuffer]
+      val tokens = new ArrayBuffer[ChannelBuffer](5)
       var scratch = buffer
       while (scratch.capacity > 0) {
         val tokenLength = scratch.bytesBefore(indexFinder)
 
         if (tokenLength < 0) {
           tokens += scratch.copy
-          scratch = scratch.slice(0, 0)
+          scratch = ChannelBuffers.EMPTY_BUFFER
         } else {
           tokens += scratch.slice(0, tokenLength).copy
           scratch = scratch.slice(
@@ -78,37 +106,36 @@ private[finagle] object ChannelBufferUtils {
   def channelBufferToString(channelBuffer: ChannelBuffer): String =
     new String(channelBufferToBytes(channelBuffer))
 
-  implicit def channelBufferToRichChannelBuffer(buffer: ChannelBuffer) =
+  implicit def channelBufferToRichChannelBuffer(buffer: ChannelBuffer): RichChannelBuffer =
     new RichChannelBuffer(buffer)
 
-  implicit def stringToChannelBuffer(string: String) =
+  implicit def stringToChannelBuffer(string: String): ChannelBuffer =
     if(Strings.isNullOrEmpty(string)) null else {
-      ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
+      ChannelBuffers.copiedBuffer(string, UTF_8)
     }
 
-  implicit def seqOfStringToSeqOfChannelBuffer(strings: Seq[String]) =
+  implicit def seqOfStringToSeqOfChannelBuffer(strings: Seq[String]): Seq[ChannelBuffer] =
     if (strings == null) null else {
       strings.map { string =>
         if(Strings.isNullOrEmpty(string)) null else {
-          ChannelBuffers.copiedBuffer(string, Charsets.Utf8)
+          ChannelBuffers.copiedBuffer(string, UTF_8)
         }
       }
     }
 
-  implicit def stringToByteArray(string: String) =
+  implicit def stringToByteArray(string: String): Array[Byte] =
     string.getBytes
 
   implicit def stringToChannelBufferIndexFinder(string: String): ChannelBufferIndexFinder =
     new ChannelBufferIndexFinder {
       def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
-        val array = string.toArray
-        var i: Int = 0
-        while (i < string.size) {
-          if (buffer.getByte(guessedIndex + i) != array(i).toByte)
+        var i = 0
+        while (i < string.length) {
+          if (buffer.getByte(guessedIndex + i) != string.charAt(i).toByte)
             return false
           i += 1
         }
-        return true
+        true
       }
     }
 }

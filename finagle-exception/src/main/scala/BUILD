@@ -1,4 +1,4 @@
-scala_library(name='scala',
+scala_library(
   provides = scala_artifact(
     org = 'com.twitter',
     name = 'finagle-exception',
@@ -7,14 +7,14 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
-    '3rdparty:thrift-0.5.0',
-    'finagle/finagle-core',
+    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-exception/src/main/thrift:thrift-scala',
     'finagle/finagle-thrift',
     'util/util-app',
     'util/util-codec',
-    'util/util-core',
-    'finagle/finagle-exception/src/main/thrift:thrift-scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-exception/src/main/resources'],
+  fatal_warnings=True,
 )

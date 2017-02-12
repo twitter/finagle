@@ -1,32 +1,39 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.base.Supplier
-import com.twitter.common.stats.{Percentile, Stats}
+import com.twitter.common.stats.{Percentile, Stats => FStats}
+import com.twitter.util.registry.GlobalRegistry
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
-  val repr = Stats.STATS_PROVIDER
+  GlobalRegistry.get.put(
+    Seq("stats", "commons_stats", "counters_latched"),
+    "false")
+
+  val repr = FStats.STATS_PROVIDER
 
   @volatile private[this] var stats = Map.empty[Seq[String], Stat]
   @volatile private[this] var counters = Map.empty[Seq[String], Counter]
 
-  private[this] def variableName(name: Seq[String]) = name mkString "_"
+  override def toString: String = "CommonsStatsReceiver"
 
-  protected[this] def registerGauge(name: Seq[String], f: => Float) {
-    Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
-      def get = new java.lang.Float(f)
+  private[this] def variableName(name: Seq[String]): String = name.mkString("_")
+
+  protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = {
+    FStats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
+      def get: java.lang.Float = new java.lang.Float(f)
     })
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]) {
+  protected[this] def deregisterGauge(name: Seq[String]): Unit = {
     // not implemented in commons
   }
 
-  def counter(name: String*) = {
+  def counter(name: String*): Counter = {
     if (!counters.contains(name)) synchronized {
       if (!counters.contains(name)) {
         val counter = new Counter {
-          private[this] val underlying = Stats.exportLong(variableName(name))
-          def incr(delta: Int) { underlying.addAndGet(delta) }
+          private[this] val underlying = FStats.exportLong(variableName(name))
+          def incr(delta: Int): Unit = underlying.addAndGet(delta)
         }
 
         counters += (name -> counter)
@@ -36,7 +43,7 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     counters(name)
   }
 
-  def stat(name: String*) = {
+  def stat(name: String*): Stat = {
     if (!stats.contains(name)) synchronized {
       if (!stats.contains(name)) {
         val stat = new Stat {

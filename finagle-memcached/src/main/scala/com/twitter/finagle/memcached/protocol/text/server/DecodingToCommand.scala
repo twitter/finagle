@@ -1,31 +1,34 @@
 package com.twitter.finagle.memcached.protocol.text.server
 
 import scala.Function.tupled
-import com.twitter.finagle.memcached.protocol._
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.{copiedBuffer, hexDump}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.memcached.util.ParserUtils
-import com.twitter.conversions.time._
-import com.twitter.util.Time
+
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
+
+import com.twitter.conversions.time._
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.util.Bufs.RichBuf
+import com.twitter.finagle.memcached.util.ParserUtils
+import com.twitter.io.Buf
+import com.twitter.util.Time
+
 import text.{TokensWithData, Tokens}
 
 object DecodingToCommand {
-  private val NOREPLY = copiedBuffer("noreply".getBytes)
-  private val SET     = copiedBuffer("set"    .getBytes)
-  private val ADD     = copiedBuffer("add"    .getBytes)
-  private val REPLACE = copiedBuffer("replace".getBytes)
-  private val APPEND  = copiedBuffer("append" .getBytes)
-  private val PREPEND = copiedBuffer("prepend".getBytes)
-  private val GET     = copiedBuffer("get"    .getBytes)
-  private val GETS    = copiedBuffer("gets"   .getBytes)
-  private val DELETE  = copiedBuffer("delete" .getBytes)
-  private val INCR    = copiedBuffer("incr"   .getBytes)
-  private val DECR    = copiedBuffer("decr"   .getBytes)
-  private val QUIT    = copiedBuffer("quit"   .getBytes)
-  private val STATS   = copiedBuffer("stats"  .getBytes)
+  private val NOREPLY = Buf.Utf8("noreply")
+  private val SET     = Buf.Utf8("set")
+  private val ADD     = Buf.Utf8("add")
+  private val REPLACE = Buf.Utf8("replace")
+  private val APPEND  = Buf.Utf8("append")
+  private val PREPEND = Buf.Utf8("prepend")
+  private val GET     = Buf.Utf8("get")
+  private val GETS    = Buf.Utf8("gets")
+  private val DELETE  = Buf.Utf8("delete")
+  private val INCR    = Buf.Utf8("incr")
+  private val DECR    = Buf.Utf8("decr")
+  private val QUIT    = Buf.Utf8("quit")
+  private val STATS   = Buf.Utf8("stats")
+  private val CAS     = Buf.Utf8("cas")
 }
 
 abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
@@ -34,29 +37,38 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
   // Taken from memcached.c
   private val RealtimeMaxdelta = 60*60*24*30
 
-  def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef) = m match {
+  def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef): C = m match {
     case Tokens(tokens) => parseNonStorageCommand(tokens)
-    case TokensWithData(tokens, data, _/*ignore CAS*/) => parseStorageCommand(tokens, data)
+    case TokensWithData(tokens, data, casUnique) => parseStorageCommand(tokens, data, casUnique)
   }
 
-  protected def parseNonStorageCommand(tokens: Seq[ChannelBuffer]): C
-  protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer): C
+  protected def parseNonStorageCommand(tokens: Seq[Buf]): C
+  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): C
 
-  protected def validateStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
-    val expiry = tokens(2).toInt match {
-      case 0 => 0.seconds.afterEpoch
-      case unixtime if unixtime > RealtimeMaxdelta => Time.fromSeconds(unixtime)
-      case delta => delta.seconds.fromNow
-    }
+  protected def validateStorageCommand(tokens: Seq[Buf], data: Buf): (Buf, Int, Time, Buf) = {
+    val expiry = getExpiry(tokens)
     (tokens(0), tokens(1).toInt, expiry, data)
   }
 
-  protected def validateDeleteCommand(tokens: Seq[ChannelBuffer]): ChannelBuffer = {
+  protected def validateCasCommand(tokens: Seq[Buf], data: Buf, casUnique: Buf): (Buf, Int, Time, Buf, Buf) = {
+    val expiry = getExpiry(tokens)
+    (tokens(0), tokens(1).toInt, expiry, data, casUnique)
+  }
+
+  protected def validateDeleteCommand(tokens: Seq[Buf]): Buf = {
     if (tokens.size < 1) throw new ClientError("No key")
     if (tokens.size == 2 && !isDigits(tokens.last)) throw new ClientError("Timestamp is poorly formed")
     if (tokens.size > 2) throw new ClientError("Too many arguments")
 
     tokens.head
+  }
+
+  private def getExpiry(tokens: Seq[Buf]): Time = {
+    tokens(2).toInt match {
+      case 0 => Time.epoch
+      case unixtime if unixtime > RealtimeMaxdelta => Time.fromSeconds(unixtime)
+      case delta => delta.seconds.fromNow
+    }
   }
 }
 
@@ -64,7 +76,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
   import DecodingToCommand._
   import ParserUtils._
 
-  private[this] def validateArithmeticCommand(tokens: Seq[ChannelBuffer]) = {
+  private[this] def validateArithmeticCommand(tokens: Seq[Buf]) = {
     if (tokens.size < 2) throw new ClientError("Too few arguments")
     if (tokens.size == 3 && tokens.last != NOREPLY) throw new ClientError("Too many arguments")
     if (!isDigits(tokens(1))) throw new ClientError("Delta is not a number")
@@ -72,11 +84,11 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
     (tokens.head, tokens(1).toLong)
   }
 
-  private[this] def validateAnyStorageCommand(tokens: Seq[ChannelBuffer]) {
+  private[this] def validateAnyStorageCommand(tokens: Seq[Buf]) {
     if (tokens.isEmpty) throw new ClientError("No arguments specified")
   }
 
-  protected def parseStorageCommand(tokens: Seq[ChannelBuffer], data: ChannelBuffer) = {
+  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf]) = {
     validateAnyStorageCommand(tokens)
     val commandName = tokens.head
     val args = tokens.tail
@@ -86,11 +98,15 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case REPLACE   => tupled(Replace)(validateStorageCommand(args, data))
       case APPEND    => tupled(Append)(validateStorageCommand(args, data))
       case PREPEND   => tupled(Prepend)(validateStorageCommand(args, data))
-      case _         => throw new NonexistentCommand(hexDump(commandName))
+      case CAS       => {
+        val casUniqueValue = casUnique.getOrElse(throw new ServerError("checksum is missing for a CAS command"))
+        tupled(Cas)(validateCasCommand(args, data, casUniqueValue))
+      }
+      case _         => throw new NonexistentCommand(Buf.slowHexString(commandName))
     }
   }
 
-  protected def parseNonStorageCommand(tokens: Seq[ChannelBuffer]) = {
+  protected def parseNonStorageCommand(tokens: Seq[Buf]) = {
     validateAnyStorageCommand(tokens)
     val commandName = tokens.head
     val args = tokens.tail
@@ -102,8 +118,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case DECR    => tupled(Decr)(validateArithmeticCommand(args))
       case QUIT    => Quit()
       case STATS   => Stats(args)
-      case _       => throw new NonexistentCommand(hexDump(commandName))
+      case _       => throw new NonexistentCommand(Buf.slowHexString(commandName))
     }
   }
-
 }

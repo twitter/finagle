@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.NonFatal
 import java.util.logging.Level
 
 private[lease] object GarbageCollector {
@@ -9,14 +8,14 @@ private[lease] object GarbageCollector {
   val forceNewGc: () => Unit = try {
     // This is a method present in Twitter's JVMs to force
     // a minor collection.
-    val meth = classOf[System].getMethod("minorGc")
-    log.log(Level.INFO, "Found System.minorGc")
+    val meth = Class.forName("com.twitter.hotspot.System").getMethod("minorGc")
+    log.log(Level.INFO, "Found com.twitter.hotspot.System.minorGc")
     () => meth.invoke(null)
   } catch {
-    case exc: NoSuchMethodException =>
+    case exc: ClassNotFoundException =>
       log.log(
         Level.INFO,
-        "Failed to resolve System.minorGc; falling "+
+        "Failed to resolve com.twitter.hotspot.System; falling "+
           "back to full GC",
         exc)
       () => System.gc()

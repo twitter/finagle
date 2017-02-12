@@ -1,10 +1,12 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{SimpleFilter, Filter, Dtab, Service}
+import com.twitter.finagle.{Filter, Dtab, Service}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{spy, verify, atLeastOnce}
+import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
+import org.mockito.Matchers.any
+import org.scalactic.source.Position
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
@@ -16,13 +18,15 @@ class TracingFilterTest
 
   val serviceName = "bird"
   val service = Service.mk[Int, Int](Future.value)
+  val exceptingService = Service.mk[Int, Int]({ x => Future.exception(new Exception("bummer"))})
 
   var tracer: Tracer = _
   var captor: ArgumentCaptor[Record] = _
-  
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
     super.test(testName, testTags:_*) {
       tracer = spy(new NullTracer)
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
       captor = ArgumentCaptor.forClass(classOf[Record])
       Trace.letTracer(tracer) { f }
     }
@@ -35,13 +39,11 @@ class TracingFilterTest
     captor.getAllValues.asScala
   }
 
-  test("TracingFilter: should trace Finagle version") {
-    val filter = new TracingFilter[Int, Int](tracer, "tracerTest")
-    val versionKeyFound = record(filter) exists {
-      case Record(_, _, Annotation.BinaryAnnotation(key, _), _) => key == "finagle.version"
-      case _ => false
-    }
-    assert(versionKeyFound, "Finagle version wasn't traced as a binary record")
+  def recordException(filter: Filter[Int, Int, Int, Int]): Seq[Record] = {
+    val composed = filter andThen exceptingService
+    intercept[Exception] { Await.result(composed(4)) }
+    verify(tracer, atLeastOnce()).record(captor.capture())
+    captor.getAllValues.asScala
   }
 
   def testAnnotatingTracingFilter(
@@ -52,7 +54,7 @@ class TracingFilterTest
       val services = record(mkFilter("")) collect {
         case Record(_, _, Annotation.ServiceName(svc), _) => svc
       }
-      assert(services === Seq(serviceName))
+      assert(services == Seq(serviceName))
     }
 
     test(s"$prefix: should trace Finagle version") {
@@ -60,7 +62,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
           if key == s"$prefix/finagle.version" => ver
       }
-      assert(versions === Seq("1.2.3"))
+      assert(versions == Seq("1.2.3"))
     }
 
     test(s"$prefix: should trace unknown Finagle version") {
@@ -68,7 +70,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
           if key == s"$prefix/finagle.version" => ver
       }
-      assert(versions === Seq("?"))
+      assert(versions == Seq("?"))
     }
 
     def withDtab(dtab: Dtab) = Filter.mk[Int, Int, Int, Int] { (req, svc) =>
@@ -84,7 +86,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
           if key == s"$prefix/dtab.local" => dtab
       }
-      assert(dtabs === Seq(dtab.show))
+      assert(dtabs == Seq(dtab.show))
     }
 
     test(s"$prefix: should not trace empty Dtab.local") {
@@ -109,7 +111,19 @@ class TracingFilterTest
       case Record(_, _, a@Annotation.ClientSend(), _) => a
       case Record(_, _, a@Annotation.ClientRecv(), _) => a
     }
-    assert(annotations === Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
+    assert(annotations == Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
+  }
+
+  test("clnt: recv error") {
+    val annotations = recordException(mkClient()) collect {
+      case Record(_, _, a@Annotation.ClientSend(), _) => a
+      case Record(_, _, a@Annotation.ClientRecv(), _) => a
+      case Record(_, _, a@Annotation.ClientRecvError(_), _) => a
+    }
+    assert(annotations == Seq(
+      Annotation.ClientSend(),
+      Annotation.ClientRecvError("java.lang.Exception: bummer"),
+      Annotation.ClientRecv()))
   }
 
   /*
@@ -125,6 +139,6 @@ class TracingFilterTest
       case Record(_, _, a@Annotation.ServerRecv(), _) => a
       case Record(_, _, a@Annotation.ServerSend(), _) => a
     }
-    assert(annotations === Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
+    assert(annotations == Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
   }
 }

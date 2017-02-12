@@ -1,8 +1,8 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.Stack
-import com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci
+import com.twitter.finagle.mysql.Charset.Utf8_general_ci
 import com.twitter.util.{Return, StorageUnit, Throw, Try}
 
 /**

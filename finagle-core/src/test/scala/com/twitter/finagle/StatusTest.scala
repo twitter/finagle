@@ -1,24 +1,46 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Await, Future, Promise}
+import com.twitter.conversions.time._
+import com.twitter.util.{Await, Return}
 import org.junit.runner.RunWith
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class StatusTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
-  val foreverBusy = Status.Busy(Future.never)
+class StatusTest
+  extends FunSuite
+  with AssertionsForJUnit
+  with GeneratorDrivenPropertyChecks
+  with Eventually
+  with IntegrationPatience {
 
-  val status1 = Gen.oneOf(Status.Open, foreverBusy, Status.Closed)
+  val status1 = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val status2 = for (left <- status1; right <- status1) yield (left, right)
+
+  test("Status.bestOf can terminate early") {
+    val res = Status.bestOf[Function0[Status]](
+      List(() => Status.Busy, () => Status.Open, () => fail("element should not be evaluated")),
+      _.apply
+    )
+    assert(res == Status.Open)
+  }
+
+  test("Status.worstOf can terminate early") {
+    val res = Status.worstOf[Function0[Status]](
+      List(() => Status.Busy, () => Status.Closed, () => fail("element should not be evaluated")),
+      _.apply
+    )
+    assert(res == Status.Closed)
+  }
 
   // This test is borderline silly.
   test("Status.worst") {
     forAll(status2) { case (left, right) =>
       val s = Status.worst(left, right)
-      Ordering[Status].equiv(left, right) || s == Ordering[Status].max(left, right)
+      assert(Ordering[Status].equiv(left, right) || s == Ordering[Status].min(left, right))
     }
   }
 
@@ -26,52 +48,39 @@ class StatusTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPr
   test("Status.best") {
     forAll(status2) { case (left, right) =>
       val s = Status.best(left, right)
-      Ordering[Status].equiv(left, right) || s == Ordering[Status].min(left, right)
+      assert(Ordering[Status].equiv(left, right) || s == Ordering[Status].max(left, right))
     }
   }
 
-  test("Status.worst(Busy, Busy)") {
-    val p1, p2 = new Promise[Unit]
-    val Status.Busy(p3) = Status.worst(Status.Busy(p1), Status.Busy(p2))
-    assert(!p3.isDefined)
-    p1.setDone()
-    assert(!p3.isDefined)
-    p2.setDone()
-    assert(p3.isDefined)
+  test("Status.whenOpen - opens") {
+    @volatile var status: Status = Status.Busy
+    val open = Status.whenOpen(status)
+
+    assert(open.poll.isEmpty)
+
+    status = Status.Open
+    eventually { assert(open.poll == Some(Return.Unit)) }
+    Await.result(open, 5.seconds)  // no exceptions
   }
 
-  test("Status.best(Busy, Busy)") {
-    val p1, p2 = new Promise[Unit]
-    val Status.Busy(p3) = Status.best(Status.Busy(p1), Status.Busy(p2))
-    assert(!p3.isDefined)
-    p1.setDone()
-    assert(p3.isDefined)
+  test("Status.whenOpen - closes") {
+    @volatile var status: Status = Status.Busy
+    val open = Status.whenOpen(status)
+
+    assert(open.poll.isEmpty)
+
+    status = Status.Closed
+    eventually { assert(open.poll.isDefined) }
+    intercept[Status.ClosedException] { Await.result(open, 5.seconds) }
   }
-  
-  test("Status.whenOpen") {
-    val p1, p2 = new Promise[Unit]
-    var status = Seq(Status.Busy(p1), Status.Busy(p2), Status.Open)
-    val open = Status.whenOpen {
-      val Seq(hd, rest@_*) = status
-      status = rest
-      hd
-    }
-    
-    assert(!open.isDefined)
-    p1.setDone()
-    assert(!open.isDefined)
-    p2.setDone()
-    assert(open.isDefined)
-    Await.result(open)  // no exceptions
-  }
-  
+
   test("Ordering spot check") {
-    val ord = Array(Status.Closed, foreverBusy, Status.Open)
-    val idx2 = for { left <- Gen.choose(0, ord.length-1); 
+    val ord = Array(Status.Closed, Status.Busy, Status.Open)
+    val idx2 = for { left <- Gen.choose(0, ord.length-1);
       right <- Gen.choose(0, ord.length-1) } yield (left, right)
 
     forAll(idx2) { case (left, right) =>
-      Ordering[Status].compare(ord(left), ord(right)).signum == (left - right).signum
+      assert(Ordering[Status].compare(ord(left), ord(right)).signum == (left - right).signum)
     }
   }
 }

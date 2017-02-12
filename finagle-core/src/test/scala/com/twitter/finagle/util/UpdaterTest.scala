@@ -34,7 +34,7 @@ class UpdaterTest extends FunSuite {
 
     thr.start()
     first.await()
-    assert(worked === Seq(Work(0)))
+    assert(worked == Seq(Work(0)))
 
     u(Work(3))
     u(Work(10))
@@ -43,6 +43,6 @@ class UpdaterTest extends FunSuite {
     barrier.await()
     barrier.await()
     thr.join()
-    assert(worked === Seq(Work(0), Work(1)))
+    assert(worked == Seq(Work(0), Work(1)))
   }
 }

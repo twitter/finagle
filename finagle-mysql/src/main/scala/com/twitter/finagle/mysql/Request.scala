@@ -1,12 +1,12 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferWriter, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter, Packet}
+import com.twitter.io.Buf
 import java.security.MessageDigest
 import java.util.logging.Logger
-import scala.annotation.tailrec
 
 object Command {
-  val COM_NO_OP               = -1.toByte   // used internall by this client
+  val COM_NO_OP               = (-1).toByte // used internally by this client
   val COM_SLEEP               = 0x00.toByte // internal thread state
   val COM_QUIT                = 0x01.toByte // mysql_close
   val COM_INIT_DB             = 0x02.toByte // mysql_select_db
@@ -58,7 +58,7 @@ abstract class CommandRequest(override val cmd: Byte) extends Request {
  */
 class SimpleCommandRequest(command: Byte, data: Array[Byte])
   extends CommandRequest(command) {
-    val buf = Buffer(Buffer(Array(command)), Buffer(data))
+    val buf = Buf.ByteArray.Owned(Array(command)).concat(Buf.ByteArray.Owned(data))
     val toPacket = Packet(seq, buf)
 }
 
@@ -67,7 +67,14 @@ class SimpleCommandRequest(command: Byte, data: Array[Byte])
  * [[http://dev.mysql.com/doc/internals/en/com-ping.html]]
  */
 case object PingRequest
-  extends SimpleCommandRequest(Command.COM_PING, Buffer.EmptyByteArray)
+  extends SimpleCommandRequest(Command.COM_PING, Array.emptyByteArray)
+
+/**
+ * Tells the server that the client wants to close the connection.
+ * [[http://dev.mysql.com/doc/internals/en/com-quit.html]]
+ */
+case object QuitRequest
+  extends SimpleCommandRequest(Command.COM_QUIT, Array.emptyByteArray)
 
 /**
  * A UseRequest is used to change the default schema of the connection.
@@ -110,23 +117,28 @@ case class HandshakeResponse(
 ) extends Request {
   import Capability._
   override val seq: Short = 1
-  lazy val hashPassword = encryptPassword(password.getOrElse(""), salt)
+
+  lazy val hashPassword = password match {
+    case Some(p) => encryptPassword(p, salt)
+    case None => Array[Byte]()
+  }
 
   def toPacket = {
     val fixedBodySize = 34
-    val dbStrSize = database map { _.size + 1 } getOrElse(0)
-    val packetBodySize = username.getOrElse("").size + hashPassword.size + dbStrSize + fixedBodySize
-    val bw = BufferWriter(new Array[Byte](packetBodySize))
-    bw.writeInt(clientCap.mask)
-    bw.writeInt(maxPacketSize)
+    val dbStrSize = database.map { _.length + 1 }.getOrElse(0)
+    val packetBodySize =
+      username.getOrElse("").length + hashPassword.length + dbStrSize + fixedBodySize
+    val bw = MysqlBuf.writer(new Array[Byte](packetBodySize))
+    bw.writeIntLE(clientCap.mask)
+    bw.writeIntLE(maxPacketSize)
     bw.writeByte(charset)
     bw.fill(23, 0.toByte) // 23 reserved bytes - zeroed out
-    bw.writeNullTerminatedString(username.getOrElse(""), Charset(charset))
+    bw.writeNullTerminatedString(username.getOrElse(""))
     bw.writeLengthCodedBytes(hashPassword)
     if (clientCap.has(ConnectWithDB) && serverCap.has(ConnectWithDB))
-      bw.writeNullTerminatedString(database.get, Charset(charset))
+      bw.writeNullTerminatedString(database.get)
 
-    Packet(seq, bw)
+    Packet(seq, bw.owned())
   }
 
   private[this] def encryptPassword(password: String, salt: Array[Byte]) = {
@@ -146,45 +158,56 @@ case class HandshakeResponse(
   }
 }
 
+class FetchRequest(val prepareOK: PrepareOK, val numRows: Int) extends CommandRequest(Command.COM_STMT_FETCH) {
+  val stmtId = prepareOK.id
+
+  override def toPacket: Packet = {
+    val bw = MysqlBuf.writer(new Array[Byte](9))
+    bw.writeByte(cmd)
+    bw.writeIntLE(stmtId)
+    bw.writeIntLE(numRows)
+
+    Packet(seq, bw.owned())
+  }
+}
+
 /**
  * Uses the binary protocol to build an execute request for
  * a prepared statement.
  * [[http://dev.mysql.com/doc/internals/en/com-stmt-execute.html]]
  */
-case class ExecuteRequest(
-  stmtId: Int,
-  params: IndexedSeq[Any] = IndexedSeq.empty,
-  hasNewParams: Boolean = true,
-  flags: Byte = 0
+class ExecuteRequest(
+  val stmtId: Int,
+  val params: IndexedSeq[Parameter],
+  val hasNewParams: Boolean,
+  val flags: Byte
 ) extends CommandRequest(Command.COM_STMT_EXECUTE) {
     private[this] val log = Logger.getLogger("finagle-mysql")
 
-    private[this] def isNull(param: Any): Boolean = param match {
-      case null => true
-      case _ => false
-    }
-
-    private[this] def makeNullBitmap(parameters: IndexedSeq[Any]): Array[Byte] = {
+    private[this] def makeNullBitmap(parameters: IndexedSeq[Parameter]): Array[Byte] = {
       val bitmap = new Array[Byte]((parameters.size + 7) / 8)
       val ps = parameters.zipWithIndex
-      for ((p, idx) <- ps if isNull(p)) {
-        val bytePos = idx / 8
-        val bitPos = idx % 8
-        val byte = bitmap(bytePos)
-        bitmap(bytePos) = (byte | (1 << bitPos)).toByte
+      ps foreach {
+        case (Parameter.NullParameter, idx) =>
+          val bytePos = idx / 8
+          val bitPos = idx % 8
+          val byte = bitmap(bytePos)
+          bitmap(bytePos) = (byte | (1 << bitPos)).toByte
+        case _ =>
+          ()
       }
       bitmap
     }
 
-    private[this] def writeTypeCode(param: Any, writer: BufferWriter): Unit = {
-      val typeCode = Type.getCode(param)
+    private[this] def writeTypeCode(param: Parameter, writer: MysqlBufWriter): Unit = {
+      val typeCode = param.typeCode
       if (typeCode != -1)
-        writer.writeShort(typeCode)
+        writer.writeShortLE(typeCode)
       else {
         // Unsupported type. Write the error to log, and write the type as null.
         // This allows us to safely skip writing the parameter without corrupting the buffer.
         log.warning("Unknown parameter %s will be treated as SQL NULL.".format(param.getClass.getName))
-        writer.writeShort(Type.Null)
+        writer.writeShortLE(Type.Null)
       }
     }
 
@@ -192,70 +215,74 @@ case class ExecuteRequest(
      * Returns sizeof all the parameters according to
      * mysql binary encoding.
      */
-    private[this] def sizeOfParameters(parameters: IndexedSeq[Any]): Int =
-      parameters.foldLeft(0) { (sum, param) =>
-        sum + Type.sizeOf(param)
-      }
+    private[this] def sizeOfParameters(parameters: IndexedSeq[Parameter]): Int =
+      parameters.foldLeft(0)(_ + _.size)
 
     /**
      * Writes the parameter into its MySQL binary representation.
      */
-    private[this] def writeParam(param: Any, writer: BufferWriter): BufferWriter = param match {
-      case s: String      => writer.writeLengthCodedString(s)
-      case b: Boolean     => writer.writeBoolean(b)
-      case b: Byte        => writer.writeByte(b)
-      case s: Short       => writer.writeShort(s)
-      case i: Int         => writer.writeInt(i)
-      case l: Long        => writer.writeLong(l)
-      case f: Float       => writer.writeFloat(f)
-      case d: Double      => writer.writeDouble(d)
-      case b: Array[Byte] => writer.writeLengthCodedBytes(b)
-      // Dates
-      case t: java.sql.Timestamp    => writeParam(TimestampValue(t), writer)
-      case d: java.sql.Date         => writeParam(DateValue(d), writer)
-      case d: java.util.Date        => writeParam(TimestampValue(new java.sql.Timestamp(d.getTime)), writer)
-      // allows for generic binary values as params to a prepared statement.
-      case RawValue(_, _, true, bytes) => writer.writeLengthCodedBytes(bytes)
-      // allows for Value types as params to prepared statements
-      case ByteValue(b) => writer.writeByte(b)
-      case ShortValue(s) => writer.writeShort(s)
-      case IntValue(i) => writer.writeInt(i)
-      case LongValue(l) => writer.writeLong(l)
-      case FloatValue(f) => writer.writeFloat(f)
-      case DoubleValue(d) => writer.writeDouble(d)
-      case StringValue(s) => writer.writeLengthCodedString(s)
-      // skip null and unknown values
-      case _  => writer
+    private[this] def writeParam(param: Parameter, writer: MysqlBufWriter): MysqlBufWriter = {
+      param.writeTo(writer)
+      writer
     }
 
     def toPacket = {
-      val bw = BufferWriter(new Array[Byte](10))
+      val bw = MysqlBuf.writer(new Array[Byte](10))
       bw.writeByte(cmd)
-      bw.writeInt(stmtId)
+      bw.writeIntLE(stmtId)
       bw.writeByte(flags)
-      bw.writeInt(1) // iteration count - always 1
+      bw.writeIntLE(1) // iteration count - always 1
 
       val newParamsBound: Byte = if (hasNewParams) 1 else 0
+      val newParamsBoundBuf = Buf.ByteArray.Owned(Array(newParamsBound))
 
       // convert parameters to binary representation.
       val sizeOfParams = sizeOfParameters(params)
-      val values = BufferWriter(new Array[Byte](sizeOfParams))
+      val values = MysqlBuf.writer(new Array[Byte](sizeOfParams))
       params foreach { writeParam(_, values) }
 
       // encode null values in bitmap
-      val nullBitmap = makeNullBitmap(params)
+      val nullBitmap = Buf.ByteArray.Owned(makeNullBitmap(params))
 
       // parameters are appended to the end of the packet
       // only if the statement has new parameters.
       val composite = if (hasNewParams) {
-        val types = BufferWriter(new Array[Byte](params.size * 2))
+        val types = MysqlBuf.writer(new Array[Byte](params.size * 2))
         params foreach { writeTypeCode(_, types) }
-        Buffer(bw, Buffer(nullBitmap), Buffer(Array(newParamsBound)), types, values)
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          types.owned(),
+          values.owned()))
       } else {
-        Buffer(bw, Buffer(nullBitmap), Buffer(Array(newParamsBound)), values)
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          values.owned()))
       }
       Packet(seq, composite)
     }
+}
+
+object ExecuteRequest {
+  val FLAG_CURSOR_READ_ONLY = 0x01.toByte // CURSOR_TYPE_READ_ONLY
+
+  def apply(
+    stmtId: Int,
+    params: IndexedSeq[Parameter] = IndexedSeq.empty,
+    hasNewParams: Boolean = true,
+    flags: Byte = 0
+  ) = {
+    val sanitizedParams = params.map {
+      case null  => Parameter.NullParameter
+      case other => other
+    }
+    new ExecuteRequest(stmtId, sanitizedParams, hasNewParams, flags)
+  }
+
+  def unapply(executeRequest: ExecuteRequest): Option[(Int, IndexedSeq[Parameter], Boolean, Byte)] = {
+    Some((executeRequest.stmtId, executeRequest.params, executeRequest.hasNewParams, executeRequest.flags))
+  }
 }
 
 /**
@@ -265,8 +292,8 @@ case class ExecuteRequest(
  */
 case class CloseRequest(stmtId: Int) extends CommandRequest(Command.COM_STMT_CLOSE) {
   override val toPacket = {
-    val bw = BufferWriter(new Array[Byte](5))
-    bw.writeByte(cmd).writeInt(stmtId)
-    Packet(seq, bw)
+    val bw = MysqlBuf.writer(new Array[Byte](5))
+    bw.writeByte(cmd).writeIntLE(stmtId)
+    Packet(seq, bw.owned())
   }
 }

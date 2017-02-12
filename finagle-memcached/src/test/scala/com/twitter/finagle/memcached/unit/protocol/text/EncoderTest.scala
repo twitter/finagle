@@ -1,9 +1,5 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.util.ChannelBufferUtils.{
-  stringToChannelBuffer,
-  channelBufferToString
-}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.junit.runner.RunWith
@@ -11,6 +7,9 @@ import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+
+import com.twitter.finagle.memcached.util.ChannelBufferUtils.channelBufferToString
+import com.twitter.io.Buf
 
 @RunWith(classOf[JUnitRunner])
 class EncoderTest extends FunSuite with MockitoSugar {
@@ -24,38 +23,38 @@ class EncoderTest extends FunSuite with MockitoSugar {
     val encoder = new Encoder
 
     def encode(x: AnyRef) = {
-      val encoded = encoder.encode(context, channel, x).asInstanceOf[ChannelBuffer]
-      channelBufferToString(encoded)
+      val encoded = encoder.encode(context, channel, x)
+      Buf.Utf8.unapply(encoded).get
     }
 
     def encodeIsPure(x: AnyRef) = {
       val buf1 = encode(x)
       val buf2 = encode(x)
-      assert(buf1 === buf2)
+      assert(buf1 == buf2)
     }
 
     info("tokens")
-    encodeIsPure(Tokens(Seq("tok")))
+    encodeIsPure(Tokens(Seq(Buf.Utf8("tok"))))
 
     info("tokens with data")
-    encodeIsPure(TokensWithData(Seq("foo"), "bar", None))
+    encodeIsPure(TokensWithData(Seq(Buf.Utf8("foo")), Buf.Utf8("bar"), None))
 
     info("tokens with data and cas")
-    encodeIsPure(TokensWithData(Seq("foo"), "baz", Some("quux")))
+    encodeIsPure(TokensWithData(Seq(Buf.Utf8("foo")), Buf.Utf8("baz"), Some(Buf.Utf8("quux"))))
 
     info("stat lines")
     encodeIsPure(
       StatLines(
         Seq(
-          Tokens(Seq("tok1")),
-          Tokens(Seq("tok2"))
+          Tokens(Seq(Buf.Utf8("tok1"))),
+          Tokens(Seq(Buf.Utf8("tok2")))
         )
       )
     )
 
     info("value lines")
     encodeIsPure(
-      ValueLines(Seq(TokensWithData(Seq("foo"), "bar", Some("quux"))))
+      ValueLines(Seq(TokensWithData(Seq(Buf.Utf8("foo")), Buf.Utf8("bar"), Some(Buf.Utf8("quux")))))
     )
   }
 }

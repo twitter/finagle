@@ -1,25 +1,12 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
-import com.twitter.io.Buf
-import com.twitter.util.{Activity, Stopwatch, Var}
-import java.nio.charset.Charset
-import com.google.common.cache.{Cache, CacheBuilder}
+import com.twitter.finagle.util.Rng
+import com.twitter.logging.Logger
+import com.twitter.util._
 
 private[serverset2] object ServiceDiscoverer {
-  class PathCache(maxSize: Int) {
-    val entries: Cache[String, Set[Entry]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-
-    val vectors: Cache[String, Option[Vector]] = CacheBuilder.newBuilder()
-      .maximumSize(maxSize)
-      .build()
-  }
-
-  val DefaultRetrying = 5.seconds
-  val Utf8 = Charset.forName("UTF-8")
   val EndpointGlob = "/member_"
   val VectorGlob = "/vector_"
 
@@ -30,11 +17,33 @@ private[serverset2] object ServiceDiscoverer {
    * Each entry in `ents` is paired with the product of all weights for that
    * entry in `vecs`.
    */
-  def zipWithWeights(ents: Set[Entry], vecs: Set[Vector]): Set[(Entry, Double)] =
+  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] = {
     ents map { ent =>
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
       ent -> w
     }
+  }
+
+  /**
+   * ZooKeeper client health as observed by the ServiceDiscoverer.
+   */
+  private[serverset2] sealed trait ClientHealth
+  private[serverset2] object ClientHealth {
+    case object Healthy extends ClientHealth
+    case object Unhealthy extends ClientHealth
+
+    def apply(sessionState: SessionState): ClientHealth = {
+      sessionState match {
+        case SessionState.Expired | SessionState.NoSyncConnected
+             | SessionState.Unknown | SessionState.AuthFailed
+             | SessionState.Disconnected => Unhealthy
+        case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated
+            | SessionState.SyncConnected => Healthy
+      }
+    }
+  }
+
+  object EntryLookupFailureException extends Exception("All serverset member lookups failed")
 }
 
 /**
@@ -43,104 +52,149 @@ private[serverset2] object ServiceDiscoverer {
  *
  * Given a ServerSet path, [[apply]] looks up the set and returns a
  * dynamic set of (entry, weight) tuples.
+ * @param varZkSession: The active, connected zkSession. This session
+ *    may change in response to normal zookeeper changes
+ *    (such as servers restarting).
+ * @param statsReceiver: Scoped statsReceiver
+ * @param healthStabilizationEpoch: Used in stabilizing the reporting
+ *  health changes of the underlying ZkSession
  */
 private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
-  statsReceiver: StatsReceiver
+  val statsReceiver: StatsReceiver,
+  healthStabilizationEpoch: Epoch,
+  timer: Timer
 ) {
   import ServiceDiscoverer._
 
   private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
-  private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
-  private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
   private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
+  private[this] val log = Logger(getClass)
+  private[this] val retryJitter = Duration.fromSeconds(20 + Rng.threadLocal.nextInt(120))
 
-  private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
-    val elapsed = Stopwatch.start()
-    f map { rv =>
-      stat.add(elapsed().inMilliseconds)
-      rv
-    }
-  }
+  /**
+   * Monitor the session status of the ZkSession and expose to listeners whether
+   * the connection is healthy or unhealthy. Exposed for testing
+   */
+  private[serverset2] val rawHealth: Var[ClientHealth] = Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+    @volatile var stateListener = Closable.nop
 
-  private[this] def dataOf(
-    pattern: String,
-    readStat: Stat
-  ): Activity[Seq[(String, Option[Buf])]] = actZkSession flatMap { zkSession =>
-    zkSession.globOf(pattern) flatMap { paths =>
-      timedOf(readStat)(zkSession.collectImmutableDataOf(paths))
-    }
-  }
-
-  private[this] def entriesOf(
-    path: String,
-    cache: PathCache
-  ): Activity[Set[Entry]] = {
-    dataOf(path + EndpointGlob, zkEntriesReadStat) flatMap { pathmap =>
-      timedOf[Set[Entry]](zkEntriesParseStat) {
-        val endpoints = pathmap flatMap {
-          case (_, null) => None // no data
-          case (path, Some(Buf.Utf8(data))) =>
-            cache.entries.getIfPresent(path) match {
-              case null =>
-                val ents = Entry.parseJson(path, data)
-                val entset = ents.toSet
-                cache.entries.put(path, entset)
-                entset
-              case ent => ent
-            }
-
-          case _ => None  // Invalid encoding
+    val sessionChanges = varZkSession.changes.dedup.respond { zk =>
+      // When the zk session changes, we need to stop observing changes
+      // to the previous session.
+      synchronized {
+        stateListener.close()
+        stateListener = zk.state.changes.dedup.respond {
+          case WatchState.SessionState(state) =>
+            log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
+            u() = ClientHealth(state)
+          case _ => // don't need to update on non-sessionstate events
         }
-        Activity.value(endpoints.toSet)
       }
     }
+
+    Closable.all(sessionChanges,
+      Closable.make(t => stateListener.close(t))
+    )
   }
 
-  private[this] def vectorsOf(
+  /**
+   * Monitor the session state of the ZkSession within a HealthStabilizer
+   * which only reports unhealthy when the rawHealth has been unhealthy for
+   * a long enough time (as defined by the stabilization epoch).
+   */
+  private[serverset2] val health: Var[ClientHealth] =
+    HealthStabilizer(rawHealth, healthStabilizationEpoch, statsReceiver)
+
+  /**
+   * Activity to keep a hydrated list of Entrys or Vectors for a given ZK path.
+   * protected for testing
+   */
+  protected[this] def entitiesOf[Entity](
     path: String,
-    cache: PathCache
-  ): Activity[Set[Vector]] = {
-    dataOf(path + VectorGlob, zkVectorsReadStat) flatMap { pathmap =>
-      timedOf[Set[Vector]](zkVectorsParseStat) {
-        val vectors = pathmap flatMap {
-          case (path, None) =>
-            cache.vectors.getIfPresent(path) match {
-              case null => None
-              case vec => vec
-            }
-          case (path, Some(Buf.Utf8(data))) =>
-            cache.vectors.getIfPresent(path) match {
-              case null =>
-                val vec = Vector.parseJson(data)
-                cache.vectors.put(path, vec)
-                vec
-              case vec => vec
-            }
-          case _ => None // Invalid encoding
-        }
-        Activity.value(vectors.toSet)
+    cache: ZkNodeDataCache[Entity],
+    readStat: Stat,
+    glob: String
+  ): Activity[Seq[Entity]] = {
+    actZkSession.flatMap { case zkSession =>
+      cache.setSession(zkSession)
+      zkSession.globOf(path + glob).flatMap { paths =>
+        // Remove any cached entries not surfaced by globOf from our cache
+        (cache.keys &~ paths).foreach(cache.remove)
+        bulkResolveMemberData(path, paths.toSeq, cache, readStat)
       }
     }
   }
 
   /**
+    * Resolve all child paths of a watch. If all resolutions fail,
+    * schedule a retry for later.
+    */
+  private[this] def bulkResolveMemberData[Entity](
+    parentPath: String,
+    paths: Seq[String],
+    cache: ZkNodeDataCache[Entity],
+    readStat: Stat
+  ): Activity[Seq[Entity]] =
+    Activity(Var.async[Activity.State[Seq[Entity]]](Activity.Pending) { u =>
+      @volatile var closed = false
+
+      def loop(): Future[Unit] = {
+        if (!closed) {
+          @volatile var seenFailures = false
+          Stat.timeFuture(readStat) {
+            Future.collectToTry(paths.map { path =>
+              // note if any failed
+              cache.get(path).onFailure { _ => seenFailures = true }
+            })
+              // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
+              // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])
+              .map(tries => tries.collect { case Return(e) => e }.flatten)
+              .map { seq =>
+                // if we have *any* results or no-failure, we consider it a success
+                if (seenFailures && seq.isEmpty) u() = Activity.Failed(EntryLookupFailureException)
+                else u() = Activity.Ok(seq)
+              }.ensure {
+                if (seenFailures) {
+                  log.warning(s"Failed to read all data for $parentPath. Retrying in $retryJitter")
+                  timer.doLater(retryJitter) { loop() }
+                }
+              }
+          }
+        }
+
+        Future.Done
+      }
+
+      loop()
+
+      Closable.make { _ =>
+        closed = true
+        Future.Done
+      }
+    })
+
+  // protected for testing
+  protected[this] val entriesOf: String => Activity[Seq[Entry]] = Memoize { path: String =>
+    entitiesOf(path, new ZkEntryCache(path, statsReceiver), zkEntriesReadStat, EndpointGlob)
+  }
+
+  private[this] val vectorsOf: String => Activity[Seq[Vector]] = Memoize { path: String =>
+    entitiesOf(path, new ZkVectorCache(path, statsReceiver), zkVectorsReadStat, VectorGlob)
+  }
+
+  /**
    * Look up the weighted ServerSet entries for a given path.
    */
-  def apply(path: String): Activity[Set[(Entry, Double)]] = {
-    val cache = new PathCache(16000)
-    val es = entriesOf(path, cache).run
-    val vs = vectorsOf(path, cache).run
+  def apply(path: String): Activity[Seq[(Entry, Double)]] = {
+    val es = entriesOf(path)
+    val vs = vectorsOf(path)
 
-    Activity((es join vs) map {
-      case (Activity.Pending, _) => Activity.Pending
-      case (f@Activity.Failed(_), _) => f
-      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
-        Activity.Ok(ServiceDiscoverer.zipWithWeights(ents, vecs))
-      case (Activity.Ok(ents), _) =>
-        Activity.Ok(ents map (_ -> 1D))
-    })
+    val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs.toSet) }
+
+    // Squash duplicate updates
+    Activity(Var(Activity.Pending, raw.states.dedup))
   }
 }

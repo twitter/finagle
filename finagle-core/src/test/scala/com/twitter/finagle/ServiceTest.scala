@@ -23,7 +23,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     when(service.apply(any[String])) thenAnswer {
       new Answer[Future[String]] {
         override def answer(invocation: InvocationOnMock) = {
-          if (proxied.status === Status.Open) service("ok")
+          if (proxied.status == Status.Open) service("ok")
           else Future("service is not available")
         }
       }
@@ -35,11 +35,28 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     proxied.close(Time.now)
     verify(service).close(any)
-    assert(proxied.status === Status.Closed)
+    assert(proxied.status == Status.Closed)
     verify(service).status
 
-    assert(Await.result(proxied("ok")) === "service is not available")
+    assert(Await.result(proxied("ok")) == "service is not available")
     verify(service)("ok")
+  }
+
+  test("Service.rescue should wrap NonFatal exceptions in a failed Future") {
+    val exc = new IllegalArgumentException
+    val service = Service.mk[String, String] { _ => throw exc }
+    val rescuedService = Service.rescue(service)
+
+    val result = Await.result(rescuedService("ok").liftToTry)
+    assert(result.throwable == exc)
+
+    val fatalExc = new InterruptedException
+    val service2 = Service.mk[String, String] { _ => throw fatalExc }
+    val rescuedService2 = Service.rescue(service2)
+
+    intercept[InterruptedException] {
+      rescuedService2("fatal")
+    }
   }
 
   test("ServiceFactory.const should resolve immediately to the given service" +
@@ -53,7 +70,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     assert(f.isDefined)
     val proxied = Await.result(f)
 
-    assert(proxied("ok").poll === Some(Return("ko")))
+    assert(proxied("ok").poll == Some(Return("ko")))
     verify(service)("ok")
   }
 
@@ -69,14 +86,14 @@ class ServiceTest extends FunSuite with MockitoSugar {
     verify(service, times(0)).close(any)
 
     var didRun = false
-    val f2 = factory flatMap { _ =>
+    val f2 = factory flatMap { _: Any =>
       didRun = true
       Future.exception(exc)
     }
 
     assert(!didRun)
     verify(service, times(0)).close(any)
-    assert(f2().poll === Some(Throw(exc)))
+    assert(f2().poll == Some(Throw(exc)))
     assert(didRun)
     verify(service).close(any)
   }

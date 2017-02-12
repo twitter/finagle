@@ -2,11 +2,10 @@ package com.twitter.finagle.http.codec
 
 import com.google.common.io.BaseEncoding
 import com.twitter.finagle._
+import com.twitter.finagle.http.Message
 import com.twitter.util.{Throw, Try, Return}
 import java.nio.charset.Charset
-import org.jboss.netty.handler.codec.http.HttpMessage
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConverters._
 
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
@@ -37,24 +36,24 @@ object HttpDtab {
     Try { Base64.decode(v) } map(new String(_, Utf8))
 
   private val unmatchedFailure =
-    Failure.Cause("Unmatched X-Dtab headers")
+    Failure("Unmatched X-Dtab headers")
 
   private def decodingFailure(value: String) =
-    Failure.Cause("Value not b64-encoded: "+value)
+    Failure("Value not b64-encoded: "+value)
 
-  private def pathFailure(path: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid path: "+path, cause)
+  private def prefixFailure(prefix: String, cause: IllegalArgumentException) =
+    Failure("Invalid prefix: "+prefix, cause)
 
   private def nameFailure(name: String, cause: IllegalArgumentException) =
-    Failure.Cause("Invalid name: "+name, cause)
+    Failure("Invalid name: "+name, cause)
 
-  private def decodePath(b64path: String): Try[Path] =
-    b64Decode(b64path) match {
-      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64path))
+  private def decodePrefix(b64pfx: String): Try[Dentry.Prefix] =
+    b64Decode(b64pfx) match {
+      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64pfx))
       case Throw(e) => Throw(e)
-      case Return(pathStr) =>
-        Try(Path.read(pathStr)) rescue {
-          case iae: IllegalArgumentException => Throw(pathFailure(pathStr, iae))
+      case Return(pfxStr) =>
+        Try(Dentry.Prefix.read(pfxStr)).rescue {
+          case iae: IllegalArgumentException => Throw(prefixFailure(pfxStr, iae))
         }
     }
 
@@ -63,30 +62,61 @@ object HttpDtab {
       case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64name))
       case Throw(e) => Throw(e)
       case Return(nameStr) =>
-        Try(NameTree.read(nameStr)) rescue {
+        Try(NameTree.read(nameStr)).rescue {
           case iae: IllegalArgumentException => Throw(nameFailure(nameStr, iae))
         }
     }
 
   private def validHeaderPair(aKey: String, bKey: String): Boolean =
-    aKey.size == bKey.size &&
-    aKey.substring(0, aKey.size-1) == bKey.substring(0, bKey.size-1) &&
-    aKey(aKey.size-1) == 'a' &&
-    bKey(bKey.size-1) == 'b'
+    aKey.length == bKey.length &&
+    aKey(aKey.length - 1) == 'a' &&
+    bKey(bKey.length - 1) == 'b' &&
+    aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
+
+  private def isDtabHeader(hdr: (String,String)): Boolean =
+    hdr._1.equalsIgnoreCase(Header) ||
+    hdr._1.regionMatches(true, 0, Prefix, 0, Prefix.length)
+
 
   private val EmptyReturn = Return(Dtab.empty)
 
-  def clear(msg: HttpMessage) {
-    val names = msg.headers.names.iterator()
-    msg.headers.remove(Header)
-    while (names.hasNext) {
-      val n = names.next()
-      if (n.toLowerCase startsWith Prefix)
-        msg.headers.remove(n)
+  /**
+   * Strip out and return a sequence of all Dtab-related headers in the given message.
+   *
+   * @return a Seq[(String, String)] containing the dtab header entries found.
+   */
+  private[finagle] def strip(msg: Message): Seq[(String, String)] = {
+    var headerArr: ArrayBuffer[(String, String)] = null
+    val headerIt = msg.headerMap.iterator
+    while (headerIt.hasNext) {
+      val header = headerIt.next()
+      if (isDtabHeader(header)) {
+        if (headerArr == null)
+          headerArr = new ArrayBuffer[(String, String)]()
+        headerArr += header
+        msg.headerMap -= header._1
+      }
+    }
+    if (headerArr == null) Nil
+    else headerArr
+  }
+
+  /**
+   * Clear all Dtab-related headers from the given message.
+   */
+  def clear(msg: Message): Unit = {
+    val headerIt = msg.headerMap.iterator
+    while (headerIt.hasNext) {
+      val header = headerIt.next()
+      if (isDtabHeader(header))
+        msg.headerMap -= header._1
     }
   }
 
-  def write(dtab: Dtab, msg: HttpMessage) {
+  /**
+   * Write a Dtab-local header into the given message.
+   */
+  def write(dtab: Dtab, msg: Message): Unit = {
     if (dtab.isEmpty)
       return
 
@@ -95,19 +125,16 @@ object HttpDtab {
         "Dtabs with length greater than 100 are not serializable with HTTP")
     }
 
-    for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
-      // TODO: now that we have a proper Dtab grammar,
-      // should just embed this directly instead.
-      msg.headers.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headers.set(Prefix+indexstr(i)+"-B".format(i), b64Encode(dst.show))
-    }
+    msg.headerMap.set(Header, dtab.show)
   }
 
   /**
    * Parse old-style X-Dtab pairs and then new-style Dtab-Local headers,
    * Dtab-Local taking precedence.
+   *
+   * @return a Try[Dtab] which keeps the created Dtab if reading in worked.
    */
-  def read(msg: HttpMessage): Try[Dtab] =
+  def read(msg: Message): Try[Dtab] =
     for {
       dtab0 <- readXDtabPairs(msg)
       dtab1 <- readDtabLocal(msg)
@@ -121,10 +148,10 @@ object HttpDtab {
    *
    * N.B. Comma is not a showable character in Paths nor is it meaningful in Dtabs.
    */
-  private def readDtabLocal(msg: HttpMessage): Try[Dtab] =
-    if (!msg.headers.contains(Header)) EmptyReturn else Try {
-      val headers = msg.headers().getAll(Header).asScala
-      val dentries = headers.view flatMap(_ split ',') flatMap(Dtab.read(_))
+  private def readDtabLocal(msg: Message): Try[Dtab] =
+    if(!msg.headerMap.contains(Header)) EmptyReturn else Try {
+      val headers = msg.headerMap.getAll(Header)
+      val dentries = headers.view.flatMap(_ split ',').flatMap(Dtab.read(_))
       Dtab(dentries.toIndexedSeq)
     }
 
@@ -133,13 +160,13 @@ object HttpDtab {
    *   X-Dtab-00-A: base64(/prefix)
    *   X-Dtab-00-B: base64(/dstA & /dstB)
    */
-  private def readXDtabPairs(msg: HttpMessage): Try[Dtab] = {
+  private def readXDtabPairs(msg: Message): Try[Dtab] = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
-    val headers = msg.headers.iterator()
-    while (headers.hasNext()) {
-      val key = headers.next().getKey().toLowerCase
-      if (key startsWith Prefix) {
+    val headers = msg.headerMap.iterator
+    while (headers.hasNext) {
+      val key = headers.next()._1.toLowerCase
+      if (key.startsWith(Prefix)) {
         if (keys == null) keys = ArrayBuffer[String]()
         keys += key
       }
@@ -166,9 +193,9 @@ object HttpDtab {
 
       val tryDentry =
         for {
-          path <- decodePath(msg.headers.get(prefix))
-          name <- decodeName(msg.headers.get(dest))
-        } yield Dentry(path,  name)
+          pfx <- decodePrefix(msg.headerMap(prefix))
+          name <- decodeName(msg.headerMap(dest))
+        } yield Dentry(pfx,  name)
 
       dentries(i) =
         tryDentry match {

@@ -3,17 +3,18 @@ package com.twitter.finagle.example.memcache
 import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached
-import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.Memcached
+import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.io.Buf
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import scala.language.reflectiveCalls
 
 class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep]) extends Service[Req, Rep] {
   @volatile private[this] var currentService: Future[Service[Req, Rep]] = factory()
@@ -38,7 +39,7 @@ object MemcacheStress extends App {
   }
   val count = new AtomicLong
 
-  def proc(client: memcached.Client, key: String, value: ChannelBuffer) {
+  def proc(client: Client, key: String, value: Buf) {
     client.set(key, value) ensure {
       count.incrementAndGet()
       proc(client, key, value)
@@ -46,39 +47,37 @@ object MemcacheStress extends App {
   }
 
   def main() {
-    var builder = ClientBuilder()
-      .name("mc")
-      .codec(Memcached())
-      .hostConnectionLimit(config.concurrency())
-      .hosts(config.hosts())
+    var client = Memcached.client
+      .withLabel("mc")
+      .withLoadBalancer.connectionsPerEndpoint(config.concurrency())
 
     if (config.nworkers() > 0)
-      builder = builder.channelFactory(
+      client = client.configured(Netty3Transporter.ChannelFactory(
           new NioClientSocketChannelFactory(
             Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheboss")),
             Executors.newCachedThreadPool(new NamedPoolThreadFactory("memcacheIO")),
             config.nworkers()
           )
-        )
+        ))
 
-    if (config.stats())    builder = builder.reportTo(new OstrichStatsReceiver)
+    if (config.stats())    client = client.withStatsReceiver(new OstrichStatsReceiver)
     if (config.tracing())  com.twitter.finagle.tracing.Trace.enable()
     else                 com.twitter.finagle.tracing.Trace.disable()
 
     val key = "x" * config.keysize()
-    val value = ChannelBuffers.wrappedBuffer(("y" * config.valuesize()).getBytes)
+    val value = Buf.Utf8("y" * config.valuesize())
 
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(2000, 100/*backlog*/, runtime)
     adminService.start()
 
-    println(builder)
-    val factory = builder.buildFactory()
+    println(client)
+    val factory =  client.newClient(config.hosts())
     val elapsed = Stopwatch.start()
 
     for (_ <- 0 until config.concurrency()) {
       val svc = new PersistentService(factory)
-      val client = memcached.Client(svc)
+      val client = Client(svc)
       proc(client, key, value)
     }
 

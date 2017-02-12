@@ -2,6 +2,7 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.util.Future
 
 object DtabStatsFilter {
   val role = Stack.Role("DtabStats")
@@ -13,7 +14,7 @@ object DtabStatsFilter {
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = DtabStatsFilter.role
       val description = "Report dtab statistics"
-      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
         else new DtabStatsFilter[Req, Rep](statsReceiver) andThen next
@@ -25,12 +26,12 @@ object DtabStatsFilter {
  * Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all
  * requests with a non-empty Dtab.
  */
-class DtabStatsFilter[Req, Rsp](statsReceiver: StatsReceiver)
-    extends SimpleFilter[Req, Rsp] {
+class DtabStatsFilter[Req, Rep](statsReceiver: StatsReceiver)
+    extends SimpleFilter[Req, Rep] {
 
   private[this] val dtabSizes = statsReceiver.stat("dtab", "size")
 
-  def apply(request: Req, service: Service[Req, Rsp]) = {
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     if (Dtab.local.nonEmpty) {
       dtabSizes.add(Dtab.local.size)
     }

@@ -9,6 +9,8 @@ private[twitter] object ServerRegistry extends StackRegistry {
   private val log = Logger.getLogger(getClass.getName)
   private var addrNames = Map[SocketAddress, String]()
 
+  def registryName: String = "server"
+
   // This is a terrible hack until we have a better
   // way of labeling addresses.
   def register(addr: String): SocketAddress = synchronized {

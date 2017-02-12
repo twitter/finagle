@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.stats.Stats
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite, Assertions}
+import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -18,11 +18,11 @@ class CommonsStatsReceiverTest extends FunSuite with BeforeAndAfter with OneInst
 
   test("counter should return a new counter object with the given name and reflect incr operations") {
     val counter = (new CommonsStatsReceiver()).counter("foo")
-    assert(Stats.getVariable("foo").read.asInstanceOf[Long] === 0)
+    assert(Stats.getVariable("foo").read.asInstanceOf[Long] == 0)
     counter.incr(7)
-    assert(Stats.getVariable("foo").read.asInstanceOf[Long] === 7)
+    assert(Stats.getVariable("foo").read.asInstanceOf[Long] == 7)
     counter.incr(-8)
-    assert(Stats.getVariable("foo").read.asInstanceOf[Long] === -1)
+    assert(Stats.getVariable("foo").read.asInstanceOf[Long] == -1)
   }
 
   test("counter should memoize objects with the same name") {
@@ -58,13 +58,13 @@ class CommonsStatsReceiverTest extends FunSuite with BeforeAndAfter with OneInst
     // val needed here to add a strong ref to the gauge otherwise it will get collected
     val myGauge = (new CommonsStatsReceiver).addGauge("bam") { inner }
     inner = 1.0f
-    assert(Stats.getVariable("bam").read.asInstanceOf[Float] === 1.0f)
+    assert(Stats.getVariable("bam").read.asInstanceOf[Float] == 1.0f)
     inner = 3.14f
-    assert(Stats.getVariable("bam").read.asInstanceOf[Float] === 3.14f)
+    assert(Stats.getVariable("bam").read.asInstanceOf[Float] == 3.14f)
   }
 
   test("Loaded receiver") {
     DefaultStatsReceiver.counter("loadedfoo").incr()
-    assert(Stats.getVariable("loadedfoo").read.asInstanceOf[Long] === 1)
+    assert(Stats.getVariable("loadedfoo").read.asInstanceOf[Long] == 1)
   }
 }

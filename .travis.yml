@@ -1,42 +1,74 @@
+# container-based build
+sudo: false
+
 language: scala
 
+env:
+  global:
+    - JAVA_OPTS="-DSKIP_FLAKY=1 -Dsbt.log.noformat=true"
+
+  matrix:
+    - PROJECT=finagle-commons-stats
+    - PROJECT=finagle-core
+    - PROJECT=finagle-exception
+    - PROJECT=finagle-exp
+    - PROJECT=finagle-http
+    - PROJECT=finagle-http2
+    - PROJECT=finagle-integration
+    - PROJECT=finagle-kestrel
+    - PROJECT=finagle-mdns
+    - PROJECT=finagle-mux
+    - PROJECT=finagle-mysql
+    - PROJECT=finagle-native
+    - PROJECT=finagle-netty4
+    - PROJECT=finagle-netty4-http
+    - PROJECT=finagle-ostrich4
+    - PROJECT=finagle-redis
+    - PROJECT=finagle-serversets
+    - PROJECT=finagle-stats
+    - PROJECT=finagle-stream
+    - PROJECT=finagle-thrift
+    - PROJECT=finagle-thriftmux
+    - PROJECT=finagle-toggle
+    - PROJECT=finagle-zipkin-core
+    - PROJECT=finagle-zipkin
+
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+   - $HOME/.m2
+   - $HOME/.ivy2
+   - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+   - $HOME/.dodo
+
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+
 scala:
-  - 2.10.4
+  - 2.11.8
 
 jdk:
-  - oraclejdk7
-  - openjdk6
-  - openjdk7
+  - oraclejdk8
+
+notifications:
+  hipchat:
+    rooms:
+      secure: UlvjA1u/K7a/ykVt9hfRksqI5coq9k5fFqpeGCcEmqPOyrkOnCLj21xHHB16SzUfwy3pqjVK+B8kWORB9zaNyalHZm6I11Ba1hfmPXWemH/qA972IN/hdAQxnMVhhnWqJPzuoVlW7WAFxwltPTbAwDMzIczmsyMv+rCc2Xffiks=
 
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS
+  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
+  - travis_retry ./sbt --error ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update finagle-native/update
+  # don't test these projects because they don't pass on travis-ci
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
 script:
-  # skip these projects because they don't pass on travis-ci
-  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-http/test
-  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test
-  - echo skip ./sbt ++$TRAVIS_SCALA_VERSION finagle-mux/test
-
-  # run conditinally because they don't pass with openjdks
-  - if [ "$TRAVIS_JDK_VERSION" = "oraclejdk7" ]; then ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/test; fi
-
   # run for all environments
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-commons-stats/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-core/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-exception/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-exp/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-kestrel/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-mdns/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-mysql/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-ostrich4/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-redis/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-serversets/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-spdy/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stats/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stream/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-stress/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-testers/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-thrift/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-thriftmux/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-zipkin/test
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
+
+after_success:
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - bash <(curl -s https://codecov.io/bash)

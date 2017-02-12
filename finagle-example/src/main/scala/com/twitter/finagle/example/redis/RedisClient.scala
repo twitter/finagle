@@ -1,7 +1,8 @@
 package com.twitter.finagle.example.redis
 
 import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.util.{RedisCluster, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.RedisCluster
+import com.twitter.io.Buf
 import com.twitter.util.Await
 
 object RedisClient {
@@ -13,16 +14,17 @@ object RedisClient {
 
     val client = Client(RedisCluster.hostAddresses())
     println("Setting foo -> bar...")
-    client.set(StringToChannelBuffer("foo"), StringToChannelBuffer("bar"))
+    client.set(Buf.Utf8("foo"), Buf.Utf8("bar"))
     println("Getting value for key 'foo'")
-    val getResult = Await.result(client.get(StringToChannelBuffer("foo")))
+
+    val getResult = Await.result(client.get(Buf.Utf8("foo")))
     getResult match {
-      case Some(n) => println("Got result: " + new String(n.array))
+      case Some(Buf.Utf8(s)) => println("Got result: " + s)
       case None => println("Didn't get the value!")
     }
 
     println("Closing client...")
-    client.release()
+    client.close()
     println("Stopping Redis instance...")
     RedisCluster.stop()
     println("Done!")

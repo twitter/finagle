@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.util.Var
 import com.twitter.finagle.util.Showable
 
@@ -23,6 +23,13 @@ import com.twitter.finagle.util.Showable
  * (e.g. `Http.newClient(/s/org/servicename)`). These APIs use `Resolver` under
  * the hood to resolve the destination names into the `Name` representation
  * of the appropriate cluster.
+ *
+ * As names are bound, a [[com.twitter.finagle.Namer Namer]] may elect
+ * to bind only a [[com.twitter.finagle.Name Name]] prefix, leaving an
+ * unbound residual name to be processed by a downstream Namer.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+ *      for further details.
  */
 sealed trait Name
 
@@ -39,7 +46,11 @@ object Name {
    *
    * Equality of two Names is delegated to `id`. Two Bound instances
    * are equal whenever their `id`s are. `id` identifies the `addr`
-   * and not the `path`.
+   * and not the `path`.  If the `id` is a [[com.twitter.finagle.Name.Path
+   * Path]], it should only contain *bound*--not residual--path components.
+   *
+   * The `path` contains unbound residual path components that were not
+   * processed during name resolution.
    */
   class Bound private(
     val addr: Var[Addr],
@@ -50,6 +61,12 @@ object Name {
 
     // Workaround for https://issues.scala-lang.org/browse/SI-4807
     def canEqual(that: Any) = true
+
+    def idStr: String =
+      id match {
+        case path: com.twitter.finagle.Path => path.show
+        case _ => id.toString
+      }
   }
 
   object Bound {
@@ -64,21 +81,25 @@ object Name {
     /**
      * Create a singleton address, equal only to itself.
      */
-    def singleton(addr: Var[Addr]): Name.Bound = Name.Bound(addr, new{})
+    def singleton(addr: Var[Addr]): Name.Bound = Name.Bound(addr, new Object())
   }
 
   // So that we can print NameTree[Name]
   implicit val showable: Showable[Name] = new Showable[Name] {
     def show(name: Name) = name match {
       case Path(path) => path.show
-      case bound@Bound(_) => bound.id.toString
+      case bound@Bound(_) =>
+        bound.id match {
+          case id: com.twitter.finagle.Path => id.show
+          case id => id.toString
+        }
     }
   }
 
   /**
    * Create a pre-bound address.
    */
-  def bound(addrs: SocketAddress*): Name.Bound =
+  def bound(addrs: Address*): Name.Bound =
     Name.Bound(Var.value(Addr.Bound(addrs:_*)), addrs.toSet)
 
   /**
@@ -91,8 +112,9 @@ object Name {
    *
    * @note Full Addr semantics cannot be recovered from Group. We
    * take a conservative approach here: we will only provide bound
-   * addresses. Empty sets could indicate either pending or negative
-   * resolutions.
+   * and failed addresses. Empty sets could indicate either pending or
+   * negative resolutions. A failed address is only returned if the Group
+   * contains a [[SocketAddress]] that is not an [[InetSocketAddress]].
    */
   def fromGroup(g: Group[SocketAddress]): Name.Bound = g match {
     case NameGroup(name) => name
@@ -105,7 +127,14 @@ object Name {
          case newSet if first && newSet.isEmpty => Addr.Pending
          case newSet =>
            first = false
-           Addr.Bound(newSet)
+           newSet.foldLeft[Addr](Addr.Bound()) {
+             case (Addr.Bound(set, metadata), ia: InetSocketAddress) =>
+               Addr.Bound(set + Address(ia), metadata)
+             case (Addr.Bound(_, _), sa) =>
+               Addr.Failed(new IllegalArgumentException(
+                 s"Unsupported SocketAddress of type '${sa.getClass.getName}': $sa"))
+             case (addr, _) => addr
+           }
        }
      }, group)
   }
@@ -124,20 +153,19 @@ object Name {
   def apply(path: String): Name =
     Name.Path(com.twitter.finagle.Path.read(path))
 
-  /**
-   * Create a name representing the union of the passed-in
-   * names.
-   */
-  def all(names: Set[Name.Bound]): Name.Bound =
+  // Create a name representing the union of the passed-in names.
+  // Metadata is not preserved on bound addresses.
+  private[finagle] def all(names: Set[Name.Bound]): Name.Bound =
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
     else {
       val va = Var.collect(names map(_.addr)) map {
-        case addrs if addrs.exists({case Addr.Bound(_) => true; case _ => false}) =>
-          Addr.Bound((addrs flatMap {
-            case Addr.Bound(as) => as
-            case _ => Set.empty: Set[SocketAddress]
-          }).toSet)
+        case addrs if addrs.exists({case Addr.Bound(_, _) => true; case _ => false}) =>
+          val endpointAddrs = addrs.flatMap {
+            case Addr.Bound(as, _) => as
+            case _ => Set.empty[Address]
+          }.toSet
+          Addr.Bound(endpointAddrs, Addr.Metadata.empty)
 
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>
@@ -149,11 +177,4 @@ object Name {
       val id = names map { case bound@Name.Bound(_) => bound.id }
       Name.Bound(va, id)
     }
-
-  // A temporary bridge API to wait for some other changes to land.
-  // Do not use.
-  def DONOTUSE_nameToGroup(name: Name): Group[SocketAddress] = {
-    val bound@Name.Bound(_) = name
-    NameGroup(bound)
-  }
 }

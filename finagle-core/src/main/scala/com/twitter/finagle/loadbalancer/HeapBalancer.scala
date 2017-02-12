@@ -1,11 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.OnReady
 import com.twitter.finagle.{
-  ClientConnection, Group, NoBrokersAvailableException, Service, ServiceFactory, 
-  ServiceProxy, Status}
+  ClientConnection, Service, ServiceFactory, ServiceProxy, Status}
 import com.twitter.util._
 import scala.annotation.tailrec
 import scala.util.Random
@@ -15,56 +14,14 @@ object HeapBalancer {
   val Zero = Int.MinValue + 1
 }
 
-object HeapBalancerFactory
-    extends LoadBalancerFactory
-    with WeightedLoadBalancerFactory {
-
-  def newLoadBalancer[Req, Rep](
-    group: Group[ServiceFactory[Req, Rep]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] = {
-    val activity = Activity(group.set map(Activity.Ok(_)))
-    new HeapBalancer[Req, Rep](activity, statsReceiver, emptyException)
-  }
-
-  def newLoadBalancer[Req, Rep](
-    weighted: Var[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] = {
-    val activity = Activity(weighted map { set =>
-      Activity.Ok(set map { case (f, _) => f })
-    })
-    new HeapBalancer[Req, Rep](activity, statsReceiver, emptyException)
-  }
-
-  def newLoadBalancer[Req, Rep](
-    activity: Activity[Set[ServiceFactory[Req, Rep]]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] =
-    new HeapBalancer(activity, statsReceiver, emptyException)
-
-  def newWeightedLoadBalancer[Req, Rep](
-    weighted: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
-  ): ServiceFactory[Req, Rep] = {
-    val unweighted = weighted map { set => set map { case (f, _) => f } }
-    newLoadBalancer(unweighted, statsReceiver, emptyException)
-  }
-}
-
-
 /**
  * An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].
  */
 class HeapBalancer[Req, Rep](
   factories: Activity[Set[ServiceFactory[Req, Rep]]],
-  statsReceiver: StatsReceiver = NullStatsReceiver,
-  emptyException: Throwable = new NoBrokersAvailableException,
-  rng: Random = new Random
+  statsReceiver: StatsReceiver,
+  emptyException: Throwable,
+  rng: Random
 ) extends ServiceFactory[Req, Rep] with OnReady {
 
   import HeapBalancer._
@@ -129,7 +86,7 @@ class HeapBalancer[Req, Rep](
 
   private[this] val availableGauge = statsReceiver.addGauge("available") {
     val nodes = synchronized { heap.drop(1) }
-    nodes.count(_.factory.isAvailable)
+    nodes.count(_.factory.status == Status.Open)
   }
 
   private[this] val loadGauge = statsReceiver.addGauge("load") {
@@ -198,7 +155,7 @@ class HeapBalancer[Req, Rep](
         n = n.downq
         if (m == null) downq = n
         else m.downq = n
-      } else if (n.factory.isAvailable) {  // revived node
+      } else if (n.factory.status == Status.Open) {  // revived node
         n.load -= Penalty
         fixUp(heap, n.index)
         val o = n.downq
@@ -213,7 +170,7 @@ class HeapBalancer[Req, Rep](
     }
 
     n = heap(1)
-    if (n.factory.isAvailable || n.load >= 0) n else {
+    if (n.factory.status == Status.Open || n.load >= 0) n else {
       // Mark as down.
       n.downq = downq
       downq = n
@@ -260,6 +217,13 @@ class HeapBalancer[Req, Rep](
     Closable.sequence(observation, nodesClosable).close(deadline)
   }
 
-  override def status: Status = Status.Open
+  /**
+   * HeapBalancer status is the best of its constituent nodes, excluding
+   * the heap(0) node because our implementation is 1-indexed.
+   */
+  override def status: Status = Status.bestOf(heap.drop(1), nodeStatus)
+
+  private[this] val nodeStatus: Node => Status = _.factory.status
+
   override val toString = synchronized("HeapBalancer(%d)".format(size))
 }

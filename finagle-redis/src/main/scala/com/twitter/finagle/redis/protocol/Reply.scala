@@ -1,165 +1,92 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.naggati.ProtocolError
 import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.util._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import com.twitter.io.Buf
 
 object RequireServerProtocol extends ErrorConversion {
-  override def getException(msg: String) = new ServerError(msg)
+  override def getException(msg: String): Exception = ServerError(msg)
 }
 
-sealed abstract class Reply extends RedisMessage
-sealed abstract class SingleLineReply extends Reply { // starts with +,-, or :
-  import RedisCodec.EOL_DELIMITER
-
-  def getMessageTuple(): (Char,String)
-  override def toChannelBuffer = {
-    val (c,s) = getMessageTuple
-    StringToChannelBuffer("%c%s%s".format(c,s,EOL_DELIMITER))
-  }
-}
+sealed abstract class Reply
+sealed abstract class SingleLineReply extends Reply // starts with +,-, or :
 sealed abstract class MultiLineReply extends Reply
+
+case object NoReply extends Reply
 
 case class StatusReply(message: String) extends SingleLineReply {
   RequireServerProtocol(message != null && message.length > 0, "StatusReply had empty message")
-  override def getMessageTuple() = (RedisCodec.STATUS_REPLY, message)
-}
-case class ErrorReply(message: String) extends SingleLineReply {
-  RequireServerProtocol(message != null && message.length > 0, "ErrorReply had empty message")
-  override def getMessageTuple() = (RedisCodec.ERROR_REPLY, message)
-}
-case class IntegerReply(id: Long) extends SingleLineReply {
-  override def getMessageTuple() = (RedisCodec.INTEGER_REPLY, id.toString)
 }
 
-case class BulkReply(message: ChannelBuffer) extends MultiLineReply {
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(List(message), false)
+case class ErrorReply(message: String) extends SingleLineReply {
+  RequireServerProtocol(message != null && message.length > 0, "ErrorReply had empty message")
 }
-case class EmptyBulkReply() extends MultiLineReply {
-  val message = "$-1"
-  override def toChannelBuffer =
-    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_BULK_REPLY_BA,
-      RedisCodec.EOL_DELIMITER_BA)
-}
+
+case class IntegerReply(id: Long) extends SingleLineReply
+
+case class BulkReply(message: Buf) extends MultiLineReply
+
+case object EmptyBulkReply extends MultiLineReply
 
 case class MBulkReply(messages: List[Reply]) extends MultiLineReply {
   RequireServerProtocol(
-    messages != null && messages.length > 0,
-    "Multi-BulkReply had empty message list")
-  override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(ReplyFormat.toChannelBuffers(messages))
-}
-case class EmptyMBulkReply() extends MultiLineReply {
-  val message = "*0"
-  override def toChannelBuffer =
-    ChannelBuffers.wrappedBuffer(RedisCodec.EMPTY_MBULK_REPLY_BA,
-      RedisCodec.EOL_DELIMITER_BA)
-}
-case class NilMBulkReply() extends MultiLineReply {
-  val message = "*-1"
-  override def toChannelBuffer =
-    ChannelBuffers.wrappedBuffer(RedisCodec.NIL_MBULK_REPLY_BA,
-      RedisCodec.EOL_DELIMITER_BA)
+    messages != null && messages.nonEmpty, "Multi-BulkReply had empty message list")
 }
 
-class ReplyCodec extends UnifiedProtocolCodec {
-  import com.twitter.finagle.redis.naggati.{Encoder, NextStep}
-  import com.twitter.finagle.redis.naggati.Stages._
-  import RedisCodec._
+case object EmptyMBulkReply extends MultiLineReply
+case object NilMBulkReply extends MultiLineReply
 
-  val encode = new Encoder[Reply] {
-    def encode(obj: Reply) = Some(obj.toChannelBuffer)
-  }
+object Reply {
 
-  val decode = readBytes(1) { bytes =>
-    bytes(0) match {
-      case STATUS_REPLY =>
-        readLine { line => emit(StatusReply(line)) }
-      case ERROR_REPLY =>
-        readLine { line => emit(ErrorReply(line)) }
-      case INTEGER_REPLY =>
-        readLine { line =>
-          RequireServerProtocol.safe {
-            emit(IntegerReply(NumberFormat.toLong(line)))
-          }
-        }
-      case BULK_REPLY =>
-        decodeBulkReply
-      case MBULK_REPLY =>
-        RequireServerProtocol.safe {
-          readLine { line => decodeMBulkReply(NumberFormat.toLong(line)) }
-        }
-      case b: Byte =>
-        throw new ServerError("Unknown response format(%c) found".format(b.asInstanceOf[Char]))
+  val EOL                 = Buf.Utf8("\r\n")
+  val STATUS_REPLY        = Buf.Utf8("+")
+  val ERROR_REPLY         = Buf.Utf8("-")
+  val INTEGER_REPLY       = Buf.Utf8(":")
+  val BULK_REPLY          = Buf.Utf8("$")
+  val MBULK_REPLY         = Buf.Utf8("*")
+
+  import Stage.NextStep
+
+  private[this] val decodeStatus =
+    Stage.readLine(line => NextStep.Emit(StatusReply(line)))
+
+  private[this] val decodeError =
+    Stage.readLine(line => NextStep.Emit(ErrorReply(line)))
+
+  private[this] val decodeInteger =
+    Stage.readLine(line =>
+      RequireServerProtocol.safe(NextStep.Emit(IntegerReply(line.toLong)))
+    )
+
+  private[this] val decodeBulk =
+    Stage.readLine { line =>
+      val num = RequireServerProtocol.safe(line.toInt)
+
+      if (num < 0) NextStep.Emit(EmptyBulkReply)
+      else NextStep.Goto(Stage.readBytes(num) { bytes =>
+        NextStep.Goto(Stage.readBytes(2) {
+          case EOL => NextStep.Emit(BulkReply(bytes))
+          case _ => throw ServerError("Expected EOL after line data and didn't find it")
+        })
+      })
     }
-  }
 
-  def decodeBulkReply = readLine { line =>
-    RequireServerProtocol.safe {
-      NumberFormat.toInt(line)
-    } match {
-      case empty if empty < 0 => emit(EmptyBulkReply())
-      case replySz => readBytes(replySz) { bytes =>
-        readBytes(2) { eol =>
-          if (eol(0) != '\r' || eol(1) != '\n') {
-            throw new ServerError("Expected EOL after line data and didn't find it")
-          }
-          emit(BulkReply(ChannelBuffers.wrappedBuffer(bytes)))
-        }
-      }
+  private[this] val decodeMBulk =
+    Stage.readLine { line =>
+      val num = RequireServerProtocol.safe(line.toLong)
+
+      if (num < 0) NextStep.Emit(NilMBulkReply)
+      else if (num == 0) NextStep.Emit(EmptyMBulkReply)
+      else NextStep.Accumulate(num, MBulkReply.apply)
     }
-  }
 
-  def decodeMBulkReply(argCount: Long) =
-    decodeMBulkLines(argCount, Nil, Nil)
-
-  def decodeMBulkLines(i: Long, stack: List[(Long, List[Reply])], lines: List[Reply]): NextStep = {
-    if (i <= 0) {
-      val reply = (i, lines) match {
-        case (i, _) if i < 0 => NilMBulkReply()
-        case (0, Nil) => EmptyMBulkReply()
-        case (0, lines) => MBulkReply(lines.reverse)
-      }
-      stack match {
-        case Nil => emit(reply)
-        case (i, lines) :: stack => decodeMBulkLines(i, stack, reply :: lines)
-      }
-    } else {
-      readLine { line =>
-        val header = line(0)
-        header match {
-          case ARG_SIZE_MARKER =>
-            val size = NumberFormat.toInt(line.drop(1))
-            if (size < 0) {
-              decodeMBulkLines(i - 1, stack, EmptyBulkReply() :: lines)
-            } else {
-              readBytes(size) { byteArray =>
-                readBytes(2) { eol =>
-                  if (eol(0) != '\r' || eol(1) != '\n') {
-                    throw new ProtocolError("Expected EOL after line data and didn't find it")
-                  }
-                  decodeMBulkLines(i - 1, stack,
-                    BulkReply(ChannelBuffers.wrappedBuffer(byteArray)) :: lines)
-                }
-              }
-            }
-          case STATUS_REPLY =>
-            decodeMBulkLines(i - 1, stack, StatusReply(BytesToString(
-              line.drop(1).getBytes)) :: lines)
-          case ARG_COUNT_MARKER =>
-            decodeMBulkLines(line.drop(1).toLong, (i - 1, lines) :: stack, Nil)
-          case INTEGER_REPLY =>
-            decodeMBulkLines(i - 1, stack, IntegerReply(NumberFormat.toLong(
-              BytesToString(line.drop(1).getBytes))) :: lines)
-          case ERROR_REPLY =>
-            decodeMBulkLines(i - 1, stack, ErrorReply(BytesToString(
-              line.drop(1).getBytes)) :: lines)
-          case b: Char =>
-            throw new ProtocolError("Expected size marker $, got " + b)
-        }
-      }
-    }
+  private[redis] val decode = Stage.readBytes(1) {
+    case STATUS_REPLY => NextStep.Goto(decodeStatus)
+    case ERROR_REPLY => NextStep.Goto(decodeError)
+    case INTEGER_REPLY => NextStep.Goto(decodeInteger)
+    case BULK_REPLY => NextStep.Goto(decodeBulk)
+    case MBULK_REPLY => NextStep.Goto(decodeMBulk)
+    case Buf.Utf8(rep) =>
+      throw ServerError(s"Unknown response format($rep) found")
   }
 }

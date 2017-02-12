@@ -6,7 +6,7 @@ import com.twitter.util.{Time, Duration}
 import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean}
 import java.util.logging.Logger
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{when, verify}
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -42,7 +42,7 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
         waitForBeat(1)
         when(nfo.remaining())
           .thenReturn(80.bytes)
-        ctl.advance(48.milliseconds) // 4/5 of 60 bytes * 1000 bps === 48.ms
+        ctl.advance(48.milliseconds) // 4/5 of 60 bytes * 1000 bps == 48.ms
       }
 
       conduct()
@@ -134,6 +134,7 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
     assert(Coordinator.parNewCMS(memories, garbages).isDefined)
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("Coordinator sleeps until discount remaining") {
     val ctx = new Ctx{}
     import ctx._
@@ -162,7 +163,7 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
     }
 
     localWhenFinished(conductor) {
-      assert(incr === 2)
+      assert(incr == 2)
     }
   }
 

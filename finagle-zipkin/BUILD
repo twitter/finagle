@@ -1,12 +1,10 @@
-maven_layout()
-
-jar_library(name='finagle-zipkin',
+target(
   dependencies=[
     'finagle/finagle-zipkin/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-zipkin/src/test/scala'
   ]

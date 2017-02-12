@@ -1,7 +1,7 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.Throwables
+import com.twitter.util.Throwables
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
 import com.twitter.util.{Future, Stopwatch, Return, Throw}
 
@@ -9,7 +9,7 @@ private[finagle] object StatsFactoryWrapper {
   val role = Stack.Role("ServiceCreationStats")
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.StatsFactoryWrapper]].
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.factory.StatsFactoryWrapper]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
@@ -18,7 +18,8 @@ private[finagle] object StatsFactoryWrapper {
         "and service acquisition latency"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
-        new StatsFactoryWrapper(
+        if (statsReceiver.isNull) next
+        else new StatsFactoryWrapper(
           next,
           new RollupStatsReceiver(statsReceiver.scope("service_creation"))
         )

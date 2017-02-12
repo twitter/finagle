@@ -1,9 +1,8 @@
 package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ClientConnection, MockTimer, Service, ServiceFactory,
-ServiceTimeoutException, TimeoutException}
-import com.twitter.util.{Await, Future, Promise, Return, Time}
+import com.twitter.finagle._
+import com.twitter.util.{Await, Future, Promise, MockTimer, Return, Time}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{verify, when}
 import org.junit.runner.RunWith
@@ -33,7 +32,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
     val res = factory()
     Time.withCurrentTimeFrozen { tc =>
       verify(underlying)(any[ClientConnection])
-      assert(promise.interrupted === None)
+      assert(promise.interrupted == None)
       assert(!res.isDefined)
       tc.advance(5.seconds)
       timer.tick()
@@ -43,12 +42,14 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
   test("TimeoutFactory after the timeout should fail the service acquisition") {
     new AfterHelper {
       assert(res.isDefined)
-      val e = intercept[TimeoutException] {
+      val failure = intercept[Failure] {
         Await.result(res)
       }
-      assert(e === exception)
+      assert(failure.getCause.isInstanceOf[TimeoutException])
+      assert(failure.getCause == exception)
     }
   }
+
   test("TimeoutFactory after the timeout should interrupt the underlying promise with a TimeoutException") {
     new AfterHelper {
       assert(promise.interrupted forall {
@@ -66,7 +67,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
       when(service.close(any[Time])).thenReturn(Future.Done)
       promise() = Return(service)
       assert(res.isDefined)
-      assert(res.poll === Some(Return(service)))
+      assert(res.poll == Some(Return(service)))
     }
   }
 }

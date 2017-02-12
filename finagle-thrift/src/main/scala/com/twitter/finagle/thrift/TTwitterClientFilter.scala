@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.tracing.{Trace, Annotation}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.finagle.{Service, SimpleFilter, Dtab, Dentry}
 import com.twitter.io.Buf
@@ -39,16 +39,17 @@ private[thrift] class TTwitterClientFilter(
 
     clientId match {
       case Some(clientId) =>
-        header.setClient_id(clientId.toThrift)
+        header.setClient_id(new thrift.ClientId(clientId.name))
       case None =>
     }
 
-    header.setSpan_id(Trace.id.spanId.toLong)
-    Trace.id._parentId foreach { id => header.setParent_span_id(id.toLong) }
-    header.setTrace_id(Trace.id.traceId.toLong)
-    header.setFlags(Trace.id.flags.toLong)
+    val traceId = Trace.id
+    header.setSpan_id(traceId.spanId.toLong)
+    traceId._parentId.foreach { id => header.setParent_span_id(id.toLong) }
+    header.setTrace_id(traceId.traceId.toLong)
+    header.setFlags(traceId.flags.toLong)
 
-    Trace.id.sampled match {
+    traceId.sampled match {
       case Some(s) => header.setSampled(s)
       case None => header.unsetSampled()
     }
@@ -72,15 +73,14 @@ private[thrift] class TTwitterClientFilter(
       }
     }
     clientIdBuf match {
-
       case Some(buf) =>
         val ctx = new thrift.RequestContext(
-          Buf.toByteBuffer(ClientId.clientIdCtx.marshalId), 
-          Buf.toByteBuffer(buf))
+          Buf.ByteBuffer.Owned.extract(ClientId.clientIdCtx.marshalId),
+          Buf.ByteBuffer.Owned.extract(buf))
         ctxs.add(ctx)
       case None => // skip
     }
-    
+
     if (!ctxs.isEmpty)
       header.setContexts(ctxs)
 
@@ -103,7 +103,8 @@ private[thrift] class TTwitterClientFilter(
   }
 
   def apply(request: ThriftClientRequest,
-      service: Service[ThriftClientRequest, Array[Byte]]): Future[Array[Byte]] = {
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Future[Array[Byte]] = {
     // Create a new span identifier for this request.
     val msg = new InputBuffer(request.message, protocolFactory)().readMessageBegin()
     Trace.recordRpc(msg.name)
@@ -121,7 +122,6 @@ private[thrift] class TTwitterClientFilter(
       reply
     } else {
       reply map { response =>
-
         if (isUpgraded) {
           // Peel off the ResponseHeader.
           InputBuffer.peelMessage(response, new thrift.ResponseHeader, protocolFactory)

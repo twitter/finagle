@@ -1,13 +1,11 @@
 package com.twitter.finagle.addr
 
 import com.twitter.concurrent.{Offer, Broker}
-import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.Addr
+import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Time, Timer, Duration, Var}
+import com.twitter.util.{Duration, Future, Time, Timer}
 import scala.collection.immutable.Queue
-import java.net.SocketAddress
 
 private[finagle] object StabilizingAddr {
   private[finagle/*(testing*/] object State extends Enumeration {
@@ -60,9 +58,9 @@ private[finagle] object StabilizingAddr {
      * transition resets the grace period.
      */
     def loop(
-        remq: Queue[(SocketAddress, Time)],
+        remq: Queue[(Address, Time)],
         h: Health,
-        active: Set[SocketAddress],
+        active: Set[Address],
         needPush: Boolean,
         srcAddr: Addr): Future[Unit] = {
       nq = remq.size
@@ -86,7 +84,7 @@ private[finagle] object StabilizingAddr {
         },
 
         addr map {
-          case addr@Addr.Bound(newSet) =>
+          case addr@Addr.Bound(newSet, _) =>
             // Update our pending queue so that newly added
             // entries aren't later removed.
             var q = remq filter { case (e, _) => !(newSet contains e) }
@@ -94,7 +92,7 @@ private[finagle] object StabilizingAddr {
             // Add newly removed elements to the remove queue.
             val until = Time.now + grace
             for (el <- active &~ newSet if !qcontains(q, el))
-              q = q enqueue (el, until)
+              q = q.enqueue((el, until))
 
             loop(q, h, active ++ newSet, true, addr)
 
@@ -103,7 +101,7 @@ private[finagle] object StabilizingAddr {
             // for removal, so that if we become bound again, we can
             // continue on merrily.
             val until = Time.now + grace
-            val q = remq enqueue (active map(el => (el, until)))
+            val q = remq.enqueue(active.map(el => (el, until)))
 
             loop(q, h, active, true, addr)
         },
@@ -120,8 +118,12 @@ private[finagle] object StabilizingAddr {
         if (!needPush) Offer.never else {
           // We always bind if active is nonempty. Otherwise we
           // pass through the current active address.
+          val attrs = srcAddr match {
+            case Addr.Bound(_, attrs) => attrs
+            case _ => Addr.Metadata.empty
+          }
           val addr =
-            if (active.nonEmpty) Addr.Bound(active)
+            if (active.nonEmpty) Addr.Bound(active, attrs)
             else srcAddr
           stabilized.send(addr) map { _ =>
             loop(remq, h, active, false, srcAddr)

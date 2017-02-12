@@ -20,7 +20,7 @@ to define schemas and expose network services that clients access using code
 generated for their preferred programming language.
 
 The IDL is the core of Thrift. IDLs provide clear service specifications that we
-can used to implement clients and servers. This means that different
+can use to implement clients and servers. This means that different
 implementations of servers can be swapped out transparently, since they all
 expose the same interface, regardless of language.
 
@@ -37,6 +37,10 @@ perform protocol negotiation upon connection and will downgrade to raw TBinary
 Thrift if servers are not using the upgraded protocol. By default, `finagle-thrift`
 uses the Thrift framed codec and the binary protocol for serialization.
 
+.. note:: Some Thrift server implementations do not handle this protocol
+          negotiation well. If your client should run into this, you can disable
+          it by calling ``Thrift.client.withNoAttemptTTwitterUpgrade``.
+
 Using finagle-thrift
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -44,30 +48,52 @@ At Twitter, we use our open-source Thrift code-generator called
 `Scrooge <http://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:
 
-.. literalinclude:: ../../../finagle-example/src/main/thrift/hello.thrift
-   :lines: 4-7
+.. literalinclude:: ../../../finagle-example/src/main/thrift/logger.thrift
+   :lines: 7-11
 
 Scrooge will generate code that can be used by `finagle-thrift` with the
-following rich APIs [#]_:
+following rich APIs:
 
 .. _finagle_thrift_server:
 
 Serving the IDL:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServer.scala#thriftserverapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftserverapi
+   :language: scala
 
 .. _finagle_thrift_client:
 
-and the symmetric remote dispatch:
+Construct a client:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftClient.scala#thriftclientapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi
 
-Check out the `finagle-thrift` `API docs <http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$>`_
+A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-call
+
+Thrift services can be combined with :api:`Filters <com.twitter.finagle.Filter$>`.
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-filters
+   :language: scala
+
+Here's an example of a retry policy that retries on Thrift exceptions:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-retries
+   :language: scala
+
+Another way to construct Thrift clients is using the method interface:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-methodiface
+   :language: scala
+
+To convert the Service interface to the method interface use :api:`Thrift.newMethodIface <com.twitter.finagle.Thrift$>`:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-method-adapter
+   :language: scala
+
+The complete example is at `ThriftServiceIfaceExample.scala <https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala>`_.
+Check out the `finagle-thrift` :api:`API <com.twitter.finagle.Thrift$>`
 for more info.
-
-.. [#] This API makes it difficult to wrap endpoints in Finagle
-       filters. We're still experimenting with how to make the `Service`
-       abstraction fit more cleanly into a world with IDLs.
 
 .. _mux:
 
@@ -129,3 +155,48 @@ session.
 Mux enables servers to advertise availability on a per-window basis. This is
 useful for establishing explicit queueing policies, leading the way to
 intelligent back-pressure, slow start, and GC-avoidance.
+
+Mysql
+-----
+*finagle-mysql* is an asynchronous implementation of the MySQL protocol built on top of Finagle.
+The project provides a simple query API with support for prepared statements and
+transactions while taking advantage of Finagle's :ref:`client stack <client_modules>` for
+connection pooling. The implementation supports both the MySQL binary and string protocols.
+
+A client can be constructed using the
+:api:`Mysql <com.twitter.finagle.Mysql$>` protocol object:
+
+.. includecode:: code/protocols/mysql.scala#client
+   :language: scala
+
+We configure the :api:`client's connection pool <com.twitter.finagle.client.DefaultPool>` to be
+compatible with our MySQL server. The constructor returns a Finagle :ref:`ServiceFactory <service_factory>`
+from :api:`mysql.Request <com.twitter.finagle.mysql.Request>` to :api:`mysql.Result <com.twitter.finagle.mysql.Result>`
+which we can use to query the db:
+
+.. includecode:: code/protocols/mysql.scala#query0
+   :language: scala
+
+A :api:`ResultSet <com.twitter.finagle.mysql.ResultSet>` makes it easy to extract
+:api:`Values <com.twitter.finagle.mysql.Value>` based on column names. For example, we can
+implement the above `processRow` as a pattern match on expected values:
+
+.. includecode:: code/protocols/mysql.scala#processRow
+   :language: scala
+
+The ServiceFactory API gives you more fine-grained control over the pool. This isn't always necessary
+- to simplify *finagle-mysql* offers a rich API that wraps the ServiceFactory returned from `newClient`:
+
+.. includecode:: code/protocols/mysql.scala#richClient
+   :language: scala
+
+and we can select:
+
+.. includecode:: code/protocols/mysql.scala#query1
+   :language: scala
+
+Note that `select` takes care of checking out the service and returning it to the pool. `select` and
+other useful methods are available on :api:`mysql.Client <com.twitter.finagle.mysql.Client>` which is returned
+from the call to `newRichClient`.
+
+For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.

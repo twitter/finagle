@@ -1,13 +1,16 @@
 package com.twitter.finagle.httpproxy
 
+import com.twitter.finagle.client.Transporter.Credentials
+import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
+import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
+import com.twitter.util.Base64StringEncoder
+
 import java.net.{InetSocketAddress, SocketAddress}
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.atomic.AtomicReference
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
-
-import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 
 /**
  * Handle SSL connections through a proxy that accepts HTTP CONNECT.
@@ -16,19 +19,39 @@ import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, I
  *
  */
 object HttpConnectHandler {
-  def addHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, pipeline: ChannelPipeline): HttpConnectHandler = {
+  def addHandler(
+    proxyAddr: SocketAddress,
+    addr: InetSocketAddress,
+    pipeline: ChannelPipeline,
+    proxyCredentials: Option[Credentials]
+  ): HttpConnectHandler = {
     val clientCodec = new HttpClientCodec()
-    val handler = new HttpConnectHandler(proxyAddr, addr, clientCodec)
+    val handler = new HttpConnectHandler(proxyAddr, addr, clientCodec, proxyCredentials)
     pipeline.addFirst("httpProxyCodec", handler)
+    proxyAddr match {
+      case proxyInetAddr: InetSocketAddress if proxyInetAddr.isUnresolved =>
+        pipeline.addFirst("socketAddressResolver", new SocketAddressResolveHandler(SocketAddressResolver.random, addr))
+      case _ =>
+    }
     pipeline.addFirst("clientCodec", clientCodec)
     handler
   }
+
+  def addHandler(
+    proxyAddr: SocketAddress,
+    addr: InetSocketAddress,
+    pipeline: ChannelPipeline
+  ): HttpConnectHandler = {
+    addHandler(proxyAddr, addr, pipeline, None)
+  }
 }
 
-class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clientCodec: HttpClientCodec)
-  extends SimpleChannelHandler
-{
-  import HttpConnectHandler._
+class HttpConnectHandler(
+    proxyAddr: SocketAddress,
+    addr: InetSocketAddress,
+    clientCodec: HttpClientCodec,
+    proxyCredentials: Option[Credentials])
+  extends SimpleChannelHandler {
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
@@ -41,6 +64,9 @@ class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clie
     val hostNameWithPort = addr.getAddress.getHostName + ":" + addr.getPort
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, hostNameWithPort)
     req.headers().set("Host", hostNameWithPort)
+    proxyCredentials.foreach { creds =>
+      req.headers().set(HttpHeaders.Names.PROXY_AUTHORIZATION, proxyAuthorizationHeader(creds))
+    }
     Channels.write(ctx, Channels.future(ctx.getChannel), req, null)
   }
 
@@ -119,5 +145,10 @@ class HttpConnectHandler(proxyAddr: SocketAddress, addr: InetSocketAddress, clie
 
       fail(e.getChannel, new ConnectionFailedException(cause, addr))
     }
+  }
+
+  private[this] def proxyAuthorizationHeader(creds: Credentials) = {
+    val bytes = "%s:%s".format(creds.username, creds.password).getBytes(UTF_8)
+    "Basic " + Base64StringEncoder.encode(bytes)
   }
 }

@@ -1,9 +1,6 @@
 package com.twitter.finagle.util
 
-// When we can rely on JDK7, switch to the ThreadLocalRandom
-// distributed there.
-import scala.concurrent.forkjoin.ThreadLocalRandom
-//import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.ThreadLocalRandom
 
 /**
  * A random number generator. Java's divergent interfaces
@@ -11,12 +8,35 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
  * to java.util.Random. We bridge this gap.
  */
 trait Rng {
+  /**
+   * Generate a random Double between `0.0` and `1.0`, inclusive.
+   */
   def nextDouble(): Double
+
+  /**
+   * Generate a random Int betwen 0 (inclusive) and `n` (exclusive).
+   *
+   * @param n the upper bound (exclusive). Must be a positive value.
+   */
   def nextInt(n: Int): Int
+
+  /**
+   * Generate a random Int across the entire allowed integer values
+   * from `Int.MinValue` to `Int.MaxValue`, inclusive.
+   */
   def nextInt(): Int
+
+  /**
+   * Generate a random Long between 0 (inclusive) and `n` (exclusive).
+   *
+   * @param n the upper bound (exclusive). Must be a positive value.
+   */
   def nextLong(n: Long): Long
 }
 
+/**
+ * See [[Rngs]] for Java compatible APIs.
+ */
 object Rng {
   def apply(): Rng = Rng(new java.util.Random)
   def apply(seed: Long): Rng = Rng(new java.util.Random(seed))
@@ -49,5 +69,10 @@ object Rng {
     def nextInt(): Int = ThreadLocalRandom.current().nextInt()
     def nextLong(n: Long): Long = ThreadLocalRandom.current().nextLong(n)
   }
+}
+
+/** Java compatible forwarders. */
+object Rngs {
+  val threadLocal: Rng = Rng.threadLocal
 }
 

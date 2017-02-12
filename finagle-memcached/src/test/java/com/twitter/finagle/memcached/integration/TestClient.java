@@ -1,22 +1,25 @@
 package com.twitter.finagle.memcached.integration;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
+import java.util.ArrayList;
 
 import scala.Option;
+import scala.collection.JavaConversions;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.twitter.finagle.Address;
+import com.twitter.finagle.Address$;
+import com.twitter.finagle.Memcached;
+import com.twitter.finagle.Name$;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.builder.ClientBuilder;
+import com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.java.Client;
 import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
-import com.twitter.finagle.memcached.protocol.text.Memcached;
+import com.twitter.io.Buf;
 import com.twitter.util.Await;
 
 import static org.junit.Assert.assertEquals;
@@ -30,19 +33,23 @@ public class TestClient {
     Assume.assumeTrue(server.isDefined());
   }
 
+  /**
+   * Tests Get/Set commands.
+   */
   @Test
   public void testGetAndSet() throws Exception {
-    Service<Command, Response> service =
-      ClientBuilder.safeBuild(
-        ClientBuilder
-          .get()
-          .hosts(server.get().address())
-          .codec(new Memcached())
-          .hostConnectionLimit(1));
+    Address addr = Address$.MODULE$.apply(server.get().address());
+    ArrayList<Address> addrs = new ArrayList<Address>();
+    addrs.add(addr);
+
+    Service<Command, Response> service = Memcached.client()
+          .configured(new ConcurrentLoadBalancerFactory.Param(1).mk())
+          .newService(Name$.MODULE$.bound(JavaConversions.asScalaBuffer(addrs)), "memcached");
 
     Client client = ClientBase.newInstance(service);
     Await.ready(client.set("foo", "bar"));
-    assertEquals("bar",
-        Await.<ChannelBuffer>result(client.get("foo")).toString(Charset.defaultCharset()));
+
+    Option<String> res = Buf.Utf8$.MODULE$.unapply(Await.result(client.get("foo")));
+    assertEquals("bar", res.get());
   }
 }

@@ -2,19 +2,19 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.finagle.builder._
-import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
+import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.util.{Closable, Duration, Future, Return, Throw, Try, Timer, Var, Witness}
-import _root_.java.{util => ju}
-import _root_.java.lang.UnsupportedOperationException
+import com.twitter.util._
 import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable
+import _root_.java.{util => ju}
 import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.util.control.NonFatal
 
 /**
  * Indicates that all [[com.twitter.finagle.kestrel.ReadHandle ReadHandles]]
@@ -82,7 +82,7 @@ private[finagle] object MultiReaderHelper {
     }
 
     def onClose(handles: Set[ReadHandle]) {
-      handles foreach { _.close }
+      handles foreach { _.close() }
       error ! ReadClosedException
     }
 
@@ -95,43 +95,38 @@ private[finagle] object MultiReaderHelper {
       val queues = handles.map { _.messages }.toSeq
       val errors = handles.map { h =>
         h.error map { e =>
-          logger.warning("Read handle %d encountered exception : %s".format(
-            _root_.java.lang.System.identityHashCode(h), e.getMessage))
+          logger.warning(s"Read handle ${_root_.java.lang.System.identityHashCode(h)} " +
+            s"encountered exception : ${e.getMessage}")
           h
         }
       }.toSeq
-      val closeOf = close.recv { _ => onClose(handles) }
 
       // We sequence here to ensure that `close` gets priority over reads.
-      val of = closeOf orElse {
-        Offer.choose(
-          closeOf,
-          Offer.choose(queues:_*) { m =>
-            messages ! trackMessage(m)
-            loop(handles)
-          },
-          Offer.choose(errors:_*) { h =>
-            logger.info("Closed read handle %d due to it encountered error".format(
-              _root_.java.lang.System.identityHashCode(h)))
-            h.close()
-            val newHandles = handles - h
-            exposeNumReadHandles(newHandles)
-            loop(newHandles)
-          },
-          clusterUpdate.recv { newHandles =>
+      Offer.prioritize(
+        close.recv { _ => onClose(handles) },
+        Offer.choose(queues:_*) { m =>
+          messages ! trackMessage(m)
+          loop(handles)
+        },
+        Offer.choose(errors:_*) { h =>
+          logger.info(s"Closed read handle ${_root_.java.lang.System.identityHashCode(h)} due to " +
+            s"it encountered error")
+          h.close()
+          val newHandles = handles - h
+          exposeNumReadHandles(newHandles)
+          loop(newHandles)
+        },
+        clusterUpdate.recv { newHandles =>
           // Close any handles that exist in old set but not the new one.
-            (handles &~ newHandles) foreach { h =>
-              logger.info("Closed read handle %d due to its host disappeared".format(
-                _root_.java.lang.System.identityHashCode(h)))
-              h.close()
-            }
-            exposeNumReadHandles(newHandles)
-            loop(newHandles)
+          (handles &~ newHandles) foreach { h =>
+            logger.info(s"Closed read handle ${_root_.java.lang.System.identityHashCode(h)} due " +
+              s"to its host disappeared")
+            h.close()
           }
-        )
-      }
-
-      of.sync()
+          exposeNumReadHandles(newHandles)
+          loop(newHandles)
+        }
+      ).sync()
     }
 
     // Wait until the ReadHandles set is populated before initializing.
@@ -191,29 +186,40 @@ private[finagle] object MultiReaderHelper {
  * there are multiple available messages, round-robin across them.  Otherwise,
  * wait for the first message to arrive.
  *
- * Var[Addr] example:
+ * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderMemcache(va, "the-queue")
+ *     MultiReaderMemcache("/the/path", "the-queue")
  *       .clientBuilder(
- *         ClientBuilder()
- *           .codec(MultiReaderMemcache.codec)
- *           .requestTimeout(1.minute)
- *           .connectTimeout(1.minute)
- *           .hostConnectionLimit(1) /* etc... but do not set hosts or build */)
+ *         ClientBuilder()      /* etc... but do not set hosts or build */
+ *           .stack(Kestrel.client
+ *             .withSession.acquisitionTimeout(1.minute)
+ *             .withRequestTimeout(1.minute)
+ *             .withSessionPool.maxValue(1)))
  *       .retryBackoffs(/* Stream[Duration], Timer; optional */)
  *       .build()
  * }}}
  */
 object MultiReaderMemcache {
+  /**
+   * Create a new MultiReader which dispatches requests to `dest` using the memcache protocol.
+   *
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String): MultiReaderBuilderMemcache =
+    apply(Resolver.eval(dest), queueName)
+
   def apply(dest: Name, queueName: String): MultiReaderBuilderMemcache = {
     dest match {
       case Name.Bound(va) => apply(va, queueName)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderMemcache.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName)
     }
   }
 
@@ -224,9 +230,11 @@ object MultiReaderMemcache {
 
   /**
    * Helper for getting the right codec for the memcache protocol
+   *
    * @return the Kestrel codec
    */
-  def codec = Kestrel()
+  @deprecated("Use `.stack(Kestrel.client)` on the configured com.twitter.finagle.builder.ClientBuilder instead", "2016-12-6")
+  def codec = KestrelCodec()
 }
 
 /**
@@ -238,16 +246,14 @@ object MultiReaderMemcache {
  *
  * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderThrift(va, "the-queue")
+ *     MultiReaderThriftMux("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
- *           .codec(MultiReaderThrift.codec(ClientId("myClientName"))
- *           .requestTimeout(1.minute)
- *           .connectTimeout(1.minute)
- *           .hostConnectionLimit(1) /* etc... but do not set hosts or build */)
+ *           .stack(ThriftMux.client
+ *             .withClientId(ClientId("myClientName"))
+ *             .withSession.acquisitionTimeout(1.minute)
+ *             .withRequestTimeout(1.minute))
  *       .retryBackoffs(/* Stream[Duration], Timer; optional */)
  *       .build()
  * }}}
@@ -257,30 +263,117 @@ object MultiReaderMemcache {
  *   val name: com.twitter.finagle.Name = Resolver.eval(...)
  *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderThrift(va, "the-queue", ClientId("myClientName"))
+ *     MultiReaderThriftMux(va, "the-queue", ClientId("myClientName"))
  *       .retryBackoffs(/* Stream[Duration], Timer; optional */)
  *       .build()
  * }}}
  */
+object MultiReaderThriftMux {
+  /**
+   * Create a new MultiReader which dispatches requests to `dest` using the thriftmux protocol.
+   *
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   */
+  def apply(dest: String, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThriftMux =
+    apply(Resolver.eval(dest), queueName, clientId)
+
+  /**
+   * Used to create a thriftmux based MultiReader with a ClientId when a custom
+   * client builder will not be used.  If a custom client builder will be
+   * used then it is more reasonable to use the version of apply that does
+   * not take a ClientId or else the client id will need to be passed to
+   * both apply and the codec in clientBuilder.
+   *
+   * @param dest a [[com.twitter.finagle.Name]] representing the Kestrel
+   * endpoints to connect to
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   *
+   * @return A MultiReaderBuilderThriftMux
+   */
+  def apply(dest: Name, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThriftMux = {
+    dest match {
+      case Name.Bound(va) => apply(va, queueName, clientId)
+      case Name.Path(path) => apply(Namer.resolve(path), queueName, clientId)
+    }
+  }
+
+  /**
+   * Used to create a thriftmux based MultiReader with a ClientId when a custom
+   * client builder will not be used.  If a custom client builder will be
+   * used then it is more reasonable to use the version of apply that does
+   * not take a ClientId or else the client id will need to be passed to
+   * both apply and the codec in clientBuilder.
+   *
+   * @param va endpoints for Kestrel
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   *
+   * @return A MultiReaderBuilderThriftMux
+   */
+  def apply(
+    va: Var[Addr],
+    queueName: String,
+    clientId: Option[ClientId]
+  ): MultiReaderBuilderThriftMux = {
+    val config = MultiReaderConfig[ThriftClientRequest, Array[Byte]](va, queueName, clientId)
+    new MultiReaderBuilderThriftMux(config)
+  }
+
+  /**
+   * Used to create a thriftmux based MultiReader when a ClientId will neither
+   * not be provided or will be provided to the codec was part of creating
+   * a custom client builder.
+   * This is provided as a separate method for Java compatability.
+   *
+   * @param va endpoints for Kestrel
+   * @param queueName the name of the queue to read from
+   *
+   * @return A MultiReaderBuilderThriftMux
+   */
+  def apply(va: Var[Addr], queueName: String): MultiReaderBuilderThriftMux = {
+    this(va, queueName, None)
+  }
+}
+
 object MultiReaderThrift {
+  /**
+   * Create a new MultiReader which dispatches requests to `dest` using the thrift protocol.
+   *
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift =
+    apply(Resolver.eval(dest), queueName, clientId)
+
   /**
    * Used to create a thrift based MultiReader with a ClientId when a custom
    * client builder will not be used.  If a custom client builder will be
    * used then it is more reasonable to use the version of apply that does
    * not take a ClientId or else the client id will need to be passed to
    * both apply and the codec in clientBuilder.
+   *
    * @param dest a [[com.twitter.finagle.Name]] representing the Kestrel
    * endpoints to connect to
    * @param queueName the name of the queue to read from
    * @param clientId the clientid to be used
+   *
    * @return A MultiReaderBuilderThrift
    */
   def apply(dest: Name, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift = {
     dest match {
       case Name.Bound(va) => apply(va, queueName, clientId)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderThrift.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName, clientId)
     }
   }
 
@@ -290,9 +383,11 @@ object MultiReaderThrift {
    * used then it is more reasonable to use the version of apply that does
    * not take a ClientId or else the client id will need to be passed to
    * both apply and the codec in clientBuilder.
+   *
    * @param va endpoints for Kestrel
    * @param queueName the name of the queue to read from
    * @param clientId the clientid to be used
+   *
    * @return A MultiReaderBuilderThrift
    */
   def apply(
@@ -309,19 +404,15 @@ object MultiReaderThrift {
    * not be provided or will be provided to the codec was part of creating
    * a custom client builder.
    * This is provided as a separate method for Java compatability.
+   *
    * @param va endpoints for Kestrel
    * @param queueName the name of the queue to read from
+   *
    * @return A MultiReaderBuilderThrift
    */
   def apply(va: Var[Addr], queueName: String): MultiReaderBuilderThrift = {
-    this(va,queueName, None)
+    this(va, queueName, None)
   }
-
-  /**
-   * Helper for getting the right codec for the thrift protocol
-   * @return the ThriftClientFramedCodec codec
-   */
-  def codec(clientId: ClientId) = ThriftClientFramedCodec(Some(clientId))
 }
 
 /**
@@ -338,16 +429,16 @@ object MultiReaderThrift {
  *   val readHandle =
  *     MultiReader(va, "the-queue")
  *       .clientBuilder(
- *         ClientBuilder()
- *           .codec(Kestrel())
- *           .requestTimeout(1.minute)
- *           .connectTimeout(1.minute)
- *           .hostConnectionLimit(1) /* etc... but do not set hosts or build */)
+ *         ClientBuilder()      /* etc... but do not set hosts or build */
+ *           .stack(Kestrel.client
+ *             .withSession.acquisitionTimeout(1.minute)
+ *             .withRequestTimeout(1.minute)
+ *             .withSessionPool.maxSize(1)))
  *       .retryBackoffs(/* Stream[Duration], Timer; optional */)
  *       .build()
  * }}}
  */
-@deprecated("Use MultiReaderMemcache or MultiReaderThrift instead", "6.15.1")
+@deprecated("Use MultiReaderMemcache or MultiReaderThriftMux instead", "6.15.1")
 object MultiReader {
   /**
    * Create a Kestrel memcache protocol based builder
@@ -458,8 +549,6 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
 
   private[this] val logger = DefaultLogger
 
-  private[this] val ReturnEmptySet = Return(Set.empty[ReadHandle])
-
   protected[kestrel] def copy(config: MultiReaderConfig[Req, Rep]): Builder
 
   protected[kestrel] def withConfig(
@@ -499,6 +588,7 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
    *
    * @param trackOutstandingRequests
    *          flag to track outstanding requests.
+   *
    * @return multi reader builder
    */
   def trackOutstandingRequests(trackOutstandingRequests: Boolean): Builder =
@@ -509,6 +599,7 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
    *
    * @param statsReceiver
    *          stats receiver
+   *
    * @return multi reader builder
    */
   def statsReceiver(statsReceiver: StatsReceiver): Builder =
@@ -521,16 +612,16 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
     }
 
     // Use a mutable Map so that we can modify it in-place on cluster change.
-    val currentHandles = mutable.Map.empty[SocketAddress, ReadHandle]
+    val currentHandles = mutable.Map.empty[Address, ReadHandle]
 
     val event = config.va.changes map {
-      case Addr.Bound(socketAddrs) => {
-        (currentHandles.keySet &~ socketAddrs) map { socketAddr =>
-          logger.info("Host %s left for reading %s.".format(socketAddr, config.queueName))
+      case Addr.Bound(addrs, _) => {
+        (currentHandles.keySet &~ addrs) foreach { addr =>
+          logger.info(s"Host ${addr} left for reading queue ${config.queueName}")
         }
-        val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
+        val newHandles = (addrs &~ currentHandles.keySet) map { addr =>
           val factory = baseClientBuilder
-            .hosts(socketAddr)
+            .addrs(addr)
             .buildFactory()
 
           val client = createClient(factory)
@@ -541,23 +632,38 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
             case _ => client.readReliably(config.queueName)
           }
 
-          logger.info("Host %s joined for reading %s (handle = %d).".format(
-            socketAddr, config.queueName, _root_.java.lang.System.identityHashCode(handle)))
+          handle.error foreach { case NonFatal(cause) =>
+            logger.warning(s"Closing service factory for address: ${addr}")
+            factory.close()
+          }
 
-          (socketAddr, handle)
+          logger.info(s"Host ${addr} joined for reading ${config.queueName} " +
+            s"(handle = ${_root_.java.lang.System.identityHashCode(handle)}).")
+
+          (addr, handle)
         }
 
         synchronized {
-          currentHandles.retain { case (addr, _) => socketAddrs.contains(addr) }
+          currentHandles.retain { case (addr, _) => addrs.contains(addr) }
           currentHandles ++= newHandles
         }
 
         Return(currentHandles.values.toSet)
       }
 
-      case Addr.Failed(t) => Throw(t)
+      case Addr.Neg =>
+        logger.info(s"Address could not be bound while trying to read from ${config.queueName}")
+        currentHandles.clear()
+        Return(currentHandles.values.toSet)
 
-      case _ => ReturnEmptySet
+      case Addr.Pending =>
+        // If resolution goes back to pending, it can mean there is a
+        // transient problem with service discovery. Keep the existing
+        // set.
+        logger.info(s"Pending name resolution for reading from ${config.queueName}")
+        Return(currentHandles.values.toSet)
+
+      case Addr.Failed(t) => Throw(t)
     }
 
     Var(Return(Set.empty), event)
@@ -580,11 +686,9 @@ abstract class MultiReaderBuilderMemcacheBase[Builder] private[kestrel](
 
   protected[kestrel] def defaultClientBuilder: MemcacheClientBuilder =
     ClientBuilder()
-      .codec(Kestrel())
-      .connectTimeout(1.minute)
-      .requestTimeout(1.minute)
-      .hostConnectionLimit(1)
-      .daemon(true)
+      .stack(Kestrel.client
+        .withSession.acquisitionTimeout(1.minute)
+        .withRequestTimeout(1.minute))
 
   protected[kestrel] def createClient(factory: ServiceFactory[Command, Response]): Client =
     Client(factory)
@@ -622,27 +726,33 @@ class MultiReaderBuilderMemcache private[kestrel](config: MultiReaderConfig[Comm
     new MultiReaderBuilderMemcache(config)
 }
 
+
+
 /**
  * Factory for [[com.twitter.finagle.kestrel.ReadHandle]] instances using
- * Kestrel's thrift protocol.
+ * Kestrel's thriftmux protocol.
  */
-class MultiReaderBuilderThrift private[kestrel](
+class MultiReaderBuilderThriftMux private[kestrel](
     config: MultiReaderConfig[ThriftClientRequest, Array[Byte]])
-  extends MultiReaderBuilder[ThriftClientRequest, Array[Byte], MultiReaderBuilderThrift](config) {
-  type ThriftClientBuilder =
+  extends MultiReaderBuilder[ThriftClientRequest, Array[Byte], MultiReaderBuilderThriftMux](config) {
+  type ThriftMuxClientBuilder =
     ClientBuilder[ThriftClientRequest, Array[Byte], Nothing, ClientConfig.Yes, ClientConfig.Yes]
 
   protected[kestrel] def copy(
-      config: MultiReaderConfig[ThriftClientRequest, Array[Byte]]): MultiReaderBuilderThrift =
-    new MultiReaderBuilderThrift(config)
+      config: MultiReaderConfig[ThriftClientRequest, Array[Byte]]): MultiReaderBuilderThriftMux =
+    new MultiReaderBuilderThriftMux(config)
 
-  protected[kestrel] def defaultClientBuilder: ThriftClientBuilder =
+  protected[kestrel] def defaultClientBuilder: ThriftMuxClientBuilder = {
+    val stackClient = config.clientId match {
+      case Some(id) => ThriftMux.client.withClientId(id)
+      case None => ThriftMux.client
+    }
+
     ClientBuilder()
-      .codec(ThriftClientFramedCodec(config.clientId))
-      .connectTimeout(1.minute)
-      .requestTimeout(1.minute)
-      .hostConnectionLimit(1)
-      .daemon(true)
+      .stack(stackClient
+        .withSession.acquisitionTimeout(1.minute)
+        .withRequestTimeout(1.minute))
+  }
 
   protected[kestrel] def createClient(
       factory: ServiceFactory[ThriftClientRequest, Array[Byte]]): Client =
@@ -656,3 +766,41 @@ class MultiReaderBuilderThrift private[kestrel](
     withConfig(_.copy(_txnAbortTimeout = txnAbortTimeout))
 }
 
+/**
+ * Factory for [[com.twitter.finagle.kestrel.ReadHandle]] instances using
+ * Kestrel's thriftmux protocol.
+ */
+class MultiReaderBuilderThrift private[kestrel](
+  config: MultiReaderConfig[ThriftClientRequest, Array[Byte]])
+  extends MultiReaderBuilder[ThriftClientRequest, Array[Byte], MultiReaderBuilderThrift](config) {
+  type ThriftClientBuilder =
+    ClientBuilder[ThriftClientRequest, Array[Byte], Nothing, ClientConfig.Yes, ClientConfig.Yes]
+
+  protected[kestrel] def copy(
+    config: MultiReaderConfig[ThriftClientRequest, Array[Byte]]): MultiReaderBuilderThrift =
+    new MultiReaderBuilderThrift(config)
+
+  protected[kestrel] def defaultClientBuilder: ThriftClientBuilder = {
+    val stackClient = config.clientId match {
+      case Some(id) => Thrift.client.withClientId(id)
+      case None => Thrift.client
+    }
+
+    ClientBuilder()
+      .stack(stackClient
+        .withSession.acquisitionTimeout(1.minute)
+        .withRequestTimeout(1.minute)
+        .withSessionPool.maxSize(1))
+  }
+
+  protected[kestrel] def createClient(
+      factory: ServiceFactory[ThriftClientRequest, Array[Byte]]): Client =
+    Client.makeThrift(factory, config.txnAbortTimeout)
+
+  /**
+   * While reading items, an open transaction will be auto aborted if not confirmed by the client within the specified
+   * timeout.
+   */
+  def txnAbortTimeout(txnAbortTimeout: Duration) =
+    withConfig(_.copy(_txnAbortTimeout = txnAbortTimeout))
+}

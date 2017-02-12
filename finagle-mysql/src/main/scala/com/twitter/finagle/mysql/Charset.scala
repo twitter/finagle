@@ -1,23 +1,25 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import java.nio.charset.{Charset => JCharset}
+import java.nio.charset.StandardCharsets.{UTF_8, ISO_8859_1, US_ASCII}
 
 object Charset {
+
   /**
    * Default Charset used by this client.
    */
-  val defaultCharset = JCharset.forName("UTF-8")
+  val defaultCharset = UTF_8
 
   /**
    * Converts from mysql charset to java charset.
    */
   def apply(charset: Short): JCharset =
     if (isUtf8(charset))
-      JCharset.forName("UTF-8")
+      UTF_8
     else if (isLatin1(charset))
-      JCharset.forName("ISO-8859-1")
+      ISO_8859_1
     else if (isBinary(charset))
-      JCharset.forName("US-ASCII")
+      US_ASCII
     else
       throw new IllegalArgumentException("Charset %d is not supported.".format(charset))
 

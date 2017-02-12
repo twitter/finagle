@@ -4,7 +4,7 @@ import com.twitter.util.{Time, MockTimer}
 import com.twitter.conversions.time.intToTimeableNumber
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{when, verify, times}
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -30,7 +30,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(3.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 2000.bytes)
+      assert(snooper.handleBytes() == 2000.bytes)
     }
   }
 
@@ -55,7 +55,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(8.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 2000.bytes)
+      assert(snooper.handleBytes() == 2000.bytes)
     }
   }
 }

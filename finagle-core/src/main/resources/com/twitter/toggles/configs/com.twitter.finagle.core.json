@@ -1,0 +1,9 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.finagle.core.UseClientNackAdmissionFilter",
+      "description": "Enable client side nack admission control",
+      "fraction": 0.0
+    }
+  ]
+}

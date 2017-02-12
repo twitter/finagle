@@ -1,12 +1,11 @@
-maven_layout()
-
-jar_library(name='finagle-http',
+target(
   dependencies=[
-    'finagle/finagle-http/src/main/scala'
+    'finagle/finagle-http/src/main/scala',
+    'finagle/finagle-http/src/main/java'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-http/src/test/java',
     'finagle/finagle-http/src/test/scala'

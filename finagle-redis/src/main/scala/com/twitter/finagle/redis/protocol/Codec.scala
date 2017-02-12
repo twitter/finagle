@@ -1,14 +1,10 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.util.StringToChannelBuffer
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import scala.collection.immutable.WrappedString
+import com.twitter.io.Buf
+import org.jboss.netty.buffer.ChannelBuffers
 
 private[redis] object RedisCodec {
-  object NilValue extends WrappedString("nil") {
-    def getBytes(charset: String = "UTF_8") = Array[Byte]()
-    def getBytes = Array[Byte]()
-  }
 
   val STATUS_REPLY        = '+'
   val ERROR_REPLY         = '-'
@@ -22,7 +18,7 @@ private[redis] object RedisCodec {
   val TOKEN_DELIMITER     = ' '
   val EOL_DELIMITER       = "\r\n"
 
-  val NIL_VALUE           = NilValue
+  val NIL_VALUE           = "nil"
   val NIL_VALUE_BA        = ChannelBuffers.EMPTY_BUFFER
 
 
@@ -45,28 +41,13 @@ private[redis] object RedisCodec {
   val POS_INFINITY_BA     = StringToChannelBuffer("+inf")
   val NEG_INFINITY_BA     = StringToChannelBuffer("-inf")
 
+  val BULK_REPLY_BUF: Buf       = Buf.Utf8("$")
+  val MBULK_REPLY_BUF: Buf      = Buf.Utf8("*")
 
-  def toUnifiedFormat(args: Seq[ChannelBuffer], includeHeader: Boolean = true) = {
-    val header = includeHeader match {
-      case true =>
-        Seq(ARG_COUNT_MARKER_BA, StringToChannelBuffer(args.length.toString), EOL_DELIMITER_BA)
-      case false => Nil
-    }
-    val buffers = args.map({ arg =>
-      Seq(
-        ARG_SIZE_MARKER_BA,
-        StringToChannelBuffer(arg.readableBytes.toString),
-        EOL_DELIMITER_BA,
-        arg,
-        EOL_DELIMITER_BA
-      )
-    }).flatten
-    ChannelBuffers.wrappedBuffer((header ++ buffers).toArray:_*)
-  }
+  val ARG_COUNT_MARKER_BUF: Buf = MBULK_REPLY_BUF
+  val ARG_SIZE_MARKER_BUF: Buf  = BULK_REPLY_BUF
 
-}
+  val EOL_DELIMITER_BUF: Buf    = Buf.Utf8(EOL_DELIMITER)
 
-abstract class RedisMessage {
-  def toChannelBuffer: ChannelBuffer
-  def toByteArray: Array[Byte] = toChannelBuffer.array
+  val NIL_VALUE_BUF: Buf        = Buf.Empty
 }

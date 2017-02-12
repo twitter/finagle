@@ -1,5 +1,6 @@
 package com.twitter.finagle.serverset2.client.apache
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
@@ -21,7 +22,7 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
     extends ZooKeeperRW {
   private def fromZKData(data: Array[Byte]): Option[Buf] = data match {
     case null => None
-    case x => Some(Buf.ByteArray(x))
+    case x => Some(Buf.ByteArray.Owned(x))
   }
 
   /**
@@ -37,7 +38,7 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
 
   def sessionId: Long = zk.getSessionId
 
-  def sessionPasswd: Buf = Buf.ByteArray(zk.getSessionPasswd)
+  def sessionPasswd: Buf = Buf.ByteArray.Owned(zk.getSessionPasswd)
 
   def sessionTimeout: Duration = Duration.fromMilliseconds(zk.getSessionTimeout)
 
@@ -321,7 +322,14 @@ private[serverset2] object ApacheZooKeeper {
    */
   private[apache] def newClient(config: ClientConfig): Watched[ZooKeeperRW] = {
     val timeoutInMs = config.sessionTimeout.inMilliseconds.toInt
-    val watcher = new ApacheWatcher(config.statsReceiver)
+    val statsReceiver = config.statsReceiver
+    val watcher = new ApacheWatcher(statsReceiver)
+    val statsWatcher = SessionStats.watcher(
+      watcher.state,
+      statsReceiver,
+      5.seconds,
+      config.timer
+    )
     val zk = (config.sessionId, config.password) match {
       case (Some(id), Some(pw)) =>
         new ApacheZooKeeper(
@@ -330,7 +338,7 @@ private[serverset2] object ApacheZooKeeper {
     }
     val wrappedZk: ZooKeeperRW = new StatsRW {
       protected val underlying: ZooKeeperRW = zk
-      protected val stats: StatsReceiver = config.statsReceiver
+      protected val stats: StatsReceiver = statsReceiver
     }
     if (com.twitter.finagle.serverset2.client.chatty()) {
       val logger = Logger.get(getClass)
@@ -339,10 +347,10 @@ private[serverset2] object ApacheZooKeeper {
           protected val underlying: ZooKeeperRW = wrappedZk
           protected val print = { m: String => logger.info(m) }
         },
-        watcher.state)
+        statsWatcher)
     }
     else
-      Watched(wrappedZk, watcher.state)
+      Watched(wrappedZk, statsWatcher)
   }
 }
 

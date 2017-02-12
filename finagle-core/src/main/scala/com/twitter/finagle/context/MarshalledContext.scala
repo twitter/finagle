@@ -1,137 +1,160 @@
 package com.twitter.finagle.context
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
-import com.twitter.util.{Try, Return, Throw}
-import scala.collection.mutable
+import com.twitter.logging.Logger
+import com.twitter.util.{Local, Return, Throw, Try}
 
 /**
  * A marshalled context contains bindings that may be
  * marshalled and sent across process boundaries. A set
  * of marshalled bindings may be restored in the local
  * environment. Thus we can use marshalled contexts to
- * propagate a set of bindings across a whole request 
+ * propagate a set of bindings across a whole request
  * tree.
  */
-final class MarshalledContext extends Context {
+final class MarshalledContext private[context] extends Context {
+
+  private[this] val log = Logger.get()
+
+  private[this] val local = new Local[Map[Buf, Cell]]
+
+  // Cell and its sub types are package visible for testing purposes only.
+  private[context] sealed trait Cell
+
+  private[context] case class Real[A](key: Key[A], content: Some[A]) extends Cell
+
+  private[context] case class Translucent(key: Buf, value: Buf) extends Cell {
+    private[this] var cachedEnv: Some[_] = null
+
+    // Should only be called after this Cell has been looked up by its key as the 
+    // key is only used to unmarshal if the parsed result hasn't been cached
+    def unmarshal[A](key: Key[A]): Option[A] = {
+      val result = {
+        if (cachedEnv != null) cachedEnv
+        else {
+          key.tryUnmarshal(value) match {
+            case Return(value) =>
+              cachedEnv = Some(value)
+              cachedEnv
+            case Throw(e) =>
+              val bytesToDisplay = value.slice(0, 10)
+              val bytesString = Buf.slowHexString(bytesToDisplay)
+              val message =
+                s"Failed to deserialize marshalled context entry for key ${key.id}. " +
+                s"Value has length ${value.length}. First ${bytesToDisplay.length} bytes " +
+                s"of the value: 0x$bytesString"
+              log.warning(e, message)
+              None
+          }
+        }
+      }
+
+      result.asInstanceOf[Option[A]]
+    }
+  }
+
   /**
    * Keys in MarshalledContext must provide a marshaller
-   * and unmarshaller.
+   * and unmarshaller. The key `id` is used for marshalling and
+   * unmarshalling and thus must be unique. The behavior of the
+   * MarshalledContext when using two keys with the same key `id`
+   * is undefined.
    */
-  abstract class Key[A] {
+  abstract class Key[A](val id: String) {
     /**
      * A unique identifier defining this marshaller. This is
-     * transmitted together with marshalled values in order to 
+     * transmitted together with marshalled values in order to
      * pick the the appropriate unmarshaller for a given value.
      */
-    def marshalId: Buf
-  
+    final val marshalId: Buf = Buf.ByteBuffer.coerce(Buf.Utf8(id))
+
     /**
      * Marshal an A-typed value into a Buf.
      */
     def marshal(value: A): Buf
-  
-    /** 
+
+    /**
      * Attempt to unmarshal an A-typed context value.
      */
     def tryUnmarshal(buf: Buf): Try[A]
   }
 
-  /**
-   * A translucent environment is capable of storing key/value pairs
-   * to be (possibly) unmarshalled later.
-   */
-  case class Translucent(next: Env, marshalId: Buf, marshalled: Buf) extends Env {
-    @volatile private var cachedEnv: Env = null
-
-    private def env[A](key: Key[A]): Env =
-      if (cachedEnv != null) cachedEnv
-      else if (key.marshalId != marshalId) next
-      else (key.tryUnmarshal(marshalled): Try[A]) match {
-        case Return(value) =>
-          cachedEnv = Bound(next, key, value)
-          cachedEnv
-        case Throw(_) =>
-          // Should we omit the context altogether when this happens?
-          // Should we log some warnings?
-          next
-      }
-
-    def apply[A](key: Key[A]): A = env(key).apply(key)
-    def get[A](key: Key[A]): Option[A] = env(key).get(key)
-    def contains[A](key: Key[A]): Boolean = env(key).contains(key)
-
-    override def toString =
-      if (cachedEnv != null) cachedEnv.toString else {
-        val Buf.Utf8(id8) = marshalId
-        s"Translucent(${id8}(${marshalled.length})) :: $next"
-      }
+  def get[A](key: Key[A]): Option[A] = env.get(key.marshalId) match {
+    case Some(Real(_, someValue)) => someValue.asInstanceOf[Some[A]]
+    case Some(t: Translucent) => t.unmarshal(key)
+    case None => None
   }
 
-  private def marshalMap(env: Env, map: mutable.Map[Buf, Buf]): Unit = 
-    env match {
-      case Bound(next, key, value) =>
-        marshalMap(next, map)
-        map.put(key.marshalId, key.marshal(value))
-      case Translucent(next, id, marshalled) =>
-        marshalMap(next, map)
-        map.put(id, marshalled)
-      case Cleared(next, key) =>
-        marshalMap(next, map)
-        map.remove(key.marshalId)
-      case Empty =>
-        ()
+  def let[A, R](key: Key[A], value: A)(fn: => R): R =
+    letLocal(env.updated(key.marshalId, Real(key, Some(value))))(fn)
+
+  def let[A, B, R](key1: Key[A], value1: A, key2: Key[B], value2: B)(fn: => R): R = {
+    val next = env.updated(key1.marshalId, Real(key1, Some(value1)))
+      .updated(key2.marshalId, Real(key2, Some(value2)))
+    letLocal(next)(fn)
   }
-  
+
+  def let[R](pairs: Iterable[KeyValuePair[_]])(fn: => R): R = {
+    val next = pairs.foldLeft(env) { case (e, KeyValuePair(k, v)) =>
+      e.updated(k.marshalId, Real(k, Some(v)))
+    }
+    letLocal(next)(fn)
+  }
+
+  def letClear[R](key: Key[_])(fn: => R): R =
+    letLocal(env - key.marshalId)(fn)
+
+  def letClear[R](keys: Iterable[Key[_]])(fn: => R): R = {
+    val next = keys.foldLeft(env) { case (e, k) => e - k.marshalId }
+    letLocal(next)(fn)
+  }
+
+  def letClearAll[R](fn: => R): R = local.letClear(fn)
+
   /**
    * Store into the current environment a set of marshalled
    * bindings and run `fn`. Bindings are unmarshalled on demand.
    */
   def letUnmarshal[R](contexts: Iterable[(Buf, Buf)])(fn: => R): R = {
-    val u = new Unmarshaller(env)
-    for ((id, marshalled) <- contexts)
-      u.put(id, marshalled)
-    letEnv(u.build)(fn)
-  }
-  
-  /**
-   * Marshal the `env` into a set of (id, value) pairs.
-   */
-  def marshal(env: Env): Iterable[(Buf, Buf)] = {
-    val map = mutable.Map[Buf, Buf]()
-    marshalMap(env, map)
-    map
+    if (contexts.isEmpty) fn
+    else letLocal(doUnmarshal(env, contexts))(fn)
   }
 
-  /** 
+  /**
    * Marshal the current environment into a set of (id, value) pairs.
    */
-  def marshal(): Iterable[(Buf, Buf)] =
-    marshal(env)
+  def marshal(): Iterable[(Buf, Buf)] = marshal(env)
 
-  /**
-   * Produce an environment consisting of the given marshalled
-   * (id, value) pairs. They are unmarshalled on demand.
-   */
-  def unmarshal(contexts: Iterable[(Buf, Buf)]): Env = {
-    val builder = new Unmarshaller
-    for ((id, marshalled) <- contexts)
-      builder.put(id, marshalled)
-    builder.build
+  // Exposed for testing
+  private[context] def marshal(env: Map[Buf, Cell]): Iterable[(Buf, Buf)] = {
+    env.mapValues {
+      case Real(k, v) => k.marshal(v.x)
+      case Translucent(_, vBuf) => vBuf
+    }
   }
 
-  /**
-   * An Unmarshaller gradually builds up an environment from 
-   * a set of (id, value) pairs.
-   */
-  class Unmarshaller(init: Env) {
-    def this() = this(Empty)
+  // Exposed for testing
+  private[context] def env: Map[Buf, Cell] = local() match {
+    case Some(env) => env
+    case None => Map.empty
+  }
 
-    private[this] var env = init
-
-    def put(id: Buf, marshalled: Buf) {
-      env = Translucent(env, id, marshalled)
+  // Exposed for testing
+  private[context] def doUnmarshal(env: Map[Buf, Cell], contexts: Iterable[(Buf, Buf)]): Map[Buf, Cell] = {
+    contexts.foldLeft(env) { case (env, (k, v)) =>
+      env.updated(k, Translucent(MarshalledContext.copy(k), MarshalledContext.copy(v)))
     }
+  }
 
-    def build: Env = env
+  // Exposed for testing
+  private[context] def letLocal[T](env: Map[Buf, Cell])(fn: => T): T = local.let(env)(fn)
+}
+
+private object MarshalledContext {
+  // TODO: This needs to be adapted to gracefully handle arbitrary types, not just ChannelBufferBuf
+  def copy(buf: Buf): Buf = buf match {
+    case ChannelBufferBuf(cb) => Buf.ByteBuffer.Shared(cb.toByteBuffer)
+    case _ => buf
   }
 }

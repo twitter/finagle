@@ -232,7 +232,7 @@ public class F {
       return true;
     }
 
-    private class another_method implements ProcessFunction {
+    private class another_method implements com.facebook.fb303.FacebookService.Processor.ProcessFunction {
       public void process(int seqid, TProtocol iprot, TProtocol oprot) throws TException
       {
         another_method_args args = new another_method_args();

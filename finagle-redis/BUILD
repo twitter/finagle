@@ -1,14 +1,11 @@
-maven_layout()
-
-jar_library(name='finagle-redis',
+target(
   dependencies=[
     'finagle/finagle-redis/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
-    'finagle/finagle-redis/src/test/java',
     'finagle/finagle-redis/src/test/scala'
   ]
 )

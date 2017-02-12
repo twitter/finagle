@@ -1,11 +1,10 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.io.Buf
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.Service
 import com.twitter.util.{ Await, Future }
-import com.twitter.io.Charsets
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -18,27 +17,38 @@ class ConnectedClientTest extends FunSuite with MockitoSugar {
 
   val service = mock[Service[Command, Response]]
   val client = Client.apply(service)
-  val casUnique = ChannelBuffers.wrappedBuffer("unique key".getBytes(Charsets.Utf8))
+  val casUnique = Buf.Utf8("unique key")
   val key = "key"
-  val value = ChannelBuffers.wrappedBuffer("value".getBytes(Charsets.Utf8))
+  val value = Buf.Utf8("value")
 
   test("cas correctly responds to return states of the service") {
     when(service.apply(any[Command])).thenReturn(Future.value(Stored()))
-    assert(Await.result(client.cas(key, value, casUnique)) === true)
+    assert(Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
     when(service.apply(any[Command])).thenReturn(Future.value(Exists()))
-    assert(Await.result(client.cas(key, value, casUnique)) === false)
+    assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
     when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
-    assert(Await.result(client.cas(key, value, casUnique)) === false)
+    assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
  }
 
-  test("cas correctly responds to the error states of the service") {
+ test("checkAndSet correctly responds to return states of the service") {
+    when(service.apply(any[Command])).thenReturn(Future.value(Stored()))
+    assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.Stored)
+
+    when(service.apply(any[Command])).thenReturn(Future.value(Exists()))
+    assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.Exists)
+
+    when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
+    assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.NotFound)
+ }
+
+  test("checkAndSet correctly responds to the error states of the service") {
     when(service.apply(any[Command])).thenReturn(Future.value(Error(new IllegalAccessException("exception"))))
-    intercept[IllegalAccessException] { Await.result(client.cas(key, value, casUnique)) }
+    intercept[IllegalAccessException] { Await.result(client.checkAndSet(key, value, casUnique)) }
 
     when(service.apply(any[Command])).thenReturn(Future.value(Deleted()))
-    intercept[IllegalStateException] { Await.result(client.cas(key, value, casUnique)) }
+    intercept[IllegalStateException] { Await.result(client.checkAndSet(key, value, casUnique)) }
   }
 }
 

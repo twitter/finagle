@@ -5,7 +5,7 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import com.twitter.finagle.Service
 import com.twitter.util.TimeConversions._
-import com.twitter.util.{Throw, Await, Try, Future}
+import com.twitter.util.{Throw, Await, Try}
 
 @RunWith(classOf[JUnitRunner])
 class ServiceTest extends FunSuite {
@@ -17,6 +17,6 @@ class ServiceTest extends FunSuite {
       }
     }
 
-    assert(Try(Await.result(Service.rescue(exceptionThrowingService)(1), 1.second)) === Throw(e))
+    assert(Try(Await.result(Service.rescue(exceptionThrowingService)(1), 1.second)) == Throw(e))
   }
 }

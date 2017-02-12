@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
-
 import com.twitter.concurrent.NamedPoolThreadFactory
-import java.util.concurrent.Executors
+import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
+import java.util.concurrent.{ExecutorService, Executors}
+import org.jboss.netty.channel.socket.nio.NioWorkerPool
 import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 
 /**
@@ -18,18 +19,15 @@ import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 package object netty3 {
   // Disable Netty's thread name rewriting, to preserve the "finagle/netty3"
   // suffix specified below.
-  ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT);
+  ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT)
 
-  val Executor = Executors.newCachedThreadPool(
-    new NamedPoolThreadFactory("finagle/netty3", true/*daemon*/))
+  val Executor: ExecutorService = {
+    val threadFactory = new BlockingTimeTrackingThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty3", makeDaemons = true)
+    )
 
-  object param {
-    /**
-     * A class eligible for configuring a netty3 timer.
-     */
-    case class Netty3Timer(timer: org.jboss.netty.util.Timer)
-    implicit object Netty3Timer extends Stack.Param[Netty3Timer] {
-      val default = Netty3Timer(util.DefaultTimer)
-    }
+    Executors.newCachedThreadPool(threadFactory)
   }
+
+  val WorkerPool: NioWorkerPool = new NioWorkerPool(Executor, numWorkers())
 }

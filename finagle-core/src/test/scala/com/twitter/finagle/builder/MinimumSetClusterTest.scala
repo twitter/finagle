@@ -19,7 +19,7 @@ class MinimumSetClusterTest extends FunSuite {
     import h._
 
     dynamicCluster.add(4)
-    assert(cluster.snap._1 === Seq(1, 2, 3, 4))
+    assert(cluster.snap._1 == Seq(1, 2, 3, 4))
   }
 
   test("MinimumSetCluster should propagate uncensored updates") {
@@ -29,7 +29,7 @@ class MinimumSetClusterTest extends FunSuite {
     val (_, updates) = cluster.snap
     dynamicCluster.add(4)
     assert(updates.isDefined)
-    assert(Await.result(updates).head === Cluster.Add(4))
+    assert(Await.result(updates).head == Cluster.Add(4))
   }
 
   test("MinimumSetCluster should not propagate censored updates") {
