@@ -53,9 +53,20 @@ User's guide
    Contexts
    Names
    Protocols
-   Extending
    Metrics
+   UnsuccessfulResponses
    FAQ
+   Glossary
+
+Developer's Guide
+-----------------
+
+.. toctree::
+   :maxdepth: 1
+
+   developers/Extending
+   developers/Futures
+   developers/SignalingFailure
 
 Notes
 -----

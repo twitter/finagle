@@ -159,6 +159,8 @@ output. To override this, use the following sample.
 
 Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
 
+.. _retries:
+
 Retries
 ~~~~~~~
 
@@ -565,6 +567,8 @@ and picks a node it hopes has become available.
 
 :ref:`Related stats <loadbalancer_stats>`
 
+.. _client_circuit_breaking:
+
 Circuit Breaking
 ~~~~~~~~~~~~~~~~
 
@@ -787,6 +791,8 @@ its peak value when you reach your peak concurrency (i.e. "load"),
 and then slowly decays, based on the TTL.
 
 :ref:`Related stats <pool_stats>`
+
+.. _response_classification:
 
 .. include:: shared-modules/ResponseClassification.rst
 
