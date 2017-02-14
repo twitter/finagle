@@ -13,11 +13,18 @@ New Features
   * finagle-base-http: `c.t.f.http.Message` now has a Java friendly method to set the
     HTTP version: `Message.version(Version)`. ``RB_ID=906946``
 
+  * finagle-base-http: `c.t.f.http.HeaderMap` now has a method, `HeaderMap.newHeaderMap` for
+    creating new empty `HeaderMap` instances. ``RB_ID=907397``
+
   * finagle-core: SSL/TLS client and server configurations and engine factories have
     been added for finer grained control when using TLS with Finagle. ``RB_ID=907191``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-base-http: `c.t.f.http.MapHeaderMap` has been made private. Please use
+    `HeaderMap.apply` or `HeaderMap.newHeaderMap` to construct a new `HeaderMap` instance.
+    ``RB_ID=907397``
 
   * finagle-base-http: `c.t.f.http.Version` is no longer represented by case objects
     and has been replaced by val instances of a case class. ``RB_ID=906946``
