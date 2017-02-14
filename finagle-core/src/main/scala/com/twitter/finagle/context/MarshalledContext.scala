@@ -1,6 +1,5 @@
 package com.twitter.finagle.context
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Local, Return, Throw, Try}
@@ -143,18 +142,10 @@ final class MarshalledContext private[context] extends Context {
   // Exposed for testing
   private[context] def doUnmarshal(env: Map[Buf, Cell], contexts: Iterable[(Buf, Buf)]): Map[Buf, Cell] = {
     contexts.foldLeft(env) { case (env, (k, v)) =>
-      env.updated(k, Translucent(MarshalledContext.copy(k), MarshalledContext.copy(v)))
+      env.updated(k, Translucent(k, v))
     }
   }
 
   // Exposed for testing
   private[context] def letLocal[T](env: Map[Buf, Cell])(fn: => T): T = local.let(env)(fn)
-}
-
-private object MarshalledContext {
-  // TODO: This needs to be adapted to gracefully handle arbitrary types, not just ChannelBufferBuf
-  def copy(buf: Buf): Buf = buf match {
-    case ChannelBufferBuf(cb) => Buf.ByteBuffer.Shared(cb.toByteBuffer)
-    case _ => buf
-  }
 }

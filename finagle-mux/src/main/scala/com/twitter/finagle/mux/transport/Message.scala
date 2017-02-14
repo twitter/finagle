@@ -534,7 +534,14 @@ private[twitter] object Message {
     while (i < n) {
       val k = br.readBytes(br.readShortBE())
       val v = br.readBytes(br.readShortBE())
-      contexts(i) = (k, v)
+
+      // For the context keys and values we want to decouple the backing array from the rest of
+      // the Buf that composed the message. The body of the message is typically on the order of a
+      // number of kilobytes and can be much larger, while the context entries are typically
+      // on the order of < 100 bytes. Therefore, it is beneficial to decouple the lifetimes
+      // at the cost of copying the context entries, but this ends up being a net win for the GC.
+      // More context can be found in ``RB_ID=559066``.
+      contexts(i) = (coerceTrimmed(k), coerceTrimmed(v))
       i += 1
     }
     contexts
@@ -680,5 +687,28 @@ private[twitter] object Message {
     val bytesStr = Buf.slowHexString(toWrite)
     s"unknown message type: $tpe [tag=$tag]. Payload bytes: ${payload.length}. " +
       s"First ${toWrite.length} bytes of the payload: '$bytesStr'"
+  }
+
+
+
+  /**
+   * Safely coerce the Buf to a representation that doesn't hold a reference to unused data.
+   *
+   * The resulting Buf will be either the Empty Buf if the input Buf has zero content, or a
+   * ByteArray whos underlying array contains only the bytes exposed by the Buf, making a
+   * copy of the data if necessary.
+   *
+   * For example, calling `coerceTrimmed` on a Buf that is a 10 byte slice of a larger Buf
+   * which contains 1 KB of data will yield a new ByteArray backed by a new Array[Byte]
+   * containing only the 10 bytes exposed by the passed slice.
+   *
+   * @note exposed for testing.
+   */
+  private[transport] def coerceTrimmed(buf: Buf): Buf = buf match {
+    case buf if buf.isEmpty => Buf.Empty
+    case Buf.ByteArray.Owned(bytes, begin, end) if begin == 0 && end == bytes.length => buf
+    case buf =>
+      val bytes = Buf.ByteArray.Owned.extract(buf)
+      Buf.ByteArray.Owned(bytes)
   }
 }
