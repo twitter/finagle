@@ -48,6 +48,8 @@ private[finagle] object Netty4Transporter {
     // Exports N4-related metrics under `finagle/netty4`.
     exportNetty4Metrics()
 
+    trackReferenceLeaks.init
+
     def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
       val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
       val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]

@@ -57,6 +57,7 @@ private[finagle] case class Netty4Listener[In, Out](
 
   // Exports N4-related metrics under `finagle/netty4`.
   exportNetty4Metrics()
+  trackReferenceLeaks.init
 
   private[this] val Timer(timer) = params[Timer]
 

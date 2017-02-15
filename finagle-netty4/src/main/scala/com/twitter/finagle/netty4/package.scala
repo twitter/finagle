@@ -57,14 +57,14 @@ package object netty4 {
     System.setProperty("io.netty.allocator.maxOrder", "4")
   }
 
+
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
-  //     because we need to disable the leak-detector and
   //     because we don't prefer direct byte buffers.
   //
   // See CSL-3027 for more details.
   private[netty4] val UnpooledAllocator = new UnpooledByteBufAllocator(
     /* preferDirect */ false,
-    /* disableLeakDetector */ true
+    /* disableLeakDetector */ !trackReferenceLeaks.enabled
   )
 
   private[finagle] val DirectToHeapInboundHandlerName = "directToHeap"
