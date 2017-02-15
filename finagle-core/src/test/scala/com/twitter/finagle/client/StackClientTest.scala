@@ -6,7 +6,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.factory.BindingFactory
-import com.twitter.finagle.filter.NackAdmissionFilter
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -14,7 +13,6 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{Name, param}
@@ -77,13 +75,6 @@ class StackClientTest extends FunSuite
 
   after {
     NameInterpreter.global = DefaultInterpreter
-  }
-
-  test("NackAdmissionFilter is controlled by toggle, default off") {
-    assert(!StackClient.newStack[Int, Int].contains(NackAdmissionFilter.role))
-    flag.overrides.let("com.twitter.finagle.core.UseClientNackAdmissionFilter", 1.0) {
-      assert(StackClient.newStack[Int, Int].contains(NackAdmissionFilter.role))
-    }
   }
 
   test("client stats are scoped to label")(new Ctx {

@@ -2,6 +2,7 @@ package com.twitter.finagle.filter
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
@@ -9,6 +10,12 @@ import com.twitter.util._
 private[finagle] object NackAdmissionFilter {
   private val OverloadFailure = Future.exception(Failure("Failed fast because service is overloaded", Failure.Rejected|Failure.NonRetryable))
   val role = new Stack.Role("NackAdmissionFilter")
+
+  /**
+   * For feature roll out only.
+   */
+  private val EnableNackAcToggle = CoreToggles("com.twitter.finagle.core.UseClientNackAdmissionFilter")
+  private def enableNackAc(): Boolean = EnableNackAcToggle(ServerInfo().id.hashCode)
 
   /**
    * An upper bound on what percentage of requests this filter will drop.
@@ -75,12 +82,11 @@ private[finagle] object NackAdmissionFilter {
           _param.window, _param.nackRateThreshold, Rng.threadLocal,
           stats.scope("nack_admission_control"))
 
-        // Insert the filter into the client stack. We use `FactoryToService`
-        // and `ServiceFactory.const` to ensure that the filter operates across
-        // all endpoints rather than just per-endpoint.
-        ServiceFactory.const(filter.andThen(new FactoryToService(next)))
+        // This creates a filter that is shared across all endpoints, which is
+        // required for proper operation.
+        filter.andThen(next)
       }
-    }
+  }
 }
 
 /**
@@ -168,7 +174,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
-    if (shouldDropRequest()) {
+    if (enableNackAc() && shouldDropRequest()) {
       droppedRequestCounter.incr()
       OverloadFailure
     } else {
