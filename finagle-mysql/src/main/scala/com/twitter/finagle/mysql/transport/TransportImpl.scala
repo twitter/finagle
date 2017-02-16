@@ -24,20 +24,25 @@ object TransportImpl {
   private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
   private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
-  val Netty3: TransportImpl = TransportImpl(params => Netty3Transporter(MysqlClientPipelineFactory, params))
+  val Netty3: TransportImpl = TransportImpl(params => Netty3Transporter(MysqlClientPipelineFactory, _, params))
 
   val Netty4: TransportImpl = TransportImpl { params =>
-    new Transporter[Packet, Packet] {
-      private[this] val bufTransporter =
-        Netty4Transporter.framedBuf(Some(framerFactory), params)
+    { addr =>
+      new Transporter[Packet, Packet] {
+        private[this] val bufTransporter =
+          Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
 
-      def apply(addr: SocketAddress): Future[Transport[Packet, Packet]] = {
-        bufTransporter(addr).map { bufTransport =>
-          bufTransport.map(_.toBuf, Packet.fromBuf)
+        def apply(): Future[Transport[Packet, Packet]] = {
+          bufTransporter().map { bufTransport =>
+            bufTransport.map(_.toBuf, Packet.fromBuf)
+          }
         }
+
+        def remoteAddress: SocketAddress = bufTransporter.remoteAddress
+
+        // Used in the registry
+        override def toString: String = bufTransporter.toString
       }
-      // Used in the registry
-      override def toString: String = bufTransporter.toString
     }
   }
 
@@ -57,7 +62,8 @@ object TransportImpl {
   }
 }
 
-case class TransportImpl(transporter: Stack.Params => Transporter[Packet, Packet]) {
+case class TransportImpl(
+    transporter: Stack.Params => SocketAddress => Transporter[Packet, Packet]) {
   def mk(): (TransportImpl, Stack.Param[TransportImpl]) = {
     (this, TransportImpl.param)
   }

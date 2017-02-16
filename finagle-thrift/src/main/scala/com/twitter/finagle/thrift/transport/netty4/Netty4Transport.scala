@@ -7,6 +7,7 @@ import com.twitter.finagle.param.Label
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.thrift.ThriftClientRequest
 import io.netty.channel.ChannelPipeline
+import java.net.SocketAddress
 
 
 /**
@@ -28,8 +29,8 @@ private[finagle] object Netty4Transport {
       }
     }
 
-  val Client: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]] = { params =>
-    Netty4Transporter.raw(ClientPipelineInit(params), params)
+  val Client: Stack.Params => SocketAddress => Transporter[ThriftClientRequest, Array[Byte]] = { params =>
+    Netty4Transporter.raw(ClientPipelineInit(params), _, params)
   }
 
   val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit =

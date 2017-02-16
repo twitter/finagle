@@ -13,6 +13,7 @@ import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.Failure
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -87,7 +88,8 @@ class MemcachedTest extends FunSuite
   test("Memcached is configured to use Netty3 by default") {
     val client = Memcached.client
     val params = client.params
+    val addr = new SocketAddress { }
 
-    assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty3Transporter")
+    assert(params[Memcached.param.MemcachedImpl].transporter(params)(addr).toString == "Netty3Transporter")
   }
 }

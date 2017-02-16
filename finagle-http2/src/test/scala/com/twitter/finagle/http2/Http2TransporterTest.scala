@@ -42,35 +42,39 @@ class Http2TransporterTest extends FunSuite {
 
     var count = 0
 
-    def apply(addr: SocketAddress): Future[Transport[Any, Any]] = {
+    def remoteAddress: SocketAddress = new SocketAddress {}
+
+    def apply(): Future[Transport[Any, Any]] = {
       count += 1
-      Future.value(fn(addr))
+      Future.value(fn(remoteAddress))
     }
   }
 
   class TestTransporter extends BackingTransporter(new TestTransport(_))
 
   test("Http2Transporter caches transports") {
-    val transporter = new Http2Transporter(new TestTransporter(), new TestTransporter(), new MockTimer()) {
-      def cached(addr: SocketAddress) = transporterCache.containsKey(addr)
+    val (t1, t2) = (new TestTransporter(), new TestTransporter())
+    val transporter = new Http2Transporter(t1, t2, new MockTimer()) {
+      def cached: Boolean = cachedConnection.get != null
     }
 
     val addr = new InetSocketAddress("127.1", 14400)
-    val tf = transporter(addr)
-    assert(transporter.cached(addr))
+    val tf = transporter()
+    assert(transporter.cached)
   }
 
   test("Http2Transporter decaches transport when closed") {
-    val transporter = new Http2Transporter(new TestTransporter(), new TestTransporter(), new MockTimer()) {
-      def cached(addr: SocketAddress) = transporterCache.containsKey(addr)
+    val (t1, t2) = (new TestTransporter(), new TestTransporter())
+    val transporter = new Http2Transporter(t1, t2, new MockTimer()) {
+      def cached: Boolean = cachedConnection.get != null
     }
 
     val addr = new InetSocketAddress("127.1", 14400)
-    val tf = transporter(addr)
-    assert(transporter.cached(addr))
+    val tf = transporter()
+    assert(transporter.cached)
     val t = await(tf)
     await(t.close())
-    assert(!transporter.cached(addr))
+    assert(!transporter.cached)
   }
 
   test("Http2Transporter uses http11 for the second outstanding transport preupgrade") {
@@ -78,11 +82,11 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    await(transporter(addr))
+    await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
 
-    await(transporter(addr))
+    await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 1)
   }
@@ -123,12 +127,12 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    val trans = await(transporter(addr))
+    val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
-    await(transporter(addr))
+    await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
   }
@@ -139,12 +143,12 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    val trans = await(transporter(addr))
+    val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
-    await(transporter(addr))
+    await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 1)
   }
@@ -155,11 +159,11 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    val trans = await(transporter(addr))
+    val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
 
-    val http11Trans = await(transporter(addr))
+    val http11Trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 1)
     assert(http11Trans.status == Status.Open)
@@ -175,11 +179,11 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    val trans = await(transporter(addr))
+    val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
 
-    val http11Trans = await(transporter(addr))
+    val http11Trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 1)
     assert(http11Trans.status == Status.Open)
@@ -192,12 +196,14 @@ class Http2TransporterTest extends FunSuite {
   class FirstFail(f: Future[Transport[Any, Any]]) extends Transporter[Any, Any] {
     var first = true
     var count = 0
-    def apply(addr: SocketAddress): Future[Transport[Any, Any]] = {
+
+    def remoteAddress: SocketAddress = new SocketAddress { }
+    def apply(): Future[Transport[Any, Any]] = {
       count += 1
       if (first) {
         first = false
         f
-      } else Future.value(new TestTransport(addr))
+      } else Future.value(new TestTransport(remoteAddress))
     }
   }
 
@@ -208,12 +214,12 @@ class Http2TransporterTest extends FunSuite {
     val transporter = new Http2Transporter(t1, t2, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
-    val fTrans = transporter(addr)
+    val fTrans = transporter()
     assert(!fTrans.isDefined)
     assert(t1.count == 1)
     assert(t2.count == 0)
 
-    val trans = await(transporter(addr))
+    val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 1)
     assert(trans.status == Status.Open)
@@ -236,13 +242,13 @@ class Http2TransporterTest extends FunSuite {
     val addr = new InetSocketAddress("127.1", 14400)
 
     val actual = intercept[Exception] {
-      await(transporter(addr))
+      await(transporter())
     }
     assert(actual == e)
     assert(t1.count == 1)
     assert(t2.count == 0)
 
-    await(transporter(addr))
+    await(transporter())
     assert(t1.count == 2)
     assert(t2.count == 0)
   }
@@ -254,14 +260,14 @@ class Http2TransporterTest extends FunSuite {
       val transporter = new Http2Transporter(t1, t2, new MockTimer())
       val addr = new InetSocketAddress("127.1", 14400)
 
-      val first = await(transporter(addr))
+      val first = await(transporter())
       assert(t1.count == 1)
       assert(t2.count == 0)
 
       await(first.write(LastHttpContent.EMPTY_LAST_CONTENT))
       assert(await(first.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
-      val second = await(transporter(addr))
+      val second = await(transporter())
       assert(t1.count == 1)
       assert(t2.count == 0)
 
@@ -269,7 +275,7 @@ class Http2TransporterTest extends FunSuite {
       second.close()
       transporter.close()
 
-      await(transporter(addr))
+      await(transporter())
       assert(t1.count == 2)
       assert(t2.count == 0)
     }

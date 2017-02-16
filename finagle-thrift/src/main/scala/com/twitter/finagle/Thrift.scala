@@ -127,7 +127,7 @@ object Thrift
    * entering the Finagle transport types.
    */
   case class ThriftImpl(
-      transporter: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]],
+      transporter: Stack.Params => SocketAddress => Transporter[ThriftClientRequest, Array[Byte]],
       listener: Stack.Params => Listener[Array[Byte], Array[Byte]]) {
 
     def mk(): (ThriftImpl, Stack.Param[ThriftImpl]) = (this, ThriftImpl.param)
@@ -238,7 +238,8 @@ object Thrift
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
-    protected def newTransporter(): Transporter[In, Out] = params[ThriftImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      params[ThriftImpl].transporter(params)(addr)
 
     protected def newDispatcher(
       transport: Transport[ThriftClientRequest, Array[Byte]]

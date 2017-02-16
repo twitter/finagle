@@ -12,6 +12,7 @@ import com.twitter.finagle.param.Logger
 import com.twitter.finagle.server.Listener
 import io.netty.channel._
 import io.netty.handler.codec.{http => NettyHttp}
+import java.net.SocketAddress
 
 /**
  * The `exp` package contains params to configure the underlying netty version
@@ -51,8 +52,10 @@ object exp {
     }
   }
 
-  private[finagle] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
-    (params: Stack.Params) => Netty4Transporter.raw(ClientPipelineInit(params), params)
+  private[finagle] val Netty4HttpTransporter: Stack.Params => SocketAddress => Transporter[Any, Any] =
+    (params: Stack.Params) =>
+      (addr: SocketAddress) =>
+        Netty4Transporter.raw(ClientPipelineInit(params), addr, params)
 
   private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
     params: Stack.Params =>

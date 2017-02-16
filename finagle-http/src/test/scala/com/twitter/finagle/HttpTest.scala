@@ -124,7 +124,9 @@ class HttpTest extends FunSuite {
     val transporter = Http.client.params[Http.HttpImpl].transporter
     val listener = Http.server.params[Http.HttpImpl].listener
 
-    assert(transporter(Stack.Params.empty).toString == "Netty3Transporter")
+    val addr = InetSocketAddress.createUnresolved("supdog", 0)
+
+    assert(transporter(Stack.Params.empty)(addr).toString == "Netty3Transporter")
     assert(listener(Stack.Params.empty).toString == "Netty3Listener")
   }
 }

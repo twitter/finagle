@@ -7,17 +7,26 @@ import com.twitter.util.{Duration, Future, Time, Closable}
 import java.net.SocketAddress
 
 /**
- * Transporters are simple functions from a `SocketAddress` to a
- * `Future[Transport[In, Out]]`. They represent a transport layer session from a
- * client to a server. Transporters are symmetric to the server-side
- * [[com.twitter.finagle.server.Listener]].
+ * Transporters construct a `Future[Transport[In, Out]]`.
  *
- * Note that although Transporters take a SocketAddress, we actually construct a new
- * Transporter per SocketAddress.  We will be changing this API to be more consistent
- * in the near future.
+ * There is one Transporter assigned per remote peer.  Transporters are
+ * symmetric to the server-side [[com.twitter.finagle.server.Listener]], except
+ * that it isn't shared across remote peers..
  */
 trait Transporter[In, Out] extends Closable {
-  def apply(addr: SocketAddress): Future[Transport[In, Out]]
+  def apply(): Future[Transport[In, Out]]
+
+  /**
+   * The address of the remote peer that this `Transporter` connects to.
+   */
+  def remoteAddress: SocketAddress
+
+  /**
+   * Some `Transporters` build `Transports` that represent streams in a
+   * connection instead of connections themselves.  When this is the case, this
+   * method should be overridden to destroy the underlying connection when it's
+   * finished.
+   */
   def close(deadline: Time): Future[Unit] = Future.Done
 }
 

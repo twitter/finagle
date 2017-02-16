@@ -41,16 +41,18 @@ private[finagle] object Netty4Transporter {
 
   private[this] def build[In, Out](
     init: ChannelInitializer[Channel],
+    addr: SocketAddress,
     params: Stack.Params,
     transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = new Transporter[In, Out] {
 
+    def remoteAddress: SocketAddress = addr
+
     // Exports N4-related metrics under `finagle/netty4`.
     exportNetty4Metrics()
 
-    trackReferenceLeaks.init
-
-    def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
+    def apply(): Future[Transport[In, Out]] = {
+      trackReferenceLeaks.init
       val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
       val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
       val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
@@ -120,12 +122,13 @@ private[finagle] object Netty4Transporter {
    */
   def raw[In, Out](
     pipelineInit: ChannelPipeline => Unit,
+    addr: SocketAddress,
     params: Stack.Params,
     transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
-    build[In, Out](init, params, transportFactory)
+    build[In, Out](init, addr, params, transportFactory)
   }
 
   /**
@@ -138,10 +141,11 @@ private[finagle] object Netty4Transporter {
    */
   def framedBuf(
     framerFactory: Option[() => Framer],
+    addr: SocketAddress,
     params: Stack.Params
   ): Transporter[Buf, Buf] = {
     val init = new Netty4ClientChannelInitializer(params, framerFactory)
 
-    build[Buf, Buf](init, params)
+    build[Buf, Buf](init, addr, params)
   }
 }

@@ -33,6 +33,7 @@ import com.twitter.hashing
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
+import java.net.SocketAddress
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
@@ -169,7 +170,7 @@ object Memcached extends finagle.Client[Command, Response]
      * used by Memcached.
      */
     case class MemcachedImpl(
-        transporter: Stack.Params => Transporter[Buf, Buf],
+        transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
         listener: Stack.Params => Listener[Buf, Buf]) {
       def mk(): (MemcachedImpl, Stack.Param[MemcachedImpl]) =
         (this, MemcachedImpl.param)
@@ -180,7 +181,7 @@ object Memcached extends finagle.Client[Command, Response]
        * A [[MemcachedImpl]] that uses netty3 as the underlying I/O multiplexer.
        */
       val Netty3 = MemcachedImpl(
-        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, params),
+        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, _, params),
         params => Netty3Listener[Buf, Buf](Netty3ServerFramer, params))
 
       /**
@@ -189,7 +190,7 @@ object Memcached extends finagle.Client[Command, Response]
        * @note Important! This is experimental and not yet tested in production!
        */
       val Netty4 = MemcachedImpl(
-        params => Netty4Transporter.raw(Netty4ClientFramer, params),
+        params => Netty4Transporter.raw(Netty4ClientFramer, _, params),
         params => Netty4Listener[Buf, Buf](Netty4ServerFramer, params))
 
       private[this] val UseNetty4ToggleId: String =
@@ -301,8 +302,8 @@ object Memcached extends finagle.Client[Command, Response]
     protected type In = Buf
     protected type Out = Buf
 
-    protected def newTransporter(): Transporter[In, Out] =
-      params[param.MemcachedImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      params[param.MemcachedImpl].transporter(params)(addr)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(

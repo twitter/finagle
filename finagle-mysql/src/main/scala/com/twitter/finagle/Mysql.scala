@@ -9,6 +9,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, ExceptionStatsHandler, Stat
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Monitor}
+import java.net.SocketAddress
 
 /**
  * Supplements a [[com.twitter.finagle.Client]] with convenient
@@ -122,7 +123,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     protected type In = Packet
     protected type Out = Packet
-    protected def newTransporter() = params[TransportImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress) = params[TransportImpl].transporter(params)(addr)
     protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
       mysql.ClientDispatcher(transport, Handshake(params), num)

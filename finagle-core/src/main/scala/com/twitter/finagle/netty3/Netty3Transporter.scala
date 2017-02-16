@@ -133,14 +133,18 @@ object Netty3Transporter {
    */
   def apply[In, Out](
     pipelineFactory: ChannelPipelineFactory,
+    addr: SocketAddress,
     params: Stack.Params
   ): Transporter[In, Out] = {
     val Stats(stats) = params[Stats]
-    val transporter = new Netty3Transporter[In, Out](pipelineFactory, params)
+
+    val transporter = new Netty3Transporter[In, Out](pipelineFactory, addr, params)
 
     new Transporter[In, Out] {
-      def apply(sa: SocketAddress): Future[Transport[In, Out]] =
-        transporter(sa, stats)
+      def apply(): Future[Transport[In, Out]] =
+        transporter(stats)
+
+      def remoteAddress: SocketAddress = transporter.remoteAddress
 
       override def toString: String = "Netty3Transporter"
     }
@@ -186,10 +190,12 @@ private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
  * configure the transporter.
  *
  */
-class Netty3Transporter[In, Out](
+private[netty3] class Netty3Transporter[In, Out](
     val pipelineFactory: ChannelPipelineFactory,
+    val remoteAddress: SocketAddress,
     val params: Stack.Params = Stack.Params.empty)
-  extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
+  extends (StatsReceiver => Future[Transport[In, Out]]) {
+
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
   private[this] val newTransport = makeNewTransport(params)
 
@@ -287,8 +293,7 @@ class Netty3Transporter[In, Out](
 
   private[this] def addFirstTlsHandlers(
     pipeline: ChannelPipeline,
-    params: Stack.Params,
-    addr: SocketAddress
+    params: Stack.Params
   ): Unit = {
     val Transport.TLSClientEngine(tlsOption) = params[Transport.TLSClientEngine]
 
@@ -296,7 +301,7 @@ class Netty3Transporter[In, Out](
       import org.jboss.netty.handler.ssl._
       val Transporter.TLSHostname(hostnameOption) = params[Transporter.TLSHostname]
 
-      val engine = tls(addr)
+      val engine = tls(remoteAddress)
       engine.self.setUseClientMode(true)
 
       val verifier = hostnameOption
@@ -326,13 +331,12 @@ class Netty3Transporter[In, Out](
 
   private[this] def addFirstSocksProxyHandlers(
     pipeline: ChannelPipeline,
-    params: Stack.Params,
-    addr: SocketAddress
+    params: Stack.Params
   ): Unit = {
     val Transporter.SocksProxy(socksProxy, socksUsernameAndPassword) =
       params[Transporter.SocksProxy]
 
-    (socksProxy, addr) match {
+    (socksProxy, remoteAddress) match {
       case (Some(proxyAddr), inetSockAddr: InetSocketAddress) if !inetSockAddr.isUnresolved =>
         val inetAddr = inetSockAddr.getAddress
         if (!inetAddr.isLoopbackAddress && !inetAddr.isLinkLocalAddress) {
@@ -349,12 +353,11 @@ class Netty3Transporter[In, Out](
 
   private[this] def addFirstHttpProxyHandlers(
     pipeline: ChannelPipeline,
-    params: Stack.Params,
-    addr: SocketAddress
+    params: Stack.Params
   ): Unit = {
     val Transporter.HttpProxy(httpProxy, httpProxyCredentials) = params[Transporter.HttpProxy]
 
-    (httpProxy, addr) match {
+    (httpProxy, remoteAddress) match {
       case (Some(proxyAddr), inetAddr: InetSocketAddress) if !inetAddr.isUnresolved =>
         HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline, httpProxyCredentials)
       case _ =>
@@ -368,32 +371,31 @@ class Netty3Transporter[In, Out](
   }
 
   private[netty3] def newPipeline(
-    addr: SocketAddress,
     statsReceiver: StatsReceiver
   ): ChannelPipeline = {
     val pipeline = pipelineFactory.getPipeline()
 
     addFirstStatsHandlers(pipeline, statsReceiver)
     addFirstIdleHandlers(pipeline, params, statsReceiver)
-    addFirstTlsHandlers(pipeline, params, addr)
-    addFirstSocksProxyHandlers(pipeline, params, addr)
-    addFirstHttpProxyHandlers(pipeline, params, addr)
+    addFirstTlsHandlers(pipeline, params)
+    addFirstSocksProxyHandlers(pipeline, params)
+    addFirstHttpProxyHandlers(pipeline, params)
     addFirstSnooperHandlers(pipeline, params)
 
     pipeline
   }
 
-  private def newConfiguredChannel(addr: SocketAddress, statsReceiver: StatsReceiver) = {
-    val ch = newChannel(newPipeline(addr, statsReceiver))
+  private def newConfiguredChannel(statsReceiver: StatsReceiver) = {
+    val ch = newChannel(newPipeline(statsReceiver))
     ch.getConfig.setOptions(channelOptions.asJava)
     ch
   }
 
-  def apply(addr: SocketAddress, statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
+  def apply(statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
     val conn = new ChannelConnector[In, Out](
-      () => newConfiguredChannel(addr, statsReceiver),
+      () => newConfiguredChannel(statsReceiver),
       newTransport, statsReceiver)
-    conn(addr)
+    conn(remoteAddress)
   }
 
   override def toString: String = "Netty3Transporter"

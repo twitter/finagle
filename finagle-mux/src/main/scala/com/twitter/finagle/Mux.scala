@@ -62,7 +62,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * servers and clients can use the same parameter).
      */
     case class MuxImpl(
-        transporter: Stack.Params => Transporter[Buf, Buf],
+        transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
         listener: Stack.Params => Listener[Buf, Buf]) {
       def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
         (this, MuxImpl.param)
@@ -81,7 +81,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.
        */
       val Netty3 = MuxImpl(
-        params => Netty3Transporter(Netty3Framer, params),
+        params => Netty3Transporter(Netty3Framer, _, params),
         params => Netty3Listener(Netty3Framer, params))
 
       /**
@@ -90,7 +90,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4 = MuxImpl(
-        params => Netty4Transporter.raw(CopyingFramer, params),
+        params => Netty4Transporter.raw(CopyingFramer, _, params),
         params => Netty4Listener(CopyingFramer, params))
 
       /**
@@ -103,6 +103,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val Netty4RefCountingControl = MuxImpl(
         params => Netty4Transporter.raw(
           RefcountControlPlaneFramer,
+          _,
           params,
           transportFactory = new RefCountingTransport(_)
         ),
@@ -219,8 +220,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newTransporter(): Transporter[In, Out] =
-      params[param.MuxImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      params[param.MuxImpl].transporter(params)(addr)
 
     protected def newDispatcher(
       transport: Transport[In, Out]

@@ -23,17 +23,17 @@ import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConverters.collectionAsScalaIterableConverter
+import java.util.concurrent.atomic.AtomicReference
 
 private[finagle] object Http2Transporter {
 
-  def apply(params: Stack.Params): Transporter[Any, Any] = {
+  def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any] = {
     // current http2 client implementation doesn't support
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
     val underlying = Netty4Transporter.raw[Any, Any](
       init(params),
+      addr,
       params + Netty4Transporter.Backpressure(false)
     )
 
@@ -42,7 +42,7 @@ private[finagle] object Http2Transporter {
     if (priorKnowledge) {
       new PriorKnowledgeTransporter(underlying, params)
     } else {
-      val underlyingHttp11 = Netty4HttpTransporter(params)
+      val underlyingHttp11 = Netty4HttpTransporter(params)(addr)
       val TimerParam(timer) = params[TimerParam]
 
       new Http2Transporter(underlying, underlyingHttp11, timer)
@@ -166,29 +166,29 @@ private[http2] class Http2Transporter(
     underlying: Transporter[Any, Any],
     underlyingHttp11: Transporter[Any, Any],
     implicit val timer: Timer)
-  extends Transporter[Any, Any] {
+  extends Transporter[Any, Any] { self =>
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
     def read(): Future[Any] = Future.never
     def write(msg: Any): Future[Unit] = Future.never
     val status: Status = Status.Closed
     def onClose: Future[Throwable] = Future.value(exn)
-    def remoteAddress: SocketAddress = new SocketAddress {}
+    def remoteAddress: SocketAddress = self.remoteAddress
     def localAddress: SocketAddress = new SocketAddress {}
     def peerCertificate: Option[Certificate] = None
     def close(deadline: Time): Future[Unit] = Future.Done
   }
 
+  def remoteAddress: SocketAddress = underlying.remoteAddress
+
   private[this] val log = Logger.get()
 
   import Http2Transporter._
 
-  protected[this] val transporterCache =
-    new ConcurrentHashMap[SocketAddress, Future[Option[MultiplexedTransporter]]]()
+  protected[this] val cachedConnection = new AtomicReference[Future[Option[MultiplexedTransporter]]]()
 
   private[this] def onUpgradeFinished(
-    f: Future[Option[MultiplexedTransporter]],
-    addr: SocketAddress
+    f: Future[Option[MultiplexedTransporter]]
   ): Future[Transport[Any, Any]] = f.transform {
     case Return(Some(fn)) =>
       Future.value(fn() match {
@@ -196,23 +196,23 @@ private[http2] class Http2Transporter(
         case Throw(exn) =>
           log.warning(
             exn,
-            s"A previously successful connection to address $addr stopped being successful."
+            s"A previously successful connection to address $remoteAddress stopped being successful."
           )
 
           // kick us out of the cache so we can try to reestablish the connection
-          transporterCache.remove(addr, f)
+          cachedConnection.set(null)
 
           // we expect finagle to treat this specially and retry if possible
           deadTransport(exn)
       })
     case Return(None) =>
       // we didn't upgrade
-      underlyingHttp11(addr)
+      underlyingHttp11()
     case Throw(exn) =>
-      log.warning(exn, s"A cached connection to address $addr was failed.")
+      log.warning(exn, s"A cached connection to address $remoteAddress was failed.")
 
       // kick us out of the cache so we can try to reestablish the connection
-      transporterCache.remove(addr, f)
+      cachedConnection.set(null)
       Future.exception(exn)
   }
 
@@ -240,40 +240,40 @@ private[http2] class Http2Transporter(
     ref
   }
 
-  private[this] def upgrade(addr: SocketAddress): Future[Transport[Any, Any]] = {
-    val conn: Future[Transport[Any, Any]] = underlying(addr)
+  private[this] def upgrade(): Future[Transport[Any, Any]] = {
+    val conn: Future[Transport[Any, Any]] = underlying()
     val p = Promise[Option[MultiplexedTransporter]]()
-    if (transporterCache.putIfAbsent(addr, p) == null) {
+    if (cachedConnection.compareAndSet(null, p)) {
       conn.transform {
         case Return(trans) =>
           val ref = new RefTransport(trans)
           ref.update { t =>
             t.onClose.ensure {
-              transporterCache.remove(addr, p)
+              cachedConnection.compareAndSet(p, null)
             }
             new Http2UpgradingTransport(t, ref, p)
           }
           Future.value(ref)
         case Throw(e) =>
-          transporterCache.remove(addr, p)
+          cachedConnection.compareAndSet(p, null)
           p.setException(e)
           Future.exception(e)
       }
-    } else apply(addr)
+    } else apply()
   }
 
-  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] =
-    Option(transporterCache.get(addr)) match {
+  final def apply(): Future[Transport[Any, Any]] =
+    Option(cachedConnection.get) match {
       case Some(f) =>
         if (f.isDefined) {
-          onUpgradeFinished(f, addr)
+          onUpgradeFinished(f)
         } else {
           // fall back to http/1.1 while upgrading
-          val conn = underlyingHttp11(addr)
+          val conn = underlyingHttp11()
           conn.map(onUpgradeInProgress(f))
         }
       case None =>
-        upgrade(addr)
+        upgrade()
     }
 
   override def close(deadline: Time): Future[Unit] = {
@@ -281,9 +281,11 @@ private[http2] class Http2Transporter(
       case Some(closable) => closable.close(deadline)
       case None => Future.Done
     }
-    val closings = transporterCache.values.asScala.toSeq.map(_.flatMap(maybeClose))
 
+    val f = cachedConnection.get
+
+    if (f == null) Future.Done
     // TODO: shouldn't rescue on timeout
-    Future.join(closings).by(deadline).rescue { case exn: Throwable => Future.Done }
+    else f.flatMap(maybeClose).by(deadline).rescue { case exn: Throwable => Future.Done }
   }
 }

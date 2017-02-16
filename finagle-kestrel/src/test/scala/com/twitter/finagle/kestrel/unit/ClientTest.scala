@@ -9,6 +9,7 @@ import com.twitter.finagle.kestrel.protocol.{Command, _}
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util._
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
@@ -193,7 +194,9 @@ class ClientTest extends FunSuite with MockitoSugar {
     val client = Kestrel.client
     val params = client.params
 
-    assert(params[Kestrel.param.KestrelImpl].transporter(params).toString == "Netty3Transporter")
+    val transporter = params[Kestrel.param.KestrelImpl].transporter(params)(new SocketAddress { })
+
+    assert(transporter.toString == "Netty3Transporter")
   }
 
   test("Client configured to use Netty4 has Netty param") {

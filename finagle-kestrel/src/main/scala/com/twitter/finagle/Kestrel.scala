@@ -19,6 +19,7 @@ import com.twitter.finagle.tracing.{ClientRequestTracingFilter, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
+import java.net.SocketAddress
 
 object Kestrel {
 
@@ -28,7 +29,7 @@ object Kestrel {
      * Configure the [[Transporter]] implementation used by Kestrel.
      */
     case class KestrelImpl(
-      transporter: Stack.Params => Transporter[Buf, Buf]){
+      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf]){
 
       def mk(): (KestrelImpl, Stack.Param[KestrelImpl]) =
         (this, KestrelImpl.param)
@@ -38,16 +39,16 @@ object Kestrel {
       /**
        * A [[KestrelImpl]] that uses netty3 as the underlying I/O multiplexer.
        */
-      val Netty3 = KestrelImpl(
-        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, params))
+      val Netty3: KestrelImpl = KestrelImpl(
+        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, _, params))
 
       /**
        * A [[KestrelImpl]] that uses netty4 as the underlying I/O multiplexer.
        *
        * @note Important! This is experimental and not yet tested in production!
        */
-      val Netty4 = KestrelImpl(
-        params => Netty4Transporter.raw(Netty4ClientFramer, params))
+      val Netty4: KestrelImpl = KestrelImpl(
+        params => Netty4Transporter.raw(Netty4ClientFramer, _, params))
 
       private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.kestrel.UseNetty4"
       private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
@@ -86,8 +87,8 @@ object Kestrel {
     protected type In = Buf
     protected type Out = Buf
 
-    protected def newTransporter(): Transporter[In, Out] =
-      params[param.KestrelImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      params[param.KestrelImpl].transporter(params)(addr)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] = {
       new SerialClientDispatcher(

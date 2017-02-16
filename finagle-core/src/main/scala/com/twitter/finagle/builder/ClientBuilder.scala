@@ -1479,10 +1479,10 @@ private case class CodecClient[Req, Rep](
       protected type In = Any
       protected type Out = Any
 
-      protected def newTransporter(): Transporter[Any, Any] = {
+      protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
         val Stats(stats) = params[Stats]
         val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
-        Netty3Transporter[Any, Any](codec.pipelineFactory,
+        Netty3Transporter[Any, Any](codec.pipelineFactory, addr,
           params + Netty3Transporter.TransportFactory(newTransport))
       }
 

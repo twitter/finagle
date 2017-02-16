@@ -66,7 +66,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   case class HttpImpl(
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
       serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-      transporter: Stack.Params => Transporter[Any, Any],
+      transporter: Stack.Params => SocketAddress => Transporter[Any, Any],
       listener: Stack.Params => Listener[Any, Any]) {
 
     def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
@@ -184,8 +184,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): StreamTransport[Request, Response] =
       new HttpTransport(params[HttpImpl].clientTransport(transport))
 
-    protected def newTransporter(): Transporter[Any, Any] = {
-      params[HttpImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
+      params[HttpImpl].transporter(params)(addr)
     }
 
     protected def copy1(

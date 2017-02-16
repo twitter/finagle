@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.io.Buf
 import com.twitter.util._
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -38,7 +39,8 @@ class CrossVersionEndToEndTest extends FunSuite {
   }
 
   test("Mux object uses netty3 impl by default") {
-    assert(Mux.client.params[Mux.param.MuxImpl].transporter(Stack.Params.empty).toString ==
+    val addr = new SocketAddress { }
+    assert(Mux.client.params[Mux.param.MuxImpl].transporter(Stack.Params.empty)(addr).toString ==
       "Netty3Transporter")
     assert(Mux.server.params[Mux.param.MuxImpl].listener(Stack.Params.empty).toString ==
       "Netty3Listener")

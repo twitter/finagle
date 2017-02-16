@@ -17,6 +17,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
 import com.twitter.util.{Future, Time}
 import com.twitter.util.registry.GlobalRegistry
+import java.net.SocketAddress
 
 object StackClient {
   /**
@@ -452,7 +453,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    * Defines a typed [[com.twitter.finagle.client.Transporter]] for this client.
    * Concrete StackClient implementations are expected to specify this.
    */
-  protected def newTransporter(): Transporter[In, Out]
+  protected def newTransporter(addr: SocketAddress): Transporter[In, Out]
 
   /**
    * Defines a dispatcher, a function which reconciles the stream based
@@ -539,7 +540,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
           case Address.Failed(e) => new FailingFactory[Req, Rep](e)
           case Address.Inet(ia, _) =>
             val endpointClient = copy1(params=prms)
-            val transporter = endpointClient.newTransporter()
+            val transporter = endpointClient.newTransporter(ia)
             // Export info about the transporter type so that we can query info
             // about its implementation at runtime. This assumes that the `toString`
             // of the implementation is sufficiently descriptive.
@@ -551,7 +552,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
             GlobalRegistry.get.put(transporterImplKey, transporter.toString)
             new ServiceFactory[Req, Rep] {
               def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-                transporter(ia).map { trans =>
+                transporter().map { trans =>
                   // we do not want to capture and request specific Locals
                   // that would live for the life of the session.
                   Contexts.letClearAll {

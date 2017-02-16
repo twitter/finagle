@@ -14,6 +14,7 @@ import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
+import java.net.SocketAddress
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -67,8 +68,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected type In = Buf
     protected type Out = Buf
 
-    protected def newTransporter(): Transporter[In, Out] =
-      Netty4Transporter.framedBuf(None /* no Framer */, params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      Netty4Transporter.framedBuf(None /* no Framer */, addr, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(

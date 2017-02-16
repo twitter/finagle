@@ -33,6 +33,10 @@ Breaking API Changes
     as instances of a single c.t.f.http.Method class. The string representation of the HTTP
     method is now available via the `Method.name` method. ``RB_ID=906697``
 
+  * finagle-core: Move the `java.net.SocketAddress` argument from the `apply` method
+    on `com.twitter.finagle.client.Transporter` to the `newTransporter` method of
+    `com.twitter.finagle.client.StackClient`. ``RB_ID=907544``
+
   * finagle-kestrel: Remove the deprecated `codec` method on `c.t.f.kestrel.MultiReaderMemcache`.
     Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
     ``RB_ID=907184``

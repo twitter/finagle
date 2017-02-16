@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.channel.RecvByteBufAllocatorProxy
 import com.twitter.finagle.toggle.flag
 import io.netty.channel.{ChannelPipeline, RecvByteBufAllocator}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -21,7 +22,7 @@ class Netty4ToggleTest extends FunSuite {
       checkReceiveBuffer(pipeline, isPooled = false), Stack.Params.empty)
 
     Netty4Transporter.raw(pipeline =>
-      checkReceiveBuffer(pipeline, isPooled = false), Stack.Params.empty)
+      checkReceiveBuffer(pipeline, isPooled = false), new SocketAddress { }, Stack.Params.empty)
   }
 
   test("pooling of receive buffers can be toggled on") {
@@ -30,7 +31,7 @@ class Netty4ToggleTest extends FunSuite {
         checkReceiveBuffer(pipeline, isPooled = true), Stack.Params.empty)
 
       Netty4Transporter.raw(pipeline =>
-        checkReceiveBuffer(pipeline, isPooled = true), Stack.Params.empty)
+        checkReceiveBuffer(pipeline, isPooled = true), new SocketAddress { }, Stack.Params.empty)
     }
   }
 }

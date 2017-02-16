@@ -448,12 +448,16 @@ object StreamingTest {
 
   def modifiedTransporterFn(
     mod: Modifier,
-    fn: Stack.Params => Transporter[Any, Any]
-  ): Stack.Params => Transporter[Any, Any] = { params: Stack.Params =>
-    val underlying = fn(params)
-    new Transporter[Any, Any] {
-      def apply(addr: SocketAddress): Future[Transport[Any, Any]] = {
-        underlying(addr).map(mod)
+    fn: Stack.Params => SocketAddress => Transporter[Any, Any]
+  ): Stack.Params => SocketAddress => Transporter[Any, Any] = { params: Stack.Params =>
+    { addr =>
+      val underlying = fn(params)(addr)
+      new Transporter[Any, Any] {
+        def apply(): Future[Transport[Any, Any]] = {
+          underlying().map(mod)
+        }
+
+        def remoteAddress: SocketAddress = underlying.remoteAddress
       }
     }
   }

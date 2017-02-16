@@ -15,7 +15,7 @@ import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import javax.net.ssl.{SSLEngine, SSLEngineResult, SSLSession}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
@@ -52,13 +52,17 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
 
   private[this] def makeTransporterPipeline(
     params: Stack.Params,
-    addr: SocketAddress = new InetSocketAddress(0),
+    addr: InetSocketAddress = new InetSocketAddress(0),
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): ChannelPipeline = {
     val pipeline = Channels.pipeline()
     val pipelineFactory = Channels.pipelineFactory(pipeline)
-    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
-    transporter.newPipeline(addr, statsReceiver)
+    val transporter = new Netty3Transporter[Int, Int](
+      pipelineFactory,
+      addr,
+      params
+    )
+    transporter.newPipeline(statsReceiver)
   }
 
   test("create a Netty3Transporter instance based on Stack params") {
@@ -77,7 +81,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
         Transport.Verbose(true)
 
     val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
-    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, inputParams)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, unresolvedAddr, inputParams)
     assert(transporter.name == inputParams[Label].label)
     assert(transporter.pipelineFactory == pipelineFactory)
     assert(transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send)
@@ -97,8 +101,8 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     val params = Stack.Params.empty + Label("name") +
       Transporter.SocksProxy(Some(InetSocketAddress.createUnresolved("anAddr", 0)), None)
 
-    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
-    val pl = transporter.newPipeline(unresolvedAddr, NullStatsReceiver)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, unresolvedAddr, params)
+    val pl = transporter.newPipeline(NullStatsReceiver)
     assert(pl == pipeline) // mainly just checking that we don't NPE anymore
   }
 
@@ -144,8 +148,11 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     val pipelineFactory = new ChannelPipelineFactory {
       override def getPipeline(): ChannelPipeline = firstPipeline
     }
-    val transporter = new Netty3Transporter[Int, Int](pipelineFactory,
-      Stack.Params.empty + Label("name"))
+    val transporter = new Netty3Transporter[Int, Int](
+      pipelineFactory,
+      unresolvedAddr,
+      Stack.Params.empty + Label("name")
+    )
 
     val firstHandler = transporter.channelStatsHandler(sr.scope("first"))
     val secondHandler = transporter.channelStatsHandler(sr.scope("second"))
@@ -338,7 +345,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
       Transporter.TLSHostname(Some("localhost"))
 
     val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
-    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, params)
+    val transporter = new Netty3Transporter[Int, Int](pipelineFactory, unresolvedAddr, params)
 
     // 21 - alert message, 3 - SSL3 major version,
     // 0 - SSL3 minor version, 0 1 - package length, 0 - close_notify
@@ -346,7 +353,7 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     cb.readerIndex(0)
     cb.writerIndex(6)
 
-    val pipeline = transporter.newPipeline(null, NullStatsReceiver)
+    val pipeline = transporter.newPipeline(NullStatsReceiver)
     val channel = transporter.newChannel(pipeline)
     new ChannelTransport(channel) // adds itself to the channel's pipeline
     val closeNotify = new UpstreamMessageEvent(channel, cb, null)
