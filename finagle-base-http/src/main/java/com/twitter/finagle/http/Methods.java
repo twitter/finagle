@@ -2,7 +2,11 @@ package com.twitter.finagle.http;
 
 /**
  * Java friendly versions of {@link com.twitter.finagle.http.Method}.
+ *
+ * @deprecated as of 2017-02-13. Please use the {@link com.twitter.finagle.http.Method}
+ * instances directly.
  */
+@Deprecated
 public final class Methods {
   private Methods() { }
 

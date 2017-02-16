@@ -2,126 +2,130 @@ package com.twitter.finagle.http;
 
 /**
  * Java friendly versions of {@link com.twitter.finagle.http.Status}.
+ *
+ * @deprecated as of 2017-02-13. Please use the {@link com.twitter.finagle.http.Status}
+ * instances directly.
  */
+@Deprecated
 public final class Statuses {
   private Statuses() { }
 
   public static final Status CONTINUE =
-    Status$.MODULE$.Continue();
+    Status.Continue();
   public static final Status SWITCHING_PROTOCOLS =
-    Status$.MODULE$.SwitchingProtocols();
+    Status.SwitchingProtocols();
   public static final Status PROCESSING =
-    Status$.MODULE$.Processing();
+    Status.Processing();
   public static final Status OK =
-    Status$.MODULE$.Ok();
+    Status.Ok();
   public static final Status CREATED =
-    Status$.MODULE$.Created();
+    Status.Created();
   public static final Status ACCEPTED =
-    Status$.MODULE$.Accepted();
+    Status.Accepted();
   public static final Status NON_AUTHORITATIVE_INFORMATION =
-    Status$.MODULE$.NonAuthoritativeInformation();
+    Status.NonAuthoritativeInformation();
   public static final Status NO_CONTENT =
-    Status$.MODULE$.NoContent();
+    Status.NoContent();
   public static final Status RESET_CONTENT =
-    Status$.MODULE$.ResetContent();
+    Status.ResetContent();
   public static final Status PARTIAL_CONTENT =
-    Status$.MODULE$.PartialContent();
+    Status.PartialContent();
   public static final Status MULTI_STATUS =
-    Status$.MODULE$.MultiStatus();
+    Status.MultiStatus();
   public static final Status MULTIPLE_CHOICES =
-    Status$.MODULE$.MultipleChoices();
+    Status.MultipleChoices();
   public static final Status MOVED_PERMANENTLY =
-    Status$.MODULE$.MovedPermanently();
+    Status.MovedPermanently();
   public static final Status FOUND =
-    Status$.MODULE$.Found();
+    Status.Found();
   public static final Status SEE_OTHER =
-    Status$.MODULE$.SeeOther();
+    Status.SeeOther();
   public static final Status NOT_MODIFIED =
-    Status$.MODULE$.NotModified();
+    Status.NotModified();
   public static final Status USE_PROXY =
-    Status$.MODULE$.UseProxy();
+    Status.UseProxy();
   public static final Status TEMPORARY_REDIRECT =
-    Status$.MODULE$.TemporaryRedirect();
+    Status.TemporaryRedirect();
   public static final Status BAD_REQUEST =
-    Status$.MODULE$.BadRequest();
+    Status.BadRequest();
   public static final Status UNAUTHORIZED =
-    Status$.MODULE$.Unauthorized();
+    Status.Unauthorized();
   public static final Status PAYMENT_REQUIRED =
-    Status$.MODULE$.PaymentRequired();
+    Status.PaymentRequired();
   public static final Status FORBIDDEN =
-    Status$.MODULE$.Forbidden();
+    Status.Forbidden();
   public static final Status NOT_FOUND =
-    Status$.MODULE$.NotFound();
+    Status.NotFound();
   public static final Status METHOD_NOT_ALLOWED =
-    Status$.MODULE$.MethodNotAllowed();
+    Status.MethodNotAllowed();
   public static final Status NOT_ACCEPTABLE =
-    Status$.MODULE$.NotAcceptable();
+    Status.NotAcceptable();
   public static final Status PROXY_AUTHENTICATION_REQUIRED =
-    Status$.MODULE$.ProxyAuthenticationRequired();
+    Status.ProxyAuthenticationRequired();
   public static final Status REQUEST_TIMEOUT =
-    Status$.MODULE$.RequestTimeout();
+    Status.RequestTimeout();
   public static final Status CONFLICT =
-    Status$.MODULE$.Conflict();
+    Status.Conflict();
   public static final Status GONE =
-    Status$.MODULE$.Gone();
+    Status.Gone();
   public static final Status LENGTH_REQUIRED =
-    Status$.MODULE$.LengthRequired();
+    Status.LengthRequired();
   public static final Status PRECONDITION_FAILED =
-    Status$.MODULE$.PreconditionFailed();
+    Status.PreconditionFailed();
   public static final Status REQUEST_ENTITY_TOO_LARGE =
-    Status$.MODULE$.RequestEntityTooLarge();
+    Status.RequestEntityTooLarge();
   public static final Status REQUEST_URITOO_LONG =
-    Status$.MODULE$.RequestURITooLong();
+    Status.RequestURITooLong();
   public static final Status UNSUPPORTED_MEDIA_TYPE =
-    Status$.MODULE$.UnsupportedMediaType();
+    Status.UnsupportedMediaType();
   public static final Status REQUESTED_RANGE_NOT_SATISFIABLE =
-    Status$.MODULE$.RequestedRangeNotSatisfiable();
+    Status.RequestedRangeNotSatisfiable();
   public static final Status EXPECTATION_FAILED =
-    Status$.MODULE$.ExpectationFailed();
+    Status.ExpectationFailed();
   public static final Status ENHANCE_YOUR_CALM =
-    Status$.MODULE$.EnhanceYourCalm();
+    Status.EnhanceYourCalm();
   public static final Status UNPROCESSABLE_ENTITY =
-    Status$.MODULE$.UnprocessableEntity();
+    Status.UnprocessableEntity();
   public static final Status LOCKED =
-    Status$.MODULE$.Locked();
+    Status.Locked();
   public static final Status FAILED_DEPENDENCY =
-    Status$.MODULE$.FailedDependency();
+    Status.FailedDependency();
   public static final Status UNORDERED_COLLECTION =
-    Status$.MODULE$.UnorderedCollection();
+    Status.UnorderedCollection();
   public static final Status UPGRADE_REQUIRED =
-    Status$.MODULE$.UpgradeRequired();
+    Status.UpgradeRequired();
   public static final Status PRECONDITION_REQUIRED =
-    Status$.MODULE$.PreconditionRequired();
+    Status.PreconditionRequired();
   public static final Status TOO_MANY_REQUESTS =
-    Status$.MODULE$.TooManyRequests();
+    Status.TooManyRequests();
   public static final Status REQUEST_HEADER_FIELDS_TOO_LARGE =
-    Status$.MODULE$.RequestHeaderFieldsTooLarge();
+    Status.RequestHeaderFieldsTooLarge();
   public static final Status UNAVAILABLE_FOR_LEGAL_REASONS =
-    Status$.MODULE$.UnavailableForLegalReasons();
+    Status.UnavailableForLegalReasons();
   public static final Status CLIENT_CLOSED_REQUEST =
-    Status$.MODULE$.ClientClosedRequest();
+    Status.ClientClosedRequest();
   public static final Status INTERNAL_SERVER_ERROR =
-    Status$.MODULE$.InternalServerError();
+    Status.InternalServerError();
   public static final Status NOT_IMPLEMENTED =
-    Status$.MODULE$.NotImplemented();
+    Status.NotImplemented();
   public static final Status BAD_GATEWAY =
-    Status$.MODULE$.BadGateway();
+    Status.BadGateway();
   public static final Status SERVICE_UNAVAILABLE =
-    Status$.MODULE$.ServiceUnavailable();
+    Status.ServiceUnavailable();
   public static final Status GATEWAY_TIMEOUT =
-    Status$.MODULE$.GatewayTimeout();
+    Status.GatewayTimeout();
   public static final Status HTTP_VERSION_NOT_SUPPORTED =
-    Status$.MODULE$.HttpVersionNotSupported();
+    Status.HttpVersionNotSupported();
   public static final Status VARIANT_ALSO_NEGOTIATES =
-    Status$.MODULE$.VariantAlsoNegotiates();
+    Status.VariantAlsoNegotiates();
   public static final Status INSUFFICIENT_STORAGE =
-    Status$.MODULE$.InsufficientStorage();
+    Status.InsufficientStorage();
   public static final Status NOT_EXTENDED =
-    Status$.MODULE$.NotExtended();
+    Status.NotExtended();
   public static final Status NETWORK_AUTHENTICATION_REQUIRED =
-    Status$.MODULE$.NetworkAuthenticationRequired();
+    Status.NetworkAuthenticationRequired();
 
   public static Status fromCode(int code) {
-    return Status$.MODULE$.fromCode(code);
+    return Status.fromCode(code);
   }
 }

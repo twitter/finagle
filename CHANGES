@@ -60,6 +60,10 @@ Runtime Behavior Changes
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-http: Now that `c.t.f.http.Method` and `c.t.f.http.Version` are represented by
+    instances and thus easier to use from Java, the Java helpers `c.t.f.http.Versions`,
+    `c.t.f.http.Statuses`, and `c.t.f.http.Methods` have been deprecated. ``RB_ID=907680``
+
   * finagle-memcached: `c.t.f.memcached.replication.ReplicationClient` is now deprecated. Use
     `c.t.f.memcached.replication.BaseReplicationClient` with clients created using
     `c.t.f.Memcached.client`. ``RB_ID=907384``

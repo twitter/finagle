@@ -1,5 +1,6 @@
 target(name='finagle-base-http',
   dependencies=[
+    'finagle/finagle-base-http/src/main/java',
     'finagle/finagle-base-http/src/main/scala'
   ]
 )
