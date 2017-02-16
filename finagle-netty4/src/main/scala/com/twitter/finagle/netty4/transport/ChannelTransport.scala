@@ -78,7 +78,7 @@ private[finagle] class ChannelTransport(
 
   val onClose: Future[Throwable] = closed
 
-  private[this] object ReadManager {
+  private[transport] object ReadManager {
     // Negative `msgsNeeded` means we're buffering data in our offer queue
     // which hasn't been processed by the application yet, so rather than read
     // off the channel we drain the offer queue. This also applies back-pressure
@@ -86,6 +86,9 @@ private[finagle] class ChannelTransport(
     // buffer up to 1 message because the TCP implementation only notifies the
     // channel of a close event when attempting to perform operations.
     private[this] val msgsNeeded = new AtomicInteger(0)
+
+    // exposed for testing
+    private[transport] def getMsgsNeeded = msgsNeeded.get
 
     // Tell the channel that we want to read if we don't have offers already queued
     def readIfNeeded(): Unit = {
@@ -96,16 +99,15 @@ private[finagle] class ChannelTransport(
 
     // Increment our needed messages by 1 and ask the channel to read if necessary
     def incrementAndReadIfNeeded(): Unit = {
-      if (!ch.config.isAutoRead) {
-        if (msgsNeeded.incrementAndGet() >= 0) ch.read()
+      val value = msgsNeeded.incrementAndGet()
+      if (value >= 0 && !ch.config.isAutoRead) {
+        ch.read()
       }
     }
 
     // Called when we have received a message from the channel pipeline
-    def decrementIfNeeded(): Unit = {
-      if (!ch.config.isAutoRead) {
-        msgsNeeded.decrementAndGet()
-      }
+    def decrement(): Unit = {
+      msgsNeeded.decrementAndGet()
     }
   }
 
@@ -221,7 +223,7 @@ private[finagle] class ChannelTransport(
     }
 
     override def channelRead(ctx: nchan.ChannelHandlerContext, msg: Any): Unit = {
-      ReadManager.decrementIfNeeded()
+      ReadManager.decrement()
 
       // `offer` can fail in races between messages arriving and the transport shutting down
       // so we cleanup the underlying resources immediately. In practice for finagle protocols

@@ -1125,4 +1125,28 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
     await(client.close())
   }
+
+  test(s"$implName client handles cut connection properly") {
+    val svc = Service.mk[Request, Response] { req: Request =>
+      Future.value(Response())
+    }
+    val server1 = serverImpl()
+      .serve("localhost:*", svc)
+    val addr = server1.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val rep1 = await(client(Request("/")))
+
+    assert(rep1.status == Status.Ok)
+    await(server1.close())
+
+    // we wait to ensure the client has been informed the connection has been dropped
+    Thread.sleep(20)
+
+    val server2 = serverImpl()
+      .serve("localhost:%d".format(addr.getPort), svc)
+    val rep2 = await(client(Request("/")))
+    assert(rep2.status == Status.Ok)
+  }
 }

@@ -302,4 +302,17 @@ class ChannelTransportTest extends FunSuite
     Await.ready(ct.close(), 1.second)
     intercept[ChannelClosedException] { Await.result(read, 1.second) }
   }
+
+  test("disabling autoread midstream is safe") {
+    val em = new EmbeddedChannel
+    em.config.setAutoRead(true)
+    val ct = new ChannelTransport(em)
+    val transport = Transport.cast[String, String](ct)
+    val f = ct.read()
+    em.config.setAutoRead(false)
+
+    em.writeInbound("one")
+
+    assert(ct.ReadManager.getMsgsNeeded == 0)
+  }
 }

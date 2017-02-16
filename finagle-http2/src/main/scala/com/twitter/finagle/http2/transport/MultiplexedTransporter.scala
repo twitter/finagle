@@ -100,6 +100,7 @@ private[http2] class MultiplexedTransporter(
         q.fail(e)
       }
       queues.clear()
+      self.close()
       Future.const(t.cast[Unit])
   }
 
