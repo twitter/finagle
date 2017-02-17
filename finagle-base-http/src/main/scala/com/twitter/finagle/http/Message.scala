@@ -24,7 +24,7 @@ import Bijections._
  */
 abstract class Message {
 
-  protected[finagle] def httpMessage: HttpMessage
+  protected def httpMessage: HttpMessage
   private[this] val readerWriter = BufReader.writable()
 
   /**
@@ -205,13 +205,45 @@ abstract class Message {
     this.contentType = builder.toString
   }
 
-  /** Get Content-Length header.  Use length to get the length of actual content. */
+  /**
+   * Get the value of the Content-Length header.  Use length to get the length of actual content.
+   *
+   * @see [[contentLengthOrElse(Long): Long]] for Java users.
+   */
   def contentLength: Option[Long] =
     headerMap.get(Fields.ContentLength).map(_.toLong)
-  /** Set Content-Length header.  Normally, this is automatically set by the
-    * Codec, but this method allows you to override that. */
+
+  /**
+   * Get the value of the Content-Length header, or the provided default if it doesn't exist.
+   *
+   * @see [[contentLength: Option(Long)]] for Scala users.
+   */
+  final def contentLengthOrElse(default: Long): Long = {
+    contentLength match {
+      case Some(len) => len
+      case None => default
+    }
+  }
+  
+  /**
+   * Set Content-Length header.  Normally, this is automatically set by the
+   * Codec, but this method allows you to override that.
+   *
+   * @see [[contentLength(Long)]] for Java users.
+   */
   def contentLength_=(value: Long): Unit =
     headerMap.set(Fields.ContentLength, value.toString)
+
+  /**
+   * Set Content-Length header.  Normally, this is automatically set by the
+   * Codec, but this method allows you to override that.
+   *
+   * @see [[contentLength_=(Long)]] for Scala users.
+    */
+  final def contentLength(value: Long): this.type = {
+    this.contentLength = value
+    this
+  }
 
   /** Get Content-Type header */
   def contentType: Option[String] = headerMap.get(Fields.ContentType)
@@ -337,7 +369,9 @@ abstract class Message {
 
   /** Get length of content. */
   def length: Int = getContent.readableBytes
-  def getLength(): Int = length
+
+  /** Get length of content. */
+  final def getLength(): Int = length
 
   /** Get the content as a string. */
   def contentString: String = {
@@ -358,7 +392,9 @@ abstract class Message {
     else
       setContent(ChannelBuffers.EMPTY_BUFFER)
   }
-  def setContentString(value: String): Unit = contentString = value
+
+  /** Set the content as a string. */
+  final def setContentString(value: String): Unit = contentString = value
 
   /**
    * Use content as InputStream.  The underlying channel buffer's reader
@@ -464,17 +500,14 @@ abstract class Message {
 
   private[http] def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
 
-  @deprecated("Use headerMap instead", "2017-01-24")
-  protected def headers(): HttpHeaders =
+  private[this] def headers(): HttpHeaders =
     httpMessage.headers()
 
-  @deprecated("Use content instead", "2017-01-23")
-  protected def getContent(): ChannelBuffer =
+  private[this] def getContent(): ChannelBuffer =
     httpMessage.getContent()
 
-  @deprecated("Use content(Buf) instead", "2017-01-23")
   @throws[IllegalStateException]
-  protected def setContent(content: ChannelBuffer): Unit = {
+  private[this] def setContent(content: ChannelBuffer): Unit = {
     // To preserve netty3 behavior, we only throw an exception if the content is non-empty
     if (isChunked && content.readable())
       throw new IllegalStateException("Cannot set non-empty content on chunked message")

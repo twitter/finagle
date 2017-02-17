@@ -1,8 +1,5 @@
 package com.twitter.finagle.example.java.http;
 
-import java.nio.charset.StandardCharsets;
-
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import com.twitter.finagle.Service;
@@ -25,15 +22,12 @@ public final class HandleErrors extends SimpleFilter<Request, Response> {
                 Response resp = Response.apply();
                 if (in instanceof NumberFormatException) {
                     resp.setStatus(HttpResponseStatus.BAD_REQUEST);
-                    resp.setContent(
-                        ChannelBuffers.wrappedBuffer(
-                            in.getMessage().getBytes(StandardCharsets.UTF_8)));
+                    resp.setContentString(in.getMessage());
 
                     return resp;
                 }
                 resp.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                resp.setContent(
-                    ChannelBuffers.wrappedBuffer(in.getMessage().getBytes(StandardCharsets.UTF_8)));
+                resp.setContentString(in.getMessage());
 
                 return resp;
             }

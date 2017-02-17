@@ -109,8 +109,8 @@ v3
     val req0 = RequestBuilder().url(new URL("http://a.com")).buildGet
     val req1 = RequestBuilder().url(new URL("http://a.com?xxx")).buildGet
 
-    req0.getUri == "/"
-    req1.getUri == "/?xxx"
+    req0.uri == "/"
+    req1.uri == "/?xxx"
   }
 
   test("not include the fragment in the resource") {
@@ -134,21 +134,21 @@ v3
     val post1 = RequestBuilder().url(u1).buildPost(BODY0)
     val post2 = RequestBuilder().url(u2).buildPost(BODY0)
 
-    assert(get0.getUri == "/")
-    assert(get1.getUri == "/")
-    assert(get2.getUri == "/?abc=def")
-    assert(head0.getUri == "/")
-    assert(head1.getUri == "/")
-    assert(head2.getUri == "/?abc=def")
-    assert(del0.getUri == "/")
-    assert(del1.getUri == "/")
-    assert(del2.getUri == "/?abc=def")
-    assert(put0.getUri == "/")
-    assert(put1.getUri == "/")
-    assert(put2.getUri == "/?abc=def")
-    assert(post0.getUri == "/")
-    assert(post1.getUri == "/")
-    assert(post2.getUri == "/?abc=def")
+    assert(get0.uri == "/")
+    assert(get1.uri == "/")
+    assert(get2.uri == "/?abc=def")
+    assert(head0.uri == "/")
+    assert(head1.uri == "/")
+    assert(head2.uri == "/?abc=def")
+    assert(del0.uri == "/")
+    assert(del1.uri == "/")
+    assert(del2.uri == "/?abc=def")
+    assert(put0.uri == "/")
+    assert(put1.uri == "/")
+    assert(put2.uri == "/?abc=def")
+    assert(post0.uri == "/")
+    assert(post1.uri == "/")
+    assert(post2.uri == "/?abc=def")
   }
 
   test("not include the empty query string") {
@@ -172,21 +172,21 @@ v3
     val post1 = RequestBuilder().url(u1).buildPost(BODY0)
     val post2 = RequestBuilder().url(u2).buildPost(BODY0)
 
-    assert(get0.getUri == "/")
-    assert(get1.getUri == "/")
-    assert(get2.getUri == "/")
-    assert(head0.getUri == "/")
-    assert(head1.getUri == "/")
-    assert(head2.getUri == "/")
-    assert(del0.getUri == "/")
-    assert(del1.getUri == "/")
-    assert(del2.getUri == "/")
-    assert(put0.getUri == "/")
-    assert(put1.getUri == "/")
-    assert(put2.getUri == "/")
-    assert(post0.getUri == "/")
-    assert(post1.getUri == "/")
-    assert(post2.getUri == "/")
+    assert(get0.uri == "/")
+    assert(get1.uri == "/")
+    assert(get2.uri == "/")
+    assert(head0.uri == "/")
+    assert(head1.uri == "/")
+    assert(head2.uri == "/")
+    assert(del0.uri == "/")
+    assert(del1.uri == "/")
+    assert(del2.uri == "/")
+    assert(put0.uri == "/")
+    assert(put1.uri == "/")
+    assert(put2.uri == "/")
+    assert(post0.uri == "/")
+    assert(post1.uri == "/")
+    assert(post2.uri == "/")
   }
 
   test("set the correct protocol version") {

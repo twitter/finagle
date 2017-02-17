@@ -52,7 +52,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val (in, out) = mkPair[Any, Any]
     val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
-    in.write(Request("/foo").httpMessage)
+    in.write(Request("/foo").httpRequest)
     Await.result(in.read, 5.seconds) match {
       case resp: HttpResponse =>
         assert(resp.getStatus == HttpResponseStatus.OK)

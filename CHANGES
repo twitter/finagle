@@ -13,6 +13,10 @@ New Features
   * finagle-base-http: `c.t.f.http.Message` now has a Java friendly method to set the
     HTTP version: `Message.version(Version)`. ``RB_ID=906946``
 
+  * finagle-base-http: Added Java friendly methods to the HTTP model including
+    `c.t.f.http.Message.contentLength(Long)`, `c.t.f.http.Message.contentLengthOrElse(Long): Long`,
+    and `c.t.f.http.Request.method(Method)`. ``RB_ID=907501``
+
   * finagle-base-http: `c.t.f.http.HeaderMap` now has a method, `HeaderMap.newHeaderMap` for
     creating new empty `HeaderMap` instances. ``RB_ID=907397``
 

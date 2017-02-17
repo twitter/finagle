@@ -62,17 +62,29 @@ abstract class Request extends Message {
   /**
    * Returns the HTTP method of this request.
    */
-  def method: Method = from(getMethod())
+  def method: Method = from(httpRequest.getMethod())
 
   /**
    * Sets the HTTP method of this request to the given `method`.
+   *
+   * * @see [[method(Method)]] for Java users.
    */
-  def method_=(method: Method): Unit = setMethod(from(method))
+  def method_=(method: Method): Unit = httpRequest.setMethod(from(method))
+
+  /**
+   * Sets the HTTP method of this request to the given `method`.
+   *
+   * @see [[method_=(Method)]] for Scala users.
+   */
+  final def method(method: Method): this.type = {
+    this.method = method
+    this
+  }
 
   /**
    * Returns the URI of this request.
    */
-  def uri: String = getUri()
+  def uri: String = httpRequest.getUri()
 
   /**
    * Set the URI of this request.
@@ -89,7 +101,7 @@ abstract class Request extends Message {
    *
    * @see [[uri(String)]] for Java users.
    */
-  def uri_=(uri: String): Unit = setUri(uri)
+  def uri_=(uri: String): Unit = httpRequest.setUri(uri)
 
   /** Path from URI. */
   @BeanProperty
@@ -229,22 +241,7 @@ abstract class Request extends Message {
   protected[finagle] def httpRequest: HttpRequest
 
   @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def getHttpRequest(): HttpRequest = httpRequest
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def httpMessage: HttpMessage = httpRequest
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def getMethod(): HttpMethod = httpRequest.getMethod
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def setMethod(method: HttpMethod): Unit = httpRequest.setMethod(method)
-
-  @deprecated("Use `uri` instead.", "2017-01-26")
-  protected[finagle] def getUri(): String = httpRequest.getUri()
-
-  @deprecated("Use `uri(String)` instead.", "2017-01-26")
-  protected[finagle] def setUri(uri: String): Unit = httpRequest.setUri(uri)
+  protected def httpMessage: HttpMessage = httpRequest
 }
 
 
