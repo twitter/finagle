@@ -1,5 +1,6 @@
 package com.twitter.finagle.kestrel.unit
 
+import _root_.java.net.SocketAddress
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
 import com.twitter.finagle.Kestrel
@@ -9,7 +10,6 @@ import com.twitter.finagle.kestrel.protocol.{Command, _}
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util._
-import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}

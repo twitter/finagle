@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import _root_.java.net.SocketAddress
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher}
@@ -19,7 +20,6 @@ import com.twitter.finagle.tracing.{ClientRequestTracingFilter, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
-import java.net.SocketAddress
 
 object Kestrel {
 

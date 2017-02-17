@@ -33,7 +33,6 @@ import com.twitter.hashing
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
-import java.net.SocketAddress
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
