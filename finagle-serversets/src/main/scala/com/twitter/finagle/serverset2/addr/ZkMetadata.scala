@@ -17,7 +17,6 @@ case class ZkMetadata(shardId: Option[Int])
 object ZkMetadata {
   // visibility exposed for testing
   private[addr] val key = "zk_metadata"
-  private val default = ZkMetadata(None)
 
   /**
    * Convert [[ZkMetadata]] to an instance of
@@ -29,18 +28,11 @@ object ZkMetadata {
   /**
    * Convert [[com.twitter.finagle.Addr.Metadata]] to an instance of
    * [[ZkMetadata]].  If [[ZkMetadata]] is not present in `metadata`,
-   * return the default metadata.
+   * return None.
    */
-  def fromAddrMetadata(metadata: Addr.Metadata): ZkMetadata =
+  def fromAddrMetadata(metadata: Addr.Metadata): Option[ZkMetadata] =
     metadata.get(key) match {
-      case Some(metadata: ZkMetadata) => metadata
-      case _ => default
+      case Some(metadata: ZkMetadata) => Some(metadata)
+      case _ => None
     }
-
-  /**
-   * Pattern match against `metadata` for [[ZkMetadata]] and return the
-   * shard ID if it exists.
-   */
-  def unapply(metadata: Addr.Metadata): Option[Int] =
-    fromAddrMetadata(metadata).shardId
 }

@@ -51,6 +51,10 @@ Breaking API Changes
   * finagle-kestrel: Removed deprecated `c.t.f.kestrel.protocol.Kestrel`. To create a Finagle
     Kestrel client, use `c.t.f.Kestrel.client`. ``RB_ID=907422``
 
+  * finagle-serversets: Removed the unapply method and modified the signature of 
+    fromAddrMetadata method in `c.t.f.serverset2.addr.ZkMetadata`. Instead of pattern
+    matching use the modified fromAddrMetadata method. ``RB_ID=908186``
+
   * finagle-stats: Remove the `com.twitter.finagle.stats.exportEmptyHistograms` toggle
     which has defaulted to 0.0 for quite some time. Change the default value of the
     `com.twitter.finagle.stats.includeEmptyHistograms` flag to false to retain the
