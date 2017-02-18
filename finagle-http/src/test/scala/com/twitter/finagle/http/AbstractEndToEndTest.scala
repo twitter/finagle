@@ -932,8 +932,8 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   test("client respects MaxResponseSize") {
-    val svc = new Service[Request, Response] {
-      def apply(request: Request) = {
+    val svc = new HttpService {
+      def apply(request: Request): Future[Response] = {
         val response = Response()
         response.contentString = "*" * 600.kilobytes.bytes.toInt
         Future.value(response)
@@ -957,6 +957,28 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     await(client.close())
     await(server.close())
+  }
+
+  test("server responds 500 if an invalid header is being served") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        val response = Response()
+        response.headerMap.add("foo", "|\f") // these are prohibited in N3
+        Future.value(response)
+      }
+    }
+
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", service)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val rep = await(client(Request("/")))
+    assert(rep.status == Status.InternalServerError)
   }
 
   testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize") {

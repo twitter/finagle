@@ -110,7 +110,10 @@ private[finagle] object Bijections {
         map.underlying
 
       case _ =>
-        val result = new NettyHttp.DefaultHttpHeaders()
+        // We don't want to validate headers here since they are already validated
+        // by Netty 3 DefaultHttpHeaders. This not only allows us to be efficient
+        // but also preserves the behavior of Netty 3.
+        val result = new NettyHttp.DefaultHttpHeaders(false/*validate headers*/)
         h.foreach { case (k,v) =>
           result.add(k, v)
         }
