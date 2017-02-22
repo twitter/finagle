@@ -1,14 +1,12 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.stats.StatsReceiver
 import io.netty.buffer.ByteBuf
 import io.netty.util.{ResourceLeakDetector, ResourceLeakDetectorFactory}
 
 /**
- * `ResourceLeakDetectorFactory` which exports a counter tracking `ByteBuf`
- *  leaks.
+ * `ResourceLeakDetectorFactory` which calls `leakFn` on each resource leak.
  */
-private[netty4] class StatsLeakDetectorFactory(stats: StatsReceiver) extends ResourceLeakDetectorFactory {
+private[netty4] class StatsLeakDetectorFactory(leakFn: () => Unit) extends ResourceLeakDetectorFactory {
 
   private[this] val stashedInstance = ResourceLeakDetectorFactory.instance()
 
@@ -18,7 +16,7 @@ private[netty4] class StatsLeakDetectorFactory(stats: StatsReceiver) extends Res
     maxActive: Long
   ): ResourceLeakDetector[T] = resource match {
     case x if x.isAssignableFrom(classOf[ByteBuf]) =>
-      new LeakDetectorStatsImpl(stats, samplingInterval, maxActive)
+      new LeakDetectorStatsImpl(leakFn, samplingInterval, maxActive)
 
     case _ =>
       stashedInstance.newResourceLeakDetector(resource, samplingInterval, maxActive)
@@ -26,20 +24,19 @@ private[netty4] class StatsLeakDetectorFactory(stats: StatsReceiver) extends Res
 
 
   private[this] class LeakDetectorStatsImpl[T](
-      sr: StatsReceiver,
+      leakFn: () => Unit,
       samplingInterval: Int,
       maxActive: Long)
     extends ResourceLeakDetector[T](classOf[ByteBuf], samplingInterval, maxActive) {
 
-    private[this] val referenceLeaks = stats.scope("netty4").counter("reference_leaks")
 
     protected[this] override def reportTracedLeak(resourceType: String, records: String): Unit = {
-      referenceLeaks.incr()
+      leakFn()
       super.reportTracedLeak(resourceType, records)
     }
 
     protected[this] override def reportUntracedLeak(resourceType: String): Unit = {
-      referenceLeaks.incr()
+      leakFn()
       super.reportUntracedLeak(resourceType)
     }
   }
