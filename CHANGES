@@ -86,6 +86,11 @@ Bug Fixes
   * finagle-thrift: Properly locate sub-classed MethodIface services to instantiate for serving
     BaseServiceIface implemented thrift services. ``RB_ID=907608``
 
+Dependencies
+~~~~~~~~~~~~
+
+  * finagle: Bump guava to 19.0. ``RB_ID=907807``
+
 6.42.0
 ------
 
