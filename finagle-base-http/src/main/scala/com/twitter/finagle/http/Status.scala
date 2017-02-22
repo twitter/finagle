@@ -71,8 +71,10 @@ object Status {
       inRange(500, 600, status)
   }
 
-  private[finagle] def inRange(lower: Int, upper: Int, status: Status): Option[Status] =
-    Some(status).filter(s => s.code >= lower && s.code < upper)
+  private[finagle] def inRange(lower: Int, upper: Int, status: Status): Option[Status] = {
+    if (lower <= status.code && status.code < upper) Some(status)
+    else None
+  }
 
   val Continue = Status(100)
   val SwitchingProtocols = Status(101)

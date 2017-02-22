@@ -1,6 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.http.{Fields, Message, Request, Response}
+import com.twitter.finagle.http.{Fields, Message, Request, Response, Status}
 import com.twitter.util.{Future, Promise}
 
 /**
@@ -49,9 +49,7 @@ private[finagle] class ConnectionManager {
   def observeResponse(response: Response, onFinish: Future[Unit]): Unit = synchronized {
     pendingResponses -= 1
 
-    if (!isKeepAlive ||
-        (!response.isChunked && response.contentLength.isEmpty) ||
-        !response.isKeepAlive) {
+    if (!isKeepAlive || mustCloseOnFinish(response) || !response.isKeepAlive) {
       // We are going to close the connection after this response so we ensure that
       // the 'Connection' header is set to 'close' in order to give the client notice.
       response.headerMap.set(Fields.Connection, "close")
@@ -82,4 +80,20 @@ private[finagle] class ConnectionManager {
 
   def shouldClose(): Boolean = synchronized { isIdle && !isKeepAlive }
   def onClose: Future[Unit] = closeP
+
+  private[this] def mustCloseOnFinish(resp: Response): Boolean = {
+    // For a HTTP/1.x response that may have a body, the body length defined by
+    // either the `Transfer-Encoding: chunked` mechanism, the Content-Length header,
+    // or the end of the connection, in that order.
+    // See https://tools.ietf.org/html/rfc7230#section-3.3.3 for more details.
+    mayHaveContent(resp.status) && !resp.isChunked && resp.contentLength.isEmpty
+  }
+
+  // Some status codes are not permitted to have a message body.
+  private[this] def mayHaveContent(status: Status): Boolean = status match {
+    case Status.Informational(_) => false // all 1xx status codes must not have a body
+    case Status.NoContent => false        // 204 No Content
+    case Status.NotModified => false      // 304 Not Modified
+    case _ => true
+  }
 }

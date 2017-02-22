@@ -62,7 +62,7 @@ Breaking API Changes
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
-
+  
   * finagle-netty4: Servers no longer set SO_LINGER=0 on sockets. ``RB_ID=907325``
 
 Deprecations
@@ -82,6 +82,10 @@ Deprecations
 
 Bug Fixes
 ~~~~~~~~~
+
+  * finagle-http: The HTTP/1.x Client will no longer force-close the socket after receiving
+    a response that lacks content-length and transfer-encoding headers but is required per
+    RFC 7230 to not have a body. ``RB_ID=908593``
 
   * finagle-thrift: Properly locate sub-classed MethodIface services to instantiate for serving
     BaseServiceIface implemented thrift services. ``RB_ID=907608``
