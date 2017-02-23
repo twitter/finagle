@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import _root_.java.net.SocketAddress
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.{Packet, TransportImpl}
@@ -10,6 +9,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, ExceptionStatsHandler, Stat
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Monitor}
+import java.net.SocketAddress
 
 /**
  * Supplements a [[com.twitter.finagle.Client]] with convenient

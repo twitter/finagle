@@ -38,4 +38,7 @@ scala_library(
   resources=['finagle/finagle-memcached/src/main/resources'],
   # Exposes a service-loaded class.
   scope='forced',
+  # NB: This is not an actual dependency, but is necessary to have Pants behave
+  #     like SBT, throwing an error for "import java.*" statements.
+  java_sources=['finagle/finagle-memcached/src/main/java'],
 )

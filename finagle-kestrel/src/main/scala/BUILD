@@ -22,4 +22,7 @@ scala_library(
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=['finagle/finagle-kestrel/src/main/resources'],
+  # NB: This is not an actual dependency, but is necessary to have Pants behave
+  #     like SBT, throwing an error for "import java.*" statements.
+  java_sources=['finagle/finagle-kestrel/src/main/java'],
 )
