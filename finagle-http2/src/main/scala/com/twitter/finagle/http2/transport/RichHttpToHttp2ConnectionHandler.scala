@@ -16,7 +16,8 @@ import scala.util.control.NonFatal
 private[http2] class RichHttpToHttp2ConnectionHandler(
     dec: Http2ConnectionDecoder,
     enc: Http2ConnectionEncoder,
-    initialSettings: Http2Settings)
+    initialSettings: Http2Settings,
+    onActive: () => Unit)
   extends HttpToHttp2ConnectionHandler(dec, enc, initialSettings, false) {
 
   private[this] val log = Logger.get(getClass.getName)
@@ -101,4 +102,10 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         promise.setFailure(wrongType)
     }
   }
+
+  override def handlerAdded(ctx: ChannelHandlerContext) {
+    super.handlerAdded(ctx)
+    onActive()
+  }
+
 }

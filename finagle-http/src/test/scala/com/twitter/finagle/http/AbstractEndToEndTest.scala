@@ -35,6 +35,8 @@ abstract class AbstractEndToEndTest extends FunSuite
   sealed trait Feature
   object TooLongStream extends Feature
   object MaxHeaderSize extends Feature
+  object ClientAbort extends Feature
+  object HeaderFields extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -58,6 +60,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf = Buf.Utf8(msg)
   def implName: String
+  def skipWholeTest: Boolean = false
   def clientImpl(): finagle.Http.Client
   def serverImpl(): finagle.Http.Server
   def initClient(client: HttpService): Unit = {}
@@ -152,7 +155,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   def standardErrors(connect: HttpService => HttpService): Unit = {
-    test(implName + ": request header fields too large") {
+    testIfImplemented(HeaderFields)(implName + ": request header fields too large") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -371,7 +374,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     if (!sys.props.contains("SKIP_FLAKY"))
-    test(implName + ": client abort") {
+    testIfImplemented(ClientAbort)(implName + ": client abort") {
       import com.twitter.conversions.time._
       val timer = new JavaTimer
       val promise = new Promise[Response]
@@ -797,13 +800,14 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
-  run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
-
-  run(streaming)(streamingConnect(_))
-
   // use 1 less than the requeue limit so that we trigger failure accrual
   // before we run into the requeue limit.
   private val failureAccrualFailures = 19
+
+  if (!skipWholeTest) { // we need this to turn off ALPN in ci
+  run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
+
+  run(streaming)(streamingConnect(_))
 
   test(implName + ": Status.busy propagates along the Stack") {
     val st = new InMemoryStatsReceiver
@@ -1170,5 +1174,6 @@ abstract class AbstractEndToEndTest extends FunSuite
       .serve("localhost:%d".format(addr.getPort), svc)
     val rep2 = await(client(Request("/")))
     assert(rep2.status == Status.Ok)
+  }
   }
 }

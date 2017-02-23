@@ -11,6 +11,8 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     RichHttpToHttp2ConnectionHandlerBuilder
   ] {
 
+  private[this] var onActiveFn: Option[() => Unit] = None
+
   override def validateHeaders(
     validateHeaders: Boolean
   ): RichHttpToHttp2ConnectionHandlerBuilder = {
@@ -72,6 +74,11 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     super.headerSensitivityDetector(headerSensitivityDetector)
   }
 
+  def onActive(fn: () => Unit): RichHttpToHttp2ConnectionHandlerBuilder = {
+    onActiveFn = Some(fn)
+    this
+  }
+
   override def build(): RichHttpToHttp2ConnectionHandler = {
     super.build()
   }
@@ -81,6 +88,7 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     encoder: Http2ConnectionEncoder,
     initialSettings: Http2Settings
   ): RichHttpToHttp2ConnectionHandler = {
-    new RichHttpToHttp2ConnectionHandler(decoder, encoder, initialSettings)
+    val fn = onActiveFn.getOrElse(() => ())
+    new RichHttpToHttp2ConnectionHandler(decoder, encoder, initialSettings, fn)
   }
 }

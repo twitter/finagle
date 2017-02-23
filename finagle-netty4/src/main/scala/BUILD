@@ -6,6 +6,8 @@ scala_library(
   ),
   dependencies=[
     '3rdparty/jvm/io/netty:netty4',
+    '3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static',
+
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     'finagle/finagle-core/src/main/scala:scala',

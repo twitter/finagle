@@ -54,7 +54,7 @@ class Http2TransporterTest extends FunSuite {
 
   test("Http2Transporter caches transports") {
     val (t1, t2) = (new TestTransporter(), new TestTransporter())
-    val transporter = new Http2Transporter(t1, t2, new MockTimer()) {
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer()) {
       def cached: Boolean = cachedConnection.get != null
     }
 
@@ -65,7 +65,7 @@ class Http2TransporterTest extends FunSuite {
 
   test("Http2Transporter decaches transport when closed") {
     val (t1, t2) = (new TestTransporter(), new TestTransporter())
-    val transporter = new Http2Transporter(t1, t2, new MockTimer()) {
+    val transporter = new Http2Transporter(new TestTransporter(), new TestTransporter(), false, new MockTimer()) {
       def cached: Boolean = cachedConnection.get != null
     }
 
@@ -79,7 +79,7 @@ class Http2TransporterTest extends FunSuite {
 
   test("Http2Transporter uses http11 for the second outstanding transport preupgrade") {
     val (t1, t2) = (new TestTransporter(), new TestTransporter())
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     await(transporter())
@@ -124,7 +124,7 @@ class Http2TransporterTest extends FunSuite {
   test("Http2Transporter reuses the http2 transporter postupgrade") {
     val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val trans = await(transporter())
@@ -140,7 +140,7 @@ class Http2TransporterTest extends FunSuite {
   test("Http2Transporter uses the http11 transporter post rejection") {
     val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_REJECTED)
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val trans = await(transporter())
@@ -156,7 +156,7 @@ class Http2TransporterTest extends FunSuite {
   test("Http2Transporter marks outstanding transports dead after a successful upgrade") {
     val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val trans = await(transporter())
@@ -176,7 +176,7 @@ class Http2TransporterTest extends FunSuite {
   test("Http2Transporter keeps outstanding transports alive after a failed upgrade") {
     val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_REJECTED)
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val trans = await(transporter())
@@ -211,7 +211,7 @@ class Http2TransporterTest extends FunSuite {
     val p = Promise[Transport[Any, Any]]()
     val t1 = new FirstFail(p)
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val fTrans = transporter()
@@ -238,7 +238,7 @@ class Http2TransporterTest extends FunSuite {
     val e = new Exception("boom!")
     val t1 = new FirstFail(Future.exception(e))
     val t2 = new TestTransporter()
-    val transporter = new Http2Transporter(t1, t2, new MockTimer())
+    val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
     val addr = new InetSocketAddress("127.1", 14400)
 
     val actual = intercept[Exception] {
@@ -257,7 +257,7 @@ class Http2TransporterTest extends FunSuite {
     Time.withCurrentTimeFrozen { ctl =>
       val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
       val t2 = new TestTransporter()
-      val transporter = new Http2Transporter(t1, t2, new MockTimer())
+      val transporter = new Http2Transporter(t1, t2, false, new MockTimer())
       val addr = new InetSocketAddress("127.1", 14400)
 
       val first = await(transporter())

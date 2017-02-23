@@ -34,6 +34,7 @@ object Finagle extends Build {
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
+  val netty4StaticSsl = "io.netty" % "netty4-tcnative-boringssl-static" % "1.1.33.Fork26" % "runtime"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.8.4"
   val jacksonLibs = Seq(
@@ -283,7 +284,7 @@ object Finagle extends Build {
       util("core"),
       util("codec"),
       util("stats"),
-      netty4Http
+      netty4StaticSsl
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleToggle)
 
@@ -466,6 +467,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-http2",
     libraryDependencies ++= Seq(
+      netty4Http,
       netty4Http2,
       util("cache"),
       util("core"),

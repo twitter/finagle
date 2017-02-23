@@ -17,6 +17,7 @@ import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransp
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
+import com.twitter.finagle.ssl.ApplicationProtocols
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
@@ -92,12 +93,15 @@ object Http extends Client[Request, Response] with HttpRichClient
       Netty4HttpTransporter,
       Netty4HttpListener)
 
-  val Http2: Stack.Params = Stack.Params.empty + Http.HttpImpl(
-    new Netty4ClientStreamTransport(_),
-    new Netty4ServerStreamTransport(_),
-    Http2Transporter.apply _,
-    Http2Listener.apply _
-  ) + param.ProtocolLibrary("http/2")
+  val Http2: Stack.Params = Stack.Params.empty +
+    Http.HttpImpl(
+      new Netty4ClientStreamTransport(_),
+      new Netty4ServerStreamTransport(_),
+      Http2Transporter.apply _,
+      Http2Listener.apply _
+    ) +
+    param.ProtocolLibrary("http/2") +
+    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
   // we disable failfast so that we can use regular requeueing on http2 stream
   // acquisition failures
 

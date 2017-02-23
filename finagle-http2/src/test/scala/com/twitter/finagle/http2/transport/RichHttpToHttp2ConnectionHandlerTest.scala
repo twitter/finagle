@@ -39,7 +39,7 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
 
     val settings = new Http2Settings()
 
-    connectionHandler = new RichHttpToHttp2ConnectionHandler(mockDecoder, mockEncoder, settings)
+    connectionHandler = new RichHttpToHttp2ConnectionHandler(mockDecoder, mockEncoder, settings, () => ())
 
     request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")

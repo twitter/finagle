@@ -8,6 +8,7 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.http.netty.{BadMessageConverter, ClientExceptionMapper, Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.netty4.http.exp.HttpCodecName
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
@@ -141,7 +142,7 @@ case class Http(
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
           val maxChunkSize = 8192
           pipeline.addLast(
-            "httpCodec", new HttpClientCodec(
+            HttpCodecName, new HttpClientCodec(
               maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
 
           if (!_streaming) {
@@ -213,11 +214,12 @@ case class Http(
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
-          pipeline.addLast("httpCodec",
-            new SafeHttpServerCodec(
-              maxInitialLineLengthInBytes,
-              maxHeaderSizeInBytes,
-              maxRequestSizeInBytes /* maxChunkSize */))
+          val safeCodec = new SafeHttpServerCodec(
+            maxInitialLineLengthInBytes,
+            maxHeaderSizeInBytes,
+            maxRequestSizeInBytes /* maxChunkSize */
+          )
+          pipeline.addLast(HttpCodecName, safeCodec)
 
           if (_compressionLevel > 0) {
             pipeline.addLast("httpCompressor", new HttpContentCompressor(_compressionLevel))

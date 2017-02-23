@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.ssl
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.ssl.SessionVerifier
+import com.twitter.finagle.ssl.{ApplicationProtocols, SessionVerifier}
 import com.twitter.finagle.transport.{TlsConfig, Transport}
 import com.twitter.finagle.{Address, Stack}
 import io.netty.handler.ssl.ApplicationProtocolConfig.{
@@ -118,13 +118,25 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
       )
     }
 
+  private[this] def protoConfig: Seq[String] = {
+    val Alpn(protocols) = params[Alpn]
+    protocols match {
+      case ApplicationProtocols.Unspecified => Nil
+      case ApplicationProtocols.Supported(protos) => protos
+    }
+  }
+
+  private[this] def addProtoConfig(nextProtocols: Iterable[String]): Iterable[String] =
+    (protoConfig ++ nextProtocols).distinct
+
   private[this] def initTls(ch: Channel): Unit = config match {
     case TlsConfig.ServerCertAndKey(certPath, keyPath, caCertPath, ciphers, nextProtocols) =>
+      val protos = appProtoConfig(addProtoConfig(nextProtocols.toList.flatMap(_.split(","))))
       finishServerSideHandler(ch, SslContextBuilder
         .forServer(new File(certPath), new File(keyPath))
         .trustManager(caCertPath.map(path => new File(path)).orNull)
         .ciphers(ciphers.map(s => s.split(":").toIterable.asJava).orNull)
-        .applicationProtocolConfig(appProtoConfig(nextProtocols.toList.flatMap(_.split(","))))
+        .applicationProtocolConfig(protos)
         .build()
         .newHandler(ch.alloc())
       )
@@ -133,14 +145,29 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
       finishServerSideHandler(ch, new SslHandler(e.createSSLEngine()))
 
     case TlsConfig.ClientHostname(hostname) =>
-      clientFromNettyContext(ch, SslContextBuilder.forClient().build(), Some(hostname))
+      clientFromNettyContext(ch,
+        SslContextBuilder
+          .forClient()
+          .applicationProtocolConfig(appProtoConfig(protoConfig))
+          .build(),
+        Some(hostname)
+      )
 
     case TlsConfig.Client =>
-      clientFromNettyContext(ch, SslContextBuilder.forClient().build(), None)
+      clientFromNettyContext(ch,
+        SslContextBuilder
+          .forClient()
+          .applicationProtocolConfig(appProtoConfig(protoConfig))
+          .build(),
+        None
+      )
 
     case TlsConfig.ClientNoValidation =>
       clientFromNettyContext(ch,
-        SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build(),
+        SslContextBuilder.forClient()
+          .trustManager(InsecureTrustManagerFactory.INSTANCE)
+          .applicationProtocolConfig(appProtoConfig(protoConfig))
+          .build(),
         None
       )
 

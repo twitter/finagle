@@ -4,10 +4,10 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http
 import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
-import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Transporter}
 import com.twitter.finagle.netty4.channel.{DirectToHeapInboundHandler, BufferingChannelOutboundHandler}
-import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
+import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter, HttpCodecName}
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
@@ -16,11 +16,14 @@ import com.twitter.util._
 import io.netty.channel.{
   ChannelHandlerContext,
   ChannelInboundHandlerAdapter,
+  ChannelOutboundHandlerAdapter,
   ChannelPipeline,
   ChannelPromise
 }
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http2._
+import io.netty.handler.logging.LogLevel
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
@@ -38,14 +41,15 @@ private[finagle] object Http2Transporter {
     )
 
     val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
+    val Transport.Tls(tls) = params[Transport.Tls]
 
-    if (priorKnowledge) {
+    // prior knowledge is only used with h2c
+    if (!tls.enabled && priorKnowledge) {
       new PriorKnowledgeTransporter(underlying, params)
     } else {
       val underlyingHttp11 = Netty4HttpTransporter(params)(addr)
       val TimerParam(timer) = params[TimerParam]
-
-      new Http2Transporter(underlying, underlyingHttp11, timer)
+      new Http2Transporter(underlying, underlyingHttp11, tls.enabled, timer)
     }
   }
 
@@ -104,22 +108,37 @@ private[finagle] object Http2Transporter {
       val EncoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize) =
         params[EncoderIgnoreMaxHeaderListSize]
 
-      val connectionHandler = new RichHttpToHttp2ConnectionHandlerBuilder()
+      val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
+        .frameLogger(new Http2FrameLogger(LogLevel.ERROR))
         .connection(connection)
         .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
-        .build()
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
-      if (priorKnowledge) {
-        pipeline.addLast("httpCodec", connectionHandler)
+      val Transport.Tls(tls) = params[Transport.Tls]
+
+      if (tls.enabled) {
+        val p = Promise[Unit]()
+        val buffer = new ChannelOutboundHandlerAdapter with BufferingChannelOutboundHandler
+        val connectionHandler = connectionHandlerBuilder
+          .onActive { () =>
+            // need to stop buffering after we've sent the connection preface
+            pipeline.remove(buffer)
+          }
+          .build()
+        pipeline.addLast("alpn", new ClientNpnOrAlpnHandler(connectionHandler, params))
+        pipeline.addLast("buffer", buffer)
+      } else if (priorKnowledge) {
+        val connectionHandler = connectionHandlerBuilder.build()
+        pipeline.addLast(HttpCodecName, connectionHandler)
         pipeline.addLast("buffer", new BufferingHandler())
         pipeline.addLast("aggregate", new AdapterProxyChannelHandler({ pipeline =>
           pipeline.addLast("schemifier", new SchemifyingHandler("http"))
           initClient(params)(pipeline)
         }))
       } else {
+        val connectionHandler = connectionHandlerBuilder.build()
         val maxChunkSize = params[http.param.MaxChunkSize].size
         val maxHeaderSize = params[http.param.MaxHeaderSize].size
         val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
@@ -132,7 +151,7 @@ private[finagle] object Http2Transporter {
 
         val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
         val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
-        pipeline.addLast("httpCodec", sourceCodec)
+        pipeline.addLast(HttpCodecName, sourceCodec)
         pipeline.addLast("httpUpgradeHandler", upgradeHandler)
         pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
         initClient(params)(pipeline)
@@ -165,6 +184,7 @@ private[finagle] object Http2Transporter {
 private[http2] class Http2Transporter(
     underlying: Transporter[Any, Any],
     underlyingHttp11: Transporter[Any, Any],
+    alpnUpgrade: Boolean,
     implicit val timer: Timer)
   extends Transporter[Any, Any] { self =>
 
@@ -187,7 +207,7 @@ private[http2] class Http2Transporter(
 
   protected[this] val cachedConnection = new AtomicReference[Future[Option[MultiplexedTransporter]]]()
 
-  private[this] def onUpgradeFinished(
+  private[this] def useExistingConnection(
     f: Future[Option[MultiplexedTransporter]]
   ): Future[Transport[Any, Any]] = f.transform {
     case Return(Some(fn)) =>
@@ -218,26 +238,27 @@ private[http2] class Http2Transporter(
 
   // uses http11 underneath, but marks itself as dead if the upgrade succeeds or
   // the connection fails
-  private[this] def onUpgradeInProgress(
-    f: Future[Option[_]]
-  ): Transport[Any, Any] => Transport[Any, Any] = { http11: Transport[Any, Any] =>
-    val ref = new RefTransport(http11)
-    f.respond {
-      case Return(None) => // we failed the upgrade, so we can keep the connection
-      case _ =>
-        // we shut down if we pass the upgrade or fail entirely
-        // we're assuming here that a well behaved dispatcher will propagate our status to a pool
-        // that will close us
-        // TODO: if we fail entirely, we should try to reregister on the new connection attempt
-        ref.update { trans =>
-          new TransportProxy[Any, Any](trans) {
-            def write(any: Any): Future[Unit] = trans.write(any)
-            def read(): Future[Any] = trans.read()
-            override def status: Status = Status.Closed
+  private[this] def fallbackToHttp11(f: Future[Option[_]]): Future[Transport[Any, Any]] = {
+    val conn = underlyingHttp11()
+    conn.map { http11Trans =>
+      val ref = new RefTransport(http11Trans)
+      f.respond {
+        case Return(None) => // the upgrade was rejected, so we can keep the connection
+        case _ =>
+          // we allow the pool to close us if we pass the upgrade or fail entirely
+          // this will trigger a new connection attempt, which will use the upgraded
+          // connection if we passed, or try to upgrade again if there was a non-rejection
+          // failure in the upgrade
+          ref.update { trans =>
+            new TransportProxy[Any, Any](trans) {
+              def write(any: Any): Future[Unit] = trans.write(any)
+              def read(): Future[Any] = trans.read()
+              override def status: Status = Status.Closed
+            }
           }
-        }
+      }
+      ref
     }
-    ref
   }
 
   private[this] def upgrade(): Future[Transport[Any, Any]] = {
@@ -246,14 +267,30 @@ private[http2] class Http2Transporter(
     if (cachedConnection.compareAndSet(null, p)) {
       conn.transform {
         case Return(trans) =>
-          val ref = new RefTransport(trans)
-          ref.update { t =>
-            t.onClose.ensure {
-              cachedConnection.compareAndSet(p, null)
-            }
-            new Http2UpgradingTransport(t, ref, p)
+          trans.onClose.ensure {
+            cachedConnection.compareAndSet(p, null)
           }
-          Future.value(ref)
+
+          if (alpnUpgrade) {
+            trans.read().onSuccess {
+              case UpgradeEvent.UPGRADE_REJECTED =>
+                p.setValue(None)
+              case UpgradeEvent.UPGRADE_SUCCESSFUL =>
+                val casted = Transport.cast[StreamMessage, StreamMessage](trans)
+                p.setValue(Some(new MultiplexedTransporter(casted, trans.remoteAddress)))
+              case msg =>
+                log.error(s"Non-upgrade event detected $msg")
+            }
+
+            useExistingConnection(p)
+          } else {
+            val ref = new RefTransport(trans)
+            ref.update { t =>
+              new Http2UpgradingTransport(t, ref, p)
+            }
+            Future.value(ref)
+          }
+
         case Throw(e) =>
           cachedConnection.compareAndSet(p, null)
           p.setException(e)
@@ -265,13 +302,8 @@ private[http2] class Http2Transporter(
   final def apply(): Future[Transport[Any, Any]] =
     Option(cachedConnection.get) match {
       case Some(f) =>
-        if (f.isDefined) {
-          onUpgradeFinished(f)
-        } else {
-          // fall back to http/1.1 while upgrading
-          val conn = underlyingHttp11()
-          conn.map(onUpgradeInProgress(f))
-        }
+        if (f.isDefined || alpnUpgrade) useExistingConnection(f)
+        else fallbackToHttp11(f) // fall back to http/1.1 while upgrading
       case None =>
         upgrade()
     }

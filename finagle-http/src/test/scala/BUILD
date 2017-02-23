@@ -18,6 +18,7 @@ junit_tests(
     'util/util-logging',
     'util/util-stats',
   ],
+  resources=['finagle/finagle-http/src/test/resources'],
   fatal_warnings=True,
   sources=rglobs('*.scala')
 )

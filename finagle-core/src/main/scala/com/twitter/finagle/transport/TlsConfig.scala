@@ -6,14 +6,18 @@ import javax.net.ssl.SSLContext
  * An ADT representing a [[https://en.wikipedia.org/wiki/Transport_Layer_Security TLS]] config used
  * by the underlying transport implementation.
  */
-sealed trait TlsConfig
+sealed trait TlsConfig {
+  def enabled: Boolean
+}
 
 object TlsConfig {
 
   /**
    * Indicates that TLS is disabled on a given [[Transport]].
    */
-  case object Disabled extends TlsConfig
+  case object Disabled extends TlsConfig {
+    def enabled: Boolean = false
+  }
 
   /**
    * Server-side TLS config based on certificate and key.
@@ -35,38 +39,52 @@ object TlsConfig {
       keyPath: String,
       caCertificatePath: Option[String],
       ciphers: Option[String],
-      nextProtocols: Option[String]) extends TlsConfig
+      nextProtocols: Option[String]) extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Server-side TLS config based on [[SSLContext]].
    */
-  final case class ServerSslContext(context: SSLContext) extends TlsConfig
+  final case class ServerSslContext(context: SSLContext) extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Client-side TLS config that requires hostname verification against the given `hostname`.
    */
-  final case class ClientHostname(hostname: String) extends TlsConfig
+  final case class ClientHostname(hostname: String) extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Client-side TLS config based on a given [[SSLContext]].
    */
-  final case class ClientSslContext(context: SSLContext) extends TlsConfig
+  final case class ClientSslContext(context: SSLContext) extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Client-side TLS config based on a given [[SSLContext]] that also requires hostname verification
    * against the given `hostname`.
    */
-  final case class ClientSslContextAndHostname(context: SSLContext, hostname: String) extends TlsConfig
+  final case class ClientSslContextAndHostname(context: SSLContext, hostname: String) extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Client-side TLS config that doesn't require certificate validation.
    *
    * @note That's probably a bad idea to use this anywhere, but testing/development.
    */
-  case object ClientNoValidation extends TlsConfig
+  case object ClientNoValidation extends TlsConfig {
+    def enabled: Boolean = true
+  }
 
   /**
    * Client-side TLS config built out of default settings.
    */
-  case object Client extends TlsConfig
+  case object Client extends TlsConfig {
+    def enabled: Boolean = true
+  }
 }
