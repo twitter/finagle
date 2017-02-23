@@ -113,6 +113,10 @@ Bug Fixes
     a response that lacks content-length and transfer-encoding headers but is required per
     RFC 7230 to not have a body. ``RB_ID=908593``
 
+  * finagle-redis: The HSCAN and SCAN commands take an optional argument for pattern matching.
+    This argument has been fixed to use the correct name of 'MATCH' instead of the incorrect
+    'PATTERN'. ``RB_ID=908817``
+
   * finagle-thrift: Properly locate sub-classed MethodIface services to instantiate for serving
     BaseServiceIface implemented thrift services. ``RB_ID=907608``
 

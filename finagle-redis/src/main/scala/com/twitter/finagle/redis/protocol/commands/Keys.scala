@@ -89,7 +89,7 @@ case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] 
     }
 
     pattern match {
-      case Some(pattern) => withCount ++ Seq(Command.PATTERN, pattern)
+      case Some(pattern) => withCount ++ Seq(Command.MATCH, pattern)
       case None          => withCount
     }
   }
