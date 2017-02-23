@@ -36,8 +36,8 @@ final class KeyCodecSuite extends RedisRequestTest {
   test("SCAN", CodecTest) {
     assert(encodeCommand(Scan(42, None, None)) == Seq("SCAN", "42"))
     assert(encodeCommand(Scan(42, Some(10L), None)) == Seq("SCAN", "42", "COUNT", "10"))
-    assert(encodeCommand(Scan(42, None, Some(Buf.Utf8("foo")))) == Seq("SCAN", "42", "PATTERN", "foo"))
+    assert(encodeCommand(Scan(42, None, Some(Buf.Utf8("foo")))) == Seq("SCAN", "42", "MATCH", "foo"))
     assert(encodeCommand(Scan(42, Some(10L), Some(Buf.Utf8("foo")))) ==
-      Seq("SCAN", "42", "COUNT", "10", "PATTERN", "foo"))
+      Seq("SCAN", "42", "COUNT", "10", "MATCH", "foo"))
   }
 }

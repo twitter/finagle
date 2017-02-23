@@ -182,7 +182,7 @@ object Command {
   val WEIGHTS          = Buf.Utf8("WEIGHTS")
   val AGGREGATE        = Buf.Utf8("AGGREGATE")
   val COUNT            = Buf.Utf8("COUNT")
-  val PATTERN          = Buf.Utf8("PATTERN")
+  val MATCH            = Buf.Utf8("MATCH")
 
   /**
    * Encodes a given [[Command]] as [[Buf]].
