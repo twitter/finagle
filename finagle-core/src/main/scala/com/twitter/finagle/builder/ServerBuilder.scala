@@ -7,12 +7,15 @@ import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, Ser
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
-import com.twitter.finagle.ssl.{Engine, Ssl}
+import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
+import com.twitter.finagle.ssl.server.{
+  ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.{TlsConfig, Transport}
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
+import java.io.File
 import java.net.SocketAddress
 import javax.net.ssl.SSLEngine
 import org.jboss.netty.channel.ServerChannelFactory
@@ -453,12 +456,27 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     caCertificatePath: String = null,
     ciphers: String = null,
     nextProtos: String = null
-  ): This =
-    newFinagleSslEngine(
-      () => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos)
-    ).configured(Transport.Tls(TlsConfig.ServerCertAndKey(
-      certificatePath, keyPath, Option(caCertificatePath), Option(ciphers), Option(nextProtos)
-    )))
+  ): This = {
+    val keyCredentials = if (caCertificatePath == null) {
+      KeyCredentials.CertAndKey(new File(certificatePath), new File(keyPath))
+    } else {
+      KeyCredentials.CertKeyAndChain(
+        new File(certificatePath), new File(keyPath), new File(caCertificatePath))
+    }
+    val cipherSuites = if (ciphers == null) CipherSuites.Unspecified
+      else CipherSuites.fromString(ciphers)
+    val applicationProtocols = if (nextProtos == null) ApplicationProtocols.Unspecified
+      else ApplicationProtocols.fromString(nextProtos)
+
+    configured(Transport.ServerSsl(
+      Some(SslServerConfiguration(
+        keyCredentials = keyCredentials,
+        cipherSuites = cipherSuites,
+        applicationProtocols = applicationProtocols))))
+    .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
+       certificatePath, keyPath, Option(caCertificatePath), Option(ciphers), Option(nextProtos)
+     )))
+  }
 
   /**
    * Provide a raw SSL engine that is used to establish SSL sessions.
@@ -467,7 +485,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    _configured(Transport.TLSServerEngine(Some(v)))
+    _configured(SslServerEngineFactory.Param(
+      new ConstServerEngineFactory(v)))
+    .configured(Transport.ServerSsl(
+      Some(SslServerConfiguration())))
 
   /**
    * Configures the maximum concurrent requests that are admitted

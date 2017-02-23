@@ -1,5 +1,6 @@
 package com.twitter.finagle.ssl.server
 
+import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.{ClientAuth, Engine, SslConfigurations}
 import javax.net.ssl.{SSLContext, SSLEngine}
 
@@ -21,6 +22,24 @@ abstract class SslServerEngineFactory {
 }
 
 object SslServerEngineFactory {
+
+  /**
+   * $param the server engine factory used for creating an [[Engine]]
+   * which is used with an SSL/TLS connection.
+   *
+   * @param factory The [[SslServerEngineFactory]] to use for creating
+   * an [[Engine]] based off of an [[SslServerConfiguration]].
+   *
+   * @note By default a [[JdkServerEngineFactory]] will be used if this
+   * param is not configured.
+   */
+  case class Param(factory: SslServerEngineFactory) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(JdkServerEngineFactory))
+  }
 
   def configureClientAuth(
     sslEngine: SSLEngine,

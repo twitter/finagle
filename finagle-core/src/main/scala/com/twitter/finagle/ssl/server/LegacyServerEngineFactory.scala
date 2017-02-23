@@ -59,7 +59,7 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
     val cipherSuites: Option[String] = cipherSuitesToString(config.cipherSuites)
     val appProtos: Option[String] = applicationProtocolsToString(config.applicationProtocols)
 
-    config.keyCredentials match {
+    val engine = config.keyCredentials match {
       case KeyCredentials.Unspecified =>
         throw SslConfigurationException.notSupported(
           "KeyCredentials.Unspecified", "LegacyServerEngineFactory")
@@ -70,6 +70,10 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
         Ssl.server(certFile.getAbsolutePath(), keyFile.getAbsolutePath(),
           chainFile.getAbsolutePath(), cipherSuites.orNull, appProtos.orNull)
     }
+
+    // Explicitly set this to server mode, since calls to Ssl.server do not.
+    engine.self.setUseClientMode(false)
+    engine
   }
 
 }

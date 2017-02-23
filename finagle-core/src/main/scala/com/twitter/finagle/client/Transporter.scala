@@ -69,18 +69,6 @@ object Transporter {
   }
 
   /**
-   * $param hostname verification, if TLS is enabled.
-   * @see [[com.twitter.finagle.transport.Transport#TLSEngine]]
-   */
-  case class TLSHostname(hostname: Option[String]) {
-    def mk(): (TLSHostname, Stack.Param[TLSHostname]) =
-      (this, TLSHostname.param)
-  }
-  object TLSHostname {
-    implicit val param = Stack.Param(TLSHostname(None))
-  }
-
-  /**
    * $param a SocksProxy as the endpoint for a `Transporter`.
    */
   case class SocksProxy(sa: Option[SocketAddress], credentials: Option[(String, String)]) {

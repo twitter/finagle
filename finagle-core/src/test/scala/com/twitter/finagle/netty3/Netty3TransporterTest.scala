@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
@@ -12,6 +12,7 @@ import com.twitter.finagle.netty3.ssl.SslConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
@@ -33,6 +34,10 @@ import scala.reflect.ClassTag
 
 @RunWith(classOf[JUnitRunner])
 class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
+
+  case class FakeClientEngineFactory(engine: Engine) extends SslClientEngineFactory {
+    def apply(address: Address, config: SslClientConfiguration): Engine = engine
+  }
 
   private[this] val unresolvedAddr = InetSocketAddress.createUnresolved("supdog", 0)
   private[this] val loopbackSockAddr = new InetSocketAddress("127.0.0.1", 9999)
@@ -72,11 +77,10 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
         Netty3Transporter.TransportFactory.param.default +
         Transporter.ConnectTimeout(1.seconds) +
         LatencyCompensation.Compensation(12.millis) +
-        Transporter.TLSHostname(Some("tls.host")) +
         Transporter.HttpProxy(Some(new InetSocketAddress(0)), Some(Credentials("user", "pw"))) +
         Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some(("user", "pw"))) +
         Transport.BufferSizes(Some(100), Some(200)) +
-        Transport.TLSClientEngine.param.default +
+        Transport.ClientSsl.param.default +
         Transport.Liveness(1.seconds, 2.seconds, Some(true)) +
         Transport.Verbose(true)
 
@@ -301,10 +305,10 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     assert(sslHandler.isEmpty)
   }
 
-  test("SslConnectHandler is added when the TLS client engine param is configured") {
+  test("SslConnectHandler is added when the SSL/TLS client configuration param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
-      Transport.TLSClientEngine(Some(Function.const(new Engine(engine))))
+      Transport.ClientSsl(Some(SslClientConfiguration()))
     val pipeline = makeTransporterPipeline(params, unresolvedAddr)
     val sslHandler = findHandlerInPipeline[SslConnectHandler](pipeline)
     assert(sslHandler.nonEmpty)
@@ -317,10 +321,10 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     assert(sslHandler.isEmpty)
   }
 
-  test("SslHandler is added when the TLS client engine param is configured") {
+  test("SslHandler is added when the SSL/TLS client configuration param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
-      Transport.TLSClientEngine(Some(Function.const(new Engine(engine))))
+      Transport.ClientSsl(Some(SslClientConfiguration()))
     val pipeline = makeTransporterPipeline(params, unresolvedAddr)
     val sslHandler = findHandlerInPipeline[SslHandler](pipeline)
     assert(sslHandler.nonEmpty)
@@ -341,8 +345,8 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     when(engine.getEnableSessionCreation) thenReturn true
 
     val params = Stack.Params.empty + Label("tls-enabled") +
-      Transport.TLSClientEngine(Some(Function.const(new Engine(engine)))) +
-      Transporter.TLSHostname(Some("localhost"))
+      SslClientEngineFactory.Param(FakeClientEngineFactory(new Engine(engine))) +
+      Transport.ClientSsl(Some(SslClientConfiguration(hostname = Some("localhost"))))
 
     val pipelineFactory = Channels.pipelineFactory(Channels.pipeline())
     val transporter = new Netty3Transporter[Int, Int](pipelineFactory, unresolvedAddr, params)

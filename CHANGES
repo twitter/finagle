@@ -41,6 +41,32 @@ Breaking API Changes
     on `com.twitter.finagle.client.Transporter` to the `newTransporter` method of
     `com.twitter.finagle.client.StackClient`. ``RB_ID=907544``
 
+  * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
+      - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
+        - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
+          key credentials, trust credentials, cipher suites, protocols, and application protocols.
+        - `SslClientEngineFactory` in `SslClientEngineFactory`, which determines how the `Engine`
+          is created based off of an `Address` and an `SslClientConfiguration`.
+      - The `TLSHostname` param in `Transporter` has been removed. Hostnames should be set as
+        part of the `SslClientConfiguration` now.
+      - The `TLSServerEngine` param in `Transport` has been replaced by two parameters:
+        - `ServerSsl` in `Transport`, which is used for configuring a client `Engine`'s key
+          credentials, trust credentials, cipher suites, protocols, application protocols, and
+          whether the server supports or requires client authentication.
+        - `SslServerEngineFactory` in `SslServerEngineFactory`, which determines how the `Engine`
+          is created based off of an `SslServerConfiguration`.
+      - Note: Not all client and server configurations work with all engine factories. Each engine
+        factory should document what is not supported by that specific engine factory.
+      - Note: Users using Finagle-Native should in the short term use `LegacyServerEngineFactory`
+        and in the long term move to using `Netty4ServerEngineFactory`.
+      - Note: With this change, private keys are expected to explicitly be PKCS#8 PEM-encoded keys.
+        Users using PKCS#1 keys should in the short term use `LegacyKeyServerEngineFactory` and in
+        the longer term switch to using PKCS#8 keys, or use your own `SslServerEngineFactory` which
+        can explicitly handle those type of keys.
+      - Note: By default, Finagle on Netty 3 will use the `JdkClientEngineFactory` and
+        `JdkServerEngineFactory` respectively.
+      ``RB_ID=907923``
+
   * finagle-kestrel: Remove the deprecated `codec` method on `c.t.f.kestrel.MultiReaderMemcache`.
     Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
     ``RB_ID=907184``

@@ -1,8 +1,10 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
+import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.transport.{TlsConfig, Transport}
+import java.io.File
 import javax.net.ssl.SSLContext
 
 /**
@@ -37,15 +39,32 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     caCertificatePath: Option[String],
     ciphers: Option[String],
     nextProtocols: Option[String]
-  ): A = self
-    .configured(Transport.TLSServerEngine(Some(() =>
-      Ssl.server(
-        certificatePath, keyPath, caCertificatePath.orNull, ciphers.orNull, nextProtocols.orNull
-      )
-    )))
-    .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
-      certificatePath, keyPath, caCertificatePath, ciphers, nextProtocols
-    )))
+  ): A = {
+    val keyCredentials = caCertificatePath match {
+      case Some(caPath) => KeyCredentials.CertKeyAndChain(
+        new File(certificatePath), new File(keyPath), new File(caPath))
+      case None => KeyCredentials.CertAndKey(
+        new File(certificatePath), new File(keyPath))
+    }
+    val cipherSuites = ciphers match {
+      case Some(suites) => CipherSuites.fromString(suites)
+      case None => CipherSuites.Unspecified
+    }
+    val applicationProtocols = nextProtocols match {
+      case Some(protos) => ApplicationProtocols.fromString(protos)
+      case None => ApplicationProtocols.Unspecified
+    }
+    val configuration = SslServerConfiguration(
+      keyCredentials = keyCredentials,
+      cipherSuites = cipherSuites,
+      applicationProtocols = applicationProtocols)
+
+    self
+      .configured(Transport.ServerSsl(Some(configuration)))
+      .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
+        certificatePath, keyPath, caCertificatePath, ciphers, nextProtocols
+      )))
+  }
 
   /**
    * Enables TLS/SSL support (connection encrypting) on this server.

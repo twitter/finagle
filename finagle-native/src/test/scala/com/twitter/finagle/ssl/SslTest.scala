@@ -3,6 +3,9 @@ package com.twitter.finagle.ssl
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http._
+import com.twitter.finagle.ssl.server.{
+  LegacyServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, TempFile}
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
@@ -102,6 +105,9 @@ class SslTest extends FunSuite {
     val chainFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server-chain.cert.pem")
     // deleteOnExit is handled by TempFile
 
+    val config = SslServerConfiguration(
+      keyCredentials = KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile))
+
     val rootFile = TempFile.fromResourcePath("/ssl/certs/ca.cert.pem")
     // deleteOnExit is handled by TempFile
 
@@ -132,9 +138,8 @@ class SslTest extends FunSuite {
     val server = ServerBuilder()
       .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-      .tls(certFile.getAbsolutePath(),
-        keyFile.getAbsolutePath(),
-        chainFile.getAbsolutePath())
+      .configured(Transport.ServerSsl(Some(config)))
+      .configured(SslServerEngineFactory.Param(LegacyServerEngineFactory))
       .name("SSL server with valid certificate chain")
       .build(service)
 

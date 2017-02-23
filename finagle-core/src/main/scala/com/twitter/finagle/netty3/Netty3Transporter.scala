@@ -11,6 +11,7 @@ import com.twitter.finagle.netty3.Netty3Transporter.{ChannelFactory, TransportFa
 import com.twitter.finagle.param.{Label, Logger}
 import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.SessionVerifier
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
@@ -25,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandler
 import org.jboss.netty.channel.socket.ChannelRunnableWrapper
 import org.jboss.netty.channel.socket.nio.{NioSocketChannel, NioClientSocketChannelFactory}
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
+import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -295,16 +297,14 @@ private[netty3] class Netty3Transporter[In, Out](
     pipeline: ChannelPipeline,
     params: Stack.Params
   ): Unit = {
-    val Transport.TLSClientEngine(tlsOption) = params[Transport.TLSClientEngine]
+    val SslClientEngineFactory.Param(clientEngine) = params[SslClientEngineFactory.Param]
+    val Transport.ClientSsl(clientConfig) = params[Transport.ClientSsl]
+    val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
 
-    for (tls <- tlsOption)  {
-      import org.jboss.netty.handler.ssl._
-      val Transporter.TLSHostname(hostnameOption) = params[Transporter.TLSHostname]
+    for (config <- clientConfig) {
+      val engine = clientEngine(addr, config)
 
-      val engine = tls(remoteAddress)
-      engine.self.setUseClientMode(true)
-
-      val verifier = hostnameOption
+      val verifier = config.hostname
         .map(SessionVerifier.hostname)
         .getOrElse(SessionVerifier.AlwaysValid)
 

@@ -3,7 +3,8 @@ package com.twitter.finagle.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.finagle.ssl
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.net.SocketAddress
@@ -156,25 +157,25 @@ object Transport {
   }
 
   /**
-   * $param the TLS engine for a `Transport`.
+   * $param the SSL/TLS client configuration for a `Transport`.
    */
-  case class TLSClientEngine(e: Option[SocketAddress => ssl.Engine]) {
-    def mk(): (TLSClientEngine, Stack.Param[TLSClientEngine]) =
-      (this, TLSClientEngine.param)
+  case class ClientSsl(e: Option[SslClientConfiguration]) {
+    def mk(): (ClientSsl, Stack.Param[ClientSsl]) =
+      (this, ClientSsl.param)
   }
-  object TLSClientEngine {
-    implicit val param = Stack.Param(TLSClientEngine(None))
+  object ClientSsl {
+    implicit val param = Stack.Param(ClientSsl(None))
   }
 
   /**
-   * $param the TLS engine for a `Transport`.
+   * $param the SSL/TLS server configuration for a `Transport`.
    */
-  case class TLSServerEngine(e: Option[() => ssl.Engine]) {
-    def mk(): (TLSServerEngine, Stack.Param[TLSServerEngine]) =
-      (this, TLSServerEngine.param)
+  case class ServerSsl(e: Option[SslServerConfiguration]) {
+    def mk(): (ServerSsl, Stack.Param[ServerSsl]) =
+      (this, ServerSsl.param)
   }
-  object TLSServerEngine {
-    implicit val param = Stack.Param(TLSServerEngine(None))
+  object ServerSsl {
+    implicit val param = Stack.Param(ServerSsl(None))
   }
 
   /**

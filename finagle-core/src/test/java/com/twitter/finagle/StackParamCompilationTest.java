@@ -40,7 +40,8 @@ import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
 import com.twitter.finagle.service.exp.FailureAccrualPolicy;
 import com.twitter.finagle.socks.SocksProxyFlags;
-import com.twitter.finagle.ssl.Engine;
+import com.twitter.finagle.ssl.client.SslClientConfiguration;
+import com.twitter.finagle.ssl.server.SslServerConfiguration;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.transport.Transport;
 import com.twitter.finagle.util.Rngs;
@@ -70,7 +71,6 @@ public class StackParamCompilationTest {
         .configured(
           new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
         .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
-        .configured(new Transporter.TLSHostname(Option.<String>empty()).mk())
         .configured(
           new Transporter.SocksProxy(
             SocksProxyFlags.socksProxy(),
@@ -116,11 +116,10 @@ public class StackParamCompilationTest {
         .configured(new Transport.Verbose(false).mk())
         .configured(new Transporter.TrafficClass(new Some<Object>(1)).mk())
         .configured(new Listener.TrafficClass(Option.empty()).mk())
-        .configured(
-          new Transport.TLSClientEngine(
-            Option.<scala.Function1<SocketAddress, Engine>>empty()
-          ).mk())
-        .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk())
+        .configured(new Transport.ClientSsl(
+          Option.<SslClientConfiguration>empty()).mk())
+        .configured(new Transport.ServerSsl(
+          Option.<SslServerConfiguration>empty()).mk())
         .configuredParams(StackClient$.MODULE$.defaultParams());
 
     ClientBuilder.get().failFast(true);

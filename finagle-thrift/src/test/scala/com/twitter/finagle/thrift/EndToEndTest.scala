@@ -5,7 +5,9 @@ import com.twitter.finagle.{Address, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
@@ -297,9 +299,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
       Thrift.server
         .configured(Stats(sr))
-        .configured(Transport.TLSServerEngine(Some {
-        () =>  Ssl.server(certFile.getAbsolutePath, keyFile.getAbsolutePath, null, null, null)
-      }))
+        .configured(Transport.ServerSsl(
+          Some(SslServerConfiguration(
+            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)))))
         .serve(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
           ifaceToService(processor, Protocols.binaryFactory()))
@@ -307,12 +309,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     def mkThriftTlsClient(server: ListeningServer) =
       Thrift.client
-        .configured(Transport.TLSClientEngine(Some({
-          case inet: InetSocketAddress =>
-            Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
-          case _ =>
-            Ssl.clientWithoutCertificateValidation()
-        })))
+        .configured(Transport.ClientSsl(
+          Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
         .newIface[B.ServiceIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client")

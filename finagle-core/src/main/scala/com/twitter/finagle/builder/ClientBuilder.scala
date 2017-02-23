@@ -11,7 +11,9 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.ssl.TrustCredentials
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.{TlsConfig, Transport}
@@ -934,16 +936,12 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(hostname: String): This =
-    configured(Transport.TLSClientEngine(Some {
-      case inet: InetSocketAddress => Ssl.client(hostname, inet.getPort)
-      case _ => Ssl.client()
-    }))
-    .configured(Transporter.TLSHostname(Some(hostname)))
+    configured(Transport.ClientSsl(
+      Some(SslClientConfiguration(hostname = Some(hostname)))))
     .configured(Transport.Tls(TlsConfig.ClientHostname(hostname)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates
    * No SSL Hostname Validation is performed
    *
    * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
@@ -955,23 +953,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(sslContext: SSLContext): This =
-    configured(Transport.TLSClientEngine(Some {
-      case inet: InetSocketAddress => Ssl.client(sslContext, inet.getHostName, inet.getPort)
-      case _ => Ssl.client(sslContext)
-    }))
+    configured(SslClientEngineFactory.Param(
+      new SslContextClientEngineFactory(sslContext)))
+    .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
     .configured(Transport.Tls(TlsConfig.ClientSslContext(sslContext)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * This allows the user to use client certificates
    * SSL Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
-    configured(Transport.TLSClientEngine(Some {
-      case inet: InetSocketAddress => Ssl.client(sslContext, hostname.getOrElse(inet.getHostName), inet.getPort)
-      case _ => Ssl.client(sslContext)
-    }))
-    .configured(Transporter.TLSHostname(hostname))
+    configured(SslClientEngineFactory.Param(
+      new SslContextClientEngineFactory(sslContext)))
+    .configured(Transport.ClientSsl(
+      Some(SslClientConfiguration(hostname = hostname))))
     .configured(Transport.Tls(
       hostname.fold[TlsConfig](TlsConfig.ClientSslContext(sslContext)) { hn =>
         TlsConfig.ClientSslContextAndHostname(sslContext, hn)
@@ -990,10 +985,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tlsWithoutValidation(): This =
-    configured(Transport.TLSClientEngine(Some({
-      case inet: InetSocketAddress => Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
-      case _ => Ssl.clientWithoutCertificateValidation()
-    })))
+    configured(Transport.ClientSsl(
+      Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
     .configured(Transport.Tls(TlsConfig.ClientNoValidation))
 
 
