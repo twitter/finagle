@@ -13,7 +13,12 @@
     {
       "id": "com.twitter.finagle.http.UseNetty4",
       "description": "Use netty4 as the transport implementation",
-      "fraction": 0.01
+      "fraction": 0.1
+    },
+    {
+      "id": "com.twitter.finagle.http.UseHttp2",
+      "description": "Use http/2 as the protocol implementation. If it fails to upgrade to http/2, it will downgrade to netty4 http/1.1. Supersedes the com.twitter.finagle.http.UseNetty4 toggle.",
+      "fraction": 0.0
     }
   ]
 }

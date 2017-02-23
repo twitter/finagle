@@ -56,6 +56,12 @@ object Http extends Client[Request, Response] with HttpRichClient
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
+  // Toggles transport implementation to Http/2.
+  private[this] object useHttp2 {
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2")
+    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
+  }
+
   /**
    * configure alternative http 1.1 implementations
    *
@@ -167,10 +173,12 @@ object Http extends Client[Request, Response] with HttpRichClient
         .prepend(nonChunkedPayloadSize)
         .prepend(new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description))
 
-    private def params: Stack.Params =
-      StackClient.defaultParams +
+    private val params: Stack.Params = {
+      val vanilla = StackClient.defaultParams +
         protocolLibrary +
         responseClassifierParam
+      if (useHttp2()) vanilla ++ Http2 else vanilla
+    }
   }
 
   case class Client(
@@ -315,10 +323,12 @@ object Http extends Client[Request, Response] with HttpRichClient
         .prepend(ServerContextFilter.module)
         .prepend(new Stack.NoOpModule(http.filter.StatsFilter.role, http.filter.StatsFilter.description))
 
-    private def params: Stack.Params =
-      StackServer.defaultParams +
+    private val params: Stack.Params = {
+      val vanilla = StackServer.defaultParams +
         protocolLibrary +
         responseClassifierParam
+      if (useHttp2()) vanilla ++ Http2 else vanilla
+    }
   }
 
   case class Server(
