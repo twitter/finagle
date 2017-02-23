@@ -34,7 +34,7 @@ object Finagle extends Build {
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-  val netty4StaticSsl = "io.netty" % "netty4-tcnative-boringssl-static" % "1.1.33.Fork26" % "runtime"
+  val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "1.1.33.Fork26" % "runtime"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.8.4"
   val jacksonLibs = Seq(
@@ -202,8 +202,8 @@ object Finagle extends Build {
       unidocSettings ++ Seq(
         unidocProjectFilter in (ScalaUnidoc, unidoc) :=
           inAnyProject -- inProjects(
-            finagleBenchmark, 
-            finagleBenchmarkThrift, 
+            finagleBenchmark,
+            finagleBenchmarkThrift,
             finagleExample
           )
       )
