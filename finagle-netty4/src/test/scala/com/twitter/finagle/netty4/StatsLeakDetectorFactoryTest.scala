@@ -1,32 +1,28 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver}
 import com.twitter.finagle.toggle.flag
 import io.netty.buffer.ByteBuf
-import io.netty.util.ResourceLeakDetectorFactory
 import org.scalatest.FunSuite
 
 class StatsLeakDetectorFactoryTest extends FunSuite {
   test("counts netty resource leaks"){
     flag.overrides.let("com.twitter.finagle.netty4.EnableReferenceLeakTracking", 1.0) {
-      val sr = new InMemoryStatsReceiver
-      LoadedStatsReceiver.self = sr
 
-      trackReferenceLeaks.init
-      val detectorFac = ResourceLeakDetectorFactory.instance()
-
-      val detector = detectorFac.newResourceLeakDetector(classOf[ByteBuf])
+      var leaks = 0
+      val fac = new StatsLeakDetectorFactory({ () => leaks += 1 })
+      val detector = fac.newResourceLeakDetector(classOf[ByteBuf])
 
       // netty's leak detection relies on references getting collected so rather than
       // introduce non-determinism into our test we grab the non-public
       // 'reportTracedLeak' method to fake a leak report.
-      val reportLeakMeth = detector.getClass.getMethod("reportTracedLeak", classOf[String], classOf[String])
+      val reportLeakMeth = detector.getClass.getDeclaredMethod("reportTracedLeak", classOf[String], classOf[String])
+      reportLeakMeth.setAccessible(true)
       reportLeakMeth.invoke(detector, "", "")
-      assert(sr.counters(Seq("finagle", "netty4", "reference_leaks")) == 1)
+      assert(leaks == 1)
       reportLeakMeth.invoke(detector, "", "")
-      assert(sr.counters(Seq("finagle", "netty4", "reference_leaks")) == 2)
+      assert(leaks == 2)
       reportLeakMeth.invoke(detector, "", "")
-      assert(sr.counters(Seq("finagle", "netty4", "reference_leaks")) == 3)
+      assert(leaks == 3)
     }
   }
 
