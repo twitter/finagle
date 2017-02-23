@@ -10,8 +10,12 @@ import com.twitter.util.{Future, Promise}
  */
 private[finagle] class ConnectionManager {
 
-  /** Indicates whether the connection should be closed when it becomes idle. */
-  private[this] var isKeepAlive = false
+  /**
+   * Indicates whether the connection should be closed when it becomes idle.
+   * Because the connection is initially idle, we set this to `true` to avoid
+   * the connection starting in a closed state.
+   */
+  private[this] var isKeepAlive = true
 
   /** When false, the connection is busy servicing a request. */
   private[this] var isIdle = true

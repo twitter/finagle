@@ -35,6 +35,11 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     response
   }
 
+  test("shouldClose returns false when initialized") {
+    val manager = new ConnectionManager()
+    assert(!manager.shouldClose())
+  }
+
   test("not terminate when response is standard") {
     val manager = new ConnectionManager()
     manager.observeRequest(makeRequest(Version.Http11), Future.Done)
