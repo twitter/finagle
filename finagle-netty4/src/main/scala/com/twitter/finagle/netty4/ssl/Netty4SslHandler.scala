@@ -9,7 +9,8 @@ import io.netty.handler.ssl.ApplicationProtocolConfig.{
 }
 import io.netty.channel._
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContext, SslContextBuilder, SslHandler}
+import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContext, SslContextBuilder, SslHandler,
+  OpenSsl}
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 import java.io.File
 import javax.net.ssl.SSLContext
@@ -107,7 +108,7 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
   }
 
   private[this] def appProtoConfig(nextProtocols: Iterable[String]): ApplicationProtocolConfig =
-    if (nextProtocols.isEmpty) ApplicationProtocolConfig.DISABLED
+    if (!OpenSsl.isAvailable || nextProtocols.isEmpty) ApplicationProtocolConfig.DISABLED
     else {
       new ApplicationProtocolConfig(
         Protocol.NPN_AND_ALPN,
