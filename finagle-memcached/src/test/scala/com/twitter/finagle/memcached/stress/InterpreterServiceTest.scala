@@ -23,7 +23,7 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
     server = new InProcessMemcached(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
     val address = Address(server.start().boundAddress.asInstanceOf[InetSocketAddress])
     client = Memcached.client
-      .withLoadBalancer.connectionsPerEndpoint(1)
+      .connectionsPerEndpoint(1)
       .newService(Name.bound(address), "memcache")
   }
 

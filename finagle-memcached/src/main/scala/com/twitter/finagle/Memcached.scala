@@ -6,33 +6,34 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher}
-import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
-import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.memcached.exp.LocalMemcached
-import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
+import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
-import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
+import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty3ServerFramer, Netty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
+import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.{Closable, Duration, Monitor}
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
@@ -288,7 +289,6 @@ object Memcached extends finagle.Client[Command, Response]
       stack: Stack[ServiceFactory[Command, Response]] = Client.newStack,
       params: Stack.Params = Client.defaultParams)
     extends StdStackClient[Command, Response, Client]
-    with WithConcurrentLoadBalancer[Client]
     with MemcachedRichClient {
 
     import Client.mkDestination
@@ -376,10 +376,17 @@ object Memcached extends finagle.Client[Command, Response]
     def withNumReps(reps: Int): Client =
       configured(param.NumReps(reps))
 
-    // Java-friendly forwarders
-    // See https://issues.scala-lang.org/browse/SI-8905
-    override val withLoadBalancer: ConcurrentLoadBalancingParams[Client] =
-      new ConcurrentLoadBalancingParams(this)
+    /**
+     * Configures the number of concurrent `connections` a single endpoint has.
+     * The connections are load balanced over which allows the pipelined client to
+     * avoid head-of-line blocking and reduce its latency.
+     *
+     * We've empirically found that four is a good default for this, but it can be
+     * increased at the cost of additional connection overhead.
+     */
+    def connectionsPerEndpoint(connections: Int): Client =
+      configured(ConcurrentLoadBalancerFactory.Param(connections))
+
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
     override val withSession: ClientSessionParams[Client] =

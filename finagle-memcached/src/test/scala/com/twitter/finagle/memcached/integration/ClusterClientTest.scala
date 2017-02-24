@@ -15,7 +15,6 @@ import com.twitter.finagle.memcached.{Client, KetamaClientBuilder, PartitionedCl
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.Buf
 import com.twitter.util.{FuturePool, Await, Duration, Future}
-import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}

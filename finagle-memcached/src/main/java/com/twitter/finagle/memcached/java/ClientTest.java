@@ -6,10 +6,10 @@ import com.google.common.collect.ImmutableSet;
 
 import com.twitter.finagle.Memcached;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.CacheNode;
 import com.twitter.finagle.memcached.CachePoolCluster;
 import com.twitter.finagle.memcached.KetamaClientBuilder;
+import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.io.Buf;

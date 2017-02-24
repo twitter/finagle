@@ -235,56 +235,6 @@ object LoadBalancerFactory {
 }
 
 /**
- * A load balancer that balances among multiple connections,
- * useful for managing concurrency in pipelining protocols.
- *
- * Each endpoint can open multiple connections. For N endpoints,
- * each opens M connections, load balancer balances among N*M
- * options. Thus, it increases concurrency of each endpoint.
- */
-object ConcurrentLoadBalancerFactory {
-  import LoadBalancerFactory._
-
-  private val ReplicaKey = "concurrent_lb_replica"
-
-  // package private for testing
-  private[finagle] def replicate(num: Int): Address => Set[Address] = {
-    case Address.Inet(ia, metadata) =>
-      for (i: Int <- (0 until num).toSet) yield
-        Address.Inet(ia, metadata + (ReplicaKey -> i))
-    case addr => Set(addr)
-  }
-
-  /**
-   * A class eligible for configuring the number of connections
-   * a single endpoint has.
-   */
-  case class Param(numConnections: Int) {
-    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
-  }
-  object Param {
-    implicit val param = Stack.Param(Param(4))
-  }
-
-  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new StackModule[Req, Rep] {
-      val description = "Balance requests across multiple connections on a single " +
-        "endpoint, used for pipelining protocols"
-
-      override def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-        val Param(numConnections) = params[Param]
-        val Dest(dest) = params[Dest]
-        val newDest = dest.map {
-          case bound@Addr.Bound(set, _) =>
-            bound.copy(addrs = set.flatMap(replicate(numConnections)))
-          case addr => addr
-        }
-        super.make(params + Dest(newDest), next)
-      }
-    }
-}
-
-/**
  * A thin interface around a Balancer's constructor that allows Finagle to pass in
  * context from the stack to the balancers at construction time.
  *

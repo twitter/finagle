@@ -1,15 +1,12 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.io.Buf
 import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
-
-import com.twitter.finagle.memcached.util.ChannelBufferUtils.channelBufferToString
-import com.twitter.io.Buf
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class EncoderTest extends FunSuite with MockitoSugar {

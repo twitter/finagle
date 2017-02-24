@@ -29,7 +29,7 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       val address = Address(testServer.get.address.asInstanceOf[InetSocketAddress])
       val service = Memcached.client
         .withStatsReceiver(stats)
-        .withLoadBalancer.connectionsPerEndpoint(1)
+        .connectionsPerEndpoint(1)
         .newService(Name.bound(address), "memcache")
       client = Client(service)
     }

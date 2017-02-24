@@ -49,7 +49,7 @@ object MemcacheStress extends App {
   def main() {
     var client = Memcached.client
       .withLabel("mc")
-      .withLoadBalancer.connectionsPerEndpoint(config.concurrency())
+      .connectionsPerEndpoint(config.concurrency())
 
     if (config.nworkers() > 0)
       client = client.configured(Netty3Transporter.ChannelFactory(

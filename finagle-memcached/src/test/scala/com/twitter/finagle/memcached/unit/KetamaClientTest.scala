@@ -4,10 +4,9 @@ import com.twitter.concurrent.Broker
 import com.twitter.finagle._
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
-import com.twitter.util.{ReadWriteVar, Await, Duration, Future}
-import scala.collection.{immutable, mutable}
+import com.twitter.util.{ReadWriteVar, Await, Future}
+import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._

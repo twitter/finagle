@@ -1,6 +1,5 @@
 package com.twitter.finagle.memcached.unit
 
-import com.google.common.hash.Hashing
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.AtomicMap

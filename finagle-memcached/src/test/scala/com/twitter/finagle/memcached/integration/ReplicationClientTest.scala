@@ -6,7 +6,6 @@ import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.{CachePoolCluster, CachePoolConfig, CasResult, KetamaClientBuilder}
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Group, WriteException}

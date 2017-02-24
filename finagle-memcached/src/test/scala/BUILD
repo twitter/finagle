@@ -37,6 +37,7 @@ junit_tests(
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
     '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/scala:scala',
     'finagle/finagle-memcached/src/main/scala:scala',
     'src/java/com/twitter/common/io:io',
     'src/java/com/twitter/common/quantity:quantity',

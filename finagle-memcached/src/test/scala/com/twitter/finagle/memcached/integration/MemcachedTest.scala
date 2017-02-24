@@ -351,7 +351,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
     val sr = new InMemoryStatsReceiver
     val myClient = Memcached.client
-      .withLoadBalancer.connectionsPerEndpoint(NumConnections)
+      .connectionsPerEndpoint(NumConnections)
       .withStatsReceiver(sr)
       .newRichClient(Name.Bound.singleton(mutableAddrs), "test_client")
 
@@ -397,7 +397,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   test("FailureAccrualFactoryException has remote address") {
 
     val client = Memcached.client
-      .withLoadBalancer.connectionsPerEndpoint(1)
+      .connectionsPerEndpoint(1)
       // 1 failure triggers FA; make sure FA stays in "dead" state after failure
       .configured(FailureAccrualFactory.Param(1, 10.minutes))
       .withEjectFailedHost(false)

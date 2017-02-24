@@ -3,22 +3,21 @@ package com.twitter.finagle.memcached.unit.util
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
+import com.twitter.finagle.Failure
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
-import com.twitter.finagle.Failure
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class MemcachedTest extends FunSuite

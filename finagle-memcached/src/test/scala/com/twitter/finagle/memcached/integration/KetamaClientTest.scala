@@ -2,7 +2,6 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.{CacheNodeGroup, KetamaClientBuilder, KetamaPartitionedClient, KetamaClientKey}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
@@ -60,13 +59,13 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
     val Buf.Utf8(res) = Await.result(client.get("foo")).get
     assert(res == "bar")
   }
-  
+
   test("using .dest() preserves custom keys") {
     val key1 = 0
     val key2 = 3
     val name = s"twcache!localhost:${address1.getPort}:1:$key1,localhost:${address2.getPort}:1:$key2"
     val client = KetamaClientBuilder().dest(name).build().asInstanceOf[KetamaPartitionedClient]
-    
+
     assert(client.ketamaNodes.size == 2)
     assert(client.ketamaNodes.map(_._1) == Set(KetamaClientKey(key1.toString), KetamaClientKey(key2.toString)))
 

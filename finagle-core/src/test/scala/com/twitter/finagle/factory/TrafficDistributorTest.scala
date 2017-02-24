@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.loadbalancer.{ConcurrentLoadBalancerFactory, DefaultBalancerFactory}
+import com.twitter.finagle.loadbalancer.DefaultBalancerFactory
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -22,7 +22,7 @@ private object TrafficDistributorTest {
 
     def apply(port: Int, weight: Double): Address =
       Address.Inet(new InetSocketAddress(port), Addr.Metadata(key -> weight))
-      
+
     def unapply(addr: Address): Option[(Int, Double)] = addr match {
       case Address.Inet(ia, metadata) =>
         Some((ia.getPort, metadata(key).asInstanceOf[Double]))
@@ -335,7 +335,6 @@ class TrafficDistributorTest extends FunSuite {
     Await.result(dist())
   })
 
-
   test("status is bestOf all weight classes") (new Ctx {
     val weightClasses = Seq((1.0, 1), (busyWeight, 2))
     val classes = weightClasses.flatMap(weightClass.tupled).toSet
@@ -350,30 +349,6 @@ class TrafficDistributorTest extends FunSuite {
     )
 
     assert(dist.status == Status.Open)
-  })
-
-  test("handles replicated addresses") (new Ctx {
-    val init: Set[Address] = (1 to 5).map(Address(_)).toSet
-    val dest = Var(Activity.Ok(init))
-    val newDest = dest.map {
-      case Activity.Ok(set) =>
-        Activity.Ok(set.flatMap(ConcurrentLoadBalancerFactory.replicate(4)))
-      case state => state
-    }
-    val dist = newDist(newDest)
-
-    assert(newEndpointCalls == 20)
-    assert(newBalancerCalls == 1)
-
-    val update: Set[Address] = (2 to 5).map(Address(_)).toSet
-    resetCounters()
-    dest() = Activity.Ok(update)
-    assert(newEndpointCalls == 0)
-    assert(newBalancerCalls == 0)
- 
-    assert(balancers.head.endpoints.sample().size == 16)
-    assert(balancers.head.endpoints.sample() ==  update.flatMap(
-      ConcurrentLoadBalancerFactory.replicate(4)).map(AddressFactory))
   })
 
   // todo: move this to util-stats?

@@ -30,7 +30,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     if (testServer.isDefined) {
       Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
       proxyClient = Memcached.client
-        .withLoadBalancer.connectionsPerEndpoint(1)
+        .connectionsPerEndpoint(1)
         .newService(
           Name.bound(Address(testServer.get.address.asInstanceOf[InetSocketAddress])), "memcached")
 
