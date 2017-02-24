@@ -4,7 +4,6 @@ import com.twitter.finagle
 import com.twitter.finagle.Service
 import com.twitter.io.TempFile
 import com.twitter.util.Future
-import io.netty.handler.ssl.OpenSsl
 
 class Http2AlpnTest extends AbstractEndToEndTest {
   val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-server.cert.pem")
@@ -13,7 +12,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
   // deleteOnExit is handled by TempFile
 
-  override def skipWholeTest: Boolean = !OpenSsl.isAvailable
+  override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 
   def implName: String = "prior knowledge http/2"
   def clientImpl(): finagle.Http.Client =
