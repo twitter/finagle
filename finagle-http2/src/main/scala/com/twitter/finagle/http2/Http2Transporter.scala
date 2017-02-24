@@ -110,7 +110,7 @@ private[finagle] object Http2Transporter {
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
-        .frameLogger(new Http2FrameLogger(LogLevel.ERROR))
+        .frameLogger(new Http2FrameLogger(LogLevel.TRACE))
         .connection(connection)
         .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
