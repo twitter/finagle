@@ -568,7 +568,7 @@ object Finagle extends Build {
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(
-  finagleCore,
+  finagleCore % "compile->compile;test->test",
   finagleNetty4,
   finagleServersets,
   finagleStats,
