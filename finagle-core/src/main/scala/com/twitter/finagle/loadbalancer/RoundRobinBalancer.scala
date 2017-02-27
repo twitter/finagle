@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.{ClientConnection, NoBrokersAvailableException, Service, ServiceFactory, ServiceFactoryProxy, Status}
-import com.twitter.util.{Activity, Future, Promise, Time}
+import com.twitter.util.{Activity, Future, Time}
 import java.util.concurrent.atomic.AtomicLong
 
 /**
@@ -18,10 +18,6 @@ class RoundRobinBalancer[Req, Rep](
   extends ServiceFactory[Req, Rep]
   with Balancer[Req, Rep]
   with Updating[Req, Rep] {
-
-  // For the OnReady mixin
-  private[this] val ready = new Promise[Unit]
-  override def onReady: Future[Unit] = ready
 
   protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 

@@ -41,6 +41,9 @@ Breaking API Changes
     on `com.twitter.finagle.client.Transporter` to the `newTransporter` method of
     `com.twitter.finagle.client.StackClient`. ``RB_ID=907544``
 
+  * finagle-core: Load Balancer implementations no longer mix-in the OnReady trait and
+    OnReady was removed. ``RB_ID=908863``
+
   * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
       - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,

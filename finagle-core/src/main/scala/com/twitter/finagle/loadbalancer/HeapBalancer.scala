@@ -2,7 +2,6 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.OnReady
 import com.twitter.finagle.{
   ClientConnection, Service, ServiceFactory, ServiceProxy, Status}
 import com.twitter.util._
@@ -18,11 +17,11 @@ object HeapBalancer {
  * An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].
  */
 class HeapBalancer[Req, Rep](
-  factories: Activity[Set[ServiceFactory[Req, Rep]]],
-  statsReceiver: StatsReceiver,
-  emptyException: Throwable,
-  rng: Random
-) extends ServiceFactory[Req, Rep] with OnReady {
+    factories: Activity[Set[ServiceFactory[Req, Rep]]],
+    statsReceiver: StatsReceiver,
+    emptyException: Throwable,
+    rng: Random)
+  extends ServiceFactory[Req, Rep] {
 
   import HeapBalancer._
 
@@ -69,19 +68,9 @@ class HeapBalancer[Req, Rep](
   }
   private[this] var snap = Set[ServiceFactory[Req, Rep]]()
 
-  private[this] val ready = new Promise[Unit]
-  def onReady: Future[Unit] = ready
-
-  private[this] val observation = factories.run.changes respond {
-    case Activity.Pending =>
-
-    case Activity.Ok(newSet) =>
-      updateGroup(newSet)
-      ready.setDone()
-
-    case Activity.Failed(_) =>
-      // On resolution failure, consider the load balancer ready (to serve errors).
-      ready.setDone()
+  private[this] val observation = factories.run.changes.respond {
+    case Activity.Ok(newSet) => updateGroup(newSet)
+    case _ => // nop
   }
 
   private[this] val availableGauge = statsReceiver.addGauge("available") {
