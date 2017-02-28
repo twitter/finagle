@@ -92,6 +92,10 @@ Breaking API Changes
     `com.twitter.finagle.stats.includeEmptyHistograms` flag to false to retain the
     behavior. ``RB_ID=907186``
 
+  * finagle-thrift: `ThriftServiceIface` was refactored to be in terms of `ThriftMethod.Args`
+    to `ThriftMethod.SuccessType` instead of `ThriftMethod.Args` to `ThriftMethod.Result`.
+    ``RB_ID=908846``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
