@@ -117,7 +117,7 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
   }
 
   def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] = {
-    val watcher = new ApacheWatcher
+    val watcher = new ApacheWatcher(watchSessionStateEvents=false)
     val rv = new Promise[Watched[Option[Data.Stat]]]
     val cb = new StatCallback {
       def processResult(ret: Int, path: String, ctx: Object, stat: zookeeper.data.Stat) =
