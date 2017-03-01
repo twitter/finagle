@@ -26,13 +26,54 @@ abstract class Response extends Message {
 
   def isRequest = false
 
-  def status: Status = from(getStatus)
-  def status_=(value: Status): Unit = { setStatus(from(value)) }
-  def statusCode: Int = getStatus.getCode
-  def statusCode_=(value: Int): Unit = { setStatus(HttpResponseStatus.valueOf(value)) }
+  def status: Status = Bijections.statusFromNetty(httpResponse.getStatus)
 
-  def getStatusCode(): Int = statusCode
-  def setStatusCode(value: Int): Unit = { statusCode = value }
+  /**
+   * Set the status of this response
+   *
+   * @note see [[status(Status)]] for Java users.
+   */
+  def status_=(value: Status): Unit = { httpResponse.setStatus(from(value)) }
+
+  /**
+   * Set the status of this response
+   *
+   * @note See [[status_=(Status)]] for Scala users.
+   */
+  final def status(value: Status): this.type = {
+    this.status = value
+    this
+  }
+
+  /**
+   * Get the status code of this response
+   */
+  def statusCode: Int = status.code
+
+  /**
+   * Set the status code of this response
+   *
+   * @note See [[statusCode(Int)]] for Java users.
+   */
+  def statusCode_=(value: Int): Unit = { httpResponse.setStatus(HttpResponseStatus.valueOf(value)) }
+
+  /**
+   * Set the status code of this response
+   *
+   * @note See [[statusCode_=(Int)]] for Scala users.
+   */
+  final def statusCode(value: Int): this.type = {
+    this.statusCode = value
+    this
+  }
+
+  /** Get the status code of this response */
+  @deprecated("2017-02-17", "Use [[statusCode]] instead")
+  final def getStatusCode(): Int = statusCode
+
+  /** Set the status code of this response */
+  @deprecated("2017-02-17", "Use [[statusCode(Int)]] instead")
+  final def setStatusCode(value: Int): Unit = { statusCode = value }
 
   /** Encode as an HTTP message */
   def encodeString(): String = {
@@ -46,21 +87,10 @@ abstract class Response extends Message {
     "Response(\"" + version + " " + status + "\")"
 
   @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def httpResponse: HttpResponse
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def getHttpResponse(): HttpResponse = httpResponse
+  protected def httpResponse: HttpResponse
 
   @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
   protected[finagle] def httpMessage: HttpMessage = httpResponse
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def getStatus(): HttpResponseStatus = httpResponse.getStatus()
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def setStatus(status: HttpResponseStatus): Unit = {
-    httpResponse.setStatus(status)
-  }
 }
 
 object Response {

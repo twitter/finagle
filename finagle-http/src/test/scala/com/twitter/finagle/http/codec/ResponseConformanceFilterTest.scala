@@ -2,11 +2,10 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Fields, Method, Request, Response}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
 import com.twitter.io.Buf
 import com.twitter.io.Reader.ReaderDiscarded
 import com.twitter.util.{Await, Future}
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -37,7 +36,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     res.contentLength = 1
 
     val resp = fetchHeadResponse(res)
-    assert(resp.getStatus == HttpResponseStatus.OK)
+    assert(resp.status == Status.Ok)
     assert(resp.content.length == 0)
     assert(!resp.isChunked)
     assert(resp.headerMap.get(Fields.ContentLength) == Some("1"))
@@ -45,7 +44,7 @@ class ResponseConformanceFilterTest extends FunSuite {
 
   test("response to HEAD request without content-length") {
     val response = fetchHeadResponse(Response())
-    assert(response.getStatus == HttpResponseStatus.OK)
+    assert(response.status == Status.Ok)
     assert(response.content.length == 0)
     assert(!response.isChunked)
     assert(response.headerMap.get(Fields.ContentLength) == None)
@@ -57,7 +56,7 @@ class ResponseConformanceFilterTest extends FunSuite {
     res.content = body
 
     val response = fetchHeadResponse(res)
-    assert(response.getStatus == HttpResponseStatus.OK)
+    assert(response.status == Status.Ok)
     assert(response.content.length == 0)
     assert(!response.isChunked)
     assert(response.headerMap.get(Fields.ContentLength) == Some(body.length.toString))
@@ -69,7 +68,7 @@ class ResponseConformanceFilterTest extends FunSuite {
 
     val response = fetchHeadResponse(res)
 
-    assert(response.getStatus == HttpResponseStatus.OK)
+    assert(response.status == Status.Ok)
     assert(response.content.length == 0)
     assert(!response.isChunked) // the pipeline will clear the chunked flag
     assert(response.headerMap.get(Fields.ContentLength) == None)

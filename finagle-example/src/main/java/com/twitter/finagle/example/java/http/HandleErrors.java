@@ -1,11 +1,10 @@
 package com.twitter.finagle.example.java.http;
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-
 import com.twitter.finagle.Service;
 import com.twitter.finagle.SimpleFilter;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
+import com.twitter.finagle.http.Status;
 import com.twitter.util.ExceptionalFunction;
 import com.twitter.util.Future;
 
@@ -21,12 +20,12 @@ public final class HandleErrors extends SimpleFilter<Request, Response> {
             public Response applyE(Throwable in) {
                 Response resp = Response.apply();
                 if (in instanceof NumberFormatException) {
-                    resp.setStatus(HttpResponseStatus.BAD_REQUEST);
+                    resp.status(Status.BadRequest());
                     resp.setContentString(in.getMessage());
 
                     return resp;
                 }
-                resp.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                resp.status(Status.InternalServerError());
                 resp.setContentString(in.getMessage());
 
                 return resp;

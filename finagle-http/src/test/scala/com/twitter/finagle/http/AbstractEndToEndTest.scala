@@ -7,13 +7,10 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.MonitorFilter
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.service.{
-  ConstantService,
-  FailureAccrualFactory,
-  ResponseClass,
-  ServiceFactoryRef
-}
+  ConstantService, FailureAccrualFactory, ResponseClass, ServiceFactoryRef}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, ReadableCounter}
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Trace
@@ -497,18 +494,18 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   def streaming(connect: HttpService => HttpService) {
-    def service(r: Reader) = new HttpService {
-      def apply(request: Request) = {
-        val response = new Response {
-          final val httpResponse = request.response.httpResponse
-          override def reader = r
-        }
-        response.setChunked(true)
-        Future.value(response)
-      }
-    }
-
     test(s"$implName (streaming)" + ": stream") {
+      def service(r: Reader) = new HttpService {
+        def apply(request: Request) = {
+          val response = new Response {
+            final val httpResponse = Bijections.responseToNetty(Response())
+            override def reader = r
+          }
+          response.setChunked(true)
+          Future.value(response)
+        }
+      }
+
       val writer = Reader.writable()
       val client = connect(service(writer))
       val reader = await(client(Request())).reader

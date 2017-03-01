@@ -114,6 +114,10 @@ Runtime Behavior Changes
 Deprecations
 ~~~~~~~~~~~~
 
+  * finagle-base-http: The `c.t.f.http.Response` methods `getStatusCode()` and `setStatusCode()`
+    have been deprecated. Use the methods `statusCode` and `statusCode(Int)` instead.
+    ``RB_ID=908409``
+
   * finagle-http: Now that `c.t.f.http.Method` and `c.t.f.http.Version` are represented by
     instances and thus easier to use from Java, the Java helpers `c.t.f.http.Versions`,
     `c.t.f.http.Statuses`, and `c.t.f.http.Methods` have been deprecated. ``RB_ID=907680``

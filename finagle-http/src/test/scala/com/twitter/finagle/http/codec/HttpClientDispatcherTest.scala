@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.{Address, Http, Name, Service, Status, http}
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.netty.Netty3ClientStreamTransport
+import com.twitter.finagle.http.netty.{Bijections, Netty3ClientStreamTransport}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Buf, Reader}
@@ -100,7 +100,7 @@ class HttpClientDispatcherTest extends FunSuite {
     // discard the request immediately
     out.read()
 
-    val r = Response().httpResponse
+    val r = Bijections.responseToNetty(Response())
     r.setChunked(true)
     out.write(r)
     val res = Await.result(f, timeout)
@@ -140,7 +140,7 @@ class HttpClientDispatcherTest extends FunSuite {
     Await.result(out.read(), timeout)
     out.write(httpRes)
     val res = Await.result(f, timeout)
-    assert(res.httpResponse === httpRes)
+    assert(Bijections.responseToNetty(res) == httpRes)
   }
 
   test("chunked") {
@@ -155,11 +155,11 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write(chunk("world"))
-    assert(Await.result(cc, timeout) === Some(Buf.Utf8("world")))
+    assert(Await.result(cc, timeout) == Some(Buf.Utf8("world")))
 
     out.write(HttpChunk.LAST_CHUNK)
     assert(Await.result(reader.read(Int.MaxValue), timeout).isEmpty)
@@ -178,7 +178,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write("something else")
