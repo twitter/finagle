@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Level
@@ -11,8 +12,19 @@ import com.twitter.util._
 import scala.util.Random
 
 object FailureAccrualFactory {
-  private val rng = new Random
-  private val defaultConsecutiveFailures = 5
+  private[this] val rng = new Random
+  private[this] val DefaultConsecutiveFailures = 5
+
+  // These values approximate 5 consecutive failures at around 5k QPS during the
+  // given window for randomly distributed failures. For lower (more typical)
+  // workloads, this approach will better deal with randomly distributed failures.
+  // Note that if an endpoint begins to fail all requests, FailureAccrual will
+  // trigger in (window) * (1 - threshold) seconds - 6 seconds for these values.
+  private[this] val DefaultSuccessRateThreshold = 0.8
+  private[this] val DefaultSuccessRateWindow = 30.seconds
+
+  private[this] val UseSuccessRateDefaultPolicyId = "com.twitter.finagle.core.UseSuccessRateFailureAccrual"
+  private[this] def useSuccessRateDefaultPolicy: Boolean = CoreToggles(UseSuccessRateDefaultPolicyId)(ServerInfo().id.hashCode)
 
   // Use equalJittered backoff in order to wait more time in between
   // each revival attempt on successive failures; if an endpoint has failed
@@ -22,14 +34,26 @@ object FailureAccrualFactory {
   private[finagle] val jitteredBackoff: Stream[Duration] =
     Backoff.equalJittered(5.seconds, 300.seconds)
 
-  private[finagle] val defaultPolicy: Function0[FailureAccrualPolicy] =
-    new Function0[FailureAccrualPolicy] {
-      def apply(): FailureAccrualPolicy = FailureAccrualPolicy
-        .consecutiveFailures(defaultConsecutiveFailures, jitteredBackoff)
+  private[finagle] def defaultPolicy: Function0[FailureAccrualPolicy] = {
+    if (useSuccessRateDefaultPolicy) {
+      new Function0[FailureAccrualPolicy] {
+        def apply(): FailureAccrualPolicy = FailureAccrualPolicy
+          .successRateWithinDuration(DefaultSuccessRateThreshold, DefaultSuccessRateWindow, jitteredBackoff)
 
-      override def toString: String = s"FailureAccrualPolicy.consecutiveFailures(numFailures: " +
-        s"$defaultConsecutiveFailures, markDeadFor: $jitteredBackoff"
+        override def toString: String = "FailureAccrualPolicy.successRateWithinDuration(" +
+          s"successRate = $DefaultSuccessRateThreshold, window = $DefaultSuccessRateWindow, " +
+          s"markDeadFor = $jitteredBackoff)"
+      }
+    } else {
+      new Function0[FailureAccrualPolicy] {
+        def apply(): FailureAccrualPolicy = FailureAccrualPolicy
+          .consecutiveFailures(DefaultConsecutiveFailures, jitteredBackoff)
+
+        override def toString: String = s"FailureAccrualPolicy.consecutiveFailures(numFailures: " +
+          s"$DefaultConsecutiveFailures, markDeadFor: $jitteredBackoff)"
+      }
     }
+  }
 
   /**
    * Add jitter in `markDeadFor` to reduce correlation.

@@ -7,6 +7,7 @@ import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
@@ -179,7 +180,10 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     val server = Mux.serve("localhost:*", service)
     val address = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val client = Mux.client.transformed(_.remove(Failure.role)) // Masks most failures
+    // Don't mask failures so we can examine which flags were propagated
+    // Remove the retries module because otherwise requests will be retried until the default budget
+    // is exceeded and then flagged as NonRetryable.
+    val client = Mux.client.transformed(_.remove(Failure.role).remove(Retries.Role))
         .newService(address, "client")
 
     def check(f: Failure): Unit = {

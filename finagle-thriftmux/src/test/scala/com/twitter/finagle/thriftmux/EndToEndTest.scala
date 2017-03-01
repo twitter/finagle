@@ -991,10 +991,10 @@ class EndToEndTest extends FunSuite
       }
     )
 
-    // Don't strip failure flags, as we're testing to ensure they traverse
+    // Don't strip failure flags, as we're testing to ensure they traverse. Also, disable retries
     val removeFailure = new Transformer {
       def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]): Stack[ServiceFactory[Req, Rep]] =
-        stack.remove(Failure.role)
+        stack.remove(Failure.role).remove(Retries.Role)
     }
 
     val client = ThriftMux.client

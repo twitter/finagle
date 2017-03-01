@@ -1,5 +1,6 @@
 package com.twitter.finagle.builder
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.integration.IntegrationBase
@@ -201,17 +202,18 @@ class ClientBuilderTest extends FunSuite
 
   test("ClientBuilder should collect stats on 'tries' with no retrypolicy") {
     new ClientBuilderHelper {
+      val numFailures = 5
       val inMemory = new InMemoryStatsReceiver
       val builder = ClientBuilder()
         .name("test")
         .hostConnectionLimit(1)
+        .failureAccrualParams((numFailures, 1.minute))
         .codec(m.codec)
         .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
         .reportTo(inMemory)
 
       val client = builder.build()
-      val numFailures = 5
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))

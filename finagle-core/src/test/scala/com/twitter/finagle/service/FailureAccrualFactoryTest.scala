@@ -5,6 +5,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.{Status, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
 import com.twitter.finagle.param
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
+import com.twitter.finagle.toggle.flag
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
@@ -44,6 +45,18 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       underlying, failureAccrualPolicy, ResponseClassifier.Default, timer, statsReceiver)
     val service = Await.result(factory(), 5.seconds)
     verify(underlying)()
+  }
+
+  test("default policy is consecutiveFailures") {
+    assert(FailureAccrualFactory.defaultPolicy.toString.contains(
+      "FailureAccrualPolicy.consecutiveFailures"))
+  }
+
+  test("default policy can be toggled to successRate with window") {
+    flag.overrides.let("com.twitter.finagle.core.UseSuccessRateFailureAccrual", 1.0) {
+      assert(FailureAccrualFactory.defaultPolicy.toString.contains(
+        "FailureAccrualPolicy.successRateWithinDuration"))
+    }
   }
 
   test("a failing service should become unavailable") {
