@@ -153,7 +153,7 @@ object SpnegoAuthenticator {
           }
         } catch {
           case le: LoginException =>
-            log.debug("Could not create LoginContext in JAAS.load().", le)
+            log.debug(le, "Could not create LoginContext in JAAS.load().")
             throw le
         } finally {
           lock.unlock(stamp)
