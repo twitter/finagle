@@ -51,6 +51,9 @@ Breaking API Changes
   * finagle-core: The `aperture` constructor on the `Balancers` object no longer takes
     a Timer since it was unused. ``RB_ID=909245``
 
+  * finagle-core: The load balancer algorithm is now further scoped under "algorithm".
+    ``RB_ID=909309``
+
   * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
       - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,

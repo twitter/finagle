@@ -47,6 +47,9 @@ All Balancers
   attempts. When this occurs, a non-open node may be selected for that
   request.
 
+**algorithm/{type}**
+  A gauge exported with the name of the algorithm used for load balancing.
+
 ApertureLoadBandBalancer
 <<<<<<<<<<<<<<<<<<<<<<<<
 

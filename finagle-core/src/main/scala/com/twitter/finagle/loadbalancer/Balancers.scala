@@ -7,7 +7,7 @@ import com.twitter.finagle.loadbalancer.p2c.{P2CPeakEwma, P2CLeastLoaded}
 import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, NoBrokersAvailableException}
 import com.twitter.util.{Activity, Duration, Future, Time}
 import scala.util.Random
 
@@ -49,6 +49,23 @@ object Balancers {
   val MaxEffort: Int = 5
 
   /**
+   * Creates a [[ServiceFactory]] proxy to `bal` with the `lbType` exported
+   * to a gauge.
+   */
+  private def newScopedBal[Req, Rep](
+    sr: StatsReceiver,
+    lbType: String,
+    bal: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] =
+    new ServiceFactoryProxy(bal) {
+      private[this] val typeGauge = sr.scope("algorithm").addGauge(lbType)(1)
+      override def close(when: Time): Future[Unit] = {
+        typeGauge.remove()
+        super.close(when)
+      }
+    }
+
+  /**
    * An O(1), concurrent, weighted least-loaded fair load balancer.
    * This uses the ideas behind "power of 2 choices" [1] combined with
    * O(1) biased coin flipping through the aliasing method, described
@@ -74,9 +91,8 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc) {
-        private[this] val gauge = sr.addGauge("p2c")(1)
-      }
+      newScopedBal(sr, "p2c_least_loaded",
+        new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc))
   }
 
   /**
@@ -113,13 +129,8 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
-        private[this] val gauge = sr.addGauge("p2cPeakEwma")(1)
-        override def close(when: Time): Future[Unit] = {
-          gauge.remove()
-          super.close(when)
-        }
-      }
+      newScopedBal(sr, "p2c_peak_ewma",
+        new P2CPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc))
   }
 
   /**
@@ -137,13 +148,8 @@ object Balancers {
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
-        new HeapLeastLoaded(endpoints, sr, exc, rng) {
-          private[this] val gauge = sr.addGauge("heap")(1)
-          override def close(when: Time): Future[Unit] = {
-            gauge.remove()
-            super.close(when)
-          }
-        }
+        newScopedBal(sr, "heap_least_loaded",
+          new HeapLeastLoaded(endpoints, sr, exc, rng))
       }
     }
 
@@ -178,14 +184,9 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
-      new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
-        highLoad, minAperture, maxEffort, rng, sr, exc) {
-        private[this] val gauge = sr.addGauge("aperture")(1)
-        override def close(when: Time): Future[Unit] = {
-          gauge.remove()
-          super.close(when)
-        }
-      }
+      newScopedBal(sr, "aperture_least_loaded",
+        new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
+          highLoad, minAperture, maxEffort, rng, sr, exc))
     }
   }
 
@@ -210,9 +211,7 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
-      new RoundRobinBalancer(endpoints, sr, exc) {
-        private[this] val gauge = sr.addGauge("round_robin")(1)
-      }
+      newScopedBal(sr, "round_robin", new RoundRobinBalancer(endpoints, sr, exc))
     }
   }
 }
