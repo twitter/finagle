@@ -1,14 +1,11 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.heap
 
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import scala.util.Random
 import scala.collection.mutable.HashMap
 
-@RunWith(classOf[JUnitRunner])
 class HeapTest extends FunSuite {
-  class Helper {
+  private class Helper {
     val N = 100
     val heap = new Array[Int](N + 1)
     val input = (new Random).shuffle(Seq(0 until 100: _*)).toArray

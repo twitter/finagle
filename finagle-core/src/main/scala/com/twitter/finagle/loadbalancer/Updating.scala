@@ -7,13 +7,11 @@ import com.twitter.util.{Time, Activity, Future}
  * A Balancer mix-in which provides the collection over which to load balance
  * by observing `activity`.
  */
-private[loadbalancer] trait Updating[Req, Rep] extends Balancer[Req, Rep] {
+private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
    * An activity representing the active set of ServiceFactories.
    */
-  // Note: this is not a terribly good method name and should be
-  // improved in a future commit.
-  protected def activity: Activity[Traversable[ServiceFactory[Req, Rep]]]
+  protected def endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]]
 
   /*
    * Subscribe to the Activity and dynamically update the load
@@ -21,7 +19,7 @@ private[loadbalancer] trait Updating[Req, Rep] extends Balancer[Req, Rep] {
    *
    * The observation is terminated when the Balancer is closed.
    */
-  private[this] val observation = activity.states.respond {
+  private[this] val observation = endpoints.states.respond {
     case Activity.Ok(newList) => update(newList)
     case _ => // nop
   }

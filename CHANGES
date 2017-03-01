@@ -44,6 +44,13 @@ Breaking API Changes
   * finagle-core: Load Balancer implementations no longer mix-in the OnReady trait and
     OnReady was removed. ``RB_ID=908863``
 
+  * finagle-core: HeapBalancer, ApertureLoadBalancer, and RoundRobinBalancer classes were
+    made package private. To construct load balancers for use within a Finagle client,
+    use the `com.twitter.finagle.loadbalancer.Balancers` object. ``RB_ID=909245``
+
+  * finagle-core: The `aperture` constructor on the `Balancers` object no longer takes
+    a Timer since it was unused. ``RB_ID=909245``
+
   * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
       - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,

@@ -37,7 +37,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   /**
    * The type of Node. Mixed in.
    */
-  protected type Node <: AnyRef with NodeT[Req, Rep] { type This = Node }
+  protected type Node <: AnyRef with NodeT[Req, Rep]
 
   /**
    * Create a new node representing the given factory, with the given

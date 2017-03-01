@@ -3,12 +3,11 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.ServiceFactory
 
 /**
- * The base type of nodes over which load is balanced.
- * Nodes define the load metric that is used; distributors
- * like P2C will use these to decide where to balance
- * the next request.
+ * The base type of nodes over which load is balanced. [[NodeT]]s define the
+ * load metric that is used. [[DistributorT]]'s will use these to decide
+ * where to balance the next request.
  */
-protected[loadbalancer] trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
+private[loadbalancer] trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
   type This
 
   /**

@@ -1,6 +1,5 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
@@ -9,12 +8,12 @@ import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Future, Time, Var}
 import java.util.logging.{Level, Logger}
 
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
-  "\tWhen enabled,the configured stats receiver will be used,\n" +
-  "\tor the loaded stats receiver if none given.\n" +
-  "\tWhen disabled, the configured stats receiver will be used,\n" +
-  "\tor the NullStatsReceiver if none given.")
-
+/**
+ * Exposes a [[Stack.Module]] which composes load balancing into the respective
+ * [[Stack]]. This is mixed in by default into Finagle's [[StackClient]]. The only
+ * necessary configuration is a [[Dest]] which represents a changing collection of
+ * addresses that is load balanced over.
+ */
 object LoadBalancerFactory {
   val role = Stack.Role("LoadBalancer")
 
@@ -241,7 +240,7 @@ object LoadBalancerFactory {
  * @see [[Balancers]] for a collection of available balancers.
  *
  * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
- *      for more details.
+ * for more details.
  */
 abstract class LoadBalancerFactory {
   /**
@@ -262,24 +261,6 @@ abstract class LoadBalancerFactory {
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep]
-}
-
-/**
- * We expose the ability to configure balancers per-process via flags. 'heap',
- * 'choice', and 'aperture' are valid choices for defaultBalancer. However, using
- * this is generally not a good idea, as Finagle processes usually contain many clients.
- * To configure the load balancer method on a client, use the `configured` method like so:
- *
- * {{
- *    val balancer = Balancers.aperture(...)
- *    Protocol.configured(LoadBalancerFactory.Param(balancer))
- * }}
- */
-object defaultBalancer extends GlobalFlag("choice", "Default load balancer")
-
-package exp {
-  object loadMetric extends GlobalFlag("leastReq",
-    "Metric used to measure load across endpoints (leastReq | ewma)")
 }
 
 object DefaultBalancerFactory extends LoadBalancerFactory {

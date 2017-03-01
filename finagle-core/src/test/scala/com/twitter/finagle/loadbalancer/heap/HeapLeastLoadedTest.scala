@@ -1,17 +1,15 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.heap
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle._
 import com.twitter.util.{Activity, Await, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
-class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
+class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   class LoadedFactory(which: String) extends ServiceFactory[Unit, LoadedFactory] {
     var load = 0
     var _status: Status = Status.Open
@@ -49,7 +47,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     val exc = new NoBrokersAvailableException
 
-    val b = new HeapBalancer[Unit, LoadedFactory](
+    val b = new HeapLeastLoaded[Unit, LoadedFactory](
       Activity(group.set map(Activity.Ok(_))),
       statsReceiver,
       exc,
@@ -64,7 +62,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
   test("balancer with empty cluster has Closed status") {
     val emptyCluster = Group.empty[ServiceFactory[Unit, LoadedFactory]]
-    val b = new HeapBalancer[Unit, LoadedFactory](
+    val b = new HeapLeastLoaded[Unit, LoadedFactory](
       Activity(emptyCluster.set.map(Activity.Ok(_))),
       NullStatsReceiver,
       new NoBrokersAvailableException,
@@ -80,7 +78,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
       val cluster = Group.mutable[ServiceFactory[Unit, LoadedFactory]](node)
 
-      val b = new HeapBalancer[Unit, LoadedFactory](
+      val b = new HeapLeastLoaded[Unit, LoadedFactory](
         Activity(cluster.set map (Activity.Ok(_))),
         NullStatsReceiver,
         new NoBrokersAvailableException,
@@ -212,7 +210,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     val ctx = new Ctx
 
     val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
-    val b = new HeapBalancer[Unit, LoadedFactory](
+    val b = new HeapLeastLoaded[Unit, LoadedFactory](
       Activity.value(Set.empty),
       NullStatsReceiver,
       new NoBrokersAvailableException(heapBalancerEmptyGroup),
@@ -322,7 +320,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](
       factories:_*)
 
-    val b = new HeapBalancer[Unit, LoadedFactory](
+    val b = new HeapLeastLoaded[Unit, LoadedFactory](
       Activity(group.set map(Activity.Ok(_))),
       statsReceiver,
       new NoBrokersAvailableException,

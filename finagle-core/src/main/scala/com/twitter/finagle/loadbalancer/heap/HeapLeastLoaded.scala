@@ -1,4 +1,4 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.heap
 
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.StatsReceiver
@@ -8,15 +8,16 @@ import com.twitter.util._
 import scala.annotation.tailrec
 import scala.util.Random
 
-object HeapBalancer {
+private object HeapBalancer {
   val Penalty = Int.MaxValue
   val Zero = Int.MinValue + 1
 }
 
 /**
- * An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].
+ * An efficient heap-based load balancer that uses a "least-loaded" metric to
+ * sort the heap.
  */
-class HeapBalancer[Req, Rep](
+private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     factories: Activity[Set[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: Throwable,

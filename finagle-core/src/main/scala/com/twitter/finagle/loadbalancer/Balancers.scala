@@ -1,10 +1,14 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.loadbalancer.aperture.ApertureLeastLoaded
+import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
+import com.twitter.finagle.loadbalancer.p2c.{P2CPeakEwma, P2CLeastLoaded}
+import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.{Rng, DefaultTimer}
+import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
-import com.twitter.util.{Activity, Duration, Future, Timer, Time}
+import com.twitter.util.{Activity, Duration, Future, Time}
 import scala.util.Random
 
 /**
@@ -12,8 +16,15 @@ import scala.util.Random
  * specific parameters and return a [[LoadBalancerFactory]] that allows you
  * to easily inject a balancer into the Finagle stack via client configuration.
  *
+ * @example configuring a client with a load balancer
+ * {{{
+ * $Protocol.client
+ *   .withLoadBalancer(Balancers.aperture())
+ *   .newClient(...)
+ * }}}
+ *
  * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
- *      for more details.
+ * for more details.
  */
 object Balancers {
 
@@ -63,7 +74,7 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CBalancer(endpoints, maxEffort, rng, sr, exc) {
+      new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc) {
         private[this] val gauge = sr.addGauge("p2c")(1)
       }
   }
@@ -89,7 +100,7 @@ object Balancers {
    * deterministic tests.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded user guide]]
-   *      for more details.
+   * for more details.
    */
   def p2cPeakEwma(
     decayTime: Duration = 10.seconds,
@@ -102,7 +113,7 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CBalancerPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
+      new P2CPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
         private[this] val gauge = sr.addGauge("p2cPeakEwma")(1)
         override def close(when: Time): Future[Unit] = {
           gauge.remove()
@@ -113,11 +124,10 @@ object Balancers {
 
   /**
    * An efficient strictly least-loaded balancer that maintains
-   * an internal heap. Note, because weights are not supported by
-   * the HeapBalancer they are ignored when the balancer is constructed.
+   * an internal heap to select least-loaded endpoints.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded user guide]]
-   *      for more details.
+   * for more details.
    */
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
@@ -127,7 +137,7 @@ object Balancers {
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
-        new HeapBalancer(endpoints, sr, exc, rng) {
+        new HeapLeastLoaded(endpoints, sr, exc, rng) {
           private[this] val gauge = sr.addGauge("heap")(1)
           override def close(when: Time): Future[Unit] = {
             gauge.remove()
@@ -152,14 +162,13 @@ object Balancers {
    * needed to cover those that are available.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
-   *      for more details.
+   * for more details.
    */
   def aperture(
     smoothWin: Duration = 5.seconds,
     lowLoad: Double = 0.5,
     highLoad: Double = 2.0,
     minAperture: Int = 1,
-    timer: Timer = DefaultTimer.twitter,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
@@ -169,8 +178,8 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
-      new ApertureLoadBandBalancer(endpoints, smoothWin, lowLoad,
-        highLoad, minAperture, maxEffort, rng, timer, sr, exc) {
+      new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
+        highLoad, minAperture, maxEffort, rng, sr, exc) {
         private[this] val gauge = sr.addGauge("aperture")(1)
         override def close(when: Time): Future[Unit] = {
           gauge.remove()

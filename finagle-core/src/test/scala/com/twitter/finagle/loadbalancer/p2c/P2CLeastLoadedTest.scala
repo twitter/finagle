@@ -1,61 +1,16 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import scala.annotation.tailrec
-import scala.collection.{SortedMap, mutable}
+import scala.collection.mutable
 import scala.language.reflectiveCalls
 
-private[loadbalancer] trait P2CSuite {
-  // number of servers
-  val N: Int = 100
-  // number of reqs
-  val R: Int = 100000
-  // tolerated variance
-  val ε: Double = 0.0001*R
-
-  class Clock extends (() => Long) {
-    var time: Long = 0L
-    def advance(tick: Long): Unit = { time += tick }
-    def apply(): Long = time
-  }
-
-  trait P2CServiceFactory extends ServiceFactory[Unit, Int] {
-    def meanLoad: Double
-  }
-
-  val noBrokers = new NoBrokersAvailableException
-
-  def newBal(
-    fs: Var[Traversable[P2CServiceFactory]],
-    sr: StatsReceiver = NullStatsReceiver,
-    clock: (() => Long) = System.nanoTime
-  ): ServiceFactory[Unit, Int] = new P2CBalancer(
-    Activity(fs.map(Activity.Ok(_))),
-    maxEffort = 5,
-    rng = Rng(12345L),
-    statsReceiver = sr,
-    emptyException = noBrokers
-  )
-
-  def assertEven(fs: Traversable[P2CServiceFactory]) {
-    val ml = fs.head.meanLoad
-    for (f <- fs) {
-      assert(math.abs(f.meanLoad - ml) < ε,
-        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))
-    }
-  }
-}
-
-@RunWith(classOf[JUnitRunner])
-class P2CBalancerTest extends FunSuite with App with P2CSuite {
+class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.exp.loadMetric=leastReq"))
 
   case class LoadedFactory(which: Int) extends P2CServiceFactory {
@@ -283,88 +238,5 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     // Give it some traffic.
     for (_ <- 0 until R) bal()
     Await.result(bal.close(), 5.seconds)
-  }
-}
-
-@RunWith(classOf[JUnitRunner])
-class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
-  override val ε: Double = 0.0005*R
-
-  override def newBal(
-    fs: Var[Traversable[P2CServiceFactory]],
-    sr: StatsReceiver = NullStatsReceiver,
-    clock: (() => Long) = System.nanoTime
-  ): ServiceFactory[Unit, Int] = new P2CBalancerPeakEwma(
-    Activity(fs.map(Activity.Ok(_))),
-    maxEffort = 5,
-    decayTime = 150.nanoseconds,
-    rng = Rng(12345L),
-    statsReceiver = sr,
-    emptyException = noBrokers
-  ) {
-    override def nanoTime(): Long = clock()
-  }
-
-  def run(fs: Traversable[P2CServiceFactory], n: Int): Unit = {
-    val clock = new Clock
-    val bal = newBal(Var.value(fs), clock=clock)
-    @tailrec
-    def go(step: Int, schedule: SortedMap[Long, Seq[Closable]]): Unit = {
-      if (step != 0 && schedule.isEmpty) return
-      val next = if (step >= n) schedule else {
-        val svc = Await.result(bal())
-        val latency = Await.result(svc((): Unit)).toLong
-        val work = clock()+latency -> (schedule.getOrElse(clock()+latency, Nil) :+ svc)
-        schedule + work
-      }
-      for (seq <- next.get(step); c <- seq) c.close()
-      clock.advance(1)
-      go(step+1, next-step)
-    }
-    go(0, SortedMap())
-  }
-
-  case class LatentFactory(which: Int, latency: Any => Int) extends P2CServiceFactory {
-    val weight = 1D
-    var load = 0
-    var sum = 0
-    def meanLoad: Double = if (load == 0) 0.0 else sum.toDouble/load.toDouble
-    def apply(conn: ClientConnection): Future[Service[Unit, Int]] = {
-      load += 1
-      sum += load
-      Future.value(new Service[Unit, Int] {
-        def apply(req: Unit): Future[Int] = Future.value(latency((): Unit))
-      })
-    }
-    def close(deadline: Time): Future[Unit] = Future.Done
-    override def toString: String = which.toString
-    override def status: Status = Status.Open
-  }
-
-  test("Balances evenly across identical nodes") {
-    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(5)) }
-    run(init, R)
-    assertEven(init)
-  }
-
-  test("Probe a node without latency history at most once") {
-    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(1)) }
-    val vec = init :+ LatentFactory(N+1, Function.const(R*2))
-    run(vec, R)
-    assertEven(vec.init)
-    assert(vec(N).load == 1)
-  }
-
-  test("Balances proportionally across nodes with varying latencies") {
-    val latency = 5
-    val init = Vector.tabulate(N) { i => LatentFactory(i, Function.const(latency)) }
-    // This is dependent on decayTime for N+1 to receive 1/2 the the load of the rest.
-    // There is probably an elegant way to normalize our load as a function of decayTime,
-    // but it wasn't obvious to me. This also verifies that we are actually decaying
-    // based on time when we don't receive load.
-    val vec = init :+ LatentFactory(N+1, Function.const(2*latency))
-    run(vec, R)
-    assertEven(vec.init)
-    assert((vec(0).meanLoad - 2*vec(N).meanLoad) < ε)
   }
 }

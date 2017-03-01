@@ -1,7 +1,8 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.util.Rng
+import com.twitter.finagle.loadbalancer.{Balancer, DistributorT}
 
 /**
  * An O(1), concurrent, weighted fair load balancer. This uses the
@@ -13,7 +14,7 @@ import com.twitter.finagle.util.Rng
  * Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
  * 10 (October 2001), 1094-1104.
  */
-private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
+private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
   /**
    * Our sturdy coin flipper.
    */

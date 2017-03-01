@@ -1,8 +1,8 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.heap
 
 import scala.annotation.tailrec
 
-private[loadbalancer] object Heap {
+private object Heap {
   trait Indexer[-T] {
     def apply(t: T, i: Int)
   }
@@ -25,9 +25,7 @@ private[loadbalancer] object Heap {
  * caller is responsible for maintaining the
  * initial value.
  */
-private[loadbalancer] class Heap[T](
-  ord: Ordering[T], indexer: Heap.Indexer[T]
-) {
+private class Heap[T](ord: Ordering[T], indexer: Heap.Indexer[T]) {
   import ord._
 
   def swap(heap: Array[T], i: Int, j: Int) {

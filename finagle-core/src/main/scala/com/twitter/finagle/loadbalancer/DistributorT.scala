@@ -7,12 +7,13 @@ package com.twitter.finagle.loadbalancer
  *
  * @param vector the nodes over which we are currently balancing.
  */
-protected[loadbalancer] abstract class DistributorT[Node](val vector: Vector[Node]) {
+private[loadbalancer] abstract class DistributorT[Node](val vector: Vector[Node]) {
 
   type This <: DistributorT[Node]
 
   /**
    * Pick the next node.
+   *
    * This is the main entry point for a load balancer implementation.
    */
   def pick(): Node

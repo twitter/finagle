@@ -41,7 +41,7 @@ object BalancerBench {
     override def rebuild(vector: Vector[NullNode]): NullDistibutor = NullDistibutor(vector)
   }
 
-  class NullBalancer extends Balancer[Unit, Unit] {
+  private class NullBalancer extends Balancer[Unit, Unit] {
     override protected def maxEffort: Int = 0
     override protected def emptyException: Throwable = new Exception()
     override protected def statsReceiver: StatsReceiver = NullStatsReceiver
@@ -96,7 +96,7 @@ object BalancerBench {
 class BalancerBench extends StdBenchAnnotations {
   import BalancerBench._
 
-  val noBalancer: NullBalancer = new NullBalancer
+  private[this] val noBalancer: NullBalancer = new NullBalancer
 
   @Benchmark
   def update5000x500(state: UpdateState): Unit = {

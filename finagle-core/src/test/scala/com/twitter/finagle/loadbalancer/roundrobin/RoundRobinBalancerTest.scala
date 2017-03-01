@@ -1,47 +1,10 @@
-package com.twitter.finagle.loadbalancer
+package com.twitter.finagle.loadbalancer.roundrobin
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Function => _, _}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-private[loadbalancer] trait RoundRobinSuite {
-  // number of servers
-  val N: Int = 100
-  // number of reqs
-  val R: Int = 100000
-  // tolerated variance
-  val variance: Double = 0.0001*R
-
-  trait RRServiceFactory extends ServiceFactory[Unit, Int] {
-    def meanLoad: Double
-  }
-
-  protected val noBrokers: NoBrokersAvailableException = new NoBrokersAvailableException
-
-  def newBal(
-    fs: Var[Traversable[RRServiceFactory]],
-    sr: StatsReceiver = NullStatsReceiver
-  ): RoundRobinBalancer[Unit, Int] = new RoundRobinBalancer(
-    Activity(fs.map(Activity.Ok(_))),
-    statsReceiver = sr,
-    emptyException = noBrokers,
-    maxEffort = 1
-  )
-
-  def assertEven(fs: Traversable[RRServiceFactory]) {
-    val ml = fs.head.meanLoad
-    for (f <- fs) {
-      assert(math.abs(f.meanLoad - ml) < variance,
-        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, variance))
-    }
-  }
-}
-
-@RunWith(classOf[JUnitRunner])
 class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
   case class LoadedFactory(id: Int) extends RRServiceFactory {
     @volatile var stat: Status = Status.Open
