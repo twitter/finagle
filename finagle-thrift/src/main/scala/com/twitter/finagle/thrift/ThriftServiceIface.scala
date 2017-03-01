@@ -8,8 +8,9 @@ import com.twitter.scrooge._
 import com.twitter.util._
 import java.util.Arrays
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
+import org.apache.thrift.protocol.{TMessageType, TMessage, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
+
 
 object maxReusableBufferSize extends GlobalFlag[StorageUnit](
   16.kilobytes,
@@ -64,15 +65,15 @@ case class ThriftMethodStats(
   failuresScope: StatsReceiver)
 
 /**
- * Construct Service interface for a Thrift method.
+ * Construct Service interface for a thrift method.
  *
- * There are two ways to use a Scrooge-generated Thrift `Service` with Finagle:
+ * There are two ways to use a Scrooge-generated thrift service with Finagle:
  *
- * 1. Using a Service interface, i.e. a collection of Finagle `Services`.
+ * 1. Using a Service interface, i.e. a collection of finagle `Services`.
  *
  * 2. Using a method interface, i.e. a collection of methods returning `Futures`.
  *
- * Example: for a Thrift service IDL:
+ * Example: for a thrift service
  * {{{
  * service Logger {
  *   string log(1: string message, 2: i32 logLevel);
@@ -80,15 +81,15 @@ case class ThriftMethodStats(
  * }
  * }}}
  *
- * the `Service` interface, or `ServiceIface`, is
+ * the Service interface is
  * {{{
  * trait LoggerServiceIface {
- *   val log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.SuccessType]
- *   val getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.SuccessType]
- * }
+ *   val log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.Result]
+ *   val getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.Result]
+ *  }
  * }}}
  *
- * and the method interface, or `MethodIface`, is
+ * and the method interface is
  * {{{
  * trait Logger[Future] {
  *   def log(message: String, logLevel: Int): Future[String]
@@ -110,7 +111,7 @@ object ThriftServiceIface {
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
     stats: StatsReceiver
-  ): Service[method.Args, method.SuccessType] = {
+  ): Service[method.Args, method.Result] = {
     statsFilter(method, stats)
       .andThen(thriftCodecFilter(method, pf))
       .andThen(thriftService)
@@ -123,21 +124,33 @@ object ThriftServiceIface {
   private def statsFilter(
     method: ThriftMethod,
     stats: StatsReceiver
-  ): SimpleFilter[method.Args, method.SuccessType] = {
+  ): SimpleFilter[method.Args, method.Result] = {
     val methodStats = ThriftMethodStats(stats.scope(method.serviceName).scope(method.name))
-    new SimpleFilter[method.Args, method.SuccessType] {
-      private[this] val respondFn: Try[method.SuccessType] => Unit = {
-        case Return(_) =>
-          methodStats.successCounter.incr()
-        case Throw(ex) =>
-          methodStats.failuresCounter.incr()
-          methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
+    new SimpleFilter[method.Args, method.Result] {
+      private[this] val respondFn: Try[method.Result] => Unit = {
+        case Return(result) =>
+          if (result.successField.isDefined) {
+            methodStats.successCounter.incr()
+          } else {
+            result.firstException() match {
+              case Some(ex) =>
+                onFailureFn(ex)
+              case None =>
+            }
+          }
+        case Throw(throwable) =>
+          onFailureFn(throwable)
+      }
+
+      private[this] val onFailureFn: Throwable => Unit = { throwable =>
+        methodStats.failuresCounter.incr()
+        methodStats.failuresScope.counter(Throwables.mkString(throwable): _*).incr()
       }
 
       def apply(
         args: method.Args,
-        service: Service[method.Args, method.SuccessType]
-      ): Future[method.SuccessType] = {
+        service: Service[method.Args, method.Result]
+      ): Future[method.Result] = {
         methodStats.requestsCounter.incr()
         service(args).respond(respondFn)
       }
@@ -151,28 +164,17 @@ object ThriftServiceIface {
   private def thriftCodecFilter(
     method: ThriftMethod,
     pf: TProtocolFactory
-  ): Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] =
-    new Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] {
-      private[this] val decodeRepFn: Array[Byte] => Future[method.SuccessType] = { bytes =>
-        val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
-        result.successField match {
-          case Some(v) => Future.value(v)
-          case None => result.firstException() match {
-            case Some(ex) => Future.exception(ex)
-            case None =>
-              Future.exception(new TApplicationException(
-                TApplicationException.MISSING_RESULT,
-                s"Thrift method '${method.name}' failed: missing result"))
-          }
-        }
-      }
+  ): Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] =
+    new Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] {
+      private[this] val decodeRepFn: Array[Byte] => method.Result =
+        bytes => decodeResponse(bytes, method.responseCodec, pf)
 
       def apply(
         args: method.Args,
         service: Service[ThriftClientRequest, Array[Byte]]
-      ): Future[method.SuccessType] = {
+      ): Future[method.Result] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
-        service(request).flatMap(decodeRepFn)
+        service(request).map(decodeRepFn)
       }
     }
 
