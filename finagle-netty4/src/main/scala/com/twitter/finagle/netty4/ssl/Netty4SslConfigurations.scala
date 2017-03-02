@@ -70,4 +70,16 @@ private[ssl] object Netty4SslConfigurations {
     }
   }
 
+  /**
+   * Configures the SSL provider with the JDK SSL provider if `forceJDK` is true.
+   * 
+   * @note This is necessary in environments where the native engine could fail to load.
+   */
+  def configureProvider(
+    builder: SslContextBuilder,
+    forceJdk: Boolean
+  ): SslContextBuilder =
+    if (forceJdk) builder.sslProvider(SslProvider.JDK)
+    else builder
+
 }

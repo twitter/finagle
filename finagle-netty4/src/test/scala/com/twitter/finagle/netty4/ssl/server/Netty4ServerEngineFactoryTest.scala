@@ -11,7 +11,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Netty4ServerEngineFactoryTest extends FunSuite {
 
-  private[this] val factory = Netty4ServerEngineFactory()
+  // Force JDK version for tests, because the native engine could fail to load in different
+  // environments
+  private[this] val factory = Netty4ServerEngineFactory(forceJdk = true)
 
   // deleteOnExit for these is handled by TempFile
   private[this] val certFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")

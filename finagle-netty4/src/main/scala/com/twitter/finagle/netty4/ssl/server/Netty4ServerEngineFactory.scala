@@ -11,7 +11,7 @@ import io.netty.handler.ssl.SslContextBuilder
  * This engine factory uses Netty 4's `SslContextBuilder`. It is the
  * recommended path for using native SSL/TLS engines within Finagle.
  */
-class Netty4ServerEngineFactory(allocator: ByteBufAllocator)
+class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
   extends SslServerEngineFactory {
 
   private[this] def startWithKey(keyCredentials: KeyCredentials): SslContextBuilder =
@@ -43,7 +43,9 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator)
    */
   def apply(config: SslServerConfiguration): Engine = {
     val builder = startWithKey(config.keyCredentials)
-    val withTrust = Netty4SslConfigurations.configureTrust(builder, config.trustCredentials)
+    
+    val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
+    val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
     val withAppProtocols = Netty4SslConfigurations.configureApplicationProtocols(
       withTrust, config.applicationProtocols)
     val context = withAppProtocols.build()
@@ -60,9 +62,15 @@ object Netty4ServerEngineFactory {
    * Creates an instance of the Netty4ServerEngineFactory using the
    * allocator defined for use by default in Finagle-Netty4.
    */
-  def apply(): Netty4ServerEngineFactory = {
+  def apply(forceJdk: Boolean): Netty4ServerEngineFactory = {
     val allocator = Allocator.allocatorParam.default.allocator
-    new Netty4ServerEngineFactory(allocator)
+    new Netty4ServerEngineFactory(allocator, forceJdk)
   }
+
+  def apply(allocator: ByteBufAllocator) =
+    new Netty4ServerEngineFactory(allocator, false)
+
+  def apply(): Netty4ServerEngineFactory =
+    apply(false)
 
 }

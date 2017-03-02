@@ -65,7 +65,6 @@ class Netty4SslHandlerTest extends FunSuite
       val ssl = ch.pipeline().get(classOf[SslHandler])
 
       assert(!ssl.engine().getUseClientMode)
-      assert(ssl.engine().getEnableSessionCreation)
 
       ch.finishAndReleaseAll()
     }
@@ -83,7 +82,6 @@ class Netty4SslHandlerTest extends FunSuite
 
       assert(ch.pipeline().get(classOf[SslConnectHandler]) != null)
       assert(ssl.engine().getUseClientMode)
-      assert(ssl.engine().getEnableSessionCreation)
       assert(ssl.engine().getPeerHost == "example.com" || ssl.engine().getPeerHost == "foobar.com")
       assert(ssl.engine().getPeerPort == 80)
 

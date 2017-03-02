@@ -16,7 +16,9 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   private[this] val address: Address = Address(new InetSocketAddress("localhost", 12345))
   private[this] val other: Address = Address.Failed(new Exception("testing"))
 
-  private[this] val factory = Netty4ClientEngineFactory()
+  // Force JDK version for tests, because the native engine could fail to load in different
+  // environments
+  private[this] val factory = Netty4ClientEngineFactory(forceJdk = true)
 
   test("default config with inet address creates client engine with peer") {
     val config = SslClientConfiguration()
