@@ -49,6 +49,14 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   ): Node
 
   /**
+   * Allows implementations to transform the underlying [[ServiceFactory]]
+   * without having to implement a [[Node]].
+   */
+  protected def newFactory(
+    factory: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = factory
+
+  /**
    * Create a node whose sole purpose it is to endlessly fail
    * with the given cause.
    */
@@ -169,12 +177,13 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
 
         var numAdded: Int = 0
 
-        for (newFactory <- newFactories) {
-          if (oldFactories.contains(newFactory)) {
-            transferred += oldFactories(newFactory)
-            oldFactories.remove(newFactory)
+        for (factory <- newFactories) {
+          if (oldFactories.contains(factory)) {
+            transferred += oldFactories(factory)
+            oldFactories.remove(factory)
           } else {
-            transferred += newNode(newFactory, statsReceiver.scope(newFactory.toString))
+            val fact = newFactory(factory)
+            transferred += newNode(fact, statsReceiver.scope(fact.toString))
             numAdded += 1
           }
         }

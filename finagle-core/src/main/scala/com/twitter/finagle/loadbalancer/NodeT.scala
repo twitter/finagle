@@ -8,8 +8,6 @@ import com.twitter.finagle.ServiceFactory
  * where to balance the next request.
  */
 private[loadbalancer] trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
-  type This
-
   /**
    * The current load, in units of the active metric.
    */

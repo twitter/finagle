@@ -1,9 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.{Balancer, NodeT}
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.loadbalancer.Balancer
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Duration, Future, Return, Time, Throw}
 import java.util.concurrent.atomic.AtomicInteger
@@ -47,11 +45,10 @@ private[loadbalancer] trait LoadBand[Req, Rep] {
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
   /**
-   * Adjust `node`'s load by `delta`.
+   * Adjust `total` by `delta` in order to keep track of total load across all
+   * nodes.
    */
-  private[this] def adjustNode(node: Node, delta: Int) = {
-    node.counter.addAndGet(delta)
-
+  private[this] def adjustTotalLoad(delta: Int): Unit = {
     // this is synchronized so that sampling the monotonic time and updating
     // based on that time are atomic, and we don't run into problems like:
     //
@@ -81,42 +78,25 @@ private[loadbalancer] trait LoadBand[Req, Rep] {
       narrow()
   }
 
-  protected case class Node(
-      factory: ServiceFactory[Req, Rep],
-      counter: AtomicInteger,
-      token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT[Req, Rep] {
-    type This = Node
+  override protected def newFactory(
+    sf: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] =
+    new ServiceFactoryProxy(sf) {
+      override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+        adjustTotalLoad(1)
+        super.apply(conn).transform {
+          case Return(svc) =>
+            Future.value(new ServiceProxy(svc) {
+              override def close(deadline: Time) =
+                super.close(deadline).ensure {
+                  adjustTotalLoad(-1)
+                }
+            })
 
-    def load: Double = counter.get
-    def pending: Int = counter.get
-
-    override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-      adjustNode(this, 1)
-      super.apply(conn).transform {
-        case Return(svc) =>
-          Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time): Future[Unit] =
-              super.close(deadline).ensure {
-                adjustNode(Node.this, -1)
-              }
-          })
-
-        case t@Throw(_) =>
-          adjustNode(this, -1)
-          Future.const(t)
+          case t@Throw(_) =>
+            adjustTotalLoad(-1)
+            Future.const(t)
+        }
       }
     }
-  }
-
-  protected def newNode(
-    factory: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver
-  ): Node = Node(factory, new AtomicInteger(0), rng.nextInt())
-
-  private[this] val failingLoad = new AtomicInteger(0)
-
-  protected def failingNode(cause: Throwable): Node =
-    Node(new FailingFactory(cause), failingLoad, 0)
 }

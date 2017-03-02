@@ -25,7 +25,6 @@ object BalancerBench {
   case class NullNode(factory: ServiceFactory[Unit, Unit])
     extends ServiceFactoryProxy[Unit, Unit](factory) with NodeT[Unit, Unit] {
 
-    override type This = NullNode
     override def load: Double = 0.0
     override def pending: Int = 0
     override def token: Int = 0
