@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
  *       or users calling [[close]] directly on the underlying
  *       resource.
  */
-private[client] class RefcountedClosable[T <: Closable](
+private[finagle] class RefcountedClosable[T <: Closable](
     closable: T)
   extends Closable {
 

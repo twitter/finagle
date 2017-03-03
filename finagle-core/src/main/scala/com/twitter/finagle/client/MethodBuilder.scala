@@ -1,18 +1,21 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle._
-import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
-import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.util.StackRegistry
+import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.{Showable, StackRegistry}
+import com.twitter.finagle.{Filter, Name, Service, ServiceFactory, Stack, param, _}
 import com.twitter.util.{Future, Promise, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 
 private[finagle] object MethodBuilder {
 
   /**
-   * Note that metrics will be scoped (e.g. "clnt/your_client_label")
-   * to the `withLabel` setting (from [[param.Label]]). If that is
-   * not set, `dest` is used.
+   * Note that metrics will be scoped (e.g. "clnt/your_client_label/method_name").
+   *
+   * The value for "your_client_label" is taken from the `withLabel` setting
+   * (from [[param.Label]]). If that is not set, `dest` is used.
+   * The value for "method_name" is set when an method-specific client
+   * is constructed, as in [[MethodBuilder.newService(String)]].
    *
    * @param dest where requests are dispatched to.
    *             See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
@@ -21,34 +24,42 @@ private[finagle] object MethodBuilder {
   def from[Req, Rep](
     dest: String,
     stackClient: StackClient[Req, Rep]
+  ): MethodBuilder[Req, Rep] =
+    from(Resolver.eval(dest), stackClient)
+
+  /**
+   * Note that metrics will be scoped (e.g. "clnt/your_client_label/method_name").
+   *
+   * The value for "your_client_label" is taken from the `withLabel` setting
+   * (from [[param.Label]]). If that is not set, `dest` is used.
+   * The value for "method_name" is set when an method-specific client
+   * is constructed, as in [[MethodBuilder.newService(String)]].
+   *
+   * @param dest where requests are dispatched to.
+   *             See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+   *             for details on destination names.
+   */
+  def from[Req, Rep](
+    dest: Name,
+    stackClient: StackClient[Req, Rep]
   ): MethodBuilder[Req, Rep] = {
-    val params = stackClient.params
-    val clientName = params[param.Label].label match {
-      case param.Label.Default => dest
-      case label => label
-    }
-
-    val needsTotalTimeoutModule =
-      stackClient.stack.contains(TimeoutFilter.totalTimeoutRole)
-
+    val stack = modifiedStack(stackClient.stack)
     val service: Service[Req, Rep] = stackClient
-      .withStack(modified(stackClient.stack))
-      .withParams(stackClient.params)
+      .withStack(stack)
       .newService(dest, param.Label.Default)
-    // use reference counting so that the underlying Service can
-    // be safely shared across methods and a close of one doesn't
-    // effect the others.
-    val refCounted = new RefcountedClosable(service)
-
-    new MethodBuilder[Req, Rep](
-      refCounted,
-      clientName,
+    new MethodBuilder(
+      new RefcountedClosable(service),
       dest,
-      stackClient,
-      Config.create(stackClient.params, needsTotalTimeoutModule))
+      stack,
+      stackClient.params,
+      Config.create(stackClient.stack, stackClient.params))
   }
 
-  private[this] def modified[Req, Rep](
+  /**
+   * Modifies the given [[Stack]] so that it is ready for use
+   * in a [[MethodBuilder]] client.
+   */
+  def modifiedStack[Req, Rep](
     stack: Stack[ServiceFactory[Req, Rep]]
   ): Stack[ServiceFactory[Req, Rep]] = {
     stack
@@ -58,48 +69,46 @@ private[finagle] object MethodBuilder {
       .replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
   }
 
-  private object Config {
-    def create[Req, Rep](
-      params: Stack.Params,
-      stackHadTotalTimeout: Boolean
-    ): Config[Req, Rep] = {
+  object Config {
+    /**
+     * @param originalStack the `Stack` before [[modifiedStack]] was called.
+     */
+    def create(
+      originalStack: Stack[_],
+      params: Stack.Params
+    ): Config = {
       Config(
-        MethodBuilderRetry.newConfig(params),
-        MethodBuilderTimeout.Config(stackHadTotalTimeout))
+        MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
+        MethodBuilderTimeout.Config(originalStack.contains(TimeoutFilter.totalTimeoutRole)))
     }
   }
 
-  private[client] case class Config[Req, Rep](
-      retry: MethodBuilderRetry.Config[Req, Rep],
+  /**
+   * @see [[MethodBuilder.Config.create]] to construct an initial instance.
+   *       Using its `copy` method is appropriate after that.
+   */
+  case class Config private (
+      retry: MethodBuilderRetry.Config,
       timeout: MethodBuilderTimeout.Config)
-
-  private val LogicalScope = "logical"
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
-
-  // the `StatsReceiver` used is already scoped to `$clientName/$methodName/logical`.
-  // this omits the pending gauge as well as failures/sourcedfailures details.
-  private val LogicalStatsBlacklistFn: Seq[String] => Boolean = { segments =>
-    val head = segments.head
-    head == "pending" || head == "failures" || head == "sourcedfailures"
-  }
 
 }
 
 /**
  * '''Experimental:''' This API is under construction.
+ *
+ * @see `methodBuilder` methods on client protocols, such as `Http.Client`
+ *      or `ThriftMux.Client` for an entry point.
  */
-private[finagle] class MethodBuilder[Req, Rep] private (
-    refCounted: RefcountedClosable[Service[Req, Rep]],
-    clientName: String,
-    dest: String,
-    stackClient: StackClient[Req, Rep],
-    private[client] val config: MethodBuilder.Config[Req, Rep]) { self =>
+private[finagle] final class MethodBuilder[Req, Rep](
+    val refCounted: RefcountedClosable[Service[Req, Rep]],
+    dest: Name,
+    stack: Stack[_],
+    stackParams: Stack.Params,
+    private[client] val config: MethodBuilder.Config) { self =>
   import MethodBuilder._
-
-  private[client] def params: Stack.Params =
-    stackClient.params
 
   //
   // Configuration
@@ -111,6 +120,11 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * Defaults to using the client's [[com.twitter.finagle.service.ResponseClassifier]]
    * to retry failures
    * [[com.twitter.finagle.service.ResponseClass.RetryableFailure marked as retryable]].
+   *
+   * The classifier is also used to determine the logical success metrics of
+   * the client. Logical here means after any retries are run. For example
+   * should a request result in retryable failure on the first attempt, but
+   * succeed upon retry, this is exposed through metrics as a success.
    *
    * @example Retrying on `Exception` responses:
    * {{{
@@ -155,7 +169,7 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    * @see [[MethodBuilderTimeout]]
    */
   def withTimeout: MethodBuilderTimeout[Req, Rep] =
-    new MethodBuilderTimeout[Req, Rep](this)
+    new MethodBuilderTimeout[Req, Rep](self)
 
   //
   // Build
@@ -166,30 +180,39 @@ private[finagle] class MethodBuilder[Req, Rep] private (
    *
    * @param name used for scoping metrics
    */
-  def newService(name: String): Service[Req, Rep] = {
-    addToRegisty(name)
-    val ret = filter(name).andThen(wrappedService(name))
-    refCounted.open()
-    ret
-  }
+  def newService(name: String): Service[Req, Rep] =
+    filters(name).andThen(wrappedService(name))
 
   //
   // Internals
   //
 
-  private[client] def withConfig(config: Config[Req, Rep]): MethodBuilder[Req, Rep] =
+  def params: Stack.Params =
+    stackParams
+
+  /**
+   * '''For implementers'''
+   *
+   * Create a new instance of this [[MethodBuilder]] with the
+   * `Config` modified.
+   */
+  private[client] def withConfig(config: Config): MethodBuilder[Req, Rep] =
     new MethodBuilder(
-      self.refCounted,
-      self.clientName,
-      self.dest,
-      self.stackClient,
+      refCounted,
+      dest,
+      stack,
+      stackParams,
       config)
 
   private[this] def statsReceiver(name: String): StatsReceiver = {
-    params[param.Stats].statsReceiver.scope(clientName, name)
+    val clientName = stackParams[param.Label].label match {
+      case param.Label.Default => Showable.show(dest)
+      case label => label
+    }
+    stackParams[param.Stats].statsReceiver.scope(clientName, name)
   }
 
-  private[this] def filter(name: String): Filter[Req, Rep, Req, Rep] = {
+  def filters(name: String): Filter.TypeAgnostic = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
@@ -200,15 +223,17 @@ private[finagle] class MethodBuilder[Req, Rep] private (
     // - Service (Finagle client's stack, including Per Request Timeout)
 
     val stats = statsReceiver(name)
+    val retries = withRetry
+    val timeouts = withTimeout
 
-    statsFilter(name, stats)
-      .andThen(withTimeout.totalFilter)
-      .andThen(withRetry.filter(stats))
-      .andThen(withTimeout.perRequestFilter)
+    retries.logicalStatsFilter(stats)
+      .andThen(timeouts.totalFilter)
+      .andThen(retries.filter(stats))
+      .andThen(timeouts.perRequestFilter)
   }
 
   private[this] def registryEntry(): StackRegistry.Entry =
-    StackRegistry.Entry(dest, stackClient.stack, params)
+    StackRegistry.Entry(Showable.show(dest), stack, params)
 
   private[this] def registryKeyPrefix(name: String): Seq[String] =
     Seq(RegistryKey, name)
@@ -236,7 +261,9 @@ private[finagle] class MethodBuilder[Req, Rep] private (
     }
   }
 
-  private[this] def wrappedService(name: String): Service[Req, Rep] =
+  def wrappedService(name: String): Service[Req, Rep] = {
+    addToRegisty(name)
+    refCounted.open()
     new ServiceProxy[Req, Rep](refCounted.get) {
       private[this] val isClosed = new AtomicBoolean(false)
       private[this] val closedP = new Promise[Unit]()
@@ -259,12 +286,6 @@ private[finagle] class MethodBuilder[Req, Rep] private (
         closedP
       }
     }
-
-  private[this] def statsFilter(name: String, stats: StatsReceiver): StatsFilter[Req, Rep] =
-    new StatsFilter[Req, Rep](
-      new BlacklistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
-      params[param.ResponseClassifier].responseClassifier,
-      ExceptionStatsHandler.Null,
-      params[StatsFilter.Param].unit)
+  }
 
 }

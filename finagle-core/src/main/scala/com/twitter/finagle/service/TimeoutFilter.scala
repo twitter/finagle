@@ -43,7 +43,7 @@ object TimeoutFilter {
     def apply(timeout: Duration): Param =
       new Param(timeout)
 
-    def apply(tunableTimeout: Tunable[Duration]) =
+    def apply(tunableTimeout: Tunable[Duration]): Param =
       new Param(tunableTimeout)
 
     def unapply(param: Param): Option[Duration] = param.tunableTimeout()
@@ -160,25 +160,32 @@ object TimeoutFilter {
     exception: RequestTimeoutException,
     timer: Timer
   ): TypeAgnostic =
-    typeAgnostic(Tunable.const(TimeoutFilter.role.name, timeout), _ => exception, timer)
+    typeAgnostic(() => timeout, _ => exception, timer)
 
   private[twitter] def typeAgnostic(
     timeoutTunable: Tunable[Duration],
     exceptionFn: Duration => RequestTimeoutException,
     timer: Timer
-  ): TypeAgnostic =
-    new TypeAgnostic {
-      private[this] val timeoutFn: () => Duration = () => timeoutTunable() match {
-        case Some(duration) => duration
-        case None => TimeoutFilter.Param.Default
-      }
-
-      override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-        new TimeoutFilter[Req, Rep](
-          timeoutFn,
-          timeout => new IndividualRequestTimeoutException(timeout),
-          timer)
+  ): TypeAgnostic = {
+    val timeoutFn: () => Duration = () => timeoutTunable() match {
+      case Some(duration) => duration
+      case None => TimeoutFilter.Param.Default
     }
+    typeAgnostic(timeoutFn, exceptionFn, timer)
+  }
+
+  private[twitter] def typeAgnostic(
+    timeoutFn: () => Duration,
+    exceptionFn: Duration => RequestTimeoutException,
+    timer: Timer
+  ): TypeAgnostic = new TypeAgnostic {
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+      new TimeoutFilter[Req, Rep](
+        timeoutFn,
+        exceptionFn,
+        timer)
+  }
+
 }
 
 /**

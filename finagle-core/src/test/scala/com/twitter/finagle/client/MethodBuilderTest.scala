@@ -255,19 +255,19 @@ class MethodBuilderTest
       val vanillaSvc = methodBuilder.newService("vanilla")
       val vanillaEntries = Set(
         Entry(key("vanilla", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/vanilla"),
-        Entry(key("vanilla", "retry"), "DefaultResponseClassifier")
+        Entry(key("vanilla", "retry"), "Config(DefaultResponseClassifier)")
       )
       assert(filteredRegistry == vanillaEntries)
 
-      // test with a retry policy and timeouts
+      // test with retries disabled and timeouts
       val sundaeSvc = methodBuilder
         .withTimeout.total(10.seconds)
         .withTimeout.perRequest(1.second)
-        .withRetry.forPolicy(RetryPolicy.none)
+        .withRetry.disabled
         .newService("sundae")
       val sundaeEntries = Set(
         Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
-        Entry(key("sundae", "retry"), "RetryPolicy.none"),
+        Entry(key("sundae", "retry"), "Config(Disabled)"),
         Entry(key("sundae", "timeout", "total"), "10.seconds"),
         Entry(key("sundae", "timeout", "per_request"), "1.seconds")
       )

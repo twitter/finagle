@@ -67,12 +67,12 @@ class MethodBuilderRetryTest extends FunSuite {
     assert(stats.stat(clientName, "defaults", "retries")() == Seq(1))
   }
 
-  test("retries can be disabled using `RetryPolicy.none`") {
+  test("retries can be disabled") {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()
     val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
     val noRetries = methodBuilder
-      .withRetry.forPolicy(RetryPolicy.none)
+      .withRetry.disabled
       .newService("no_retries")
 
     // the client will not retry anything, let alone have a retry filter,

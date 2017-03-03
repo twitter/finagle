@@ -113,7 +113,7 @@ private[finagle] object DynamicTimeout {
     }
 
   /**
-   * Produces a [[Filter]] which allows for dynamic total timeouts
+   * Produces a [[Filter.TypeAgnostic]] which allows for dynamic total timeouts
    * from a set of [[Stack.Params]].
    * These timeouts should encompass the time included in retry requests.
    *
@@ -127,15 +127,17 @@ private[finagle] object DynamicTimeout {
    * @see [[TimeoutFilter]]
    * @see [[LatencyCompensation]]
    */
-  private[client] def totalFilter[Req, Rep](
+  private[client] def totalFilter(
     params: Stack.Params
-  ): Filter[Req, Rep, Req, Rep] = {
+  ): Filter.TypeAgnostic = {
     val defaultTimeout = params[TimeoutFilter.TotalTimeout].timeout
     val compensation = params[LatencyCompensation.Compensation].howlong
     val timer = params[param.Timer].timer
-    new TimeoutFilter[Req, Rep](
-      timeoutFn(TotalKey, defaultTimeout, compensation),
-      duration => new GlobalRequestTimeoutException(duration),
+    val timeoutFunc = timeoutFn(TotalKey, defaultTimeout, compensation)
+    val exceptionFn = { d: Duration => new GlobalRequestTimeoutException(d) }
+    TimeoutFilter.typeAgnostic(
+      timeoutFunc,
+      exceptionFn,
       timer)
   }
 
