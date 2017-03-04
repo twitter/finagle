@@ -309,7 +309,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.38",
+      "com.twitter.common" % "metrics" % "0.0.39",
       util("app"),
       util("core"),
       util("events"),
@@ -369,7 +369,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-commons-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "stats" % "0.0.115",
+      "com.twitter.common" % "stats" % "0.0.116",
       util("core"),
       util("registry"),
       util("stats")
@@ -392,7 +392,8 @@ object Finagle extends Build {
       util("zk-test") % "test",
       "com.twitter" % "libthrift" % libthriftVersion,
       "com.twitter.common" % "io-json" % "0.0.54",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.111" excludeAll(
+      "com.twitter.common.zookeeper" % "server-set" % "1.0.112" excludeAll(
+        ExclusionRule("com.fasterxml.jackson.module", "jackson-module-scala_2.11"),
         ExclusionRule("com.twitter", "finagle-core-java"),
         ExclusionRule("com.twitter", "finagle-core_2.11"),
         ExclusionRule("com.twitter", "util-core-java"),
@@ -519,7 +520,7 @@ object Finagle extends Build {
       guavaLib,
       "com.twitter" %% "bijection-core" % "0.9.4",
       "com.twitter.common" % "io-json" % "0.0.54",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.56" % "test" excludeAll(
+      "com.twitter.common" % "zookeeper-testing" % "0.0.57" % "test" excludeAll(
         // These exclusions are necessary because zookeeper-testing has an explicit
         // dependency on scala 2.11 and some 2.11 scala libraries
         ExclusionRule("com.google.testing", "test-libraries-for-java"),
@@ -617,7 +618,7 @@ object Finagle extends Build {
       util("core"),
       util("logging"),
       util("stats"),
-      "com.twitter.common" % "stats-util" % "0.0.59")
+      "com.twitter.common" % "stats-util" % "0.0.60")
   ).dependsOn(
     finagleCore,
     finagleNetty4,
