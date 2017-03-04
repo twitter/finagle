@@ -1,8 +1,7 @@
 package com.twitter.finagle.netty3.socks
 
 import com.twitter.finagle.ConnectionFailedException
-import com.twitter.finagle.netty3.SocketAddressResolveHandler
-import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
+import com.twitter.finagle.socks.UsernamePassAuthenticationSetting
 import java.net.{SocketAddress, InetAddress, InetSocketAddress}
 import java.util.Arrays
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
@@ -271,28 +270,5 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       assert(connectFuture.getCause.isInstanceOf[ConnectionFailedException])
       checkDidClose()
     }
-  }
-
-  test("SocksConnectHandler should not add socket address resolve handler when proxy address is resolved") {
-    val pipeline = new DefaultChannelPipeline
-    SocksConnectHandler.addHandler(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 2222),
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
-      Seq(Unauthenticated),
-      pipeline
-    )
-
-    assert(pipeline.get("socketAddressResolver") == null)
-  }
-
-  test("SocksConnectHandler should add socket address resolve handler when proxy address is unresolved") {
-    val pipeline = new DefaultChannelPipeline
-    SocksConnectHandler.addHandler(
-      InetSocketAddress.createUnresolved("meow.meow", 2222),
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
-      Seq(Unauthenticated),
-      pipeline
-    )
-    assert(pipeline.get("socketAddressResolver").isInstanceOf[SocketAddressResolveHandler])
   }
 }

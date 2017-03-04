@@ -1,7 +1,6 @@
 package com.twitter.finagle.netty3.socks
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
-import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
 import com.twitter.finagle.socks.{AuthenticationSetting, Unauthenticated, UsernamePassAuthenticationSetting}
 import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
@@ -39,11 +38,6 @@ object SocksConnectHandler {
   ): SocksConnectHandler = {
     val handler = new SocksConnectHandler(proxyAddr, addr, authenticationSettings)
     pipeline.addFirst("socksConnect", handler)
-    proxyAddr match {
-      case proxyInetAddr: InetSocketAddress if proxyInetAddr.isUnresolved =>
-        pipeline.addFirst("socketAddressResolver", new SocketAddressResolveHandler(SocketAddressResolver.random, addr))
-      case _ =>
-    }
     handler
   }
 }

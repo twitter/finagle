@@ -83,6 +83,9 @@ Breaking API Changes
   * finagle-core: `withLoadBalancer.connectionsPerEndpoint` was removed and moved
     into finagle-memcached, which was the only client that uses the feature. ``RB_ID=908354``
 
+  * finagle-core: `ClientBuilder.expHttpProxy` and `ClientBuilder.expSocksProxy` are removed.
+    Use `$Protocol.withTransport.httpProxyTo` instead (requires Netty 4 transport). ``RB_ID=909739``
+
   * finagle-kestrel: Remove the deprecated `codec` method on `c.t.f.kestrel.MultiReaderMemcache`.
     Use `.stack(Kestrel.client)` on the configured `c.t.f.builder.ClientBuilder` instead.
     ``RB_ID=907184``

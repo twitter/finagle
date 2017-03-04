@@ -2,7 +2,6 @@ package com.twitter.finagle.httpproxy
 
 import com.twitter.finagle.client.Transporter.Credentials
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
-import com.twitter.finagle.netty3.SocketAddressResolveHandler
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -176,28 +175,5 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
     assert(connectFuture.getCause == exc)
-  }
-
-  test("HttpConnectHandler should not add socket address resolve handler when proxy address is resolved") {
-    val pipeline = new DefaultChannelPipeline
-    HttpConnectHandler.addHandler(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 2222),
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
-      pipeline,
-      None
-    )
-
-    assert(pipeline.get("socketAddressResolver") == null)
-  }
-
-  test("HttpConnectHandler should add socket address resolve handler when proxy address is unresolved") {
-    val pipeline = new DefaultChannelPipeline
-    HttpConnectHandler.addHandler(
-      InetSocketAddress.createUnresolved("meow.meow", 2222),
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
-      pipeline,
-      None
-    )
-    assert(pipeline.get("socketAddressResolver").isInstanceOf[SocketAddressResolveHandler])
   }
 }
