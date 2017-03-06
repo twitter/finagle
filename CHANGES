@@ -112,6 +112,11 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-http: Responses with a server error status code (500s) are now classified
+    as a failure. This effects success rate metrics and failure accrual.
+    See the `com.twitter.finagle.http.serverErrorsAsFailuresV2` toggle for opting
+    out of this behavior. ``RB_ID=909315``
+
   * finagle-netty4: Servers no longer set SO_LINGER=0 on sockets. ``RB_ID=907325``
 
 Deprecations

@@ -89,7 +89,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     Request("/", ("statusCode", status.code.toString))
 
   private val statusCodeSvc = new HttpService {
-    def apply(request: Request) = {
+    def apply(request: Request): Future[Response] = {
       val statusCode = request.getIntParam("statusCode", Status.BadRequest.code)
       Future.value(Response(Status.fromCode(statusCode)))
     }
@@ -165,10 +165,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     test(implName + ": with default client-side ResponseClassifier") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
+      val client = connect(statusCodeSvc)
 
       await(client(requestWith(Status.Ok)))
       assert(statsRecv.counters(Seq("client", "requests")) == 1)
@@ -176,8 +173,8 @@ abstract class AbstractEndToEndTest extends FunSuite
 
       await(client(requestWith(Status.ServiceUnavailable)))
       assert(statsRecv.counters(Seq("client", "requests")) == 2)
-      // by default any `Return` is a successful response.
-      assert(statsRecv.counters(Seq("client", "success")) == 2)
+      // by default 500s are treated as unsuccessful
+      assert(statsRecv.counters(Seq("client", "success")) == 1)
 
       await(client.close())
     }
@@ -191,8 +188,8 @@ abstract class AbstractEndToEndTest extends FunSuite
 
       await(client(requestWith(Status.ServiceUnavailable)))
       assert(statsRecv.counters(Seq("server", "requests")) == 2)
-      // by default any `Return` is a successful response.
-      assert(statsRecv.counters(Seq("server", "success")) == 2)
+      // by default 500s are treated as unsuccessful
+      assert(statsRecv.counters(Seq("server", "success")) == 1)
 
       await(client.close())
     }
@@ -1120,31 +1117,31 @@ abstract class AbstractEndToEndTest extends FunSuite
         assert(Status.InternalServerError == await(res).status)
       }
 
-      // as tested above, the default is that 500s are successful
+      // as tested above, the default is that 500s are errors
       issueRequest(None)
       eventually {
-        assert(1 == clientSuccesses())
-        assert(0 == clientFailures())
-        assert(1 == serverSuccesses())
-        assert(0 == serverFailures())
+        assert(0 == clientSuccesses())
+        assert(1 == clientFailures())
+        assert(0 == serverSuccesses())
+        assert(1 == serverFailures())
       }
 
-      // switch to 500s as failures
+      // switch to 500s are successful
+      issueRequest(Some(0.0))
+      eventually {
+        assert(1 == clientSuccesses())
+        assert(1 == clientFailures())
+        assert(1 == serverSuccesses())
+        assert(1 == serverFailures())
+      }
+
+      // switch it back to 500s are failures
       issueRequest(Some(1.0))
       eventually {
         assert(1 == clientSuccesses())
-        assert(1 == clientFailures())
+        assert(2 == clientFailures())
         assert(1 == serverSuccesses())
-        assert(1 == serverFailures())
-      }
-
-      // switch it back to 500s are ok
-      issueRequest(Some(0.0))
-      eventually {
-        assert(2 == clientSuccesses())
-        assert(1 == clientFailures())
-        assert(2 == serverSuccesses())
-        assert(1 == serverFailures())
+        assert(2 == serverFailures())
       }
 
       await(server.close())
