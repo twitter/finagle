@@ -8,46 +8,7 @@ import com.twitter.util.{Throw, Try}
 /**
  * '''Experimental:''' This API is under construction.
  *
- * Retries are intended to help clients improve success rate by trying
- * failed requests additional times. Care must be taken by developers
- * to only retry when they are known to be safe to issue the request multiple
- * times. This is because the client cannot always be sure what the
- * backend service has done. An example of a request that is safe to
- * retry would be a read-only request.
- *
- * Defaults to using the client's [[ResponseClassifier]] to retry failures
- * [[com.twitter.finagle.service.ResponseClass.RetryableFailure marked as retryable]].
- * See [[forClassifier]] for details.
- *
- * A [[RetryBudget]] is used to prevent retries from overwhelming
- * the backend service. The budget is shared across clients created from
- * an initial [[MethodBuilder]]. As such, even if the retry rules
- * deem the request retryable, it may not be retried if there is insufficient
- * budget.
- *
- * Finagle will automatically retry failures that are known to be safe
- * to retry via [[RequeueFilter]]. This includes
- * [[com.twitter.finagle.WriteException WriteExceptions]] and
- * [[com.twitter.finagle.Failure.Restartable retryable nacks]]. As these should have
- * already been retried, we avoid retrying them again by ignoring them at this layer.
- *
- * Additional information regarding retries can be found in the
- * [[https://twitter.github.io/finagle/guide/Clients.html#retries user guide]].
- *
- * The classifier is also used to determine the logical success metrics of
- * the client. Logical here means after any retries are run. For example
- * should a request result in retryable failure on the first attempt, but
- * succeed upon retry, this is exposed through metrics as a success.
- *
- * @note Retries can be disabled using [[disabled]]:
- * {{{
- * import com.twitter.finagle.client.MethodBuilder
- *
- * val methodBuilder: MethodBuilder[Int, Int] = ???
- * methodBuilder.withRetry.disabled
- * }}}
- *
- * @see [[MethodBuilder.withRetry]]
+ * @see [[MethodBuilderScaladoc]]
  */
 private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
     mb: MethodBuilder[Req, Rep]) {
@@ -55,34 +16,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
   import MethodBuilderRetry._
 
   /**
-   * Retry based on [[ResponseClassifier]].
-   *
-   * The default behavior is to use the client's classifier which is typically
-   * configured through `theClient.withResponseClassifier` or
-   * `ClientBuilder.withResponseClassifier`.
-   *
-   * For example, retrying on `Exception` responses:
-   * {{{
-   * import com.twitter.finagle.client.MethodBuilder
-   * import com.twitter.finagle.service.{ReqRep, ResponseClass}
-   * import com.twitter.util.Throw
-   *
-   * val builder: MethodBuilder[Int, Int] = ???
-   * builder.withRetry.forClassifier {
-   *   case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
-   * }
-   * }}}
-   *
-   * The classifier is also used to determine the logical success metrics of
-   * the client.
-   *
-   * @param classifier when a [[ResponseClass.Failed Failed]] with `retryable`
-   *                   is `true` is returned for a given `ReqRep`, the
-   *                   request will be retried.
-   *                   This is often [[ResponseClass.RetryableFailure]].
-   *
-   * @see [[https://twitter.github.io/finagle/guide/Clients.html#response-classification
-   *     response classification user guide]]
+   * @see [[MethodBuilderScaladoc.withRetryForClassifier]]
    */
   def forClassifier(
     classifier: ResponseClassifier
@@ -90,14 +24,7 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
     mb.withConfig(mb.config.copy(retry = Config(classifier)))
 
   /**
-   * Disables retries.
-   *
-   * This '''does not''' disable retries of failures that are known
-   * to be safe to retry via [[RequeueFilter]].
-   *
-   * This causes the logical success metrics to be based on the
-   * [[ResponseClassifier.Default default response classifier]] rules
-   * of a `Return` response is a success, while everything else is not.
+   * @see [[MethodBuilderScaladoc.withRetryDisabled]]
    */
   def disabled: MethodBuilder[Req, Rep] =
     forClassifier(Disabled)

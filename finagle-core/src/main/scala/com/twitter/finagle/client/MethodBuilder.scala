@@ -178,10 +178,10 @@ private[finagle] final class MethodBuilder[Req, Rep](
   /**
    * Create a [[Service]] from the current configuration.
    *
-   * @param name used for scoping metrics
+   * @param methodName used for scoping metrics
    */
-  def newService(name: String): Service[Req, Rep] =
-    filters(name).andThen(wrappedService(name))
+  def newService(methodName: String): Service[Req, Rep] =
+    filters(methodName).andThen(wrappedService(methodName))
 
   //
   // Internals

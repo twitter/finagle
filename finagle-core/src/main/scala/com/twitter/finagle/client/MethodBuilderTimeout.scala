@@ -7,46 +7,13 @@ import scala.collection.mutable
 /**
  * '''Experimental:''' This API is under construction.
  *
- * Defaults to having no timeouts set.
- *
- * @example To set a per-request timeout of 50 milliseconds and a total
- *          timeout of 100 milliseconds:
- *          {{{
- *          import com.twitter.conversions.time._
- *          import com.twitter.finagle.client.MethodBuilder
- *
- *          val builder: MethodBuilder[Int, Int] = ???
- *          builder
- *            .withTimeout.perRequest(50.milliseconds)
- *            .withTimeout.total(100.milliseconds)
- *          }}}
- *
- * @see [[MethodBuilder.withTimeout]]
+ * @see [[MethodBuilderScaladoc]]
  */
 private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
     mb: MethodBuilder[Req, Rep]) {
 
   /**
-   * Set a total timeout, including time spent on retries.
-   *
-   * If the request does not complete in this time, the response
-   * will be satisfied with a [[com.twitter.finagle.GlobalRequestTimeoutException]].
-   *
-   * @example
-   * For example, a total timeout of 200 milliseconds:
-   * {{{
-   * import com.twitter.conversions.time._
-   * import com.twitter.finagle.client.MethodBuilder
-   *
-   * val builder: MethodBuilder[Int, Int] = ???
-   * builder.withTimeout.total(200.milliseconds)
-   * }}}
-   * @param howLong how long, from the initial request issuance,
-   *                is the request given to complete.
-   *                If it is not finite (e.g. `Duration.Top`),
-   *                no method specific timeout will be applied.
-   *
-   * @see [[perRequest(Duration)]]
+   * @see [[MethodBuilderScaladoc.withTimeoutTotal(Duration)]]
    */
   def total(howLong: Duration): MethodBuilder[Req, Rep] = {
     val timeouts = mb.config.timeout.copy(total = howLong)
@@ -54,30 +21,7 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
   }
 
   /**
-   * How long a '''single''' request is given to complete.
-   *
-   * If there are [[MethodBuilderRetry retries]], each attempt is given up to
-   * this amount of time.
-   *
-   * If a request does not complete within this time, the response
-   * will be satisfied with a [[com.twitter.finagle.IndividualRequestTimeoutException]].
-   *
-   * @example
-   * For example, a per-request timeout of 50 milliseconds:
-   * {{{
-   * import com.twitter.conversions.time._
-   * import com.twitter.finagle.client.MethodBuilder
-   *
-   * val builder: MethodBuilder[Int, Int] = ???
-   * builder.withTimeout.perRequest(50.milliseconds)
-   * }}}
-   *
-   * @param howLong how long, from the initial request issuance,
-   *                an individual attempt given to complete.
-   *                If it is not finite (e.g. `Duration.Top`),
-   *                no method specific timeout will be applied.
-   *
-   * @see [[total(Duration)]]
+   * @see [[MethodBuilderScaladoc.withTimeoutPerRequest(Duration)]]
    */
   def perRequest(howLong: Duration): MethodBuilder[Req, Rep] = {
     val timeouts = mb.config.timeout.copy(perRequest = howLong)

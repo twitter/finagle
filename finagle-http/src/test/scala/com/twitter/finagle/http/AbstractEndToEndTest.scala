@@ -9,8 +9,7 @@ import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.service.{
-  ConstantService, FailureAccrualFactory, ResponseClass, ServiceFactoryRef}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, ReadableCounter}
 import com.twitter.finagle.toggle.flag
 import com.twitter.finagle.tracing.Trace
@@ -1193,4 +1192,128 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
   }
+
+  test(implName + ": methodBuilder timeouts") {
+    implicit val timer = HashedWheelTimer.Default
+    val svc = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        Future.sleep(50.millis).before {
+          val rep = Response()
+          rep.setContentString("ok")
+          Future.value(rep)
+        }
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl()
+      .withStatsReceiver(stats)
+      .configured(com.twitter.finagle.param.Timer(timer))
+      .withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    // these should never complete within the timeout
+    val shortTimeout: Service[Request, Response] = builder
+      .withTimeoutPerRequest(5.millis)
+      .newService("fast")
+
+    intercept[IndividualRequestTimeoutException] {
+      await(shortTimeout(Request()))
+    }
+    eventually {
+      assert(stats.counter("a_label", "fast", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "fast", "logical", "success")() == 0)
+    }
+
+    // these should always complete within the timeout
+    val longTimeout: Service[Request, Response] = builder
+      .withTimeoutPerRequest(5.seconds)
+      .newService("slow")
+
+    assert("ok" == await(longTimeout(Request())).contentString)
+    eventually {
+      assert(stats.counter("a_label", "slow", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "slow", "logical", "success")() == 1)
+    }
+
+    await(Future.join(Seq(longTimeout.close(), shortTimeout.close())))
+    await(server.close())
+  }
+
+  test(implName + ": methodBuilder retries") {
+    val svc = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        val rep = Response()
+        rep.contentString = req.contentString
+        req.contentString match {
+          case "500" => rep.statusCode = 500
+          case "503" => rep.statusCode = 503
+          case _ => ()
+        }
+        Future.value(rep)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl()
+      .withStatsReceiver(stats)
+      .withLabel("a_label")
+
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    val retry500sClassifier: ResponseClassifier = {
+      case ReqRep(_, Return(r: Response)) if r.statusCode / 100 == 5 =>
+        ResponseClass.RetryableFailure
+    }
+    val ok503sClassifier: ResponseClassifier = {
+      case ReqRep(_, Return(r: Response)) if r.statusCode == 503 =>
+        ResponseClass.Success
+    }
+
+    val retry5xxs = builder
+      .withRetryForClassifier(retry500sClassifier)
+      .newService("5xx")
+
+    val ok503s = builder
+      .withRetryForClassifier(ok503sClassifier.orElse(retry500sClassifier))
+      .newService("503")
+
+    val req500 = Request()
+    req500.contentString = "500"
+    val req503 = Request()
+    req503.contentString = "503"
+
+    assert(500 == await(retry5xxs(req500)).statusCode)
+    eventually {
+      assert(stats.counter("a_label", "5xx", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "5xx", "logical", "success")() == 0)
+      assert(stats.stat("a_label", "5xx", "retries")() == Seq(2))
+    }
+
+    assert(503 == await(ok503s(req503)).statusCode)
+    eventually {
+      assert(stats.counter("a_label", "503", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "503", "logical", "success")() == 1)
+      assert(stats.stat("a_label", "503", "retries")() == Seq(0))
+    }
+
+    assert(500 == await(ok503s(req500)).statusCode)
+    eventually {
+      assert(stats.counter("a_label", "503", "logical", "requests")() == 2)
+      assert(stats.counter("a_label", "503", "logical", "success")() == 1)
+      assert(stats.stat("a_label", "503", "retries")() == Seq(0, 2))
+    }
+
+    await(Future.join(Seq(retry5xxs.close(), ok503s.close())))
+    await(server.close())
+  }
+
 }

@@ -3,14 +3,11 @@ package com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.http.{
-  DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request,
-  Response, Toggles}
+import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{
-  Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter,Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Transporter, Http2Listener}
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
@@ -264,12 +261,23 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withCompressionLevel(level: Int): Client =
       configured(http.param.CompressionLevel(level))
 
-
     /**
      * Enable the collection of HTTP specific metrics. See [[http.filter.StatsFilter]].
      */
     def withHttpStats: Client =
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
+
+    /**
+     * '''Experimental:''' This API is under construction.
+     */
+    private[finagle] def methodBuilder(dest: String): http.MethodBuilder =
+      http.MethodBuilder.from(dest, this)
+
+    /**
+     * '''Experimental:''' This API is under construction.
+     */
+    private[finagle] def methodBuilder(dest: Name): http.MethodBuilder =
+      http.MethodBuilder.from(dest, this)
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
