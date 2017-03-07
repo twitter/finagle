@@ -283,6 +283,7 @@ object Finagle extends Build {
       util("codec"),
       util("core"),
       util("codec"),
+      util("lint"),
       util("stats")
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleToggle)

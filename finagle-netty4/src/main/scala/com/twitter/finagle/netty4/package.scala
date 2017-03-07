@@ -62,10 +62,11 @@ package object netty4 {
   //     because we don't prefer direct byte buffers.
   //
   // See CSL-3027 for more details.
-  private[netty4] val UnpooledAllocator = new UnpooledByteBufAllocator(
-    /* preferDirect */ false,
-    /* disableLeakDetector */ !trackReferenceLeaks.enabled
-  )
+  private[netty4] val UnpooledAllocator =
+    if (trackReferenceLeaks.enabled)
+      LeakDetectingAllocator
+    else
+      new UnpooledByteBufAllocator(/* preferDirect */ false, /* disableLeakDetector */ true)
 
   private[finagle] val DirectToHeapInboundHandlerName = "directToHeap"
 }

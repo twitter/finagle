@@ -16,6 +16,7 @@ scala_library(
     'util/util-codec/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-jvm/src/main/scala:scala',
+    'util/util-lint/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
   fatal_warnings=True,
