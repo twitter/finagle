@@ -7,13 +7,11 @@ import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
 import com.twitter.util.Activity
 
 /**
- * An O(1), concurrent, weighted least-loaded fair load balancer.
- * This uses the ideas behind "power of 2 choices" [1] combined with
- * O(1) biased coin flipping through the aliasing method, described
- * in [[com.twitter.finagle.util.Drv Drv]].
+ * An O(1), concurrent, least-loaded fair load balancer. This uses the ideas
+ * behind "power of 2 choices" [1].
  *
- * @param activity An activity that updates with the set of
- * (node, weight) pairs over which we distribute load.
+ * @param activity An activity that updates with the set of nodes over which
+ * we distribute load.
  *
  * @param maxEffort the maximum amount of "effort" we're willing to
  * expend on a load balancing decision without reweighing.

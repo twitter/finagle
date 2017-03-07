@@ -40,8 +40,8 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   protected type Node <: AnyRef with NodeT[Req, Rep]
 
   /**
-   * Create a new node representing the given factory, with the given
-   * weight. Report node-related stats to the given StatsReceiver.
+   * Create a new node representing the given factory.
+   * Report node-related stats to the given StatsReceiver.
    */
   protected def newNode(
     factory: ServiceFactory[Req, Rep],

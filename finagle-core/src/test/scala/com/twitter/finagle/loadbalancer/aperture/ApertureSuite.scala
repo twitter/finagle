@@ -16,12 +16,7 @@ trait ApertureSuite {
 
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
-    // 3 makes sense for aperture
-    // Example: if 1/2 of the cluster is down, picking 2 dead nodes is
-    // 0.25. If we repeat that 3 times, it's 0.25^3 = 1%
-    // Simply speaking: if 50% of the cluster is down we will rebuild
-    // in 1% of the cases/requests
-    protected val maxEffort = 3
+    protected val maxEffort = 5
     protected def statsReceiver = NullStatsReceiver
     protected val minAperture = 1
 
@@ -62,6 +57,8 @@ trait ApertureSuite {
     def status_=(v: Status) { _status = v }
 
     def close(deadline: Time): Future[Unit] = ???
+
+    override def toString: String = s"Factory(id=$i, requests=$n, status=$status)"
   }
 
   class Counts extends Iterable[Factory] {
@@ -69,12 +66,16 @@ trait ApertureSuite {
 
     def iterator = factories.values.iterator
 
-    def clear() {
+    def clear(): Unit = {
       factories.values.foreach(_.clear())
     }
 
-    def aperture: Int = nonzero.size
-
+    /**
+     * This allows test writers to validate the number of [[Counts]] that
+     * have received requests. After a statistically significant number
+     * of requests sent through the balancer, the size of this collection
+     * should be bound by the aperture size.
+     */
     def nonzero: Set[Int] = factories.filter({
       case (_, f) => f.n > 0
     }).keys.toSet

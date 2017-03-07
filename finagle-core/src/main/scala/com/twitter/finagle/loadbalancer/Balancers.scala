@@ -66,10 +66,8 @@ object Balancers {
     }
 
   /**
-   * An O(1), concurrent, weighted least-loaded fair load balancer.
-   * This uses the ideas behind "power of 2 choices" [1] combined with
-   * O(1) biased coin flipping through the aliasing method, described
-   * in [[com.twitter.finagle.util.Drv Drv]].
+   * An O(1), concurrent, least-loaded fair load balancer.
+   * This uses the ideas behind "power of 2 choices" [1].
    *
    * @param maxEffort the maximum amount of "effort" we're willing to
    * expend on a load balancing decision without reweighing.

@@ -54,6 +54,9 @@ Breaking API Changes
   * finagle-core: The load balancer algorithm is now further scoped under "algorithm".
     ``RB_ID=909309``
 
+  * finagle-core: Remove `Ring` from Finagle core's util since it is unused
+    internally. ``RB_ID=909718``
+
   * finagle-core: SSL/TLS stack params for Finagle running Netty 3 have changed.
       - The `TLSClientEngine` param in `Transport` has been replaced by two parameters:
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
