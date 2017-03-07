@@ -18,7 +18,8 @@ import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.InetSocketAddress
-import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest}
+import org.scalactic.source.Position
+import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
 
@@ -92,6 +93,15 @@ abstract class AbstractEndToEndTest extends FunSuite
       val statusCode = request.getIntParam("statusCode", Status.BadRequest.code)
       Future.value(Response(Status.fromCode(statusCode)))
     }
+  }
+
+  override def test(testName: String, testTags: Tag*)
+    (testFun: => Any)
+    (implicit pos: Position): Unit = {
+    if (skipWholeTest)
+      ignore(testName)(testFun)
+    else
+      super.test(testName, testTags:_*)(testFun)
   }
 
   /**
@@ -797,400 +807,397 @@ abstract class AbstractEndToEndTest extends FunSuite
   // before we run into the requeue limit.
   private val failureAccrualFailures = 19
 
-  if (!skipWholeTest) {
-    // we need this to turn off ALPN in ci
-    run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
+  run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
 
-    run(streaming)(streamingConnect(_))
+  run(streaming)(streamingConnect(_))
 
-    test(implName + ": Status.busy propagates along the Stack") {
-      val st = new InMemoryStatsReceiver
-      val failService = new HttpService {
-        def apply(req: Request): Future[Response] =
-          Future.exception(Failure.rejected("unhappy"))
-      }
-
-      val clientName = "http"
-      val server = serverImpl().serve(new InetSocketAddress(0), failService)
-      val client = clientImpl()
-        .withStatsReceiver(st)
-        .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          clientName
-        )
-
-      val e = intercept[FailureFlags[_]] {
-        await(client(Request("/")))
-      }
-      assert(e.isFlagged(FailureFlags.Rejected))
-
-      assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
-      assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
-      assert(st.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
-      await(Closable.all(client, server).close())
+  test(implName + ": Status.busy propagates along the Stack") {
+    val st = new InMemoryStatsReceiver
+    val failService = new HttpService {
+      def apply(req: Request): Future[Response] =
+        Future.exception(Failure.rejected("unhappy"))
     }
 
-    test(implName + ": nonretryable isn't retried") {
-      val st = new InMemoryStatsReceiver
-      val failService = new HttpService {
-        def apply(req: Request): Future[Response] =
-          Future.exception(Failure("unhappy", FailureFlags.NonRetryable | FailureFlags.Rejected))
-      }
+    val clientName = "http"
+    val server = serverImpl().serve(new InetSocketAddress(0), failService)
+    val client = clientImpl()
+      .withStatsReceiver(st)
+      .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        clientName
+      )
 
-      val clientName = "http"
-      val server = serverImpl().serve(new InetSocketAddress(0), failService)
-      val client = clientImpl()
-        .withStatsReceiver(st)
-        .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-        .newService(
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-          clientName
-        )
+    val e = intercept[FailureFlags[_]] {
+      await(client(Request("/")))
+    }
+    assert(e.isFlagged(FailureFlags.Rejected))
 
-      val e = intercept[FailureFlags[_]] {
-        val req = Request("/")
-        await(client(req))
-      }
-      assert(e.isFlagged(FailureFlags.Rejected))
+    assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
+    assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
+    assert(st.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
+    await(Closable.all(client, server).close())
+  }
 
-      assert(!st.counters.contains(Seq(clientName, "failure_accrual", "removals")))
-      assert(!st.counters.contains(Seq(clientName, "retries", "requeues")))
-      assert(!st.counters.contains(Seq(clientName, "failures", "restartable")))
-      assert(st.counters(Seq(clientName, "failures")) == 1)
-      assert(st.counters(Seq(clientName, "requests")) == 1)
-      await(Closable.all(client, server).close())
+  test(implName + ": nonretryable isn't retried") {
+    val st = new InMemoryStatsReceiver
+    val failService = new HttpService {
+      def apply(req: Request): Future[Response] =
+        Future.exception(Failure("unhappy", FailureFlags.NonRetryable | FailureFlags.Rejected))
     }
 
-    test("Client-side ResponseClassifier based on status code") {
-      val classifier = HttpResponseClassifier {
-        case (_, r: Response) if r.status == Status.ServiceUnavailable =>
-          ResponseClass.NonRetryableFailure
-      }
+    val clientName = "http"
+    val server = serverImpl().serve(new InetSocketAddress(0), failService)
+    val client = clientImpl()
+      .withStatsReceiver(st)
+      .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        clientName
+      )
 
-      val server = serverImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .serve("localhost:*", statusCodeSvc)
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withStatsReceiver(statsRecv)
-        .withResponseClassifier(classifier)
-        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-      val rep1 = await(client(requestWith(Status.Ok)))
-      assert(statsRecv.counters(Seq("client", "requests")) == 1)
-      assert(statsRecv.counters(Seq("client", "success")) == 1)
-
-      val rep2 = await(client(requestWith(Status.ServiceUnavailable)))
-
-      assert(statsRecv.counters(Seq("client", "requests")) == 2)
-      assert(statsRecv.counters(Seq("client", "success")) == 1)
-
-      await(client.close())
-      await(server.close())
-    }
-
-    test("server-side ResponseClassifier based on status code") {
-      val classifier = HttpResponseClassifier {
-        case (_, r: Response) if r.status == Status.ServiceUnavailable =>
-          ResponseClass.NonRetryableFailure
-      }
-
-      val server = serverImpl()
-        .withResponseClassifier(classifier)
-        .withStatsReceiver(statsRecv)
-        .withLabel("server")
-        .serve("localhost:*", statusCodeSvc)
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-      await(client(requestWith(Status.Ok)))
-      assert(statsRecv.counters(Seq("server", "requests")) == 1)
-      assert(statsRecv.counters(Seq("server", "success")) == 1)
-
-      await(client(requestWith(Status.ServiceUnavailable)))
-      assert(statsRecv.counters(Seq("server", "requests")) == 2)
-      assert(statsRecv.counters(Seq("server", "success")) == 1)
-      assert(statsRecv.counters(Seq("server", "failures")) == 1)
-
-      await(client.close())
-      await(server.close())
-    }
-
-    test("codec should require a message size be less than 2Gb") {
-      intercept[IllegalArgumentException](Http().maxRequestSize(2.gigabytes))
-      intercept[IllegalArgumentException](Http(_maxResponseSize = 100.gigabytes))
-      intercept[IllegalArgumentException] {
-        serverImpl().withMaxRequestSize(2049.megabytes)
-      }
-      intercept[IllegalArgumentException] {
-        clientImpl().withMaxResponseSize(3000.megabytes)
-      }
-    }
-
-    test("client respects MaxResponseSize") {
-      val svc = new HttpService {
-        def apply(request: Request): Future[Response] = {
-          val response = Response()
-          response.contentString = "*" * 600.kilobytes.bytes.toInt
-          Future.value(response)
-        }
-      }
-
-      val server = serverImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withMaxResponseSize(500.kilobytes) // wontfix: doesn't work on netty3 with limit <= 8 KB
-        .withStatsReceiver(NullStatsReceiver)
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
+    val e = intercept[FailureFlags[_]] {
       val req = Request("/")
-      intercept[TooLongMessageException] {
-        await(client(req))
-      }
+      await(client(req))
+    }
+    assert(e.isFlagged(FailureFlags.Rejected))
 
-      await(client.close())
-      await(server.close())
+    assert(!st.counters.contains(Seq(clientName, "failure_accrual", "removals")))
+    assert(!st.counters.contains(Seq(clientName, "retries", "requeues")))
+    assert(!st.counters.contains(Seq(clientName, "failures", "restartable")))
+    assert(st.counters(Seq(clientName, "failures")) == 1)
+    assert(st.counters(Seq(clientName, "requests")) == 1)
+    await(Closable.all(client, server).close())
+  }
+
+  test("Client-side ResponseClassifier based on status code") {
+    val classifier = HttpResponseClassifier {
+      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+        ResponseClass.NonRetryableFailure
     }
 
-    test("server responds 500 if an invalid header is being served") {
-      val service = new HttpService {
-        def apply(request: Request): Future[Response] = {
-          val response = Response()
-          response.headerMap.add("foo", "|\f") // these are prohibited in N3
-          Future.value(response)
-        }
-      }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", statusCodeSvc)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(statsRecv)
+      .withResponseClassifier(classifier)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
-      val server = serverImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .serve("localhost:*", service)
+    val rep1 = await(client(requestWith(Status.Ok)))
+    assert(statsRecv.counters(Seq("client", "requests")) == 1)
+    assert(statsRecv.counters(Seq("client", "success")) == 1)
 
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+    val rep2 = await(client(requestWith(Status.ServiceUnavailable)))
 
-      val rep = await(client(Request("/")))
-      assert(rep.status == Status.InternalServerError)
+    assert(statsRecv.counters(Seq("client", "requests")) == 2)
+    assert(statsRecv.counters(Seq("client", "success")) == 1)
+
+    await(client.close())
+    await(server.close())
+  }
+
+  test("server-side ResponseClassifier based on status code") {
+    val classifier = HttpResponseClassifier {
+      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+        ResponseClass.NonRetryableFailure
     }
 
-    testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize") {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response()
-          response.headerMap.set("foo", "*" * 1.kilobytes.bytes.toInt)
-          Future.value(response)
-        }
+    val server = serverImpl()
+      .withResponseClassifier(classifier)
+      .withStatsReceiver(statsRecv)
+      .withLabel("server")
+      .serve("localhost:*", statusCodeSvc)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    await(client(requestWith(Status.Ok)))
+    assert(statsRecv.counters(Seq("server", "requests")) == 1)
+    assert(statsRecv.counters(Seq("server", "success")) == 1)
+
+    await(client(requestWith(Status.ServiceUnavailable)))
+    assert(statsRecv.counters(Seq("server", "requests")) == 2)
+    assert(statsRecv.counters(Seq("server", "success")) == 1)
+    assert(statsRecv.counters(Seq("server", "failures")) == 1)
+
+    await(client.close())
+    await(server.close())
+  }
+
+  test("codec should require a message size be less than 2Gb") {
+    intercept[IllegalArgumentException](Http().maxRequestSize(2.gigabytes))
+    intercept[IllegalArgumentException](Http(_maxResponseSize = 100.gigabytes))
+    intercept[IllegalArgumentException] {
+      serverImpl().withMaxRequestSize(2049.megabytes)
+    }
+    intercept[IllegalArgumentException] {
+      clientImpl().withMaxResponseSize(3000.megabytes)
+    }
+  }
+
+  test("client respects MaxResponseSize") {
+    val svc = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        val response = Response()
+        response.contentString = "*" * 600.kilobytes.bytes.toInt
+        Future.value(response)
       }
-
-      val server = serverImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withMaxHeaderSize(1.kilobyte)
-        .withStatsReceiver(NullStatsReceiver)
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      val req = Request("/")
-      intercept[TooLongMessageException] {
-        await(client(req))
-      }
-
-      await(client.close())
-      await(server.close())
     }
 
-    test("non-streaming clients can decompress content") {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response()
-          response.contentString = "raw content"
-          Future.value(response)
-        }
-      }
-      val server = serverImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .withCompressionLevel(5)
-        .serve("localhost:*", svc)
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
 
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withStatsReceiver(NullStatsReceiver)
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withMaxResponseSize(500.kilobytes) // wontfix: doesn't work on netty3 with limit <= 8 KB
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
 
-      val req = Request("/")
-      req.headerMap.set("accept-encoding", "gzip")
-      assert(await(client(req)).contentString == "raw content")
-      await(client.close())
-      await(server.close())
+    val req = Request("/")
+    intercept[TooLongMessageException] {
+      await(client(req))
     }
 
-    test("request remote address") {
-      val svc = new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response()
-          response.contentString = request.remoteAddress.toString
-          Future.value(response)
-        }
+    await(client.close())
+    await(server.close())
+  }
+
+  test("server responds 500 if an invalid header is being served") {
+    val service = new HttpService {
+      def apply(request: Request): Future[Response] = {
+        val response = Response()
+        response.headerMap.add("foo", "|\f") // these are prohibited in N3
+        Future.value(response)
       }
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
-
-      assert(await(client(Request("/"))).contentString.startsWith("/127.0.0.1"))
-      await(client.close())
-      await(server.close())
     }
 
-    test(implName + ": ResponseClassifier respects toggle") {
-      import com.twitter.finagle.{Http => ctfHttp}
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", service)
 
-      val serverFraction = new AtomicDouble(-1.0)
-      val serverToggleFilter = new SimpleFilter[Request, Response] {
-        def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
-          val frac = serverFraction.get()
-          if (frac < 0.0) {
-            service(request)
-          } else {
-            var rep: Future[Response] = Future.exception(new RuntimeException("not init"))
-            flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, frac) {
-              rep = service(request)
-            }
-            rep
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val rep = await(client(Request("/")))
+    assert(rep.status == Status.InternalServerError)
+  }
+
+  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.headerMap.set("foo", "*" * 1.kilobytes.bytes.toInt)
+        Future.value(response)
+      }
+    }
+
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withMaxHeaderSize(1.kilobyte)
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    intercept[TooLongMessageException] {
+      await(client(req))
+    }
+
+    await(client.close())
+    await(server.close())
+  }
+
+  test("non-streaming clients can decompress content") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "raw content"
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .withCompressionLevel(5)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    req.headerMap.set("accept-encoding", "gzip")
+    assert(await(client(req)).contentString == "raw content")
+    await(client.close())
+    await(server.close())
+  }
+
+  test("request remote address") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = request.remoteAddress.toString
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    assert(await(client(Request("/"))).contentString.startsWith("/127.0.0.1"))
+    await(client.close())
+    await(server.close())
+  }
+
+  test(implName + ": ResponseClassifier respects toggle") {
+    import com.twitter.finagle.{Http => ctfHttp}
+
+    val serverFraction = new AtomicDouble(-1.0)
+    val serverToggleFilter = new SimpleFilter[Request, Response] {
+      def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+        val frac = serverFraction.get()
+        if (frac < 0.0) {
+          service(request)
+        } else {
+          var rep: Future[Response] = Future.exception(new RuntimeException("not init"))
+          flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, frac) {
+            rep = service(request)
           }
+          rep
         }
       }
-      val module = new Stack.Module0[ServiceFactory[Request, Response]] {
-        val role: Stack.Role = Stack.Role("server response classifier")
-        val description: String = role.toString
+    }
+    val module = new Stack.Module0[ServiceFactory[Request, Response]] {
+      val role: Stack.Role = Stack.Role("server response classifier")
+      val description: String = role.toString
 
-        def make(next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] =
-          serverToggleFilter.andThen(next)
-      }
-
-      val srvImpl = serverImpl()
-        .withLabel("server")
-        .withStatsReceiver(statsRecv)
-      val svc500s = new ConstantService[Request, Response](
-        Future.value(Response(Status.InternalServerError)))
-
-      val server = srvImpl
-        // we need to inject a filter that'll set the fraction properly
-        // for the server's flag's Local value
-        .withStack(srvImpl.stack.insertBefore(MonitorFilter.role, module))
-        .serve("localhost:*", svc500s)
-
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withStatsReceiver(statsRecv)
-        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-      val clientSuccesses: ReadableCounter = statsRecv.counter("client", "success")
-      val clientFailures: ReadableCounter = statsRecv.counter("client", "failures")
-      val serverSuccesses: ReadableCounter = statsRecv.counter("server", "success")
-      val serverFailures: ReadableCounter = statsRecv.counter("server", "failures")
-
-      def issueRequest(fraction: Option[Double]) = {
-        val res = fraction match {
-          case None =>
-            serverFraction.set(-1.0)
-            client(Request("/"))
-          case Some(f) =>
-            serverFraction.set(f)
-            var r: Future[Response] = Future.exception(new RuntimeException("never init"))
-            flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, f) {
-              r = client(Request("/"))
-            }
-            r
-        }
-        assert(Status.InternalServerError == await(res).status)
-      }
-
-      // as tested above, the default is that 500s are errors
-      issueRequest(None)
-      eventually {
-        assert(0 == clientSuccesses())
-        assert(1 == clientFailures())
-        assert(0 == serverSuccesses())
-        assert(1 == serverFailures())
-      }
-
-      // switch to 500s are successful
-      issueRequest(Some(0.0))
-      eventually {
-        assert(1 == clientSuccesses())
-        assert(1 == clientFailures())
-        assert(1 == serverSuccesses())
-        assert(1 == serverFailures())
-      }
-
-      // switch it back to 500s are failures
-      issueRequest(Some(1.0))
-      eventually {
-        assert(1 == clientSuccesses())
-        assert(2 == clientFailures())
-        assert(1 == serverSuccesses())
-        assert(2 == serverFailures())
-      }
-
-      await(server.close())
-      await(client.close())
+      def make(next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] =
+        serverToggleFilter.andThen(next)
     }
 
-    test(s"$implName client handles cut connection properly") {
-      val svc = Service.mk[Request, Response] { req: Request =>
-        Future.value(Response())
+    val srvImpl = serverImpl()
+      .withLabel("server")
+      .withStatsReceiver(statsRecv)
+    val svc500s = new ConstantService[Request, Response](
+      Future.value(Response(Status.InternalServerError)))
+
+    val server = srvImpl
+      // we need to inject a filter that'll set the fraction properly
+      // for the server's flag's Local value
+      .withStack(srvImpl.stack.insertBefore(MonitorFilter.role, module))
+      .serve("localhost:*", svc500s)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(statsRecv)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val clientSuccesses: ReadableCounter = statsRecv.counter("client", "success")
+    val clientFailures: ReadableCounter = statsRecv.counter("client", "failures")
+    val serverSuccesses: ReadableCounter = statsRecv.counter("server", "success")
+    val serverFailures: ReadableCounter = statsRecv.counter("server", "failures")
+
+    def issueRequest(fraction: Option[Double]) = {
+      val res = fraction match {
+        case None =>
+          serverFraction.set(-1.0)
+          client(Request("/"))
+        case Some(f) =>
+          serverFraction.set(f)
+          var r: Future[Response] = Future.exception(new RuntimeException("never init"))
+          flag.overrides.let(ctfHttp.ServerErrorsAsFailuresToggleId, f) {
+            r = client(Request("/"))
+          }
+          r
       }
-      val server1 = serverImpl()
-        .serve("localhost:*", svc)
-      val addr = server1.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-      val rep1 = await(client(Request("/")))
-
-      assert(rep1.status == Status.Ok)
-      await(server1.close())
-
-      // we wait to ensure the client has been informed the connection has been dropped
-      Thread.sleep(20)
-
-      val server2 = serverImpl()
-        .serve("localhost:%d".format(addr.getPort), svc)
-      val rep2 = await(client(Request("/")))
-      assert(rep2.status == Status.Ok)
+      assert(Status.InternalServerError == await(res).status)
     }
 
-    test("Does not retry service acquisition many times when not using FactoryToService") {
-      val svc = Service.mk[Request, Response] { req: Request =>
-        Future.value(Response())
-      }
-      val sr = new InMemoryStatsReceiver
-      val server = serverImpl()
-        .serve("localhost:*", svc)
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .withStatsReceiver(sr)
-        .newClient("%s:%d".format(addr.getHostName, addr.getPort), "client")
-
-      val conn = await(client())
-
-      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
-
-      await(conn.close())
-      await(server.close())
-      await(client.close())
+    // as tested above, the default is that 500s are errors
+    issueRequest(None)
+    eventually {
+      assert(0 == clientSuccesses())
+      assert(1 == clientFailures())
+      assert(0 == serverSuccesses())
+      assert(1 == serverFailures())
     }
+
+    // switch to 500s are successful
+    issueRequest(Some(0.0))
+    eventually {
+      assert(1 == clientSuccesses())
+      assert(1 == clientFailures())
+      assert(1 == serverSuccesses())
+      assert(1 == serverFailures())
+    }
+
+    // switch it back to 500s are failures
+    issueRequest(Some(1.0))
+    eventually {
+      assert(1 == clientSuccesses())
+      assert(2 == clientFailures())
+      assert(1 == serverSuccesses())
+      assert(2 == serverFailures())
+    }
+
+    await(server.close())
+    await(client.close())
+  }
+
+  test(s"$implName client handles cut connection properly") {
+    val svc = Service.mk[Request, Response] { req: Request =>
+      Future.value(Response())
+    }
+    val server1 = serverImpl()
+      .serve("localhost:*", svc)
+    val addr = server1.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val rep1 = await(client(Request("/")))
+
+    assert(rep1.status == Status.Ok)
+    await(server1.close())
+
+    // we wait to ensure the client has been informed the connection has been dropped
+    Thread.sleep(20)
+
+    val server2 = serverImpl()
+      .serve("localhost:%d".format(addr.getPort), svc)
+    val rep2 = await(client(Request("/")))
+    assert(rep2.status == Status.Ok)
+  }
+
+  test("Does not retry service acquisition many times when not using FactoryToService") {
+    val svc = Service.mk[Request, Response] { req: Request =>
+      Future.value(Response())
+    }
+    val sr = new InMemoryStatsReceiver
+    val server = serverImpl()
+      .serve("localhost:*", svc)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(sr)
+      .newClient("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val conn = await(client())
+
+    assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
+
+    await(conn.close())
+    await(server.close())
+    await(client.close())
   }
 
   test(implName + ": methodBuilder timeouts") {

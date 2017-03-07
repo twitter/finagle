@@ -12,6 +12,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
   // deleteOnExit is handled by TempFile
 
+  // we need this to turn off ALPN in ci
   override def skipWholeTest: Boolean = sys.props.contains("SKIP_FLAKY")
 
   def implName: String = "prior knowledge http/2"
@@ -33,7 +34,6 @@ class Http2AlpnTest extends AbstractEndToEndTest {
 
   def featureImplemented(feature: Feature): Boolean = !unimplementedFeatures(feature)
 
-  if (!skipWholeTest) { // we need this to turn off ALPN in ci
   test("An alpn connection counts as one upgrade for stats") {
     val client = nonStreamingConnect(Service.mk { req: Request =>
       Future.value(Response())
@@ -44,6 +44,5 @@ class Http2AlpnTest extends AbstractEndToEndTest {
     assert(statsRecv.counters(Seq("server", "upgrade", "success")) == 1)
     assert(statsRecv.counters(Seq("client", "upgrade", "success")) == 1)
     await(client.close())
-  }
   }
 }
