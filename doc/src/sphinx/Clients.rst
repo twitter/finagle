@@ -159,7 +159,7 @@ output. To override this, use the following sample.
 
 Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
 
-.. _retries:
+.. _client_retries:
 
 Retries
 ~~~~~~~
@@ -791,6 +791,25 @@ its peak value when you reach your peak concurrency (i.e. "load"),
 and then slowly decays, based on the TTL.
 
 :ref:`Related stats <pool_stats>`
+
+Admission Control
+-----------------
+
+Clients are configured with the :src:`NackAdmissionFilter <com/twitter/finagle/filter/NackAdmissionFilter.scala>`
+which will probabilistically drop some requests to unhealthy clusters. This aims
+to decrease the request volume to those clusters with little to no effect on a
+client's already unhealthy success rate. The filter works by keeping a moving
+average of the fraction of requests that are :ref:`nacked <glossary_nack>`. When
+this fraction hits a given threshold, the filter will probabilistically drop
+requests in proportion to that fraction.
+The filter can be configured with the following parameters:
+
+1. ``window`` The duration over which the average is calculated. Default is 2
+   minutes.
+2. ``nackRateThreshold`` The rate of rejected requests at which the filter kicks
+   in. Default is 0.5.
+
+:ref:`Related stats <admission_control_stats>`
 
 .. _response_classification:
 

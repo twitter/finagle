@@ -38,10 +38,11 @@ Other useful resources include:
 .. _Dapper: http://research.google.com/pubs/pub36356.html
 .. _Zipkin: http://zipkin.io
 
-User's guide
-------------
+Contents
+--------
 
 .. toctree::
+   :caption: User's Guide
    :maxdepth: 1
 
    Quickstart
@@ -58,20 +59,16 @@ User's guide
    FAQ
    Glossary
 
-Developer's Guide
------------------
-
 .. toctree::
+   :caption: Developer's Guide
    :maxdepth: 1
 
    developers/Extending
    developers/Futures
    developers/SignalingFailure
 
-Notes
------
-
 .. toctree::
+   :caption: Notes
    :maxdepth: 1
 
    changelog

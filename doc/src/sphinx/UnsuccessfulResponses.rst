@@ -79,7 +79,7 @@ responses, this information does not automatically exist.
 
 Users have two mechanisms available to provide this information:
 :ref:`ResponseClassifiers <response_classification>` and
-:ref:`RetryPolicies <retries>`. Response classification is used for stats
+:ref:`RetryPolicies <client_retries>`. Response classification is used for stats
 recording and :ref:`circuit breaking <client_circuit_breaking>`. `RetryPolicies`
 are used to control which responses will be retried.
 
