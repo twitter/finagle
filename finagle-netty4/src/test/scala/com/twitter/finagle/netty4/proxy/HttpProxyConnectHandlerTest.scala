@@ -1,15 +1,14 @@
 package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException}
-import io.netty.channel.{
-  ChannelHandlerAdapter, ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter
-}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{ChannelHandlerAdapter, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetSocketAddress, SocketAddress}
 
 @RunWith(classOf[JUnitRunner])
 class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
@@ -109,10 +108,15 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     channel.writeOutbound("pending write")
     assert(channel.outboundMessages().size() == 0)
 
-    val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST)
+    val payload = Unpooled.wrappedBuffer("do not talk to me ever again".getBytes("UTF-8"))
+    val rep = new DefaultFullHttpResponse(
+      HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, payload
+    )
+
     assert(intercept[Exception](channel.writeInbound(rep)).isInstanceOf[ConnectionFailedException])
     assert(!connectPromise.isSuccess)
     assert(connectPromise.cause().isInstanceOf[ConnectionFailedException])
+    assert(rep.refCnt() == 0)
 
     channel.finishAndReleaseAll()
   }

@@ -1,13 +1,15 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{ChannelClosedException, Failure, ConnectionFailedException}
+import com.twitter.conversions.storage._
+import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, Failure}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
+import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
+import com.twitter.logging.Logger
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.net.SocketAddress
 
@@ -44,8 +46,12 @@ private[netty4] class HttpProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] val httpCodecKey: String = "httpProxyClientCodec"
-  private[this] val httpObjectAggregatorKey: String = "httpProxyObjectAggregator"
+  private[this] final val logger = Logger()
+
+  private[this] final def maxHandshakeResponseSize = 10.kilobytes.inBytes.toInt
+  private[this] final def httpCodecKey = "httpProxyClientCodec"
+  private[this] final def httpObjectAggregatorKey = "httpProxyObjectAggregator"
+
   private[this] var connectPromise: ChannelPromise = _
 
   private[this] def proxyAuthorizationHeader(c: Credentials): String = {
@@ -79,10 +85,11 @@ private[netty4] class HttpProxyConnectHandler(
         if (f.isSuccess) {
           // Add HTTP client codec so we can talk to an HTTP proxy.
           ctx.pipeline().addBefore(ctx.name(), httpCodecKey, httpClientCodec)
-          // We don't expect any payload coming back in the response from the HTTP proxy
-          // so no need to aggregate the content (maxContentLength = 0).
+          // Some HTTP proxy servers send their errors in HTML documents.
+          // We're aiming to accumulate up to 10kb of such error responses to make sure
+          // we can throw something meaningful instead of N4 `TooLongFrameException`.
           ctx.pipeline().addBefore(ctx.name(), httpObjectAggregatorKey,
-            new HttpObjectAggregator(0))
+            new HttpObjectAggregator(maxHandshakeResponseSize))
 
           // Create new connect HTTP proxy connect request.
           val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, host)
@@ -125,7 +132,7 @@ private[netty4] class HttpProxyConnectHandler(
 
         connectPromise.trySuccess()
         // We don't release `req` since by specs, we don't expect any payload sent back from a
-        // a web proxy server.
+        // a web proxy server in a successful case.
       } else {
         val failure = new ConnectionFailedException(
           Failure(s"Unexpected status returned from an HTTP proxy server: ${rep.status()}."),
@@ -134,6 +141,13 @@ private[netty4] class HttpProxyConnectHandler(
 
         fail(ctx, failure)
         ctx.close()
+
+        try {
+          logger.ifError(s"Unexpected status returned from an HTTP proxy server.\n${rep.toString}")
+        } finally {
+          // It's possible that the failure response had a payload in it so we release to be safe.
+          rep.release()
+        }
       }
     case other => ctx.fireChannelRead(other)
   }
