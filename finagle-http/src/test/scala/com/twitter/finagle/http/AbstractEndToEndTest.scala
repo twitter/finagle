@@ -34,6 +34,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   object MaxHeaderSize extends Feature
   object ClientAbort extends Feature
   object HeaderFields extends Feature
+  object ReaderClose extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -626,7 +627,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(res.contentString == "hello")
     }
 
-    test(s"$implName (streaming): transport closure propagates to request stream reader") {
+    testIfImplemented(ReaderClose)(s"$implName (streaming): transport closure propagates to request stream reader") {
       val p = new Promise[Buf]
       val s = Service.mk[Request, Response] { req =>
         p.become(Reader.readAll(req.reader))

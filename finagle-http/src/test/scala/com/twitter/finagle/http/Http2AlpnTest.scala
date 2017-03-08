@@ -29,7 +29,8 @@ class Http2AlpnTest extends AbstractEndToEndTest {
   def unimplementedFeatures: Set[Feature] = Set(
     ClientAbort,
     MaxHeaderSize,
-    HeaderFields
+    HeaderFields,
+    ReaderClose
   )
 
   def featureImplemented(feature: Feature): Boolean = !unimplementedFeatures(feature)
