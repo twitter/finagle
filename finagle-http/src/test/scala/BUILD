@@ -4,6 +4,7 @@ junit_tests(
     '3rdparty/jvm/com/google/guava',
     scoped('3rdparty/jvm/commons-lang', scope='forced'),
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalacheck',
