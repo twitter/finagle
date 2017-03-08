@@ -26,7 +26,8 @@ object SentinelClient {
     val port: Int = props("port").toInt
     val runid: String = props("runid")
     val flags: Seq[String] = props("flags").split(",")
-    val linkPendingCommands: Int = props("link-pending-commands").toInt
+    val pendingCommands: Int = props.get("link-pending-commands")
+      .getOrElse(props("pending-commands")).toInt
     val lastPingSent: Int = props("last-ping-sent").toInt
     val lastPingReply: Int = props("last-ping-reply").toInt
     val downAfterMilliseconds: Int = props("down-after-milliseconds").toInt
