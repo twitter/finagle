@@ -109,6 +109,10 @@ Breaking API Changes
     to `ThriftMethod.SuccessType` instead of `ThriftMethod.Args` to `ThriftMethod.Result`.
     ``RB_ID=908846``
 
+  * finagle-redis: Remove pendingCommands from `c.t.f.finagle.redis.SentinelClient.Node` and
+    add linkPendingCommands for compatibility with redis 3.2 and newer.
+    ``RB_ID=??????``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -151,6 +155,9 @@ Bug Fixes
 
   * finagle-thrift: Properly locate sub-classed MethodIface services to instantiate for serving
     BaseServiceIface implemented thrift services. ``RB_ID=907608``
+
+  * finagle-redis: The SentinelClient will no longer throw an NoSuchElementException when
+    initializing connections to a redis 3.2 or greater sentinel server. ``RB_ID=??????``
 
 Dependencies
 ~~~~~~~~~~~~
