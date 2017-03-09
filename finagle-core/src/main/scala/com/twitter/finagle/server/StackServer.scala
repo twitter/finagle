@@ -223,11 +223,12 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       val Reporter(reporter) = params[Reporter]
       val Stats(stats) = params[Stats]
       val Label(label) = params[Label]
+      val registry = ServerRegistry.connectionRegistry(addr)
       // For historical reasons, we have to respect the ServerRegistry
       // for naming addresses (i.e. label=addr). Until we deprecate
       // its usage, it takes precedence for identifying a server as
       // it is the most recently set label.
-      val serverLabel = ServerRegistry.nameOf(addr) getOrElse label
+      val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
 
       // Connection bookkeeping used to explicitly manage
       // connection resources per ListeningServer. Note, draining
@@ -275,11 +276,13 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       GlobalRegistry.get.put(listenerImplKey, listener.toString)
 
       val underlying = listener.listen(addr) { transport =>
+        registry.register(transport.remoteAddress)
+        transport.onClose.ensure(registry.unregister(transport.remoteAddress))
         serviceFactory(newConn(transport)).respond {
           case Return(service) =>
             val d = server.newDispatcher(transport, service)
             connections.add(d)
-            transport.onClose ensure connections.remove(d)
+            transport.onClose.ensure(connections.remove(d))
           case Throw(exc) =>
             // If we fail to create a new session locally, we continue establishing
             // the session but (1) reject any incoming requests; (2) close it right
@@ -291,7 +294,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
                 Failure.rejected("Terminating session and ignoring request", exc)))
             )
             connections.add(d)
-            transport.onClose ensure connections.remove(d)
+            transport.onClose.ensure(connections.remove(d))
             // We give it a generous amount of time to shut down the session to
             // improve our chances of being able to do so gracefully.
             d.close(10.seconds)
@@ -317,7 +320,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
         val everythingElse = Seq[Closable](factory) ++ connections.asScala.toSeq
 
         // and once they're drained we can then wait on the listener physically closing them
-        Closable.all(everythingElse:_*).close(deadline) before ulClosed
+        Closable.all(everythingElse: _*).close(deadline).before(ulClosed)
       }
 
       def boundAddress = underlying.boundAddress
