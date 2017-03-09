@@ -88,37 +88,41 @@ class StringServerTest extends FunSuite
 
   test("ConnectionRegistry has the right size") {
     new Ctx {
-      assert(registry.iterator.size == 0)
+      val initialRegistrySize = registry.iterator.size
 
       Await.ready(client1("hello"), 1.second)
-      assert(registry.iterator.size ==  1)
+      assert((registry.iterator.size - initialRegistrySize) ==  1)
 
       Await.ready(client2("foo"), 1.second)
-      assert(registry.iterator.size == 2)
+      assert((registry.iterator.size - initialRegistrySize) == 2)
 
       Await.result(client1.close(), 5.seconds)
-      assert(registry.iterator.size == 1)
+      assert((registry.iterator.size - initialRegistrySize) == 1)
 
       Await.result(server.close(), 5.seconds)
       Await.result(client2.close(), 5.seconds)
-      assert(registry.iterator.size ==  0)
+      assert((registry.iterator.size - initialRegistrySize) ==  0)
     }
   }
 
   test("ConnectionRegistry correctly removes entries upon client close") {
     new Ctx {
-      Await.ready(client1("hello"), 1.second)
+      val initialState = registry.iterator.toSeq
 
-      val remoteAddr1 = registry.iterator.next()
+      Await.ready(client1("hello"), 1.second)
+      val remoteAddr1 = registry.iterator.filter(!initialState.contains(_)).next()
 
       Await.ready(client2("foo"), 1.second)
-
-      val remoteAddr2 = registry.iterator.filter(_ != remoteAddr1).next()
+      val remoteAddr2 = registry
+        .iterator
+        .filter(!initialState.contains(_))
+        .filter(_ != remoteAddr1)
+        .next()
 
       Await.ready(client1("hi"), 1.second)
 
       Await.result(client2.close(), 5.seconds)
-      val itr = registry.iterator.toSeq
+      val itr = registry.iterator.filter(!initialState.contains(_)).toSeq
       assert(itr.contains(remoteAddr1))
       assert(!itr.contains(remoteAddr2))
 
