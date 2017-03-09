@@ -1,8 +1,11 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Service
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.test._
 import com.twitter.util.{Await, Future}
+import org.apache.thrift.protocol.TProtocolFactory
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -19,7 +22,7 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
     def multiply(a: Int, b: Int) = Future { a * b }
     // Re-purpose `complex_return` to return the serversize ClientId.
     def complex_return(someString: String) = Future {
-      val clientIdStr = ClientId.current map { _.name } getOrElse("")
+      val clientIdStr = ClientId.current.map(_.name).getOrElse("")
       new SomeStruct(123, clientIdStr)
     }
     def someway() = Future.Void
@@ -28,7 +31,10 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   }
 
   val ifaceToService = new B.Service(_, _)
-  val serviceToIface = new B.ServiceToClient(_, _)
+  val serviceToIface = new B.ServiceToClient(
+    _: Service[ThriftClientRequest, Array[Byte]],
+    _: TProtocolFactory,
+    ResponseClassifier.Default)
 
   val clientId = "test.devel"
 

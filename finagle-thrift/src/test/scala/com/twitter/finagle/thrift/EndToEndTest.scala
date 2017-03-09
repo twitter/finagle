@@ -65,7 +65,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   val processor = new BServiceImpl()
 
   val ifaceToService = new B.Service(_, _)
-  val serviceToIface = new B.ServiceToClient(_, _)
+  val serviceToIface = new B.ServiceToClient(
+    _: Service[ThriftClientRequest, Array[Byte]],
+    _: TProtocolFactory,
+    ResponseClassifier.Default)
 
   val missingClientIdEx = new IllegalStateException("uh no client id")
   val presentClientIdEx = new IllegalStateException("unexpected client id")

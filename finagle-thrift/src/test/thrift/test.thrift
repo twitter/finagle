@@ -1,18 +1,7 @@
-/* 
-		CHANGING THIS FILE REQUIRES MANUAL REGENERATION 
-		
-E.g.:
-
-thrift --gen java test.thrift
-cd gen-java
-find . -type f -print0 | cpio -pmud0 ../src/test/java
-
-*/
-
-include "fb303.thrift"
-
 namespace java com.twitter.test
 #@namespace scala com.twitter.test.thriftscala
+
+include "fb303.thrift"
 
 exception AnException {}
 
