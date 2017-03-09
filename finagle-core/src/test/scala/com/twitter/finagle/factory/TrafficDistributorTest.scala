@@ -410,10 +410,16 @@ class TrafficDistributorTest extends FunSuite {
     assert(sr.counters(Seq("test", "closes")) == 1)
     assert(sr.counters(Seq("test", "loadbalancer", "adds")) == N)
     assert(sr.counters(Seq("test", "loadbalancer", "removes")) == N)
-    assert(sr.gauges(Seq("test", "loadbalancer", "size"))() == 0)
-    assert(sr.numGauges(Seq("test", "loadbalancer", "size")) == 1)
     assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == 0)
     assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
+
+    // the TrafficDistributor /may/ close the cached Balancer which
+    // holds a reference to the gauge, thus allowing the gauge to be gc-ed.
+    sr.gauges.get(Seq("test", "loadbalancer", "size")) match {
+      case Some(gauge) => assert(gauge() == 0)
+      case None => // it was GC-ed, this is ok too
+    }
+    assert(sr.numGauges(Seq("test", "loadbalancer", "size")) <= 1)
   })
 
   test("close a client") (new StringClient with StringServer {
