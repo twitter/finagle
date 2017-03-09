@@ -20,7 +20,7 @@ object maxReusableBufferSize extends GlobalFlag[StorageUnit](
  * Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
  * Scrooge generates implementations of this builder.
  */
-trait ServiceIfaceBuilder[ServiceIface] {
+trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]] {
   /**
    * Build a client ServiceIface wrapping a binary thrift service.
    *
@@ -114,6 +114,17 @@ object ThriftServiceIface {
     statsFilter(method, stats)
       .andThen(thriftCodecFilter(method, pf))
       .andThen(thriftService)
+  }
+
+  /**
+   * Used in conjunction with [[ServiceIfaceBuilder]] to allow for filtering
+   * of a `ServiceIface`.
+   */
+  trait Filterable[T] {
+    /**
+     * Prepend the given type-agnostic [[Filter]].
+     */
+    def filtered(filter: Filter.TypeAgnostic): T
   }
 
   /**

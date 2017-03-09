@@ -248,6 +248,18 @@ object ThriftMux
       ThriftMuxToMux andThen deserializingClassifier.newClient(dest, label)
     }
 
+    /**
+     * '''Experimental:''' This API is under construction.
+     */
+    private[finagle] def methodBuilder(dest: String): thriftmux.MethodBuilder =
+      thriftmux.MethodBuilder.from(dest, this)
+
+    /**
+     * '''Experimental:''' This API is under construction.
+     */
+    private[finagle] def methodBuilder(dest: Name): thriftmux.MethodBuilder =
+      thriftmux.MethodBuilder.from(dest, this)
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ClientTransportParams[Client] =

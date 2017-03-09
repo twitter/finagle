@@ -13,15 +13,15 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
-import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
+import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
+import org.apache.thrift.protocol._
 import org.junit.runner.RunWith
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -59,7 +59,7 @@ class EndToEndTest extends FunSuite
     val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) =
+        def query(x: String): Future[String] =
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
               Future.value(x+x)
@@ -118,7 +118,7 @@ class EndToEndTest extends FunSuite
 
     def servers(pf: TProtocolFactory): Seq[(String, Closable, Int)] = {
       val iface = new TestService.FutureIface {
-        def query(x: String) =
+        def query(x: String): Future[String] =
           if (x.isEmpty) Future.value(ClientId.current.map(_.name).getOrElse(""))
           else Future.value(x + x)
       }
@@ -207,7 +207,7 @@ class EndToEndTest extends FunSuite
     val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
-        def query(x: String) = throw new Exception("sad panda")
+        def query(x: String): Future[String] = throw new Exception("sad panda")
       })
     val client = Thrift.client.newIface[TestService.FutureIface](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "aclient")
@@ -236,7 +236,7 @@ class EndToEndTest extends FunSuite
       .serveIface(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         new TestService.FutureIface {
-          def query(x: String) = Future.value(x + x)
+          def query(x: String): Future[String] = Future.value(x + x)
         })
 
     val client = Thrift.client
@@ -1108,4 +1108,117 @@ class EndToEndTest extends FunSuite
       await(server.close())
     }
   }
+
+  test("methodBuilder timeouts") {
+    implicit val timer = HashedWheelTimer.Default
+    val service = new TestService.FutureIface {
+      def query(x: String): Future[String] = {
+        Future.sleep(50.millis).before { Future.value(x) }
+      }
+    }
+    val server = ThriftMux.server.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .configured(param.Timer(timer))
+      .withStatsReceiver(stats)
+      .withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    // these should never complete within the timeout
+    val shortTimeout: Service[TestService.Query.Args, TestService.Query.SuccessType] =
+      builder.withTimeoutPerRequest(5.millis)
+        .newServiceIface[TestService.ServiceIface]("fast")
+        .query
+
+    intercept[IndividualRequestTimeoutException] {
+      await(shortTimeout(TestService.Query.Args("shorty")))
+    }
+    eventually {
+      assert(stats.counter("a_label", "fast", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "fast", "logical", "success")() == 0)
+    }
+
+    // these should always complete within the timeout
+    val longTimeout =
+      builder.withTimeoutPerRequest(5.seconds)
+        .newServiceIface[TestService.ServiceIface]("slow")
+        .query
+
+    val result = await(longTimeout(TestService.Query.Args("looong")))
+    assert("looong" == result)
+    eventually {
+      assert(stats.counter("a_label", "slow", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "slow", "logical", "success")() == 1)
+    }
+    await(server.close())
+  }
+
+  test("methodBuilder retries") {
+    val service = new TestService.FutureIface {
+      def query(x: String): Future[String] = x match {
+        case "fail0" => Future.exception(InvalidQueryException(0))
+        case "fail1" => Future.exception(InvalidQueryException(1))
+        case _ => Future.value(x)
+      }
+    }
+    val server = ThriftMux.server.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
+    val stats = new InMemoryStatsReceiver()
+    val tmuxClient = ThriftMux.client
+      .withStatsReceiver(stats)
+      .withLabel("a_label")
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = tmuxClient.methodBuilder(name)
+
+    val retryInvalid = builder
+      .withRetryForClassifier {
+        case ReqRep(_, Throw(InvalidQueryException(_))) =>
+          ResponseClass.RetryableFailure
+      }
+      .newServiceIface[TestService.ServiceIface]("all_invalid")
+      .query
+
+    intercept[InvalidQueryException] {
+      await(retryInvalid(TestService.Query.Args("fail0")))
+    }
+    eventually {
+      assert(stats.counter("a_label", "all_invalid", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "all_invalid", "logical", "success")() == 0)
+      assert(stats.stat("a_label", "all_invalid", "retries")() == Seq(2))
+    }
+
+    val errCode1Succeeds = builder
+      .withRetryForClassifier {
+        case ReqRep(_,  Throw(InvalidQueryException(errorCode))) if errorCode == 0 =>
+          ResponseClass.NonRetryableFailure
+        case ReqRep(_,  Throw(InvalidQueryException(errorCode))) if errorCode == 1 =>
+          ResponseClass.Success
+      }
+      .newServiceIface[TestService.ServiceIface]("err_1")
+      .query
+
+    intercept[InvalidQueryException] {
+      // this is a non-retryable failure
+      await(errCode1Succeeds(TestService.Query.Args("fail0")))
+    }
+    eventually {
+      assert(stats.counter("a_label", "err_1", "logical", "requests")() == 1)
+      assert(stats.counter("a_label", "err_1", "logical", "success")() == 0)
+      assert(stats.stat("a_label", "err_1", "retries")() == Seq(0))
+    }
+
+    intercept[InvalidQueryException] {
+      // this is a "successful" "failure"
+      await(errCode1Succeeds(TestService.Query.Args("fail1")))
+    }
+    eventually {
+      assert(stats.counter("a_label", "err_1", "logical", "requests")() == 2)
+      assert(stats.counter("a_label", "err_1", "logical", "success")() == 1)
+    }
+    await(server.close())
+  }
+
 }
