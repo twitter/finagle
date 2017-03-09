@@ -86,6 +86,12 @@ private[finagle] class ByteBufAsBuf(
     dup.readBytes(bytes, off, dup.readableBytes)
   }
 
+  def write(buffer: java.nio.ByteBuffer): Unit = {
+    checkWriteArgs(buffer.remaining, 0)
+    val dup = underlying.duplicate()
+    dup.readBytes(buffer)
+  }
+
   protected def unsafeByteArrayBuf: Option[ByteArray] =
     if (underlying.hasArray) {
       val bytes = underlying.array

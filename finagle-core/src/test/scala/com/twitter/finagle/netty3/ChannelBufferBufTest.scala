@@ -117,6 +117,16 @@ class ChannelBufferBufTest
     }
   }
 
+  test("write(ByteBuffer)") {
+    forAll { bytes: Array[Byte] =>
+      val buf = new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(bytes))
+      val out = java.nio.ByteBuffer.allocate(bytes.length)
+      buf.write(out)
+      out.flip()
+      assert(new ChannelBufferBuf(ChannelBuffers.wrappedBuffer(out)) == buf)
+    }
+  }
+
   test("process returns -1 when fully processed") {
     forAll { bytes: Array[Byte] =>
       val cb = ChannelBuffers.wrappedBuffer(bytes)

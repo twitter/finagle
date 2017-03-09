@@ -49,6 +49,12 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
     dup.readBytes(bytes, off, dup.readableBytes)
   }
 
+  def write(buffer: java.nio.ByteBuffer): Unit = {
+    checkWriteArgs(buffer.remaining, 0)
+    val dup = underlying.duplicate()
+    dup.readBytes(buffer)
+  }
+
   def slice(i: Int, j: Int): Buf = {
     checkSliceArgs(i, j)
     if (isSliceEmpty(i, j)) Buf.Empty

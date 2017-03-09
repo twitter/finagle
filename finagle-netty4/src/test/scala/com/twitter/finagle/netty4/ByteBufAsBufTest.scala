@@ -2,11 +2,12 @@ package com.twitter.finagle.netty4
 
 import com.twitter.io.Buf
 import io.netty.buffer.Unpooled
+import java.nio.ByteBuffer
 import org.junit.runner.RunWith
-import org.scalacheck.{Gen, Arbitrary}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
 class ByteBufAsBufTest
@@ -109,6 +110,16 @@ class ByteBufAsBufTest
       intercept[IndexOutOfBoundsException] {
         buf.get(bytes.length)
       }
+    }
+  }
+
+  test("write(ByteBuffer)") {
+    forAll { bytes: Array[Byte] =>
+      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+      val out = ByteBuffer.allocate(bytes.length)
+      buf.write(out)
+      out.flip()
+      assert(new ByteBufAsBuf(Unpooled.wrappedBuffer(out)) == buf)
     }
   }
 
