@@ -4,10 +4,11 @@ import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.framer.Framer
 import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Stack}
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, Promise, Stopwatch}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
@@ -45,6 +46,11 @@ private[finagle] object Netty4Transporter {
     params: Stack.Params,
     transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = new Transporter[In, Out] {
+    private[this] val Stats(statsReceiver) = params[Stats]
+
+    private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
+    private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
+    private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
 
     def remoteAddress: SocketAddress = addr
 
@@ -90,6 +96,7 @@ private[finagle] object Netty4Transporter {
       sendBufSize.foreach(bootstrap.option[JInt](ChannelOption.SO_SNDBUF, _))
       recvBufSize.foreach(bootstrap.option[JInt](ChannelOption.SO_RCVBUF, _))
 
+      val elapsed = Stopwatch.start()
       val nettyConnectF = bootstrap.connect(addr)
 
       val transportP = Promise[Transport[In, Out]]()
@@ -98,12 +105,21 @@ private[finagle] object Netty4Transporter {
 
       nettyConnectF.addListener(new ChannelFutureListener {
         def operationComplete(channelF: ChannelFuture): Unit = {
-          if (channelF.isCancelled()) transportP.setException(CancelledConnectionEstablishment)
-          else if (channelF.cause != null) transportP.setException(channelF.cause match {
-            case e: UnresolvedAddressException => e
-            case NonFatal(e) => Failure.rejected(e)
-          })
-          else transportP.setValue(Transport.cast[In, Out](transportFactory(channelF.channel())))
+          val latency = elapsed().inMilliseconds
+          if (channelF.isCancelled()) {
+            cancelledConnects.incr()
+            transportP.setException(CancelledConnectionEstablishment)
+          } else if (channelF.cause != null) {
+            failedConnectLatencyStat.add(latency)
+            transportP.setException(channelF.cause match {
+              case e: UnresolvedAddressException => e
+              case NonFatal(e) => Failure.rejected(e)
+            })
+          }
+          else {
+            connectLatencyStat.add(latency)
+            transportP.setValue(Transport.cast[In, Out](transportFactory(channelF.channel())))
+          }
         }
       })
 
