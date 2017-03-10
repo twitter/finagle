@@ -1,12 +1,10 @@
 package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners
-import io.netty.channel.{
-  Channel, ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter
-}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.handler.proxy.ProxyHandler
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
-import java.net.SocketAddress
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
+import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * An internal handler that upgrades the pipeline to delay connect-promise satisfaction until the
@@ -77,7 +75,18 @@ private[netty4] class Netty4ProxyConnectHandler(
       }
     })
 
-    ctx.connect(remote, local, proxyConnectPromise)
+    // We're replacing resolved InetSocketAddress with unresolved one such that
+    // Netty's `HttpProxyHandler` will prefer hostname over the IP address as a destination
+    // for a proxy server. This is a safer way to do HTTP proxy handshakes since not
+    // all HTTP proxy servers allow for IP addresses to be passed as destinations/host headers.
+    val unresolvedRemote = remote match {
+      case isa: InetSocketAddress if !isa.isUnresolved =>
+        InetSocketAddress.createUnresolved(isa.getHostName, isa.getPort)
+      case _ =>
+        remote
+    }
+
+    ctx.connect(unresolvedRemote, local, proxyConnectPromise)
   }
 
   // We don't override either `exceptionCaught` or `channelInactive` here since `ProxyHandler`
