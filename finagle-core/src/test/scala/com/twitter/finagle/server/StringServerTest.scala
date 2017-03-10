@@ -86,7 +86,7 @@ class StringServerTest extends FunSuite
     val client2 = stringClient.newService(Name.bound(Address(boundAddress)), "stringClient2")
   }
 
-  test("ConnectionRegistry has the right size") {
+  ignore("ConnectionRegistry has the right size") {
     new Ctx {
       val initialRegistrySize = registry.iterator.size
 
@@ -105,7 +105,7 @@ class StringServerTest extends FunSuite
     }
   }
 
-  test("ConnectionRegistry correctly removes entries upon client close") {
+  ignore("ConnectionRegistry correctly removes entries upon client close") {
     new Ctx {
       val initialState = registry.iterator.toSeq
 
