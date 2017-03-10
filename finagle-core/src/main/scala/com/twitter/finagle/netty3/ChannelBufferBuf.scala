@@ -52,7 +52,10 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
   def write(buffer: java.nio.ByteBuffer): Unit = {
     checkWriteArgs(buffer.remaining, 0)
     val dup = underlying.duplicate()
+    val currentLimit = buffer.limit
+    buffer.limit(buffer.position + length)
     dup.readBytes(buffer)
+    buffer.limit(currentLimit)
   }
 
   def slice(i: Int, j: Int): Buf = {

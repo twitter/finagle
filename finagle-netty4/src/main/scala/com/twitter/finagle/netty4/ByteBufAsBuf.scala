@@ -89,7 +89,10 @@ private[finagle] class ByteBufAsBuf(
   def write(buffer: java.nio.ByteBuffer): Unit = {
     checkWriteArgs(buffer.remaining, 0)
     val dup = underlying.duplicate()
+    val currentLimit = buffer.limit
+    buffer.limit(buffer.position + length)
     dup.readBytes(buffer)
+    buffer.limit(currentLimit)
   }
 
   protected def unsafeByteArrayBuf: Option[ByteArray] =

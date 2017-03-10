@@ -114,11 +114,49 @@ class ByteBufAsBufTest
   }
 
   test("write(ByteBuffer)") {
+    withBufferOfExcessSize(0)
+  }
+
+  test("write(ByteBuffer) when dest has greater capacity than necessary") {
+    withBufferOfExcessSize(1)
+  }
+
+  private def withBufferOfExcessSize(excess: Int): Unit = {
     forAll { bytes: Array[Byte] =>
       val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      val out = ByteBuffer.allocate(bytes.length)
+      val out = ByteBuffer.allocate(bytes.length + excess)
       buf.write(out)
+      assert(out.remaining == excess)
       out.flip()
+      assert(new ByteBufAsBuf(Unpooled.wrappedBuffer(out)) == buf)
+    }
+  }
+
+  test("write(ByteBuffer) validates output ByteBuffer is large enough") {
+    forAll { bytes: Array[Byte] =>
+      whenever (bytes.length > 0) {
+        val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+        val out = java.nio.ByteBuffer.allocate(bytes.length - 1)
+        val clonedIndexes = out.duplicate()
+        val ex = intercept[IllegalArgumentException] {
+          buf.write(out)
+        }
+        assert(ex.getMessage.startsWith("Output too small"))
+        // Make sure the indexes of the output buffer were not modified
+        assert(out == clonedIndexes)
+      }
+    }
+  }
+
+  test("write(ByteBuffer) with existing data") {
+    forAll { bytes: Array[Byte] =>
+      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+      val out = java.nio.ByteBuffer.allocate(bytes.length + 1)
+      out.put(1.toByte)
+      buf.write(out)
+      assert(out.remaining == 0)
+      out.flip()
+      assert(out.get() == 1)
       assert(new ByteBufAsBuf(Unpooled.wrappedBuffer(out)) == buf)
     }
   }
