@@ -392,12 +392,6 @@ their name.">
                           HttpTracing
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MapHeaderMap$.html" title=""></a>
-                        <a class="class" href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap"></a>
-                        <a href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap">
-                          MapHeaderMap
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">
@@ -567,7 +561,7 @@ its credentials from a provided CredentialSource...">
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed abstract </span>
+        <span class="modifier">final </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -576,18 +570,14 @@ its credentials from a provided CredentialSource...">
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents the HTTP method.</p><p>For Java-friendly enums, see <a href="Methods.html" class="extype" name="com.twitter.finagle.http.Methods">com.twitter.finagle.http.Methods</a>.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents the HTTP method.</p><p>The method is a case-sensitive string defined as part of the request
+line of the HTTP protocol.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>https://tools.ietf.org/html/rfc7230#section-3.1.1</p></span><span class="cmt"><p>For Java-friendly enums, see <a href="Methods.html" class="extype" name="com.twitter.finagle.http.Methods">com.twitter.finagle.http.Methods</a>.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="Method$$Connect$.html" class="extype" name="com.twitter.finagle.http.Method.Connect">Connect</a>, <a href="Method$$Delete$.html" class="extype" name="com.twitter.finagle.http.Method.Delete">Delete</a>, <a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Get</a>, <a href="Method$$Head$.html" class="extype" name="com.twitter.finagle.http.Method.Head">Head</a>, <a href="Method$$Options$.html" class="extype" name="com.twitter.finagle.http.Method.Options">Options</a>, <a href="Method$$Patch$.html" class="extype" name="com.twitter.finagle.http.Method.Patch">Patch</a>, <a href="Method$$Post$.html" class="extype" name="com.twitter.finagle.http.Method.Post">Post</a>, <a href="Method$$Put$.html" class="extype" name="com.twitter.finagle.http.Method.Put">Put</a>, <a href="Method$$Trace$.html" class="extype" name="com.twitter.finagle.http.Method.Trace">Trace</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -741,10 +731,10 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
+    </li><li name="com.twitter.finagle.http.Method#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(other:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Method.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/Method.html#equals(other:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -753,10 +743,10 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="other">other: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Method">Method</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -795,7 +785,7 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Method#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Method.html#hashCode():Int" title="Permalink">
@@ -810,7 +800,7 @@ its credentials from a provided CredentialSource...">
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Method">Method</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -827,6 +817,22 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Method#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="name:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Method.html#name:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

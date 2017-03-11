@@ -167,12 +167,17 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../index.html">
+        <a title="This package implements client side load balancing algorithms." href="../index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">

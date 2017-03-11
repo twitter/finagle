@@ -392,12 +392,6 @@ their name.">
                           HttpTracing
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MapHeaderMap$.html" title=""></a>
-                        <a class="class" href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap"></a>
-                        <a href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap">
-                          MapHeaderMap
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">
@@ -696,10 +690,8 @@ its credentials from a provided CredentialSource...">
         <span class="name">apply</span><span class="params">(<span name="headers">headers: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)*</span>)</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       
-      <p class="shortcomment cmt">Create HeaderMap from header list.</p><div class="fullcomment"><div class="comment cmt"><p>Create HeaderMap from header list.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@varargs</span><span class="args">()</span>
-              
-        </dd></dl></div>
+      <p class="shortcomment cmt">Create a new HeaderMap from header list.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new HeaderMap from header list.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the headers are added to the new <code>HeaderMap</code> via <code>add</code> operations.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -856,6 +848,22 @@ its credentials from a provided CredentialSource...">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HeaderMap#newHeaderMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="newHeaderMap:com.twitter.finagle.http.HeaderMap"></a><a id="newHeaderMap:HeaderMap"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HeaderMap$.html#newHeaderMap:com.twitter.finagle.http.HeaderMap" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newHeaderMap</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a new, empty HeaderMap.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">

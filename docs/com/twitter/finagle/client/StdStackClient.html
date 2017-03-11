@@ -232,10 +232,8 @@ com.twitter.finagle.client.StackClient.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="Transporter.html" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]]."></a>
-                        <a href="Transporter.html" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]].">
+                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]]."></a>
+                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]].">
                           Transporter
                         </a>
                       </li>
@@ -407,9 +405,9 @@ Together with a <code>Transporter</code>, it forms the foundation of a
 finagle client. Concrete implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>See also</dt><dd><span class="cmt"><p><a href="../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#newTransporter" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newTransporter():com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]"></a><a id="newTransporter():Transporter[In,Out]"></a>
+      <a id="newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]"></a><a id="newTransporter(SocketAddress):Transporter[In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newTransporter():com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -418,7 +416,7 @@ finagle client. Concrete implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newTransporter</span><span class="params">()</span><span class="result">: <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>]</span>
+        <span class="name">newTransporter</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a typed <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.

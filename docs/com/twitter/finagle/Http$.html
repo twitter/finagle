@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1950,7 +1955,7 @@ request.">
         <a title="configure alternative http 1.1 implementations
 " href="Http$$HttpImpl.html">
               <span class="name">HttpImpl</span>
-            </a><span class="params">(<span name="clientTransport">clientTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>, <span name="serverTransport">serverTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>, <span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="clientTransport">clientTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>, <span name="serverTransport">serverTransport: (<a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]) ⇒ <span class="extype" name="com.twitter.finagle.http.exp.StreamTransport">StreamTransport</span>[<a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>]</span>, <span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">configure alternative http 1.1 implementations
@@ -2030,6 +2035,22 @@ request.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Http#Http2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Http2:com.twitter.finagle.Stack.Params"></a><a id="Http2:Params"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Http$.html#Http2:com.twitter.finagle.Stack.Params" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Http2</span><span class="result">: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.Http#Netty3Impl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Netty3Impl:com.twitter.finagle.Http.HttpImpl"></a><a id="Netty3Impl:HttpImpl"></a>
       <span class="permalink">

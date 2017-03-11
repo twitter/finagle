@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1087,12 +1092,6 @@ the hood.">
                           NullReporterFactory
                         </a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="OnReady.html" title="A base type for something that signals its readiness asynchronously."></a>
-                        <a href="OnReady.html" title="A base type for something that signals its readiness asynchronously.">
-                          OnReady
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="Proc$.html" title=""></a>
                         <a class="trait" href="Proc.html" title="A Proc is a process that can receive messages."></a>
                         <a href="Proc.html" title="A Proc is a process that can receive messages.">
@@ -1103,12 +1102,6 @@ the hood.">
                         <a class="trait" href="ReporterFactory.html" title=""></a>
                         <a href="ReporterFactory.html" title="">
                           ReporterFactory
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="Ring$.html" title=""></a>
-                        <a class="class" href="Ring.html" title="Class Ring implements a hash ring."></a>
-                        <a href="Ring.html" title="Class Ring implements a hash ring.">
-                          Ring
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="Rng$.html" title="See Rngs for Java compatible APIs."></a>
@@ -1337,24 +1330,6 @@ functions are executed in the order that they are provided to <code>await</code>
       </span>
       
       
-    </li><li name="com.twitter.finagle.util.OnReady" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="OnReadyextendsAnyRef"></a><a id="OnReady:OnReady"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/index.html#OnReadyextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="A base type for something that signals its readiness asynchronously." href="OnReady.html">
-              <span class="name">OnReady</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A base type for something that signals its readiness asynchronously.</p>
     </li><li name="com.twitter.finagle.util.Proc" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Proc[-T]extendsChan[T]"></a><a id="Proc[-T]:Proc[T]"></a>
       <span class="permalink">
@@ -1394,36 +1369,6 @@ delivered in the order received.</p><p>They can be thought of as featherweight a
       </span>
       
       
-    </li><li name="com.twitter.finagle.util.Ring" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RingextendsAnyRef"></a><a id="Ring:Ring"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/index.html#RingextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Class Ring implements a hash ring." href="Ring.html">
-              <span class="name">Ring</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Class <code>Ring</code> implements a hash ring.</p><div class="fullcomment"><div class="comment cmt"><p>Class <code>Ring</code> implements a hash ring. Given an array mapping
-indices to positions, the ring supplies the reverse mapping: to
-which index does a position belong?</p><p>Its distinguishing feature is that <code>Ring</code> can pick random
-positions in a range. (And then map them to their corresponding
-indices.) Ring can also pick without replacement two elements from
-a range.</p><pre><span class="kw">val</span> r = <span class="kw">new</span> Ring(<span class="std">Array</span>(<span class="num">1</span>,<span class="num">5</span>,<span class="num">20</span>))
-r(<span class="num">0</span>)  == <span class="num">0</span>
-r(<span class="num">1</span>)  == <span class="num">0</span>
-r(<span class="num">2</span>)  == <span class="num">1</span>
-r(<span class="num">5</span>)  == <span class="num">1</span>
-r(<span class="num">6</span>)  == <span class="num">2</span>
-r(<span class="num">20</span>) == <span class="num">2</span>
-r(<span class="num">21</span>) == <span class="num">0</span> <span class="cmt">// Wraps around; it's a ring!</span></pre></div></div>
     </li><li name="com.twitter.finagle.util.Rng" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RngextendsAnyRef"></a><a id="Rng:Rng"></a>
       <span class="permalink">
@@ -1717,24 +1662,6 @@ more resilient to varying Java packaging configurations than ServiceLoader.
       <span class="symbol">
         <a title="" href="Proc$.html">
               <span class="name">Proc</span>
-            </a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.util.Ring" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Ring"></a><a id="Ring:Ring"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/index.html#Ring" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Ring$.html">
-              <span class="name">Ring</span>
             </a>
       </span>
       

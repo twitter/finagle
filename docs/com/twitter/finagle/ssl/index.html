@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -836,7 +841,87 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.client" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="client"></a><a id="client:client"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#client" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="client/index.html">
+              <span class="name">client</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.server" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="server"></a><a id="server:server"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="server/index.html">
+              <span class="name">server</span>
+            </a>
+      </span>
+      
+      
     </li><li class="current-entities indented4">
+                        <a class="object" href="ApplicationProtocols$.html" title=""></a>
+                        <a class="trait" href="ApplicationProtocols.html" title="ApplicationProtocols represent the prioritized list of Application-Layer Protocol
+Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
+Engine should support."></a>
+                        <a href="ApplicationProtocols.html" title="ApplicationProtocols represent the prioritized list of Application-Layer Protocol
+Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
+Engine should support.">
+                          ApplicationProtocols
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ApplicationProtocolsConfig.html" title="Java APIs for ApplicationProtocols."></a>
+                        <a href="ApplicationProtocolsConfig.html" title="Java APIs for ApplicationProtocols.">
+                          ApplicationProtocolsConfig
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="CipherSuites$.html" title=""></a>
+                        <a class="trait" href="CipherSuites.html" title="CipherSuites represent the collection of prioritized cipher suites that should be
+enabled for a TLS Engine."></a>
+                        <a href="CipherSuites.html" title="CipherSuites represent the collection of prioritized cipher suites that should be
+enabled for a TLS Engine.">
+                          CipherSuites
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CipherSuitesConfig.html" title="Java APIs for CipherSuites."></a>
+                        <a href="CipherSuitesConfig.html" title="Java APIs for CipherSuites.">
+                          CipherSuitesConfig
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ClientAuth$.html" title=""></a>
+                        <a class="trait" href="ClientAuth.html" title="ClientAuth represents whether one-way or two-way TLS should
+be used with a TLS Engine."></a>
+                        <a href="ClientAuth.html" title="ClientAuth represents whether one-way or two-way TLS should
+be used with a TLS Engine.">
+                          ClientAuth
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ClientAuthConfig.html" title="Java APIs for ClientAuth."></a>
+                        <a href="ClientAuthConfig.html" title="Java APIs for ClientAuth.">
+                          ClientAuthConfig
+                        </a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="Engine.html" title=""></a>
                         <a href="Engine.html" title="">
@@ -847,6 +932,20 @@ finagle clients and servers.
                         <a class="object" href="JSSE$.html" title=""></a>
                         <a href="JSSE$.html" title="">
                           JSSE
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="KeyCredentials$.html" title=""></a>
+                        <a class="trait" href="KeyCredentials.html" title="KeyCredentials represent the items necessary for this configured
+TLS Engine to authenticate itself to a remote peer."></a>
+                        <a href="KeyCredentials.html" title="KeyCredentials represent the items necessary for this configured
+TLS Engine to authenticate itself to a remote peer.">
+                          KeyCredentials
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="KeyCredentialsConfig.html" title="Java APIs for KeyCredentials."></a>
+                        <a href="KeyCredentialsConfig.html" title="Java APIs for KeyCredentials.">
+                          KeyCredentialsConfig
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -865,6 +964,20 @@ via openssl, which is then loaded into a resulting KeyManager
                           PEMEncodedKeyManager
                         </a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="Protocols$.html" title=""></a>
+                        <a class="trait" href="Protocols.html" title="Protocols represent the versions of the TLS protocol which should
+be enabled with a given TLS Engine."></a>
+                        <a href="Protocols.html" title="Protocols represent the versions of the TLS protocol which should
+be enabled with a given TLS Engine.">
+                          Protocols
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ProtocolsConfig.html" title="Java APIs for Protocols."></a>
+                        <a href="ProtocolsConfig.html" title="Java APIs for Protocols.">
+                          ProtocolsConfig
+                        </a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Shell$.html" title=""></a>
                         <a href="Shell$.html" title="">
@@ -875,6 +988,32 @@ via openssl, which is then loaded into a resulting KeyManager
                         <a class="object" href="Ssl$.html" title=""></a>
                         <a href="Ssl$.html" title="">
                           Ssl
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SslConfigurationException.html" title="SslConfigurationException is an exception which is thrown by
+a particular engine factory when the engine factory does not
+support the collection of parameters specified by the
+SslClientConfiguration or the SslServerConfiguration."></a>
+                        <a href="SslConfigurationException.html" title="SslConfigurationException is an exception which is thrown by
+a particular engine factory when the engine factory does not
+support the collection of parameters specified by the
+SslClientConfiguration or the SslServerConfiguration.">
+                          SslConfigurationException
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="TrustCredentials$.html" title=""></a>
+                        <a class="trait" href="TrustCredentials.html" title="TrustCredentials represent the items necessary for this configured
+TLS Engine to verify a remote peer's credentials."></a>
+                        <a href="TrustCredentials.html" title="TrustCredentials represent the items necessary for this configured
+TLS Engine to verify a remote peer's credentials.">
+                          TrustCredentials
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="TrustCredentialsConfig.html" title="Java APIs for TrustCredentials."></a>
+                        <a href="TrustCredentialsConfig.html" title="Java APIs for TrustCredentials.">
+                          TrustCredentialsConfig
                         </a>
                       </li><li name="com.twitter.finagle.stats" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stats"></a><a id="stats:stats"></a>
@@ -1147,7 +1286,139 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.ssl.Engine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.ssl.ApplicationProtocols" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ApplicationProtocolsextendsAnyRef"></a><a id="ApplicationProtocols:ApplicationProtocols"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ApplicationProtocolsextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="ApplicationProtocols represent the prioritized list of Application-Layer Protocol
+Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
+Engine should support." href="ApplicationProtocols.html">
+              <span class="name">ApplicationProtocols</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ApplicationProtocols represent the prioritized list of Application-Layer Protocol
+Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
+<a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> should support.</p><div class="fullcomment"><div class="comment cmt"><p>ApplicationProtocols represent the prioritized list of Application-Layer Protocol
+Negotiation (ALPN) or Next Protocol Negotiation (NPN) values that a configured TLS
+<a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> should support.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="ApplicationProtocolsConfig.html" class="extype" name="com.twitter.finagle.ssl.ApplicationProtocolsConfig">ApplicationProtocolsConfig</a>.</p></span>, <span class="cmt"><p>Currently supported values include IANA Registered Application-Layer Protocol
+Negotiation (ALPN) IDs and &quot;spdy/3.1&quot; which is commonly used with Next Protocol
+Negotiation (NPN).</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.ApplicationProtocolsConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ApplicationProtocolsConfigextendsObject"></a><a id="ApplicationProtocolsConfig:ApplicationProtocolsConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ApplicationProtocolsConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for ApplicationProtocols." href="ApplicationProtocolsConfig.html">
+              <span class="name">ApplicationProtocolsConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="ApplicationProtocols.html" class="extype" name="com.twitter.finagle.ssl.ApplicationProtocols">ApplicationProtocols</a></code>.</p>
+    </li><li name="com.twitter.finagle.ssl.CipherSuites" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="CipherSuitesextendsAnyRef"></a><a id="CipherSuites:CipherSuites"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#CipherSuitesextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="CipherSuites represent the collection of prioritized cipher suites that should be
+enabled for a TLS Engine." href="CipherSuites.html">
+              <span class="name">CipherSuites</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">CipherSuites represent the collection of prioritized cipher suites that should be
+enabled for a TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>.</p><div class="fullcomment"><div class="comment cmt"><p>CipherSuites represent the collection of prioritized cipher suites that should be
+enabled for a TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>. A cipher suite, for protocols prior to TLSv1.3, is a
+combination of various algorithms for items such as key exchange, authentication
+type, bulk encryption algorithm, and message authentication code.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="CipherSuitesConfig.html" class="extype" name="com.twitter.finagle.ssl.CipherSuitesConfig">CipherSuitesConfig</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.CipherSuitesConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CipherSuitesConfigextendsObject"></a><a id="CipherSuitesConfig:CipherSuitesConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#CipherSuitesConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for CipherSuites." href="CipherSuitesConfig.html">
+              <span class="name">CipherSuitesConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="CipherSuites.html" class="extype" name="com.twitter.finagle.ssl.CipherSuites">CipherSuites</a></code>.</p>
+    </li><li name="com.twitter.finagle.ssl.ClientAuth" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ClientAuthextendsAnyRef"></a><a id="ClientAuth:ClientAuth"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ClientAuthextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="ClientAuth represents whether one-way or two-way TLS should
+be used with a TLS Engine." href="ClientAuth.html">
+              <span class="name">ClientAuth</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">ClientAuth represents whether one-way or two-way TLS should
+be used with a TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>.</p><div class="fullcomment"><div class="comment cmt"><p>ClientAuth represents whether one-way or two-way TLS should
+be used with a TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>. One-way TLS authentication is
+where the server sends its certificate to the client for
+verification. Two-way or mutual TLS is where the server
+sends its certificate to the client and the client sends its
+certificate to the server for verification.</p><p>This parameter is only used by <span class="extype" name="SslServerConfiguration">SslServerConfiguration</span>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="ClientAuthConfig.html" class="extype" name="com.twitter.finagle.ssl.ClientAuthConfig">ClientAuthConfig</a>.</p></span>, <span class="cmt"><p>Not all engine factories provide support for client
+authentication, especially with some underlying native engines.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.ClientAuthConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientAuthConfigextendsObject"></a><a id="ClientAuthConfig:ClientAuthConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ClientAuthConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for ClientAuth." href="ClientAuthConfig.html">
+              <span class="name">ClientAuthConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="ClientAuth.html" class="extype" name="com.twitter.finagle.ssl.ClientAuth">ClientAuth</a></code>.</p>
+    </li><li name="com.twitter.finagle.ssl.Engine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EngineextendsProductwithSerializable"></a><a id="Engine:Engine"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/ssl/index.html#EngineextendsProductwithSerializable" title="Permalink">
@@ -1165,6 +1436,151 @@ generator.
       </span>
       
       
+    </li><li name="com.twitter.finagle.ssl.KeyCredentials" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="KeyCredentialsextendsAnyRef"></a><a id="KeyCredentials:KeyCredentials"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#KeyCredentialsextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="KeyCredentials represent the items necessary for this configured
+TLS Engine to authenticate itself to a remote peer." href="KeyCredentials.html">
+              <span class="name">KeyCredentials</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">KeyCredentials represent the items necessary for this configured
+TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> to authenticate itself to a remote peer.</p><div class="fullcomment"><div class="comment cmt"><p>KeyCredentials represent the items necessary for this configured
+TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> to authenticate itself to a remote peer. This
+generally includes an X.509 certificate and a private key.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="KeyCredentialsConfig.html" class="extype" name="com.twitter.finagle.ssl.KeyCredentialsConfig">KeyCredentialsConfig</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.KeyCredentialsConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyCredentialsConfigextendsObject"></a><a id="KeyCredentialsConfig:KeyCredentialsConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#KeyCredentialsConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for KeyCredentials." href="KeyCredentialsConfig.html">
+              <span class="name">KeyCredentialsConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="KeyCredentials.html" class="extype" name="com.twitter.finagle.ssl.KeyCredentials">KeyCredentials</a></code>.</p>
+    </li><li name="com.twitter.finagle.ssl.Protocols" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ProtocolsextendsAnyRef"></a><a id="Protocols:Protocols"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ProtocolsextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Protocols represent the versions of the TLS protocol which should
+be enabled with a given TLS Engine." href="Protocols.html">
+              <span class="name">Protocols</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Protocols represent the versions of the TLS protocol which should
+be enabled with a given TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Protocols represent the versions of the TLS protocol which should
+be enabled with a given TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="ProtocolsConfig.html" class="extype" name="com.twitter.finagle.ssl.ProtocolsConfig">ProtocolsConfig</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.ProtocolsConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ProtocolsConfigextendsObject"></a><a id="ProtocolsConfig:ProtocolsConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ProtocolsConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for Protocols." href="ProtocolsConfig.html">
+              <span class="name">ProtocolsConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="Protocols.html" class="extype" name="com.twitter.finagle.ssl.Protocols">Protocols</a></code>.</p>
+    </li><li name="com.twitter.finagle.ssl.SslConfigurationException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslConfigurationExceptionextendsExceptionwithProductwithSerializable"></a><a id="SslConfigurationException:SslConfigurationException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#SslConfigurationExceptionextendsExceptionwithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="SslConfigurationException is an exception which is thrown by
+a particular engine factory when the engine factory does not
+support the collection of parameters specified by the
+SslClientConfiguration or the SslServerConfiguration." href="SslConfigurationException.html">
+              <span class="name">SslConfigurationException</span>
+            </a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">SslConfigurationException is an exception which is thrown by
+a particular engine factory when the engine factory does not
+support the collection of parameters specified by the
+<span class="extype" name="SslClientConfiguration">SslClientConfiguration</span> or the <span class="extype" name="SslServerConfiguration">SslServerConfiguration</span>.</p>
+    </li><li name="com.twitter.finagle.ssl.TrustCredentials" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="TrustCredentialsextendsAnyRef"></a><a id="TrustCredentials:TrustCredentials"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#TrustCredentialsextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="TrustCredentials represent the items necessary for this configured
+TLS Engine to verify a remote peer's credentials." href="TrustCredentials.html">
+              <span class="name">TrustCredentials</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">TrustCredentials represent the items necessary for this configured
+TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> to verify a remote peer's credentials.</p><div class="fullcomment"><div class="comment cmt"><p>TrustCredentials represent the items necessary for this configured
+TLS <a href="Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a> to verify a remote peer's credentials.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Java users: See <a href="TrustCredentialsConfig.html" class="extype" name="com.twitter.finagle.ssl.TrustCredentialsConfig">TrustCredentialsConfig</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.TrustCredentialsConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TrustCredentialsConfigextendsObject"></a><a id="TrustCredentialsConfig:TrustCredentialsConfig"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#TrustCredentialsConfigextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java APIs for TrustCredentials." href="TrustCredentialsConfig.html">
+              <span class="name">TrustCredentialsConfig</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java APIs for <code><a href="TrustCredentials.html" class="extype" name="com.twitter.finagle.ssl.TrustCredentials">TrustCredentials</a></code>.</p>
     </li></ol>
             </div>
 
@@ -1173,7 +1589,61 @@ generator.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.ssl.JSSE" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.ssl.ApplicationProtocols" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ApplicationProtocols"></a><a id="ApplicationProtocols:ApplicationProtocols"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ApplicationProtocols" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ApplicationProtocols$.html">
+              <span class="name">ApplicationProtocols</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.CipherSuites" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CipherSuites"></a><a id="CipherSuites:CipherSuites"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#CipherSuites" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CipherSuites$.html">
+              <span class="name">CipherSuites</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.ClientAuth" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientAuth"></a><a id="ClientAuth:ClientAuth"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#ClientAuth" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ClientAuth$.html">
+              <span class="name">ClientAuth</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.JSSE" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="JSSE"></a><a id="JSSE:JSSE"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/ssl/index.html#JSSE" title="Permalink">
@@ -1187,6 +1657,24 @@ generator.
       <span class="symbol">
         <a title="" href="JSSE$.html">
               <span class="name">JSSE</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.KeyCredentials" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyCredentials"></a><a id="KeyCredentials:KeyCredentials"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#KeyCredentials" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="KeyCredentials$.html">
+              <span class="name">KeyCredentials</span>
             </a>
       </span>
       
@@ -1233,6 +1721,24 @@ via openssl, which is then loaded into a resulting KeyManager
 </p><div class="fullcomment"><div class="comment cmt"><p>Take a PEM-encoded cert and key and turn it into a PKCS#12 keystore
 via openssl, which is then loaded into a resulting KeyManager
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Array[KeyManager]</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.ssl.Protocols" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Protocols"></a><a id="Protocols:Protocols"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#Protocols" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Protocols$.html">
+              <span class="name">Protocols</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.ssl.Shell" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Shell"></a><a id="Shell:Shell"></a>
       <span class="permalink">
@@ -1265,6 +1771,24 @@ via openssl, which is then loaded into a resulting KeyManager
       <span class="symbol">
         <a title="" href="Ssl$.html">
               <span class="name">Ssl</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.TrustCredentials" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TrustCredentials"></a><a id="TrustCredentials:TrustCredentials"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/ssl/index.html#TrustCredentials" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="TrustCredentials$.html">
+              <span class="name">TrustCredentials</span>
             </a>
       </span>
       

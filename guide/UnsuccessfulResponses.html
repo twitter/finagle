@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Unsuccessful Responses &#8212; Finagle 6.43.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.43.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="next" title="FAQ" href="FAQ.html" />
+    <link rel="prev" title="Metrics" href="Metrics.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="FAQ.html" title="FAQ"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Metrics.html" title="Metrics"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="unsuccessful-responses">
+<h1>Unsuccessful Responses<a class="headerlink" href="#unsuccessful-responses" title="Permalink to this headline">¶</a></h1>
+<p>In normal operation, the majority of requests follow the &#8220;successful
+response&#8221; code path. This is generally easy to reason about and receives lots of
+developer attention. However, many things can and do go wrong in complex systems
+that are caused by subtle behaviors which can be hard to detect and plan for.
+Finagle aims to help services gracefully degrade whenever possible.</p>
+<p>It is important to understand that there are many ways a service can respond to
+a request unsuccessfully. Some, but not all of those responses may be due to
+exceptional cases. In Finagle, each response is represented as a
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-core/src/main/scala/com/twitter/util/Future.scala">Future</a> which may be satisfied
+with either a <cite>Return</cite> or <cite>Throw</cite>. From a user&#8217;s point of view, either case could be
+considered successful or not, even though considering a <cite>Throw</cite> result as a
+successful response is an anti-pattern.</p>
+<p>For instance, an unsuccessful HTTP request may be satisfied with a
+<cite>Return(HttpResponse)</cite> where the response code is 5XX or some kind of
+<cite>Throw(LostConnection)</cite>. Another possibility is that a service takes far too
+long to reply or never replies at all. In this case, Finagle may transform the
+lack of reply into a timeout exception (if a timeout is configured. There is
+no timeout by default). This aims to provide some clarity around unsuccessful
+responses and how Finagle deals with them.</p>
+<div class="section" id="types-of-unsuccessful-responses">
+<h2>Types of Unsuccessful Responses<a class="headerlink" href="#types-of-unsuccessful-responses" title="Permalink to this headline">¶</a></h2>
+<p>Since Finagle is based on <cite>Futures</cite> which may be satisfied with arbitrary
+<cite>Throwables</cite>, the state space of possible unsuccessful responses is very large.
+They fall into the following categories.</p>
+<dl class="docutils">
+<dt><strong>Throwables with FailureFlags</strong></dt>
+<dd><a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/FailureFlags.scala">FailureFlags</a> allow for
+signaling about how to handle the response. Some <cite>FailureFlags</cite> are propagated
+across service boundaries over ThriftMux and Http. See <a class="reference internal" href="#failure-flags">Failure Flags</a> below.</dd>
+<dt><strong>Throwables with Sources</strong></dt>
+<dd><p class="first">Sources contain additional information about what was happening when the
+exception was encountered. A throwable may have both Sources and FailureFlags.</p>
+<ul class="last simple">
+<li>Note: <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">com.twitter.finagle.Failures</a>,
+which can sometimes be seen in logs, are un-named exceptions which can contain
+both sources and FailureFlags. Failures lack specificity of named exceptions.</li>
+</ul>
+</dd>
+<dt><strong>Finagle Exceptions</strong></dt>
+<dd>Internally, Finagle has exceptions for many different
+occasions. Many of these can be found in
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">Exceptions.scala</a>. Occasionally,
+these will be defined elsewhere, such as in a relevant module. These exceptions
+cover common cases that Finagle may encounter when servicing a request, such as
+<cite>ConnectionRefusedException</cite> when a connection to a given address is refused,
+or a <cite>RequestTimeoutException</cite> when a service fails to respond in a prescribed
+amount of time.</dd>
+<dt><strong>Protocol Specific Unsuccessful Responses</strong></dt>
+<dd>Some protocols have built-in support for a wide range of unsuccessful responses.
+For example HTTP provides many response codes such as 2XX: success, 4XX: failed
+due to client error, or 5XX: failed due to server error. Wikipedia provides a
+comprehensive list of <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">http response codes</a>.</dd>
+<dt><strong>User-Specified Unsuccessful Responses</strong></dt>
+<dd>Users may also wish to treat certain successful-looking responses as failures.
+For example, a Thrift struct representing the response to a query may return
+no results. From the perspective of the service, this is normal, but the client
+may wish to consider this empty result set situation as an exceptional case.
+In those cases, Finagle is unable to act appropriately unless a
+<cite>ResponseClassifier</cite> or <cite>RetryPolicy</cite> is configured. See
+<a class="reference internal" href="#handling-unsuccessful-responses">Handling Unsuccessful Responses</a> below for details.</dd>
+</dl>
+</div>
+<div class="section" id="handling-unsuccessful-responses">
+<h2>Handling Unsuccessful Responses<a class="headerlink" href="#handling-unsuccessful-responses" title="Permalink to this headline">¶</a></h2>
+<p>Finagle clients <a class="footnote-reference" href="#standard" id="id1">[1]</a> make decisions about behavior by examining
+<cite>FailureFlags</cite>. For exceptions that originate from within Finagle,
+these flags are set appropriately. However, for user specified unsuccessful
+responses, this information does not automatically exist.</p>
+<p>Users have two mechanisms available to provide this information:
+<a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">ResponseClassifiers</span></a> and
+<a class="reference internal" href="Clients.html#client-retries"><span class="std std-ref">RetryPolicies</span></a>. Response classification is used for stats
+recording and <a class="reference internal" href="Clients.html#client-circuit-breaking"><span class="std std-ref">circuit breaking</span></a>. <cite>RetryPolicies</cite>
+are used to control which responses will be retried.</p>
+<p>Users should also handle exceptions in application code via <cite>Future#handle</cite> or
+<cite>Future#rescue</cite>. This may also take place in a filter which transforms responses,
+allowing for additional composition.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">SimpleFilter</span><span class="o">,</span> <span class="nc">Service</span><span class="o">,</span> <span class="nc">Protocol</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.protocol.</span><span class="o">{</span><span class="nc">Response</span><span class="o">,</span> <span class="nc">Request</span><span class="o">,</span> <span class="nc">NotFoundError</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.StatsReceiver</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="o">...</span>
+
+<span class="k">val</span> <span class="n">rawService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Protocol</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;service.com&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">defaultValueFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="n">service</span><span class="o">(</span><span class="n">req</span><span class="o">).</span><span class="n">handle</span> <span class="o">{</span>
+      <span class="k">case</span> <span class="k">_:</span> <span class="kt">NotFoundError</span> <span class="o">=&gt;</span> <span class="nc">MyDefaultValueResponse</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// Record stats after custom exception handling</span>
+<span class="k">val</span> <span class="n">logicalRequestStats</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">StatsReceiver</span><span class="o">(</span><span class="n">stats</span><span class="o">.</span><span class="n">scope</span><span class="o">(</span><span class="s">&quot;logical&quot;</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">lookupService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">logicalRequestStats</span>
+  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">defaultValueFilter</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">rawService</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sending-unsuccessful-responses">
+<h2>Sending Unsuccessful Responses<a class="headerlink" href="#sending-unsuccessful-responses" title="Permalink to this headline">¶</a></h2>
+<p>A service that wishes to tap into Finagle&#8217;s client-side exception handling
+mechanisms should respond with a <cite>Throwable</cite> that extends <cite>FailureFlags</cite> with
+flags set appropriately. An easy way to create a generic unnamed response like
+this is by using the convenience methods in <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Failure.scala">Failure.scala</a></p>
+<p>In a situation where a service would normally be able to process a request but
+is temporarily overloaded, a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a> response is appropriate.
+The client receiving this will automatically retry the request via the <cite>Retries</cite>
+module. This is the recommended way of exerting
+<a class="reference internal" href="Glossary.html#glossary-back-pressure"><span class="std std-ref">back pressure</span></a> on clients.</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution</p>
+<p class="last">A nack response implies that no work has been done to process the request.
+This contract should be adhered to when using back pressure.</p>
+</div>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="c1">// Using Failure.rejected - Creates an exception with FailureFlags</span>
+<span class="c1">// that&#39;s flagged Rejected and Retryable. This is a typical Nack response.</span>
+<span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="nc">Failure</span><span class="o">.</span><span class="n">rejected</span><span class="o">(</span><span class="s">&quot;Too busy to handle the request&quot;</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>Sometimes it is useful to explicitly disable retries on a request on the client
+side. By constructing a response as shown below, the NonRetryable flag will
+propagate back across service boundaries. This can be used to mitigate
+<a class="reference internal" href="Glossary.html#glossary-retry-storm"><span class="std std-ref">retry storms</span></a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Failure</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="c1">// Create a rejected response, and flag it as non-retryable.</span>
+<span class="k">val</span> <span class="n">exn</span> <span class="k">=</span> <span class="nc">Failure</span><span class="o">.</span><span class="n">rejected</span><span class="o">(</span><span class="s">&quot;Retry limit exceeded to service X&quot;</span><span class="o">).</span><span class="n">asNonRetryable</span>
+<span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="n">exn</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>If a service wishes to send an application-level exception, Finagle will deliver
+it to the client without any special processing. As mentioned above, clients can
+this behavior by setting up <cite>ResponseClassifiers</cite> and <cite>RetryPolicies</cite>. For
+instance, if a client has set <cite>ThriftExceptionsAsFailures</cite> as its response
+classifier, those application level Thrift exceptions will be treated as
+non-retryable failures.</p>
+<div class="section" id="exception-or-failureflags">
+<h3>Exception or FailureFlags?<a class="headerlink" href="#exception-or-failureflags" title="Permalink to this headline">¶</a></h3>
+<p>For application-level exceptions, such as those defined in Thrift interfaces,
+services should use those exceptions. For situations where the response should
+propagate across multiple server/client boundaries or to use any signaling with
+<cite>FailureFlags</cite>, respond with a <cite>Throwable</cite> that extends <cite>FailureFlags</cite> as
+suggested above. A quick way to create such a response (if its name is not
+important) is to use <cite>Failure</cite>&#8216;s convenience methods.</p>
+<p>If a custom <cite>Throwable</cite> is used, only its message and <cite>FailureFlags</cite> (if any) will
+propagate across multiple service boundaries. Any other information,
+such as stack traces, will be discarded. Due to Finagle&#8217;s asynchronous nature,
+stack traces are not particularly useful. Instead Finagle provides built-in
+support for <a class="reference external" href="http://zipkin.io">Zipkin</a>, the distributed tracing system.</p>
+</div>
+</div>
+<div class="section" id="failure-flags">
+<h2>Failure Flags<a class="headerlink" href="#failure-flags" title="Permalink to this headline">¶</a></h2>
+<p><cite>FailureFlags</cite> can signal what should be done with an unsuccessful response or
+provide extra information for stats gathering or other measurements. This list
+of flags is not comprehensive as some flags are stripped out as they leave
+Finagle clients and are not exposed to users. The following table describes these
+flags, what they mean, how they&#8217;re used internally, and which protocols support
+passing them through.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag</th>
+<th class="head">Indicates</th>
+<th class="head">Protocols</th>
+<th class="head">Used by</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Rejected</td>
+<td>No attempt was made to do any work on this request.</td>
+<td>ThrifMux, Http</td>
+<td>NackAdmissionFilter, HttpNackFilter, RequeueFilter</td>
+</tr>
+<tr class="row-odd"><td>Interrupted</td>
+<td>Something intentionally stopped this request, so it will not be retried.</td>
+<td>None</td>
+<td>RequeueFilter</td>
+</tr>
+<tr class="row-even"><td>NonRetryable</td>
+<td>This request should not be retried</td>
+<td>ThriftMux, Http</td>
+<td>HttpNackFilter, RetryFilter, RequeueFilter</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="standard" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>&#8220;Finagle client&#8221; or &#8220;Finagle server&#8221; here refers to the typical
+stack client or server that one creates by following methods outlined in the
+user&#8217;s guide.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Unsuccessful Responses</a><ul>
+<li><a class="reference internal" href="#types-of-unsuccessful-responses">Types of Unsuccessful Responses</a></li>
+<li><a class="reference internal" href="#handling-unsuccessful-responses">Handling Unsuccessful Responses</a></li>
+<li><a class="reference internal" href="#sending-unsuccessful-responses">Sending Unsuccessful Responses</a><ul>
+<li><a class="reference internal" href="#exception-or-failureflags">Exception or FailureFlags?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#failure-flags">Failure Flags</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Metrics.html" title="previous chapter">Metrics</a></li>
+      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
+  
+  </body>
+</html>

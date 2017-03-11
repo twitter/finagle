@@ -266,10 +266,8 @@ com.twitter.finagle.client.StackClient.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="Transporter.html" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]]."></a>
-                        <a href="Transporter.html" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]].">
+                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]]."></a>
+                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]].">
                           Transporter
                         </a>
                       </li><li name="com.twitter.finagle.context" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -502,12 +500,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1301,9 +1304,9 @@ com.twitter.finagle.client.StackClient." href="StdStackClient.html">
       
       <p class="shortcomment cmt">Transform a service factory stack.</p>
     </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="Transporter[In,Out]extendsAnyRef"></a><a id="Transporter[In,Out]:Transporter[In,Out]"></a>
+      <a id="Transporter[In,Out]extendsClosable"></a><a id="Transporter[In,Out]:Transporter[In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out]extendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out]extendsClosable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1312,17 +1315,14 @@ com.twitter.finagle.client.StackClient." href="StdStackClient.html">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]]." href="Transporter.html">
+        <a title="Transporters construct a Future[Transport[In, Out]]." href="Transporter.html">
               <span class="name">Transporter</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Transporters are simple functions from a <code>SocketAddress</code> to a
-<code>Future[Transport[In, Out]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters are simple functions from a <code>SocketAddress</code> to a
-<code>Future[Transport[In, Out]]</code>. They represent a transport layer session from a
-client to a server. Transporters are symmetric to the server-side
-<a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>.
+      <p class="shortcomment cmt">Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
+symmetric to the server-side <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>, except
+that it isn't shared across remote peers..
 </p></div></div>
     </li></ol>
             </div>

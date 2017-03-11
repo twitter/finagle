@@ -300,13 +300,9 @@ In-typed downstream messages.">
                           Netty3Listener
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint."></a>
-                        <a href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint.">
+                        <a href="" title="">
                           Netty3Transporter
                         </a>
                       </li><li class="current-entities indented4">
@@ -328,16 +324,14 @@ endpoint.">
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <a href="Netty3Transporter.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
+        <div class="big-circle object">o</div>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></p>
-        <h1><a href="Netty3Transporter.html" title="See companion class">Netty3Transporter</a><span class="permalink">
+        <h1>Netty3Transporter<span class="permalink">
       <a href="../../../../com/twitter/finagle/netty3/Netty3Transporter$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="Netty3Transporter.html" title="See companion class">class Netty3Transporter</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -500,9 +494,9 @@ factory, a function from a netty3 channel to a finagle Transport.</p>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply[In,Out](pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[In,Out]"></a><a id="apply[In,Out](ChannelPipelineFactory,Params):Transporter[In,Out]"></a>
+      <a id="apply[In,Out](pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[In,Out]"></a><a id="apply[In,Out](ChannelPipelineFactory,SocketAddress,Params):Transporter[In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/Netty3Transporter$.html#apply[In,Out](pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[In,Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/Netty3Transporter$.html#apply[In,Out](pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,addr:java.net.SocketAddress,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.client.Transporter[In,Out]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -511,7 +505,7 @@ factory, a function from a netty3 channel to a finagle Transport.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.apply.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.apply.Out">Out</span>]</span>
+        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.apply.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.apply.Out">Out</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Constructs a <code>Transporter[In, Out]</code> given a netty3 <code>ChannelPipelineFactory</code>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &#8212; Finagle 6.42.0 documentation</title>
+    <title>Protocols &#8212; Finagle 6.43.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.42.0',
+        VERSION:     '6.43.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,8 +26,8 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
-    <link rel="next" title="Extending Finagle" href="Extending.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
   
@@ -55,7 +55,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="Extending.html" title="Extending Finagle"
+          <a href="Metrics.html" title="Metrics"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Names.html" title="Names and Naming in Finagle"
@@ -148,12 +148,12 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>val result: Future[Log.Result] = clientServiceIface.log(Log.Args(&quot;hello&quot;, 1))
+<div class="highlight-text"><div class="highlight"><pre><span></span>val result: Future[Log.SuccessType] = clientServiceIface.log(Log.Args(&quot;hello&quot;, 1))
 </pre></div>
 </div>
 <p>Thrift services can be combined with <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Filter$">Filters</a>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.Result</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.Result</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.Result</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="k">val</span> <span class="n">uppercaseRequest</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">message</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">toUpperCase</span><span class="o">)</span>
     <span class="n">service</span><span class="o">(</span><span class="n">uppercaseRequest</span><span class="o">)</span>
   <span class="o">}</span>
@@ -164,7 +164,9 @@ following rich APIs:</p>
   <span class="k">val</span> <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
   <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="o">,</span> <span class="n">exc</span><span class="o">,</span> <span class="n">timer</span><span class="o">)</span>
 <span class="o">}</span>
-<span class="k">val</span> <span class="n">filteredLog</span> <span class="k">=</span> <span class="n">timeoutFilter</span><span class="o">(</span><span class="mf">2.</span><span class="n">seconds</span><span class="o">)</span> <span class="n">andThen</span> <span class="n">uppercaseFilter</span> <span class="n">andThen</span> <span class="n">clientServiceIface</span><span class="o">.</span><span class="n">log</span>
+<span class="k">val</span> <span class="n">filteredLog</span> <span class="k">=</span> <span class="n">timeoutFilter</span><span class="o">(</span><span class="mf">2.</span><span class="n">seconds</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">uppercaseFilter</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">log</span><span class="o">)</span>
 
 <span class="n">filteredLog</span><span class="o">(</span><span class="nc">Log</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">))</span>
 <span class="c1">// [2] Server received: &#39;HELLO&#39;</span>
@@ -177,9 +179,8 @@ following rich APIs:</p>
 <span class="o">})</span>
 
 <span class="k">val</span> <span class="n">retriedGetLogSize</span> <span class="k">=</span>
-  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span><span class="o">)</span> <span class="n">andThen</span>
-    <span class="nc">ThriftServiceIface</span><span class="o">.</span><span class="n">resultFilter</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">)</span> <span class="n">andThen</span>
-    <span class="n">clientServiceIface</span><span class="o">.</span><span class="n">getLogSize</span>
+  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">getLogSize</span><span class="o">)</span>
 
 <span class="n">retriedGetLogSize</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">.</span><span class="nc">Args</span><span class="o">())</span>
 </pre></div>
@@ -352,7 +353,7 @@ from the call to <cite>newRichClient</cite>.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="Names.html" title="previous chapter">Names and Naming in Finagle</a></li>
-      <li>Next: <a href="Extending.html" title="next chapter">Extending Finagle</a></li>
+      <li>Next: <a href="Metrics.html" title="next chapter">Metrics</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

@@ -647,12 +647,6 @@ an offer to acknowledge.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Server.html" title=""></a>
-                        <a href="Server.html" title="">
-                          Server
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="ThriftConnectedClient.html" title="A Client representing a single TCP connection to a single server using thrift."></a>
                         <a href="ThriftConnectedClient.html" title="A Client representing a single TCP connection to a single server using thrift.">
                           ThriftConnectedClient
@@ -669,12 +663,17 @@ an offer to acknowledge.">
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1648,24 +1647,6 @@ an offer to acknowledge." href="ReadMessage.html">
       
       <p class="shortcomment cmt">A message that has been read: consists of the message itself, and
 an offer to acknowledge.</p>
-    </li><li name="com.twitter.finagle.kestrel.Server" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerextendsAnyRef"></a><a id="Server:Server"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/kestrel/index.html#ServerextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Server.html">
-              <span class="name">Server</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.kestrel.ThriftConnectedClient" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftConnectedClientextendsClientBase[com.twitter.finagle.kestrel.FinagledClosableClient,Seq[com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item],Long]"></a><a id="ThriftConnectedClient:ThriftConnectedClient"></a>
       <span class="permalink">

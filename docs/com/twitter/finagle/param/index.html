@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -743,14 +748,6 @@ shared between Finagle clients and servers.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ConcurrentLoadBalancingParams.html" title="A collection of methods for configuring the Load Balancing (concurrent) module
-of Finagle clients."></a>
-                        <a href="ConcurrentLoadBalancingParams.html" title="A collection of methods for configuring the Load Balancing (concurrent) module
-of Finagle clients.">
-                          ConcurrentLoadBalancingParams
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="class" href="DefaultLoadBalancingParams.html" title="A collection of methods for configuring the Load Balancing (default) module
 of Finagle clients."></a>
                         <a href="DefaultLoadBalancingParams.html" title="A collection of methods for configuring the Load Balancing (default) module
@@ -912,12 +909,6 @@ Finagle servers or clients.">
                         <a class="trait" href="WithClientTransport.html" title="Provides the withTransport (client's transport) API entry point."></a>
                         <a href="WithClientTransport.html" title="Provides the withTransport (client's transport) API entry point.">
                           WithClientTransport
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="trait" href="WithConcurrentLoadBalancer.html" title="Provides the withLoadBalancer (concurrent balancer) API entry point."></a>
-                        <a href="WithConcurrentLoadBalancer.html" title="Provides the withLoadBalancer (concurrent balancer) API entry point.">
-                          WithConcurrentLoadBalancer
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -1472,29 +1463,6 @@ shared between Finagle clients and servers." href="CommonParams.html">
 shared between Finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A collection of methods for configuring common parameters (labels, stats receivers, etc)
 shared between Finagle clients and servers.
 </p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> server/client to configure</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.param.ConcurrentLoadBalancingParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConcurrentLoadBalancingParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsDefaultLoadBalancingParams[A]"></a><a id="ConcurrentLoadBalancingParams[A&lt;:Parameterized[A]]:ConcurrentLoadBalancingParams[A]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/index.html#ConcurrentLoadBalancingParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsDefaultLoadBalancingParams[A]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A collection of methods for configuring the Load Balancing (concurrent) module
-of Finagle clients." href="ConcurrentLoadBalancingParams.html">
-              <span class="name">ConcurrentLoadBalancingParams</span>
-            </a><span class="tparams">[<span name="A">A &lt;: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.param.ConcurrentLoadBalancingParams.A">A</span>]</span>]</span><span class="result"> extends <a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a>[<span class="extype" name="com.twitter.finagle.param.ConcurrentLoadBalancingParams.A">A</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A collection of methods for configuring the Load Balancing (concurrent) module
-of Finagle clients.</p><div class="fullcomment"><div class="comment cmt"><p>A collection of methods for configuring the Load Balancing (concurrent) module
-of Finagle clients.</p><p>A concurrent load balancer balancers the traffic among multiple connections, which
-is useful for maintaining concurrency in pipelining protocols.
-</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> client to configure</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.DefaultLoadBalancingParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultLoadBalancingParams[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="DefaultLoadBalancingParams[A&lt;:Parameterized[A]]:DefaultLoadBalancingParams[A]"></a>
       <span class="permalink">
@@ -1960,25 +1928,6 @@ Finagle servers or clients.</p><p><span class="extype" name="Transport">Transpor
       
       <p class="shortcomment cmt">Provides the <code>withTransport</code> (client's transport) API entry point.</p><div class="fullcomment"><div class="comment cmt"><p>Provides the <code>withTransport</code> (client's transport) API entry point.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="ClientTransportParams.html" class="extype" name="com.twitter.finagle.param.ClientTransportParams">ClientTransportParams</a></p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.param.WithConcurrentLoadBalancer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="WithConcurrentLoadBalancer[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="WithConcurrentLoadBalancer[A&lt;:Parameterized[A]]:WithConcurrentLoadBalancer[A]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/index.html#WithConcurrentLoadBalancer[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="Provides the withLoadBalancer (concurrent balancer) API entry point." href="WithConcurrentLoadBalancer.html">
-              <span class="name">WithConcurrentLoadBalancer</span>
-            </a><span class="tparams">[<span name="A">A &lt;: <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.param.WithConcurrentLoadBalancer.A">A</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Provides the <code>withLoadBalancer</code> (concurrent balancer) API entry point.</p><div class="fullcomment"><div class="comment cmt"><p>Provides the <code>withLoadBalancer</code> (concurrent balancer) API entry point.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="ConcurrentLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.ConcurrentLoadBalancingParams">ConcurrentLoadBalancingParams</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.WithDefaultLoadBalancer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="WithDefaultLoadBalancer[A&lt;:com.twitter.finagle.Stack.Parameterized[A]]extendsAnyRef"></a><a id="WithDefaultLoadBalancer[A&lt;:Parameterized[A]]:WithDefaultLoadBalancer[A]"></a>
       <span class="permalink">

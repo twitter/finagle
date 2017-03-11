@@ -392,12 +392,6 @@ their name.">
                           HttpTracing
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MapHeaderMap$.html" title=""></a>
-                        <a class="class" href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap"></a>
-                        <a href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap">
-                          MapHeaderMap
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">
@@ -1069,6 +1063,24 @@ an <code>IllegalStateException</code> is thrown.
       <p class="shortcomment cmt">Retrieve the current content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current content of this <code>Message</code>.</p><p>If this message is chunked, the resulting <code>Buf</code> will always be empty.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#contentLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="contentLength(value:Long):Message.this.type"></a><a id="contentLength(Long):ResponseProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#contentLength(value:Long):Message.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contentLength</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a>.this.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">Set Content-Length header.</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Length header.  Normally, this is automatically set by the
+Codec, but this method allows you to override that.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="contentLength_=(Long)">contentLength_=(Long)</span> for Scala users.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#contentLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contentLength:Option[Long]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#contentLength:Option[Long]" title="Permalink">
@@ -1083,7 +1095,25 @@ an <code>IllegalStateException</code> is thrown.
         <span class="name">contentLength</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Get Content-Length header.</p><div class="fullcomment"><div class="comment cmt"><p>Get Content-Length header.  Use length to get the length of actual content.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the value of the Content-Length header.</p><div class="fullcomment"><div class="comment cmt"><p>Get the value of the Content-Length header.  Use length to get the length of actual content.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="contentLengthOrElse(Long):">Long</span> for Java users.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#contentLengthOrElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="contentLengthOrElse(default:Long):Long"></a><a id="contentLengthOrElse(Long):Long"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#contentLengthOrElse(default:Long):Long" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contentLengthOrElse</span><span class="params">(<span name="default">default: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Get the value of the Content-Length header, or the provided default if it doesn't exist.</p><div class="fullcomment"><div class="comment cmt"><p>Get the value of the Content-Length header, or the provided default if it doesn't exist.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="contentLength:">Option(Long)</span> for Scala users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#contentLength_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contentLength_=(value:Long):Unit"></a><a id="contentLength_=(Long):Unit"></a>
       <span class="permalink">
@@ -1100,7 +1130,8 @@ an <code>IllegalStateException</code> is thrown.
       </span>
       
       <p class="shortcomment cmt">Set Content-Length header.</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Length header.  Normally, this is automatically set by the
-Codec, but this method allows you to override that.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+Codec, but this method allows you to override that.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="contentLength(Long)">contentLength(Long)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#contentString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contentString:String"></a>
       <span class="permalink">
@@ -1468,14 +1499,14 @@ users should use withInputStream.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">getLength</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Get length of content.</p><div class="fullcomment"><div class="comment cmt"><p>Get length of content.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getReader():java.io.Reader"></a><a id="getReader():Reader"></a>
       <span class="permalink">
@@ -1492,22 +1523,6 @@ users should use withInputStream.)
       </span>
       
       <p class="shortcomment cmt">Get Reader for content.</p><div class="fullcomment"><div class="comment cmt"><p>Get Reader for content.  (Java interface.  Scala users should use withReader.)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.ResponseProxy#getStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getStatusCode():Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#getStatusCode():Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getStatusCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -1580,14 +1595,14 @@ users should use withInputStream.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">httpResponse</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#isChunked" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isChunked:Boolean"></a>
       <span class="permalink">
@@ -2025,14 +2040,14 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">setContentString</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the content as a string.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content as a string.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#setContentType" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setContentType(mediaType:String,charset:String):Unit"></a><a id="setContentType(String,String):Unit"></a>
       <span class="permalink">
@@ -2065,22 +2080,6 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </span>
       
       <p class="shortcomment cmt">Set Content-Type header to application/json;charset=utf-8</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header to application/json;charset=utf-8</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.ResponseProxy#setStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setStatusCode(value:Int):Unit"></a><a id="setStatusCode(Int):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#setStatusCode(value:Int):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setStatusCode</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ResponseProxy#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.http.Status"></a><a id="status:Status"></a>
       <span class="permalink">
@@ -2097,6 +2096,24 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Response#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="status(value:com.twitter.finagle.http.Status):Response.this.type"></a><a id="status(Status):ResponseProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#status(value:com.twitter.finagle.http.Status):Response.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">status</span><span class="params">(<span name="value">value: <a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">Status</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a>.this.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the status of this response
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the status of this response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Note</dt><dd><span class="cmt"><p>See <span class="extype" name="status_=(Status)">status_=(Status)</span> for Scala users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ResponseProxy#statusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="statusCode:Int"></a>
       <span class="permalink">
@@ -2112,7 +2129,27 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
         <span class="name">statusCode</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the status code of this response
+</p><div class="fullcomment"><div class="comment cmt"><p>Get the status code of this response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Response#statusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="statusCode(value:Int):Response.this.type"></a><a id="statusCode(Int):ResponseProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#statusCode(value:Int):Response.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statusCode</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a>.this.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the status code of this response
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the status code of this response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Note</dt><dd><span class="cmt"><p>See <span class="extype" name="statusCode_=(Int)">statusCode_=(Int)</span> for Scala users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ResponseProxy#statusCode_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="statusCode_=(value:Int):Unit"></a><a id="statusCode_=(Int):Unit"></a>
       <span class="permalink">
@@ -2128,7 +2165,9 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
         <span title="gt4s: statusCode_$eq" class="name">statusCode_=</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the status code of this response
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the status code of this response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Note</dt><dd><span class="cmt"><p>See <span class="extype" name="statusCode(Int)">statusCode(Int)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ResponseProxy#status_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status_=(value:com.twitter.finagle.http.Status):Unit"></a><a id="status_=(Status):Unit"></a>
       <span class="permalink">
@@ -2144,7 +2183,9 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
         <span title="gt4s: status_$eq" class="name">status_=</span><span class="params">(<span name="value">value: <a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">Status</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the status of this response
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the status of this response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a> → <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Note</dt><dd><span class="cmt"><p>see <span class="extype" name="status(Status)">status(Status)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -2210,6 +2251,23 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       
       <p class="shortcomment cmt">Set User-Agent header</p><div class="fullcomment"><div class="comment cmt"><p>Set User-Agent header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="version(version:com.twitter.finagle.http.Version):Message.this.type"></a><a id="version(Version):ResponseProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#version(version:com.twitter.finagle.http.Version):Message.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">version</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.ResponseProxy">ResponseProxy</a>.this.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the HTTP version</p><div class="fullcomment"><div class="comment cmt"><p>Set the HTTP version</p><p>* @see <span class="extype" name="version_=(Version)">version_=(Version)</span> for Scala users
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="version:com.twitter.finagle.http.Version"></a><a id="version:Version"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#version:com.twitter.finagle.http.Version" title="Permalink">
@@ -2224,7 +2282,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
         <span class="name">version</span><span class="result">: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Get the HTTP version</p><div class="fullcomment"><div class="comment cmt"><p>Get the HTTP version</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#version_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="version_=(version:com.twitter.finagle.http.Version):Unit"></a><a id="version_=(Version):Unit"></a>
       <span class="permalink">
@@ -2240,7 +2298,9 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
         <span title="gt4s: version_$eq" class="name">version_=</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Set the HTTP version
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the HTTP version
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="version(Version)">version(Version)</span> for Java users</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -2549,82 +2609,25 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Message#getContent" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getContent():org.jboss.netty.buffer.ChannelBuffer"></a><a id="getContent():ChannelBuffer"></a>
+              <ol><li name="com.twitter.finagle.http.Response#getStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getStatusCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#getContent():org.jboss.netty.buffer.ChannelBuffer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#getStatusCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-23) Use content instead">getContent</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name deprecated" title="Deprecated: (Since version Use statusCode instead) 2017-02-17">getStatusCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Get the status code of this response</p><div class="fullcomment"><div class="comment cmt"><p>Get the status code of this response</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-23)</i> Use content instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Response#getHttpResponse" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getHttpResponse():org.jboss.netty.handler.codec.http.HttpResponse"></a><a id="getHttpResponse():HttpResponse"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#getHttpResponse():org.jboss.netty.handler.codec.http.HttpResponse" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-26) Going away as part of the Netty 4 transition">getHttpResponse</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-26)</i> Going away as part of the Netty 4 transition</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Response#getStatus" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getStatus():org.jboss.netty.handler.codec.http.HttpResponseStatus"></a><a id="getStatus():HttpResponseStatus"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#getStatus():org.jboss.netty.handler.codec.http.HttpResponseStatus" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-26) Going away as part of the Netty 4 transition">getStatus</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponseStatus">HttpResponseStatus</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-26)</i> Going away as part of the Netty 4 transition</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#headers" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="headers():org.jboss.netty.handler.codec.http.HttpHeaders"></a><a id="headers():HttpHeaders"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#headers():org.jboss.netty.handler.codec.http.HttpHeaders" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-24) Use headerMap instead">headers</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpHeaders">HttpHeaders</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-24)</i> Use headerMap instead</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version Use <a href="#statusCode:Int" class="extmbr" name="com.twitter.finagle.http.ResponseProxy#statusCode">statusCode</a> instead)</i> 2017-02-17</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Response#httpMessage" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpMessage:org.jboss.netty.handler.codec.http.HttpMessage"></a><a id="httpMessage:HttpMessage"></a>
       <span class="permalink">
@@ -2644,49 +2647,25 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-26)</i> Going away as part of the Netty 4 transition</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#setContent" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setContent(content:org.jboss.netty.buffer.ChannelBuffer):Unit"></a><a id="setContent(ChannelBuffer):Unit"></a>
+    </li><li name="com.twitter.finagle.http.Response#setStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setStatusCode(value:Int):Unit"></a><a id="setStatusCode(Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#setContent(content:org.jboss.netty.buffer.ChannelBuffer):Unit" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#setStatusCode(value:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-23) Use content(Buf) instead">setContent</span><span class="params">(<span name="content">content: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version Use statusCode(Int) instead) 2017-02-17">setStatusCode</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">Set the status code of this response</p><div class="fullcomment"><div class="comment cmt"><p>Set the status code of this response</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="scala.this.throws.&lt;init&gt;$default$1[IllegalStateException]">...</span>
-    </span>)</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-23)</i> Use content(Buf) instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Response#setStatus" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setStatus(status:org.jboss.netty.handler.codec.http.HttpResponseStatus):Unit"></a><a id="setStatus(HttpResponseStatus):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/ResponseProxy.html#setStatus(status:org.jboss.netty.handler.codec.http.HttpResponseStatus):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-26) Going away as part of the Netty 4 transition">setStatus</span><span class="params">(<span name="status">status: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponseStatus">HttpResponseStatus</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-26)</i> Going away as part of the Netty 4 transition</p></dd></dl></div>
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version Use <span class="extype" name="statusCode(Int)">statusCode(Int)</span> instead)</i> 2017-02-17</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

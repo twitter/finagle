@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -778,13 +783,9 @@ In-typed downstream messages.">
                           Netty3Listener
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="Netty3Transporter$.html" title=""></a>
-                        <a class="class" href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint."></a>
-                        <a href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint.">
+                        <a href="Netty3Transporter$.html" title="">
                           Netty3Transporter
                         </a>
                       </li><li class="current-entities indented4">
@@ -1267,9 +1268,9 @@ package netty3 can move into its own package, so that only the
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ChannelBufferBufextendsBufwithBuf.Indexed"></a><a id="ChannelBufferBuf:ChannelBufferBuf"></a>
+      <a id="ChannelBufferBufextendsBuf"></a><a id="ChannelBufferBuf:ChannelBufferBuf"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#ChannelBufferBufextendsBufwithBuf.Indexed" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#ChannelBufferBufextendsBuf" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1281,7 +1282,7 @@ package netty3 can move into its own package, so that only the
         <a title="A com.twitter.io.Buf wrapper for
 Netty ChannelBuffers." href="ChannelBufferBuf.html">
               <span class="name">ChannelBufferBuf</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> with <span class="extype" name="com.twitter.io.Buf.Indexed">Indexed</span></span>
+            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       
       <p class="shortcomment cmt">A <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a> wrapper for
@@ -1352,33 +1353,6 @@ that yields <code><code>Out</code></code>-typed upstream messages and accepts
 that yields <code><code>Out</code></code>-typed upstream messages and accepts
 <code><code>In</code></code>-typed downstream messages.
 </p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of input messages</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of output messages</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.Netty3Transporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a><a id="Netty3Transporter[In,Out]:Netty3Transporter[In,Out]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#Netty3Transporter[In,Out]extends(java.net.SocketAddress,com.twitter.finagle.stats.StatsReceiver)=&gt;com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint." href="Netty3Transporter.html">
-              <span class="name">Netty3Transporter</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint.
-</p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of requests. The given pipeline must consume
-<code>Req</code>-typed objects</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of replies. The given pipeline must produce
-objects of this type.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.SimpleChannelSnooper" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleChannelSnooperextendsChannelSnooper"></a><a id="SimpleChannelSnooper:SimpleChannelSnooper"></a>
       <span class="permalink">

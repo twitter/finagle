@@ -425,7 +425,7 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
-    </li><li name="com.twitter.finagle.loadbalancer" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.loadbalancer" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="loadbalancer"></a><a id="loadbalancer:loadbalancer"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/index.html#loadbalancer" title="Permalink">
@@ -437,12 +437,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">

@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -2041,7 +2046,7 @@ In other words, it converts a <code>Service[ReqOut, RepIn]</code> to a
         <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>, <span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Convert the <span class="extype" name="TypeAgnostic">TypeAgnostic</span> filter to a Filter and chain it with
+      <p class="shortcomment cmt">Convert the <a href="Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">Filter.TypeAgnostic</a> filter to a Filter and chain it with
 <code>andThen</code>.</p>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(factory:com.twitter.finagle.ServiceFactory[ReqOut,RepIn]):com.twitter.finagle.ServiceFactory[ReqIn,RepOut]"></a><a id="andThen(ServiceFactory[ReqOut,RepIn]):ServiceFactory[ReqIn,RepOut]"></a>

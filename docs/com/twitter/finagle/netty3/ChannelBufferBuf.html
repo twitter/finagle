@@ -300,13 +300,9 @@ In-typed downstream messages.">
                           Netty3Listener
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="Netty3Transporter$.html" title=""></a>
-                        <a class="class" href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint."></a>
-                        <a href="Netty3Transporter.html" title="A transporter for netty3 which, given an endpoint name (socket
-address), provides a typed transport for communicating with this
-endpoint.">
+                        <a href="Netty3Transporter$.html" title="">
                           Netty3Transporter
                         </a>
                       </li><li class="current-entities indented4">
@@ -346,7 +342,7 @@ endpoint.">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelBufferBuf</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> with <span class="extype" name="com.twitter.io.Buf.Indexed">Indexed</span></span>
+        <span class="name">ChannelBufferBuf</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4>
 
@@ -360,7 +356,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.io.Buf.Indexed">Indexed</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -386,7 +382,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.netty3.ChannelBufferBuf"><span>ChannelBufferBuf</span></li><li class="in" name="com.twitter.io.Buf.Indexed"><span>Indexed</span></li><li class="in" name="com.twitter.io.Buf"><span>Buf</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.netty3.ChannelBufferBuf"><span>ChannelBufferBuf</span></li><li class="in" name="com.twitter.io.Buf"><span>Buf</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -575,7 +571,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -653,6 +649,22 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get(index:Int):Byte"></a><a id="get(Int):Byte"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#get(index:Int):Byte" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">(<span name="index">index: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → Buf</dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -813,6 +825,38 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#process" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="process(from:Int,until:Int,processor:com.twitter.io.Buf.Processor):Int"></a><a id="process(Int,Int,Processor):Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#process(from:Int,until:Int,processor:com.twitter.io.Buf.Processor):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">process</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="processor">processor: <span class="extype" name="com.twitter.io.Buf.Processor">Processor</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → Buf</dd></dl></div>
+    </li><li name="com.twitter.io.Buf#process" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="process(processor:com.twitter.io.Buf.Processor):Int"></a><a id="process(Processor):Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#process(processor:com.twitter.io.Buf.Processor):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">process</span><span class="params">(<span name="processor">processor: <span class="extype" name="com.twitter.io.Buf.Processor">Processor</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Buf</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#slice" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="slice(i:Int,j:Int):com.twitter.io.Buf"></a><a id="slice(Int,Int):Buf"></a>
       <span class="permalink">
@@ -976,6 +1020,22 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#write" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="write(buffer:java.nio.ByteBuffer):Unit"></a><a id="write(ByteBuffer):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#write(buffer:java.nio.ByteBuffer):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">write</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → Buf</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf#write" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="write(bytes:Array[Byte],off:Int):Unit"></a><a id="write(Array[Byte],Int):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#write(bytes:Array[Byte],off:Int):Unit" title="Permalink">
@@ -1001,9 +1061,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.io.Buf.Indexed">
-              <h3>Inherited from <span class="extype" name="com.twitter.io.Buf.Indexed">Indexed</span></h3>
-            </div><div class="parent" name="com.twitter.io.Buf">
+        <div class="parent" name="com.twitter.io.Buf">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>

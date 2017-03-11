@@ -232,10 +232,8 @@ com.twitter.finagle.client.StackClient.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]]."></a>
-                        <a href="" title="Transporters are simple functions from a SocketAddress to a
-Future[Transport[In, Out]].">
+                        <a class="trait" href="" title="Transporters construct a Future[Transport[In, Out]]."></a>
+                        <a href="" title="Transporters construct a Future[Transport[In, Out]].">
                           Transporter
                         </a>
                       </li>
@@ -263,20 +261,19 @@ Future[Transport[In, Out]].">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Transporters are simple functions from a <code>SocketAddress</code> to a
-<code>Future[Transport[In, Out]]</code>. They represent a transport layer session from a
-client to a server. Transporters are symmetric to the server-side
-<a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
+symmetric to the server-side <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>, except
+that it isn't shared across remote peers..
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -302,7 +299,7 @@ client to a server. Transporters are symmetric to the server-side
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.client.Transporter"><span>Transporter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.client.Transporter"><span>Transporter</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -327,9 +324,9 @@ client to a server. Transporters are symmetric to the server-side
         <div class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.twitter.finagle.client.Transporter#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="apply(addr:java.net.SocketAddress):com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a><a id="apply(SocketAddress):Future[Transport[In,Out]]"></a>
+      <a id="apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a><a id="apply():Future[Transport[In,Out]]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/Transporter.html#apply(addr:java.net.SocketAddress):com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -338,10 +335,26 @@ client to a server. Transporters are symmetric to the server-side
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.client.Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.client.Transporter.Out">Out</span>]]</span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.client.Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.client.Transporter.Out">Out</span>]]</span>
       </span>
       
       
+    </li><li name="com.twitter.finagle.client.Transporter#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#remoteAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The address of the remote peer that this <code>Transporter</code> connects to.</p>
     </li></ol>
             </div>
 
@@ -434,6 +447,59 @@ client to a server. Transporters are symmetric to the server-side
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.client.Transporter#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a><a id="close(Time):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Some <code>Transporters</code> build <code>Transports</code> that represent streams in a
+connection instead of connections themselves.</p><div class="fullcomment"><div class="comment cmt"><p>Some <code>Transporters</code> build <code>Transports</code> that represent streams in a
+connection instead of connections themselves.  When this is the case, this
+method should be overridden to destroy the underlying connection when it's
+finished.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a> → Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a><a id="close(Duration):Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close():com.twitter.util.Future[Unit]"></a><a id="close():Future[Unit]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#close():com.twitter.util.Future[Unit]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -692,7 +758,9 @@ client to a server. Transporters are symmetric to the server-side
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.util.Closable">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

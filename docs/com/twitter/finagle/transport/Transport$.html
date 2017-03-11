@@ -324,6 +324,24 @@ a <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Tr
 </p></div><dl class="paramcmts block"><dt class="param">send</dt><dd class="cmt"><p>An option indicating the size of the send buffer.
 If None, the implementation default is used.</p></dd><dt class="param">recv</dt><dd class="cmt"><p>An option indicating the size of the receive buffer.
 If None, the implementation default is used.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport.ClientSsl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientSslextendsProductwithSerializable"></a><a id="ClientSsl:ClientSsl"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#ClientSslextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="$param the SSL/TLS client configuration for a Transport." href="Transport$$ClientSsl.html">
+              <span class="name">ClientSsl</span>
+            </a><span class="params">(<span name="e">e: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../ssl/client/SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">$param the SSL/TLS client configuration for a <code>Transport</code>.</p>
     </li><li name="com.twitter.finagle.transport.Transport.Liveness" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LivenessextendsProductwithSerializable"></a><a id="Liveness:Liveness"></a>
       <span class="permalink">
@@ -369,10 +387,10 @@ If None, the implementation default is used.</p></dd></dl></div>
                option on a transport socket (<code>noDelay = true</code> means
                disabled). Default is <code>true</code> (disabled).</p></dd><dt class="param">reuseAddr</dt><dd class="cmt"><p>enables or disables <code>SO_REUSEADDR</code> option on a
                  transport socket. Default is <code>true</code>.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.transport.Transport.TLSClientEngine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TLSClientEngineextendsProductwithSerializable"></a><a id="TLSClientEngine:TLSClientEngine"></a>
+    </li><li name="com.twitter.finagle.transport.Transport.ServerSsl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerSslextendsProductwithSerializable"></a><a id="ServerSsl:ServerSsl"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#TLSClientEngineextendsProductwithSerializable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#ServerSslextendsProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -381,30 +399,12 @@ If None, the implementation default is used.</p></dd></dl></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="$param the TLS engine for a Transport." href="Transport$$TLSClientEngine.html">
-              <span class="name">TLSClientEngine</span>
-            </a><span class="params">(<span name="e">e: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a title="$param the SSL/TLS server configuration for a Transport." href="Transport$$ServerSsl.html">
+              <span class="name">ServerSsl</span>
+            </a><span class="params">(<span name="e">e: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../ssl/server/SslServerConfiguration.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerConfiguration">SslServerConfiguration</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">$param the TLS engine for a <code>Transport</code>.</p>
-    </li><li name="com.twitter.finagle.transport.Transport.TLSServerEngine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TLSServerEngineextendsProductwithSerializable"></a><a id="TLSServerEngine:TLSServerEngine"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#TLSServerEngineextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="$param the TLS engine for a Transport." href="Transport$$TLSServerEngine.html">
-              <span class="name">TLSServerEngine</span>
-            </a><span class="params">(<span name="e">e: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[() ⇒ <a href="../ssl/Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engine</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">$param the TLS engine for a <code>Transport</code>.</p>
+      <p class="shortcomment cmt">$param the SSL/TLS server configuration for a <code>Transport</code>.</p>
     </li><li name="com.twitter.finagle.transport.Transport.Tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TlsextendsProductwithSerializable"></a><a id="Tls:Tls"></a>
       <span class="permalink">
@@ -861,6 +861,24 @@ for example.
       </span>
       
       
+    </li><li name="com.twitter.finagle.transport.Transport.ClientSsl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ClientSsl"></a><a id="ClientSsl:ClientSsl"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#ClientSsl" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Transport$$ClientSsl$.html">
+              <span class="name">ClientSsl</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.transport.Transport.Liveness" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Liveness"></a><a id="Liveness:Liveness"></a>
       <span class="permalink">
@@ -897,10 +915,10 @@ for example.
       </span>
       
       
-    </li><li name="com.twitter.finagle.transport.Transport.TLSClientEngine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TLSClientEngine"></a><a id="TLSClientEngine:TLSClientEngine"></a>
+    </li><li name="com.twitter.finagle.transport.Transport.ServerSsl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerSsl"></a><a id="ServerSsl:ServerSsl"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#TLSClientEngine" title="Permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport$.html#ServerSsl" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -909,26 +927,8 @@ for example.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Transport$$TLSClientEngine$.html">
-              <span class="name">TLSClientEngine</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.transport.Transport.TLSServerEngine" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TLSServerEngine"></a><a id="TLSServerEngine:TLSServerEngine"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#TLSServerEngine" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Transport$$TLSServerEngine$.html">
-              <span class="name">TLSServerEngine</span>
+        <a title="" href="Transport$$ServerSsl$.html">
+              <span class="name">ServerSsl</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       

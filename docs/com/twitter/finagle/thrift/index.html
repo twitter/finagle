@@ -439,12 +439,17 @@ stabilized (moved elsewhere) at any time.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1117,8 +1122,8 @@ not.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ThriftServiceIface$.html" title="Construct Service interface for a thrift method."></a>
-                        <a href="ThriftServiceIface$.html" title="Construct Service interface for a thrift method.">
+                        <a class="object" href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method."></a>
+                        <a href="ThriftServiceIface$.html" title="Construct Service interface for a Thrift method.">
                           ThriftServiceIface
                         </a>
                       </li><li class="current-entities indented4">
@@ -1539,9 +1544,9 @@ on the corresponding request." href="SeqMismatchException.html">
 ID according to that assigned by <a href="SeqIdFilter.html" class="extype" name="com.twitter.finagle.thrift.SeqIdFilter">com.twitter.finagle.thrift.SeqIdFilter</a>
 on the corresponding request.</p>
     </li><li name="com.twitter.finagle.thrift.ServiceIfaceBuilder" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ServiceIfaceBuilder[ServiceIface]extendsAnyRef"></a><a id="ServiceIfaceBuilder[ServiceIface]:ServiceIfaceBuilder[ServiceIface]"></a>
+      <a id="ServiceIfaceBuilder[ServiceIface&lt;:com.twitter.finagle.thrift.ThriftServiceIface.Filterable[ServiceIface]]extendsAnyRef"></a><a id="ServiceIfaceBuilder[ServiceIface&lt;:Filterable[ServiceIface]]:ServiceIfaceBuilder[ServiceIface]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ServiceIfaceBuilder[ServiceIface]extendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ServiceIfaceBuilder[ServiceIface&lt;:com.twitter.finagle.thrift.ThriftServiceIface.Filterable[ServiceIface]]extendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1552,7 +1557,7 @@ on the corresponding request.</p>
       <span class="symbol">
         <a title="Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients." href="ServiceIfaceBuilder.html">
               <span class="name">ServiceIfaceBuilder</span>
-            </a><span class="tparams">[<span name="ServiceIface">ServiceIface</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="tparams">[<span name="ServiceIface">ServiceIface &lt;: <a href="ThriftServiceIface$$Filterable.html" class="extype" name="com.twitter.finagle.thrift.ThriftServiceIface.Filterable">Filterable</a>[<span class="extype" name="com.twitter.finagle.thrift.ServiceIfaceBuilder.ServiceIface">ServiceIface</span>]</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.</p><div class="fullcomment"><div class="comment cmt"><p>Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
@@ -1595,42 +1600,6 @@ not.</p>
         <a title="" href="ThriftMethodStats.html">
               <span class="name">ThriftMethodStats</span>
             </a><span class="params">(<span name="requestsCounter">requestsCounter: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>, <span name="successCounter">successCounter: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>, <span name="failuresCounter">failuresCounter: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>, <span name="failuresScope">failuresScope: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerFramedCodecextendsCodec[Array[Byte],Array[Byte]]"></a><a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodecextendsCodec[Array[Byte],Array[Byte]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftServerFramedCodec.html">
-              <span class="name">ThriftServerFramedCodec</span>
-            </a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodecFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerFramedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]"></a><a id="ThriftServerFramedCodecFactory:ThriftServerFramedCodecFactory"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftServerFramedCodecFactory.html">
-              <span class="name">ThriftServerFramedCodecFactory</span>
-            </a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       
       
@@ -1701,6 +1670,48 @@ errors as an &quot;application&quot; exception.</p><p>All we can do is sigh, pin
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-01)</i> Use the com.twitter.finagle.Thrift object to build a client</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ThriftServerFramedCodecextendsCodec[Array[Byte],Array[Byte]]"></a><a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodecextendsCodec[Array[Byte],Array[Byte]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ThriftServerFramedCodec.html">
+              <span class="name deprecated" title="Deprecated: (Since version 2017-02-10) Use the com.twitter.finagle.Thrift object to build a server">ThriftServerFramedCodec</span>
+            </a><span class="result"> extends <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-10)</i> Use the com.twitter.finagle.Thrift object to build a server</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodecFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ThriftServerFramedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]"></a><a id="ThriftServerFramedCodecFactory:ThriftServerFramedCodecFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodecFactoryextendscom.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Array[Byte],Array[Byte]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ThriftServerFramedCodecFactory.html">
+              <span class="name deprecated" title="Deprecated: (Since version 2017-02-10) Use the com.twitter.finagle.Thrift object to build a server">ThriftServerFramedCodecFactory</span>
+            </a><span class="result"> extends (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-10)</i> Use the com.twitter.finagle.Thrift object to build a server</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -1821,24 +1832,6 @@ to specify the client ID in their codec.
       </span>
       
       
-    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftServerFramedCodec"></a><a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodec" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ThriftServerFramedCodec$.html">
-              <span class="name">ThriftServerFramedCodec</span>
-            </a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.thrift.ThriftServiceIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftServiceIface"></a><a id="ThriftServiceIface:ThriftServiceIface"></a>
       <span class="permalink">
@@ -1851,18 +1844,18 @@ to specify the client ID in their codec.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Construct Service interface for a thrift method." href="ThriftServiceIface$.html">
+        <a title="Construct Service interface for a Thrift method." href="ThriftServiceIface$.html">
               <span class="name">ThriftServiceIface</span>
             </a>
       </span>
       
-      <p class="shortcomment cmt">Construct Service interface for a thrift method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct Service interface for a thrift method.</p><p>There are two ways to use a Scrooge-generated thrift service with Finagle:</p><p>1. Using a Service interface, i.e. a collection of finagle <code>Services</code>.</p><p>2. Using a method interface, i.e. a collection of methods returning <code>Futures</code>.</p><p>Example: for a thrift service</p><pre>service Logger {
+      <p class="shortcomment cmt">Construct Service interface for a Thrift method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct Service interface for a Thrift method.</p><p>There are two ways to use a Scrooge-generated Thrift <code>Service</code> with Finagle:</p><p>1. Using a Service interface, i.e. a collection of Finagle <code>Services</code>.</p><p>2. Using a method interface, i.e. a collection of methods returning <code>Futures</code>.</p><p>Example: for a Thrift service IDL:</p><pre>service Logger {
   string log(<span class="num">1</span>: string message, <span class="num">2</span>: i32 logLevel);
   i32 getLogSize();
-}</pre><p>the Service interface is</p><pre><span class="kw">trait</span> LoggerServiceIface {
-  <span class="kw">val</span> log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.Result]
-  <span class="kw">val</span> getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.Result]
- }</pre><p>and the method interface is</p><pre><span class="kw">trait</span> Logger[Future] {
+}</pre><p>the <code>Service</code> interface, or <code>ServiceIface</code>, is</p><pre><span class="kw">trait</span> LoggerServiceIface {
+  <span class="kw">val</span> log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.SuccessType]
+  <span class="kw">val</span> getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.SuccessType]
+}</pre><p>and the method interface, or <code>MethodIface</code>, is</p><pre><span class="kw">trait</span> Logger[Future] {
   <span class="kw">def</span> log(message: <span class="std">String</span>, logLevel: <span class="std">Int</span>): Future[<span class="std">String</span>]
   <span class="kw">def</span> getLogSize(): Future[<span class="std">Int</span>]
 }</pre><p>Service interfaces can be modified and composed with Finagle <code>Filters</code>.
@@ -1921,6 +1914,27 @@ requests.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-01)</i> Use the com.twitter.finagle.Thrift object to build a client</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ThriftServerFramedCodec"></a><a id="ThriftServerFramedCodec:ThriftServerFramedCodec"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/thrift/index.html#ThriftServerFramedCodec" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ThriftServerFramedCodec$.html">
+              <span class="name deprecated" title="Deprecated: (Since version 2017-02-10) Use the com.twitter.finagle.Thrift object to build a server">ThriftServerFramedCodec</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-10)</i> Use the com.twitter.finagle.Thrift object to build a server</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

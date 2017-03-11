@@ -872,46 +872,6 @@ considers only valid non cancelled requests.</p><p>To migrate to the Stack-based
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.client.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#expHttpProxy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expHttpProxy(hostName:String,port:Int):ClientBuilder.this.This"></a><a id="expHttpProxy(String,Int):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#expHttpProxy(hostName:String,port:Int):ClientBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">expHttpProxy</span><span class="params">(<span name="hostName">hostName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Make connections via the given HTTP proxy by host name and port.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy by host name and port.
-The host name is resolved every transport connection.
-This API is experiment.
-If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
-</p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#expSocksProxy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expSocksProxy(hostName:String,port:Int):ClientBuilder.this.This"></a><a id="expSocksProxy(String,Int):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ClientBuilder.html#expSocksProxy(hostName:String,port:Int):ClientBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">expSocksProxy</span><span class="params">(<span name="hostName">hostName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Make connections via the given HTTP proxy by host name and port.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy by host name and port.
-The host name is resolved every transport connection.
-This API is experiment.
-If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
-</p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failFast" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failFast(enabled:Boolean):ClientBuilder.this.This"></a><a id="failFast(Boolean):This"></a>
       <span class="permalink">
@@ -1761,7 +1721,6 @@ ClientBuilder()
       </span>
       
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-This allows the user to use client certificates
 SSL Hostname Validation is performed, on the passed in hostname
 </p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1780,7 +1739,6 @@ SSL Hostname Validation is performed, on the passed in hostname
       </span>
       
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-This allows the user to use client certificates
 No SSL Hostname Validation is performed</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.tls</code>.
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 6.42.0 documentation</title>
+    <title>Metrics &#8212; Finagle 6.43.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.42.0',
+        VERSION:     '6.43.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,9 +26,9 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
-    <link rel="next" title="FAQ" href="FAQ.html" />
-    <link rel="prev" title="Extending Finagle" href="Extending.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
+    <link rel="prev" title="Protocols" href="Protocols.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -55,10 +55,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="FAQ.html" title="FAQ"
+          <a href="UnsuccessfulResponses.html" title="Unsuccessful Responses"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="Extending.html" title="Extending Finagle"
+          <a href="Protocols.html" title="Protocols"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
       </ul>
@@ -310,6 +310,9 @@ on any instance running Finagle with Netty 4.</p>
 <dt><strong>pooling/deallocations/tiny</strong></dt>
 <dd>A gauge (a counter) of total number of TINY <em>direct deallocations</em>
 (i.e., less than 512 bytes).</dd>
+<dt><strong>reference_leaks</strong></dt>
+<dd>A counter of detected reference leaks. See longer note on
+<cite>com.twitter.finagle.netty4.trackReferenceLeaks</cite> for details.</dd>
 </dl>
 </div>
 </div>
@@ -356,6 +359,8 @@ of <code class="docutils literal"><span class="pre">updates</span></code>.</dd>
 <code class="docutils literal"><span class="pre">Status.Open</span></code> within <code class="docutils literal"><span class="pre">com.twitter.finagle.loadbalancer.Balancer.maxEffort</span></code>
 attempts. When this occurs, a non-open node may be selected for that
 request.</dd>
+<dt><strong>algorithm/{type}</strong></dt>
+<dd>A gauge exported with the name of the algorithm used for load balancing.</dd>
 </dl>
 </div>
 <div class="section" id="apertureloadbandbalancer">
@@ -563,9 +568,6 @@ milliseconds.</dd>
 <dl class="docutils">
 <dt><strong>dropped_requests</strong></dt>
 <dd>A counter of the number of requests probabilistically dropped.</dd>
-<dt><strong>accept_probability</strong></dt>
-<dd>A histogram of the filter&#8217;s estimated probability of a request not being
-nacked.</dd>
 </dl>
 </div>
 </div>
@@ -595,8 +597,8 @@ protocol.</p>
 <p id="transport-stats">These metrics pertain to where the Finagle abstraction ends and the bytes are sent over the wire.
 Understanding these stats often requires deep knowledge of the protocol, or individual transport
 (e.g. Netty) internals.</p>
-<div class="section" id="channelconnector">
-<h3>ChannelConnector<a class="headerlink" href="#channelconnector" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="netty-transporter">
+<h3>Netty Transporter<a class="headerlink" href="#netty-transporter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>connect_latency_ms</strong></dt>
 <dd>A histogram of the length of time it takes for a connection to succeed,
@@ -1047,7 +1049,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#transport">Transport</a><ul>
-<li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
+<li><a class="reference internal" href="#netty-transporter">Netty Transporter</a></li>
 <li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
 <li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
@@ -1079,8 +1081,8 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="Extending.html" title="previous chapter">Extending Finagle</a></li>
-      <li>Next: <a href="FAQ.html" title="next chapter">FAQ</a></li>
+      <li>Previous: <a href="Protocols.html" title="previous chapter">Protocols</a></li>
+      <li>Next: <a href="UnsuccessfulResponses.html" title="next chapter">Unsuccessful Responses</a></li>
   </ul></li>
 </ul>
 <div id="searchbox" style="display: none">

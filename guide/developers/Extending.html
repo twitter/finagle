@@ -1,0 +1,502 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extending Finagle &#8212; Finagle 6.43.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '6.43.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="../index.html" />
+    <link rel="next" title="Twitter Futures" href="Futures.html" />
+    <link rel="prev" title="Glossary of Terms" href="../Glossary.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Futures.html" title="Twitter Futures"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../Glossary.html" title="Glossary of Terms"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="extending-finagle">
+<h1>Extending Finagle<a class="headerlink" href="#extending-finagle" title="Permalink to this headline">¶</a></h1>
+<p>In this section we&#8217;ll examine the internals of Finagle by implementing
+a client and server for a simple newline-delimited, string-based
+protocol. We&#8217;ll build a client capable of sending simple strings to a
+server, which in turn may reply with another.</p>
+<p>While we&#8217;re going to dig a bit deeper here than in the rest of the
+user&#8217;s guide — implementing even a simple protocol requires a deeper
+appreciation of Finagle&#8217;s internals — the material presented here is not
+necessary to understand how to use Finagle productively. However,
+expert users may find the material useful.</p>
+<p>If you haven&#8217;t yet, first read the <span class="xref doc">quickstart</span> to
+understand some of Finagle&#8217;s core concepts (i.e. <a class="reference internal" href="Futures.html"><span class="doc">Futures</span></a>, <span class="xref doc">Services and Filters</span>).</p>
+<p>The entire example is available, together with a self-contained script
+to launch <cite>sbt</cite>, in the Finagle git repository:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ git clone https://github.com/twitter/finagle.git
+$ cd finagle/doc/src/sphinx/code/client-server-anatomy
+$ ./sbt run
+</pre></div>
+</div>
+<div class="section" id="stack">
+<h2>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h2>
+<p>Finagle&#8217;s clients and servers comprise many relatively simple
+components, arranged together in a stack. Each component is a
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ServiceFactory">ServiceFactory</a> that
+composes other service factories. We&#8217;ve seen this before:
+<span class="xref doc">filters</span> are a kind of component.</p>
+<p>This allows us to create simple components that we arrange into a
+sophisticated whole. For example, we define timeout behavior as a
+separate module; we then arrange to insert this module into the
+composite stack wherever timeout behavior is required. Some of the
+components included in Finagle&#8217;s clients are discussed in the
+<a class="reference internal" href="../Clients.html#client-modules"><span class="std std-ref">client documentation</span></a>.</p>
+<p>While we can imagine stacking such modules together in a manual
+fashion—for example, by building it bottoms-up, passing each
+<code class="docutils literal"><span class="pre">ServiceFactory</span></code> into the constructor of the next—this technique quickly
+becomes onerous; it become very difficult to:</p>
+<ul class="simple">
+<li>parameterize each component, for example to set the sizes of
+connection pools</li>
+<li>inject dependencies such as
+<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> implementations</li>
+<li>rearrange any part of the stack, for example to remove an
+unused timeout filter</li>
+<li>modify the stack for a specific use, for example to replace
+the connection pooling implementation or the load balancer</li>
+</ul>
+<p>Traditionally, the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> performed this duty in
+the manner just described. While it worked well for a while, it
+ultimately proved inflexible. With the needs and requirements of the
+various protocol implementations like <a class="reference internal" href="../Protocols.html#mux"><span class="std std-ref">Mux&#8217;s</span></a>, as well as
+more sophisticated new features, the builders became unworkable
+monoliths.</p>
+<p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack">Stack</a> formalizes the concept of a
+<em>stackable</em> component and treats a sequence of stackable components as
+a first-class (immutable) value that may be manipulated like any other
+collection. For example, modules may be inserted or removed from the
+stack; you can map one stack to another, for example when
+parameterizing individual modules.</p>
+<p>The stack abstraction also formalizes the concept of a <em>parameter</em>—i.e.
+a map of values used to construct an object. <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack$.Params">Stack.Params</a>
+is a kind of type-safe map used to hold parameters.</p>
+<p><code class="docutils literal"><span class="pre">Stack</span></code> and <code class="docutils literal"><span class="pre">Param</span></code> work together like this: <code class="docutils literal"><span class="pre">Stack</span></code> represents the stack
+of modules. These modules aren&#8217;t <em>materialized</em>. Rather, they represent
+a constructor for a <code class="docutils literal"><span class="pre">ServiceFactory</span></code> that accepts a <code class="docutils literal"><span class="pre">Params</span></code> map. Thus,
+to extract the final <code class="docutils literal"><span class="pre">ServiceFactory</span></code> that represents the entirety of the stack,
+we simply call <code class="docutils literal"><span class="pre">stack.make(params)</span></code>.</p>
+<p>Finagle defines default (polymorphic) stacks for both
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.StackClient$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">clients</a> and
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.server.StackServer$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">servers</a>.</p>
+<p>We&#8217;ll now discuss the constituent parts of Finagle&#8217;s clients and servers.</p>
+</div>
+<div class="section" id="transport-layer">
+<span id="transport-interface"></span><h2>Transport Layer<a class="headerlink" href="#transport-layer" title="Permalink to this headline">¶</a></h2>
+<p>Finagle represents the OSI transport layer as a typed stream that may
+be read from and written to asynchronously. The noteworthy methods in
+the interface are defined as such:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">trait</span> <span class="nc">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">read</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Out</span><span class="o">]</span>
+  <span class="k">def</span> <span class="n">write</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">In</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span>
+  <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Most Transports are implemented using <a class="reference external" href="http://netty.io">Netty</a>
+for I/O multiplexing and protocol codecs.</p>
+<p>You have a choice of whether to use <a class="reference external" href="http://netty.io/wiki/new-and-noteworthy-in-4.0.html">Netty 3 or Netty 4</a>
+for your protocol implementation. As we have migrated our existing protocols
+to Netty 4, (which is currently in beta and should be considered experimental),
+our best-practice recommendations have evolved, and those will be covered in the
+following section.</p>
+</div>
+<div class="section" id="decoding-in-the-transport">
+<h2>Decoding in the Transport<a class="headerlink" href="#decoding-in-the-transport" title="Permalink to this headline">¶</a></h2>
+<p>In the following <a class="reference internal" href="#server-protocol"><span class="std std-ref">sections</span></a>, we use Netty-provided
+encoders/decoders in the <code class="docutils literal"><span class="pre">Pipeline</span></code>, but it would be possible to have an empty
+pipeline and do this work in a <code class="docutils literal"><span class="pre">Transport</span></code>.</p>
+<p>If you were to write your own custom decoding code, which we strongly recommend,
+it&#8217;s preferable to put that logic in a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/transport/Transport.scala">Transport</a>.
+There are two motivations for this:</p>
+<p>1. Being decoupled from an I/O multiplexer means that it can be easily swapped out
+(e.g., for a new version of Netty).</p>
+<p>2. Finagle and Netty present different programming models and it
+isn&#8217;t straight forward to reason about logic split amongst them.</p>
+<p>In this case, the <code class="docutils literal"><span class="pre">Pipeline</span></code> will only contain a handler that decodes to/from the Netty buffer type
+(<a class="reference external" href="https://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>
+for Netty 3 and <a class="reference external" href="http://netty.io/4.0/api/io/netty/buffer/ByteBuf.html">ByteBuf</a> for Netty 4)
+from/to the buffer type used in Finagle, <a class="reference external" href="https://github.com/twitter/util/blob/master/util-core/src/main/scala/com/twitter/io/Buf.scala">Buf</a>,
+and a framer (or framing could happen in the <code class="docutils literal"><span class="pre">Transport</span></code>).</p>
+<p>On the client side, the <code class="docutils literal"><span class="pre">Pipeline</span></code> would look like:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.netty4.codec.BufCodec</span>
+<span class="k">import</span> <span class="nn">io.netty.channel.ChannelPipeline</span>
+
+<span class="k">object</span> <span class="nc">ClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;bufCodec&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">BufCodec</span><span class="o">)</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;framer&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">MyFramer</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>We&#8217;ll cover two different approaches to decoding in the <code class="docutils literal"><span class="pre">Transport</span></code>.</p>
+<p>The first, and simplest approach, is best if your decoding logic is stateless and
+has a one-to-one mapping with the frames received. If your client or server can decode
+one frame into one message, without knowing anything about the previous or next
+frame, this approach will work for you.</p>
+<p>On your message type object (in this case, <code class="docutils literal"><span class="pre">Message</span></code>), define encoding and decoding methods:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">object</span> <span class="nc">Message</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">encode</span><span class="o">(</span><span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span><span class="o">)</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="o">}</span>
+
+  <span class="k">def</span> <span class="n">decode</span><span class="o">(</span><span class="n">buf</span><span class="k">:</span> <span class="kt">Buf</span><span class="o">)</span><span class="k">:</span> <span class="kt">Message</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="o">...</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">class</span> <span class="nc">Message</span> <span class="o">{</span>
+  <span class="o">...</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Then, on the client side, we can simply map over the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/transport/Transport.scala">Transport</a> with the encoding and decoding
+functions to produce a new <code class="docutils literal"><span class="pre">Transport</span></code> that will do decoding and encoding
+for us (to do the same thing on the server side, we&#8217;d use a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ServerDispatcher.scala">ServerDispatcher</a> ).</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
+    <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">ChannelBuffer</span>, <span class="kt">ChannelBuffer</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Message</span>, <span class="kt">Message</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">Message</span><span class="o">.</span><span class="n">encode</span><span class="o">,</span> <span class="nc">Message</span><span class="o">.</span><span class="n">decode</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>The second approach to doing decoding in the <code class="docutils literal"><span class="pre">Transport</span></code> applies if your client or server
+decodes one frame into multiple messages (or multiple frames into a single message), or
+needs to maintain some state when decoding. In that case, you can use a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/transport/Transport.scala">TransportProxy</a> to wrap the underlying
+<cite>Transport</cite> and implement your own read/write methods.</p>
+<p>A custom client transport might look like the following; where a Decoder class
+maintains state and returns a <code class="docutils literal"><span class="pre">Message</span></code> when sufficient frames have been read,
+or null otherwise.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ClientTransport</span><span class="o">(</span>
+  <span class="n">underlying</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">Buf</span>, <span class="kt">Buf</span><span class="o">]</span>
+<span class="o">)</span> <span class="k">extends</span> <span class="nc">TransportProxy</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="n">decoder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyDecoder</span><span class="o">()</span>
+  <span class="k">val</span> <span class="n">encoder</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyEncoder</span><span class="o">()</span>
+
+  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">decode</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">Message</span><span class="o">]</span> <span class="k">=</span> <span class="n">buf</span> <span class="k">=&gt;</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">msg</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">msg</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="n">readLoop</span><span class="o">()</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+
+  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">def</span> <span class="n">readLoop</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Message</span><span class="o">]</span> <span class="k">=</span> <span class="n">underlying</span><span class="o">.</span><span class="n">read</span><span class="o">().</span><span class="n">flatMap</span><span class="o">(</span><span class="n">decode</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">read</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">readLoop</span><span class="o">()</span>
+
+  <span class="k">def</span> <span class="n">write</span><span class="o">(</span><span class="n">msg</span><span class="k">:</span> <span class="kt">Message</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">buf</span><span class="k">:</span> <span class="kt">Buf</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="o">(</span><span class="n">msg</span><span class="o">)</span>
+    <span class="n">underlying</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="n">buf</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="server-protocol">
+<span id="id1"></span><h2>Server Protocol<a class="headerlink" href="#server-protocol" title="Permalink to this headline">¶</a></h2>
+<p>To frame data received over the network with respect to our
+protocol, we use a Netty Channel Pipeline. Our server pipeline defines a UTF-8
+text-based newline delimited protocol (since Netty already provides
+a <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/string/StringEncoder.html">StringEncoder</a>
+and <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/string/StringDecoder.html">StringDecoder</a>,
+we&#8217;ll put this decoding in the Pipeline). The types have different namespaces but look
+much the same in Netty 3 and Netty 4.</p>
+<p>Using a Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Using a Netty 4 <a class="reference external" href="http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+</div>
+<div class="section" id="listener">
+<h2>Listener<a class="headerlink" href="#listener" title="Permalink to this headline">¶</a></h2>
+<p>The mechanics of listening over a network socket and
+translating our pipeline into a typed transport are defined by the
+Netty Listener. Finagle provides a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>
+and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>.</p>
+<p>Here we define a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>
+in our server implementation:</p>
+<p>This implements the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/Listener.scala">Listener</a>
+interface that exposes a <code class="docutils literal"><span class="pre">listen</span></code> method:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">listen</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)(</span><span class="n">serveTransport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Unit</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>That is, given a socket address to bind and listen, <code class="docutils literal"><span class="pre">serveTransport</span></code> is dispatched
+for each new connection established.</p>
+<p>For example, here is a simple echo server using a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Listener.scala">Netty4Listener</a>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">address</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty4Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">echoServer</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
+   <span class="n">transport</span><span class="o">.</span><span class="n">read</span><span class="o">()</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span> <span class="n">ensure</span> <span class="n">transport</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+ <span class="o">}</span>
+</pre></div>
+</div>
+<p>We can now send requests over this socket and have them echoed back:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>&gt; echo &quot;hello&quot; | nc localhost 8080
+&gt; hello
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">serveTransport</span></code> function defined above is primitive. For example,
+it closes each connection after one read and write. Finagle provides tools
+to provision a transport with more sophisticated behavior.</p>
+</div>
+<div class="section" id="server-dispatcher">
+<h2>Server Dispatcher<a class="headerlink" href="#server-dispatcher" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ServerDispatcher.scala">server dispatcher</a>
+queues concurrent incoming requests and serially dispatches
+them over a <code class="docutils literal"><span class="pre">Transport</span></code>. The data read from the <code class="docutils literal"><span class="pre">Transport</span></code>
+is funneled through a service object and the resulting value
+is written back to the <code class="docutils literal"><span class="pre">Transport</span></code>. Additionally, the
+server dispatcher drains existing requests before
+closing a <code class="docutils literal"><span class="pre">Transport</span></code>.</p>
+<p>We could translate our <code class="docutils literal"><span class="pre">serveTransport</span></code> function to use this facility.</p>
+<p>Using Netty 4:</p>
+<p>A nice consequence of using a <a class="reference internal" href="../ServicesAndFilters.html#services"><span class="std std-ref">Service</span></a> to process
+data received over the transport is the ability to furnish our server with
+additional behavior via <span class="xref doc">Filters</span>. This is exactly
+what Finagle&#8217;s default server implementation does.</p>
+</div>
+<div class="section" id="stdstackserver">
+<h2>StdStackServer<a class="headerlink" href="#stdstackserver" title="Permalink to this headline">¶</a></h2>
+<p>Finagle&#8217;s <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/StackServer.scala">StdStackServer</a> provides appropriate
+features for building a robust server. It puts together a <code class="docutils literal"><span class="pre">Listener</span></code>
+and a <code class="docutils literal"><span class="pre">Dispatcher</span></code> in much the same way we just did. <code class="docutils literal"><span class="pre">StdStackServer</span></code>
+also layers a <code class="docutils literal"><span class="pre">Stack</span></code> on top of it (e.g. to provide timeouts, stats,
+concurrency control, tracing, etc.) and takes care of graceful
+shutdown, so that outstanding requests are drained before a server
+exits. The resulting server is fully parameterized, providing a simple
+and standard way to receive parameters and dependencies.</p>
+<p>Using the listener and dispatcher as above, we define our full server.
+The abstract type parameters <code class="docutils literal"><span class="pre">In</span></code> and <code class="docutils literal"><span class="pre">Out</span></code> are used when the type of
+<code class="docutils literal"><span class="pre">Listener</span></code> differs from the type of <code class="docutils literal"><span class="pre">Server</span></code>. This is common when some protocol
+processing is done in the <code class="docutils literal"><span class="pre">Dispatcher</span></code>.</p>
+<p>We&#8217;ll create a server that uses Netty 4:</p>
+<p>Finally, we make use of our service:</p>
+<p>To create a server that uses Netty 3, use a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>
+and a Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>.</p>
+</div>
+<div class="section" id="client-protocol">
+<h2>Client Protocol<a class="headerlink" href="#client-protocol" title="Permalink to this headline">¶</a></h2>
+<p>Again, we&#8217;ll use a Netty Channel Pipeline to frame our network traffic.
+Our client pipeline defines a UTF-8 newline delimited protocol. As with the server
+pipeline, the types have different namespaces but look much the same in Netty 3 and Netty 4.</p>
+<p>Netty 3 <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+<p>Netty 4 <a class="reference external" href="http://netty.io/4.1/api/io/netty/channel/ChannelPipeline.html">ChannelPipeline</a>:</p>
+</div>
+<div class="section" id="transporter">
+<h2>Transporter<a class="headerlink" href="#transporter" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/clients/Transporter.scala">Transporter</a> is responsible for connecting
+a <a class="reference internal" href="#transport-interface"><span class="std std-ref">Transport</span></a> to a peer; it establishes a session. Finagle provides
+a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Transporter.scala">Netty3Transporter</a> and a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>,
+however the use of other Transporters is fully supported.</p>
+<p>Using a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>:</p>
+</div>
+<div class="section" id="client-dispatcher">
+<h2>Client Dispatcher<a class="headerlink" href="#client-dispatcher" title="Permalink to this headline">¶</a></h2>
+<p>A client dispatcher turns a Transport (a stream of objects) into a Service
+(request-response pairs). It must manage all outstanding requests,
+pairing incoming responses to their respective requests.
+The simplest kind of dispatcher is called a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/dispatch/ClientDispatcher.scala">SerialClientDispatcher</a>,
+which allows only a single outstanding request (concurrent requests are queued) <a class="footnote-reference" href="#id7" id="id6">[1]</a>.</p>
+<p>Our client will employ the SerialClientDispatcher.</p>
+<table class="docutils footnote" frame="void" id="id7" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[1]</a></td><td>Note that Finagle also includes a dispatcher that can
+pipeline requests, i.e., allow more than one outstanding request.
+It&#8217;s possible to create a custom dispatcher as well. For example,
+<span class="xref doc">Mux</span>, which support true multiplexing,
+defines a custom dispatcher.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="a-basic-client">
+<h2>A Basic Client<a class="headerlink" href="#a-basic-client" title="Permalink to this headline">¶</a></h2>
+<p>Given a defined transporter and request dispatching strategy, we can compose the
+two and create a client. We&#8217;ll create a client that uses Netty 4:</p>
+<p>Finally, we can dispatch requests over our client.</p>
+<p>Assuming we have a server willing to listen, we can expect a response:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ ./sbt run
+&gt; hello
+</pre></div>
+</div>
+<p>To create a client that uses Netty 4, use a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>.</p>
+</div>
+<div class="section" id="a-robust-client">
+<h2>A Robust Client<a class="headerlink" href="#a-robust-client" title="Permalink to this headline">¶</a></h2>
+<p>Our client is a <code class="docutils literal"><span class="pre">Service</span></code>, so we can supply additional
+behavior to make our client more robust using
+filters:</p>
+<p>Composing these filters <a class="footnote-reference" href="#id9" id="id8">[2]</a> with our basic client demonstrates
+the composable components used throughout finagle.</p>
+<p>This client is a good start, but we cannot dispatch concurrent requests
+to a single host, nor load balance over multiple hosts. A typical Finagle client
+affords us the ability to dispatch a large number of concurrent requests.</p>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[2]</a></td><td>The use of the MaskCancelFilter in the example filter stack
+ensures that timeout exceptions don&#8217;t propagate to our
+bottom most service which, in this case, represents a dispatcher.
+Without this guarantee, the service would be closed after the first
+timeout exception. This becomes unnecessary when we use a StdStackClient
+because the semantics of Service#close() change
+with respect to Finagle&#8217;s connection pool.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="stdstackclient">
+<h2>StdStackClient<a class="headerlink" href="#stdstackclient" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/StackClient.scala">StdStackClient</a>
+combines a <cite>Transporter</cite>, a <cite>Dispatcher</cite>, and a <cite>Stack</cite> to provide a robust,
+load balanced, resource-managed client. The default stack includes many
+features including
+<a class="reference internal" href="../Clients.html#load-balancer"><span class="std std-ref">load balancing</span></a> over multiple hosts
+and <a class="reference internal" href="../Clients.html#watermark-pool"><span class="std std-ref">connection pooling</span></a> per host. See the section
+on <a class="reference internal" href="../Clients.html#client-modules"><span class="std std-ref">client modules</span></a> for more details.</p>
+<p>Putting together a <code class="docutils literal"><span class="pre">StdStackClient</span></code> is simple:</p>
+<p>Armed with this new client, we can connect to a destination <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Name.scala">Name</a>, representing multiple hosts:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">dest</span> <span class="k">=</span> <span class="nc">Resolver</span><span class="o">.</span><span class="n">eval</span><span class="o">(</span>
+  <span class="s">&quot;localhost:8080,localhost:8081,localhost:8082&quot;</span><span class="o">)</span>
+
+<span class="n">client</span><span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
+</pre></div>
+</div>
+<p>Requests sent to this client are load balanced across these
+hosts and each host maintains a connection pool, thus
+allowing concurrent dispatches.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="../index.html">
+  <img class="logo" src="../_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Extending Finagle</a><ul>
+<li><a class="reference internal" href="#stack">Stack</a></li>
+<li><a class="reference internal" href="#transport-layer">Transport Layer</a></li>
+<li><a class="reference internal" href="#decoding-in-the-transport">Decoding in the Transport</a></li>
+<li><a class="reference internal" href="#server-protocol">Server Protocol</a></li>
+<li><a class="reference internal" href="#listener">Listener</a></li>
+<li><a class="reference internal" href="#server-dispatcher">Server Dispatcher</a></li>
+<li><a class="reference internal" href="#stdstackserver">StdStackServer</a></li>
+<li><a class="reference internal" href="#client-protocol">Client Protocol</a></li>
+<li><a class="reference internal" href="#transporter">Transporter</a></li>
+<li><a class="reference internal" href="#client-dispatcher">Client Dispatcher</a></li>
+<li><a class="reference internal" href="#a-basic-client">A Basic Client</a></li>
+<li><a class="reference internal" href="#a-robust-client">A Robust Client</a></li>
+<li><a class="reference internal" href="#stdstackclient">StdStackClient</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../Glossary.html" title="previous chapter">Glossary of Terms</a></li>
+      <li>Next: <a href="Futures.html" title="next chapter">Twitter Futures</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
+  
+  </body>
+</html>

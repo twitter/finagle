@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 6.42.0 documentation</title>
+    <title>Clients &#8212; Finagle 6.43.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.42.0',
+        VERSION:     '6.43.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -155,7 +155,7 @@ stacks: the <cite>client stack</cite> manages <cite>name</cite> resolution and b
 across multiple endpoints, the <cite>endpoint stack</cite> provides circuit breakers
 and connection pooling, and the <cite>connection stack</cite> provides connection life-cycle
 management and implements the wire protocol.</p>
-<div class="figure" id="id31">
+<div class="figure" id="id32">
 <img alt="_images/clientstack.svg" src="_images/clientstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle client
 that is configured with three endpoints and connections. Requests flow from
 left to right.</span></p>
@@ -199,7 +199,7 @@ output. To override this, use the following sample.</p>
 <p>Finally, clients have built-in support for <a class="reference external" href="http://zipkin.io/">Zipkin</a>.</p>
 </div>
 <div class="section" id="retries">
-<h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
+<span id="client-retries"></span><h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
 <p>Every Finagle client contains a <cite>Retries</cite> module in the top (above load balancers) of its
 stack so it can retry failures from the underlying modules: circuit breakers, timeouts,
 load balancers and connection pools.</p>
@@ -552,7 +552,7 @@ and picks a node it hopes has become available.</p>
 </div>
 </div>
 <div class="section" id="circuit-breaking">
-<h3>Circuit Breaking<a class="headerlink" href="#circuit-breaking" title="Permalink to this headline">¶</a></h3>
+<span id="client-circuit-breaking"></span><h3>Circuit Breaking<a class="headerlink" href="#circuit-breaking" title="Permalink to this headline">¶</a></h3>
 <p>The following modules aim to preemptively disable sessions that will likely fail requests.
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.</p>
@@ -738,8 +738,26 @@ and then slowly decays, based on the TTL.</p>
 </div>
 </div>
 </div>
+<div class="section" id="admission-control">
+<h2>Admission Control<a class="headerlink" href="#admission-control" title="Permalink to this headline">¶</a></h2>
+<p>Clients are configured with the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>
+which will probabilistically drop some requests to unhealthy clusters. This aims
+to decrease the request volume to those clusters with little to no effect on a
+client&#8217;s already unhealthy success rate. The filter works by keeping a moving
+average of the fraction of requests that are <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nacked</span></a>. When
+this fraction hits a given threshold, the filter will probabilistically drop
+requests in proportion to that fraction.
+The filter can be configured with the following parameters:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">window</span></code> The duration over which the average is calculated. Default is 2
+minutes.</li>
+<li><code class="docutils literal"><span class="pre">nackRateThreshold</span></code> The rate of rejected requests at which the filter kicks
+in. Default is 0.5.</li>
+</ol>
+<p><a class="reference internal" href="Metrics.html#admission-control-stats"><span class="std std-ref">Related stats</span></a></p>
+</div>
 <div class="section" id="response-classification">
-<h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>
+<span id="id30"></span><h2>Response Classification<a class="headerlink" href="#response-classification" title="Permalink to this headline">¶</a></h2>
 <p>To give Finagle visibility into application level success and failure
 developers can provide classification of responses on clients and servers by using
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/package.scala">response classifiers</a>.
@@ -992,6 +1010,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#admission-control">Admission Control</a></li>
 <li><a class="reference internal" href="#response-classification">Response Classification</a><ul>
 <li><a class="reference internal" href="#custom-classifiers">Custom Classifiers</a></li>
 <li><a class="reference internal" href="#thrift-and-thriftmux-classifiers">Thrift and ThriftMux Classifiers</a></li>

@@ -590,12 +590,6 @@ their name.">
                           HttpTracing
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MapHeaderMap$.html" title=""></a>
-                        <a class="class" href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap"></a>
-                        <a href="MapHeaderMap.html" title="Mutable-Map-backed HeaderMap">
-                          MapHeaderMap
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MapParamMap$.html" title=""></a>
                         <a class="class" href="MapParamMap.html" title="Map-backed ParamMap."></a>
                         <a href="MapParamMap.html" title="Map-backed ParamMap.">
@@ -810,12 +804,17 @@ its credentials from a provided CredentialSource...">
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="../loadbalancer/index.html">
+        <a title="This package implements client side load balancing algorithms." href="../loadbalancer/index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="mdns"></a><a id="mdns:mdns"></a>
       <span class="permalink">
@@ -1710,29 +1709,10 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
       <p class="shortcomment cmt">Rich Message</p><div class="fullcomment"><div class="comment cmt"><p>Rich Message</p><p>Base class for Request and Response.  There are both input and output
 methods, though only one set of methods should be used.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.Method" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Method" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MethodextendsAnyRef"></a><a id="Method:Method"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/index.html#MethodextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">sealed abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Represents the HTTP method." href="Method.html">
-              <span class="name">Method</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Represents the HTTP method.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the HTTP method.</p><p>For Java-friendly enums, see <a href="Methods.html" class="extype" name="com.twitter.finagle.http.Methods">com.twitter.finagle.http.Methods</a>.
-</p></div></div>
-    </li><li name="com.twitter.finagle.http.Methods" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MethodsextendsObject"></a><a id="Methods:Methods"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#MethodsextendsObject" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1741,12 +1721,14 @@ methods, though only one set of methods should be used.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Java friendly versions of com.twitter.finagle.http.Method." href="Methods.html">
-              <span class="name">Methods</span>
+        <a title="Represents the HTTP method." href="Method.html">
+              <span class="name">Method</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Java friendly versions of <code><a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a></code>.</p>
+      <p class="shortcomment cmt">Represents the HTTP method.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the HTTP method.</p><p>The method is a case-sensitive string defined as part of the request
+line of the HTTP protocol.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>https://tools.ietf.org/html/rfc7230#section-3.1.1</p></span><span class="cmt"><p>For Java-friendly enums, see <a href="Methods.html" class="extype" name="com.twitter.finagle.http.Methods">com.twitter.finagle.http.Methods</a>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a><a id="ParamMap:ParamMap"></a>
       <span class="permalink">
@@ -1944,8 +1926,8 @@ index. Routes with the same grouping are displayed together.</p></dd><dt class="
 is routed to the path as per the <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">com.twitter.finagle.http.HttpMuxer</a>
 spec. The path only needs to be specified if the URL accessed in the
 admin interface is different from the pattern provided in <a href="Route.html#pattern:String" class="extmbr" name="com.twitter.finagle.http.Route#pattern">Route.pattern</a>.</p></dd><dt class="param">method</dt><dd class="cmt"><p>Specifies which HTTP Method to use from
-<a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a>. The default is <a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a>. Only
-<a href="Method$$Get$.html" class="extype" name="com.twitter.finagle.http.Method.Get">Method.Get</a> and <a href="Method$$Post$.html" class="extype" name="com.twitter.finagle.http.Method.Post">Method.Post</a> are supported.</p></dd></dl></div>
+<a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a>. The default is <a href="Method$.html#Get:com.twitter.finagle.http.Method" class="extmbr" name="com.twitter.finagle.http.Method#Get">Method.Get</a>. Only
+<a href="Method$.html#Get:com.twitter.finagle.http.Method" class="extmbr" name="com.twitter.finagle.http.Method#Get">Method.Get</a> and <a href="Method$.html#Post:com.twitter.finagle.http.Method" class="extmbr" name="com.twitter.finagle.http.Method#Post">Method.Post</a> are supported.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http.SimpleElement" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleElementextendsFormElementwithProductwithSerializable"></a><a id="SimpleElement:SimpleElement"></a>
       <span class="permalink">
@@ -1987,24 +1969,6 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
 - it omits the possibility of statuses with duplicate reason phrases</p><p>The only downside is that we lose the ability to create custom statuses with
 &quot;vanity&quot; reason phrases, but this should be tolerable.</p><p>For Java-friendly enums, see <a href="Statuses.html" class="extype" name="com.twitter.finagle.http.Statuses">com.twitter.finagle.http.Statuses</a>.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.Statuses" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StatusesextendsObject"></a><a id="Statuses:Statuses"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#StatusesextendsObject" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Java friendly versions of com.twitter.finagle.http.Status." href="Statuses.html">
-              <span class="name">Statuses</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Java friendly versions of <code><a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">com.twitter.finagle.http.Status</a></code>.</p>
     </li><li name="com.twitter.finagle.http.TlsFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TlsFilterextendsSimpleFilter[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="TlsFilter:TlsFilter"></a>
       <span class="permalink">
@@ -2041,26 +2005,68 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       
       <p class="shortcomment cmt">The Message was too long to be handled correctly</p>
-    </li><li name="com.twitter.finagle.http.Version" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="VersionextendsAnyRef"></a><a id="Version:Version"></a>
+    </li><li name="com.twitter.finagle.http.Version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="VersionextendsProductwithSerializable"></a><a id="Version:Version"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#VersionextendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#VersionextendsProductwithSerializable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">sealed abstract </span>
-        <span class="kind">class</span>
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
         <a title="Represents the HTTP version." href="Version.html">
               <span class="name">Version</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Represents the HTTP version.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the HTTP version.</p><p>For Java-friendly enums, see <a href="Versions.html" class="extype" name="com.twitter.finagle.http.Versions">com.twitter.finagle.http.Versions</a>.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.Versions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Methods" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MethodsextendsObject"></a><a id="Methods:Methods"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#MethodsextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java friendly versions of com.twitter.finagle.http.Method." href="Methods.html">
+              <span class="name deprecated" title="Deprecated: as of 2017-02-13. Please use the com.twitter.finagle.http.Method
+instances directly.">Methods</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java friendly versions of <code><a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a></code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly versions of <code><a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a></code>.
+</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"><p>as of 2017-02-13. Please use the <code><a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">com.twitter.finagle.http.Method</a></code>
+instances directly.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Statuses" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StatusesextendsObject"></a><a id="Statuses:Statuses"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#StatusesextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java friendly versions of com.twitter.finagle.http.Status." href="Statuses.html">
+              <span class="name deprecated" title="Deprecated: as of 2017-02-13. Please use the com.twitter.finagle.http.Status
+instances directly.">Statuses</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java friendly versions of <code><a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">com.twitter.finagle.http.Status</a></code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly versions of <code><a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">com.twitter.finagle.http.Status</a></code>.
+</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"><p>as of 2017-02-13. Please use the <code><a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">com.twitter.finagle.http.Status</a></code>
+instances directly.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Versions" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="VersionsextendsObject"></a><a id="Versions:Versions"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/index.html#VersionsextendsObject" title="Permalink">
@@ -2073,32 +2079,14 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       </span>
       <span class="symbol">
         <a title="Java friendly versions of com.twitter.finagle.http.Version." href="Versions.html">
-              <span class="name">Versions</span>
+              <span class="name deprecated" title="Deprecated: as of 2017-02-13. Please use the com.twitter.finagle.http.Version
+instances directly.">Versions</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Java friendly versions of <code><a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">com.twitter.finagle.http.Version</a></code>.</p>
-    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MapHeaderMapextendsHeaderMap"></a><a id="MapHeaderMap:MapHeaderMap"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#MapHeaderMapextendsHeaderMap" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Mutable-Map-backed HeaderMap" href="MapHeaderMap.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2017-02-01) This is becoming private. Use HeaderMap.apply(..) instead.">MapHeaderMap</span>
-            </a><span class="result"> extends <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p><div class="fullcomment"><div class="comment cmt"><p>Mutable-Map-backed <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-02-01)</i> This is becoming private. Use <code>HeaderMap.apply(..)</code> instead.</p></dd></dl></div>
+      <p class="shortcomment cmt">Java friendly versions of <code><a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">com.twitter.finagle.http.Version</a></code>.</p><div class="fullcomment"><div class="comment cmt"><p>Java friendly versions of <code><a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">com.twitter.finagle.http.Version</a></code>.
+</p></div><dl class="attributes block"> <dt>Deprecated</dt><dd class="cmt"><p>as of 2017-02-13. Please use the <code><a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">com.twitter.finagle.http.Version</a></code>
+instances directly.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -2230,24 +2218,6 @@ admin interface is different from the pattern provided in <a href="Route.html#pa
       <span class="symbol">
         <a title="" href="HttpTracing$.html">
               <span class="name">HttpTracing</span>
-            </a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MapHeaderMap"></a><a id="MapHeaderMap:MapHeaderMap"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#MapHeaderMap" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="MapHeaderMap$.html">
-              <span class="name">MapHeaderMap</span>
             </a>
       </span>
       
@@ -2524,7 +2494,7 @@ its credentials from a provided CredentialSource... usually JAAS.
       <span class="symbol">
         <a title="" href="Version$.html">
               <span class="name">Version</span>
-            </a>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       

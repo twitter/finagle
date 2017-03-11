@@ -425,9 +425,9 @@ resources for using Finagle.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.serverset2.addr.ZkMetadata#fromAddrMetadata" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="fromAddrMetadata(metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.serverset2.addr.ZkMetadata"></a><a id="fromAddrMetadata(Metadata):ZkMetadata"></a>
+      <a id="fromAddrMetadata(metadata:com.twitter.finagle.Addr.Metadata):Option[com.twitter.finagle.serverset2.addr.ZkMetadata]"></a><a id="fromAddrMetadata(Metadata):Option[ZkMetadata]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/serverset2/addr/ZkMetadata$.html#fromAddrMetadata(metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.serverset2.addr.ZkMetadata" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/serverset2/addr/ZkMetadata$.html#fromAddrMetadata(metadata:com.twitter.finagle.Addr.Metadata):Option[com.twitter.finagle.serverset2.addr.ZkMetadata]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -436,13 +436,13 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromAddrMetadata</span><span class="params">(<span name="metadata">metadata: <a href="../../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result">: <a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a></span>
+        <span class="name">fromAddrMetadata</span><span class="params">(<span name="metadata">metadata: <a href="../../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Convert <a href="../../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">com.twitter.finagle.Addr.Metadata</a> to an instance of
 <a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Convert <a href="../../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">com.twitter.finagle.Addr.Metadata</a> to an instance of
 <a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a>.  If <a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a> is not present in <code>metadata</code>,
-return the default metadata.
+return None.
 </p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
@@ -589,23 +589,6 @@ return the default metadata.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.serverset2.addr.ZkMetadata#unapply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="unapply(metadata:com.twitter.finagle.Addr.Metadata):Option[Int]"></a><a id="unapply(Metadata):Option[Int]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/serverset2/addr/ZkMetadata$.html#unapply(metadata:com.twitter.finagle.Addr.Metadata):Option[Int]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">unapply</span><span class="params">(<span name="metadata">metadata: <a href="../../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Pattern match against <code>metadata</code> for <a href="ZkMetadata.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a> and return the
-shard ID if it exists.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

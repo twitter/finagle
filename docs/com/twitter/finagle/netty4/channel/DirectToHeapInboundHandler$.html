@@ -235,7 +235,10 @@ and gives them a deterministic lifecycle.">
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An inbound channel handler that copies direct byte buffers onto the JVM heap
-and gives them a deterministic lifecycle.
+and gives them a deterministic lifecycle. This handler also makes sure to
+use the unpooled byte buffer (regardless of what channel's allocator is) as
+its destination thereby defining a clear boundaries between pooled and unpooled
+environments.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@Sharable</span><span class="args">()</span>
               
@@ -243,7 +246,12 @@ and gives them a deterministic lifecycle.
       to application space you don't need this handler in your pipeline. Every
       other use case needs this handler or you will with very high probability
       incur a direct buffer leak.</p></span>, <span class="cmt"><p>This handler recognizes both ByteBuf's and ByteBufHolder's (think of HTTP
-      messages extending ByteBufHolder's in Netty).</p></span></dd></dl><div class="toggleContainer block">
+      messages extending ByteBufHolder's in Netty).</p></span>, <span class="cmt"><p>If the input buffer is direct but not readable it's still guaranteed to be
+      released and replaced with a heap buffer of equivalent capacity.</p></span>, <span class="cmt"><p>This handler will bypass all heap buffers since there is no way to tell
+      if they are pooled or not. However, given that it's not expected to
+      receive a heap buffer on the inbound path when pooling is enabled, the
+      &quot;bypass heap buffers&quot; code path only exists to accommodate pipelines
+      with unpooled allocators.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>

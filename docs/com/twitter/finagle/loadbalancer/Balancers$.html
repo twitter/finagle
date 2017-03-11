@@ -167,12 +167,17 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html">
+        <a title="This package implements client side load balancing algorithms." href="index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -193,23 +198,9 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Aperture$.html" title=""></a>
-                        <a href="Aperture$.html" title="">
-                          Aperture
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="" title="Constructor methods for various load balancers."></a>
                         <a href="" title="Constructor methods for various load balancers.">
                           Balancers
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="ConcurrentLoadBalancerFactory$.html" title="A load balancer that balances among multiple connections,
-useful for managing concurrency in pipelining protocols."></a>
-                        <a href="ConcurrentLoadBalancerFactory$.html" title="A load balancer that balances among multiple connections,
-useful for managing concurrency in pipelining protocols.">
-                          ConcurrentLoadBalancerFactory
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -218,19 +209,8 @@ useful for managing concurrency in pipelining protocols.">
                           DefaultBalancerFactory
                         </a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="DistributorT.html" title="The base type of the load balancer distributor."></a>
-                        <a href="DistributorT.html" title="The base type of the load balancer distributor.">
-                          DistributorT
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="HeapBalancer$.html" title=""></a>
-                        <a class="class" href="HeapBalancer.html" title="An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]]."></a>
-                        <a href="HeapBalancer.html" title="An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].">
-                          HeapBalancer
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="LoadBalancerFactory$.html" title=""></a>
+                        <a class="object" href="LoadBalancerFactory$.html" title="Exposes a Stack.Module which composes load balancing into the respective
+Stack."></a>
                         <a class="class" href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in
 context from the stack to the balancers at construction time."></a>
                         <a href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in
@@ -239,28 +219,16 @@ context from the stack to the balancers at construction time.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="NodeT.html" title="The base type of nodes over which load is balanced."></a>
-                        <a href="NodeT.html" title="The base type of nodes over which load is balanced.">
-                          NodeT
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="RoundRobinBalancer.html" title="A simple round robin balancer that chooses the next backend in
-the list for each request."></a>
-                        <a href="RoundRobinBalancer.html" title="A simple round robin balancer that chooses the next backend in
-the list for each request.">
-                          RoundRobinBalancer
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="defaultBalancer$.html" title="We expose the ability to configure balancers per-process via flags."></a>
-                        <a href="defaultBalancer$.html" title="We expose the ability to configure balancers per-process via flags.">
+                        <a class="object" href="defaultBalancer$.html" title="A GlobalFlag that changes the default balancer for every client in the process."></a>
+                        <a href="defaultBalancer$.html" title="A GlobalFlag that changes the default balancer for every client in the process.">
                           defaultBalancer
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="perHostStats$.html" title=""></a>
-                        <a href="perHostStats$.html" title="">
+                        <a class="object" href="perHostStats$.html" title="A GlobalFlag which allows the configuration of per host (or endpoint)
+stats to be toggled."></a>
+                        <a href="perHostStats$.html" title="A GlobalFlag which allows the configuration of per host (or endpoint)
+stats to be toggled.">
                           perHostStats
                         </a>
                       </li>
@@ -294,8 +262,12 @@ the list for each request.">
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
 specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
 to easily inject a balancer into the Finagle stack via client configuration.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
-     for more details.</p></span></dd></dl><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>configuring a client with a load balancer</p><pre>$Protocol.client
+  .withLoadBalancer(Balancers.aperture())
+  .newClient(...)</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
+for more details.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -430,9 +402,9 @@ by P2C operating on a half-dead cluster since there is an additional layer
 of requeues (see <code>Retries</code> module) involved above those &quot;bad picks&quot;.
 </p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperture" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,timer:com.twitter.util.Timer,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperture(Duration,Double,Double,Int,Timer,Int,Rng):LoadBalancerFactory"></a>
+      <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperture(Duration,Double,Double,Int,Int,Rng):LoadBalancerFactory"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/loadbalancer/Balancers$.html#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,timer:com.twitter.util.Timer,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/Balancers$.html#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -441,7 +413,7 @@ of requeues (see <code>Retries</code> module) involved above those &quot;bad pic
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">aperture</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2.0</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../index.html">DefaultTimer.twitter</a></span></span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+        <span class="name">aperture</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2.0</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
       <p class="shortcomment cmt">The aperture load-band balancer balances load to the smallest
@@ -452,7 +424,7 @@ subset (&quot;aperture&quot;) of services so that:</p><ol class="decimal"><li>Th
     weights.</p><p>Unavailable services are not counted--the aperture expands as
 needed to cover those that are available.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
-     for more details.</p></span></dd></dl></div>
+for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -593,11 +565,10 @@ needed to cover those that are available.
       </span>
       
       <p class="shortcomment cmt">An efficient strictly least-loaded balancer that maintains
-an internal heap.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains
-an internal heap. Note, because weights are not supported by
-the HeapBalancer they are ignored when the balancer is constructed.
+an internal heap to select least-loaded endpoints.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains
+an internal heap to select least-loaded endpoints.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded" target="_blank">user guide</a>
-     for more details.</p></span></dd></dl></div>
+for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -677,10 +648,8 @@ the HeapBalancer they are ignored when the balancer is constructed.
         <span class="name">p2c</span><span class="params">(<span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">An O(1), concurrent, weighted least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, weighted least-loaded fair load balancer.
-This uses the ideas behind &quot;power of 2 choices&quot; [1] combined with
-O(1) biased coin flipping through the aliasing method, described
-in <a href="../util/Drv.html" class="extype" name="com.twitter.finagle.util.Drv">Drv</a>.
+      <p class="shortcomment cmt">An O(1), concurrent, least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, least-loaded fair load balancer.
+This uses the ideas behind &quot;power of 2 choices&quot; [1].
 </p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
 expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.
@@ -713,7 +682,7 @@ presence of long polling clients.
 </p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
 expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded" target="_blank">user guide</a>
-     for more details.</p></span></dd></dl></div>
+for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#roundRobin" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="roundRobin(maxEffort:Int):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="roundRobin(Int):LoadBalancerFactory"></a>
       <span class="permalink">

@@ -138,11 +138,8 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 
 .. rubric:: Footnotes
 
-.. [#nack] Depending on the protocol, a rejected request might be transformed into a `NACK`
-   (currently supported in HTTP/1.1 and Mux) message. A `NACK` means that the server did not attempt
-   to perform any work associated with the request and therefore is typically safe to retry. However,
-   Finagle also supports `NACK` messages that are explicitly non-retryable. See the Retries section of
-   :doc:`/Clients`
+.. [#nack] Depending on the protocol, a rejected request might be transformed into a :ref:`nack <glossary_nack>`
+   (currently supported in HTTP/1.1 and Mux) message.
 
 .. [#example] Configuration parameters/values provided in this example are only demonstrate
    the API usage, not the real world values. We do not recommend blindly applying those values

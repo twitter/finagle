@@ -167,12 +167,17 @@ resources for using Finagle.
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="" href="index.html">
+        <a title="This package implements client side load balancing algorithms." href="index.html">
               <span class="name">loadbalancer</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+      <p class="shortcomment cmt">This package implements client side load balancing algorithms.</p><div class="fullcomment"><div class="comment cmt"><p>This package implements client side load balancing algorithms.</p><p>As an end-user, see the <a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> API to create instances which can be
+used to configure a Finagle client with various load balancing strategies.</p><p>As an implementor, each algorithm gets its own subdirectory and is exposed
+via the <a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> object. Several convenient traits are provided which factor
+out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
+and Updating).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LoadBalancerFactory"></a><a id="LoadBalancerFactory:LoadBalancerFactory"></a>
       <span class="permalink">
@@ -185,12 +190,18 @@ resources for using Finagle.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="LoadBalancerFactory$.html">
+        <a title="Exposes a Stack.Module which composes load balancing into the respective
+Stack." href="LoadBalancerFactory$.html">
               <span class="name">LoadBalancerFactory</span>
             </a>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
+      <p class="shortcomment cmt">Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>. This is mixed in by default into Finagle's <span class="extype" name="StackClient">StackClient</span>. The only
+necessary configuration is a <a href="LoadBalancerFactory$$Dest.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Dest">Dest</a> which represents a changing collection of
+addresses that is load balanced over.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <a class="object" href="" title=""></a>
                         <a class="class" href="LoadBalancerFactory$$Dest.html" title="A class eligible for configuring a com.twitter.finagle.Stackable

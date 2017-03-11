@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &#8212; Finagle 6.42.0 documentation</title>
+    <title>Servers &#8212; Finagle 6.43.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.42.0',
+        VERSION:     '6.43.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.42.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Configuration" href="Configuration.html" />
    
@@ -301,11 +301,8 @@ processed.</p>
 <table class="docutils footnote" frame="void" id="nack" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <cite>NACK</cite>
-(currently supported in HTTP/1.1 and Mux) message. A <cite>NACK</cite> means that the server did not attempt
-to perform any work associated with the request and therefore is typically safe to retry. However,
-Finagle also supports <cite>NACK</cite> messages that are explicitly non-retryable. See the Retries section of
-<a class="reference internal" href="Clients.html"><span class="doc">Clients</span></a></td></tr>
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Depending on the protocol, a rejected request might be transformed into a <a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">nack</span></a>
+(currently supported in HTTP/1.1 and Mux) message.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="example" rules="none">
