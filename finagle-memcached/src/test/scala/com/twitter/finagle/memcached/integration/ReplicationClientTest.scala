@@ -4,20 +4,20 @@ import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.conversions.time._
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached.{CachePoolCluster, CachePoolConfig, CasResult, KetamaClientBuilder}
+import com.twitter.finagle.builder.Cluster
+import com.twitter.finagle.service.FailFastFactory.FailFast
+import com.twitter.finagle.{Addr, Name, Memcached, Group, WriteException}
+import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster, CachePoolConfig, CasResult}
 import com.twitter.finagle.memcached.replication._
+import com.twitter.finagle.service.{FailFastFactory, FailureAccrualFactory}
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import com.twitter.finagle.{Group, WriteException}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Return, Throw}
+import com.twitter.util.{Var, Await, Return, Throw}
 import java.io.ByteArrayOutputStream
 import java.lang.{Boolean => JBoolean}
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
   /**
    * Note: This integration test requires a real Memcached server to run.
@@ -85,6 +85,11 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     secondTestServerPool = List()
   }
 
+  def nameFromCluster(cluster: Cluster[CacheNode]): Name = {
+    val va = Group.fromCluster(cluster).set.map(_.map(CacheNode.toAddress)).map(Addr.Bound(_))
+    Name.Bound.singleton(va)
+  }
+
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1712
   test("base replication client set & getOne") {
     // create my cluster client solely based on a zk client and a path
@@ -93,16 +98,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -144,16 +147,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -201,16 +202,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -253,16 +252,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -340,16 +337,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -409,16 +404,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -470,16 +463,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     val count = 100
@@ -520,16 +511,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     assert(Await.result(replicatedClient.set("foo", Buf.Utf8("bar"))) == ConsistentReplication(()))
@@ -569,16 +558,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new BaseReplicationClient(Seq(client1, client2))
 
     intercept[UnsupportedOperationException] {
@@ -598,16 +585,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -654,16 +639,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -701,16 +684,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -754,16 +735,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -805,16 +784,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     // consistent
@@ -848,16 +825,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     val count = 100
@@ -893,16 +868,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     Await.result(replicatedClient.set("foo", Buf.Utf8("bar")))
@@ -937,16 +910,14 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     val mycluster2 = CachePoolCluster.newZkCluster(secondPoolPath, zookeeperClient)
     Await.result(mycluster2.ready) // give it sometime for the cluster to get the initial set of memberships
 
-    val client1 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster1))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
-    val client2 = KetamaClientBuilder()
-        .clientBuilder(ClientBuilder().hostConnectionLimit(1).failFast(false))
-        .group(Group.fromCluster(mycluster2))
-        .failureAccrualParams(Int.MaxValue, 0.seconds)
-        .build()
+    val client1 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster1), "client1")
+    val client2 = Memcached.client
+      .configured(FailureAccrualFactory.Disabled)
+      .configured(FailFast(false))
+      .newTwemcacheClient(nameFromCluster(mycluster2), "client2")
     val replicatedClient = new SimpleReplicationClient(Seq(client1, client2))
 
     intercept[UnsupportedOperationException] {

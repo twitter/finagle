@@ -5,7 +5,7 @@ import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.finagle.memcached.{Client, Entry, Interpreter, InterpreterService, KetamaClientBuilder, PartitionedClient}
+import com.twitter.finagle.memcached.{Client, Entry, Interpreter, InterpreterService, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
@@ -272,23 +272,6 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     val expectedKey = Seq("client", "memcached", clientName, "is_pipelining")
     val isPipelining = GlobalRegistry.get.iterator.exists { e =>
       e.key == expectedKey && e.value == "true"
-    }
-    assert(isPipelining)
-  }
-
-  test("GlobalRegistry non-pipelined client") {
-    val name = "not-pipelined"
-    val expectedKey = Seq("client", "memcached", name, "is_pipelining")
-    KetamaClientBuilder()
-      .clientBuilder(ClientBuilder()
-        .hosts(Seq(servers(0).address))
-        .name(name)
-        .codec(new com.twitter.finagle.memcached.protocol.text.Memcached())
-        .hostConnectionLimit(1))
-      .build()
-
-    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
-      e.key == expectedKey && e.value == "false"
     }
     assert(isPipelining)
   }

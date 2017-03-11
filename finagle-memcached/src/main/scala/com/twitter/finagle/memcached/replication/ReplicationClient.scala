@@ -40,39 +40,6 @@ case class RCasUnique(uniques: Seq[Buf]) extends ReplicaCasUnique
 case class SCasUnique(casUnique: Buf) extends ReplicaCasUnique
 
 /**
- * Replication client helper
- */
-@deprecated("Use BaseReplicationClient with clients created using `c.t.f.Memcached.client`", "2017-02-08")
-object ReplicationClient {
-  def newBaseReplicationClient(
-    pools: Seq[Cluster[CacheNode]],
-    clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
-    hashName: Option[String] = None,
-    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
-  ) = {
-    val underlyingClients = pools map { pool =>
-      val group = Group.fromCluster(pool)
-      // Must use `set` method on Group so we get updates
-      val va: Var[Addr] = group.set.map(_.map(CacheNode.toAddress)).map(Addr.Bound(_))
-      val name = Name.Bound.singleton(va)
-      KetamaClientBuilder(name, hashName, clientBuilder, failureAccrualParams).build()
-    }
-    val repStatsReceiver =
-      clientBuilder map { _.statsReceiver.scope("cache_replication") } getOrElse(NullStatsReceiver)
-    new BaseReplicationClient(underlyingClients, repStatsReceiver)
-  }
-
-  def newSimpleReplicationClient(
-    pools: Seq[Cluster[CacheNode]],
-    clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]] = None,
-    hashName: Option[String] = None,
-    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds)
-  ) = {
-    new SimpleReplicationClient(newBaseReplicationClient(pools, clientBuilder, hashName, failureAccrualParams))
-  }
-}
-
-/**
  * Base replication client. This client manages a list of base memcached clients representing
  * cache replicas. All replication API returns ReplicationStatus object indicating the underlying
  * replicas consistency state.

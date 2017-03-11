@@ -2,13 +2,8 @@ package com.twitter.finagle.memcached.java;
 
 import scala.Option;
 
-import com.google.common.collect.ImmutableSet;
-
 import com.twitter.finagle.Memcached;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.memcached.CacheNode;
-import com.twitter.finagle.memcached.CachePoolCluster;
-import com.twitter.finagle.memcached.KetamaClientBuilder;
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
@@ -30,18 +25,6 @@ public final class ClientTest {
 
     Client client = Client.newInstance(service);
     testClient(client);
-
-    // cache client with cluster
-    CachePoolCluster cluster = CachePoolClusterUtil.newStaticCluster(
-        ImmutableSet.of(new CacheNode("localhost", 11211, 1)));
-
-    com.twitter.finagle.memcached.Client memcachedClient = KetamaClientBuilder.get()
-        .cachePoolCluster(cluster)
-        .build();
-
-    client = new ClientBase(memcachedClient);
-    testClient(client);
-
   }
 
   public static void testClient(Client client) throws Exception {

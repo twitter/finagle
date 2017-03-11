@@ -7,6 +7,16 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: Remove deprecated `c.t.f.memcached.KetamaClientBuilder`. Use
+  `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=907352``
+
+* finagle-memcached: Remove deprecated `c.t.f.memcached.replication.ReplicationClient`. Use
+  `c.t.f.memcached.replication.BaseReplicationClient` with clients created using
+  `c.t.f.Memcached.client`. ``RB_ID=907352``
+
 6.43.0
 ------
 
@@ -102,7 +112,7 @@ Breaking API Changes
   * finagle-kestrel: Removed deprecated `c.t.f.kestrel.protocol.Kestrel`. To create a Finagle
     Kestrel client, use `c.t.f.Kestrel.client`. ``RB_ID=907422``
 
-  * finagle-serversets: Removed the unapply method and modified the signature of
+  * finagle-serversets: Removed the unapply method and modified the signature of 
     fromAddrMetadata method in `c.t.f.serverset2.addr.ZkMetadata`. Instead of pattern
     matching use the modified fromAddrMetadata method. ``RB_ID=908186``
 
