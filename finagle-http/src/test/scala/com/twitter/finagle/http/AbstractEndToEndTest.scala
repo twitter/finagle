@@ -1156,6 +1156,32 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(client.close())
   }
 
+  test("out of order client requests are OK") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request): Future[Response] = {
+        Future.value(Response())
+      }
+    }
+
+    val server = serverImpl()
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val factory = clientImpl()
+      .newClient(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val client1 = await(factory())
+    val client2 = await(factory())
+
+    await(client2(Request("/")))
+    await(client1(Request("/")))
+
+    await(client1.close())
+    await(client2.close())
+    await(factory.close())
+    await(server.close())
+  }
+
   test(s"$implName client handles cut connection properly") {
     val svc = Service.mk[Request, Response] { req: Request =>
       Future.value(Response())

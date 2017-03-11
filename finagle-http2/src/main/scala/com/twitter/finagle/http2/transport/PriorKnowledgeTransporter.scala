@@ -4,12 +4,13 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.Http2Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, ConstFuture, Promise}
-import java.util.concurrent.atomic.AtomicReference
+import com.twitter.util.{Future, ConstFuture, Promise, Time}
 import java.net.SocketAddress
+import java.security.cert.Certificate
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * This `Transporter` makes `Transports` that speak netty http/1.1, but writes
@@ -23,7 +24,7 @@ import java.net.SocketAddress
 private[http2] class PriorKnowledgeTransporter(
     underlying: Transporter[Any, Any],
     params: Stack.Params)
-  extends Transporter[Any, Any] {
+  extends Transporter[Any, Any] { self =>
 
   private[this] val log = Logger.get()
   private[this] val Stats(statsReceiver) = params[Stats]
@@ -61,15 +62,26 @@ private[http2] class PriorKnowledgeTransporter(
     }
   }
 
+  private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
+    def read(): Future[Any] = Future.never
+    def write(msg: Any): Future[Unit] = Future.never
+    val status: Status = Status.Closed
+    def onClose: Future[Throwable] = Future.value(exn)
+    def remoteAddress: SocketAddress = self.remoteAddress
+    def localAddress: SocketAddress = new SocketAddress {}
+    def peerCertificate: Option[Certificate] = None
+    def close(deadline: Time): Future[Unit] = Future.Done
+  }
+
   def apply(): Future[Transport[Any, Any]] = getMulti().flatMap { multi =>
-    new ConstFuture(multi().map(Http2Transporter.unsafeCast)).rescue { case exn: Throwable =>
+    new ConstFuture(multi().map(Http2Transporter.unsafeCast).handle { case exn: Throwable =>
       log.warning(
         exn,
         s"A previously successful connection to address $remoteAddress stopped being successful."
       )
 
       ref.set(null)
-      apply()
-    }
+      deadTransport(exn)
+    })
   }
 }
