@@ -43,7 +43,8 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
         .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), proxyService)
 
       serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
-      externalClient = Client("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
+      externalClient = Client(Memcached.client.newService(
+        "%s:%d".format(serverAddress.getHostName, serverAddress.getPort)))
     }
   }
 

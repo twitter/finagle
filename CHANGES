@@ -17,6 +17,16 @@ Breaking API Changes
   `c.t.f.memcached.replication.BaseReplicationClient` with clients created using
   `c.t.f.Memcached.client`. ``RB_ID=907352``
 
+  * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
+    - `apply(name: Name)`
+    - `apply(host: String)`
+
+    Use `c.t.f.Memcached.client` to create a Memcached client. `RB_ID=908442``
+
+  * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.
+    Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=908442``
+
+
 6.43.0
 ------
 

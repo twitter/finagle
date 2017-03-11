@@ -24,31 +24,6 @@ import scala.collection.breakOut
 import scala.collection.{immutable, mutable}
 
 object Client {
-  /**
-   * Construct a client from a single host.
-   *
-   * @param host a String of host:port combination.
-   */
-  @deprecated(message = "Use `com.twitter.finagle.Memcached.client`", since = "2016-12-22")
-  def apply(host: String): Client = Client(
-    ClientBuilder()
-      .hosts(host)
-      .hostConnectionLimit(1)
-      .codec(text.Memcached())
-      .daemon(true)
-      .build())
-
-  /**
-   * Construct a client from a Name
-   */
-  @deprecated(message = "Use `com.twitter.finagle.Memcached.client`", since = "2016-12-22")
-  def apply(name: Name): Client = Client(
-    ClientBuilder()
-      .dest(name)
-      .hostConnectionLimit(1)
-      .codec(new text.Memcached)
-      .daemon(true)
-      .build())
 
   /**
    * Construct a client from a single Service.
@@ -1289,7 +1264,7 @@ case class RubyMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val clients = _nodes.map { case (hostname, port, weight) =>
       require(weight == 1, "Ruby memcache node weight must be 1")
-      Client(builder.hosts(hostname + ":" + port).codec(text.Memcached()).build())
+      Client(Memcached.client.newService(hostname + ":" + port))
     }
     new RubyMemCacheClient(clients)
   }
@@ -1338,7 +1313,7 @@ case class PHPMemCacheClientBuilder(
     val builder = _clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true)
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("crc32-itu"))
     val clients = _nodes.flatMap { case (hostname, port, weight) =>
-      val client = Client(builder.hosts(hostname + ":" + port).codec(text.Memcached()).build())
+      val client = Client(Memcached.client.newService(hostname + ":" + port))
       for (i <- (1 to weight)) yield client
     }.toArray
     new PHPMemCacheClient(clients, keyHasher)
