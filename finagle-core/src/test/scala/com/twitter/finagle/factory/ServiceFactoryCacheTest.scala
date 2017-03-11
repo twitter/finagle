@@ -29,6 +29,7 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
       })
 
       def close(deadline: Time) = {
+        assert(factories.contains(i))
         factories -= i
         Future.Done
       }
@@ -42,35 +43,35 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
     assert(factories.isEmpty)
 
-    val s1 = Await.result(cache(1, ClientConnection.nil))
+    val s1 = Await.result(cache(1, ClientConnection.nil), 1.second)
     assert(factories == Map(1->1))
-    val s2 = Await.result(cache(2, ClientConnection.nil))
+    val s2 = Await.result(cache(2, ClientConnection.nil), 1.second)
     assert(factories == Map(1->1, 2->1))
 
-    val s3 = Await.result(cache(3, ClientConnection.nil))
+    val s3 = Await.result(cache(3, ClientConnection.nil), 1.second)
     assert(factories == Map(1->1, 2->1, 3->1))
-    Await.result(s3.close())
+    Await.result(s3.close(), 1.second)
 
     assert(factories == Map(1->1, 2->1))
-    Await.result(s2.close())
+    Await.result(s2.close(), 1.second)
     tc.advance(1.second)
     assert(factories == Map(1->1, 2->0))
-    Await.result(s1.close())
+    Await.result(s1.close(), 1.second)
     tc.advance(1.second)
     assert(factories == Map(1->0, 2->0))
 
     assert(news == Map(1->1, 2->1, 3->1))
 
-    val s3x = Await.result(cache(3, ClientConnection.nil))
+    val s3x = Await.result(cache(3, ClientConnection.nil), 1.second)
 
     assert(factories == Map(1->0, 3->1))
     assert(news == Map(1->1, 2->1, 3->2))
 
-    val s1x, s1y = Await.result(cache(1, ClientConnection.nil))
+    val s1x, s1y = Await.result(cache(1, ClientConnection.nil), 1.second)
     assert(factories == Map(1->2, 3->1))
     assert(news == Map(1->1, 2->1, 3->2))
 
-    val s2x = Await.result(cache(2, ClientConnection.nil))
+    val s2x = Await.result(cache(2, ClientConnection.nil), 1.second)
     assert(factories == Map(1->2, 3->1, 2->1))
     assert(news == Map(1->1, 2->2, 3->2))
   }})
@@ -87,9 +88,9 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
     assert(factories.isEmpty)
 
-    var s1 = Await.result(cache(1, ClientConnection.nil))
-    var s2 = Await.result(cache(2, ClientConnection.nil))
-    var s3 = Await.result(cache(3, ClientConnection.nil))
+    var s1 = Await.result(cache(1, ClientConnection.nil), 1.second)
+    var s2 = Await.result(cache(2, ClientConnection.nil), 1.second)
+    var s3 = Await.result(cache(3, ClientConnection.nil), 1.second)
     s1.close()
     s2.close()
     s3.close()
@@ -103,9 +104,9 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
     assert(factories == Map(1->0, 2->0, 3->0))
 
     // s1 and s2 stay active
-    s1 = Await.result(cache(1, ClientConnection.nil))
+    s1 = Await.result(cache(1, ClientConnection.nil), 1.second)
     s1.close()
-    s2 = Await.result(cache(2, ClientConnection.nil))
+    s2 = Await.result(cache(2, ClientConnection.nil), 1.second)
     s2.close()
 
     tc.advance(tti)
@@ -113,10 +114,10 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
 
     assert(factories == Map(1->0, 2->0))
 
-    s1 = Await.result(cache(1, ClientConnection.nil))
+    s1 = Await.result(cache(1, ClientConnection.nil), 1.second)
     s1.close()
     tc.advance(1.second)
-    s2 = Await.result(cache(2, ClientConnection.nil))
+    s2 = Await.result(cache(2, ClientConnection.nil), 1.second)
     s2.close()
     tc.advance(1.second)
 
@@ -126,5 +127,34 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
     timer.tick()
     // Avoid expiring least idle entry (s2).
     assert(factories == Map(2 -> 0))
+  }})
+
+  test("close") (Time.withCurrentTimeFrozen { tc  => new Ctx {
+    val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
+    val tti = 1.minute
+    val timer = new MockTimer
+    val cache = new ServiceFactoryCache[Int, String, String](
+      newFactory,
+      timer,
+      maxCacheSize=3,
+      tti=tti)
+
+    assert(factories.isEmpty)
+
+    var s1 = Await.result(cache(1, ClientConnection.nil), 1.second)
+    var s2 = Await.result(cache(2, ClientConnection.nil), 1.second)
+    var s3 = Await.result(cache(3, ClientConnection.nil), 1.second)
+    s1.close()
+
+    assert(factories == Map(1->0, 2->1, 3->1))
+
+    tc.advance(tti)
+    tc.advance(1.second)
+    timer.tick()
+
+    assert(factories == Map(2->1, 3->1))
+
+    Await.result(cache.close(), 1.second)
+    assert(factories.isEmpty)
   }})
 }

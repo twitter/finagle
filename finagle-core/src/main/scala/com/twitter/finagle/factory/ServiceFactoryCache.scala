@@ -8,6 +8,7 @@ import java.util
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.StampedLock
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 /**
  * A service factory that keeps track of idling times to implement
@@ -56,15 +57,15 @@ private class IdlingFactory[Req, Rep](
 
 /**
  * A "read-through" cache of service factories.
- * 
+ *
  * Eviction is based on cache size and idle time:
- * 
+ *
  * 1. When the cache is full, a miss evicts the most idle factory.
  * When no underlying factories are idle, a one-shot factory is created.
  * This doesn't necessarily guarantee good performance: one-shots could
  * be created constantly for a hot cache key, but should work well
  * when there are a few hot keys.
- * 
+ *
  * 2. Periodically evict factories that are idle for at least one TTI
  * (time-to-idle) period. An idle factory could remain in the cache
  * for up to (TTI * 2) minutes, with the caveat that we never expire
@@ -211,11 +212,15 @@ private[finagle] class ServiceFactoryCache[Key, Req, Rep](
   def close(deadline: Time): Future[Unit] = {
     val writeStamp = lock.writeLock()
     val svcFacs = try {
-      val values = cache.values.asScala.toSeq
+      val values = ListBuffer.empty[Closable]
+      val it = cache.values.iterator
       // Clear the cache to avoid racing with the timer task. If the
       // task is invoked after releasing this lock but before it has
       // a chance to close, it will be a noop.
-      cache.clear()
+      while (it.hasNext) {
+        values += it.next()
+        it.remove()
+      }
       values
     } finally {
       lock.unlockWrite(writeStamp)

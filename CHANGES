@@ -147,6 +147,9 @@ Deprecations
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: Fix `ConcurrentModificationException` thrown by calling `close()` on
+    `c.t.f.factory.ServiceFactoryCache`. ``RB_ID=910407``
+
   * finagle-http: The HTTP/1.x Client will no longer force-close the socket after receiving
     a response that lacks content-length and transfer-encoding headers but is required per
     RFC 7230 to not have a body. ``RB_ID=908593``
