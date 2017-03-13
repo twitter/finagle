@@ -19,7 +19,7 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
   // Objects that are emitted from this Listener
   sealed trait StreamMessage
   case class Message(obj: HttpObject, streamId: Int) extends StreamMessage
-  case class GoAway(obj: HttpObject) extends StreamMessage
+  case class GoAway(obj: HttpObject, lastStreamId: Int) extends StreamMessage
   case class Rst(streamId: Int, errorCode: Long) extends StreamMessage
 
   // Http2EventAdapter overrides
@@ -119,6 +119,6 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     } else HttpResponseStatus.BAD_REQUEST
 
     val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status)
-    ctx.fireChannelRead(GoAway(rep))
+    ctx.fireChannelRead(GoAway(rep, lastStreamId))
   }
 }
