@@ -6,7 +6,7 @@ import com.twitter.finagle.Failure
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Timer}
+import com.twitter.util.{Future, Promise, Timer, Time}
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -66,14 +66,18 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
 
     p.setInterruptHandler {
       case t: Throwable =>
-        f.raiseWithin(TimeToWaitForStalledPipeline, StalledPipelineException)(timer)
-        self.synchronized {
-          // we check stalled so that we log exactly once per failed pipeline
-          if (!stalled) {
-            stalled = true
-            val addr = trans.remoteAddress
-            PipeliningDispatcher.log.warning(
-              s"pipelined connection stalled with ${q.size} items, talking to $addr")
+        timer.schedule(Time.now + TimeToWaitForStalledPipeline) {
+          if (!f.isDefined) {
+            f.raise(StalledPipelineException)
+            self.synchronized {
+              // we check stalled so that we log exactly once per failed pipeline
+              if (!stalled) {
+                stalled = true
+                val addr = trans.remoteAddress
+                PipeliningDispatcher.log.warning(
+                  s"pipelined connection stalled with ${q.size} items, talking to $addr")
+              }
+            }
           }
         }
     }
