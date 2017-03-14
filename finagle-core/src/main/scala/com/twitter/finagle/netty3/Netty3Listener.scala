@@ -351,10 +351,11 @@ class Netty3Listener[In, Out](
 
 private[netty3] object ServerBridge {
   private val FinestIOExceptionMessages = Set(
-    "Connection reset by peer",
-    "Broken pipe",
-    "Connection timed out",
+    "Connection reset by peer", // Found on linux
+    "Broken pipe", // Found on linux
+    "Connection timed out", // Found on linux NIO1
     "No route to host",
+    "An existing connection was forcibly closed by the remote host", // Found on windows
     "")
 }
 
