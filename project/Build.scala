@@ -389,7 +389,6 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       caffeineLib,
       util("cache"),
-      util("zk-common"),
       util("zk-test") % "test",
       "com.twitter" % "libthrift" % libthriftVersion,
       "com.twitter.common" % "io-json" % "0.0.54",
