@@ -51,7 +51,11 @@ object TimeoutFilter {
     private[twitter] val Default = Duration.Top
 
     implicit val param: Stack.Param[TimeoutFilter.Param] =
-      Stack.Param(Param(Default))
+      new Stack.Param[Param] {
+        val default = Param(Default)
+        override def show(p: Param): Seq[(String, String)] =
+          Seq(("timeout", p.timeout.toString))
+      }
   }
 
   /**

@@ -305,6 +305,13 @@ object Stack {
    */
   trait Param[P] {
     def default: P
+
+    /**
+     * Method invoked to display a P-typed param in the form Seq[(key, value)], where `key`
+     * and `value` are the variable names and values for public member variables in the class.
+     * This should be overriden by param classes that do not implement [[scala.Product]]
+     */
+    def show(p: P): Seq[(String, String)] = Seq.empty
   }
   object Param {
     def apply[T](t: => T): Param[T] = new Param[T] {

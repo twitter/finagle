@@ -16,9 +16,21 @@ object TestParam {
 case class TestParam2(p2: Int) {
   def mk() = (this, TestParam2.param)
 }
-
 object TestParam2 {
   implicit val param = Stack.Param(TestParam2(1))
+}
+
+class NotCaseClassParam(val ncc: Int) {
+  def mk() = (this, NotCaseClassParam.param)
+
+}
+object NotCaseClassParam {
+
+  implicit val param = new Stack.Param[NotCaseClassParam] {
+    val default = new NotCaseClassParam(3)
+    override def show(p: NotCaseClassParam): Seq[(String, String)] =
+      Seq(("ncc", p.ncc.toString))
+  }
 }
 
 @RunWith(classOf[JUnitRunner])
@@ -75,6 +87,27 @@ class StackRegistryTest extends FunSuite {
           Entry(Seq("test", "qux", "foo", "bar", "head", "p2"), "1")
         )
       }
+      assert(GlobalRegistry.get.toSet == expected)
+    }
+  }
+
+  test("StackRegistry should record params properly that override the Stack.Param.show method") {
+    val reg = new StackRegistry {
+      def registryName: String = "test"
+    }
+    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
+      def role: Stack.Role = headRole
+      def description: String = "the head!!"
+      def parameters: Seq[Stack.Param[_]] = Seq(NotCaseClassParam.param)
+    }, List(1, 2, 3, 4))).result
+    val params = (Stack.Params.empty
+      + new NotCaseClassParam(50)
+      + param.Label("foo")
+      + param.ProtocolLibrary("qux"))
+    val simple = new SimpleRegistry()
+    GlobalRegistry.withRegistry(simple) {
+      reg.register("bar", stack, params)
+      val expected = Set(Entry(List("test", "qux", "foo", "bar", "head", "ncc"), "50"))
       assert(GlobalRegistry.get.toSet == expected)
     }
   }

@@ -7,24 +7,29 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.language.existentials
 
 object StackRegistry {
+
   /**
    * Represents an entry in the registry.
    */
   case class Entry(addr: String, stack: Stack[_], params: Stack.Params) {
-    // Introspect the entries stack and params. We limit the
-    // reflection of params to case classes.
-    // TODO: we might be able to make this avoid reflection with Showable
-    val modules: Seq[Module] = stack.tails.map { node =>
-      val raw = node.head.parameters.map { p => params(p) }
-      val reflected = raw.foldLeft(Seq.empty[(String, String)]) {
-        case (seq, p: Product) =>
-          // TODO: many case classes have a $outer field because they close over an outside scope.
-          // this is not very useful, and it might make sense to filter them out in the future.
-          val fields = p.getClass.getDeclaredFields.map(_.getName).toSeq
-          val values = p.productIterator.map(_.toString).toSeq
-          seq ++ fields.zipAll(values, "<unknown>", "<unknown>")
 
-        case (seq, _) => seq
+    val modules: Seq[Module] = stack.tails.map { node =>
+      val raw = node.head.parameters
+      val reflected = raw.foldLeft(Seq.empty[(String, String)]) {
+        case (seq, s) if s.show(params(s)).nonEmpty =>
+          seq ++ s.show(params(s))
+
+        // If Stack.Param.show() returns an empty Seq, and the parameter is a case class, obtain the names
+        // and values via reflection.
+        case (seq, s) => params(s) match {
+          case p: Product =>
+            // TODO: many case classes have a $outer field because they close over an outside scope.
+            // this is not very useful, and it might make sense to filter them out in the future.
+            val fields = p.getClass.getDeclaredFields.map(_.getName).toSeq
+            val values = p.productIterator.map(_.toString).toSeq
+            seq ++ fields.zipAll(values, "<unknown>", "<unknown>")
+          case _ => seq
+        }
       }
       Module(node.head.role.name, node.head.description, reflected)
     }.toSeq
