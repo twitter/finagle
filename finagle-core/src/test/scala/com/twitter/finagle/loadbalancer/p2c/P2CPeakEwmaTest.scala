@@ -13,7 +13,7 @@ class P2CBalancerEwmaTest extends FunSuite with P2CSuite {
   override val ε: Double = 0.0005*R
 
   override def newBal(
-    fs: Var[Traversable[P2CServiceFactory]],
+    fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CPeakEwma(
@@ -27,7 +27,7 @@ class P2CBalancerEwmaTest extends FunSuite with P2CSuite {
     override def nanoTime(): Long = clock()
   }
 
-  def run(fs: Traversable[P2CServiceFactory], n: Int): Unit = {
+  def run(fs: Vector[P2CServiceFactory], n: Int): Unit = {
     val clock = new Clock
     val bal = newBal(Var.value(fs), clock=clock)
     @tailrec

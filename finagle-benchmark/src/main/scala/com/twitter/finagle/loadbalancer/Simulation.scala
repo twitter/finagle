@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
+import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.util.{Activity, Future, Stopwatch, Var}
 
 private object Simulation extends com.twitter.app.App {
@@ -45,7 +45,7 @@ private object Simulation extends com.twitter.app.App {
     }.toSet)
 
     val activityServers = Activity(servers.map { srvs =>
-      Activity.Ok(srvs.asInstanceOf[Set[ServiceFactory[Unit, Unit]]])
+      Activity.Ok(srvs.toVector)
     })
 
     var clientCount: Int = 0

@@ -48,7 +48,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     val exc = new NoBrokersAvailableException
 
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(group.set map(Activity.Ok(_))),
+      Activity(group.set.map(set => Activity.Ok(set.toVector))),
       statsReceiver,
       exc,
       nonRng)
@@ -63,7 +63,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
   test("balancer with empty cluster has Closed status") {
     val emptyCluster = Group.empty[ServiceFactory[Unit, LoadedFactory]]
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(emptyCluster.set.map(Activity.Ok(_))),
+      Activity(emptyCluster.set.map(set => Activity.Ok(set.toVector))),
       NullStatsReceiver,
       new NoBrokersAvailableException,
       new Random
@@ -79,7 +79,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
       val cluster = Group.mutable[ServiceFactory[Unit, LoadedFactory]](node)
 
       val b = new HeapLeastLoaded[Unit, LoadedFactory](
-        Activity(cluster.set map (Activity.Ok(_))),
+        Activity(cluster.set.map(set => Activity.Ok(set.toVector))),
         NullStatsReceiver,
         new NoBrokersAvailableException,
         new Random
@@ -211,7 +211,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
 
     val heapBalancerEmptyGroup = "HeapBalancerEmptyGroup"
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity.value(Set.empty),
+      Activity.value(Vector.empty),
       NullStatsReceiver,
       new NoBrokersAvailableException(heapBalancerEmptyGroup),
       new Random
@@ -321,7 +321,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
       factories:_*)
 
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(group.set map(Activity.Ok(_))),
+      Activity(group.set.map(set => Activity.Ok(set.toVector))),
       statsReceiver,
       new NoBrokersAvailableException,
       new Random

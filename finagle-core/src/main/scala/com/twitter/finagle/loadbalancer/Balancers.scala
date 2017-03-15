@@ -85,7 +85,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "P2cLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -123,7 +123,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "P2cPeakEwmaLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -142,7 +142,7 @@ object Balancers {
     new LoadBalancerFactory {
       override def toString: String = "HeapLoadBalancerFactory"
       def newBalancer[Req, Rep](
-        endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+        endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
@@ -178,7 +178,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "ApertureLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
@@ -205,7 +205,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "RoundRobinLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {

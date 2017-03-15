@@ -17,8 +17,8 @@ object BalancerBench {
       def apply(req: Unit): Future[Unit] = Future.Done
     })
 
-  def newActivity(num: Int): Activity[Set[ServiceFactory[Unit, Unit]]] = {
-    val underlying = Var((0 until num).map(_ => newFactory()).toSet)
+  def newActivity(num: Int): Activity[Vector[ServiceFactory[Unit, Unit]]] = {
+    val underlying = Var((0 until num).map(_ => newFactory()).toVector)
     Activity(underlying.map { facs => Activity.Ok(facs) })
   }
 

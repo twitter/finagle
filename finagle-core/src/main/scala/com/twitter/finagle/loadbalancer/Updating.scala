@@ -11,7 +11,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
    * An activity representing the active set of ServiceFactories.
    */
-  protected def endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]]
+  protected def endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]]
 
   /*
    * Subscribe to the Activity and dynamically update the load

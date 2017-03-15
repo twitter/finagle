@@ -27,7 +27,7 @@ import com.twitter.util.Activity
  * 10 (October 2001), 1094-1104.
  */
 private[loadbalancer] class P2CLeastLoaded[Req, Rep](
-    protected val endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]],
+    protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     protected val maxEffort: Int,
     protected val rng: Rng,
     protected val statsReceiver: StatsReceiver,

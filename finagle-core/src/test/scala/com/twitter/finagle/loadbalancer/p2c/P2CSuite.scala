@@ -26,7 +26,7 @@ trait P2CSuite {
   val noBrokers = new NoBrokersAvailableException
 
   def newBal(
-    fs: Var[Traversable[P2CServiceFactory]],
+    fs: Var[Vector[P2CServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CLeastLoaded(
@@ -37,7 +37,7 @@ trait P2CSuite {
     emptyException = noBrokers
   )
 
-  def assertEven(fs: Traversable[P2CServiceFactory]) {
+  def assertEven(fs: Vector[P2CServiceFactory]) {
     val ml = fs.head.meanLoad
     for (f <- fs) {
       assert(math.abs(f.meanLoad - ml) < ε,

@@ -14,7 +14,7 @@ import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT, Updating
  * load into account and as such doesn't mix-in a load metric.
  */
 private[loadbalancer] class RoundRobinBalancer[Req, Rep](
-    protected val endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]],
+    protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     protected val statsReceiver: StatsReceiver,
     protected val emptyException: NoBrokersAvailableException,
     protected val maxEffort: Int = 5)

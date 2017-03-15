@@ -18,7 +18,7 @@ private object HeapBalancer {
  * sort the heap.
  */
 private[loadbalancer] class HeapLeastLoaded[Req, Rep](
-    factories: Activity[Set[ServiceFactory[Req, Rep]]],
+    factories: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: Throwable,
     rng: Random)
@@ -70,7 +70,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   private[this] var snap = Set[ServiceFactory[Req, Rep]]()
 
   private[this] val observation = factories.run.changes.respond {
-    case Activity.Ok(newSet) => updateGroup(newSet)
+    case Activity.Ok(indexedSeq) => updateGroup(indexedSeq.toSet)
     case _ => // nop
   }
 

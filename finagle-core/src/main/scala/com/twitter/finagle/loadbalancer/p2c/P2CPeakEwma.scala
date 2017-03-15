@@ -34,7 +34,7 @@ import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
  * 10 (October 2001), 1094-1104.
  */
 private[loadbalancer] class P2CPeakEwma[Req, Rep](
-    protected val endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]],
+    protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     protected val decayTime: Duration,
     protected val maxEffort: Int,
     protected val rng: Rng,

@@ -19,7 +19,7 @@ trait RoundRobinSuite {
   protected val noBrokers: NoBrokersAvailableException = new NoBrokersAvailableException
 
   def newBal(
-    fs: Var[Traversable[RRServiceFactory]],
+    fs: Var[Vector[RRServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver
   ): RoundRobinBalancer[Unit, Int] = new RoundRobinBalancer(
     Activity(fs.map(Activity.Ok(_))),
@@ -28,7 +28,7 @@ trait RoundRobinSuite {
     maxEffort = 1
   )
 
-  def assertEven(fs: Traversable[RRServiceFactory]) {
+  def assertEven(fs: Vector[RRServiceFactory]) {
     val ml = fs.head.meanLoad
     for (f <- fs) {
       assert(math.abs(f.meanLoad - ml) < variance,

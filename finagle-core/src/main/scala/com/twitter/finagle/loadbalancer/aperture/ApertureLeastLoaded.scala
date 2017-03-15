@@ -37,7 +37,7 @@ import com.twitter.util.{Activity, Duration}
  *     concurrency.
  */
 private[loadbalancer] class ApertureLeastLoaded[Req, Rep](
-    protected val endpoints: Activity[Traversable[ServiceFactory[Req, Rep]]],
+    protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     protected val smoothWin: Duration,
     protected val lowLoad: Double,
     protected val highLoad: Double,

@@ -90,6 +90,33 @@ object LoadBalancerFactory {
   }
 
   /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a
+   * finagle [[Address]] ordering. The collection of endpoints in a load
+   * balancer are sorted by this ordering. Although it's generally not a
+   * good idea to have the same ordering across process boundaries, the
+   * final ordering decision is left to the load balancer implementations.
+   * This only provides a stable ordering before we hand off the collection
+   * of endpoints to the balancer.
+   *
+   * The default reads the process global ordering from [[defaultAddressOrdering]].
+   *
+   * @note This is configurable to allow for environment specific orderings.
+   * See [[defaultAddressOrdering]] for a way to set the ordering for the
+   * entire process.
+   */
+  case class AddressOrdering(ordering: StatsReceiver => Ordering[Address]) {
+    def mk(): (AddressOrdering, Stack.Param[AddressOrdering]) =
+      (this, AddressOrdering.param)
+  }
+
+  object AddressOrdering {
+    implicit val param = new Stack.Param[AddressOrdering] {
+      def default = AddressOrdering(defaultAddressOrdering)
+    }
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
@@ -102,6 +129,7 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[Param]],
       implicitly[Stack.Param[HostStats]],
+      implicitly[Stack.Param[AddressOrdering]],
       implicitly[Stack.Param[param.Stats]],
       implicitly[Stack.Param[param.Logger]],
       implicitly[Stack.Param[param.Monitor]],
@@ -196,8 +224,20 @@ object LoadBalancerFactory {
 
       val balancerStats = rawStatsReceiver.scope("loadbalancer")
       val balancerExc = new NoBrokersAvailableException(errorLabel)
-      def newBalancer(endpoints: Activity[Set[ServiceFactory[Req, Rep]]]) =
-        loadBalancerFactory.newBalancer(endpoints, balancerStats, balancerExc)
+
+      def newBalancer(
+        endpoints: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]]
+      ): ServiceFactory[Req, Rep] = {
+        // note, we late bind these so that we can read the latest value of
+        // `addressOrdering` if it's set to `defaultAddressOrdering`.
+        val AddressOrdering(addressOrdering) = params[AddressOrdering]
+        val ordering = addressOrdering(balancerStats.scope("address_ordering"))
+
+        val orderedEndpoints = endpoints.map { set =>
+          set.toVector.sortBy(_.address)(ordering)
+        }
+        loadBalancerFactory.newBalancer(orderedEndpoints, balancerStats, balancerExc)
+      }
 
       val destActivity: Activity[Set[Address]] = Activity(dest.map {
         case Addr.Bound(set, _) =>
@@ -255,9 +295,11 @@ abstract class LoadBalancerFactory {
    * across implementations.
    *
    * @param emptyException The exception returned when a balancer's collection is empty.
+   *
+   * @note `endpoints` are ordered by the [[LoadBalancerFactory.Ordering]] param.
    */
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep]
@@ -283,7 +325,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     }
 
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] = {

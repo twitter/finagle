@@ -15,6 +15,8 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 private object TrafficDistributorTest {
+  import TrafficDistributor.EndpointServiceFactory
+
   // The distributor is not privy to this wrapped socket address and
   // it allows us to retrieve the weight class.
   object WeightedTestAddr {
@@ -36,18 +38,18 @@ private object TrafficDistributorTest {
     }
 
   val busyWeight = 2.0
-  case class AddressFactory(addr: Address) extends ServiceFactory[Int, Int] {
+  case class AddressFactory(address: Address) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = Future.value(Service.mk(i => Future.value(i)))
     def close(deadline: Time): Future[Unit] = Future.Done
-    override def toString: String = s"AddressFactory($addr)"
+    override def toString: String = s"AddressFactory($address)"
     override def status: Status =
-      addr match {
+      address match {
         case WeightedTestAddr(_, weight) if weight == busyWeight => Status.Busy
         case _ => Status.Open
       }
   }
 
-  case class Balancer(endpoints: Activity[Set[ServiceFactory[Int, Int]]])
+  case class Balancer(endpoints: Activity[Traversable[ServiceFactory[Int, Int]]])
     extends ServiceFactory[Int, Int] {
       var offeredLoad = 0
       def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
@@ -84,7 +86,7 @@ private object TrafficDistributorTest {
 
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
-    def newBalancer(eps: Activity[Set[ServiceFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
+    def newBalancer(eps: Activity[Set[EndpointServiceFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
       newBalancerCalls += 1
       val b = Balancer(eps)
       balancers += b
@@ -339,10 +341,20 @@ class TrafficDistributorTest extends FunSuite {
     val weightClasses = Seq((1.0, 1), (busyWeight, 2))
     val classes = weightClasses.flatMap(weightClass.tupled).toSet
     val dest = Var(Activity.Ok(classes))
+
+    def mkBalancer(
+      set: Activity[Set[TrafficDistributor.EndpointServiceFactory[Int, Int]]]
+    ): ServiceFactory[Int, Int] = {
+      DefaultBalancerFactory.newBalancer(
+        set.map(_.toVector),
+        NullStatsReceiver,
+        new NoBrokersAvailableException("test"))
+    }
+
     val dist = new TrafficDistributor[Int, Int](
       dest = Activity(dest),
       newEndpoint = newEndpoint,
-      newBalancer = DefaultBalancerFactory.newBalancer(_, NullStatsReceiver, new NoBrokersAvailableException("test")),
+      newBalancer = mkBalancer,
       eagerEviction = true,
       statsReceiver = NullStatsReceiver,
       rng = Rng("seed".hashCode)

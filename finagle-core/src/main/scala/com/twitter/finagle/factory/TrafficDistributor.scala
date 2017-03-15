@@ -8,12 +8,22 @@ import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
 private[finagle] object TrafficDistributor {
+
+  /**
+   * A [[ServiceFactory]] which admits that a concrete address flows through
+   * the [[TrafficDistributor]].
+   */
+  case class EndpointServiceFactory[Req, Rep](
+      underlying: ServiceFactory[Req, Rep],
+      address: Address)
+    extends ServiceFactoryProxy[Req, Rep](underlying)
+
   /**
    * A [[ServiceFactory]] and its associated weight. The `closeGate` defers closes
    * to `factory` until it is set.
    */
   case class WeightedFactory[Req, Rep](
-      factory: ServiceFactory[Req, Rep],
+      factory: EndpointServiceFactory[Req, Rep],
       closeGate: Promise[Unit],
       weight: Double)
 
@@ -21,8 +31,9 @@ private[finagle] object TrafficDistributor {
    * An intermediate representation of the endpoints that a load balancer
    * operates over, capable of being updated.
    */
-  type BalancerEndpoints[Req, Rep] = Var[Activity.State[Set[ServiceFactory[Req, Rep]]]]
-    with Updatable[Activity.State[Set[ServiceFactory[Req, Rep]]]]
+  type BalancerEndpoints[Req, Rep] =
+    Var[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
+      with Updatable[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
 
   /**
    * Represents cache entries for load balancer instances. Stores both
@@ -121,7 +132,7 @@ private[finagle] object TrafficDistributor {
 private[finagle] class TrafficDistributor[Req, Rep](
     dest: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
-    newBalancer: Activity[Set[ServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
+    newBalancer: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
     eagerEviction: Boolean,
     rng: Rng = Rng.threadLocal,
     statsReceiver: StatsReceiver = NullStatsReceiver)
@@ -162,7 +173,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
               // be closed prematurely when moving across weight classes if the
               // weight class is removed.
               val closeGate = new Promise[Unit]
-              val endpoint = new ServiceFactoryProxy(newEndpoint(addr)) {
+              val endpoint = new EndpointServiceFactory(newEndpoint(addr), addr) {
                 override def close(when: Time) =
                   (closeGate or outerClose).before { super.close(when) }
               }
@@ -264,7 +275,8 @@ private[finagle] class TrafficDistributor[Req, Rep](
     weightClasses.foldLeft(init) {
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
-        val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty[ServiceFactory[Req, Rep]]))))
+        val emptyBal = newBalancer(
+          Activity(Var(Activity.Ok(Set.empty[EndpointServiceFactory[Req, Rep]]))))
         updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal
