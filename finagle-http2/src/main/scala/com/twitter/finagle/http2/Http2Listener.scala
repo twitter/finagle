@@ -6,7 +6,7 @@ import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Listene
 import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.transport.Transport
 import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline}
 import io.netty.handler.codec.http.HttpServerCodec
 
@@ -61,9 +61,9 @@ private[finagle] object Http2Listener {
 
   def apply[In, Out](params: Stack.Params)
     (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
-    val Transport.Tls(tlsConfig) = params[Transport.Tls]
+    val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]
 
-    if (tlsConfig != TlsConfig.Disabled) tlsListener(params)
+    if (configuration.isDefined) tlsListener(params)
     else cleartextListener(params)
   }
 }

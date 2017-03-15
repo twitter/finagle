@@ -66,4 +66,26 @@ object ApplicationProtocols {
     if (appProtos.isEmpty) Unspecified
     else Supported(appProtos)
   }
+
+  /**
+   * Combines two [[ApplicationProtocols]] into one. This is used internally within
+   * Finagle to combine [[ApplicationProtocols]] that are necessary for a communication
+   * protocol to work and where a user may have declared a sequence of [[ApplicationProtocols]]
+   * themselves.
+   *
+   * @note If both values are [[ApplicationProtocols.Supported]], the combination will consist
+   * of the first group in its entirety, with the second group appended to the end minus duplicates
+   * contained within the first group.
+   */
+  private[finagle] def combine(
+    appProtocols1: ApplicationProtocols,
+    appProtocols2: ApplicationProtocols
+  ): ApplicationProtocols = {
+    (appProtocols1, appProtocols2) match {
+      case (_, ApplicationProtocols.Unspecified) => appProtocols1
+      case (ApplicationProtocols.Unspecified, _) => appProtocols2
+      case (ApplicationProtocols.Supported(protos1), ApplicationProtocols.Supported(protos2)) =>
+        ApplicationProtocols.Supported((protos1 ++ protos2).distinct)
+    }
+  }
 }

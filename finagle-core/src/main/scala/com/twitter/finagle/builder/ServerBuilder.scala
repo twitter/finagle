@@ -12,7 +12,7 @@ import com.twitter.finagle.ssl.server.{
   ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.io.File
@@ -473,9 +473,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         keyCredentials = keyCredentials,
         cipherSuites = cipherSuites,
         applicationProtocols = applicationProtocols))))
-    .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
-       certificatePath, keyPath, Option(caCertificatePath), Option(ciphers), Option(nextProtos)
-     )))
   }
 
   /**

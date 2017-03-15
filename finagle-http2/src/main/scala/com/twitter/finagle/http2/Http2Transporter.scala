@@ -41,15 +41,16 @@ private[finagle] object Http2Transporter {
     )
 
     val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
-    val Transport.Tls(tls) = params[Transport.Tls]
+    val Transport.ClientSsl(config) = params[Transport.ClientSsl]
+    val tlsEnabled = config.isDefined
 
     // prior knowledge is only used with h2c
-    if (!tls.enabled && priorKnowledge) {
+    if (!tlsEnabled && priorKnowledge) {
       new PriorKnowledgeTransporter(underlying, params)
     } else {
       val underlyingHttp11 = Netty4HttpTransporter(params)(addr)
       val TimerParam(timer) = params[TimerParam]
-      new Http2Transporter(underlying, underlyingHttp11, tls.enabled, timer)
+      new Http2Transporter(underlying, underlyingHttp11, tlsEnabled, timer)
     }
   }
 
@@ -116,9 +117,10 @@ private[finagle] object Http2Transporter {
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
-      val Transport.Tls(tls) = params[Transport.Tls]
+      val Transport.ClientSsl(config) = params[Transport.ClientSsl]
+      val tlsEnabled = config.isDefined
 
-      if (tls.enabled) {
+      if (tlsEnabled) {
         val p = Promise[Unit]()
         val buffer = new ChannelOutboundHandlerAdapter with BufferingChannelOutboundHandler
         val connectionHandler = connectionHandlerBuilder

@@ -16,7 +16,7 @@ import com.twitter.finagle.ssl.client.{
   SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
 import com.twitter.util.{Duration, Future, NullMonitor, Time, Try}
@@ -934,7 +934,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tls(hostname: String): This =
     configured(Transport.ClientSsl(
       Some(SslClientConfiguration(hostname = Some(hostname)))))
-    .configured(Transport.Tls(TlsConfig.ClientHostname(hostname)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -952,7 +951,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(SslClientEngineFactory.Param(
       new SslContextClientEngineFactory(sslContext)))
     .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
-    .configured(Transport.Tls(TlsConfig.ClientSslContext(sslContext)))
 
   /**
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
@@ -963,11 +961,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
       new SslContextClientEngineFactory(sslContext)))
     .configured(Transport.ClientSsl(
       Some(SslClientConfiguration(hostname = hostname))))
-    .configured(Transport.Tls(
-      hostname.fold[TlsConfig](TlsConfig.ClientSslContext(sslContext)) { hn =>
-        TlsConfig.ClientSslContextAndHostname(sslContext, hn)
-      }
-    ))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
@@ -983,7 +976,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tlsWithoutValidation(): This =
     configured(Transport.ClientSsl(
       Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
-    .configured(Transport.Tls(TlsConfig.ClientNoValidation))
 
 
   /**

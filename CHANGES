@@ -17,6 +17,25 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: SSL/TLS stack params for Finagle running Netty 4 have changed.
+      - The `TlsConfig` param in `Transport` has been removed.
+      - For client engines, the same two parameters as Finagle running Netty 3 are now used:
+        - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
+          key credentials, trust credentials, cipher suites, protocols, and application protocols.
+        - `SslClientEngineFactory` in `SslClientEngineFactory`, which determines how the `Engine`
+          is created based off of an `Address` and an `SslClientConfiguration`.
+      - For server engines, the same two parameters as Finagle running Netty 3 are now used:
+        - `ServerSsl` in `Transport`, which is used for configuring a server `Engine`'s key
+          credentials, trust credentials, cipher suites, protocols, application protocols, and
+          where the server supports or requires client authentication.
+        - `SslServerEngineFactory` in `SslServerEngineFactory`, which determines how the `Engine`
+          is created based off of an `SslServerConfiguration`.
+      - Note: Not all client and server configurations work with all engine factories. Each engine
+        factory should document what is not supported by that specific engine factory.
+      - Note: By default, Finagle on Netty 4 will use the `Netty4ClientEngineFactory` and
+        `Netty4ServerEngineFactory` respectively.
+      ``RB_ID=910500``
+
   * finagle-core: Change the API to LoadBalancerFactory to a more concrete
     `Activity[IndexedSeq[ServiceFactory[Req, Rep]]]` since the majority of the
     load balancer implementations don't need the properties of a Set but instead
@@ -101,7 +120,7 @@ Breaking API Changes
       - The `TLSHostname` param in `Transporter` has been removed. Hostnames should be set as
         part of the `SslClientConfiguration` now.
       - The `TLSServerEngine` param in `Transport` has been replaced by two parameters:
-        - `ServerSsl` in `Transport`, which is used for configuring a client `Engine`'s key
+        - `ServerSsl` in `Transport`, which is used for configuring a server `Engine`'s key
           credentials, trust credentials, cipher suites, protocols, application protocols, and
           whether the server supports or requires client authentication.
         - `SslServerEngineFactory` in `SslServerEngineFactory`, which determines how the `Engine`

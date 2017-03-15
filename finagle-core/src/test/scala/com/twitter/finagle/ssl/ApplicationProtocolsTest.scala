@@ -62,4 +62,32 @@ class ApplicationProtocolsTest extends FunSuite {
     }
   }
 
+  test("combine results in Unspecified for two Unspecifed items") {
+    val appProtos1 = ApplicationProtocols.Unspecified
+    val appProtos2 = ApplicationProtocols.Unspecified
+    val combined = ApplicationProtocols.combine(appProtos1, appProtos2)
+    assert(combined == ApplicationProtocols.Unspecified)
+  }
+
+  test("combine uses the second when the first is Unspecified") {
+    val appProtos1 = ApplicationProtocols.Unspecified
+    val appProtos2 = ApplicationProtocols.Supported(Seq("h2", "spdy/3.1", "http/1.1"))
+    val combined = ApplicationProtocols.combine(appProtos1, appProtos2)
+    assert(combined == appProtos2)
+  }
+
+  test("combine uses the first when the second is Unspecified") {
+    val appProtos1 = ApplicationProtocols.Supported(Seq("h2", "spdy/3.1", "http/1.1"))
+    val appProtos2 = ApplicationProtocols.Unspecified
+    val combined = ApplicationProtocols.combine(appProtos1, appProtos2)
+    assert(combined == appProtos1)
+  }
+
+  test("combine uniquely combines Supported lists") {
+    val appProtos1 = ApplicationProtocols.Supported(Seq("h2", "http/1.1"))
+    val appProtos2 = ApplicationProtocols.Supported(Seq("spdy/3.1", "http/1.1"))
+    val combined = ApplicationProtocols.combine(appProtos1, appProtos2)
+    assert(combined == ApplicationProtocols.Supported(Seq("h2", "http/1.1", "spdy/3.1")))
+  }
+
 }

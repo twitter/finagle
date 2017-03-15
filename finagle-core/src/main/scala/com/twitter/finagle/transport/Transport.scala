@@ -179,14 +179,6 @@ object Transport {
   }
 
   /**
-   * $param the TLS config for a `Transport` (default: disabled).
-   */
-  case class Tls(config: TlsConfig)
-  object Tls {
-    implicit val param: Stack.Param[Tls] = Stack.Param(Tls(TlsConfig.Disabled))
-  }
-
-  /**
    * $param the options (i.e., socket options) of a `Transport`.
    *
    * @param noDelay enables or disables `TCP_NODELAY` (Nagle's algorithm)

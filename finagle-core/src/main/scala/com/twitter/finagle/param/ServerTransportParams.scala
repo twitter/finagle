@@ -2,8 +2,9 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
-import com.twitter.finagle.ssl.server.SslServerConfiguration
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.ssl.server.{
+  SslContextServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.transport.Transport
 import java.io.File
 import javax.net.ssl.SSLContext
 
@@ -61,15 +62,10 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
 
     self
       .configured(Transport.ServerSsl(Some(configuration)))
-      .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
-        certificatePath, keyPath, caCertificatePath, ciphers, nextProtocols
-      )))
   }
 
   /**
    * Enables TLS/SSL support (connection encrypting) on this server.
-   *
-   * @note This configuration method is only used to configure Netty 4 transports.
    *
    * @note It's recommended to not use [[SSLContext]] directly, but rely on Finagle to pick
    *       the most efficient TLS/SSL implementation available on your platform.
@@ -77,5 +73,8 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * @param context the SSL context to use
    */
   def tls(context: SSLContext): A =
-    self.configured(Transport.Tls(TlsConfig.ServerSslContext(context)))
+    self
+      .configured(SslServerEngineFactory.Param(new SslContextServerEngineFactory(context)))
+      .configured(Transport.ServerSsl(Some(SslServerConfiguration())))
+
 }

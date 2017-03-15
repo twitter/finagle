@@ -4,7 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.poolReceiveBuffers
 import com.twitter.finagle.netty4.proxy.{HttpProxyConnectHandler, Netty4ProxyConnectHandler}
-import com.twitter.finagle.netty4.ssl.Netty4SslHandler
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
 import com.twitter.finagle.param.{Label, Logger, Stats}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
@@ -75,7 +75,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
     pipe.addLast("exceptionHandler", exceptionHandler)
 
     // Add SslHandler to the pipeline.
-    pipe.addFirst("sslInit", new Netty4SslHandler(params))
+    pipe.addFirst("sslInit", new Netty4ClientSslHandler(params))
 
     // SOCKS5 proxy via `Netty4ProxyConnectHandler`.
     socksAddress.foreach { sa =>

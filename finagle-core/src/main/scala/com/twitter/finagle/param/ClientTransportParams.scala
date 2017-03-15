@@ -5,7 +5,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.{
   SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import javax.net.ssl.SSLContext
 
@@ -37,7 +37,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
   def tls: A =
     self
       .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
-      .configured(Transport.Tls(TlsConfig.Client))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) on this client.
@@ -47,7 +46,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     self
       .configured(Transport.ClientSsl(
         Some(SslClientConfiguration(hostname = Some(hostname)))))
-      .configured(Transport.Tls(TlsConfig.ClientHostname(hostname)))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with no hostname validation
@@ -61,7 +59,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
       .configured(SslClientEngineFactory.Param(
         new SslContextClientEngineFactory(context)))
       .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
-      .configured(Transport.Tls(TlsConfig.Client))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with hostname validation
@@ -73,7 +70,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
         new SslContextClientEngineFactory(context)))
       .configured(Transport.ClientSsl(
         Some(SslClientConfiguration(hostname = Some(hostname)))))
-      .configured(Transport.Tls(TlsConfig.ClientSslContextAndHostname(context, hostname)))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with no certificate validation
@@ -86,7 +82,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     self
       .configured(Transport.ClientSsl(
         Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
-      .configured(Transport.Tls(TlsConfig.ClientNoValidation))
   }
 
   /**
