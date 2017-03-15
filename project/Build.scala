@@ -722,7 +722,6 @@ object Finagle extends Build {
     )
   ).dependsOn(
     finagleBenchmarkThrift,
-    finagleCommonsStats,
     finagleCore,
     finagleExp,
     finagleMemcached,
