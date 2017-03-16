@@ -8,7 +8,6 @@ env:
     - JAVA_OPTS="-DSKIP_FLAKY=1 -Dsbt.log.noformat=true"
 
   matrix:
-    - PROJECT=finagle-commons-stats
     - PROJECT=finagle-core
     - PROJECT=finagle-exception
     - PROJECT=finagle-exp
