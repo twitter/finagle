@@ -57,6 +57,9 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.
     Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=908442``
 
+  * finagle: Remove finagle-commons-stats, which was a compatibility layer for a deprecated
+    stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
+
 
 6.43.0
 ------

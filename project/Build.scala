@@ -176,7 +176,6 @@ object Finagle extends Build {
     finagleServersets,
     finagleException,
     finagleIntegration,
-    finagleCommonsStats,
     finagleExp,
     finagleMdns,
     finagleOstrich4,
@@ -364,22 +363,6 @@ object Finagle extends Build {
     ) ++ scroogeLibs,
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleThrift)
-
-  lazy val finagleCommonsStats = Project(
-    id = "finagle-commons-stats",
-    base = file("finagle-commons-stats"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-commons-stats",
-    libraryDependencies ++= Seq(
-      "com.twitter.common" % "stats" % "0.0.116",
-      util("core"),
-      util("registry"),
-      util("stats")
-    ),
-    libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleServersets = Project(
     id = "finagle-serversets",
