@@ -91,21 +91,6 @@ private[finagle] class Interpreter(queues: LoadingCache[Buf, BlockingDeque[Buf]]
       case Flush(queueName) =>
         queues.invalidate(queueName)
         Deleted()
-      case FlushAll() =>
-        queues.invalidateAll()
-        Deleted()
-      case Version() =>
-        NotFound()
-      case ShutDown() =>
-        NotFound()
-      case DumpConfig() =>
-        NotFound()
-      case Stats() =>
-        NotFound()
-      case DumpStats() =>
-        NotFound()
-      case Reload() =>
-        NotFound()
     }
   }
 }

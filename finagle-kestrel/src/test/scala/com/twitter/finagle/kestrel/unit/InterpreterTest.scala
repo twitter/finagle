@@ -96,12 +96,4 @@ class InterpreterTest extends FunSuite {
       assert(interpreter(Get(Buf.Utf8("name"))) == Values(Seq.empty))
     }
   }
-
-  test("Interpreter: flushAll") {
-    new InterpreterHelper {
-      interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
-      interpreter(FlushAll())
-      assert(interpreter(Get(Buf.Utf8("name"))) == Values(Seq.empty))
-    }
-  }
 }

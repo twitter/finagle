@@ -13,11 +13,6 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
   private[this] val SET         = Buf.Utf8("set")
   private[this] val DELETE      = Buf.Utf8("delete")
   private[this] val FLUSH       = Buf.Utf8("flush")
-  private[this] val FLUSH_ALL   = Buf.Utf8("flush_all")
-  private[this] val VERSION     = Buf.Utf8("version")
-  private[this] val SHUTDOWN    = Buf.Utf8("shutdown")
-  private[this] val STATS       = Buf.Utf8("stats")
-  private[this] val DUMP_STATS  = Buf.Utf8("dump_stats")
 
   private[this] val OPEN        = Buf.Utf8("open")
   private[this] val CLOSE       = Buf.Utf8("close")
@@ -44,11 +39,6 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
       case GET        => validateGetCommand(args)
       case DELETE     => Delete(validateDeleteCommand(args))
       case FLUSH      => Flush(validateDeleteCommand(args))
-      case FLUSH_ALL  => FlushAll()
-      case VERSION    => Version()
-      case SHUTDOWN   => ShutDown()
-      case STATS      => Stats()
-      case DUMP_STATS => DumpStats()
       case _          => throw new NonexistentCommand(commandName.toString)
     }
   }

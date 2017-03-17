@@ -41,6 +41,16 @@ Breaking API Changes
     load balancer implementations don't need the properties of a Set but instead
     need ordering guarantees and efficient random access. ``RB_ID=910372``
 
+  * finagle-kestrel: Remove commands that are not supported by the client:
+      - `com.twitter.finagle.kestrel.protocol.DumpConfig`
+      - `com.twitter.finagle.kestrel.protocol.DumpStats`
+      - `com.twitter.finagle.kestrel.protocol.FlushAll`
+      - `com.twitter.finagle.kestrel.protocol.Reload`
+      - `com.twitter.finagle.kestrel.protocol.ShutDown`
+      - `com.twitter.finagle.kestrel.protocol.Stats`
+      - `com.twitter.finagle.kestrel.protocol.Version`
+    ``RB_ID=911206``
+
   * finagle-memcached: Remove deprecated `c.t.f.memcached.KetamaClientBuilder`. Use
     `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=907352``
 

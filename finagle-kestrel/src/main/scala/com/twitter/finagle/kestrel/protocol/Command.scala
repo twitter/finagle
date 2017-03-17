@@ -20,12 +20,3 @@ case class Set(queueName: Buf, expiry: Time, value: Buf)                        
 
 case class Delete(queueName: Buf)                                                    extends Command("Delete")
 case class Flush(queueName: Buf)                                                     extends Command("Flush")
-case class FlushAll()                                                                extends Command("FlushAll")
-
-case class Version()                                                                 extends Command("Version")
-case class ShutDown()                                                                extends Command("ShutDown")
-case class Reload()                                                                  extends Command("Reload")
-case class DumpConfig()                                                              extends Command("DumpConfig")
-case class Stats()                                                                   extends Command("Stats")
-case class DumpStats()                                                               extends Command("DumpStats")
-
