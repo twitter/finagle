@@ -15,7 +15,6 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.{Span, SpanSugar}
 import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import scala.collection.JavaConverters.mapAsJavaMapConverter
-import scala.language.implicitConversions
 
 @RunWith(classOf[JUnitRunner])
 class Zk2ResolverTest
@@ -115,7 +114,7 @@ class Zk2ResolverTest
         "resolution is not negative after the serverset disappears")
     }
   }
-  
+
   test("end-to-end: no shard ID") {
     val Name.Bound(va) = zk2resolve("/foo/bar")
     eventually {
