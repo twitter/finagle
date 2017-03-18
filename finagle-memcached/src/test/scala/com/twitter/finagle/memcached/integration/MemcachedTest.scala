@@ -3,7 +3,6 @@ package com.twitter.finagle.memcached.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle._
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.memcached.{Client, Entry, Interpreter, InterpreterService, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
