@@ -16,6 +16,9 @@ import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
+
+import com.twitter.finagle.context.Contexts
+
 import scala.collection.JavaConverters._
 
 object StackServer {
@@ -278,7 +281,13 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       val underlying = listener.listen(addr) { transport =>
         registry.register(transport.remoteAddress)
         transport.onClose.ensure(registry.unregister(transport.remoteAddress))
-        serviceFactory(newConn(transport)).respond {
+        val eventuallyService = transport.peerCertificate match {
+          case None => serviceFactory(newConn(transport))
+          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+            serviceFactory(newConn(transport))
+          }
+        }
+        eventuallyService.respond {
           case Return(service) =>
             val d = server.newDispatcher(transport, service)
             connections.add(d)
