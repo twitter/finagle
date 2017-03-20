@@ -2,6 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{ExpiringService, StatsFilter, TimeoutFilter}
@@ -278,7 +279,13 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       val underlying = listener.listen(addr) { transport =>
         registry.register(transport.remoteAddress)
         transport.onClose.ensure(registry.unregister(transport.remoteAddress))
-        serviceFactory(newConn(transport)).respond {
+        val eventuallyService = transport.peerCertificate match {
+          case None => serviceFactory(newConn(transport))
+          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+            serviceFactory(newConn(transport))
+          }
+        }
+        eventuallyService.respond {
           case Return(service) =>
             val d = server.newDispatcher(transport, service)
             connections.add(d)
