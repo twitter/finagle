@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
+import com.twitter.finagle.IOExceptionStrings.FinestIOExceptionMessages
 import com.twitter.finagle.netty3.channel._
 import com.twitter.finagle.netty3.param.Netty3Timer
 import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
@@ -349,16 +350,6 @@ class Netty3Listener[In, Out](
   override def toString: String = "Netty3Listener"
 }
 
-private[netty3] object ServerBridge {
-  private val FinestIOExceptionMessages = Set(
-    "Connection reset by peer", // Found on linux
-    "Broken pipe", // Found on linux
-    "Connection timed out", // Found on linux NIO1
-    "No route to host",
-    "An existing connection was forcibly closed by the remote host", // Found on windows
-    "")
-}
-
 /**
  * Bridges a channel (pipeline) onto a transport. This must be
  * installed as the last handler.
@@ -369,7 +360,6 @@ private[netty3] class ServerBridge[In, Out](
     statsReceiver: StatsReceiver,
     channels: ChannelGroup)
   extends SimpleChannelHandler {
-  import ServerBridge.FinestIOExceptionMessages
 
   private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")

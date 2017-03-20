@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.IOExceptionStrings.{ChannelClosedStrings, ConnectionFailedStrings}
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Duration
@@ -251,12 +252,10 @@ object ChannelException {
       case _: java.nio.channels.UnresolvedAddressException => new ConnectionFailedException(cause, remoteAddress)
       case _: java.nio.channels.ClosedChannelException     => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
-        if "Connection reset by peer" == e.getMessage      => new ChannelClosedException(cause, remoteAddress)
+        if ChannelClosedStrings.contains(e.getMessage)     => new ChannelClosedException(cause, remoteAddress)
       case e: java.io.IOException
-        if "Broken pipe" == e.getMessage                   => new ChannelClosedException(cause, remoteAddress)
-      case e: java.io.IOException
-        if "Connection timed out" == e.getMessage          => new ConnectionFailedException(cause, remoteAddress)
-      case e                                               => new UnknownChannelException(cause, remoteAddress)
+        if ConnectionFailedStrings.contains(e.getMessage)  => new ConnectionFailedException(cause, remoteAddress)
+      case _                                               => new UnknownChannelException(cause, remoteAddress)
     }
   }
 }

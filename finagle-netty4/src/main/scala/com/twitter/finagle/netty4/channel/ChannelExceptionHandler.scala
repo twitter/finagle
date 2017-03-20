@@ -1,20 +1,12 @@
 package com.twitter.finagle.netty4.channel
 
-import com.twitter.finagle.{ReadTimedOutException, WriteTimedOutException, Failure}
+import com.twitter.finagle.{IOExceptionStrings, ReadTimedOutException, WriteTimedOutException, Failure}
 import com.twitter.finagle.stats.StatsReceiver
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.timeout.{WriteTimeoutException, ReadTimeoutException}
 import java.util.logging.Level
 
-private[netty4] object ChannelExceptionHandler {
-  private val FinestIOExceptionMessages = Set(
-    "Connection reset by peer",
-    "Broken pipe",
-    "Connection timed out",
-    "No route to host",
-    "")
-}
 
 /**
  * 1. Wraps Netty exceptions with Finagle ones.
@@ -26,7 +18,6 @@ private[netty4] class ChannelExceptionHandler(
     stats: StatsReceiver,
     log: java.util.logging.Logger)
   extends ChannelInboundHandlerAdapter {
-  import ChannelExceptionHandler.FinestIOExceptionMessages
 
   private[this] val readTimeoutCounter = stats.counter("read_timeout")
   private[this] val writeTimeoutCounter = stats.counter("write_timeout")
@@ -39,7 +30,7 @@ private[netty4] class ChannelExceptionHandler(
       | _: ReadTimeoutException
       | _: WriteTimeoutException
       | _: javax.net.ssl.SSLException => Level.FINEST
-    case e: java.io.IOException if FinestIOExceptionMessages.contains(e.getMessage) =>
+    case e: java.io.IOException if IOExceptionStrings.FinestIOExceptionMessages.contains(e.getMessage) =>
       Level.FINEST
     case _ => Level.WARNING
   }
