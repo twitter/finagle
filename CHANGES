@@ -62,18 +62,20 @@ Breaking API Changes
     - `apply(name: Name)`
     - `apply(host: String)`
 
-    Use `c.t.f.Memcached.client` to create a Memcached client. `RB_ID=908442``
+    Use `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=908442``
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.
     Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=908442``
 
   * finagle-memcached: Remove old `c.t.f.memcached.replicated.BaseReplicationClient` and
-    `c.t.f.memcached.replicated.MigrationClient`, and most `c.t.f.memcached.CachePoolCluster`
+    `c.t.f.memcached.migration.MigrationClient`, and most `c.t.f.memcached.CachePoolCluster`
     methods. ``RB_ID=910986``
 
   * finagle: Remove finagle-commons-stats, which was a compatibility layer for a deprecated
     stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
 
+  * finagle-memcached: Remove old `c.t.f.memcached.migration.DarkRead`, and
+    `c.t.f.memcached.migration.DarkWrite`. ``RB_ID=911367``
 
 6.43.0
 ------
