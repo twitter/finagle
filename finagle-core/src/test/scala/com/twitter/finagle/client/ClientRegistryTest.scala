@@ -59,6 +59,7 @@ class ClientRegistryTest extends FunSuite
     assert(allResolved0.poll == Some(Return(Set())))
   })
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("ClientRegistry.expAllRegisteredClientsResolved handles Addr.Bound")(new Ctx {
     val va = Var[Addr](Addr.Pending)
 
