@@ -44,6 +44,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
       })
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("thriftmux server + thriftmux client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = ThriftMux.client.newIface[TestService.FutureIface](
