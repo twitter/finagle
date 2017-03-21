@@ -5,94 +5,42 @@ import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.util.Showable
-import java.lang.reflect.{Constructor, Method}
+import java.lang.reflect.Constructor
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
-import scala.language.existentials
 import scala.reflect.ClassTag
-import scala.util.control.NonFatal
 
 private[twitter] object ThriftUtil {
   private type BinaryService = Service[Array[Byte], Array[Byte]]
 
-  private val thriftFinagleClientParamTypes =
-    Seq(classOf[Service[_, _]], classOf[TProtocolFactory])
-
-  private val thriftFinagleClientWithRepClassifierParamTypes =
-    Seq(classOf[Service[_, _]], classOf[TProtocolFactory], classOf[ResponseClassifier])
-
-  private val scrooge2FinagleClientParamTypes =
-    Seq(
-      classOf[Service[_, _]],
-      classOf[TProtocolFactory],
-      classOf[Option[_]],
-      classOf[StatsReceiver])
-
-  private val scrooge3FinagleClientParamTypes =
-    Seq(
-      classOf[Service[_, _]],
-      classOf[TProtocolFactory],
-      classOf[String],
-      classOf[StatsReceiver])
-
-  private val scrooge3FinagleClientWithRepClassifierParamTypes =
-    Seq(
-      classOf[Service[_, _]],
-      classOf[TProtocolFactory],
-      classOf[String],
-      classOf[StatsReceiver],
-      classOf[ResponseClassifier])
-
-  def findClass1(name: String): Option[Class[_]] =
+  private def findClass1(name: String): Option[Class[_]] =
     try Some(Class.forName(name)) catch {
       case _: ClassNotFoundException => None
     }
 
-  def findClass[A](name: String): Option[Class[A]] =
+  private def findClass[A](name: String): Option[Class[A]] =
     for {
       cls <- findClass1(name)
     } yield cls.asInstanceOf[Class[A]]
 
-  def findConstructor[A](clz: Class[A], paramTypes: Class[_]*): Option[Constructor[A]] =
+  private def findConstructor[A](clz: Class[A], paramTypes: Class[_]*): Option[Constructor[A]] =
     try {
       Some(clz.getConstructor(paramTypes: _*))
     } catch {
       case _: NoSuchMethodException => None
     }
 
-  def findMethod(clz: Class[_], name: String, params: Class[_]*): Option[Method] =
-    try Some(clz.getMethod(name, params:_*)) catch {
-      case _: NoSuchMethodException => None
-    }
-
-  def findRootWithSuffix(str: String, suffix: String): Option[String] =
+  private def findRootWithSuffix(str: String, suffix: String): Option[String] =
     if (str.endsWith(suffix))
       Some(str.stripSuffix(suffix))
     else
       None
 
-  lazy val findSwiftClass: Class[_] => Option[Class[_]] = {
-    val f = for {
-      serviceSym <- findClass1("com.twitter.finagle.exp.swift.ServiceSym")
-      meth <- findMethod(serviceSym, "isService", classOf[Class[_]])
-    } yield {
-      k: Class[_] =>
-        try {
-          if (meth.invoke(null, k).asInstanceOf[Boolean]) Some(k)
-          else None
-        } catch {
-          case NonFatal(_) => None
-        }
-    }
-
-    f getOrElse Function.const(None)
-  }
-
   /**
    * Construct an `Iface` based on an underlying [[com.twitter.finagle.Service]]
    * using whichever Thrift code-generation toolchain is available.
    */
-  def constructIface[Iface](
+  private[finagle] def constructIface[Iface](
     underlying: Service[ThriftClientRequest, Array[Byte]],
     cls: Class[_],
     protocolFactory: TProtocolFactory,
@@ -101,69 +49,39 @@ private[twitter] object ThriftUtil {
   ): Iface = {
     val clsName = cls.getName
 
-    def tryThriftFinagleClientRepClassifier: Option[Iface] =
+    // This is used with Scrooge's Java generated code.
+    // The class name passed in should be ServiceName$ServiceIface.
+    // Will try to create a ServiceName$ServiceToClient instance.
+    def tryJavaServiceNameDotServiceIface: Option[Iface] =
       for {
-        baseName   <- findRootWithSuffix(clsName, "$ServiceIface")
-        clientCls  <- findClass[Iface](baseName + "$ServiceToClient")
-        cons       <- findConstructor(clientCls, thriftFinagleClientWithRepClassifierParamTypes: _*)
+        baseName <- findRootWithSuffix(clsName, "$ServiceIface")
+        clientCls <- findClass[Iface](baseName + "$ServiceToClient")
+        cons <- findConstructor(clientCls,
+          classOf[Service[_, _]], classOf[TProtocolFactory], classOf[ResponseClassifier])
       } yield cons.newInstance(underlying, protocolFactory, responseClassifier)
 
-    def tryThriftFinagleClient: Option[Iface] =
+    // This is used with Scrooge's Scala generated code.
+    // The class name passed in should be ServiceName$FutureIface
+    // or the higher-kinded version, ServiceName[Future].
+    // Will try to create a ServiceName$FinagledClient instance.
+    def tryScalaServiceNameIface: Option[Iface] =
       for {
-        baseName   <- findRootWithSuffix(clsName, "$ServiceIface")
-        clientCls  <- findClass[Iface](baseName + "$ServiceToClient")
-        cons       <- findConstructor(clientCls, thriftFinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory)
-
-    def tryScrooge3FinagleClient: Option[Iface] =
-      for {
-        clientCls  <- findClass[Iface](clsName + "$FinagleClient")
-        cons       <- findConstructor(clientCls, scrooge3FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, "", sr)
-
-    def tryScrooge3FinagledClientRepClassifier: Option[Iface] =
-      for {
-        baseName   <- findRootWithSuffix(clsName, "$FutureIface")
-        clientCls  <- findClass[Iface](baseName + "$FinagledClient")
-        cons       <- findConstructor(clientCls, scrooge3FinagleClientWithRepClassifierParamTypes: _*)
+        baseName <- findRootWithSuffix(clsName, "$FutureIface")
+          .orElse(Some(clsName))
+        clientCls <- findClass[Iface](baseName + "$FinagledClient")
+        cons <- findConstructor(clientCls,
+          classOf[Service[_, _]], classOf[TProtocolFactory], classOf[String], classOf[StatsReceiver], classOf[ResponseClassifier])
       } yield cons.newInstance(underlying, protocolFactory, "", sr, responseClassifier)
 
-    def tryScrooge3FinagledClient: Option[Iface] =
-      for {
-        baseName   <- findRootWithSuffix(clsName, "$FutureIface")
-        clientCls  <- findClass[Iface](baseName + "$FinagledClient")
-        cons       <- findConstructor(clientCls, scrooge3FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, "", sr)
-
-    def tryScrooge2Client: Option[Iface] =
-      for {
-        baseName   <- findRootWithSuffix(clsName, "$FutureIface")
-        clientCls  <- findClass[Iface](baseName + "$FinagledClient")
-        cons       <- findConstructor(clientCls, scrooge2FinagleClientParamTypes: _*)
-      } yield cons.newInstance(underlying, protocolFactory, None, sr)
-
-    def trySwiftClient: Option[Iface] =
-      for {
-        swiftClass <- findSwiftClass(cls)
-        proxy <- findClass1("com.twitter.finagle.exp.swift.SwiftProxy")
-        meth <- findMethod(proxy, "newClient",
-          classOf[Service[_, _]], classOf[ClassTag[_]])
-      } yield {
-        val manifest = ClassTag(swiftClass).asInstanceOf[ClassTag[Iface]]
-        meth.invoke(null, underlying, manifest).asInstanceOf[Iface]
-      }
-
     val iface =
-      tryThriftFinagleClientRepClassifier orElse
-      tryThriftFinagleClient orElse
-      tryScrooge3FinagleClient orElse
-      tryScrooge3FinagledClientRepClassifier orElse
-      tryScrooge3FinagledClient orElse
-      tryScrooge2Client orElse
-      trySwiftClient
+      tryJavaServiceNameDotServiceIface
+        .orElse(tryScalaServiceNameIface)
 
-    iface getOrElse {
-      throw new IllegalArgumentException("Iface %s is not a valid thrift iface".format(clsName))
+    iface.getOrElse {
+      throw new IllegalArgumentException(
+        s"Iface $clsName is not a valid thrift iface. For Scala generated code, " +
+          "try `YourServiceName$FutureIface` or `YourServiceName[Future]. " +
+          "For Java generated code, try `YourServiceName$ServiceIface`.")
     }
   }
 
@@ -178,64 +96,48 @@ private[twitter] object ThriftUtil {
     maxThriftBufferSize: Int,
     label: String
   ): BinaryService = {
+    // This is used with Scrooge's Java generated code.
+    // The class passed in should be ServiceName$ServiceIface.
+    // Will try to create a ServiceName$Service instance.
     def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] =
       for {
-        baseName   <- findRootWithSuffix(iface.getName, "$ServiceIface")
+        baseName <- findRootWithSuffix(iface.getName, "$ServiceIface")
         serviceCls <- findClass[BinaryService](baseName + s"$$Service")
-        cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
+        cons <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
       } yield cons.newInstance(impl, protocolFactory)
 
+    // This is used with Scrooge's Scala generated code.
+    // The class passed in should be ServiceName$FutureIface,
+    // ServiceName$FutureIface, or ServiceName.
+    // Will try to create a ServiceName$FinagleService.
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       (for {
-        baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
-          // for handling MethodIface service subclasses
-          findRootWithSuffix(iface.getName, "$MethodIface") orElse
-          Some(iface.getName)
-        serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
-          findClass[BinaryService](baseName + "$FinagledService")
-        baseClass  <- findClass1(baseName)
+        baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
+          // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
+          .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
+          .orElse(Some(iface.getName))
+        serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
+        baseClass <- findClass1(baseName)
       } yield {
-        // The new constructor takes one more 'label' paramater than the old one, so we first try find
-        // the new constructor, it it doesn't not exist, fallback to the one without 'label' parameter.
-        val oldParameters = Seq(baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
-        val newParameters = oldParameters :+ classOf[String]
-        val oldArgs = Seq(impl, protocolFactory, stats, Int.box(maxThriftBufferSize))
-        val newArgs = oldArgs :+ label
-        def newConsCall: Option[BinaryService] = findConstructor(serviceCls, newParameters: _*).map(
-          cons => cons.newInstance(newArgs: _*)
-        )
-        def oldConsCall: Option[BinaryService] = findConstructor(serviceCls, oldParameters: _*).map(
-          cons => cons.newInstance(oldArgs: _*)
-        )
-        newConsCall.orElse(oldConsCall)
+        findConstructor(serviceCls,
+          baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE, classOf[String]
+        ).map { cons =>
+          cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize), label)
+        }
       }).flatten
 
-    // The legacy $FinagleService that doesn't take stats.
-    def tryLegacyScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
-      for {
-        baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
-          Some(iface.getName)
-        serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
-          findClass[BinaryService](baseName + "$FinagledService")
-        cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory])
-      } yield cons.newInstance(impl, protocolFactory)
-
-    def trySwiftService(iface: Class[_]): Option[BinaryService] =
-      for {
-        _ <- findSwiftClass(iface)
-        swiftServiceCls <- findClass1("com.twitter.finagle.exp.swift.SwiftService")
-        const <- findConstructor(swiftServiceCls, classOf[Object])
-      } yield const.newInstance(impl).asInstanceOf[BinaryService]
-
     def tryClass(cls: Class[_]): Option[BinaryService] =
-      tryThriftFinagleService(cls) orElse
-      tryScroogeFinagleService(cls) orElse
-      tryLegacyScroogeFinagleService(cls) orElse
-      trySwiftService(cls) orElse
-      (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
+      tryThriftFinagleService(cls)
+        .orElse(tryScroogeFinagleService(cls))
+        .orElse {
+          (Option(cls.getSuperclass) ++ cls.getInterfaces).view.flatMap(tryClass).headOption
+        }
 
     tryClass(impl.getClass).getOrElse {
-      throw new IllegalArgumentException("argument implements no candidate ifaces")
+      throw new IllegalArgumentException(
+        s"$impl implements no candidate ifaces. For Scala generated code, " +
+          "try `YourServiceName$FutureIface`, `YourServiceName$MethodIface` or `YourServiceName`. " +
+          "For Java generated code, try `YourServiceName$ServiceIface`.")
     }
   }
 
@@ -244,9 +146,17 @@ private[twitter] object ThriftUtil {
    * interface using whichever Thrift code-generation toolchain is available.
    * (Legacy version for backward-compatibility).
    */
-  def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory, serviceName: String): BinaryService = {
-    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.Server.maxThriftBufferSize, serviceName)
-  }
+  def serverFromIface(
+    impl: AnyRef,
+    protocolFactory: TProtocolFactory,
+    serviceName: String
+  ): BinaryService =
+    serverFromIface(
+      impl,
+      protocolFactory,
+      LoadedStatsReceiver,
+      Thrift.Server.maxThriftBufferSize,
+      serviceName)
 }
 
 /**
@@ -255,8 +165,13 @@ private[twitter] object ThriftUtil {
  * @define clientUse
  *
  * Create a new client of type `Iface`, which must be generated
- * by either [[https://github.com/twitter/scrooge Scrooge]] or
- * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
+ * [[https://github.com/twitter/scrooge Scrooge]].
+ *
+ * For Scala generated code, the `Class` passed in should be
+ * either `ServiceName$FutureIface` or `ServiceName[Future]`.
+ *
+ * For Java generated code, the `Class` passed in should be
+ * `ServiceName$ServiceIface`.
  *
  * @define serviceIface
  *

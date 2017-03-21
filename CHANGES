@@ -17,7 +17,10 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: SSL/TLS stack params for Finagle running Netty 4 have changed.
+    * finagle-commons-stats: Remove finagle-commons-stats, which was a compatibility layer
+      for a deprecated stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
+
+    * finagle-core: SSL/TLS stack params for Finagle running Netty 4 have changed.
       - The `TlsConfig` param in `Transport` has been removed.
       - For client engines, the same two parameters as Finagle running Netty 3 are now used:
         - `ClientSsl` in `Transport`, which is used for configuring a client `Engine`'s hostname,
@@ -71,11 +74,11 @@ Breaking API Changes
     `c.t.f.memcached.migration.MigrationClient`, and most `c.t.f.memcached.CachePoolCluster`
     methods. ``RB_ID=910986``
 
-  * finagle: Remove finagle-commons-stats, which was a compatibility layer for a deprecated
-    stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
-
   * finagle-memcached: Remove old `c.t.f.memcached.migration.DarkRead`, and
     `c.t.f.memcached.migration.DarkWrite`. ``RB_ID=911367``
+
+  * finagle-thrift, finagle-thriftmux: Remove rich client/server support for prior
+    versions of Scrooge generated code. ``RB_ID=911515``
 
 6.43.0
 ------
