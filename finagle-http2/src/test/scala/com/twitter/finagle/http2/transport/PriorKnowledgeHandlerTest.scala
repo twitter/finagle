@@ -72,7 +72,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     val nonMatching = directBuffer(16).writeBytes("MORE BYTES\n\nHERE"
       .getBytes(UTF_8)).asReadOnly()
 
-    channel.writeInbound(partialPreface)
+    channel.writeInbound(partialPreface.duplicate())
 
     verify(dummyHandler, never()).channelRead(anyObject(), anyObject())
 
@@ -88,11 +88,9 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
 
     assert(capturedMessages.size() == 2)
 
-    assert(ByteBufUtil.equals(capturedMessages.get(0), 0,
-      partialPreface, 0, partialPreface.capacity()))
+    assert(ByteBufUtil.equals(capturedMessages.get(0), partialPreface))
 
-    assert(ByteBufUtil.equals(capturedMessages.get(1), 0,
-      nonMatching, 0, nonMatching.capacity()))
+    assert(ByteBufUtil.equals(capturedMessages.get(1), nonMatching))
 
     assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
@@ -103,7 +101,7 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     val extraBytes = directBuffer(16).writeBytes("MORE BYTES\n\nHERE"
       .getBytes(UTF_8)).asReadOnly()
 
-    val prefacePlusExtra = directBuffer(40).writeBytes(connectionPrefaceBuf).writeBytes(extraBytes)
+    val prefacePlusExtra = directBuffer(40).writeBytes(connectionPrefaceBuf).writeBytes(extraBytes.duplicate())
 
     channel.writeInbound(prefacePlusExtra)
 
@@ -117,11 +115,9 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
 
     assert(capturedMessages.size() == 2)
 
-    assert(ByteBufUtil.equals(capturedMessages.get(0), 0,
-      connectionPrefaceBuf, 0, connectionPrefaceBuf.capacity()))
+    assert(ByteBufUtil.equals(capturedMessages.get(0), connectionPrefaceBuf))
 
-    assert(ByteBufUtil.equals(capturedMessages.get(1), 0,
-      extraBytes, 0, extraBytes.capacity()))
+    assert(ByteBufUtil.equals(capturedMessages.get(1), extraBytes))
 
     assert(stats.counters(Seq("upgrade", "success")) == 1)
   }

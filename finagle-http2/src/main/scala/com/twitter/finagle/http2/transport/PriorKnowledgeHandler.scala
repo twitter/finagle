@@ -90,10 +90,7 @@ private[http2] class PriorKnowledgeHandler(
           nextCtx.fireChannelRead(connectionPrefaceBuf)
 
           // send any additional bytes left over after the preface was matched.
-          if (buf.isReadable) {
-            val remaining = buf.slice(buf.readerIndex, buf.capacity() - buf.readerIndex())
-            nextCtx.fireChannelRead(remaining)
-          }
+          nextCtx.fireChannelRead(buf)
         }
 
       case _ =>
