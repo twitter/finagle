@@ -18,7 +18,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  *       with unpooled allocators.
  *
  * @note If the input buffer is direct but not readable it's still guaranteed to be
- *       released and replaced with a heap buffer of equivalent capacity.
+ *       released and replaced with EmptyByteBuf.
  *
  * @note This handler recognizes both ByteBuf's and ByteBufHolder's (think of HTTP
  *       messages extending ByteBufHolder's in Netty).
@@ -30,24 +30,24 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  */
 @Sharable
 object DirectToHeapInboundHandler extends ChannelInboundHandlerAdapter {
-  // Assuming that `bb.capacity` isn't zero.
-  private[this] final def copyOnHeap(bb: ByteBuf): ByteBuf = {
-    try Unpooled.buffer(bb.readableBytes, bb.capacity).writeBytes(bb)
-    finally bb.release()
+  private[this] final def copyOnHeapAndRelease(bb: ByteBuf): ByteBuf = {
+    try {
+      if (bb.readableBytes > 0) Unpooled.buffer(bb.readableBytes, bb.capacity).writeBytes(bb)
+      else Unpooled.EMPTY_BUFFER
+    } finally bb.release()
   }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
-    case bb: EmptyByteBuf =>
-      ctx.fireChannelRead(bb)
-
     case bb: ByteBuf if bb.isDirect  =>
-      ctx.fireChannelRead(copyOnHeap(bb))
+      ctx.fireChannelRead(copyOnHeapAndRelease(bb))
 
+    // This case is special since it helps to avoid unnecessary `replace`
+    // when the underlying content is already `EmptyByteBuffer`.
     case bbh: ByteBufHolder if bbh.content.isInstanceOf[EmptyByteBuf] =>
       ctx.fireChannelRead(bbh)
 
     case bbh: ByteBufHolder if bbh.content.isDirect =>
-      val onHeapContent = copyOnHeap(bbh.content)
+      val onHeapContent = copyOnHeapAndRelease(bbh.content)
       ctx.fireChannelRead(bbh.replace(onHeapContent))
 
     case _ => ctx.fireChannelRead(msg)

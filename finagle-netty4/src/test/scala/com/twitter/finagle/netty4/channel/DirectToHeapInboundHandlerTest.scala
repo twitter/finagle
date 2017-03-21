@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.channel
 
-import io.netty.buffer.{ByteBuf, ByteBufHolder, ByteBufUtil, DefaultByteBufHolder, Unpooled}
+import io.netty.buffer.{ByteBuf, ByteBufHolder, ByteBufUtil, DefaultByteBufHolder, EmptyByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
@@ -32,8 +32,8 @@ class DirectToHeapInboundHandlerTest extends FunSuite
 
   test("convert direct to heap") {
     def assertDirectIsCopied(in: ByteBuf, out: ByteBuf): Unit = {
-      // The output buffer should never be direct.
-      assert(!out.isDirect)
+      // The output buffer should never be direct (unless it's an `EmptyByteBuf`).
+      assert(out.isInstanceOf[EmptyByteBuf] || !out.isDirect)
       // The output buffer should be equal to input.
       assert(ByteBufUtil.equals(in, out))
       // The input buffer should've been released.
@@ -89,6 +89,20 @@ class DirectToHeapInboundHandlerTest extends FunSuite
     val in = new DefaultByteBufHolder(Unpooled.EMPTY_BUFFER)
     channel.writeInbound(in)
     assert(channel.readInbound[ByteBufHolder] eq in)
+  }
+
+  test("map unreadable bufs into empty bufs") {
+    val in = Unpooled.directBuffer().retainedSlice(0, 0)
+    channel.writeInbound(in)
+    assert(channel.readInbound[ByteBuf] eq Unpooled.EMPTY_BUFFER)
+    assert(in.release())
+  }
+
+  test("map unreadable buf holders into empty buf holders") {
+    val in = new DefaultByteBufHolder(Unpooled.directBuffer().retainedSlice(0, 0))
+    channel.writeInbound(in)
+    assert(channel.readInbound[ByteBufHolder].content() eq Unpooled.EMPTY_BUFFER)
+    assert(in.release())
   }
 }
 
