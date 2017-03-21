@@ -16,7 +16,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MethodBuilderTest extends FunSuite {
 
-  private def await[T](f: Future[T]): T = Await.result(f, 5.seconds)
+  private def await[T](f: Future[T]): T = Await.result(f, 15.seconds)
 
   private implicit val timer = HashedWheelTimer.Default
   private val serviceSleep = 50.milliseconds
@@ -44,7 +44,7 @@ class MethodBuilderTest extends FunSuite {
       s"${addr.getHostName}:${addr.getPort}", stackClient)
 
     val short = methodBuilder.withTimeout.total(10.millis).newService("short")
-    val long = methodBuilder.withTimeout.total(2.seconds).newService("long")
+    val long = methodBuilder.withTimeout.total(5.seconds).newService("long")
 
     // check we get a timeout for a client with a short timeout
     intercept[GlobalRequestTimeoutException] {
@@ -107,7 +107,7 @@ class MethodBuilderTest extends FunSuite {
       s"${addr.getHostName}:${addr.getPort}", stackClient)
 
     val short = methodBuilder.withTimeout.perRequest(5.millis).newService("short")
-    val long = methodBuilder.withTimeout.perRequest(2.seconds).newService("long")
+    val long = methodBuilder.withTimeout.perRequest(5.seconds).newService("long")
 
     // check we get a timeout for a client with a short timeout
     intercept[IndividualRequestTimeoutException] {
