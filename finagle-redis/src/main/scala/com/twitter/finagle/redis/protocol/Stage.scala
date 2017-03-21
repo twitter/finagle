@@ -1,14 +1,13 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.util.BufReader
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import java.nio.charset.StandardCharsets
 
 /**
  * A decoder stage.
  */
 private[redis] trait Stage {
-  def apply(reader: BufReader): Stage.NextStep
+  def apply(reader: ByteReader): Stage.NextStep
 }
 
 private[redis] object Stage {
@@ -42,8 +41,8 @@ private[redis] object Stage {
   /**
    * Generate a Stage from a code block.
    */
-  def apply(f: BufReader => NextStep): Stage = new Stage {
-    def apply(buf: BufReader): NextStep = f(buf)
+  def apply(f: ByteReader => NextStep): Stage = new Stage {
+    def apply(buf: ByteReader): NextStep = f(buf)
   }
 
   /**

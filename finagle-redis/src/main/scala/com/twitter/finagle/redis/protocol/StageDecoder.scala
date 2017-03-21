@@ -1,7 +1,6 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.util.BufReader
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
@@ -17,7 +16,7 @@ private[redis] final class StageDecoder(init: Stage) {
 
   import Stage._
 
-  private[this] var reader = BufReader(Buf.Empty)
+  private[this] var reader = ByteReader(Buf.Empty)
   private[this] var stack = List.empty[Acc]
   private[this] var current = init
 
@@ -30,7 +29,7 @@ private[redis] final class StageDecoder(init: Stage) {
    */
   def absorb(buf: Buf): Reply = synchronized {
     // Absorb the new buffer.
-    reader = BufReader(reader.readAll().concat(buf))
+    reader = ByteReader(reader.readAll().concat(buf))
 
     // Decode the next reply if possible.
     decodeNext(current)

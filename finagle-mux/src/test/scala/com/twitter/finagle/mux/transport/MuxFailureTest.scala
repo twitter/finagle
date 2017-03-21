@@ -1,8 +1,7 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.{Failure, FailureFlags}
-import com.twitter.finagle.util.BufWriter
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteWriter}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -39,7 +38,7 @@ class MuxFailureTest extends FunSuite {
     val muxFail = MuxFailure(MuxFailure.NonRetryable)
 
     val expectedContext = Seq(
-      (Buf.Utf8("MuxFailure"), BufWriter.fixed(8).writeLongBE(MuxFailure.NonRetryable).owned())
+      (Buf.Utf8("MuxFailure"), ByteWriter.fixed(8).writeLongBE(MuxFailure.NonRetryable).owned())
     )
 
     assert(muxFail.contexts.equals(expectedContext))

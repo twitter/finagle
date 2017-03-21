@@ -2,9 +2,8 @@ package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.netty4.Bufs
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util.{Duration, Time}
 import java.nio.charset.{StandardCharsets => Charsets}
 import scala.collection.mutable.ArrayBuffer
@@ -119,7 +118,7 @@ private[twitter] object Message {
         // 8 bytes for length encoding of k, v
         size += 8 + k.length + v.length
       }
-      val bw = BufWriter.fixed(size)
+      val bw = ByteWriter.fixed(size)
       bw.writeShortBE(version)
       iter = headers.iterator
       while (iter.hasNext) {
@@ -134,7 +133,7 @@ private[twitter] object Message {
     }
 
     def decode(buf: Buf): (Short, Seq[(Buf, Buf)]) = {
-      val br = BufReader(buf)
+      val br = ByteReader(buf)
       val version = br.readShortBE()
       val headers = new ArrayBuffer[(Buf, Buf)]
       while (br.remaining > 0) {
@@ -178,7 +177,7 @@ private[twitter] object Message {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = BufWriter.fixed(1+1+1+24+1+1+1)
+          val hd = ByteWriter.fixed(1+1+1+24+1+1+1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)
@@ -265,7 +264,7 @@ private[twitter] object Message {
       }
 
       // then, allocate and populate the header
-      val hd = BufWriter.fixed(n)
+      val hd = ByteWriter.fixed(n)
       hd.writeShortBE(contexts.length)
       iter = contexts.iterator
       while (iter.hasNext) {
@@ -314,7 +313,7 @@ private[twitter] object Message {
         }
       }
 
-      val hd = BufWriter.fixed(n)
+      val hd = ByteWriter.fixed(n)
       hd.writeByte(status)
       hd.writeShortBE(contexts.length)
       iter = contexts.iterator
@@ -427,7 +426,7 @@ private[twitter] object Message {
   case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage {
     def typ = Types.Tlease
     lazy val buf: Buf = {
-      val bw = BufWriter.fixed(9)
+      val bw = ByteWriter.fixed(9)
       bw.writeByte(unit)
       bw.writeLongBE(howLong)
       bw.owned()
@@ -466,7 +465,7 @@ private[twitter] object Message {
     if (buf.length < 1)
       throwBadMessageException("short Treq")
 
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     var nkeys = br.readByte().toInt
     if (nkeys < 0)
       throwBadMessageException("Treq: too many keys")
@@ -524,7 +523,7 @@ private[twitter] object Message {
     Treq(tag, id, br.readAll())
   }
 
-  private def decodeContexts(br: BufReader): Seq[(Buf, Buf)] = {
+  private def decodeContexts(br: ByteReader): Seq[(Buf, Buf)] = {
     val n = br.readShortBE()
     if (n == 0)
       return Nil
@@ -548,7 +547,7 @@ private[twitter] object Message {
   }
 
   private def decodeTdispatch(tag: Int, buf: Buf) = {
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     val contexts = decodeContexts(br)
     val ndst = br.readShortBE()
     // Path.read("") fails, so special case empty-dst.
@@ -573,7 +572,7 @@ private[twitter] object Message {
   }
 
   private def decodeRdispatch(tag: Int, buf: Buf) = {
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     val status = br.readByte()
     val contexts = decodeContexts(br)
     val rest = br.readAll()
@@ -588,7 +587,7 @@ private[twitter] object Message {
   private def decodeRreq(tag: Int, buf: Buf) = {
     if (buf.length < 1)
       throwBadMessageException("short Rreq")
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     val status = br.readByte()
     val rest = br.readAll()
     status match {
@@ -602,7 +601,7 @@ private[twitter] object Message {
   private def decodeTdiscarded(buf: Buf) = {
     if (buf.length < 3)
       throwBadMessageException("short Tdiscarded message")
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     val which = ((br.readByte() & 0xff) << 16) |
       ((br.readByte() & 0xff) << 8) |
       (br.readByte() & 0xff)
@@ -612,7 +611,7 @@ private[twitter] object Message {
   private def decodeTlease(buf: Buf) = {
     if (buf.length < 9)
       throwBadMessageException("short Tlease message")
-    val br = BufReader(buf)
+    val br = ByteReader(buf)
     val unit: Byte = br.readByte()
     val howMuch: Long = br.readLongBE()
     Tlease(unit, howMuch)
@@ -628,7 +627,7 @@ private[twitter] object Message {
   def decode(buf: Buf): Message = {
     try {
       if (buf.length < 4) throwBadMessageException(s"short message: ${Buf.slowHexString(buf)}")
-      val br = BufReader(buf)
+      val br = ByteReader(buf)
       val head = br.readIntBE()
       val rest = br.readAll()
       val typ = Tags.extractType(head)

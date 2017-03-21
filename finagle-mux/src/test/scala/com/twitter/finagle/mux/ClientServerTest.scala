@@ -8,9 +8,8 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -241,7 +240,7 @@ private[mux] abstract class ClientServerTest
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
-          val bw = BufWriter.fixed(8)
+          val bw = ByteWriter.fixed(8)
           bw.writeLongBE(Trace.id.flags.toLong)
           Future.value(Response(bw.owned()))
         }
@@ -255,7 +254,7 @@ private[mux] abstract class ClientServerTest
       p
     }
     assert(resp.poll.isDefined)
-    val respBr = BufReader(Await.result(resp, 5.seconds).body)
+    val respBr = ByteReader(Await.result(resp, 5.seconds).body)
     assert(respBr.remaining == 8)
     val respFlags = Flags(respBr.readLongBE())
     assert(respFlags == flags)

@@ -1,7 +1,6 @@
 package com.twitter.finagle.mysql.transport
 
-import com.twitter.io.Buf
-import com.twitter.finagle.util.{ProxyBufWriter, ProxyBufReader, BufReader, BufWriter}
+import com.twitter.io.{Buf, ByteReader, ByteWriter, ProxyByteReader, ProxyByteWriter}
 import java.nio.charset.{Charset => JCharset, StandardCharsets}
 import scala.collection.mutable.{Buffer => MutableBuffer}
 
@@ -40,10 +39,10 @@ object MysqlBuf {
   }
 }
 
-class MysqlBufReader(buf: Buf) extends ProxyBufReader {
+class MysqlBufReader(buf: Buf) extends ProxyByteReader {
   import MysqlBuf._
 
-  protected val reader: BufReader = BufReader(buf)
+  protected val reader: ByteReader = ByteReader(buf)
 
   /**
    * Take `n` bytes as a byte array
@@ -136,9 +135,9 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
 }
 
 
-class MysqlBufWriter(bytes: Array[Byte]) extends ProxyBufWriter {
+class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter {
 
-  protected val writer: BufWriter = BufWriter(bytes)
+  protected val writer: ByteWriter = ByteWriter(bytes)
 
   /**
    * Writes `b` to the buffer `num` times

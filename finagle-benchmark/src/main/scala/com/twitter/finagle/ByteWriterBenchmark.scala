@@ -1,14 +1,20 @@
-package com.twitter.finagle.util
+package com.twitter.finagle
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
+import com.twitter.io.ByteWriter
 import org.openjdk.jmh.annotations._
 
 /**
- * Note: These tests use JMH's single shot because a BufWriter
+ * @note These tests use JMH's single shot because a `ByteWriter`
  * is stateful.
+ *
+ * @note `ByteWriter` (formerly `BufWriter`) is located in util-core. This
+ * benchmark remains in finagle-benchmark to keep it co-located with
+ * `ByteReaderBenchmark`. `ByteReaderBenchmark` has dependencies on Finagle
+ * and Netty, so needs to remain in finagle-benchmark.
  */
 @State(Scope.Benchmark)
-class BufWriterBenchmark extends StdBenchAnnotations {
+class ByteWriterBenchmark extends StdBenchAnnotations {
 
   private[this] final val Size = 1000
 
@@ -21,24 +27,24 @@ class BufWriterBenchmark extends StdBenchAnnotations {
 
   private[this] val bytesOut = new Array[Byte](Size)
 
-  private[this] var bufWriter: BufWriter = _
+  private[this] var byteWriter: ByteWriter = _
 
   @Setup(Level.Iteration)
   def setup(): Unit =
-    bufWriter = BufWriter(bytesOut)
+    byteWriter = ByteWriter(bytesOut)
 
   @Benchmark
   @BenchmarkMode(Array(Mode.SingleShotTime))
   @Measurement(iterations = Iterations, batchSize = Size)
   @Warmup(iterations = Iterations, batchSize = Size)
-  def writeByteFixed(): BufWriter =
-    bufWriter.writeByte(0x5)
+  def writeByteFixed(): ByteWriter =
+    byteWriter.writeByte(0x5)
 
   @Benchmark
   @BenchmarkMode(Array(Mode.SingleShotTime))
   @Measurement(iterations = Iterations, batchSize = WriteBytesBatchSize)
   @Warmup(iterations = Iterations, batchSize = WriteBytesBatchSize)
-  def writeBytesFixed(): BufWriter =
-    bufWriter.writeBytes(Bytes)
+  def writeBytesFixed(): ByteWriter =
+    byteWriter.writeBytes(Bytes)
 
 }

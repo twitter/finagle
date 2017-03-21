@@ -1,17 +1,21 @@
-package com.twitter.finagle.util
+package com.twitter.finagle
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.netty4.ByteBufAsBuf
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import org.openjdk.jmh.annotations.{BenchmarkMode, Measurement, Warmup, _}
 
 /**
- * Note: These tests use JMH's single shot because a BufReader
+ * @note These tests use JMH's single shot because a `ByteReader`
  * is stateful.
+ *
+ * @note `ByteReader` (formerly `BufReader`) is located in util-core. This
+ * benchmark remains in finagle-benchmark due to dependencies on Finagle and
+ * Netty.
  */
 @State(Scope.Benchmark)
-class BufReaderBenchmark extends StdBenchAnnotations {
+class ByteReaderBenchmark extends StdBenchAnnotations {
 
   private[this] final val Size = 1000
   private[this] final val Iterations = 100
@@ -25,10 +29,10 @@ class BufReaderBenchmark extends StdBenchAnnotations {
 
   private[this] var directByteBuf: ByteBuf = _
 
-  private[this] var heapReader: BufReader = _
-  private[this] var directReader: BufReader = _
+  private[this] var heapReader: ByteReader = _
+  private[this] var directReader: ByteReader = _
 
-  private[this] def needsReset(reader: BufReader): Boolean =
+  private[this] def needsReset(reader: ByteReader): Boolean =
     reader == null || reader.remaining != Size
 
   private[this] def directByteBufNeedsReset: Boolean =
@@ -38,13 +42,13 @@ class BufReaderBenchmark extends StdBenchAnnotations {
   def setup(): Unit = {
     if (needsReset(heapReader)) {
       val heapByteBuf = ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes))
-      heapReader = BufReader(heapByteBuf)
+      heapReader = ByteReader(heapByteBuf)
     }
 
     if (needsReset(directReader) || directByteBufNeedsReset) {
       val direct = Unpooled.directBuffer(Size)
       directByteBuf = direct.writeBytes(bytes)
-      directReader = BufReader(ByteBufAsBuf.Owned(directByteBuf))
+      directReader = ByteReader(ByteBufAsBuf.Owned(directByteBuf))
     }
   }
 

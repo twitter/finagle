@@ -1,8 +1,7 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.FailureFlags
-import com.twitter.finagle.util.{BufWriter, BufReader}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 
 private[mux] object MuxFailure {
   private val ContextId = Buf.Utf8("MuxFailure")
@@ -33,7 +32,7 @@ private[mux] object MuxFailure {
   private val Extractor: PartialFunction[(Buf, Buf), MuxFailure] = {
     // Ignore anything after the first 8 bytes for future use
     case (k, vBuf) if k.equals(ContextId) && vBuf.length >= 8 =>
-      MuxFailure(BufReader(vBuf).readLongBE())
+      MuxFailure(ByteReader(vBuf).readLongBE())
   }
 
   /**
@@ -108,6 +107,6 @@ private[mux] case class MuxFailure(flags: Long) {
    */
   def contexts: Seq[(Buf, Buf)] = {
     if (this == Empty) Nil
-    else Seq((ContextId, BufWriter.fixed(8).writeLongBE(flags).owned()))
+    else Seq((ContextId, ByteWriter.fixed(8).writeLongBE(flags).owned()))
   }
 }

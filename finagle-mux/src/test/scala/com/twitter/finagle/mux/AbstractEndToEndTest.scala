@@ -4,14 +4,13 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Mux.param.MuxImpl
 import com.twitter.finagle._
 import com.twitter.finagle.context.RemoteInfo
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
@@ -79,7 +78,7 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   test(s"$implName: (no) Dtab propagation") {
     val server = Mux.server.configured(serverImpl).serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val bw = BufWriter.fixed(4)
+      val bw = ByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
       Future.value(Response(bw.owned()))
     })
@@ -87,7 +86,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     val client = Mux.client.configured(clientImpl).newService(server)
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
-    val br = BufReader(payload)
+    val br = ByteReader(payload)
 
     assert(br.remaining == 4)
     assert(br.readIntBE() == 0)
