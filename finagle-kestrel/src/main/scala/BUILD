@@ -6,7 +6,6 @@ scala_library(
   ),
   dependencies=[
     '3rdparty/jvm/com/github/ben-manes/caffeine',
-    '3rdparty/jvm/io/netty',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-kestrel/src/main/thrift:thrift-scala',
     'finagle/finagle-memcached/src/main/scala:scala',
