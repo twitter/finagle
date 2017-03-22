@@ -88,8 +88,8 @@ class MethodBuilderTest extends FunSuite {
   testTotalTimeout(
     "Mux",
     Mux.server,
-    Mux.client,
-    mux.Request.empty,
+    Mux.client.withSessionQualifier.noFailFast, // we disable failfast to allow retries to
+    mux.Request.empty,                          // smooth over the race with the server bind.
     mux.Response.empty
   )
 
