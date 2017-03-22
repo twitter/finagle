@@ -130,7 +130,7 @@ class DirectBufferLifecycleTest extends FunSuite {
       val cte: memcached.text.AbstractCommandToEncoding[AnyRef] = new memcached.text.CommandToEncoding
       val enc = new memcached.text.Encoder
       val command = memcached.Get(Seq(Buf.Utf8("1")))
-      enc.encode(null, null, cte.encode(command))
+      enc.encode(cte.encode(command))
     },
     pipelineInit = memcached.text.transport.Netty4ServerFramer,
     framedCB = { x => assert(!x.underlying.isDirect) }
@@ -142,7 +142,7 @@ class DirectBufferLifecycleTest extends FunSuite {
       val cte = new memcached.text.CommandToEncoding[AnyRef]
       val enc = new memcached.text.Encoder
       val command = memcached.Get(Seq(Buf.Utf8("1")))
-      enc.encode(null, null, cte.encode(command))
+      enc.encode(cte.encode(command))
     },
     pipelineInit = memcached.text.transport.Netty4ClientFramer,
     framedCB = { x => assert(!x.underlying.isDirect) }

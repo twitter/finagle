@@ -22,7 +22,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("NOT_FOUND")))
-    assert(decodingToResponse.decode(null, null, buffer) == NotFound())
+    assert(decodingToResponse.decode(buffer) == NotFound())
   }
 
   test("parseResponse STORED") {
@@ -30,7 +30,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("STORED")))
-    assert(decodingToResponse.decode(null, null, buffer) == Stored())
+    assert(decodingToResponse.decode(buffer) == Stored())
   }
 
   test("parseResponse EXISTS") {
@@ -38,7 +38,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("EXISTS")))
-    assert(decodingToResponse.decode(null, null, buffer) == Exists())
+    assert(decodingToResponse.decode(buffer) == Exists())
   }
 
   test("parseResponse ERROR") {
@@ -47,7 +47,7 @@ class DecodingToResponseTest extends FunSuite {
 
     val buffer = Tokens(Seq(Buf.Utf8("ERROR")))
     assert(decodingToResponse
-      .decode(null, null, buffer).asInstanceOf[protocol.Error]
+      .decode(buffer).asInstanceOf[protocol.Error]
       .cause
       .getClass == classOf[NonexistentCommand])
   }
@@ -63,7 +63,7 @@ class DecodingToResponseTest extends FunSuite {
     val plines = lines.map { line =>
       Tokens(line map { Buf.Utf8(_) } )
     }
-    val info = decodingToResponse.decode(null, null, StatLines(plines))
+    val info = decodingToResponse.decode(StatLines(plines))
     assert(info.getClass == classOf[InfoLines])
     val ilines = info.asInstanceOf[InfoLines].lines
     assert(ilines.size == lines.size)
@@ -84,7 +84,7 @@ class DecodingToResponseTest extends FunSuite {
 
     val errorMessage = "sad panda error"
     val buffer = Tokens(Seq("CLIENT_ERROR", errorMessage).map(Buf.Utf8(_)))
-    val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
+    val error = decodingToResponse.decode(buffer).asInstanceOf[protocol.Error]
     assert(error.cause.getClass == classOf[ClientError])
     assert(error.cause.getMessage() == errorMessage)
   }
@@ -95,7 +95,7 @@ class DecodingToResponseTest extends FunSuite {
 
     val errorMessage = "sad panda error"
     val buffer = Tokens(Seq("SERVER_ERROR", "sad", "panda", "error").map(Buf.Utf8(_)))
-    val error = decodingToResponse.decode(null, null, buffer).asInstanceOf[protocol.Error]
+    val error = decodingToResponse.decode(buffer).asInstanceOf[protocol.Error]
     assert(error.cause.getClass == classOf[ServerError])
     assert(error.cause.getMessage() == errorMessage)
   }

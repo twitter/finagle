@@ -28,7 +28,7 @@ private[finagle] class ServerTransport(
   private[this] val decode: Buf => Future[Command] = buf => {
     val decoding: Decoding = decoder.decode(buf)
     if (decoding != null) {
-      Future.value(decodingToCommand.decode(null, null, decoding))
+      Future.value(decodingToCommand.decode(decoding))
     } else {
       readLoop()
     }
@@ -39,8 +39,8 @@ private[finagle] class ServerTransport(
   def read(): Future[Command] = readLoop()
 
   def write(response: Response): Future[Unit] = {
-    val decoding: Decoding = responseToEncoding.encode(null, null, response)
-    val buf: Buf = encoder.encode(null, null, decoding)
+    val decoding: Decoding = responseToEncoding.encode(response)
+    val buf: Buf = encoder.encode(decoding)
     underlying.write(buf)
   }
 

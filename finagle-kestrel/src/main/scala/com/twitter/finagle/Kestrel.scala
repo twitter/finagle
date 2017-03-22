@@ -4,62 +4,20 @@ import _root_.java.net.SocketAddress
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher}
-import com.twitter.finagle.kestrel.Toggles
 import com.twitter.finagle.kestrel.protocol._
-import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty4ClientFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.Netty4ClientFramer
 import com.twitter.finagle.param.{Stats, ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
-import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing.{ClientRequestTracingFilter, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 
 object Kestrel {
-
-  object param {
-
-    /**
-     * Configure the [[Transporter]] implementation used by Kestrel.
-     */
-    case class KestrelImpl(
-      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf]){
-
-      def mk(): (KestrelImpl, Stack.Param[KestrelImpl]) =
-        (this, KestrelImpl.param)
-    }
-
-    object KestrelImpl {
-      /**
-       * A [[KestrelImpl]] that uses netty3 as the underlying I/O multiplexer.
-       */
-      val Netty3: KestrelImpl = KestrelImpl(
-        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, _, params))
-
-      /**
-       * A [[KestrelImpl]] that uses netty4 as the underlying I/O multiplexer.
-       *
-       * @note Important! This is experimental and not yet tested in production!
-       */
-      val Netty4: KestrelImpl = KestrelImpl(
-        params => Netty4Transporter.raw(Netty4ClientFramer, _, params))
-
-      private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.kestrel.UseNetty4"
-      private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
-
-      implicit val param: Stack.Param[KestrelImpl] = Stack.Param(
-         if (useNetty4) Netty4
-         else Netty3
-      )
-    }
-  }
 
   /**
    * A client for Kestrel, which operates over the memcached protocol.
@@ -88,7 +46,7 @@ object Kestrel {
     protected type Out = Buf
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
-      params[param.KestrelImpl].transporter(params)(addr)
+      Netty4Transporter.raw(Netty4ClientFramer, addr, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] = {
       new SerialClientDispatcher(

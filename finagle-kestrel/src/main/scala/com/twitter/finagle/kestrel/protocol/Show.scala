@@ -80,7 +80,7 @@ private[finagle] class CommandToEncoding extends AbstractCommandToEncoding[Comma
     }
   }
 
-  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = {
+  def encode(message: Command): Decoding = {
     message match {
       case Set(key, expiry, value) =>
         TokensWithData(Seq(SET, key, ZERO, Buf.Utf8(expiry.inSeconds.toString)), value)

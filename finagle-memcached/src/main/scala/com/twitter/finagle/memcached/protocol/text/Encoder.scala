@@ -1,10 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.Failure
-import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.{Buf, ByteWriter}
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
 object Encoder {
   private val SPACE         = " ".getBytes
@@ -12,7 +8,7 @@ object Encoder {
   private val END           = "END".getBytes
 }
 
-class Encoder extends OneToOneEncoder {
+class Encoder {
   import Encoder._
 
   private[this] def encodeTokensWithData(bw: ByteWriter, twd: TokensWithData): Unit = twd match {
@@ -44,7 +40,7 @@ class Encoder extends OneToOneEncoder {
       bw.writeBytes(DELIMITER)
   }
 
-  def encode(context: ChannelHandlerContext, channel: Channel, message: Object): Buf = message match {
+  def encode(message: Decoding): Buf = message match {
     case t@Tokens(tokens) =>
       // + 2 to estimated size for DELIMITER.
       val bw = ByteWriter.dynamic(10 * tokens.size + 2)

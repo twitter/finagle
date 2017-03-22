@@ -11,7 +11,6 @@ scala_library(
     '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/com/google/inject:guice',
     '3rdparty/jvm/com/twitter/bijection:core',
-    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/io/netty:netty4',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',

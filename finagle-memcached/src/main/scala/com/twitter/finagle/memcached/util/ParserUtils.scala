@@ -1,6 +1,5 @@
 package com.twitter.finagle.memcached.util
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
 import java.util.regex.Pattern
 import org.jboss.netty.buffer.ChannelBuffer
@@ -19,14 +18,6 @@ object ParserUtils {
 
   // Used by byteArrayStringToInt. The maximum length of a non-negative Int in chars
   private[this] val MaxLengthOfIntString = Int.MaxValue.toString.length
-
-  /**
-   * Returns true if every readable byte in the ChannelBuffer is a digit,
-   * false otherwise.
-   */
-  @deprecated("Use isDigits(Buf) instead", "2017-01-24")
-  def isDigits(cb: ChannelBuffer): Boolean =
-    isDigits(new ChannelBufferBuf(cb))
 
   private[this] val isDigitProcessor = new Buf.Processor {
     def apply(byte: Byte): Boolean = byte >= '0' && byte <= '9'

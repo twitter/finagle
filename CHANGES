@@ -44,6 +44,12 @@ Breaking API Changes
     load balancer implementations don't need the properties of a Set but instead
     need ordering guarantees and efficient random access. ``RB_ID=910372``
 
+  * finagle-kestrel: Remove `c.t.f.kestrel.param.KestrelImpl.` Kestrel clients and servers
+    now use Netty 4 and cannot be configured for Netty 3. ``RB_ID=911031``
+
+  * finagle-memcached: Remove `c.t.f.memcached.param.MemcachedImpl.` Memcached clients and servers
+    now use Netty 4 and cannot be configured for Netty 3. ``RB_ID=911031``
+
   * finagle-kestrel: Remove commands that are not supported by the client:
       - `com.twitter.finagle.kestrel.protocol.DumpConfig`
       - `com.twitter.finagle.kestrel.protocol.DumpStats`

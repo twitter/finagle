@@ -1,9 +1,7 @@
 package com.twitter.finagle.kestrel.unit
 
-import _root_.java.net.SocketAddress
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.Kestrel
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.protocol.{Command, _}
@@ -188,21 +186,5 @@ class ClientTest extends FunSuite with MockitoSugar {
     assert(wasInterrupted == false)
     rh.close()
     assert(wasInterrupted == true)
-  }
-
-  test("Client is configured to use Netty 3 by default") {
-    val client = Kestrel.client
-    val params = client.params
-
-    val transporter = params[Kestrel.param.KestrelImpl].transporter(params)(new SocketAddress { })
-
-    assert(transporter.toString == "Netty3Transporter")
-  }
-
-  test("Client configured to use Netty4 has Netty param") {
-    val client = Kestrel.client.configured(Kestrel.param.KestrelImpl.Netty4)
-    val params = client.params
-
-    assert(params[Kestrel.param.KestrelImpl] == Kestrel.param.KestrelImpl.Netty4)
   }
 }

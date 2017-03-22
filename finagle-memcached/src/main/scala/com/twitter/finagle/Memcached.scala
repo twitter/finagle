@@ -14,10 +14,9 @@ import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
 import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty3ServerFramer, Netty4ClientFramer, Netty4ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.memcached.Toggles
-import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
@@ -165,46 +164,6 @@ object Memcached extends finagle.Client[Command, Response]
       implicit val param = Stack.Param(KeyHasher(hashing.KeyHasher.KETAMA))
     }
 
-    /**
-     * Configure the [[Transporter]] and [[Listener]] implementation
-     * used by Memcached.
-     */
-    case class MemcachedImpl(
-        transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
-        listener: Stack.Params => Listener[Buf, Buf]) {
-      def mk(): (MemcachedImpl, Stack.Param[MemcachedImpl]) =
-        (this, MemcachedImpl.param)
-    }
-
-    object MemcachedImpl {
-      /**
-       * A [[MemcachedImpl]] that uses netty3 as the underlying I/O multiplexer.
-       */
-      val Netty3 = MemcachedImpl(
-        params => Netty3Transporter[Buf, Buf](Netty3ClientFramer, _, params),
-        params => Netty3Listener[Buf, Buf](Netty3ServerFramer, params))
-
-      /**
-       * A [[MemcachedImpl]] that uses netty4 as the underlying I/O multiplexer.
-       *
-       * @note Important! This is experimental and not yet tested in production!
-       */
-      val Netty4 = MemcachedImpl(
-        params => Netty4Transporter.raw(Netty4ClientFramer, _, params),
-        params => Netty4Listener[Buf, Buf](Netty4ServerFramer, params))
-
-      private[this] val UseNetty4ToggleId: String =
-        "com.twitter.finagle.memcached.UseNetty4"
-
-      private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
-
-      implicit val param: Stack.Param[MemcachedImpl] = Stack.Param(
-        if (useNetty4) Netty4
-        else Netty3
-      )
-    }
-
     case class NumReps(reps: Int) {
       def mk(): (NumReps, Stack.Param[NumReps]) =
         (this, NumReps.param)
@@ -302,7 +261,7 @@ object Memcached extends finagle.Client[Command, Response]
     protected type Out = Buf
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
-      params[param.MemcachedImpl].transporter(params)(addr)
+      Netty4Transporter.raw(Netty4ClientFramer, addr, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
@@ -447,7 +406,7 @@ object Memcached extends finagle.Client[Command, Response]
     protected type Out = Buf
 
     protected def newListener(): Listener[In, Out] =
-      params[param.MemcachedImpl].listener(params)
+      Netty4Listener[Buf, Buf](Netty4ServerFramer, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],

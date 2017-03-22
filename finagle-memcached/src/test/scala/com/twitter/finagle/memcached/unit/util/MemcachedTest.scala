@@ -83,12 +83,4 @@ class MemcachedTest extends FunSuite
     }
     assert(isPipelining)
   }
-
-  test("Memcached is configured to use Netty3 by default") {
-    val client = Memcached.client
-    val params = client.params
-    val addr = new SocketAddress { }
-
-    assert(params[Memcached.param.MemcachedImpl].transporter(params)(addr).toString == "Netty3Transporter")
-  }
 }

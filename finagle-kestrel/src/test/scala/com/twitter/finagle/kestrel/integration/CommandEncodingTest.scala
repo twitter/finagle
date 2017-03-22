@@ -21,7 +21,7 @@ class CommandEncodingTest extends FunSuite {
     val encoder = new CommandToEncoding
 
     val command = mkCommand(Buf.Utf8(name), timeout)
-    val enc = encoder.encode(null, null, command).asInstanceOf[Tokens]
+    val enc = encoder.encode(command).asInstanceOf[Tokens]
 
     val decoded = decoder.parseNonStorageCommand(enc.tokens).asInstanceOf[GetCommand]
 
@@ -40,7 +40,7 @@ class CommandEncodingTest extends FunSuite {
     val encoder = new CommandToEncoding
 
     val command = mkCommand(Buf.Utf8(name))
-    val enc = encoder.encode(null, null, command).asInstanceOf[Tokens]
+    val enc = encoder.encode(command).asInstanceOf[Tokens]
 
     val decoded = decoder.parseNonStorageCommand(enc.tokens)
 
@@ -57,8 +57,6 @@ class CommandEncodingTest extends FunSuite {
     val data = "hi"
     val time = Time.now
     val msg = encoder.encode(
-      null,
-      null,
       Set(Buf.Utf8(qName),
         time,
         Buf.Utf8(data))

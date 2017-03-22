@@ -10,11 +10,8 @@ import com.twitter.io.Buf
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Time}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
 
   var server: InProcessMemcached = null

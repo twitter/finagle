@@ -68,24 +68,6 @@ class ClientTest extends FunSuite {
       }
       assert(rep == Some("bar"))
     }
-
-    test("Stack cxtlient configured for netty3/netty4") {
-      val client = Kestrel.client
-
-      val clients = Seq(
-        client.configured(Kestrel.param.KestrelImpl.Netty3),
-        client.configured(Kestrel.param.KestrelImpl.Netty4)
-      )
-
-      for (client <- clients) {
-        val clnt = Client(client.newClient("localhost:22133", "client"))
-
-        Await.result(clnt.delete("foo"), 2.seconds)
-        assert(Await.result(clnt.get("foo"), 2.seconds) == None)
-        Await.result(clnt.set("foo", Buf.Utf8("bar")), 2.seconds)
-        assert(Await.result(clnt.get("foo"), 2.seconds).get == Buf.Utf8("bar"))
-      }
-    }
   }
 }
 

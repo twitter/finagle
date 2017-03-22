@@ -26,44 +26,6 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
   val TimeOut = 15.seconds
 
-  test("Clients and servers on different netty versions") {
-    val concurrencyLevel = 16
-    val slots = 500000
-    val slotsPerLru = slots / concurrencyLevel
-    val maps = (0 until concurrencyLevel).map { i =>
-      new SynchronizedLruMap[Buf, Entry](slotsPerLru)
-    }
-
-    val service = {
-      val interpreter = new Interpreter(new AtomicMap(maps))
-      new InterpreterService(interpreter)
-    }
-
-    val server = Memcached.server
-    val client = Memcached.client
-
-    val servers = Seq(
-      server.configured(Memcached.param.MemcachedImpl.Netty3),
-      server.configured(Memcached.param.MemcachedImpl.Netty4)
-    )
-
-    val clients = Seq(
-      client.configured(Memcached.param.MemcachedImpl.Netty3),
-      client.configured(Memcached.param.MemcachedImpl.Netty4)
-    )
-
-    for (server <- servers; client <- clients) {
-      val srv = server.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
-      val clnt = client.newRichClient(
-        Name.bound(Address(srv.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-      Await.result(clnt.delete("foo"), 5.seconds)
-      assert(Await.result(clnt.get("foo"), 5.seconds) == None)
-      Await.result(clnt.set("foo", Buf.Utf8("bar")), 5.seconds)
-      assert(Await.result(clnt.get("foo"), 5.seconds).get == Buf.Utf8("bar"), 5.seconds)
-    }
-  }
-
   private val clientName = "test_client"
   before {
     val serversOpt = for (_ <- 1 to NumServers) yield TestMemcachedServer.start()
