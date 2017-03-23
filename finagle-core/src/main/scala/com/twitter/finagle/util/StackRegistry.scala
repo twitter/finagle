@@ -13,9 +13,9 @@ object StackRegistry {
    */
   case class Entry(addr: String, stack: Stack[_], params: Stack.Params) {
 
-    val modules: Seq[Module] = stack.tails.map { node =>
+    def modules: Seq[Module] = stack.tails.map { node =>
       val raw = node.head.parameters
-      val reflected = raw.foldLeft(Seq.empty[(String, String)]) {
+      val reflected = raw.foldLeft(Seq.empty[(String, () => String)]) {
         case (seq, s) if s.show(params(s)).nonEmpty =>
           seq ++ s.show(params(s))
 
@@ -26,12 +26,12 @@ object StackRegistry {
             // TODO: many case classes have a $outer field because they close over an outside scope.
             // this is not very useful, and it might make sense to filter them out in the future.
             val fields = p.getClass.getDeclaredFields.map(_.getName).toSeq
-            val values = p.productIterator.map(_.toString).toSeq
-            seq ++ fields.zipAll(values, "<unknown>", "<unknown>")
+            val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
+            seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
           case _ => seq
         }
       }
-      Module(node.head.role.name, node.head.description, reflected)
+      Module(node.head.role.name, node.head.description, reflected.map { case (n, v) => (n, v()) } )
     }.toSeq
 
     val name: String = params[Label].label

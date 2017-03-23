@@ -53,8 +53,8 @@ object TimeoutFilter {
     implicit val param: Stack.Param[TimeoutFilter.Param] =
       new Stack.Param[Param] {
         val default = Param(Default)
-        override def show(p: Param): Seq[(String, String)] =
-          Seq(("timeout", p.timeout.toString))
+        override def show(p: Param): Seq[(String, () => String)] =
+          Seq(("timeout", () => p.timeout.toString))
       }
   }
 
