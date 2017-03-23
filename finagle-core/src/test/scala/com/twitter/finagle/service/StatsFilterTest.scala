@@ -16,26 +16,14 @@ import scala.util.control.ControlThrowable
 class StatsFilterTest extends FunSuite {
   val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
 
-  sealed trait ServiceBehaviour
-  object Default extends ServiceBehaviour
-  object Fail extends ServiceBehaviour
-
-  object Serious extends ControlThrowable
-
   def getService(
-    exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions,
-    behaviour: ServiceBehaviour = Default
+    exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions
   ): (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
     val receiver = new InMemoryStatsReceiver()
     val statsFilter = new StatsFilter[String, String](receiver, exceptionStatsHandler)
     val promise = new Promise[String]
     val service = new Service[String, String] {
-      def apply(request: String): Future[String] = behaviour match {
-        case Fail =>
-          throw Serious
-        case _ =>
-          promise
-      }
+      def apply(request: String): Future[String] = promise
     }
 
     (promise, receiver, statsFilter andThen service)
@@ -157,13 +145,17 @@ class StatsFilterTest extends FunSuite {
   }
 
   test("don't report pending requests after uncaught exceptions") {
-    val (_, receiver, statsService) = getService(behaviour = Fail)
-    assert(receiver.gauges(Seq("pending"))() == 0.0)
-
-    intercept[ControlThrowable] {
-      statsService("foo")
+    val receiver = new InMemoryStatsReceiver()
+    val service = new Service[String, String] {
+      def apply(request: String): Future[String] = throw new Exception("broken")
+    }
+    val statsFilter = new StatsFilter[String, String](receiver, BasicExceptions)
+    val chain = new Service[String, String] {
+      def apply(request: String): Future[String] = statsFilter.apply(request, service)
     }
 
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
+    chain("foo")
     assert(receiver.gauges(Seq("pending"))() == 0.0)
   }
 
