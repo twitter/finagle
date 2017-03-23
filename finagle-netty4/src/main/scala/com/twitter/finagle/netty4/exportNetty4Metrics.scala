@@ -31,43 +31,43 @@ private[netty4] object exportNetty4Metrics {
   private[this] val applyOnce: () => Unit = Once {
 
     if (poolReceiveBuffers()) {
-      val allocator = PooledByteBufAllocator.DEFAULT
+      val metric = PooledByteBufAllocator.DEFAULT.metric()
       val poolingStats = stats.scope("pooling")
 
       // Allocations.
 
       gauges.add(poolingStats.addGauge("allocations", "huge")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumHugeAllocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumHugeAllocations)
       ))
 
       gauges.add(poolingStats.addGauge("allocations", "normal")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumNormalAllocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumNormalAllocations)
       ))
 
       gauges.add(poolingStats.addGauge("allocations", "small")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumSmallAllocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumSmallAllocations)
       ))
 
       gauges.add(poolingStats.addGauge("allocations", "tiny")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumTinyAllocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumTinyAllocations)
       ))
 
       // Deallocations.
 
       gauges.add(poolingStats.addGauge("deallocations", "huge")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumHugeDeallocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumHugeDeallocations)
       ))
 
       gauges.add(poolingStats.addGauge("deallocations", "normal")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumNormalDellocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumNormalDellocations)
       ))
 
       gauges.add(poolingStats.addGauge("deallocations", "small")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumSmallDeallocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumSmallDeallocations)
       ))
 
       gauges.add(poolingStats.addGauge("deallocations", "tiny")(
-        allocator.directArenas().asScala.foldLeft(0.0f)(sumTinyDeallocations)
+        metric.directArenas().asScala.foldLeft(0.0f)(sumTinyDeallocations)
       ))
     }
   }
