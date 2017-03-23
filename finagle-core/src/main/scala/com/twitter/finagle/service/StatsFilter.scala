@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.LongAdder
+import java.util.concurrent.TimeUnit
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
