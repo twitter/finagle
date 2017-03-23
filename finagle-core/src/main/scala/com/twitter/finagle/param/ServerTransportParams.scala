@@ -18,6 +18,20 @@ import javax.net.ssl.SSLContext
 class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
   extends TransportParams(self) {
 
+  /*
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(config: SslServerConfiguration): A =
+    self.configured(Transport.ServerSsl(Some(config)))
+
+  /*
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): A =
+    self
+      .configured(Transport.ServerSsl(Some(config)))
+      .configured(SslServerEngineFactory.Param(engineFactory))
+
   /**
    * Enables the TLS/SSL support (connection encrypting) on this server. Only `certificatePath` and
    * `keyPath` are required to build up a TLS/SSL transport.
@@ -59,9 +73,7 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
       keyCredentials = keyCredentials,
       cipherSuites = cipherSuites,
       applicationProtocols = applicationProtocols)
-
-    self
-      .configured(Transport.ServerSsl(Some(configuration)))
+    tls(configuration)
   }
 
   /**
@@ -73,8 +85,7 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * @param context the SSL context to use
    */
   def tls(context: SSLContext): A =
-    self
-      .configured(SslServerEngineFactory.Param(new SslContextServerEngineFactory(context)))
-      .configured(Transport.ServerSsl(Some(SslServerConfiguration())))
+    tls(SslServerConfiguration(),
+      new SslContextServerEngineFactory(context))
 
 }

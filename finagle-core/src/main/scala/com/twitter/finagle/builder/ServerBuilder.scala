@@ -442,6 +442,37 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     _configured(Transport.Verbose(v))
 
   /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration): This =
+    configured(Transport.ServerSsl(Some(config)))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, engineFactory)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
    * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
    * For example:
    * {{{

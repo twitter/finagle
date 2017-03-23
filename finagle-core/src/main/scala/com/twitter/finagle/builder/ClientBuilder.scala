@@ -911,7 +911,36 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(Retries.Budget(budget, backoffSchedule))
 
   /**
-   * Encrypt the connection with SSL.  Hostname verification will be
+   * Encrypt the connection with SSL.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(config)
+   * }}}
+   */
+  def tls(config: SslClientConfiguration): This =
+    configured(Transport.ClientSsl(Some(config)))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(config, engineFactory)
+   * }}}
+   */
+  def tls(config: SslClientConfiguration, engineFactory: SslClientEngineFactory): This =
+    configured(Transport.ClientSsl(Some(config)))
+    .configured(SslClientEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.  Hostname verification will be
    * provided against the given hostname.
    *
    * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
@@ -923,12 +952,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(hostname: String): This =
-    configured(Transport.ClientSsl(
-      Some(SslClientConfiguration(hostname = Some(hostname)))))
+    tls(SslClientConfiguration(hostname = Some(hostname)))
 
   /**
-   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * No SSL Hostname Validation is performed
+   * Encrypt the connection with SSL/TLS.  The Engine to use can be passed into the client.
+   * No SSL/TLS Hostname Validation is performed
    *
    * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
    * For example:
@@ -939,19 +967,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tls(sslContext: SSLContext): This =
-    configured(SslClientEngineFactory.Param(
-      new SslContextClientEngineFactory(sslContext)))
-    .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
+    tls(SslClientConfiguration(), new SslContextClientEngineFactory(sslContext))
 
   /**
-   * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
-   * SSL Hostname Validation is performed, on the passed in hostname
+   * Encrypt the connection with SSL/TLS.  The Engine to use can be passed into the client.
+   * SSL/TLS Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
-    configured(SslClientEngineFactory.Param(
-      new SslContextClientEngineFactory(sslContext)))
-    .configured(Transport.ClientSsl(
-      Some(SslClientConfiguration(hostname = hostname))))
+    tls(SslClientConfiguration(hostname = hostname),
+      new SslContextClientEngineFactory(sslContext))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
@@ -965,9 +989,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def tlsWithoutValidation(): This =
-    configured(Transport.ClientSsl(
-      Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
-
+    tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))
 
   /**
    * Make connections via the given HTTP proxy.

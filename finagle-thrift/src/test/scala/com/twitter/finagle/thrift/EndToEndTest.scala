@@ -12,7 +12,6 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, Nu
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
-import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.TempFile
 import com.twitter.test._
@@ -300,24 +299,20 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
       // deleteOnExit is handled by TempFile
 
-      Thrift.server
+      Thrift.server.withTransport.tls(SslServerConfiguration(
+        keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)))
         .configured(Stats(sr))
-        .configured(Transport.ServerSsl(
-          Some(SslServerConfiguration(
-            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)))))
         .serve(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
           ifaceToService(processor, Protocols.binaryFactory()))
     }
 
     def mkThriftTlsClient(server: ListeningServer) =
-      Thrift.client
-        .configured(Transport.ClientSsl(
-          Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
+      Thrift.client.withTransport.tls(SslClientConfiguration(
+        trustCredentials = TrustCredentials.Insecure))
         .newIface[B.ServiceIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client")
-
 
     val sr = new InMemoryStatsReceiver()
 

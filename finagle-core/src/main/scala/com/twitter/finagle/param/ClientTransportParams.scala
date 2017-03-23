@@ -29,7 +29,21 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     self.configured(Transporter.ConnectTimeout(timeout))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) on this client.
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(config: SslClientConfiguration): A =
+    self.configured(Transport.ClientSsl(Some(config)))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(config: SslClientConfiguration, engineFactory: SslClientEngineFactory): A =
+    self
+      .configured(Transport.ClientSsl(Some(config)))
+      .configured(SslClientEngineFactory.Param(engineFactory))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
    *
    * @note Given that this uses default [[SSLContext]], all configuration params (trust/key stores)
    *       should be passed as Java system properties.
@@ -39,7 +53,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
       .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) on this client.
+   * Enables SSL/TLS support (connection encrypting) on this client.
    * Hostname verification will be provided against the given `hostname`.
    */
   def tls(hostname: String): A =
@@ -48,11 +62,11 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
         Some(SslClientConfiguration(hostname = Some(hostname)))))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) with no hostname validation
-   * on this client. The TLS/SSL sessions are configured using the given `context`.
+   * Enables SSL/TLS support (connection encrypting) with no hostname validation
+   * on this client. The SSL/TLS are configured using the given `context`.
    *
    * @note It's recommended to not use [[SSLContext]] directly, but rely on Finagle to pick
-   *       the most efficient TLS/SSL implementation available on your platform.
+   *       the most efficient SSL/TLS available on your platform.
    */
   def tls(context: SSLContext): A =
     self
