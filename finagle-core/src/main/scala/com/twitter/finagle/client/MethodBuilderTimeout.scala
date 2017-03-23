@@ -30,11 +30,8 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
 
   private[client] def totalFilter: Filter.TypeAgnostic = {
     val config = mb.config.timeout
-    if (!config.total.isFinite) {
-      if (config.stackHadTotalTimeout)
-        DynamicTimeout.totalFilter(mb.params) // use their defaults
-      else
-        Filter.TypeAgnostic.Identity
+    if (!config.total.isFinite && !config.stackHadTotalTimeout) {
+      Filter.TypeAgnostic.Identity
     } else {
       new Filter.TypeAgnostic {
         def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = {
@@ -57,16 +54,12 @@ private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (
    */
   private[client] def perRequestFilter: Filter.TypeAgnostic = {
     val config = mb.config.timeout
-    if (!config.perRequest.isFinite) {
-      Filter.TypeAgnostic.Identity
-    } else {
-      new Filter.TypeAgnostic {
-        def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = {
-          new SimpleFilter[Req1, Rep1] {
-            def apply(req: Req1, service: Service[Req1, Rep1]): Future[Rep1] = {
-              DynamicTimeout.letPerRequestTimeout(config.perRequest) {
-                service(req)
-              }
+    new Filter.TypeAgnostic {
+      def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = {
+        new SimpleFilter[Req1, Rep1] {
+          def apply(req: Req1, service: Service[Req1, Rep1]): Future[Rep1] = {
+            DynamicTimeout.letPerRequestTimeout(config.perRequest) {
+              service(req)
             }
           }
         }

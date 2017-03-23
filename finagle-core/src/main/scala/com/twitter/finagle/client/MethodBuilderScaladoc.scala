@@ -8,7 +8,7 @@ import com.twitter.util.Duration
  *
  * = Timeouts =
  *
- * Defaults to having no timeouts set.
+ * Defaults to using the StackClient's configuration.
  *
  * An example of setting a per-request timeout of 50 milliseconds and a total
  * timeout of 100 milliseconds:
@@ -69,7 +69,8 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * If the request does not complete in this time, the response
    * will be satisfied with a [[com.twitter.finagle.GlobalRequestTimeoutException]].
    *
-   * The default is no timeout.
+   * Defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.TotalTimeout(timeout)]].
    *
    * @example
    * For example, a total timeout of 200 milliseconds:
@@ -102,7 +103,10 @@ private[finagle] trait MethodBuilderScaladoc[T] {
    * If a request does not complete within this time, the response
    * will be satisfied with a [[com.twitter.finagle.IndividualRequestTimeoutException]].
    *
-   * The default is no timeout.
+   * Defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.Param(timeout)]],
+   * which is typically set via
+   * [[com.twitter.finagle.param.CommonParams.withRequestTimeout]].
    *
    * @example
    * For example, a per-request timeout of 50 milliseconds:

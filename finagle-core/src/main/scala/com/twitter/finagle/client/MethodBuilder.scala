@@ -79,7 +79,11 @@ private[finagle] object MethodBuilder {
     ): Config = {
       Config(
         MethodBuilderRetry.Config(params[param.ResponseClassifier].responseClassifier),
-        MethodBuilderTimeout.Config(originalStack.contains(TimeoutFilter.totalTimeoutRole)))
+        MethodBuilderTimeout.Config(
+          stackHadTotalTimeout = originalStack.contains(TimeoutFilter.totalTimeoutRole),
+          total = params[TimeoutFilter.TotalTimeout].timeout,
+          perRequest = params[TimeoutFilter.Param].timeout)
+      )
     }
   }
 
@@ -146,7 +150,13 @@ private[finagle] final class MethodBuilder[Req, Rep](
   /**
    * Configure the timeouts.
    *
-   * Defaults to having no timeouts set.
+   * The per-request timeout defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.Param(timeout)]],
+   * which is typically set via
+   * [[com.twitter.finagle.param.CommonParams.withRequestTimeout]].
+   *
+   * The total timeout defaults to using the client's configuration for
+   * [[com.twitter.finagle.service.TimeoutFilter.TotalTimeout(timeout)]].
    *
    * @example A total timeout of 200 milliseconds:
    * {{{

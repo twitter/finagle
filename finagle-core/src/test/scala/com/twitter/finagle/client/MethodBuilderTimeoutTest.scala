@@ -6,12 +6,9 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.{GlobalRequestTimeoutException, IndividualRequestTimeoutException, RequestTimeoutException, ServiceFactory, Stack, param}
 import com.twitter.util.{Await, Duration, Future, MockTimer, Time, TimeControl}
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 
-@RunWith(classOf[JUnitRunner])
 class MethodBuilderTimeoutTest
   extends FunSuite
   with Matchers
@@ -63,7 +60,8 @@ class MethodBuilderTimeoutTest
 
   private def testTotalTimeout(stack: Stack[ServiceFactory[Int, Int]]): Unit = {
     // this is the default if a method doesn't override
-    val params = totalTimeoutParams(4.seconds)
+    val stackClientTimeout = 4.seconds
+    val params = totalTimeoutParams(stackClientTimeout)
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("dest_paradise", stackClient)
 
@@ -88,6 +86,20 @@ class MethodBuilderTimeoutTest
     Time.withCurrentTimeFrozen { tc =>
       assertBeforeAndAfterTimeout(sixSecs(1), 6.seconds, tc, totalTimeoutExn)
     }
+
+    // verify that the timeout can be disabled
+    // and the total timeout set on the StackClient has been removed
+    val noTimeout = methodBuilder
+      .withTimeout.total(Duration.Top)
+      .newService("no_timeout")
+    Time.withCurrentTimeFrozen { tc =>
+      val result = noTimeout(1)
+
+      // advancing past the default timeout should not trigger a timeout
+      tc.advance(stackClientTimeout + 1.second)
+      timer.tick()
+      assert(!result.isDefined)
+    }
   }
 
   test("total with module in stack") {
@@ -100,7 +112,8 @@ class MethodBuilderTimeoutTest
 
   test("perRequest") {
     // this is the default if a method doesn't override
-    val params = perReqTimeoutParams(4.seconds)
+    val stackClientTimeout = 4.seconds
+    val params = perReqTimeoutParams(stackClientTimeout)
 
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("dest_paradise", stackClient)
@@ -123,6 +136,20 @@ class MethodBuilderTimeoutTest
     // using a longer timeout
     Time.withCurrentTimeFrozen { tc =>
       assertBeforeAndAfterTimeout(sixSecs(1), 6.seconds, tc, perReqTimeoutExn)
+    }
+
+    // verify that the timeout can be disabled
+    // and the per-request timeout set on the StackClient has been removed
+    val noTimeout = methodBuilder
+      .withTimeout.perRequest(Duration.Top)
+      .newService("no_timeout")
+    Time.withCurrentTimeFrozen { tc =>
+      val result = noTimeout(1)
+
+      // advancing past the default timeout should not trigger a timeout
+      tc.advance(stackClientTimeout + 1.second)
+      timer.tick()
+      assert(!result.isDefined)
     }
   }
 
