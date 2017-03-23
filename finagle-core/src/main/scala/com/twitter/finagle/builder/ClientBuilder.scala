@@ -12,8 +12,7 @@ import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.TrustCredentials
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
@@ -117,14 +116,6 @@ object ClientConfig {
   }
   private[builder] object DestName {
     implicit val param = Stack.Param(DestName(Name.empty))
-  }
-
-  private[builder] case class GlobalTimeout(timeout: Duration) {
-    def mk(): (GlobalTimeout, Stack.Param[GlobalTimeout]) =
-      (this, GlobalTimeout.param)
-  }
-  private[builder] object GlobalTimeout {
-    implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
   private[builder] case class Daemonize(onOrOff: Boolean) {
@@ -651,7 +642,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * @see [[requestTimeout(Duration)]]
    */
   def timeout(duration: Duration): This =
-    configured(GlobalTimeout(duration))
+    configured(TimeoutFilter.TotalTimeout(duration))
 
   /**
    * Apply TCP keepAlive (`SO_KEEPALIVE` socket option).
@@ -1276,26 +1267,23 @@ private[finagle] object ClientBuilderClient {
   }
 
   private[builder] class GlobalTimeoutModule[Req, Rep]
-    extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
+    extends Stack.Module2[TimeoutFilter.TotalTimeout, Timer, ServiceFactory[Req, Rep]] {
     /** See [[TimeoutFilter.totalTimeoutRole]]. */
     val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
     val description: String = "Application-configured global timeout"
 
     def make(
-      globalTimeoutP: GlobalTimeout,
-      timerP: Timer,
+      totalTimeout: TimeoutFilter.TotalTimeout,
+      timerParam: Timer,
       next: ServiceFactory[Req, Rep]
-    ): ServiceFactory[Req, Rep] = {
-      val timeout = globalTimeoutP.timeout
-      if (!timeout.isFinite || timeout <= Duration.Zero) next
-      else {
-        val filter = new TimeoutFilter[Req, Rep](
-          () => timeout,
-          timeout => new GlobalRequestTimeoutException(timeout),
-          timerP.timer)
-        filter.andThen(next)
-      }
-    }
+    ): ServiceFactory[Req, Rep] =
+      TimeoutFilter.make(
+        totalTimeout.tunableTimeout,
+        TimeoutFilter.TotalTimeout.Default,
+        Duration.Zero,
+        timeout => new GlobalRequestTimeoutException(timeout),
+        timerParam.timer,
+        next)
   }
 
   private[builder] class ExceptionSourceFilterModule[Req, Rep]

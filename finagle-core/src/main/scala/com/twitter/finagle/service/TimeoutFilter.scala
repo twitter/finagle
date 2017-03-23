@@ -88,6 +88,41 @@ object TimeoutFilter {
   }
 
   /**
+   * Used for adding, or not, a `TimeoutFilter` for `Stack.Module.make`.
+   */
+  private[finagle] def make[Req, Rep](
+    tunable: Tunable[Duration],
+    defaultTimeout: Duration,
+    compensation: Duration,
+    exceptionFn: Duration => RequestTimeoutException,
+    timer: Timer,
+    next: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = {
+    def hasNoTimeout(duration: Duration, compensation: Duration): Boolean = {
+      val total = duration + compensation
+      !total.isFinite || total <= Duration.Zero
+    }
+
+    tunable match {
+      case Tunable.Const(duration) if hasNoTimeout(duration, compensation) =>
+        next
+      case _ =>
+        val timeoutFn: () => Duration = () => {
+          val tunableTimeout = tunable() match {
+            case Some(duration) => duration
+            case None => defaultTimeout
+          }
+          compensation + tunableTimeout
+        }
+        new TimeoutFilter[Req, Rep](
+          timeoutFn,
+          exceptionFn,
+          timer
+        ).andThen(next)
+    }
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.TimeoutFilter]]
    * for use in clients.
    */
@@ -102,28 +137,18 @@ object TimeoutFilter {
         "Apply a timeout-derived deadline to requests; adjust existing deadlines."
 
       def make(
-        _param: Param,
-        _timer: param.Timer,
-        _compensation: LatencyCompensation.Compensation,
+        param: Param,
+        timerParam: com.twitter.finagle.param.Timer,
+        compensation: LatencyCompensation.Compensation,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = _param.tunableTimeout match {
-        case Tunable.Const(duration)
-          if !(duration + _compensation.howlong).isFinite ||
-             (duration + _compensation.howlong) <= Duration.Zero =>
-          next
-
-        case tunable =>
-          val timeoutFn: () => Duration = () => _compensation.howlong + (tunable() match {
-            case Some(duration) => duration
-            case None => TimeoutFilter.Param.Default
-          })
-
-          new TimeoutFilter[Req, Rep](
-            timeoutFn,
-            timeout => new IndividualRequestTimeoutException(timeout),
-            _timer.timer
-          ).andThen(next)
-      }
+      ): ServiceFactory[Req, Rep] =
+        TimeoutFilter.make(
+          param.tunableTimeout,
+          TimeoutFilter.Param.Default,
+          compensation.howlong,
+          timeout => new IndividualRequestTimeoutException(timeout),
+          timerParam.timer,
+          next)
     }
 
   /**
@@ -139,24 +164,17 @@ object TimeoutFilter {
       val description: String =
         "Apply a timeout-derived deadline to requests; adjust existing deadlines."
       def make(
-        _param: Param,
-        _timer: param.Timer,
+        param: Param,
+        timerParam: com.twitter.finagle.param.Timer,
         next: ServiceFactory[Req, Rep]
-      ): ServiceFactory[Req, Rep] = _param.tunableTimeout match {
-        case Tunable.Const(duration) if !duration.isFinite || duration <= Duration.Zero =>
-          next
-        case tunable =>
-          val timeoutFn: () => Duration = () => tunable() match {
-            case Some(duration) => duration
-            case None => TimeoutFilter.Param.Default
-          }
-
-          new TimeoutFilter[Req, Rep](
-            timeoutFn,
-            timeout => new IndividualRequestTimeoutException(timeout),
-            _timer.timer
-          ).andThen(next)
-      }
+      ): ServiceFactory[Req, Rep] =
+        TimeoutFilter.make(
+          param.tunableTimeout,
+          TimeoutFilter.Param.Default,
+          Duration.Zero,
+          timeout => new IndividualRequestTimeoutException(timeout),
+          timerParam.timer,
+          next)
     }
 
   def typeAgnostic(
