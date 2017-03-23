@@ -1,11 +1,12 @@
 package com.twitter.finagle.service
 
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.LongAdder
+
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Future, Stopwatch, Throw, Try}
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.LongAdder
+import com.twitter.util._
 
 object StatsFilter {
   val role: Stack.Role = Stack.Role("RequestStats")
@@ -158,27 +159,34 @@ class StatsFilter[Req, Rep](
     val elapsed = Stopwatch.start()
 
     outstandingRequestCount.increment()
-    service(request).respond { response =>
-      outstandingRequestCount.decrement()
-      if (!isBlackholeResponse(response)) {
-        dispatchCount.incr()
-        responseClassifier.applyOrElse(
-          ReqRep(request, response),
-          ResponseClassifier.Default
-        ) match {
-          case ResponseClass.Failed(_) =>
-            latencyStat.add(elapsed().inUnit(timeUnit))
-            response match {
-              case Throw(e) =>
-                exceptionStatsHandler.record(statsReceiver, e)
-              case _ =>
-                exceptionStatsHandler.record(statsReceiver, SyntheticException)
-            }
-          case ResponseClass.Successful(_) =>
-            successCount.incr()
-            latencyStat.add(elapsed().inUnit(timeUnit))
+
+    try {
+      service(request).respond { response =>
+        outstandingRequestCount.decrement()
+        if (!isBlackholeResponse(response)) {
+          dispatchCount.incr()
+          responseClassifier.applyOrElse(
+            ReqRep(request, response),
+            ResponseClassifier.Default
+          ) match {
+            case ResponseClass.Failed(_) =>
+              latencyStat.add(elapsed().inUnit(timeUnit))
+              response match {
+                case Throw(e) =>
+                  exceptionStatsHandler.record(statsReceiver, e)
+                case _ =>
+                  exceptionStatsHandler.record(statsReceiver, SyntheticException)
+              }
+            case ResponseClass.Successful(_) =>
+              successCount.incr()
+              latencyStat.add(elapsed().inUnit(timeUnit))
+          }
         }
       }
+    } catch {
+      case e: Throwable =>
+        outstandingRequestCount.decrement()
+        throw e
     }
   }
 }

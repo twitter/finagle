@@ -5,22 +5,37 @@ import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionSt
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+
+import scala.util.control.ControlThrowable
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
   val BasicExceptions = new CategorizingExceptionStatsHandler(_ => None, _ => None, rollup = false)
 
+  sealed trait ServiceBehaviour
+  object Default extends ServiceBehaviour
+  object Fail extends ServiceBehaviour
+
+  object Serious extends ControlThrowable
+
   def getService(
-    exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions
+    exceptionStatsHandler: ExceptionStatsHandler = BasicExceptions,
+    behaviour: ServiceBehaviour = Default
   ): (Promise[String], InMemoryStatsReceiver, Service[String, String]) = {
     val receiver = new InMemoryStatsReceiver()
     val statsFilter = new StatsFilter[String, String](receiver, exceptionStatsHandler)
     val promise = new Promise[String]
     val service = new Service[String, String] {
-      def apply(request: String) = promise
+      def apply(request: String): Future[String] = behaviour match {
+        case Fail =>
+          throw Serious
+        case _ =>
+          promise
+      }
     }
 
     (promise, receiver, statsFilter andThen service)
@@ -141,6 +156,17 @@ class StatsFilterTest extends FunSuite {
     assert(receiver.gauges(Seq("pending"))() == 0.0)
   }
 
+  test("don't report pending requests after uncaught exceptions") {
+    val (_, receiver, statsService) = getService(behaviour = Fail)
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
+
+    intercept[ControlThrowable] {
+      statsService("foo")
+    }
+
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
+  }
+
   test("should count failure requests only after they are finished") {
     val (promise, receiver, statsService) = getService()
 
@@ -230,5 +256,4 @@ class StatsFilterTest extends FunSuite {
     assert(2 == sr.counter("success")())
     assert(1 == sr.counter("failures")())
   }
-
 }
