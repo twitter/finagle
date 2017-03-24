@@ -1,13 +1,11 @@
 package com.twitter.finagle.service
 
-import java.util.concurrent.atomic.LongAdder
-import java.util.concurrent.TimeUnit
-
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
 import com.twitter.util._
-
+import java.util.concurrent.atomic.LongAdder
+import java.util.concurrent.TimeUnit
 import scala.util.control.NonFatal
 
 object StatsFilter {
