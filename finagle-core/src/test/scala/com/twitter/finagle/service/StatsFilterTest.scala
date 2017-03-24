@@ -5,12 +5,9 @@ import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionSt
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
-
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-import scala.util.control.ControlThrowable
 
 @RunWith(classOf[JUnitRunner])
 class StatsFilterTest extends FunSuite {
@@ -147,16 +144,35 @@ class StatsFilterTest extends FunSuite {
   test("don't report pending requests after uncaught exceptions") {
     val receiver = new InMemoryStatsReceiver()
     val service = new Service[String, String] {
-      def apply(request: String): Future[String] = throw new Exception("broken")
+      def apply(request: String): Future[String] = throw new IllegalStateException("broken")
     }
+
     val statsFilter = new StatsFilter[String, String](receiver, BasicExceptions)
+
+    // verifies that before the Exception is thrown, the pending metric in the StatsFilter is incremented to 1
+    val verifyingFilter = new SimpleFilter[String, String] {
+      private val incremented = receiver.counter("incremented")
+      override def apply(request: String, service: Service[String, String]): Future[String] = {
+        val pendingRequests = receiver.gauges(Seq("pending"))().toInt
+        incremented.incr(pendingRequests)
+        service(request)
+      }
+    }
+
+    // not chaining using andThen here because that wraps any raw Exception inside a Future.exception
     val chain = new Service[String, String] {
-      def apply(request: String): Future[String] = statsFilter.apply(request, service)
+      def apply(request: String): Future[String] = statsFilter.apply(
+        request, (request: String) => verifyingFilter.apply(request, service)
+      )
     }
 
     assert(receiver.gauges(Seq("pending"))() == 0.0)
-    chain("foo")
+    intercept[IllegalStateException] {
+      Await.result(chain("foo"))
+    }
     assert(receiver.gauges(Seq("pending"))() == 0.0)
+
+    assert(receiver.counter("incremented")() == 1)
   }
 
   test("should count failure requests only after they are finished") {
