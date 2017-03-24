@@ -289,7 +289,7 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
  * particular category of connection failure.
  */
 class ConnectionFailedException(underlying: Throwable, remoteAddress: SocketAddress)
-  extends ChannelException(underlying, remoteAddress) with NoStackTrace {
+  extends ChannelException(underlying, remoteAddress) {
   def this() = this(null, null)
 }
 
@@ -298,7 +298,7 @@ class ConnectionFailedException(underlying: Throwable, remoteAddress: SocketAddr
  * was reset by a peer or a proxy.
  */
 class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress)
-  extends ChannelException(underlying, remoteAddress) with NoStackTrace {
+  extends ChannelException(underlying, remoteAddress) {
   def this(remoteAddress: SocketAddress) = this(null, remoteAddress)
   def this() = this(null, null)
 }
