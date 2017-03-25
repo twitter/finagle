@@ -31,7 +31,7 @@ To use an HTTP client:
   import com.twitter.finagle.Service
   import com.twitter.finagle.http
 
-  val httpService: Service[http.Request, http.Request] = ???
+  val httpService: Service[http.Request, http.Response] = ???
 
   httpService(Request("/foo/bar")).onSuccess { response: http.Response =>
     println("received response " + response.contentString)
