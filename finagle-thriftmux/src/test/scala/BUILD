@@ -8,6 +8,7 @@ junit_tests(
     'finagle/finagle-thrift',
     'finagle/finagle-thrift/src/main/java:java',
     'finagle/finagle-thriftmux',
+    'finagle/finagle-thriftmux/src/test/resources',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-java',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
     'util/util-app/src/main/scala:scala',
@@ -15,8 +16,5 @@ junit_tests(
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-thriftmux/src/test/resources'
-  ],
   fatal_warnings=True,
 )

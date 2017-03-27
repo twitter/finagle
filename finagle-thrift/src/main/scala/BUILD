@@ -11,6 +11,7 @@ scala_library(
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
     'finagle/finagle-thrift/src/main/java',
+    'finagle/finagle-thrift/src/main/resources',
     'finagle/finagle-toggle/src/main/scala:scala',
     'scrooge/scrooge-core',
     'util/util-app/src/main/scala:scala',
@@ -20,7 +21,6 @@ scala_library(
     '3rdparty/jvm/com/fasterxml/jackson:jackson-annotations',
   ],
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-thrift/src/main/resources'],
   fatal_warnings=True,
 )
 

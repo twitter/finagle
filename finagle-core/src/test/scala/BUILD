@@ -8,6 +8,7 @@ junit_tests(
     '3rdparty/jvm/com/github/ben-manes/caffeine:caffeine',
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/resources',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-hashing/src/main/scala:scala',
@@ -16,8 +17,5 @@ junit_tests(
     'util/util-registry/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-core/src/test/resources'
-  ],
   fatal_warnings=True,
 )

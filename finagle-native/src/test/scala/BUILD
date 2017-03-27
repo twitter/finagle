@@ -6,11 +6,9 @@ junit_tests(
     '3rdparty/jvm/com/google/guava:guava',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
+    'finagle/finagle-native/src/test/resources',
     'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-native/src/test/resources'
-  ]
 )

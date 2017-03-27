@@ -12,6 +12,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/org/apache/zookeeper:zookeeper-client',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-serversets/src/main/resources',
     'src/java/com/twitter/common/net:dynamic-host-set',
     'src/java/com/twitter/common/quantity:quantity',
     'src/java/com/twitter/common/zookeeper:client',
@@ -24,9 +25,6 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-serversets/src/main/resources'
-  ],
   # Exposes a service-loaded class.
   scope='forced',
 )

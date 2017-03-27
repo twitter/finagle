@@ -10,6 +10,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-mux/src/main/resources',
     'finagle/finagle-netty4',
     'finagle/finagle-toggle',
     'src/java/com/twitter/common/quantity:quantity',
@@ -22,5 +23,4 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-mux/src/main/resources'],
 )

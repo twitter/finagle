@@ -16,6 +16,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/org/apache/zookeeper:zookeeper-client',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-memcached/src/main/resources',
     'finagle/finagle-netty4',
     'finagle/finagle-serversets',
     'finagle/finagle-toggle/src/main/scala:scala',
@@ -30,7 +31,6 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-memcached/src/main/resources'],
   # Exposes a service-loaded class.
   scope='forced',
   # NB: This is not an actual dependency, but is necessary to have Pants behave

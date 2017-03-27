@@ -9,6 +9,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-netty4/src/main/resources',
     'finagle/finagle-toggle',
     'util/util-app/src/main/scala:scala',
     'util/util-codec/src/main/scala:scala',
@@ -18,6 +19,5 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   fatal_warnings=True,
-  resources=['finagle/finagle-netty4/src/main/resources'],
   sources=rglobs('*.scala'),
 )

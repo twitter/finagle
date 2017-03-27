@@ -16,6 +16,7 @@ scala_library(
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
+    'finagle/finagle-stats/src/main/resources',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-events/src/main/scala:scala',
@@ -23,9 +24,6 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-stats/src/main/resources'
-  ],
   # In the vast majority of cases, the consumers of finagle-stats only need it at runtime,
   # and so ideally we would mark this "scope=runtime". But there are enough consumers that also
   # need it at compiletime that it is non-trivial to split the target at this juncture.

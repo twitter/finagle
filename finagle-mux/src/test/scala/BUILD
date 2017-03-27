@@ -6,14 +6,12 @@ junit_tests(
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-mux/src/main/scala:scala',
+    'finagle/finagle-mux/src/test/resources',
     'finagle/finagle-toggle',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-mux/src/test/resources'
-  ],
   fatal_warnings=True,
 )

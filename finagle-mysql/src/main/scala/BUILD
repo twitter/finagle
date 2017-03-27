@@ -9,6 +9,7 @@ scala_library(
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-mysql/src/main/resources',
     'finagle/finagle-netty4',
     'finagle/finagle-toggle',
     'util/util-cache',
@@ -16,5 +17,4 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=['finagle/finagle-mysql/src/main/resources'],
 )

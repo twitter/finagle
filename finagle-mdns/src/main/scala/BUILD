@@ -7,12 +7,10 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/org/jmdns',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-mdns/src/main/resources',
     'util/util-core/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-mdns/src/main/resources'
-  ],
   # Exposes a service-loaded class.
   scope='forced',
 )

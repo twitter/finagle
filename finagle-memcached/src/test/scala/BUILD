@@ -32,6 +32,7 @@ junit_tests(
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-core/src/test/scala:scala',
     'finagle/finagle-memcached/src/main/scala:scala',
+    'finagle/finagle-memcached/src/test/resources',
     'finagle/finagle-serversets',
     'util/util-collection/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
@@ -41,7 +42,4 @@ junit_tests(
     'util/util-zk-test',
   ],
   sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
-  resources=[
-    'finagle/finagle-memcached/src/test/resources'
-  ]
 )

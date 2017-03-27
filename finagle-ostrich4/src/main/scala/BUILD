@@ -10,14 +10,12 @@ scala_library(
     'util/util-stats',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
+    'finagle/finagle-ostrich4/src/main/resources',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-ostrich4/src/main/resources'
-  ],
   # Exposes a service-loaded class.
   scope='forced',
 )

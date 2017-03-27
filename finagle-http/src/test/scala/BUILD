@@ -12,6 +12,7 @@ junit_tests(
     'finagle/finagle-base-http',
     'finagle/finagle-core',
     'finagle/finagle-http',
+    'finagle/finagle-http/src/test/resources',
     'finagle/finagle-netty4-http',
     'finagle/finagle-toggle',
     scoped('util/util-app', scope='forced'),
@@ -19,7 +20,6 @@ junit_tests(
     'util/util-logging',
     'util/util-stats',
   ],
-  resources=['finagle/finagle-http/src/test/resources'],
   fatal_warnings=True,
   sources=rglobs('*.scala')
 )

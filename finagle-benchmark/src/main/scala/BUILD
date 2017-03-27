@@ -34,10 +34,10 @@ scala_library(
 jvm_binary(
   name='lbsim',
   main='com.twitter.finagle.loadbalancer.Simulation',
-  dependencies=[':scala'],
-  resources=[
+  dependencies=[
+    ':scala',
     'finagle/finagle-benchmark/src/main/resources'
-  ],
+  ]
 )
 
 jvm_binary(
