@@ -129,6 +129,7 @@ private[http2] class AdapterProxyChannelHandler(
             updateCompletionStatus(obj, streamId, false)
           case rst: Rst => ctx.write(rst, promise)
           case goaway: GoAway => ctx.write(goaway, promise)
+          case Ping => ctx.write(Ping, promise)
         }
       case _ =>
         val wrongType = new IllegalArgumentException(

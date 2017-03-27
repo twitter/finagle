@@ -13,7 +13,7 @@ import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import scala.collection.JavaConverters._
 
 /**
@@ -47,6 +47,8 @@ private[http2] class MultiplexedTransporter(
 
   // exposed for testing
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
+
+  private[this] val pingPromise = new AtomicReference[Promise[Unit]]()
 
   private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = self.synchronized {
     dead = true
@@ -91,6 +93,7 @@ private[http2] class MultiplexedTransporter(
       else new StreamClosedException(addr, streamId.toString)
 
       tryToInitializeQueue(streamId).fail(error)
+    case Ping => pingPromise.get.setDone()
     case rep =>
       val name = rep.getClass.getName
       log.error(s"we only support Message, GoAway, Rst right now but got $name. "

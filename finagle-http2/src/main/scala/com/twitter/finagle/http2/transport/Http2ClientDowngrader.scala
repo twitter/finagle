@@ -7,7 +7,8 @@ import io.netty.handler.codec.http2.{Http2EventAdapter, Http2Headers, HttpConver
 import java.nio.charset.StandardCharsets.UTF_8
 
 /**
- * `Http2ClientDowngrader` wraps RSTs, GOAWAYs, HEADERS, and DATA in thin finagle wrappers.
+ * `Http2ClientDowngrader` wraps RSTs, GOAWAYs, HEADERS, Pings, and DATA in thin
+ * finagle wrappers.
  */
 private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
 
@@ -21,6 +22,7 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
   case class Message(obj: HttpObject, streamId: Int) extends StreamMessage
   case class GoAway(obj: HttpObject, lastStreamId: Int) extends StreamMessage
   case class Rst(streamId: Int, errorCode: Long) extends StreamMessage
+  case object Ping extends StreamMessage
 
   // Http2EventAdapter overrides
 
@@ -121,4 +123,9 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
     val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status)
     ctx.fireChannelRead(GoAway(rep, lastStreamId))
   }
+
+  override def onPingAckRead(ctx: ChannelHandlerContext, data: ByteBuf): Unit = {
+    ctx.fireChannelRead(Ping)
+  }
+
 }
