@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{Balancer, LeastLoaded, Updating}
+import com.twitter.finagle.loadbalancer.{LeastLoaded, Updating}
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
@@ -45,9 +45,9 @@ private[loadbalancer] class ApertureLeastLoaded[Req, Rep](
     protected val maxEffort: Int,
     protected val rng: Rng,
     protected val statsReceiver: StatsReceiver,
-    protected val emptyException: NoBrokersAvailableException)
-  extends Balancer[Req, Rep]
-  with Aperture[Req, Rep]
+    protected val emptyException: NoBrokersAvailableException,
+    protected val useDeterministicOrdering: Boolean)
+  extends Aperture[Req, Rep]
   with LeastLoaded[Req, Rep]
   with LoadBand[Req, Rep]
   with Updating[Req, Rep] {

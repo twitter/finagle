@@ -37,7 +37,7 @@ public class BalancersCompilationTest {
       .newBalancer(Activity.value(vec), sr, noBrokers);
 
     Balancers
-      .aperture(Duration.fromSeconds(5), 0.5, 2, 1, 5, Rngs.threadLocal())
+      .aperture(Duration.fromSeconds(5), 0.5, 2, 1, 5, Rngs.threadLocal(), false)
       .newBalancer(Activity.value(vec), sr, noBrokers);
   }
 }

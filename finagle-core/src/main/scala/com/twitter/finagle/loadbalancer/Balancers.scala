@@ -83,7 +83,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
-    override def toString: String = "P2cLoadBalancerFactory"
+    override def toString: String = "P2CLeastLoaded"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -121,7 +121,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
-    override def toString: String = "P2cPeakEwmaLoadBalancerFactory"
+    override def toString: String = "P2CPeakEwma"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -140,7 +140,7 @@ object Balancers {
    */
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
-      override def toString: String = "HeapLoadBalancerFactory"
+      override def toString: String = "HeapLeastLoaded"
       def newBalancer[Req, Rep](
         endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
         sr: StatsReceiver,
@@ -174,9 +174,10 @@ object Balancers {
     highLoad: Double = 2.0,
     minAperture: Int = 1,
     maxEffort: Int = MaxEffort,
-    rng: Rng = Rng.threadLocal
+    rng: Rng = Rng.threadLocal,
+    useDeterministicOrdering: Boolean = false
   ): LoadBalancerFactory = new LoadBalancerFactory {
-    override def toString: String = "ApertureLoadBalancerFactory"
+    override def toString: String = "ApertureLeastLoaded"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -184,7 +185,7 @@ object Balancers {
     ): ServiceFactory[Req, Rep] = {
       newScopedBal(sr, "aperture_least_loaded",
         new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, exc))
+          highLoad, minAperture, maxEffort, rng, sr, exc, useDeterministicOrdering))
     }
   }
 
@@ -203,7 +204,7 @@ object Balancers {
   def roundRobin(
     maxEffort: Int = MaxEffort
   ): LoadBalancerFactory = new LoadBalancerFactory {
-    override def toString: String = "RoundRobinLoadBalancerFactory"
+    override def toString: String = "RoundRobin"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,

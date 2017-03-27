@@ -1,23 +1,42 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.LeastLoaded
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.loadbalancer.NodeT
+import com.twitter.finagle.service.FailingFactory
+import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.Rng
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
 import com.twitter.finagle.{NoBrokersAvailableException, Status}
 import com.twitter.util.{Activity, Await, Duration}
 import org.scalatest.FunSuite
 
-class ApertureLeastLoadedTest extends FunSuite with ApertureSuite {
+class ApertureTest extends FunSuite with ApertureSuite {
   /**
-   * @note we mix-in [[LeastLoaded]] but no controller for the aperture.
-   * This means that the aperture will not expand or contract automatically.
-   * Thus, each test in this suite must manually adjust it or rely on the
-   * "rebuild" functionality provided by [[Balancer]] which kicks in when
-   * we select a down node. Since aperture uses P2C to select nodes, we inherit
-   * the same probabilistic properties that help us avoid down nodes with the
-   * important caveat that we only select over a subset.
+   * @note We don't mix in a controller for the aperture. This means that the aperture
+   * will not expand or contract automatically. Thus, each test in this suite must
+   * manually adjust it or rely on the "rebuild" functionality provided by [[Balancer]]
+   * which kicks in when we select a down node. Since aperture uses P2C to select
+   * nodes, we inherit the same probabilistic properties that help us avoid down
+   * nodes with the important caveat that we only select over a subset.
    */
-  private class Bal extends TestBal with LeastLoaded[Unit, Unit]
+  private class Bal extends TestBal {
+    protected class Node(val factory: ServiceFactory[Unit, Unit])
+      extends ServiceFactoryProxy[Unit, Unit](factory)
+      with NodeT[Unit, Unit] {
+      // We don't need a load metric since this test only focuses on
+      // the internal behavior of aperture.
+      def load: Double = 0
+      def pending: Int = 0
+      def token: Int = 0
+    }
+
+    protected def newNode(
+      factory: ServiceFactory[Unit, Unit],
+      statsReceiver: StatsReceiver
+    ): Node = new Node(factory)
+
+    protected def failingNode(cause: Throwable): Node =
+      new Node(new FailingFactory[Unit, Unit](cause))
+  }
 
   test("requires minAperture > 0") {
     intercept[IllegalArgumentException] {
@@ -30,7 +49,8 @@ class ApertureLeastLoadedTest extends FunSuite with ApertureSuite {
         maxEffort = 0,
         rng = Rng.threadLocal,
         statsReceiver = NullStatsReceiver,
-        emptyException = new NoBrokersAvailableException
+        emptyException = new NoBrokersAvailableException,
+        useDeterministicOrdering = false
       )
     }
   }
@@ -92,7 +112,7 @@ class ApertureLeastLoadedTest extends FunSuite with ApertureSuite {
 
   test("Enforce min aperture size is not > the number of active nodes") {
     val counts = new Counts
-    val bal = new TestBal with LeastLoaded[Unit, Unit] {
+    val bal = new Bal {
       override protected val minAperture = 4
     }
 
@@ -182,5 +202,44 @@ class ApertureLeastLoadedTest extends FunSuite with ApertureSuite {
     counts.clear()
     bal.applyn(1000)
     assert(counts.nonzero == Set(goodkey))
+  }
+
+  test("useDeterministicOrdering") {
+    val bal = new Bal {
+      override protected val useDeterministicOrdering = true
+    }
+
+    DeterministicOrdering.unsetCoordinate()
+
+    val servers = Vector.tabulate(10) { i => new Factory(i) }
+
+    val distSnap = bal.distx
+    bal.update(servers)
+    assert(distSnap ne bal.distx)
+    assert(servers.indices.forall { i => bal.distx.vector(i) == servers(i) })
+
+    DeterministicOrdering.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
+    bal.update(servers)
+    assert(servers.indices.exists { i => bal.distx.vector(i) != servers(i) })
+  }
+
+  test("no-arg rebuilds are idempotent") {
+    val bal = new Bal {
+      override protected val useDeterministicOrdering = true
+    }
+
+    DeterministicOrdering.setCoordinate(0, 5, 10)
+
+    val servers = Vector.tabulate(10) { i => new Factory(i) }
+    bal.update(servers)
+
+    val order = bal.distx.vector
+    for (_ <- 0 to 100) {
+      // This shouldn't affect order since we don't have a new
+      // coordinate. Thus, the rebuild should be a no-op for
+      // the ordering.
+      bal.rebuildx()
+      assert(order.indices.forall { i => order(i) == bal.distx.vector(i) })
+    }
   }
 }

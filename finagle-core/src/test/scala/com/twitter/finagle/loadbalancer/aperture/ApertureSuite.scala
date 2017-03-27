@@ -19,6 +19,7 @@ trait ApertureSuite {
     protected val maxEffort = 5
     protected def statsReceiver = NullStatsReceiver
     protected val minAperture = 1
+    protected val useDeterministicOrdering = false
 
     protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
 
@@ -31,9 +32,11 @@ trait ApertureSuite {
     def adjustx(n: Int): Unit = adjust(n)
     def aperturex: Int = aperture
     def unitsx: Int = units
+    def distx: Distributor = dist
+    def rebuildx(): Unit = rebuild()
   }
 
-  class Factory(val i: Int) extends ServiceFactory[Unit, Unit] {
+  case class Factory(i: Int) extends ServiceFactory[Unit, Unit] {
     var n = 0
     var p = 0
 
@@ -81,10 +84,10 @@ trait ApertureSuite {
     }).keys.toSet
 
 
-    def apply(i: Int) = factories.getOrElseUpdate(i, new Factory(i))
+    def apply(i: Int) = factories.getOrElseUpdate(i, Factory(i))
 
-    def range(n: Int): Traversable[ServiceFactory[Unit, Unit]] =
-      Traversable.tabulate(n) { i => apply(i) }
+    def range(n: Int): IndexedSeq[ServiceFactory[Unit, Unit]] =
+      Vector.tabulate(n) { i => apply(i) }
   }
 
 }

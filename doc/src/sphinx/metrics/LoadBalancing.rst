@@ -56,3 +56,15 @@ ApertureLoadBandBalancer
 **aperture**
   A gauge of the width of the window over which endpoints are
   load-balanced.
+
+**coordinate**
+  The process global coordinate for the process as sampled by
+  the Aperture implementation.
+
+**use_deterministic_ordering**
+  1 if the Apeture implementation uses deterministic ordering
+  0, otherwise.
+
+**coordinate_updates**
+  A counter of the number of times the Aperture implementation receives
+  updates from the `DeterministicOrdering` process global.

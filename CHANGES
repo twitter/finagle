@@ -48,6 +48,11 @@ Breaking API Changes
     load balancer implementations don't need the properties of a Set but instead
     need ordering guarantees and efficient random access. ``RB_ID=910372``
 
+  * finagle-core: Balancers.aperture now has a new parameter `useDeterministicOrdering`,
+    which is set to false by default. This feature is still experimental and under
+    construction. This will break the Java API and require the additional param to
+    be passed in explicitly.  ``RB_ID=911541``
+
   * finagle-kestrel: Remove `c.t.f.kestrel.param.KestrelImpl.` Kestrel clients and servers
     now use Netty 4 and cannot be configured for Netty 3. ``RB_ID=911031``
 
