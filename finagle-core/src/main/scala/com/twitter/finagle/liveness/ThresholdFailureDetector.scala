@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
@@ -122,7 +122,7 @@ private class ThresholdFailureDetector(
  *
  * @param windowSize the size of the window to keep track of
  */
-private[mux] class WindowedMax(windowSize: Int) {
+private[liveness] class WindowedMax(windowSize: Int) {
   @volatile private[this] var currentMax: Long = Long.MinValue
   private[this] val buf: Array[Long] = Array.fill(windowSize)(Long.MinValue)
   private[this] var index: Int = 0

@@ -4,9 +4,10 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
-import com.twitter.finagle.mux.{FailureDetector, Handshake, Toggles}
+import com.twitter.finagle.mux.{Handshake, Toggles}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}

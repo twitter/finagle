@@ -9,7 +9,7 @@ scala_library(
     '3rdparty/jvm/io/netty:netty4',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
-    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core',
     'finagle/finagle-mux/src/main/resources',
     'finagle/finagle-netty4',
     'finagle/finagle-toggle',

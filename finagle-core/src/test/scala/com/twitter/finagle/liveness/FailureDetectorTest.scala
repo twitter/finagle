@@ -1,12 +1,9 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.Future
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class FailureDetectorTest extends FunSuite
 {
   def ping = () => Future.Done

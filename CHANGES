@@ -95,6 +95,10 @@ Breaking API Changes
   * finagle-thrift, finagle-thriftmux: Remove rich client/server support for prior
     versions of Scrooge generated code. ``RB_ID=911515``
 
+  * finagle-core, finagle-mux: Move FailureDetector from `c.t.f.mux` to `c.t.f.liveness`.
+    This also means that the `sessionFaiureDetector` flag is now
+    `c.t.f.liveness.sessionFailureDetector`. ``RB_ID=912337``
+
 6.43.0
 ------
 

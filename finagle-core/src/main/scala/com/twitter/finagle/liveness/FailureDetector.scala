@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
@@ -13,7 +13,7 @@ import java.util.logging.Logger
  * usually by sending ping messages and evaluating response
  * times.
  */
-private[mux] trait FailureDetector {
+private[liveness] trait FailureDetector {
   def status: Status
 }
 
@@ -58,13 +58,13 @@ object FailureDetector {
   case object GlobalFlagConfig extends Config
 
   /**
-   * Indicated to use the [[com.twitter.finagle.mux.NullFailureDetector]]
+   * Indicated to use the [[com.twitter.finagle.liveness.NullFailureDetector]]
    * when creating a new detector
    */
   case object NullConfig extends Config
 
   /**
-   * Indicated to use the [[com.twitter.finagle.mux.ThresholdFailureDetector]]
+   * Indicated to use the [[com.twitter.finagle.liveness.ThresholdFailureDetector]]
    * configured with these values when creating a new detector.
    *
    * The default `windowSize` and `threshold` are chosen from examining a
@@ -104,7 +104,7 @@ object FailureDetector {
   /**
    * Instantiate a new FailureDetector based on the config type
    */
-  private[mux] def apply(
+  private[finagle] def apply(
     config: Config,
     ping: () => Future[Unit],
     statsReceiver: StatsReceiver

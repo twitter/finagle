@@ -1,16 +1,14 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 
-@RunWith(classOf[JUnitRunner])
 class ThresholdFailureDetectorTest extends FunSuite
   with AssertionsForJUnit
   with Eventually

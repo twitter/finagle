@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport

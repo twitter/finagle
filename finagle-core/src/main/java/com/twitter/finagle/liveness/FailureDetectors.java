@@ -1,7 +1,7 @@
-package com.twitter.finagle.mux;
+package com.twitter.finagle.liveness;
 
 /**
- * A Java adaptation of the {@link com.twitter.finagle.mux.FailureDetector} companion object.
+ * A Java adaptation of the {@link com.twitter.finagle.liveness.FailureDetector} companion object.
  */
 public final class FailureDetectors {
   private FailureDetectors() { }

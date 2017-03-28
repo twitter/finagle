@@ -3,6 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.liveness.{FailureDetector, Latch}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver

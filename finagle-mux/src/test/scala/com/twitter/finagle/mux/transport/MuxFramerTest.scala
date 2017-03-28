@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.Latch
+import com.twitter.finagle.liveness.Latch
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Dtab, Dentry, Failure, Path}

@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import java.util.concurrent.TimeUnit
 

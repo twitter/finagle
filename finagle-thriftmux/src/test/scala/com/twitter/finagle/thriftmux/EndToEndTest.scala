@@ -41,7 +41,7 @@ class EndToEndTest extends FunSuite
   // turn off failure detector since we don't need it for these tests.
   override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     super.test(testName, testTags:_*) {
-      mux.sessionFailureDetector.let("none") { f }
+      liveness.sessionFailureDetector.let("none") { f }
     }
   }
 

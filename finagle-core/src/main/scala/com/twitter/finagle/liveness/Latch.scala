@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.liveness
 
 import com.twitter.util.{Future, Promise}
 
@@ -8,7 +8,9 @@ import com.twitter.util.{Future, Promise}
  * extra careful to flip() only under lock. It can be used as a kind of
  * asynchronous barrier.
  */
-private class Latch {
+// latch is only used for testing now, but we keep it in main because it's
+// useful across testing modules.
+private[finagle] class Latch {
   @volatile private[this] var p = new Promise[Unit]
 
   def get: Future[Unit] = p
