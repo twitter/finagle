@@ -4,13 +4,12 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.integration.thriftscala.Echo
 import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.mux.{transport => mux}
-import com.twitter.finagle.netty4.{ByteBufAsBuf, http}
+import com.twitter.finagle.netty4.ByteBufAsBuf
 import com.twitter.finagle.thrift.transport.{netty4 => thrift}
 import com.twitter.io.Buf
-import io.netty.buffer.{ByteBufHolder, ByteBuf, Unpooled}
+import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelPipeline
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.{http => nhttp}
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TMemoryBuffer}
 import org.junit.runner.RunWith
@@ -22,14 +21,13 @@ import org.scalatest.junit.JUnitRunner
  *
  * Covered protocols:
  *
- *  http 1.1
- *  todo: http2
  *  kestrel (implicitly via memcached)
  *  memcached
  *  mux (copying framer only)
- *  mysql (coverage from c.t.f.netty4.channel.Netty4ClientChannelInitializerTest)
  *  thrift
  *
+ *  mysql (coverage from c.t.f.netty4.channel.Netty4ClientChannelInitializerTest)
+ *  http/1.1, http/2 (coverage from c.t.f.http.DirectPayloadsLifecycleTest)
  */
 @RunWith(classOf[JUnitRunner])
 class DirectBufferLifecycleTest extends FunSuite {
@@ -60,68 +58,6 @@ class DirectBufferLifecycleTest extends FunSuite {
     msg = Buf.U32BE(4).concat(mux.Message.encode(mux.Message.Tping(123))),
     pipelineInit = mux.CopyingFramer,
     framedCB = { x => assert(!x.underlying.isDirect) }
-  )
-
-  testDirect[ByteBufHolder](
-    protocol = "http 1.1 server",
-    msg = {
-      val content = "some content".getBytes("UTF-8")
-      val req = new nhttp.DefaultFullHttpRequest(
-        nhttp.HttpVersion.HTTP_1_1,
-        nhttp.HttpMethod.GET,
-        "/path",
-        Unpooled.wrappedBuffer(content)
-      )
-      nhttp.HttpUtil.setContentLength(req, content.length)
-
-      val e = new EmbeddedChannel()
-      val enc = new nhttp.HttpRequestEncoder()
-      e.pipeline.addLast(enc)
-      assert(e.writeOutbound(req))
-      ByteBufAsBuf.Owned(e.readOutbound[ByteBuf]())
-    },
-    pipelineInit = http.exp.ServerPipelineInit(Stack.Params.empty),
-    framedCB = { x => assert(!x.content().isDirect) }
-  )
-
-  def http1Resp(): nhttp.HttpResponse =  {
-    val resp =
-      new nhttp.DefaultFullHttpResponse(
-        nhttp.HttpVersion.HTTP_1_1,
-        nhttp.HttpResponseStatus.OK,
-        Unpooled.wrappedBuffer("pretty cool response".getBytes("UTF-8"))
-      )
-    nhttp.HttpUtil.setContentLength(resp, resp.content.readableBytes)
-    resp
-  }
-
-  val http1RespBytes: ByteBuf = {
-    val e = new EmbeddedChannel()
-    val enc = new nhttp.HttpResponseEncoder()
-    e.pipeline.addLast(enc)
-    assert(e.writeOutbound(http1Resp()))
-    e.readOutbound[ByteBuf]()
-  }
-
-  def http1Req(): nhttp.HttpRequest = {
-    val req = new nhttp.DefaultFullHttpRequest(
-      nhttp.HttpVersion.HTTP_1_1,
-      nhttp.HttpMethod.GET,
-      "/path",
-      Unpooled.wrappedBuffer("rad request".getBytes("UTF-8"))
-    )
-    nhttp.HttpUtil.setContentLength(req, req.content.readableBytes)
-    req
-  }
-
-  testDirect[ByteBufHolder](
-    protocol = "http 1.1 client",
-    msg = ByteBufAsBuf.Owned(http1RespBytes),
-    pipelineInit = { (pipe: ChannelPipeline) =>
-      http.exp.ClientPipelineInit(Stack.Params.empty)(pipe)
-      pipe.writeAndFlush(http1Req())
-    },
-    framedCB = { x => assert(!x.content().isDirect) }
   )
 
   testDirect[ByteBufAsBuf](
