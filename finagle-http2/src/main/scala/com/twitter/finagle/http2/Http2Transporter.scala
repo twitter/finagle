@@ -5,8 +5,8 @@ import com.twitter.finagle.http
 import com.twitter.finagle.http2.param._
 import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
-import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Transporter}
-import com.twitter.finagle.netty4.channel.{DirectToHeapInboundHandler, BufferingChannelOutboundHandler}
+import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter, HttpCodecName}
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
@@ -35,9 +35,9 @@ private[finagle] object Http2Transporter {
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
     val underlying = Netty4Transporter.raw[Any, Any](
-      init(params),
-      addr,
-      params + Netty4Transporter.Backpressure(false)
+      pipelineInit = init(params),
+      addr = addr,
+      params = params + Netty4Transporter.Backpressure(false)
     )
 
     val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
@@ -96,7 +96,6 @@ private[finagle] object Http2Transporter {
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit =
     { pipeline: ChannelPipeline =>
-      pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
       val connection = new DefaultHttp2Connection(false /*server*/)
 
       // decompresses data frames according to the content-encoding header

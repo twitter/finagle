@@ -2,8 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.http
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Listener}
-import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
+import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
@@ -31,7 +30,6 @@ private[finagle] object Http2Listener {
     (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
         val source = sourceCodec(params)
         pipeline.addLast(HttpCodecName, source)
         initServer(params)(pipeline)
@@ -48,7 +46,6 @@ private[finagle] object Http2Listener {
     (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
     Netty4Listener(
       pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
         pipeline.addLast(HttpCodecName, sourceCodec(params))
         initServer(params)(pipeline)
       },
