@@ -1,6 +1,5 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.toggle.WriteOnce
 import com.twitter.util.NetUtil
 import com.twitter.util.registry.GlobalRegistry
 

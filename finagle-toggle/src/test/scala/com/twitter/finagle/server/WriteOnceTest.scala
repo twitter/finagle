@@ -1,4 +1,4 @@
-package com.twitter.finagle.toggle
+package com.twitter.finagle.server
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

@@ -174,6 +174,7 @@ object Finagle extends Build {
     finagleZipkinCore,
     finagleZipkin,
     finagleServersets,
+    finagleTunable,
     finagleException,
     finagleIntegration,
     finagleExp,
@@ -241,7 +242,6 @@ object Finagle extends Build {
       util("app"),
       util("core"),
       util("logging"),
-      util("registry"),
       util("stats")) ++
       jacksonLibs
   )
@@ -402,6 +402,20 @@ object Finagle extends Build {
     libraryDependencies ++= jacksonLibs,
     excludeFilter in unmanagedSources := "ZkTest.scala"
   ).dependsOn(finagleCore)
+
+  lazy val finagleTunable = Project(
+    id = "finagle-tunable",
+    base = file("finagle-tunable"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-tunable",
+    libraryDependencies ++= Seq(
+      util("core"),
+      util("tunable")
+    ),
+    libraryDependencies ++= jacksonLibs
+  )
 
   // Protocol support
 
