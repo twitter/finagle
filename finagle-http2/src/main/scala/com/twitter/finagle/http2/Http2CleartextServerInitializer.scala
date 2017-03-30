@@ -2,15 +2,17 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http
-import com.twitter.finagle.http2.transport.{PriorKnowledgeHandler, Http2NackHandler}
+import com.twitter.finagle.http2.transport.{Http2NackHandler, PriorKnowledgeHandler}
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer,
-  ChannelInboundHandlerAdapter}
+import io.netty.channel.{
+  Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, ChannelOption
+}
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
-  SourceCodec, UpgradeCodec, UpgradeCodecFactory}
+  SourceCodec, UpgradeCodec, UpgradeCodecFactory
+}
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2.{
   Http2Codec,
@@ -54,12 +56,15 @@ private[http2] class Http2CleartextServerInitializer(
     }
   }
 
-  val upgradeCodecFactory: UpgradeCodecFactory = new UpgradeCodecFactory {
+  def upgradeCodecFactory(channel: Channel): UpgradeCodecFactory = new UpgradeCodecFactory {
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
         val initialSettings = Settings.fromParams(params)
         val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
-        val bootstrap = (new Http2StreamChannelBootstrap()).handler(initializer)
+        val bootstrap = new Http2StreamChannelBootstrap()
+          .option(ChannelOption.ALLOCATOR, channel.alloc())
+          .handler(initializer)
+
         val codec = new Http2Codec(true /* server */, bootstrap, logger, initialSettings)
         new Http2ServerUpgradeCodec(codec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
@@ -88,7 +93,7 @@ private[http2] class Http2CleartextServerInitializer(
     }
     p.addBefore(HttpCodecName, "priorKnowledgeHandler", new PriorKnowledgeHandler(initializer, params))
     p.addAfter(HttpCodecName, "upgradeHandler",
-      new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory, maxRequestSize.inBytes.toInt))
+      new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory(ch), maxRequestSize.inBytes.toInt))
 
     p.addLast(init)
   }

@@ -5,8 +5,10 @@ import com.twitter.finagle.http2.Settings
 import com.twitter.finagle.netty4.http.exp._
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
-import io.netty.buffer.{ByteBufUtil, ByteBuf}
-import io.netty.channel.{Channel, ChannelInitializer, ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.buffer.{ByteBuf, ByteBufUtil}
+import io.netty.channel.{
+  Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, ChannelOption
+}
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
 import io.netty.handler.codec.http2.{Http2Codec, Http2FrameLogger, Http2StreamChannelBootstrap}
 import io.netty.handler.logging.LogLevel
@@ -72,7 +74,10 @@ private[http2] class PriorKnowledgeHandler(
           // we have read a complete preface. Setup HTTP/2 pipeline.
           val initialSettings = Settings.fromParams(params)
           val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
-          val bootstrap = (new Http2StreamChannelBootstrap()).handler(initializer)
+          val bootstrap = new Http2StreamChannelBootstrap()
+            .option(ChannelOption.ALLOCATOR, ctx.alloc())
+            .handler(initializer)
+
           val codec = new Http2Codec(true /* server */ , bootstrap, logger, initialSettings)
           p.replace(HttpCodecName, "http2Codec", codec)
           p.remove("upgradeHandler")

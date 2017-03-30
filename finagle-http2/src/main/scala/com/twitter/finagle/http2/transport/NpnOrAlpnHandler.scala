@@ -4,7 +4,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.Settings
 import com.twitter.finagle.netty4.http.exp._
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer, ChannelOption}
 import io.netty.handler.codec.http2.{
   Http2Codec,
   Http2FrameLogger,
@@ -39,7 +39,10 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         ctx.channel.config.setAutoRead(true)
         val initialSettings = Settings.fromParams(params)
         val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
-        val bootstrap = (new Http2StreamChannelBootstrap()).handler(initializer)
+        val bootstrap = new Http2StreamChannelBootstrap()
+          .option(ChannelOption.ALLOCATOR, ctx.alloc())
+          .handler(initializer)
+
         ctx.pipeline().replace(
           HttpCodecName,
           "http2Codec",
