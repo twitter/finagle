@@ -75,13 +75,12 @@ private[http] class SafeHttpServerCodec(
  * which gives the application a handle to the byte stream. If `false`, the
  * entire message content is buffered into a [[com.twitter.io.Buf]].
  */
-case class Http(
+private case class Http(
     _compressionLevel: Int = -1,
     _maxRequestSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes,
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
-    _annotateCipherHeader: Option[String] = None,
     _enableTracing: Boolean = false,
     _maxInitialLineLength: StorageUnit = 4096.bytes,
     _maxHeaderSize: StorageUnit = 8192.bytes,
@@ -95,7 +94,6 @@ case class Http(
     _maxResponseSize: StorageUnit,
     _decompressionEnabled: Boolean,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker],
-    _annotateCipherHeader: Option[String],
     _enableTracing: Boolean,
     _maxInitialLineLength: StorageUnit,
     _maxHeaderSize: StorageUnit,
@@ -107,7 +105,6 @@ case class Http(
       _maxResponseSize,
       _decompressionEnabled,
       _channelBufferUsageTracker,
-      _annotateCipherHeader,
       _enableTracing,
       _maxInitialLineLength,
       _maxHeaderSize,
@@ -127,7 +124,6 @@ case class Http(
   @deprecated("Use maxRequestSize to enforce buffer footprint limits", "2016-05-10")
   def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
     copy(_channelBufferUsageTracker = Some(usageTracker))
-  def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
   def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
   def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
@@ -241,10 +237,6 @@ case class Http(
               "httpDechunker",
               new SafeServerHttpChunkAggregator(maxRequestSizeInBytes))
 
-          _annotateCipherHeader foreach { headerName: String =>
-            pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))
-          }
-
           pipeline
         }
       }
@@ -280,7 +272,7 @@ case class Http(
   override val protocolLibraryName: String = "http"
 }
 
-object Http {
+private object Http {
   def get() = new Http()
 }
 

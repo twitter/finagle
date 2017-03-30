@@ -62,11 +62,12 @@ class TraceInitializationTest extends FunSuite {
   }
 
   test("TraceId is propagated through the protocol (builder)") {
+    import com.twitter.finagle
     testTraces { (serverTracer, clientTracer) =>
       val server = ServerBuilder()
         .name("theServer")
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .codec(Http(_enableTracing = true))
+        .stack(finagle.Http.server)
         .tracer(serverTracer)
         .build(Svc)
 
@@ -74,36 +75,11 @@ class TraceInitializationTest extends FunSuite {
       val client = ClientBuilder()
         .name("theClient")
         .hosts(s"localhost:$port")
-        .codec(Http(_enableTracing = true))
+        .stack(finagle.Http.client)
         .hostConnectionLimit(1)
         .tracer(clientTracer)
         .build()
       (client, server)
     }
-  }
-
-  test("TraceId is set when a client does not propagate one") {
-    import com.twitter.finagle
-    val tracer = new BufferingTracer
-
-    val server = finagle.Http.server
-      .withTracer(tracer)
-      .withLabel("theServer").serve(":*", Svc)
-    try {
-      val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
-      val client = ClientBuilder()
-        .name("theClient")
-        .hosts(s"localhost:$port")
-        .codec(Http(_enableTracing = false))
-        .hostConnectionLimit(1)
-        .build()
-      try {
-        0.until(2).foreach { _ =>
-          Await.result(client(req))
-        }
-
-        assert(tracer.map(_.traceId).toSet.size == 2)
-      } finally client.close()
-    } finally server.close()
   }
 }

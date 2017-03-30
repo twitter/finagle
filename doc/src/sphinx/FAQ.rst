@@ -103,8 +103,8 @@ Old ``ClientBuilder`` APIs:
 
 .. code-block:: scala
 
+  import com.twitter.finagle.Http
   import com.twitter.finagle.builder.ClientBuilder
-  import com.twitter.finagle.http.Http
   import com.twitter.finagle.stats.StatsReceiver
   import com.twitter.finagle.tracing.Tracer
   import com.twitter.util.Duration
@@ -115,7 +115,7 @@ Old ``ClientBuilder`` APIs:
   val connectTimeout: Duration = ???
 
   val client = ClientBuilder()
-    .codec(Http)
+    .stack(Http.client)
     .name("clientname")
     .reportTo(statsReceiver)
     .tracer(tracer)

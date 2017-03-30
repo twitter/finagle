@@ -96,7 +96,7 @@ class NackTest extends FunSuite {
         ClientBuilder()
           .name("http")
           .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-          .codec(com.twitter.finagle.http.Http())
+          .stack(FHttp.client)
           .reportTo(clientSr)
           .hostConnectionLimit(1).build()
 
@@ -114,7 +114,7 @@ class NackTest extends FunSuite {
       val serverLabel = "myservice"
       val server =
         ServerBuilder()
-          .codec(Http(_statsReceiver = serverSr.scope(serverLabel)))
+          .stack(FHttp.server.withLabel(serverLabel))
           .bindTo(new InetSocketAddress(0))
           .name(serverLabel)
           .reportTo(serverSr)

@@ -73,7 +73,7 @@ class ServerSideDecodingTest extends FunSuite
 
     // Standard client
     val client = ClientBuilder()
-      .codec(Http())
+      .stack(finagle.Http.client)
       .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()

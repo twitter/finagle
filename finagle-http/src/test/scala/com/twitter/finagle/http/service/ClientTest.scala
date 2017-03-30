@@ -2,7 +2,7 @@ package com.twitter.finagle.http.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http.{Method, Request, Response, Version, Http => HttpCodec}
+import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
 import com.twitter.util.Await
@@ -23,7 +23,7 @@ class ClientTest extends FunSuite {
       ClientBuilder()
         .hosts(serverAddress)
         .hostConnectionLimit(1)
-        .codec(HttpCodec())
+        .stack(Http.client)
 
     try spec(builder) finally {
       Await.result(server.close())

@@ -1,8 +1,8 @@
 package com.twitter.finagle.example.http
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http._
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.{Http, Service, SimpleFilter}
+import com.twitter.finagle.http.{Request, Response, Status, Version, Method, Fields}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
 
@@ -34,7 +34,7 @@ object HttpClient {
 
   def main(args: Array[String]) {
     val clientWithoutErrorHandling: Service[Request, Response] = ClientBuilder()
-      .codec(Http())
+      .stack(Http.client)
       .hosts(new InetSocketAddress(8080))
       .hostConnectionLimit(1)
       .build()
