@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
@@ -19,8 +20,8 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Future, Monitor, StorageUnit}
-import java.net.SocketAddress
+import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
+import java.net.{SocketAddress, InetSocketAddress}
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -68,40 +69,46 @@ object Http extends Client[Request, Response] with HttpRichClient
    * @param listener [[Listener]] factory
    */
   case class HttpImpl(
-      clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
-      serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-      transporter: Stack.Params => SocketAddress => Transporter[Any, Any],
-      listener: Stack.Params => Listener[Any, Any]) {
+    clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
+    serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
+    transporter: Stack.Params => SocketAddress => Transporter[Any, Any],
+    listener: Stack.Params => Listener[Any, Any],
+    implName: String
+  ) {
 
     def mk(): (HttpImpl, Stack.Param[HttpImpl]) = (this, HttpImpl.httpImplParam)
   }
 
   object HttpImpl {
-    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(
-      if (useNetty4()) Netty4Impl else Netty3Impl
-    )
+    implicit val httpImplParam: Stack.Param[HttpImpl] = new Stack.Param[HttpImpl] {
+      lazy val default = if (useNetty4()) Netty4Impl else Netty3Impl
+      override def show(p: HttpImpl): Seq[(String, () => String)] = Seq(("impl", () => p.implName))
+    }
   }
 
   val Netty3Impl: HttpImpl = HttpImpl(
     new Netty3ClientStreamTransport(_),
     new Netty3ServerStreamTransport(_),
     Netty3HttpTransporter,
-    Netty3HttpListener
+    Netty3HttpListener,
+    "Netty3"
   )
 
-  val Netty4Impl: Http.HttpImpl =
-    Http.HttpImpl(
-      new Netty4ClientStreamTransport(_),
-      new Netty4ServerStreamTransport(_),
-      Netty4HttpTransporter,
-      Netty4HttpListener)
+  val Netty4Impl: Http.HttpImpl = Http.HttpImpl(
+    new Netty4ClientStreamTransport(_),
+    new Netty4ServerStreamTransport(_),
+    Netty4HttpTransporter,
+    Netty4HttpListener,
+    "Netty4"
+  )
 
   val Http2: Stack.Params = Stack.Params.empty +
     Http.HttpImpl(
       new Netty4ClientStreamTransport(_),
       new Netty4ServerStreamTransport(_),
       Http2Transporter.apply _,
-      Http2Listener.apply _
+      Http2Listener.apply _,
+      "Netty4"
     ) +
     param.ProtocolLibrary("http/2") +
     netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
@@ -181,32 +188,46 @@ object Http extends Client[Request, Response] with HttpRichClient
   case class Client(
       stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
       params: Stack.Params = Client.params)
-    extends StdStackClient[Request, Response, Client]
+    extends EndpointerStackClient[Request, Response, Client]
     with param.WithSessionPool[Client]
     with param.WithDefaultLoadBalancer[Client] {
 
     protected type In = Any
     protected type Out = Any
 
-    protected def newStreamTransport(
-      transport: Transport[Any, Any]
-    ): StreamTransport[Request, Response] =
-      new HttpTransport(params[HttpImpl].clientTransport(transport))
+    protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
+      new EndpointerModule[Request, Response](
+        Seq(implicitly[Stack.Param[HttpImpl]]),
+        { (prms: Stack.Params, addr: InetSocketAddress) =>
 
-    protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
-      params[HttpImpl].transporter(params)(addr)
-    }
+          val transporter = params[HttpImpl].transporter(prms)(addr)
+          new ServiceFactory[Request, Response] {
+            def apply(conn: ClientConnection): Future[Service[Request, Response]] =
+              // we do not want to capture and request specific Locals
+              // that would live for the life of the session.
+              Contexts.letClearAll {
+                transporter().map { trans =>
+                  val streamTransport = params[HttpImpl].clientTransport(trans)
+
+                  new HttpClientDispatcher(
+                    new HttpTransport(streamTransport),
+                    params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+                  )
+                }
+              }
+
+            def close(deadline: Time): Future[Unit] = transporter match {
+              case http2: Http2Transporter => http2.close(deadline)
+              case _ => Future.Done
+            }
+          }
+        }
+      )
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
-
-    protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
-      new HttpClientDispatcher(
-        newStreamTransport(transport),
-        params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
-      )
 
     def withTls(hostname: String): Client = withTransport.tls(hostname)
 

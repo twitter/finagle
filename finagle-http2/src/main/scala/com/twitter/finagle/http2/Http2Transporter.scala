@@ -182,12 +182,12 @@ private[finagle] object Http2Transporter {
  * request while the upgrade is in progress, which it does over http/1.1, and
  * doesn't attempt to upgrade.
  */
-private[http2] class Http2Transporter(
+private[finagle] class Http2Transporter(
     underlying: Transporter[Any, Any],
     underlyingHttp11: Transporter[Any, Any],
     alpnUpgrade: Boolean,
     implicit val timer: Timer)
-  extends Transporter[Any, Any] { self =>
+  extends Transporter[Any, Any] with Closable { self =>
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
     def read(): Future[Any] = Future.never
@@ -309,7 +309,7 @@ private[http2] class Http2Transporter(
         upgrade()
     }
 
-  override def close(deadline: Time): Future[Unit] = {
+  def close(deadline: Time): Future[Unit] = {
     val maybeClose: Option[Closable] => Future[Unit] = {
       case Some(closable) => closable.close(deadline)
       case None => Future.Done

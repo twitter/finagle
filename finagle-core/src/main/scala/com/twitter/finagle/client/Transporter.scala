@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Future, Time, Closable}
+import com.twitter.util.{Duration, Future}
 import java.net.SocketAddress
 
 /**
@@ -13,21 +13,13 @@ import java.net.SocketAddress
  * symmetric to the server-side [[com.twitter.finagle.server.Listener]], except
  * that it isn't shared across remote peers..
  */
-trait Transporter[In, Out] extends Closable {
+trait Transporter[In, Out] {
   def apply(): Future[Transport[In, Out]]
 
   /**
    * The address of the remote peer that this `Transporter` connects to.
    */
   def remoteAddress: SocketAddress
-
-  /**
-   * Some `Transporters` build `Transports` that represent streams in a
-   * connection instead of connections themselves.  When this is the case, this
-   * method should be overridden to destroy the underlying connection when it's
-   * finished.
-   */
-  def close(deadline: Time): Future[Unit] = Future.Done
 }
 
 /**

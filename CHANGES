@@ -18,6 +18,10 @@ New Features
     of endpoints passed to the balancer implementations. This allows a consistent ordering
     of endpoints across process boundaries. ``RB_ID=910372``
 
+  * finagle-core: Introduce `c.t.f.client.EndpointerStackClient`, a mechanism for
+    making clients that don't need a transporter and dispatcher. This simplifies
+    making non-netty clients. ``RB_ID=912889``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -94,6 +98,10 @@ Breaking API Changes
 
   * finagle-thrift, finagle-thriftmux: Remove rich client/server support for prior
     versions of Scrooge generated code. ``RB_ID=911515``
+
+  * finagle-core: `c.t.f.client.Transporter` no longer has a close method, which
+    was introduced in 6.43.0.  It was sort of a hack, and we saw the opportunity
+    to do it properly. ``RB_ID=912889``
 
   * finagle-core, finagle-mux: Move FailureDetector from `c.t.f.mux` to `c.t.f.liveness`.
     This also means that the `sessionFaiureDetector` flag is now
