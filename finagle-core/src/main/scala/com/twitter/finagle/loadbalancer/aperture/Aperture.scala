@@ -108,7 +108,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       // because we'd like to the know last value it ordered by.
       dist.coordinate match {
         case Some(coord) => coord.toFloat
-        case None => Float.NaN
+        case None => 0f
       }
     }
   )
