@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.kestrel.UseNetty4",
-      "description": "Use Netty4 for the Finagle Kestrel stack client",
-      "fraction": 0.0
-    }
-  ]
-}
