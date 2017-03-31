@@ -1,14 +1,13 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.conversions.storage._
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, Failure}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
-import com.twitter.logging.Logger
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
+import io.netty.util.ReferenceCountUtil
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.net.SocketAddress
@@ -46,20 +45,17 @@ private[netty4] class HttpProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] final val logger = Logger()
-
-  private[this] final def maxHandshakeResponseSize = 10.kilobytes.inBytes.toInt
   private[this] final def httpCodecKey = "httpProxyClientCodec"
-  private[this] final def httpObjectAggregatorKey = "httpProxyObjectAggregator"
 
   private[this] var connectPromise: ChannelPromise = _
+  private[this] var proxyResponseStatus: HttpResponseStatus = _
 
-  private[this] def proxyAuthorizationHeader(c: Credentials): String = {
+  private[this] final def proxyAuthorizationHeader(c: Credentials): String = {
     val bytes = "%s:%s".format(c.username, c.password).getBytes(UTF_8)
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 
-  private[this] def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
+  private[this] final def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
     // We "try" because it might be already cancelled and we don't need to handle
     // cancellations here - it's already done by `proxyCancellationsTo`.
     connectPromise.tryFailure(t)
@@ -85,11 +81,6 @@ private[netty4] class HttpProxyConnectHandler(
         if (f.isSuccess) {
           // Add HTTP client codec so we can talk to an HTTP proxy.
           ctx.pipeline().addBefore(ctx.name(), httpCodecKey, httpClientCodec)
-          // Some HTTP proxy servers send their errors in HTML documents.
-          // We're aiming to accumulate up to 10kb of such error responses to make sure
-          // we can throw something meaningful instead of N4 `TooLongFrameException`.
-          ctx.pipeline().addBefore(ctx.name(), httpObjectAggregatorKey,
-            new HttpObjectAggregator(maxHandshakeResponseSize))
 
           // Create new connect HTTP proxy connect request.
           val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, host)
@@ -99,11 +90,7 @@ private[netty4] class HttpProxyConnectHandler(
           )
 
           ctx.writeAndFlush(req)
-
-          // We issue a read request if auto-read is disabled.
-          if (!ctx.channel().config().isAutoRead) {
-            ctx.read()
-          }
+          readIfNeeded(ctx)
         } else {
           // The connect request was cancelled or failed so the channel was never active. Since no
           // writes are expected from the previous handler, no need to fail the pending writes.
@@ -119,37 +106,27 @@ private[netty4] class HttpProxyConnectHandler(
     ctx.connect(remote, local, proxyConnectPromise)
   }
 
-  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
-    // We only need to match against FullHttpResponse given that the HttpObjectAggregator
-    // will collapse all HTTP pieces into a full response.
-    case rep: FullHttpResponse =>
-      // A remote HTTP proxy is ready to proxy traffic to an ultimate destination. We no longer
-      // need HTTP proxy pieces in the pipeline.
-      if (rep.status() == HttpResponseStatus.OK) {
-        ctx.pipeline().remove(httpCodecKey)
-        ctx.pipeline().remove(httpObjectAggregatorKey)
-        ctx.pipeline().remove(self) // drains pending writes when removed
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
+    def finishOrRead(o: HttpObject): Unit = {
+      ReferenceCountUtil.release(o)
 
-        connectPromise.trySuccess()
-        // We don't release `req` since by specs, we don't expect any payload sent back from a
-        // a web proxy server in a successful case.
-      } else {
-        val failure = new ConnectionFailedException(
-          Failure(s"Unexpected status returned from an HTTP proxy server: ${rep.status()}."),
-          ctx.channel().remoteAddress()
-        )
+      if (o.isInstanceOf[LastHttpContent]) finishProxyHandshake(ctx)
+      else readIfNeeded(ctx)
+    }
 
-        fail(ctx, failure)
-        ctx.close()
+    msg match {
+      case rep: HttpResponse =>
+        // The first portion of a response has arrived so we capture the status.
+        proxyResponseStatus = rep.status()
+        finishOrRead(rep)
 
-        try {
-          logger.ifError(s"Unexpected status returned from an HTTP proxy server.\n${rep.toString}")
-        } finally {
-          // It's possible that the failure response had a payload in it so we release to be safe.
-          rep.release()
-        }
-      }
-    case other => ctx.fireChannelRead(other)
+      case chunk: HttpContent =>
+        // Some proxy servers send their error messages as HTML formatted documents so
+        // we need to swallow them.
+        finishOrRead(chunk)
+
+      case other => ctx.fireChannelRead(other)
+    }
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
@@ -162,5 +139,33 @@ private[netty4] class HttpProxyConnectHandler(
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     fail(ctx, new ChannelClosedException(ctx.channel().remoteAddress()))
     ctx.fireChannelInactive()
+  }
+
+  private[this] final def finishProxyHandshake(ctx: ChannelHandlerContext): Unit = {
+    // A remote HTTP proxy is ready to proxy traffic to an ultimate destination. We no longer
+    // need HTTP proxy pieces in the pipeline.
+    if (proxyResponseStatus == HttpResponseStatus.OK) {
+      ctx.pipeline().remove(httpCodecKey)
+      ctx.pipeline().remove(self) // drains pending writes when removed
+
+      connectPromise.trySuccess()
+      // We don't release `req` since by specs, we don't expect any payload sent back from a
+      // a web proxy server in a successful case.
+    } else {
+      val failure = new ConnectionFailedException(
+        Failure(s"Unexpected status returned from an HTTP proxy server: $proxyResponseStatus."),
+        ctx.channel().remoteAddress()
+      )
+
+      fail(ctx, failure)
+      ctx.close()
+    }
+  }
+
+  private[this] final def readIfNeeded(ctx: ChannelHandlerContext): Unit = {
+    // We issue a read request if auto-read is disabled.
+    if (!ctx.channel().config().isAutoRead) {
+      ctx.read()
+    }
   }
 }

@@ -43,7 +43,6 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     channel.writeOutbound("pending write")
     assert(channel.outboundMessages().size() == 0)
 
-    // Let's chunk the response. Netty loves doing that.
     channel.writeInbound(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
     channel.writeInbound(LastHttpContent.EMPTY_LAST_CONTENT)
 
@@ -108,15 +107,15 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     channel.writeOutbound("pending write")
     assert(channel.outboundMessages().size() == 0)
 
-    val payload = Unpooled.wrappedBuffer("do not talk to me ever again".getBytes("UTF-8"))
     val rep = new DefaultFullHttpResponse(
-      HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, payload
+      HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST,
+      Unpooled.wrappedBuffer("do not talk to me ever again".getBytes("UTF-8"))
     )
 
-    assert(intercept[Exception](channel.writeInbound(rep)).isInstanceOf[ConnectionFailedException])
+    assert(intercept[Exception](channel.writeInbound(rep.retain())).isInstanceOf[ConnectionFailedException])
     assert(!connectPromise.isSuccess)
     assert(connectPromise.cause().isInstanceOf[ConnectionFailedException])
-    assert(rep.refCnt() == 0)
+    assert(rep.release())
 
     channel.finishAndReleaseAll()
   }

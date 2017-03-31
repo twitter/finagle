@@ -107,8 +107,20 @@ Breaking API Changes
     to do it properly. ``RB_ID=912889``
 
   * finagle-core, finagle-mux: Move FailureDetector from `c.t.f.mux` to `c.t.f.liveness`.
-    This also means that the `sessionFaiureDetector` flag is now
+    This also means that the `sessionFailureDetector` flag is now
     `c.t.f.liveness.sessionFailureDetector`. ``RB_ID=912337``
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-netty4: Fixed connection stall on unsuccessful proxy handshakes in Finagle clients
+    configured with HTTP proxy (`Transporter.HttpProxyTo`).  ``RB_ID=913358``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-netty4: Finagle is no longer logging the failed proxy handshake response.
+    ``RB_ID=913358``
 
 6.43.0
 ------
