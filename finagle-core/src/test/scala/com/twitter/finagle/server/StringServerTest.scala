@@ -86,45 +86,55 @@ class StringServerTest extends FunSuite
     val client2 = stringClient.newService(Name.bound(Address(boundAddress)), "stringClient2")
   }
 
-  ignore("ConnectionRegistry has the right size") {
+  test("ConnectionRegistry has the right size") {
     new Ctx {
       val initialRegistrySize = registry.iterator.size
 
-      Await.ready(client1("hello"), 1.second)
-      assert((registry.iterator.size - initialRegistrySize) ==  1)
+      assert(Await.result(client1("hello"), 1.second) == "hello")
+      eventually {
+        assert((registry.iterator.size - initialRegistrySize) == 1)
+      }
 
-      Await.ready(client2("foo"), 1.second)
-      assert((registry.iterator.size - initialRegistrySize) == 2)
+      assert(Await.result(client2("foo"), 1.second) == "foo")
+      eventually {
+        assert((registry.iterator.size - initialRegistrySize) == 2)
+      }
 
       Await.result(client1.close(), 5.seconds)
-      assert((registry.iterator.size - initialRegistrySize) == 1)
+      eventually {
+        assert((registry.iterator.size - initialRegistrySize) == 1)
+      }
 
       Await.result(server.close(), 5.seconds)
       Await.result(client2.close(), 5.seconds)
-      assert((registry.iterator.size - initialRegistrySize) ==  0)
+      eventually {
+        assert((registry.iterator.size - initialRegistrySize) == 0)
+      }
     }
   }
 
-  ignore("ConnectionRegistry correctly removes entries upon client close") {
+  test("ConnectionRegistry correctly removes entries upon client close") {
     new Ctx {
-      val initialState = registry.iterator.toSeq
+      val initialState = registry.iterator.toArray
 
-      Await.ready(client1("hello"), 1.second)
-      val remoteAddr1 = registry.iterator.filter(!initialState.contains(_)).next()
+      assert(Await.result(client1("hello"), 1.second) == "hello")
+      val remoteAddr1 = registry
+        .iterator
+        .find(!initialState.contains(_))
+        .get
 
-      Await.ready(client2("foo"), 1.second)
+      assert(Await.result(client2("foo"), 1.second) == "foo")
       val remoteAddr2 = registry
         .iterator
-        .filter(!initialState.contains(_))
-        .filter(_ != remoteAddr1)
-        .next()
-
-      Await.ready(client1("hi"), 1.second)
+        .find { a => !initialState.contains(a) && a != remoteAddr1}
+        .get
 
       Await.result(client2.close(), 5.seconds)
-      val itr = registry.iterator.filter(!initialState.contains(_)).toSeq
-      assert(itr.contains(remoteAddr1))
-      assert(!itr.contains(remoteAddr2))
+      eventually {
+        val addresses = registry.iterator.toArray
+        assert(addresses.contains(remoteAddr1))
+        assert(!(addresses.contains(remoteAddr2)))
+      }
 
       Await.result(server.close(), 5.seconds)
       Await.result(client1.close(), 5.seconds)
