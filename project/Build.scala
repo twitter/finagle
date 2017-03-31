@@ -415,7 +415,7 @@ object Finagle extends Build {
       util("tunable")
     ),
     libraryDependencies ++= jacksonLibs
-  )
+  ).dependsOn(finagleToggle)
 
   // Protocol support
 
