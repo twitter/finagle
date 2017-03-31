@@ -270,9 +270,8 @@ private[mux] abstract class ClientServerTest
     import ctx._
 
     assert(nping.get == 1)
-    assert(client.status == Status.Busy)
+    assert(client.status == Status.Open)
     pingRep.flip()
-    Status.awaitOpen(client.status)
 
     // This is technically racy, but would require a pretty
     // pathological test environment.

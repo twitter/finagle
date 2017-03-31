@@ -47,7 +47,7 @@ class ThresholdFailureDetectorTest extends FunSuite
     val ctx = new Ctx
     import ctx._
 
-    assert(d.status == Status.Busy)
+    assert(d.status == Status.Open)
 
     for (i <- Seq.range(1, 10)) {
       assert(n.get == i)
@@ -145,7 +145,7 @@ class ThresholdFailureDetectorTest extends FunSuite
     val ctx = new Ctx
     import ctx._
 
-    assert(d.status == Status.Busy)
+    assert(d.status == Status.Open)
     tc.advance(1.milliseconds)
     latch.flip() // rtt = 1, maxPing = 1
     assert(n.get == 1)

@@ -111,6 +111,7 @@ private[http2] class AdapterProxyChannelHandler(
       updateCompletionStatus(obj, streamId, true)
     case rst: Rst => ctx.fireChannelRead(rst)
     case goaway: GoAway => ctx.fireChannelRead(goaway)
+    case Ping => ctx.fireChannelRead(Ping)
     case upgrade: UpgradeEvent => ctx.fireChannelRead(upgrade)
     case _ =>
       val wrongType = new IllegalArgumentException(

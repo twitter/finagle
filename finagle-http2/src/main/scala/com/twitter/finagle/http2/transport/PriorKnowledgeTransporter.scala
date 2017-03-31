@@ -38,7 +38,8 @@ private[http2] class PriorKnowledgeTransporter(
     underlying().map { transport =>
       val multi = new MultiplexedTransporter(
         Transport.cast[StreamMessage, StreamMessage](transport),
-        remoteAddress
+        remoteAddress,
+        params
       )
       transport.onClose.ensure {
         ref.set(null)

@@ -27,6 +27,14 @@ private object NullFailureDetector extends FailureDetector {
 }
 
 /**
+ * The mock failure detector is for testing, and invokes the passed in
+ * `fn` to decide what `status` to return.
+ */
+private class MockFailureDetector(fn: () => Status) extends FailureDetector {
+  def status: Status = fn()
+}
+
+/**
  * GlobalFlag to configure FailureDetection used only in the
  * absence of any app-specified config. This is the default
  * behavior.
@@ -62,6 +70,12 @@ object FailureDetector {
    * when creating a new detector
    */
   case object NullConfig extends Config
+
+  /**
+   * Indicated to use the [[com.twitter.finagle.liveness.MockFailureDetector]]
+   * when creating a new detector
+   */
+  case class MockConfig(fn: () => Status) extends Config
 
   /**
    * Indicated to use the [[com.twitter.finagle.liveness.ThresholdFailureDetector]]
@@ -111,6 +125,8 @@ object FailureDetector {
   ): FailureDetector = {
     config match {
       case NullConfig => NullFailureDetector
+
+      case MockConfig(fn) => new MockFailureDetector(fn)
 
       case cfg: ThresholdConfig =>
         new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,

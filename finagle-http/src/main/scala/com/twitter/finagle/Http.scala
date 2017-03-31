@@ -220,6 +220,11 @@ object Http extends Client[Request, Response] with HttpRichClient
               case http2: Http2Transporter => http2.close(deadline)
               case _ => Future.Done
             }
+
+            override def status: Status = transporter match {
+              case http2: Http2Transporter => http2.status
+              case _ => super.status
+            }
           }
         }
       )

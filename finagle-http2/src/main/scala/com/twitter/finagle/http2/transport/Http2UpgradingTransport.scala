@@ -1,5 +1,6 @@
 package com.twitter.finagle.http2.transport
 
+import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.{RefTransport, Http2Transporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Promise, Future}
@@ -15,7 +16,8 @@ import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 private[http2] class Http2UpgradingTransport(
     t: Transport[Any, Any],
     ref: RefTransport[Any, Any],
-    p: Promise[Option[MultiplexedTransporter]])
+    p: Promise[Option[MultiplexedTransporter]],
+    params: Stack.Params)
   extends TransportProxy[Any, Any](t) {
 
   import Http2Transporter._
@@ -30,7 +32,7 @@ private[http2] class Http2UpgradingTransport(
     case _@UpgradeEvent.UPGRADE_SUCCESSFUL =>
       val casted =
         Transport.cast[Http2ClientDowngrader.StreamMessage, Http2ClientDowngrader.StreamMessage](t)
-      val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress)
+      val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress, params)
       p.setValue(Some(multiplexed))
       ref.update { _ =>
         unsafeCast(multiplexed.first())

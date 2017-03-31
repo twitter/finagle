@@ -4,8 +4,9 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.MultiplexedTransporter._
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{FailureFlags, Status, StreamClosedException}
+import com.twitter.finagle.{FailureFlags, Status, StreamClosedException, Stack}
 import com.twitter.util.{Await, Future}
 import io.netty.buffer._
 import io.netty.handler.codec.http._
@@ -26,7 +27,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
-    val multi = new MultiplexedTransporter(transport, addr)
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(Int.MaxValue)
 
     val first = multi().get
@@ -44,7 +45,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
-    val multi = new MultiplexedTransporter(transport, addr)
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(Int.MaxValue)
 
     val child = multi().get
@@ -65,7 +66,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
-    val multi = new MultiplexedTransporter(transport, addr)
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(2)
 
     val child = multi().get
@@ -81,7 +82,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
-    val multi = new MultiplexedTransporter(transport, addr)
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
     val child = multi().get
     readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1))
@@ -95,7 +96,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
-    val multi = new MultiplexedTransporter(transport, addr)
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
     val c1, c3 = multi().get
 
@@ -118,5 +119,18 @@ class MultiplexedTransporterTest extends FunSuite {
 
     assert(c1.status == Status.Closed)
     assert(c3.status == Status.Closed)
+  }
+
+  test("MultiplexedTransporter reflects detector status") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val multi = new MultiplexedTransporter(transport, addr, params)
+
+    assert(multi.status == Status.Open)
+    cur = Status.Busy
+    assert(multi.status == Status.Busy)
   }
 }

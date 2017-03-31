@@ -50,7 +50,7 @@ private[finagle] object Http2Transporter {
     } else {
       val underlyingHttp11 = Netty4HttpTransporter(params)(addr)
       val TimerParam(timer) = params[TimerParam]
-      new Http2Transporter(underlying, underlyingHttp11, tlsEnabled, timer)
+      new Http2Transporter(underlying, underlyingHttp11, tlsEnabled, params, timer)
     }
   }
 
@@ -186,6 +186,7 @@ private[finagle] class Http2Transporter(
     underlying: Transporter[Any, Any],
     underlyingHttp11: Transporter[Any, Any],
     alpnUpgrade: Boolean,
+    params: Stack.Params,
     implicit val timer: Timer)
   extends Transporter[Any, Any] with Closable { self =>
 
@@ -278,7 +279,7 @@ private[finagle] class Http2Transporter(
                 p.setValue(None)
               case UpgradeEvent.UPGRADE_SUCCESSFUL =>
                 val casted = Transport.cast[StreamMessage, StreamMessage](trans)
-                p.setValue(Some(new MultiplexedTransporter(casted, trans.remoteAddress)))
+                p.setValue(Some(new MultiplexedTransporter(casted, trans.remoteAddress, params)))
               case msg =>
                 log.error(s"Non-upgrade event detected $msg")
             }
@@ -287,7 +288,7 @@ private[finagle] class Http2Transporter(
           } else {
             val ref = new RefTransport(trans)
             ref.update { t =>
-              new Http2UpgradingTransport(t, ref, p)
+              new Http2UpgradingTransport(t, ref, p, params)
             }
             Future.value(ref)
           }
@@ -320,5 +321,18 @@ private[finagle] class Http2Transporter(
     if (f == null) Future.Done
     // TODO: shouldn't rescue on timeout
     else f.flatMap(maybeClose).by(deadline).rescue { case exn: Throwable => Future.Done }
+  }
+
+  def status: Status = {
+    val f = cachedConnection.get
+
+    // Status.Open is a good default since this is just here to do liveness checks with Ping.
+    // We assume all other failure detection is handled up the chain.
+    if (f == null) Status.Open else {
+      f.poll match {
+        case Some(Return(Some(multi))) => multi.status
+        case _ => Status.Open
+      }
+    }
   }
 }

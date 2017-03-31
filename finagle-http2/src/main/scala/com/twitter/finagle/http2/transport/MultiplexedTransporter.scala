@@ -1,9 +1,11 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{Status, StreamClosedException, FailureFlags}
+import com.twitter.finagle.{Status, StreamClosedException, FailureFlags, Stack, Failure}
 import com.twitter.finagle.http.filter.HttpNackFilter.{RetryableNackFailure, NonRetryableNackFailure}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
+import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.{Logger, HasLogLevel, Level}
@@ -28,7 +30,8 @@ import scala.collection.JavaConverters._
  */
 private[http2] class MultiplexedTransporter(
     underlying: Transport[StreamMessage, StreamMessage],
-    addr: SocketAddress)
+    addr: SocketAddress,
+    params: Stack.Params)
   extends (() => Try[Transport[HttpObject, HttpObject]]) with Closable { self =>
 
   import MultiplexedTransporter._
@@ -48,7 +51,21 @@ private[http2] class MultiplexedTransporter(
   // exposed for testing
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
 
+  private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
+  private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val pingPromise = new AtomicReference[Promise[Unit]]()
+
+  private[this] def ping(): Future[Unit] = {
+    val done = new Promise[Unit]
+    if (pingPromise.compareAndSet(null, done)) {
+      underlying.write(Ping).before(done)
+    } else {
+      FuturePingNack
+    }
+  }
+
+  private[this] val detector =
+    FailureDetector(detectorConfig, ping, statsReceiver.scope("failuredetector"))
 
   private[this] def handleGoaway(obj: HttpObject, lastStreamId: Int): Unit = self.synchronized {
     dead = true
@@ -147,6 +164,8 @@ private[http2] class MultiplexedTransporter(
   def onClose: Future[Throwable] = underlying.onClose
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
+
+  def status: Status = detector.status
 
   /**
    * ChildTransport represents a single http/2 stream at a time.  Once the stream
@@ -292,6 +311,9 @@ private[http2] class MultiplexedTransporter(
 }
 
 private[http2] object MultiplexedTransporter {
+  val FuturePingNack: Future[Nothing] = Future.exception(Failure(
+    "A ping is already outstanding on this session."))
+
   class DeadConnectionException(
       addr: SocketAddress,
       private[finagle] val flags: Long)

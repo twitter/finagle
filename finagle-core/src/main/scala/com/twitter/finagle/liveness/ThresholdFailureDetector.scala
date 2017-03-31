@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicReference
  * The threshold failure detector uses session pings to gauge the health
  * of a peer. It sends ping messages periodically and records their RTTs.
  *
- * The session is marked [[Status.Busy]] until the first successful ping
- * response has been received.
+ * The session is marked [[Status.Open]] until it starts slowing or failing.
  *
  * If a ping has been sent and has been outstanding for a time greater
  * than the threshold multiplied by max ping latency over a number of
@@ -57,8 +56,8 @@ private class ThresholdFailureDetector(
   // The timestamp of the last ping, in nanoseconds.
   @volatile private[this] var timestampNs: Long = 0L
 
-  // start as busy, and become open after receiving the first ping response
-  private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Busy)
+  // start as open
+  private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Open)
 
   private[this] val onBusyTimeout: Throwable => Unit =
     x => x match {
@@ -91,9 +90,11 @@ private class ThresholdFailureDetector(
     val p = ping()
 
     val max = maxPingNs.get
-    val busyTimeout = (threshold * max).toLong.nanoseconds
 
-    p.within(busyTimeout).onFailure(onBusyTimeout)
+    if (max != WindowedMax.InitialValue) {
+      val busyTimeout = (threshold * max).toLong.nanoseconds
+      p.within(busyTimeout).onFailure(onBusyTimeout)
+    }
 
     p.within(closeTimeout).transform {
       case Return(_) =>
@@ -123,8 +124,8 @@ private class ThresholdFailureDetector(
  * @param windowSize the size of the window to keep track of
  */
 private[liveness] class WindowedMax(windowSize: Int) {
-  @volatile private[this] var currentMax: Long = Long.MinValue
-  private[this] val buf: Array[Long] = Array.fill(windowSize)(Long.MinValue)
+  @volatile private[this] var currentMax: Long = WindowedMax.InitialValue
+  private[this] val buf: Array[Long] = Array.fill(windowSize)(WindowedMax.InitialValue)
   private[this] var index: Int = 0
 
   // Amortized 0(1)
@@ -152,4 +153,8 @@ private[liveness] class WindowedMax(windowSize: Int) {
 
   // O(1)
   def get: Long = currentMax
+}
+
+private object WindowedMax {
+  val InitialValue: Long = Long.MinValue
 }

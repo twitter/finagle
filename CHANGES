@@ -22,6 +22,9 @@ New Features
     making clients that don't need a transporter and dispatcher. This simplifies
     making non-netty clients. ``RB_ID=912889``
 
+  * finagle-http2: Add support for liveness detection via pings.  It can be configured
+    the same way as it is in mux. ``RB_ID=913341``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
