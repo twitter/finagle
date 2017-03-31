@@ -7,6 +7,7 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/io/netty:netty4',
+    '3rdparty/jvm/io/netty:netty4-codec',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-http2',
