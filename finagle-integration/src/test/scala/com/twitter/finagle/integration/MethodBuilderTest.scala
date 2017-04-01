@@ -68,7 +68,6 @@ class MethodBuilderTest extends FunSuite {
     http.Response()
   )
 
-  if (!sys.props.contains("SKIP_FLAKY"))
   testTotalTimeout(
     "HTTP/2",
     Http.server.configuredParams(Http2),
@@ -131,7 +130,6 @@ class MethodBuilderTest extends FunSuite {
     http.Response()
   )
 
-  if (!sys.props.contains("SKIP_FLAKY"))
   testPerRequestTimeout(
     "HTTP/2",
     Http.server.configuredParams(Http2),

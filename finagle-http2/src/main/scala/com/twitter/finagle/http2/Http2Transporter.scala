@@ -209,6 +209,11 @@ private[finagle] class Http2Transporter(
 
   protected[this] val cachedConnection = new AtomicReference[Future[Option[MultiplexedTransporter]]]()
 
+  private[this] def tryEvict(f: Future[Option[MultiplexedTransporter]]): Unit = {
+    // kick us out of the cache so we can try to reestablish the connection
+    cachedConnection.compareAndSet(f, null)
+  }
+
   private[this] def useExistingConnection(
     f: Future[Option[MultiplexedTransporter]]
   ): Future[Transport[Any, Any]] = f.transform {
@@ -220,9 +225,7 @@ private[finagle] class Http2Transporter(
             exn,
             s"A previously successful connection to address $remoteAddress stopped being successful."
           )
-
-          // kick us out of the cache so we can try to reestablish the connection
-          cachedConnection.set(null)
+          tryEvict(f)
 
           // we expect finagle to treat this specially and retry if possible
           deadTransport(exn)
@@ -232,9 +235,7 @@ private[finagle] class Http2Transporter(
       underlyingHttp11()
     case Throw(exn) =>
       log.warning(exn, s"A cached connection to address $remoteAddress was failed.")
-
-      // kick us out of the cache so we can try to reestablish the connection
-      cachedConnection.set(null)
+      tryEvict(f)
       Future.exception(exn)
   }
 
@@ -267,10 +268,14 @@ private[finagle] class Http2Transporter(
     val conn: Future[Transport[Any, Any]] = underlying()
     val p = Promise[Option[MultiplexedTransporter]]()
     if (cachedConnection.compareAndSet(null, p)) {
+      p.onFailure { case NonFatal(exn) =>
+        log.warning(exn, s"An upgrade attempt to $remoteAddress failed.")
+        tryEvict(p)
+      }
       conn.transform {
         case Return(trans) =>
           trans.onClose.ensure {
-            cachedConnection.compareAndSet(p, null)
+            tryEvict(p)
           }
 
           if (alpnUpgrade) {
@@ -294,7 +299,7 @@ private[finagle] class Http2Transporter(
           }
 
         case Throw(e) =>
-          cachedConnection.compareAndSet(p, null)
+          tryEvict(p)
           p.setException(e)
           Future.exception(e)
       }
