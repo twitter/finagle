@@ -55,7 +55,7 @@ private[finagle] object Netty4Transporter {
     def remoteAddress: SocketAddress = addr
 
     // Exports N4-related metrics under `finagle/netty4`.
-    exportNetty4Metrics()
+    exportNetty4MetricsAndRegistryEntries()
 
     def apply(): Future[Transport[In, Out]] = {
       trackReferenceLeaks.init
