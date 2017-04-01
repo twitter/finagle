@@ -4,6 +4,10 @@ import com.twitter.util.tunable.{JsonTunableMapper, NullTunableMap, ServiceLoade
   TunableMap}
 import com.twitter.finagle.server.ServerInfo
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.function.{Function => JFunction}
+import scala.collection.JavaConverters._
+
 /**
  * Object used for getting the [[TunableMap]] for a given `id`. This [[TunableMap]] is composed
  * from 3 sources, in order of priority:
@@ -20,9 +24,22 @@ import com.twitter.finagle.server.ServerInfo
  *  i.  Instance-specific
  *  i.  All instances
  *
- *  A new composed [[TunableMap]] is returned on each `apply`.
  */
 private[twitter] object StandardTunableMap {
+
+  private[this] val clientMaps = new ConcurrentHashMap[String, TunableMap]()
+
+  private[this] def composeMap(mutable: TunableMap, serverInfo: ServerInfo) =
+    new JFunction[String, TunableMap] {
+      def apply(id: String): TunableMap = {
+        val json = loadJsonConfig(id, serverInfo)
+        TunableMap.of(
+          mutable,
+          ServiceLoadedTunableMap(id),
+          json
+        )
+      }
+    }
 
   def apply(id: String): TunableMap =
     apply(id, ServerInfo(), TunableMap.newMutable())
@@ -32,14 +49,15 @@ private[twitter] object StandardTunableMap {
     id: String,
     serverInfo: ServerInfo,
     mutable: TunableMap
-  ): TunableMap = {
-    val json = loadJsonConfig(id, serverInfo)
-    TunableMap.of(
-      mutable,
-      ServiceLoadedTunableMap(id),
-      json
-    )
-  }
+  ): TunableMap =
+    clientMaps.computeIfAbsent(id, composeMap(mutable, serverInfo))
+
+  /**
+   * Returns all registered [[TunableMap TunableMaps]] that have been
+   * created by [[apply]], keyed by `id`.
+   */
+  def registeredIds: Map[String, TunableMap] =
+    clientMaps.asScala.toMap
 
   /**
    * Load [[TunableMap]]s from JSON configuration files. We look for the following files in the

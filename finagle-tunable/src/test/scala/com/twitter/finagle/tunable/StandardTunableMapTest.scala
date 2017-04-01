@@ -15,6 +15,13 @@ class StandardTunableMapTestClient extends ServiceLoadedTunableMap with TunableM
 
 class StandardTunableMapTest extends FunSuite {
 
+  test("Application returns the same map for the same id") {
+     val map1 = StandardTunableMap("foo")
+     val map2 = StandardTunableMap("foo")
+
+     assert(map1 eq map2)
+   }
+
   test("composes in-memory, service-loaded, and file-based tunable maps") {
     val inMemory = TunableMap.newMutable()
     inMemory.put("com.twitter.util.tunable.InMemory", "in memory")
