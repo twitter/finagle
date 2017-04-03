@@ -3,9 +3,10 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Future, Stopwatch, Throw, Try}
-import java.util.concurrent.TimeUnit
+import com.twitter.util._
 import java.util.concurrent.atomic.LongAdder
+import java.util.concurrent.TimeUnit
+import scala.util.control.NonFatal
 
 object StatsFilter {
   val role: Stack.Role = Stack.Role("RequestStats")
@@ -158,7 +159,14 @@ class StatsFilter[Req, Rep](
     val elapsed = Stopwatch.start()
 
     outstandingRequestCount.increment()
-    service(request).respond { response =>
+
+    val result = try {
+      service(request)
+    } catch { case NonFatal(e) =>
+      Future.exception(e)
+    }
+
+    result.respond { response =>
       outstandingRequestCount.decrement()
       if (!isBlackholeResponse(response)) {
         dispatchCount.incr()
