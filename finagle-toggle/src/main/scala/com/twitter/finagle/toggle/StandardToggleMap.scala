@@ -95,9 +95,9 @@ object StandardToggleMap {
     Toggle.validateId(libraryName)
 
     val svcsJson = loadJsonConfig(
-      libraryName, s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
+      s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
     val libsJson = loadJsonConfig(
-      libraryName, libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
+      libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -115,16 +115,15 @@ object StandardToggleMap {
   }
 
   private[this] def loadJsonConfig(
-    libraryName: String,
     configName: String,
     serverInfo: ServerInfo,
     descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
-    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName, descriptionMode)
+    val withoutEnv = loadJsonConfigWithEnv(configName, descriptionMode)
     val withEnv = serverInfo.environment match {
       case Some(env) =>
         val e = env.toString.toLowerCase
-        loadJsonConfigWithEnv(libraryName, s"$configName-$e", descriptionMode)
+        loadJsonConfigWithEnv(s"$configName-$e", descriptionMode)
       case None =>
         NullToggleMap
     }
@@ -167,7 +166,6 @@ object StandardToggleMap {
   }
 
   private[this] def loadJsonConfigWithEnv(
-    libraryName: String,
     configName: String,
     descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
