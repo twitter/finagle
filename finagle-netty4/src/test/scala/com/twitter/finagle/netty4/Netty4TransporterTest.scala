@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.{Failure, ReadTimedOutException, WriteTimedOutException}
+import com.twitter.finagle.{ConnectionFailedException, Failure, ReadTimedOutException, WriteTimedOutException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.framer.TestFramer
 import com.twitter.finagle.transport.Transport
@@ -57,10 +57,15 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     val exc = intercept[Failure] {
       Await.result(p, Duration.fromSeconds(15))
     }
-    assert(exc.flags == (Failure.Restartable | Failure.Rejected))
-    intercept[java.net.SocketException] {
-      throw exc.cause.get
+
+    exc match {
+      case Failure(Some(e: ConnectionFailedException)) =>
+        assert(e.getCause.isInstanceOf[java.net.SocketException])
+
+      case other => fail(s"Expected ConnectionFailedException wrapped in a Failure, found $other")
     }
+
+
   }
 
   test("interrupts on read cut connections") {

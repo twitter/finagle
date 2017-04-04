@@ -6,8 +6,9 @@ import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Failure, Stack}
+import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, Stack}
 import com.twitter.io.Buf
+import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.PooledByteBufAllocator
@@ -33,12 +34,6 @@ private[finagle] object Netty4Transporter {
     implicit val param: Stack.Param[Backpressure] =
       Stack.Param(Backpressure(backpressure = true))
   }
-
-  // this is marked as rejected for historical reasons--we marked it as a WriteException
-  // in the netty3 implementation, and we don't want to change behavior when moving to
-  // netty4.
-  private[this] val CancelledConnectionEstablishment =
-    Failure.rejected("connection establishment was cancelled")
 
   private[this] def build[In, Out](
     init: ChannelInitializer[Channel],
@@ -108,12 +103,15 @@ private[finagle] object Netty4Transporter {
           val latency = elapsed().inMilliseconds
           if (channelF.isCancelled()) {
             cancelledConnects.incr()
-            transportP.setException(CancelledConnectionEstablishment)
+            transportP.setException(Failure(
+              cause = new CancelledConnectionException,
+              flags = Failure.Interrupted | Failure.Restartable,
+              logLevel = Level.DEBUG))
           } else if (channelF.cause != null) {
             failedConnectLatencyStat.add(latency)
             transportP.setException(channelF.cause match {
               case e: UnresolvedAddressException => e
-              case NonFatal(e) => Failure.rejected(e)
+              case NonFatal(e) => Failure.rejected(new ConnectionFailedException(e, addr))
             })
           }
           else {

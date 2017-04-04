@@ -304,8 +304,7 @@ class EndToEndTest extends FunSuite
       // This request fails and is not requeued because there are
       // no Open service factories in the load balancer.
       try await(client.query("ok")) catch {
-        case _: ChannelClosedException => // ok
-        case _: ChannelWriteException => // ok
+        case Failure(Some(_: ConnectionFailedException)) => // ok
       }
 
       // Subsequent requests are failed fast since there are (still) no
@@ -359,8 +358,13 @@ class EndToEndTest extends FunSuite
 
       assert(await(client.query("ok")) == "okok")
       await(server.close())
-      intercept[ChannelWriteException] {
+      val ex = intercept[Failure] {
         await(client.query("ok"))
+      }
+
+      ex match {
+        case Failure(Some(_: ConnectionFailedException)) => ()
+        case other => fail(s"Expected Failure(Some(ConnectionFailedException)) but found $other")
       }
 
       intercept[FailedFastException] {
