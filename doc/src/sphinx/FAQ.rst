@@ -53,12 +53,12 @@ A simplified code snippet that exemplifies the intra-process structure:
        However, this will still hold if the client call was in the context
        of a Future combinator (ex. `Future#select`, `Future#join`, etc.)
 
-This is the source of the :API:`CancelledRequestException <com.twitter.finagle.CancelledRequestException>` --
+This is the source of the :API:`CancelledRequestException <com/twitter/finagle/CancelledRequestException>` --
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception. A special case of this is when a request is in the process
-of establishing a session and is instead interrupted with a :API:`CancelledConnectionException <com.twitter.finagle.CancelledConnectionException>`
+of establishing a session and is instead interrupted with a :API:`CancelledConnectionException <com/twitter/finagle/CancelledConnectionException>`
 
-You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
+You can disable this behavior by using the :API:`MaskCancelFilter <com/twitter/finagle/filter/MaskCancelFilter>`:
 
 .. code-block:: scala
 
@@ -218,7 +218,7 @@ What service behavior will change when upgrading to Mux?
 
 With Mux, Finagle multiplexes several requests onto a single connection. As a
 consequence, traditional forms of connection-pooling are no longer required. Thus
-Mux employs `com.twitter.finagle.pool.SingletonPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool>`_,
+Mux employs :API:`SingletonPool <com/twitter/finagle/pool/SingletonPool>`,
 which exposes new stats:
 
 - ``connects``, ``connections``, and ``closes`` stats should drop, since
@@ -234,7 +234,7 @@ which exposes new stats:
 
 *ClientBuilder configuration*
 
-Certain `ClientBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder>`_
+Certain :API:`ClientBuilder <com/twitter/finagle/builder/ClientBuilder>`
 settings related to connection pooling become obsolete:
 ``hostConnectionCoresize``, ``hostConnectionLimit``, ``hostConnectionIdleTime``,
 ``hostConnectionMaxWaiters``, and ``expHostConnectionBufferSize``
@@ -250,7 +250,7 @@ be impacted:
 - Obsolete stats: ``idle/idle``, ``idle/refused``, and ``idle/closed``
 
 *ServerBuilder configuration*
-Certain `ServerBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder>`_
+Certain :API:`ServerBuilder <com/twitter/finagle/builder/ServerBuilder>`
 connection management settings become obsolete: ``openConnectionsThresholds``.
 
 What is ThriftMux?
@@ -258,5 +258,5 @@ What is ThriftMux?
 
 .. _whats_thriftmux:
 
-`ThriftMux <http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$>`_
+:API:`ThriftMux <com/twitter/finagle/ThriftMux$>`
 is an implementation of the Thrift protocol built on top of Mux.
