@@ -374,7 +374,7 @@ Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeli
 Transporter
 -----------
 
-A :src:`Transporter <com/twitter/finagle/clients/Transporter.scala>` is responsible for connecting
+A :src:`Transporter <com/twitter/finagle/client/Transporter.scala>` is responsible for connecting
 a :ref:`Transport <transport_interface>` to a peer; it establishes a session. Finagle provides
 a :src:`Netty3Transporter <com/twitter/finagle/netty3/Netty3Transporter.scala>` and a
 :finagle-netty4-src:`Netty4Transporter <com/twitter/finagle/netty4/Netty4Transporter.scala>`,

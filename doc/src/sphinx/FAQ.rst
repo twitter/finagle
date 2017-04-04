@@ -56,7 +56,7 @@ A simplified code snippet that exemplifies the intra-process structure:
 This is the source of the :API:`CancelledRequestException <com.twitter.finagle.CancelledRequestException>` --
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception. A special case of this is when a request is in the process
-of establishing a session and is instead interrupted with a :API:`CancelledConnectException <com.twitter.finagle.CancelledConnectException>`
+of establishing a session and is instead interrupted with a :API:`CancelledConnectionException <com.twitter.finagle.CancelledConnectionException>`
 
 You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
 
