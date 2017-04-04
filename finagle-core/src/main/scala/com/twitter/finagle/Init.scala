@@ -2,12 +2,13 @@ package com.twitter.finagle
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
+import com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.FuturePool
-import java.util.Properties
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
+import java.util.Properties
 import scala.util.control.NonFatal
 
 /**
@@ -25,11 +26,19 @@ private[twitter] object Init {
     // because unboundedPool and interruptibleUnboundedPool share a common
     // `ExecutorService`, these metrics apply to both of the FuturePools.
     val pool = FuturePool.unboundedPool
-    val stats = FinagleStatsReceiver.scope("future_pool")
+    val fpoolStats = FinagleStatsReceiver.scope("future_pool")
     Seq(
-      stats.addGauge("pool_size") { pool.poolSize },
-      stats.addGauge("active_tasks") { pool.numActiveTasks },
-      stats.addGauge("completed_tasks") { pool.numCompletedTasks }
+      fpoolStats.addGauge("pool_size") { pool.poolSize },
+      fpoolStats.addGauge("active_tasks") { pool.numActiveTasks },
+      fpoolStats.addGauge("completed_tasks") { pool.numCompletedTasks },
+      FinagleStatsReceiver.addGauge("aperture_coordinate") {
+        DeterministicOrdering() match {
+          case Some(coord) => coord.toFloat
+          // We know the coordinate's range is [-1, 1], so anything outside
+          // of this can be used to signify empty.
+          case None => -2f
+        }
+      }
     )
   }
 

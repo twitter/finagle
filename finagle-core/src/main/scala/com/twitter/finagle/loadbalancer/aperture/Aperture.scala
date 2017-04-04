@@ -102,14 +102,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     statsReceiver.addGauge("aperture") { aperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (useDeterministicOrdering) 1F else 0F
-    },
-    statsReceiver.addGauge("coordinate") {
-      // Note, we defer to the distributor to read the coordinate
-      // because we'd like to the know last value it ordered by.
-      dist.coordinate match {
-        case Some(coord) => coord.toFloat
-        case None => 0f
-      }
     }
   )
 
@@ -142,7 +134,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected class Distributor(
       vector: Vector[Node],
       originalVector: Vector[Node],
-      val coordinate: Option[Double],
       initAperture: Int)
     extends DistributorT[Node](vector)
     with P2CPick[Node] {
@@ -215,13 +206,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      */
     def rebuild(vec: Vector[Node]): This = {
       if (vec.isEmpty) {
-        new Distributor(vec, vec, coordinate, aperture)
+        new Distributor(vec, vec, aperture)
       } else {
         DeterministicOrdering() match {
           case someCoord@Some(coord) if useDeterministicOrdering =>
-            new Distributor(ringOrder(vec, coord), vec, someCoord, aperture)
+            new Distributor(ringOrder(vec, coord), vec, aperture)
           case _ =>
-            new Distributor(tokenOrder(vec), vec, coordinate, aperture)
+            new Distributor(tokenOrder(vec), vec, aperture)
         }
       }
     }
@@ -236,7 +227,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   }
 
   protected def initDistributor(): Distributor =
-    new Distributor(Vector.empty, Vector.empty, None, 1)
+    new Distributor(Vector.empty, Vector.empty, 1)
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())
