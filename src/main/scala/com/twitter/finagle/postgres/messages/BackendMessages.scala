@@ -77,6 +77,8 @@ case object Begin extends CommandCompleteStatus
 
 case object Savepoint extends CommandCompleteStatus
 
+case object Release extends CommandCompleteStatus
+
 case object RollBack extends CommandCompleteStatus
 
 case object Commit extends CommandCompleteStatus

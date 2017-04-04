@@ -95,10 +95,8 @@ class ConnectionStateMachine(state: State = AuthenticationRequired, val id: Int)
     case (CommandComplete(Update(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(Delete(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(DiscardAll), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(Begin), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(Savepoint), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(RollBack), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
-    case (CommandComplete(Commit), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(Begin | Savepoint | Release | RollBack | Commit), SimpleQuery) =>
+      (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(Do), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
 
     case (RowDescription(fields), SimpleQuery) =>
