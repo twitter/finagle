@@ -11,7 +11,7 @@ import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter, H
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.logging.Logger
+import com.twitter.logging.{Logger, HasLogLevel, Level}
 import com.twitter.util._
 import io.netty.channel.{
   ChannelHandlerContext,
@@ -269,7 +269,11 @@ private[finagle] class Http2Transporter(
     val p = Promise[Option[MultiplexedTransporter]]()
     if (cachedConnection.compareAndSet(null, p)) {
       p.onFailure { case NonFatal(exn) =>
-        log.warning(exn, s"An upgrade attempt to $remoteAddress failed.")
+        val level = exn match {
+          case HasLogLevel(level) => level
+          case _ => Level.WARNING
+        }
+        log.log(level, exn, s"An upgrade attempt to $remoteAddress failed.")
         tryEvict(p)
       }
       conn.transform {

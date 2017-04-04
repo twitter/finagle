@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.{FailureFlags, Stack}
 import com.twitter.finagle.http2.{RefTransport, Http2Transporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Promise, Future, Time, Return, Throw}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 
@@ -56,8 +57,10 @@ private object Http2UpgradingTransport {
   class ClosedWhileUpgradingException(
       private[finagle] val flags: Long = FailureFlags.Empty)
     extends Exception("h2c transport was closed while upgrading")
+    with HasLogLevel
     with FailureFlags[ClosedWhileUpgradingException] {
 
+    def logLevel: Level = Level.DEBUG // this happens often on interrupts, so let's be quiet
     protected def copyWithFlags(newFlags: Long): ClosedWhileUpgradingException =
       new ClosedWhileUpgradingException(newFlags)
   }
