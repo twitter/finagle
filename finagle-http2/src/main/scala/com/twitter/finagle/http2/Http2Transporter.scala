@@ -117,6 +117,7 @@ private[finagle] object Http2Transporter {
 
       val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
       val Transport.ClientSsl(config) = params[Transport.ClientSsl]
+      val HeaderSensitivity(sensitivityDetector) = params[HeaderSensitivity]
       val tlsEnabled = config.isDefined
 
       if (tlsEnabled) {
@@ -127,6 +128,11 @@ private[finagle] object Http2Transporter {
             // need to stop buffering after we've sent the connection preface
             pipeline.remove(buffer)
           }
+          .headerSensitivityDetector(new Http2HeadersEncoder.SensitivityDetector {
+            def isSensitive(name: CharSequence, value: CharSequence): Boolean = {
+              sensitivityDetector(name, value)
+            }
+          })
           .build()
         pipeline.addLast("alpn", new ClientNpnOrAlpnHandler(connectionHandler, params))
         pipeline.addLast("buffer", buffer)
