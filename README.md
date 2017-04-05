@@ -35,7 +35,7 @@ protocols.
 
 For extensive documentation, please see the
 [user guide](https://twitter.github.io/finagle/guide/) and
-[API documentation](https://twitter.github.io/finagle/docs/#com.twitter.finagle.package)
+[API documentation](https://twitter.github.io/finagle/docs/com/twitter/finagle)
 websites. Documentation improvements are always welcome, so please send patches
 our way.
 

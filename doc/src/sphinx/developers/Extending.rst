@@ -30,7 +30,7 @@ Stack
 
 Finagle's clients and servers comprise many relatively simple
 components, arranged together in a stack. Each component is a
-:api:`ServiceFactory <com.twitter.finagle.ServiceFactory>` that
+:api:`ServiceFactory <com/twitter/finagle/ServiceFactory>` that
 composes other service factories. We've seen this before:
 :doc:`filters <ServicesAndFilters>` are a kind of component.
 
@@ -49,22 +49,22 @@ becomes onerous; it become very difficult to:
 - parameterize each component, for example to set the sizes of
   connection pools
 - inject dependencies such as
-  :util:`StatsReceiver <com.twitter.finagle.stats.StatsReceiver>` implementations
+  :util:`StatsReceiver <com/twitter/finagle/stats/StatsReceiver>` implementations
 - rearrange any part of the stack, for example to remove an
   unused timeout filter
 - modify the stack for a specific use, for example to replace
   the connection pooling implementation or the load balancer
 
 Traditionally, the :api:`ClientBuilder
-<com.twitter.finagle.builder.ClientBuilder>` and :api:`ServerBuilder
-<com.twitter.finagle.builder.ServerBuilder>` performed this duty in
+<com/twitter/finagle/builder/ClientBuilder>` and :api:`ServerBuilder
+<com/twitter/finagle/builder/ServerBuilder>` performed this duty in
 the manner just described. While it worked well for a while, it
 ultimately proved inflexible. With the needs and requirements of the
 various protocol implementations like :ref:`Mux's <mux>`, as well as
 more sophisticated new features, the builders became unworkable
 monoliths.
 
-:api:`Stack <com.twitter.finagle.Stack>` formalizes the concept of a
+:api:`Stack <com/twitter/finagle/Stack>` formalizes the concept of a
 *stackable* component and treats a sequence of stackable components as
 a first-class (immutable) value that may be manipulated like any other
 collection. For example, modules may be inserted or removed from the
@@ -72,7 +72,7 @@ stack; you can map one stack to another, for example when
 parameterizing individual modules.
 
 The stack abstraction also formalizes the concept of a *parameter*—i.e.
-a map of values used to construct an object. :api:`Stack.Params <com.twitter.finagle.Stack$.Params>`
+a map of values used to construct an object. :api:`Stack.Params <com/twitter/finagle/Stack$$Params>`
 is a kind of type-safe map used to hold parameters.
 
 ``Stack`` and ``Param`` work together like this: ``Stack`` represents the stack
@@ -82,8 +82,8 @@ to extract the final ``ServiceFactory`` that represents the entirety of the stac
 we simply call ``stack.make(params)``.
 
 Finagle defines default (polymorphic) stacks for both
-:api:`clients <com.twitter.finagle.client.StackClient$@newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>` and
-:api:`servers <com.twitter.finagle.server.StackServer$@newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>`.
+:api:`clients <com/twitter/finagle/client/StackClient$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>` and
+:api:`servers <com/twitter/finagle/server/StackServer$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]>`.
 
 We'll now discuss the constituent parts of Finagle's clients and servers.
 
@@ -374,7 +374,7 @@ Netty 4 `ChannelPipeline <http://netty.io/4.1/api/io/netty/channel/ChannelPipeli
 Transporter
 -----------
 
-A :src:`Transporter <com/twitter/finagle/clients/Transporter.scala>` is responsible for connecting
+A :src:`Transporter <com/twitter/finagle/client/Transporter.scala>` is responsible for connecting
 a :ref:`Transport <transport_interface>` to a peer; it establishes a session. Finagle provides
 a :src:`Netty3Transporter <com/twitter/finagle/netty3/Netty3Transporter.scala>` and a
 :finagle-netty4-src:`Netty4Transporter <com/twitter/finagle/netty4/Netty4Transporter.scala>`,
