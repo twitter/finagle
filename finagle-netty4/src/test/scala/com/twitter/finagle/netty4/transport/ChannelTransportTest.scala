@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4.transport
 
-import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
@@ -9,14 +8,14 @@ import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
-import javax.net.ssl.{SSLEngine, SSLSession}
+import javax.net.ssl.{SSLSession, SSLEngine}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest extends FunSuite
@@ -228,91 +227,5 @@ class ChannelTransportTest extends FunSuite
     // Called twice to buffer one inbound message to attempt to detect close events
     verify(channel, times(6)).read()
     assert("three" == Await.result(readThree, timeout))
-  }
-
-  test("replacePending fn sees and transforms pending messages on session close") {
-    val seen = collection.mutable.ListBuffer.empty[String]
-    val em = new EmbeddedChannel
-    val releaseFn: Any => Any = {
-      case m: String => seen.append(m); m.reverse
-      case other => fail(s"Unexpected message: $other")
-    }
-    val ct = Transport.cast[String, String](new ChannelTransport(em, replacePending = releaseFn))
-
-    em.writeInbound("one")
-    em.writeInbound("two")
-    em.writeInbound("three")
-
-    Await.ready(ct.close(), 1.second)
-    assert(seen.toList == List("one", "two", "three"))
-
-
-    assert(Await.result(ct.read(), 1.second) == "one".reverse)
-    assert(Await.result(ct.read(), 1.second) == "two".reverse)
-    assert(Await.result(ct.read(), 1.second) == "three".reverse)
-  }
-
-  test("releaseMessage fn sees failed offers") {
-    var failedMsgSeen: String = null
-    val em = new EmbeddedChannel
-    val q = new AsyncQueue[Any](maxPendingOffers = 1)
-    val releaseFn: Any => Unit = {
-      case s: String => failedMsgSeen = s
-      case other => fail(s"Unexptected tye")
-    }
-    val ct = Transport.cast[String, String](new ChannelTransport(em, releaseMessage = releaseFn) {
-      override val queue = q
-    })
-
-    assert(q.offer("full")) // backing async queue is now full
-
-    em.writeInbound("doomed")
-
-    assert(failedMsgSeen == "doomed")
-
-    // channel transport is consequently failed
-    assert(ct.status == Status.Closed)
-  }
-
-  test("buffered messages are not flushed on transport shutdown") {
-    val em = new EmbeddedChannel
-    val ct = Transport.cast[String, String](new ChannelTransport(em))
-    em.writeInbound("one")
-    Await.ready(ct.close())
-    assert(Await.result(ct.read(), 1.second) == "one")
-  }
-
-  test("buffered messages are not flushed on exceptions") {
-    val em = new EmbeddedChannel
-    val ct = Transport.cast[String, String](new ChannelTransport(em))
-    // buffer a message
-    em.writeInbound("one")
-
-    // channel failure -> transport is failed
-    em.pipeline().fireExceptionCaught(new Exception("boom"))
-    assert(ct.status == Status.Closed)
-
-    assert(Await.result(ct.read(), 1.second) == "one")
-  }
-
-  test("pending transport reads are failed on channel close") {
-    val em = new EmbeddedChannel
-    val ct = Transport.cast[String, String](new ChannelTransport(em))
-    val read = ct.read()
-    Await.ready(ct.close(), 1.second)
-    intercept[ChannelClosedException] { Await.result(read, 1.second) }
-  }
-
-  test("disabling autoread midstream is safe") {
-    val em = new EmbeddedChannel
-    em.config.setAutoRead(true)
-    val ct = new ChannelTransport(em)
-    val transport = Transport.cast[String, String](ct)
-    val f = ct.read()
-    em.config.setAutoRead(false)
-
-    em.writeInbound("one")
-
-    assert(ct.ReadManager.getMsgsNeeded == 0)
   }
 }
