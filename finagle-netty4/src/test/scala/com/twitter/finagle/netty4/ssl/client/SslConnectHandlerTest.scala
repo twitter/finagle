@@ -1,15 +1,15 @@
-package com.twitter.finagle.netty4.ssl
+package com.twitter.finagle.netty4.ssl.client
 
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
-import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, OneInstancePerTest}
-import org.scalatest.junit.JUnitRunner
-import org.mockito.Mockito._
 import java.net.InetSocketAddress
 import javax.net.ssl.{SSLEngine, SSLSession}
+import org.junit.runner.RunWith
+import org.mockito.Mockito._
+import org.scalatest.{FunSuite, OneInstancePerTest}
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
@@ -30,7 +30,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
   }
 
   test("success") {
-    channel.pipeline().addFirst(new SslConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -46,7 +46,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
 
   test("failed session validation") {
     val e = new Exception("whoa")
-    channel.pipeline().addFirst(new SslConnectHandler(sslHandler, _ => Some(e)))
+    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => Some(e)))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -61,7 +61,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
   }
 
   test("cancelled after connected") {
-    channel.pipeline().addFirst(new SslConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -72,7 +72,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
   }
 
   test("failed handshake") {
-    channel.pipeline().addFirst(new SslConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 

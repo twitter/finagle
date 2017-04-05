@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
 import io.netty.channel._
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 
 /**
  * This trait provides [[GenericFutureListener]]s that are useful for implementing handlers
@@ -10,7 +10,7 @@ import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
  *
  * For example, this is used by:
  *
- * - [[com.twitter.finagle.netty4.ssl.SslConnectHandler]]
+ * - [[com.twitter.finagle.netty4.ssl.client.SslClientConnectHandler]
  * - [[com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler]]
  * - [[com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler]]
  */

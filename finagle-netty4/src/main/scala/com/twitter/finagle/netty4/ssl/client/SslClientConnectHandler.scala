@@ -1,9 +1,9 @@
-package com.twitter.finagle.netty4.ssl
+package com.twitter.finagle.netty4.ssl.client
 
-import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
+import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.net.SocketAddress
 import javax.net.ssl.SSLSession
 
@@ -14,7 +14,7 @@ import javax.net.ssl.SSLSession
  * If `sessionValidation` returns `Some` exception, an [[SSLSession]] considered invalid and the
  * connect promise failed with this exception and the channel is closed.
  */
-private[netty4] class SslConnectHandler(
+private[netty4] class SslClientConnectHandler(
     ssl: SslHandler,
     sessionValidation: SSLSession => Option[Throwable])
   extends ChannelOutboundHandlerAdapter

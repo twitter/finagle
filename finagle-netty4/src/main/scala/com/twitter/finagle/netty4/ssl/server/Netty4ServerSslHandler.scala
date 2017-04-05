@@ -53,8 +53,13 @@ private[netty4] class Netty4ServerSslHandler(
     // create an `SslHandler`.
     new SslHandler(engine.self)
 
-  private[this] def addHandlerToPipeline(pipeline: ChannelPipeline, sslHandler: SslHandler): Unit =
+  private[this] def addHandlersToPipeline(pipeline: ChannelPipeline,
+    sslHandler: SslHandler,
+    sslConnectHandler: SslServerConnectHandler
+  ): Unit = {
+    pipeline.addFirst("sslConnect", sslConnectHandler)
     pipeline.addFirst("ssl", sslHandler)
+  }
 
   /**
    * In this method, an `Engine` is created by an `SslServerEngineFactory` via
@@ -69,7 +74,7 @@ private[netty4] class Netty4ServerSslHandler(
       val combined: SslServerConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      addHandlerToPipeline(ch.pipeline(), sslHandler)
+      addHandlersToPipeline(ch.pipeline(), sslHandler, new SslServerConnectHandler(sslHandler))
     }
   }
 }
