@@ -80,7 +80,7 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
   }
 
   override def build(): RichHttpToHttp2ConnectionHandler = {
-    super.build()
+    configureEncoder(super.build())
   }
 
   override protected def build(
@@ -89,6 +89,21 @@ private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
     initialSettings: Http2Settings
   ): RichHttpToHttp2ConnectionHandler = {
     val fn = onActiveFn.getOrElse(() => ())
-    new RichHttpToHttp2ConnectionHandler(decoder, encoder, initialSettings, fn)
+    configureEncoder(new RichHttpToHttp2ConnectionHandler(decoder, encoder, initialSettings, fn))
+  }
+
+  private[this] def configureEncoder(
+    handler: RichHttpToHttp2ConnectionHandler
+  ): RichHttpToHttp2ConnectionHandler = {
+    val encoderConfig = handler.encoder.configuration
+    val settings = super.initialSettings
+
+    val maxHeaderSize = settings.maxHeaderListSize
+    if (maxHeaderSize != null) encoderConfig.headersConfiguration.maxHeaderListSize(maxHeaderSize)
+
+    val maxFrameSize = settings.maxFrameSize
+    if (maxFrameSize != null) encoderConfig.frameSizePolicy.maxFrameSize(maxFrameSize)
+
+    handler
   }
 }

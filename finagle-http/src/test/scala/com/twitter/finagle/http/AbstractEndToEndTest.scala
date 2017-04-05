@@ -988,7 +988,7 @@ abstract class AbstractEndToEndTest extends FunSuite
     assert(rep.status == Status.InternalServerError)
   }
 
-  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize") {
+  testIfImplemented(MaxHeaderSize)("client respects MaxHeaderSize in response") {
     val svc = new Service[Request, Response] {
       def apply(request: Request) = {
         val response = Response()
@@ -1006,6 +1006,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       .withMaxHeaderSize(1.kilobyte)
       .withStatsReceiver(NullStatsReceiver)
       .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    initClient(client)
 
     val req = Request("/")
     intercept[TooLongMessageException] {

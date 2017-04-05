@@ -238,8 +238,17 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
 
-    def withMaxHeaderSize(size: StorageUnit): Client =
-      configured(http.param.MaxHeaderSize(size))
+    /**
+     * For HTTP1*, configures the max size of headers
+     * For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
+     * number of uncompressed bytes of header name/values.
+     * These may be set independently via the .configured API.
+     */
+    def withMaxHeaderSize(size: StorageUnit): Client = {
+      this
+        .configured(http.param.MaxHeaderSize(size))
+        .configured(http2.param.MaxHeaderListSize(Some(size)))
+    }
 
     /**
      * Configures the maximum initial line length the client can

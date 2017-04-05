@@ -28,9 +28,8 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
     msg: HttpObject,
     streamId: Int
   ): Unit = {
-    val combiner = new PromiseCombiner()
-
     try {
+      val combiner = new PromiseCombiner()
       msg match {
         case req: HttpRequest =>
           val headers = HttpConversionUtil.toHttp2Headers(req, false /* validateHeaders */)
@@ -68,8 +67,8 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           }
         case _ => // nop
       }
+      combiner.finish(promise)
     } catch {
-
       case e: Http2Exception =>
         val status = if (e.isInstanceOf[HeaderListSizeException])
           HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
@@ -79,12 +78,11 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
           status
         )
         ctx.fireChannelRead(Http2ClientDowngrader.Message(rep, streamId))
+        promise.trySuccess()
+
       case NonFatal(e) =>
-        val p = ctx.newPromise()
-        p.setFailure(e)
-        combiner.add(p)
-    } finally {
-      combiner.finish(promise)
+        promise.setFailure(e)
+
     }
   }
 

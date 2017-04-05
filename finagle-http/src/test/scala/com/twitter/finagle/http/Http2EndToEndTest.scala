@@ -1,8 +1,10 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.storage._
 import com.twitter.finagle
 import com.twitter.finagle.Service
 import com.twitter.util.Future
+import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -52,4 +54,23 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     shouldUpgrade.set(true)
   }
 
+  // TODO: Consolidate behavior between h1 and h2
+  test("Client sets & enforces MaxHeaderSize") {
+    val server = serverImpl()
+      .serve("localhost:*", initService)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withMaxHeaderSize(1.kilobyte)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    initClient(client)
+
+    val req = Request("/")
+    req.headerMap.set("foo", "*" * 2.kilobytes.bytes.toInt)
+    assert(await(client(req)).status == Status.RequestHeaderFieldsTooLarge)
+
+    await(client.close())
+    await(server.close())
+  }
 }
