@@ -47,7 +47,8 @@ class StandardTunableMapTest extends FunSuite {
   test("loadJsonConfig: all possible files exist") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = Some("staging")
-      def id: String = "0"
+      def instanceId: Option[Long] = Some(0)
+      def id: String = "id"
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -68,7 +69,8 @@ class StandardTunableMapTest extends FunSuite {
   test("loadJsonConfig: per-instance-id and all-instances files exists") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = None
-      def id: String = "0"
+      def instanceId: Option[Long] = Some(0)
+      def id: String = "id"
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -85,7 +87,8 @@ class StandardTunableMapTest extends FunSuite {
   test("loadJsonConfig: per-environment all-instances and all-instances files exist") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = Some("staging")
-      def id: String = "1"
+      def instanceId: Option[Long] = None
+      def id: String = "id"
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -102,7 +105,8 @@ class StandardTunableMapTest extends FunSuite {
   test("loadJsonConfig: all-instances file exists") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = None
-      def id: String = "1"
+      def instanceId: Option[Long] = None
+      def id: String = "id"
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdForStandardTunableMapTest", serverInfo)
@@ -117,7 +121,8 @@ class StandardTunableMapTest extends FunSuite {
   test("loadJsonConfig: no files exist") {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = None
-      def id: String = "0"
+      def instanceId: Option[Long] = None
+      def id: String = "id"
     }
 
     val map = StandardTunableMap.loadJsonConfig("IdWithNoFiles", serverInfo)

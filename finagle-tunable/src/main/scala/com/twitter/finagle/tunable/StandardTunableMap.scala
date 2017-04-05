@@ -63,7 +63,7 @@ private[twitter] object StandardTunableMap {
    * Load [[TunableMap]]s from JSON configuration files. We look for the following files in the
    * com/twitter/tunables/`id` directory and compose the resulting [[TunableMap]]s in order of
    * priority, where $env is serverInfo.environment` (if it exists) and $id is
-   * `serverInfo.id`:
+   * the instance id identified in the String `serverInfo.id`:
    *
    * i. $env/instance-$id.json
    * i. $env/instances.json
@@ -71,16 +71,21 @@ private[twitter] object StandardTunableMap {
    * i. instances.json
    */
   private[tunable] def loadJsonConfig(id: String, serverInfo: ServerInfo): TunableMap = {
-    val instanceId = serverInfo.id
+    val environmentOpt = serverInfo.environment
+    val instanceIdOpt = serverInfo.instanceId
 
     val pathTemplate = s"com/twitter/tunables/$id/%sinstance%s.json"
 
-    val envPathParams = serverInfo.environment match {
-      case Some(env) => Seq(Seq(s"$env/", s"-$instanceId"), Seq(s"$env/", "s"))
-      case None => Seq.empty[Seq[String]]
+    val envPathParams = (environmentOpt, instanceIdOpt) match {
+      case (Some(env), Some(id)) => Seq(Seq(s"$env/", s"-$id"), Seq(s"$env/", "s"))
+      case (Some(env), None) => Seq(Seq(s"$env/", "s"))
+      case (None, _) => Seq.empty[Seq[String]]
     }
 
-    val instancePathParams = Seq(Seq("", s"-$instanceId"), Seq("", "s"))
+    val instancePathParams = instanceIdOpt match {
+      case Some(instanceId) => Seq(Seq("", s"-$instanceId"), Seq("", "s"))
+      case None => Seq(Seq("", "s"))
+    }
 
     val pathParams = envPathParams ++ instancePathParams
 

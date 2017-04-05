@@ -25,6 +25,11 @@ abstract class ServerInfo {
    */
   def id: String
 
+  /**
+   * The instance id of the server, if available
+   */
+  def instanceId: Option[Long]
+
 }
 
 object ServerInfo {
@@ -36,6 +41,7 @@ object ServerInfo {
     override def toString: String = "ServerInfo.Empty"
     def environment: Option[String] = None
     val id: String = NetUtil.getLocalHostName()
+    val instanceId: Option[Long] = None
   }
 
   private[this] def registerServerInfo(serverInfo: ServerInfo): Unit =
