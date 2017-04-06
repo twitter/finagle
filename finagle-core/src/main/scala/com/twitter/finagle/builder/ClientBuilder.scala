@@ -110,11 +110,11 @@ object ClientConfig {
   def nilClient[Req, Rep]: StackBasedClient[Req, Rep] = NilClient[Req, Rep]()
 
   // params specific to ClientBuilder
-  private[builder] case class DestName(name: Name) {
+  private[finagle] case class DestName(name: Name) {
     def mk(): (DestName, Stack.Param[DestName]) =
       (this, DestName.param)
   }
-  private[builder] object DestName {
+  private[finagle] object DestName {
     implicit val param = Stack.Param(DestName(Name.empty))
   }
 
@@ -243,7 +243,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-    client: StackBasedClient[Req, Rep]) {
+    private[finagle] val client: StackBasedClient[Req, Rep]) {
   import ClientConfig._
   import com.twitter.finagle.param._
 

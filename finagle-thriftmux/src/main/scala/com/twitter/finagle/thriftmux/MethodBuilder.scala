@@ -2,6 +2,7 @@ package com.twitter.finagle.thriftmux
 
 import com.twitter.finagle.thrift.{ServiceIfaceBuilder, ThriftClientRequest, ThriftServiceIface}
 import com.twitter.finagle._
+import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.util.Duration
@@ -13,6 +14,8 @@ private[finagle] object MethodBuilder {
   import client.MethodBuilder._
 
   /**
+   * Create a [[MethodBuilder]] for a given destination.
+   *
    * Note that metrics will be scoped (e.g. "clnt/your_client_label/method_name").
    *
    * The value for "your_client_label" is taken from the `withLabel` setting
@@ -31,6 +34,8 @@ private[finagle] object MethodBuilder {
     from(Resolver.eval(dest), thriftMuxClient)
 
   /**
+   * Create a [[MethodBuilder]] for a given destination.
+   *
    * Note that metrics will be scoped (e.g. "clnt/your_client_label/method_name").
    *
    * The value for "your_client_label" is taken from the `withLabel` setting
@@ -59,6 +64,47 @@ private[finagle] object MethodBuilder {
       Config.create(thriftMuxClient.stack, params))
     new MethodBuilder(thriftMuxClient, mb)
   }
+
+  /**
+   * '''NOTE:''' Prefer using [[ThriftMux.Client.methodBuilder]] over using
+   * this approach to construction. The functionality is available through
+   * [[ThriftMux.Client]] and [[MethodBuilder]] while addressing the various issues
+   * of `ClientBuilder`.
+   *
+   * Creates a [[MethodBuilder]] from the given [[ClientBuilder]].
+   *
+   * Note that metrics will be scoped (e.g. "clnt/clientbuilders_name/method_name").
+   *
+   * The value for "clientbuilders_name" is taken from the [[ClientBuilder.name]]
+   * configuration, using "client" if unspecified.
+   * The value for "method_name" is set when an method-specific client
+   * is constructed, as in [[MethodBuilder.newServiceIface]].
+   *
+   *  - The [[ClientBuilder.timeout]] configuration will be used as the default
+   *  value for [[MethodBuilder.withTimeoutTotal]].
+   *
+   *  - The [[ClientBuilder.requestTimeout]] configuration will be used as the
+   *  default value for [[MethodBuilder.withTimeoutPerRequest]].
+   *
+   *  - The [[ClientBuilder]] must have been constructed using
+   *  [[ClientBuilder.stack]] passing an instance of a [[ThriftMux.Client]].
+   *
+   *  - The [[ClientBuilder]] metrics scoped to "tries" are not included
+   *  as they are superseded by metrics scoped to "logical".
+   *
+   *  - The [[ClientBuilder]] retry policy will not be applied and must
+   *  be migrated to using [[MethodBuilder.withRetryForClassifier]].
+   */
+  def from(
+    clientBuilder: ClientBuilder[ThriftClientRequest, Array[Byte], ClientConfig.Yes, _, _]
+  ): MethodBuilder = {
+    if (!clientBuilder.params.contains[ClientConfig.DestName])
+      throw new IllegalArgumentException("ClientBuilder must be configured with a dest")
+    val dest = clientBuilder.params[ClientConfig.DestName].name
+    val client = clientBuilder.client.asInstanceOf[ThriftMux.Client]
+    from(dest, client)
+  }
+
 }
 
 /**
