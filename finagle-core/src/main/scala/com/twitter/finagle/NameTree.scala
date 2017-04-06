@@ -200,6 +200,7 @@ object NameTree {
   /**
    * A string parseable by [[com.twitter.finagle.NameTree.read NameTree.read]].
    */
+  @tailrec
   def show[T: Showable](tree: NameTree[T]): String = tree match {
     case Union(Weighted(_, tree)) => show(tree)
     case Alt(tree) => show(tree)
@@ -211,6 +212,7 @@ object NameTree {
     case _ => show1(tree)
   }
 
+  @tailrec
   private def show1[T: Showable](tree: NameTree[T]): String = tree match {
     case Union(Weighted(_, tree)) => show1(tree)
     case Alt(tree) => show1(tree)
@@ -227,6 +229,7 @@ object NameTree {
     case _ => showSimple(tree)
   }
 
+  @tailrec
   private def showSimple[T: Showable](tree: NameTree[T]): String = tree match {
     case Union(Weighted(_, tree)) => showSimple(tree)
     case Alt(tree) => showSimple(tree)
