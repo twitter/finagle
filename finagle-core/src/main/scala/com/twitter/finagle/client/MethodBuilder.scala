@@ -222,24 +222,38 @@ private[finagle] final class MethodBuilder[Req, Rep](
     stackParams[param.Stats].statsReceiver.scope(clientName, name)
   }
 
-  def filters(name: String): Filter.TypeAgnostic = {
+  def filters(methodName: String): Filter.TypeAgnostic = {
     // Ordering of filters:
     // Requests start at the top and traverse down.
     // Responses flow back from the bottom up.
     //
     // - Logical Stats
+    // - Annotate method name for a `Failure`
     // - Total Timeout
     // - Retries
     // - Service (Finagle client's stack, including Per Request Timeout)
 
-    val stats = statsReceiver(name)
+    val stats = statsReceiver(methodName)
     val retries = withRetry
     val timeouts = withTimeout
 
     retries.logicalStatsFilter(stats)
+      .andThen(addFailureSource(methodName))
       .andThen(timeouts.totalFilter)
       .andThen(retries.filter(stats))
       .andThen(timeouts.perRequestFilter)
+  }
+
+  private[this] def addFailureSource(methodName: String) = new Filter.TypeAgnostic {
+    def toFilter[Req1, Rep1]: Filter[Req1, Rep1, Req1, Rep1] = new SimpleFilter[Req1, Rep1] {
+      private[this] val onRescue: PartialFunction[Throwable, Future[Rep1]] = {
+        case f: Failure =>
+          Future.exception(f.withSource(Failure.Source.Method, methodName))
+      }
+
+      def apply(request: Req1, service: Service[Req1, Rep1]): Future[Rep1] =
+        service(request).rescue(onRescue)
+    }
   }
 
   private[this] def registryEntry(): StackRegistry.Entry =

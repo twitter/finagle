@@ -93,7 +93,31 @@ final class Failure private[finagle](
 
 object Failure {
   object Source extends Enumeration {
-    val Service, Role, RemoteInfo = Value
+    val
+      /**
+       * Represents the name of the service.
+       * See [[com.twitter.finagle.filter.ExceptionSourceFilter]]
+       */
+      Service,
+
+      /**
+       * Represents a [[Stack.Role Stack module's role]].
+       */
+      Role,
+
+      /**
+       * Represents the remote info of the upstream caller and/or
+       * downstream backend.
+       * See [[com.twitter.finagle.service.ExceptionRemoteInfoFactory]]
+       */
+      RemoteInfo,
+
+      /**
+       * Represents the name of the method.
+       * See [[com.twitter.finagle.client.MethodBuilder]].
+       */
+      Method
+    = Value
   }
 
   /**

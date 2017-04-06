@@ -291,7 +291,7 @@ class MethodBuilderTest
         param.Label(clientLabel) +
         param.Stats(stats)
 
-    val failure = Failure.apply("some reason", new RuntimeException("welp"))
+    val failure = Failure("some reason", new RuntimeException("welp"))
       .withSource(Failure.Source.Service, "test_service")
     val svc: Service[Int, Int] = new FailedService(failure)
 
@@ -368,6 +368,28 @@ class MethodBuilderTest
     assert(!m2.isAvailable)
     intercept[ServiceClosedException] { Await.result(m2(1), 5.seconds) }
     assert(!svc.isAvailable)
+  }
+
+  test("failures are annotated with the method name") {
+    val params = Stack.Params.empty
+
+    val failure = Failure("some reason", new RuntimeException("welp"))
+    val svc: Service[Int, Int] = new FailedService(failure)
+
+    val stack = Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc))
+    val stackClient = TestStackClient(stack, params)
+
+    val methodBuilder = MethodBuilder.from("destination", stackClient)
+
+    val methodName = "a_method"
+    val client = methodBuilder.newService(methodName)
+
+    // issue a failing request
+    val f = intercept[Failure] {
+      Await.result(client(1), 5.seconds)
+    }
+
+    assert(f.getSource(Failure.Source.Method).contains(methodName))
   }
 
 }
