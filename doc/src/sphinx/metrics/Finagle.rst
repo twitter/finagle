@@ -47,7 +47,7 @@ ClientRegistry
 
 **finagle/clientregistry/size**
   A gauge of the current number of clients registered in the
-  :src:`HashedWheelTimer.Default <com/twitter/finagle/client/ClientRegistry.scala>`.
+  :src:`ClientRegistry <com/twitter/finagle/client/ClientRegistry.scala>`.
 
 Name Resolution
 <<<<<<<<<<<<<<<
