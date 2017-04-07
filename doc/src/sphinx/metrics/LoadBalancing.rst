@@ -22,7 +22,7 @@ All Balancers
 **meanweight**
   A gauge tracking the arithmetic mean of the weights of the endpoints
   being load-balanced across. Does not apply to
-  :src:`HeapBalancer <com/twitter/finagle/loadbalancer/HeapBalancer.scala>`.
+  :src:`HeapLeastLoaded <com/twitter/finagle/loadbalancer/heap/HeapLeastLoaded.scala>`.
 
 **adds**
   A counter of the number of hosts added to the loadbalancer.
