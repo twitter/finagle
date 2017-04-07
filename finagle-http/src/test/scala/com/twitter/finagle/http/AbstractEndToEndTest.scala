@@ -5,6 +5,7 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.http.netty.Bijections
@@ -1229,29 +1230,11 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(client.close())
   }
 
-  test(implName + ": methodBuilder timeouts") {
-    implicit val timer = HashedWheelTimer.Default
-    val svc = new Service[Request, Response] {
-      def apply(req: Request): Future[Response] = {
-        Future.sleep(50.millis).before {
-          val rep = Response()
-          rep.setContentString("ok")
-          Future.value(rep)
-        }
-      }
-    }
-    val server = serverImpl()
-      .withStatsReceiver(NullStatsReceiver)
-      .serve("localhost:*", svc)
-
-    val stats = new InMemoryStatsReceiver()
-    val client = clientImpl()
-      .withStatsReceiver(stats)
-      .configured(com.twitter.finagle.param.Timer(timer))
-      .withLabel("a_label")
-    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    val builder: MethodBuilder = client.methodBuilder(name)
-
+  private def testMethodBuilderTimeouts(
+    stats: InMemoryStatsReceiver,
+    server: ListeningServer,
+    builder: MethodBuilder
+  ): Unit = {
     // these should never complete within the timeout
     val shortTimeout: Service[Request, Response] = builder
       .withTimeoutPerRequest(5.millis)
@@ -1280,17 +1263,15 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
   }
 
-  test(implName + ": methodBuilder retries") {
+  test(implName + ": methodBuilder timeouts from Stack") {
+    implicit val timer = HashedWheelTimer.Default
     val svc = new Service[Request, Response] {
       def apply(req: Request): Future[Response] = {
-        val rep = Response()
-        rep.contentString = req.contentString
-        req.contentString match {
-          case "500" => rep.statusCode = 500
-          case "503" => rep.statusCode = 503
-          case _ => ()
+        Future.sleep(50.millis).before {
+          val rep = Response()
+          rep.setContentString("ok")
+          Future.value(rep)
         }
-        Future.value(rep)
       }
     }
     val server = serverImpl()
@@ -1300,11 +1281,49 @@ abstract class AbstractEndToEndTest extends FunSuite
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
       .withStatsReceiver(stats)
+      .configured(com.twitter.finagle.param.Timer(timer))
       .withLabel("a_label")
-
     val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     val builder: MethodBuilder = client.methodBuilder(name)
 
+    testMethodBuilderTimeouts(stats, server, builder)
+  }
+
+  test(implName + ": methodBuilder timeouts from ClientBuilder") {
+    implicit val timer = HashedWheelTimer.Default
+    val svc = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        Future.sleep(50.millis).before {
+          val rep = Response()
+          rep.setContentString("ok")
+          Future.value(rep)
+        }
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl()
+      .configured(com.twitter.finagle.param.Timer(timer))
+
+    val clientBuilder = ClientBuilder()
+      .reportTo(stats)
+      .name("a_label")
+      .stack(client)
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+
+    val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
+
+    testMethodBuilderTimeouts(stats, server, builder)
+  }
+
+  private[this] def testMethodBuilderRetries(
+    stats: InMemoryStatsReceiver,
+    server: ListeningServer,
+    builder: MethodBuilder
+  ): Unit = {
     val retry500sClassifier: ResponseClassifier = {
       case ReqRep(_, Return(r: Response)) if r.statusCode / 100 == 5 =>
         ResponseClass.RetryableFailure
@@ -1350,6 +1369,65 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     await(Future.join(Seq(retry5xxs.close(), ok503s.close())))
     await(server.close())
+  }
+
+  test(implName + ": methodBuilder retries from Stack") {
+    val svc = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        val rep = Response()
+        rep.contentString = req.contentString
+        req.contentString match {
+          case "500" => rep.statusCode = 500
+          case "503" => rep.statusCode = 503
+          case _ => ()
+        }
+        Future.value(rep)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl()
+      .withStatsReceiver(stats)
+      .withLabel("a_label")
+
+    val name = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    val builder: MethodBuilder = client.methodBuilder(name)
+
+    testMethodBuilderRetries(stats, server, builder)
+  }
+
+  test(implName + ": methodBuilder retries from ClientBuilder") {
+    val svc = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        val rep = Response()
+        rep.contentString = req.contentString
+        req.contentString match {
+          case "500" => rep.statusCode = 500
+          case "503" => rep.statusCode = 503
+          case _ => ()
+        }
+        Future.value(rep)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .serve("localhost:*", svc)
+
+
+    val stats = new InMemoryStatsReceiver()
+    val client = clientImpl()
+    val clientBuilder = ClientBuilder()
+      .reportTo(stats)
+      .name("a_label")
+      .stack(client)
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+
+    val builder: MethodBuilder = MethodBuilder.from(clientBuilder)
+
+    testMethodBuilderRetries(stats, server, builder)
   }
 
 }
