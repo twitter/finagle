@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4
 
+import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.io.Buf
 
 private[finagle] object Bufs {
@@ -28,7 +29,7 @@ private[finagle] object Bufs {
    */
   def copyAndReleaseDirect(msg: Buf): Buf = msg match {
     case bbb: ByteBufAsBuf if bbb.underlying.isDirect =>
-      val res = UnpooledAllocator.heapBuffer(bbb.underlying.readableBytes, bbb.underlying.capacity)
+      val res = Allocator.Unpooled.heapBuffer(bbb.underlying.readableBytes, bbb.underlying.capacity)
       res.writeBytes(bbb.underlying)
       bbb.underlying.release()
       ByteBufAsBuf.Owned(res)

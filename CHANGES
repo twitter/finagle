@@ -150,6 +150,9 @@ New Features
   * finagle-core: SSL/TLS client and server configurations and engine factories have
     been added for finer grained control when using TLS with Finagle. ``RB_ID=907191``
 
+  * finagle-netty4: Introducing a new toggle `com.twitter.finagle.netty4.UsePooling` that
+    enables byte buffers pooling in Netty 4 pipelines. ``RB_ID=912789``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
