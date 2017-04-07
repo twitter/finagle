@@ -73,4 +73,41 @@ class Http2EndToEndTest extends AbstractEndToEndTest {
     await(client.close())
     await(server.close())
   }
+
+  test("H1 related connection headers are stripped") {
+    val connectionHeaders = Seq(
+      "Keep-Alive",
+      "Proxy-Connection",
+      "Upgrade",
+      "Transfer-Encoding",
+      "TE",
+      "custom1",
+      "custom2"
+    )
+    val client = nonStreamingConnect(Service.mk { req: Request =>
+      val res = Response()
+      connectionHeaders.foreach(res.headerMap.add(_, "bad"))
+      res.headerMap.add("Connection", "custom1")
+      res.headerMap.add("Connection", "custom2")
+      res.headerMap.add("ok-header", ":)")
+      Future.value(res)
+    })
+
+    val rh = await(client(Request("/"))).headerMap
+    connectionHeaders.foreach { header =>
+      assert(rh.get(header).isEmpty)
+    }
+    assert(rh.get("ok-header").get == ":)")
+  }
+
+  test("The TE header is allowed iff its value is trailers") {
+    val client = nonStreamingConnect(Service.mk { req: Request =>
+      val res = Response()
+      res.headerMap.add("TE", "trailers")
+      Future.value(res)
+    })
+
+    val rh = await(client(Request("/"))).headerMap
+    assert(rh.get("TE").get == "trailers")
+  }
 }

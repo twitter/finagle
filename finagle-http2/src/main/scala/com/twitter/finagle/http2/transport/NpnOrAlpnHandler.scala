@@ -8,7 +8,6 @@ import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInitializer, Cha
 import io.netty.handler.codec.http2.{
   Http2Codec,
   Http2FrameLogger,
-  Http2ServerDowngrader,
   Http2StreamChannelBootstrap
 }
 import io.netty.handler.logging.LogLevel
@@ -29,7 +28,7 @@ private[http2] class NpnOrAlpnHandler(init: ChannelInitializer[Channel], params:
         val initializer = new ChannelInitializer[Channel] {
           def initChannel(ch: Channel): Unit = {
             ch.pipeline.addLast(new Http2NackHandler)
-            ch.pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
+            ch.pipeline.addLast(new RichHttp2ServerDowngrader(validateHeaders = false))
             initServer(params)(ch.pipeline)
             ch.pipeline.addLast(init)
           }

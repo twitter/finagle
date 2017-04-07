@@ -72,21 +72,19 @@ private[finagle] class HttpServerDispatcher(
    * allowing services to gracefully close the connection through the Connection header mechanism.
    */
   private def setKeepAlive(rep: Response, keepAlive: Boolean): Unit = {
-    val connectionHeader = rep.headerMap.get(Fields.Connection)
-    if (connectionHeader.isEmpty || !"close".equalsIgnoreCase(connectionHeader.get)) {
+    val connectionHeaders = rep.headerMap.getAll(Fields.Connection)
+    if (connectionHeaders.isEmpty || !connectionHeaders.exists("close".equalsIgnoreCase(_))) {
       rep.version match {
-        case Version.Http10 =>
-          if (keepAlive) {
+        case Version.Http10 if keepAlive =>
             rep.headerMap.set(Fields.Connection, "keep-alive")
-          } else {
-            rep.headerMap.remove(Fields.Connection)
-          }
-        case Version.Http11 =>
-          if (keepAlive) {
-            rep.headerMap.remove(Fields.Connection)
-          } else {
-            rep.headerMap.set(Fields.Connection, "close")
-          }
+
+        case Version.Http11 if (!keepAlive) =>
+            // The connection header may contain additional information, so add
+            // rather than set.
+            rep.headerMap.add(Fields.Connection, "close")
+
+        case _ =>
+
       }
     }
   }
