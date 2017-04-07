@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.CRC32
+import java.util.{function => juf}
+import java.{lang => jl}
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.{breakOut, immutable, mutable}
@@ -134,6 +136,9 @@ object ToggleMap {
    */
   def observed(toggleMap: ToggleMap, statsReceiver: StatsReceiver): ToggleMap = {
     new Proxy with Composite {
+      private[this] val lastApplied =
+        new ConcurrentHashMap[String, AtomicReference[jl.Boolean]]()
+
       private[this] val checksum = statsReceiver.addGauge("checksum") {
         // crc32 is not a cryptographic hash, but good enough for our purposes
         // of summarizing the current state of the ToggleMap. we only need it
@@ -166,6 +171,36 @@ object ToggleMap {
 
       def components: Seq[ToggleMap] =
         Seq(underlying)
+
+      // mixes in `Toggle.Captured` to provide visibility into how
+      // toggles are in use at rutime.
+      override def apply(id: String): Toggle[Int] = {
+        val delegate = super.apply(id)
+        new Toggle[Int](delegate.id) with Toggle.Captured {
+          private[this] val last = lastApplied.computeIfAbsent(id,
+            new juf.Function[String, AtomicReference[jl.Boolean]] {
+              def apply(t: String): AtomicReference[jl.Boolean] =
+                new AtomicReference[jl.Boolean](null)
+            }
+          )
+
+          override def toString: String = delegate.toString
+
+          def isDefinedAt(x: Int): Boolean =
+            delegate.isDefinedAt(x)
+
+          def apply(v1: Int): Boolean = {
+            val value = delegate(v1)
+            last.set(jl.Boolean.valueOf(value))
+            value
+          }
+
+          def lastApply: Option[Boolean] = last.get match {
+            case null => None
+            case v => Some(v)
+          }
+        }
+      }
     }
   }
 

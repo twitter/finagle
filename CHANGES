@@ -25,6 +25,9 @@ New Features
   * finagle-http2: Add support for liveness detection via pings.  It can be configured
     the same way as it is in mux. ``RB_ID=913341``
 
+  * finagle-toggle: Standard toggles now track the last value produced from `apply`.
+    These values are visible via TwitterServer's /admin/toggles endpoint. ``RB_ID=913925``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

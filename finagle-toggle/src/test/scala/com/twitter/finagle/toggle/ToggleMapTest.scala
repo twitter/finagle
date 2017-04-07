@@ -48,6 +48,28 @@ class ToggleMapTest extends FunSuite
     assert(state2 == gauge())
   }
 
+  test("ToggleMap.observed produces Toggle.Captured") {
+    val inMem = ToggleMap.newMutable()
+    val tm = ToggleMap.observed(inMem, NullStatsReceiver)
+
+    val name = "com.id"
+    val toggle = tm(name)
+    val capture = toggle.asInstanceOf[Toggle.Captured]
+
+    // starts empty
+    assert(capture.lastApply.isEmpty)
+
+    // observe a false
+    inMem.put(name, 0.0)
+    toggle(55)
+    assert(capture.lastApply.contains(false))
+
+    // observe a true
+    inMem.put(name, 1.0)
+    toggle(55)
+    assert(capture.lastApply.contains(true))
+  }
+
   test("ToggleMap.newMutable toString") {
     val src = "um well excuse me um"
     val m = ToggleMap.newMutable(src)
