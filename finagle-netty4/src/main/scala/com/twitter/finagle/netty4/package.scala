@@ -68,5 +68,5 @@ package object netty4 {
     else
       new UnpooledByteBufAllocator(/* preferDirect */ false, /* disableLeakDetector */ true)
 
-  private[finagle] val DirectToHeapInboundHandlerName = "directToHeap"
+  private[finagle] val AnyToHeapInboundHandlerName = "anyToHeap"
 }

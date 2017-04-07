@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.framer.Framer
-import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
+import com.twitter.finagle.netty4.AnyToHeapInboundHandlerName
 import com.twitter.finagle.netty4.codec.BufCodec
 import com.twitter.finagle.netty4.framer.FrameHandler
 import com.twitter.finagle.Stack
@@ -42,7 +42,7 @@ private[netty4] class Netty4ClientChannelInitializer(
 
     val pipe = ch.pipeline
 
-    pipe.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
+    pipe.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
     pipe.addLast(BufCodecKey, new BufCodec)
 
     framerFactory.foreach { newFramer =>

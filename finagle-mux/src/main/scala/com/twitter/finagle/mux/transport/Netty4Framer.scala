@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.netty4.DirectToHeapInboundHandlerName
-import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
+import com.twitter.finagle.netty4.AnyToHeapInboundHandlerName
+import com.twitter.finagle.netty4.channel.AnyToHeapInboundHandler
 import com.twitter.finagle.netty4.codec.BufCodec
 import io.netty.channel.{ChannelHandler, ChannelPipeline}
 import io.netty.handler.codec.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
@@ -38,8 +38,8 @@ private[mux] abstract class Netty4Framer extends (ChannelPipeline => Unit) {
  * A mux framer which copies all inbound direct buffers onto the heap.
  */
 private[finagle] object CopyingFramer extends Netty4Framer {
-  override def bufferManager: ChannelHandler = DirectToHeapInboundHandler
-  override def bufferManagerName: String = DirectToHeapInboundHandlerName
+  override def bufferManager: ChannelHandler = AnyToHeapInboundHandler
+  override def bufferManagerName: String = AnyToHeapInboundHandlerName
 }
 
 /**

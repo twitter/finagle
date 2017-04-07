@@ -4,8 +4,8 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.http
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler
+import com.twitter.finagle.netty4.{AnyToHeapInboundHandlerName, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.channel.AnyToHeapInboundHandler
 import com.twitter.finagle.netty4.http.handler._
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.server.Listener
@@ -48,7 +48,7 @@ object exp {
       // Map some client related channel exceptions to something meaningful to finagle
       pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
 
-      pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
+      pipeline.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
     }
   }
 
@@ -119,7 +119,7 @@ object exp {
       // We need to handle bad requests as the dispatcher doesn't know how to handle them.
       pipeline.addLast("badRequestHandler", BadRequestHandler)
 
-      pipeline.addLast(DirectToHeapInboundHandlerName, DirectToHeapInboundHandler)
+      pipeline.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
     }
   }
 

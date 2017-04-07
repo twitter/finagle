@@ -7,7 +7,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 
 /**
  * Handler for managing framed inbound Mux buffers. Distinguishes itself from the
- * [[com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler]] by excluding control
+ * [[com.twitter.finagle.netty4.channel.AnyToHeapInboundHandler]] by excluding control
  * messages from copying and putting the onus on the Mux implementation for releasing them.
  *
  * @note Must be installed after the LengthFieldBasedFrameDecoder instance.

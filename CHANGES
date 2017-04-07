@@ -105,6 +105,9 @@ Breaking API Changes
   * finagle-memcached: Remove old `c.t.f.memcached.migration.DarkRead`, and
     `c.t.f.memcached.migration.DarkWrite`. ``RB_ID=911367``
 
+  * finagle-netty4: `DirectToHeapInboundHandler` was renamed to `AnyToHeapInboundHandler`
+    and now copies any inbound buffer (not just directs) on heap.  ``RB_ID=913984``
+
   * finagle-thrift, finagle-thriftmux: Remove rich client/server support for prior
     versions of Scrooge generated code. ``RB_ID=911515``
 
