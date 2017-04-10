@@ -1,6 +1,5 @@
 package com.twitter.finagle.serverset2.addr
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.{Addr, Address}
 import java.net.InetSocketAddress
 import org.scalatest.FunSuite
@@ -34,23 +33,31 @@ class ZkMetadataTest extends FunSuite {
       Address.Inet(InetSocketAddress.createUnresolved("test", 0), metadata)
     }
 
-    val sr = new InMemoryStatsReceiver
-    val fallback = new Ordering[Address] {
-      def compare(a0: Address, a1: Address) = 0
-    }
-    val order = ZkMetadata.addressOrdering(sr, fallback)
-
-    val sorted = addresses.sorted(order)
+    val sorted = addresses.sorted(ZkMetadata.AddressOrdering)
     sorted.indices.foreach { i => assert(addresses(i) == sorted(size - i - 1)) }
-
-    assert(sr.counters(Seq("zk_metadata")) == 9)
 
     val noMetaData: Seq[Address] = addresses.collect {
       case a@Address.Inet(_, _) => a.copy(metadata = Addr.Metadata.empty)
     }
-    val sortedNoMetaData = noMetaData.sorted(order)
+    val sortedNoMetaData = noMetaData.sorted(ZkMetadata.AddressOrdering)
     sortedNoMetaData.indices.foreach { i => assert(noMetaData(i) == sortedNoMetaData(i)) }
+  }
 
-    assert(sr.counters(Seq("fallback")) == 9)
+  test("Heterogenous AddressOrdering") {
+    def newAddress(shardId: Option[Int]): Address = {
+      val metadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardId))
+      Address.Inet(InetSocketAddress.createUnresolved("test", 0), metadata)
+    }
+
+    val addresses: Seq[Address] = Seq(
+      newAddress(None),
+      newAddress(Some(3)),
+      newAddress(Some(2)),
+      newAddress(Some(1)),
+      Address.Inet(InetSocketAddress.createUnresolved("test", 0), Addr.Metadata.empty),
+      Address.Failed(new Exception))
+
+    val sorted = addresses.zipWithIndex.sortBy(_._1)(ZkMetadata.AddressOrdering)
+    assert(sorted.map(_._2) == Seq(3, 2, 1, 0, 4, 5))
   }
 }

@@ -1,6 +1,5 @@
 package com.twitter.finagle.serverset2.addr
 
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Addr, Address}
 
 /**
@@ -23,25 +22,23 @@ object ZkMetadata {
   /**
    * Orders a Finagle [[Address]] based on its [[ZkMetadata]].
    */
-  def addressOrdering(sr: StatsReceiver, fallback: Ordering[Address]): Ordering[Address] =
-    new Ordering[Address] {
-      private[this] val zkMetadataCounter = sr.counter("zk_metadata")
-      private[this] val fallbackCounter = sr.counter("fallback")
-      def compare(a0: Address, a1: Address): Int = (a0, a1) match {
-        case (Address.Inet(_, md0), Address.Inet(_, md1)) =>
-          (fromAddrMetadata(md0), fromAddrMetadata(md1)) match {
-            case (Some(ZkMetadata(Some(id0))), Some(ZkMetadata(Some(id1)))) =>
-              zkMetadataCounter.incr()
-              Integer.compare(id0, id1)
-            case _ =>
-              fallbackCounter.incr()
-              fallback.compare(a0, a1)
-          }
-
-        case _ =>
-          fallbackCounter.incr()
-          fallback.compare(a0, a1)
-      }
+  val AddressOrdering: Ordering[Address] = new Ordering[Address] {
+    def compare(a0: Address, a1: Address): Int = (a0, a1) match {
+      case (Address.Inet(_, md0), Address.Inet(_, md1)) =>
+        (fromAddrMetadata(md0), fromAddrMetadata(md1)) match {
+          case (Some(ZkMetadata(Some(id0))), Some(ZkMetadata(Some(id1)))) =>
+            Integer.compare(id0, id1)
+          // If they don't have two shardIds to compare, we don't really care
+          // about the ordering only that it's consistent.
+          case (Some(ZkMetadata(Some(_))), Some(ZkMetadata(None))) => -1
+          case (Some(ZkMetadata(None)), Some(ZkMetadata(Some(_)))) => 1
+          case (Some(ZkMetadata(None)), Some(ZkMetadata(None))) => 0
+          case (Some(_), None) => -1
+          case (None, Some(_)) => 1
+          case (None, None) => 0
+        }
+      case _ => 0
+    }
   }
 
   /**
