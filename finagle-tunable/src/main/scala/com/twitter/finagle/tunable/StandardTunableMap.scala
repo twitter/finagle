@@ -43,7 +43,7 @@ private[twitter] object StandardTunableMap {
     }
 
   def apply(id: String): TunableMap =
-    apply(id, ServerInfo(), TunableMap.newMutable())
+    apply(id, ServerInfo(), TunableMap.newMutable(s"Mutable($id)"))
 
   // Exposed for testing
   private[tunable] def apply(
