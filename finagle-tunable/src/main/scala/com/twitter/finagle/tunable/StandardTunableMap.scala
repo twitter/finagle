@@ -1,7 +1,6 @@
 package com.twitter.finagle.tunable
 
-import com.twitter.util.tunable.{JsonTunableMapper, NullTunableMap, ServiceLoadedTunableMap,
-  TunableMap}
+import com.twitter.util.tunable.{NullTunableMap, JsonTunableMapper, ServiceLoadedTunableMap, TunableMap}
 import com.twitter.finagle.server.ServerInfo
 
 import java.util.concurrent.ConcurrentHashMap
@@ -62,40 +61,18 @@ private[twitter] object StandardTunableMap {
     clientMaps.asScala.toMap
 
   /**
-   * Load [[TunableMap]]s from JSON configuration files. We look for the following files in the
-   * com/twitter/tunables/`id` directory and compose the resulting [[TunableMap]]s in order of
-   * priority, where $env is serverInfo.environment` (if it exists) and $id is
-   * the instance id identified in the String `serverInfo.id`:
-   *
-   * i. $env/instance-$id.json
-   * i. $env/instances.json
-   * i. instance-$id.json
-   * i. instances.json
+   * Load `TunableMap`s from JSON configuration files and compose them in the path order from
+   * `JsonTunableMapper.pathsByPriority`.
    */
   private[tunable] def loadJsonConfig(id: String, serverInfo: ServerInfo): TunableMap = {
     val environmentOpt = serverInfo.environment
     val instanceIdOpt = serverInfo.instanceId
 
-    val pathTemplate = s"com/twitter/tunables/$id/%sinstance%s.json"
+    val paths = JsonTunableMapper.pathsByPriority(
+      s"com/twitter/tunables/$id/", environmentOpt, instanceIdOpt)
 
-    val envPathParams = (environmentOpt, instanceIdOpt) match {
-      case (Some(env), Some(id)) => Seq(Seq(s"$env/", s"-$id"), Seq(s"$env/", "s"))
-      case (Some(env), None) => Seq(Seq(s"$env/", "s"))
-      case (None, _) => Seq.empty[Seq[String]]
+    paths.foldLeft(NullTunableMap: TunableMap) { case (map, path) =>
+      map.orElse(JsonTunableMapper().loadJsonTunables(id, path))
     }
-
-    val instancePathParams = instanceIdOpt match {
-      case Some(instanceId) => Seq(Seq("", s"-$instanceId"), Seq("", "s"))
-      case None => Seq(Seq("", "s"))
-    }
-
-    val pathParams = envPathParams ++ instancePathParams
-
-    var tunableMap: TunableMap = NullTunableMap
-    pathParams.foreach { params =>
-      val path = pathTemplate.format(params: _*)
-      tunableMap = tunableMap.orElse(JsonTunableMapper().loadJsonTunables(id, path))
-    }
-    tunableMap
   }
 }
