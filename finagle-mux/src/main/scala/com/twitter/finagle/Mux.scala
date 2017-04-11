@@ -8,7 +8,6 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
-import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
@@ -72,18 +71,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     object MuxImpl {
       private val RefCountToggleId: String = "com.twitter.finagle.mux.RefCountControlMessages"
-      private val UseNetty4ToggleId: String = "com.twitter.finagle.mux.UseNetty4"
       private val refCountControlToggle: Toggle[Int] = Toggles(RefCountToggleId)
-      private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
       private def refCountControl: Boolean = refCountControlToggle(ServerInfo().id.hashCode)
-
-      /**
-       * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.
-       */
-      val Netty3 = MuxImpl(
-        params => Netty3Transporter(Netty3Framer, _, params),
-        params => Netty3Listener(Netty3Framer, params))
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
@@ -106,12 +95,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val Netty4RefCountingControl = Netty4
 
       implicit val param = Stack.Param(
-        if (useNetty4) {
-          // note that ref-counting toggle is dependent on n4 toggle.
-          if (refCountControl) Netty4RefCountingControl
-          else Netty4
-        }
-        else Netty3
+        // note that ref-counting toggle is dependent on n4 toggle.
+        if (refCountControl) Netty4RefCountingControl
+        else Netty4
       )
     }
   }

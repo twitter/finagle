@@ -108,6 +108,9 @@ Breaking API Changes
   * finagle-memcached: Remove old `c.t.f.memcached.migration.DarkRead`, and
     `c.t.f.memcached.migration.DarkWrite`. ``RB_ID=911367``
 
+  * finagle-mux: Netty 3 implementation of Mux is removed. Default is
+    Netty 4. ``RB_ID=914239``
+
   * finagle-netty4: `DirectToHeapInboundHandler` was renamed to `AnyToHeapInboundHandler`
     and now copies any inbound buffer (not just directs) on heap.  ``RB_ID=913984``
 
