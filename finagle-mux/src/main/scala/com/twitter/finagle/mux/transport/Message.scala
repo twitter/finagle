@@ -132,8 +132,7 @@ private[twitter] object Message {
       bw.owned()
     }
 
-    def decode(buf: Buf): (Short, Seq[(Buf, Buf)]) = {
-      val br = ByteReader(buf)
+    def decode(br: ByteReader): (Short, Seq[(Buf, Buf)]) = {
       val version = br.readShortBE()
       val headers = new ArrayBuffer[(Buf, Buf)]
       while (br.remaining > 0) {
@@ -461,11 +460,10 @@ private[twitter] object Message {
 
   def encodeString(str: String): Buf = Buf.Utf8(str)
 
-  private def decodeTreq(tag: Int, buf: Buf) = {
-    if (buf.length < 1)
+  private def decodeTreq(tag: Int, br: ByteReader):Treq = {
+    if (br.remaining < 1)
       throwBadMessageException("short Treq")
 
-    val br = ByteReader(buf)
     var nkeys = br.readByte().toInt
     if (nkeys < 0)
       throwBadMessageException("Treq: too many keys")
@@ -546,8 +544,7 @@ private[twitter] object Message {
     contexts
   }
 
-  private def decodeTdispatch(tag: Int, buf: Buf) = {
-    val br = ByteReader(buf)
+  private def decodeTdispatch(tag: Int, br: ByteReader) = {
     val contexts = decodeContexts(br)
     val ndst = br.readShortBE()
     // Path.read("") fails, so special case empty-dst.
@@ -571,8 +568,7 @@ private[twitter] object Message {
     Tdispatch(tag, contexts, dst, dtab, br.readAll())
   }
 
-  private def decodeRdispatch(tag: Int, buf: Buf) = {
-    val br = ByteReader(buf)
+  private def decodeRdispatch(tag: Int, br: ByteReader) = {
     val status = br.readByte()
     val contexts = decodeContexts(br)
     val rest = br.readAll()
@@ -584,10 +580,9 @@ private[twitter] object Message {
     }
   }
 
-  private def decodeRreq(tag: Int, buf: Buf) = {
-    if (buf.length < 1)
-      throwBadMessageException("short Rreq")
-    val br = ByteReader(buf)
+  private def decodeRreq(tag: Int, br: ByteReader) = {
+    if (br.remaining < 1)
+    throwBadMessageException("short Rreq")
     val status = br.readByte()
     val rest = br.readAll()
     status match {
@@ -598,20 +593,18 @@ private[twitter] object Message {
     }
   }
 
-  private def decodeTdiscarded(buf: Buf) = {
-    if (buf.length < 3)
+  private def decodeTdiscarded(br: ByteReader) = {
+    if (br.remaining < 3)
       throwBadMessageException("short Tdiscarded message")
-    val br = ByteReader(buf)
     val which = ((br.readByte() & 0xff) << 16) |
       ((br.readByte() & 0xff) << 8) |
       (br.readByte() & 0xff)
     Tdiscarded(which, decodeUtf8(br.readAll()))
   }
 
-  private def decodeTlease(buf: Buf) = {
-    if (buf.length < 9)
+  private def decodeTlease(br: ByteReader) = {
+    if (br.remaining < 9)
       throwBadMessageException("short Tlease message")
-    val br = ByteReader(buf)
     val unit: Byte = br.readByte()
     val howMuch: Long = br.readLongBE()
     Tlease(unit, howMuch)
@@ -625,39 +618,43 @@ private[twitter] object Message {
    * @note may throw a [[Failure]] wrapped [[BadMessageException]]
    */
   def decode(buf: Buf): Message = {
-    try {
-      if (buf.length < 4) throwBadMessageException(s"short message: ${Buf.slowHexString(buf)}")
-      val br = ByteReader(buf)
-      val head = br.readIntBE()
-      val rest = br.readAll()
-      val typ = Tags.extractType(head)
-      val tag = Tags.extractTag(head)
-      val res = if (Tags.isFragment(tag))
-        Fragment(typ, tag, rest)
-      else typ match {
-        case Types.Tinit =>
-          val (version, ctx) = Init.decode(rest)
-          Tinit(tag, version, ctx)
-        case Types.Rinit =>
-          val (version, ctx) = Init.decode(rest)
-          Rinit(tag, version, ctx)
-        case Types.Treq => decodeTreq(tag, rest)
-        case Types.Rreq => decodeRreq(tag, rest)
-        case Types.Tdispatch => decodeTdispatch(tag, rest)
-        case Types.Rdispatch => decodeRdispatch(tag, rest)
-        case Types.Tdrain => Tdrain(tag)
-        case Types.Rdrain => Rdrain(tag)
-        case Types.Tping => Tping(tag)
-        case Types.Rping => Rping(tag)
-        case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(rest))
-        case Types.Rdiscarded => Rdiscarded(tag)
-        case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(rest)
-        case Types.Tlease => decodeTlease(rest)
-        case unknown => throwBadMessageException(unknownMessageDescription(unknown, tag, rest))
-      }
-      res
-    } finally {
-      Bufs.releaseDirect(buf)
+    try decode(ByteReader(buf))
+    finally Bufs.releaseDirect(buf)
+  }
+
+  /**
+   * Try to decode the contents of a `ByteReader` to [[Message]]. This function
+   * assumes the content of the `ByteReader` represents exactly one message.
+   *
+   * @note may throw a [[Failure]] wrapped [[BadMessageException]]
+   */
+  def decode(byteReader: ByteReader): Message = {
+    if (byteReader.remaining < 4) throwBadMessageException(s"short message: ${Buf.slowHexString(byteReader.readAll())}")
+    val head = byteReader.readIntBE()
+    val typ = Tags.extractType(head)
+    val tag = Tags.extractTag(head)
+
+    if (Tags.isFragment(tag)) Fragment(typ, tag, byteReader.readAll())
+    else typ match {
+      case Types.Tinit =>
+        val (version, ctx) = Init.decode(byteReader)
+        Tinit(tag, version, ctx)
+      case Types.Rinit =>
+        val (version, ctx) = Init.decode(byteReader)
+        Rinit(tag, version, ctx)
+      case Types.Treq => decodeTreq(tag, byteReader)
+      case Types.Rreq => decodeRreq(tag, byteReader)
+      case Types.Tdispatch => decodeTdispatch(tag, byteReader)
+      case Types.Rdispatch => decodeRdispatch(tag, byteReader)
+      case Types.Tdrain => Tdrain(tag)
+      case Types.Rdrain => Rdrain(tag)
+      case Types.Tping => Tping(tag)
+      case Types.Rping => Rping(tag)
+      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(byteReader.readAll()))
+      case Types.Rdiscarded => Rdiscarded(tag)
+      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(byteReader)
+      case Types.Tlease => decodeTlease(byteReader)
+      case unknown => throwBadMessageException(unknownMessageDescription(unknown, tag, byteReader))
     }
   }
 
@@ -681,10 +678,11 @@ private[twitter] object Message {
   private def throwBadMessageException(why: String): Nothing =
     throw Failure.wrap(BadMessageException(why))
 
-  private def unknownMessageDescription(tpe: Byte, tag: Int, payload: Buf): String = {
-    val toWrite = payload.slice(0, 16) // Limit reporting to at most 16 bytes
+  private def unknownMessageDescription(tpe: Byte, tag: Int, payload: ByteReader): String = {
+    val remaining = payload.remaining
+    val toWrite = payload.readBytes(16) // Limit reporting to at most 16 bytes
     val bytesStr = Buf.slowHexString(toWrite)
-    s"unknown message type: $tpe [tag=$tag]. Payload bytes: ${payload.length}. " +
+    s"unknown message type: $tpe [tag=$tag]. Payload bytes: $remaining. " +
       s"First ${toWrite.length} bytes of the payload: '$bytesStr'"
   }
 
