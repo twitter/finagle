@@ -305,13 +305,13 @@ object Http extends Client[Request, Response] with HttpRichClient
     /**
      * '''Experimental:''' This API is under construction.
      */
-    private[finagle] def methodBuilder(dest: String): http.MethodBuilder =
+    def methodBuilder(dest: String): http.MethodBuilder =
       http.MethodBuilder.from(dest, this)
 
     /**
      * '''Experimental:''' This API is under construction.
      */
-    private[finagle] def methodBuilder(dest: Name): http.MethodBuilder =
+    def methodBuilder(dest: Name): http.MethodBuilder =
       http.MethodBuilder.from(dest, this)
 
     // Java-friendly forwarders

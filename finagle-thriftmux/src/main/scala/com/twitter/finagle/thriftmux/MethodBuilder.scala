@@ -10,7 +10,7 @@ import com.twitter.util.Duration
 /**
  * '''Experimental:''' This API is under construction.
  */
-private[finagle] object MethodBuilder {
+object MethodBuilder {
   import client.MethodBuilder._
 
   /**
@@ -150,7 +150,7 @@ private[finagle] object MethodBuilder {
  *
  * @see [[client.MethodBuilderScaladoc]] for documentation.
  */
-private[finagle] class MethodBuilder(
+class MethodBuilder(
     rich: ThriftRichClient,
     mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]])
   extends client.MethodBuilderScaladoc[MethodBuilder] {

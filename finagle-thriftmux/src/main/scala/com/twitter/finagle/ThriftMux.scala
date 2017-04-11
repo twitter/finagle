@@ -251,13 +251,13 @@ object ThriftMux
     /**
      * '''Experimental:''' This API is under construction.
      */
-    private[finagle] def methodBuilder(dest: String): thriftmux.MethodBuilder =
+    def methodBuilder(dest: String): thriftmux.MethodBuilder =
       thriftmux.MethodBuilder.from(dest, this)
 
     /**
      * '''Experimental:''' This API is under construction.
      */
-    private[finagle] def methodBuilder(dest: Name): thriftmux.MethodBuilder =
+    def methodBuilder(dest: Name): thriftmux.MethodBuilder =
       thriftmux.MethodBuilder.from(dest, this)
 
     // Java-friendly forwarders
