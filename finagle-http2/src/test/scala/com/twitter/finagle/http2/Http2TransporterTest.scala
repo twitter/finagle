@@ -23,7 +23,7 @@ class Http2TransporterTest extends FunSuite {
 
   class TestTransport(addr: SocketAddress) extends Transport[Any, Any] {
     private[this] val _onClose = Promise[Throwable]()
-    def write(req: Any): Future[Unit] = Future.never
+    def write(req: Any): Future[Unit] = Future.Done
     def read(): Future[Any] = Future.never
     def status: Status = Status.Open
     def onClose: Future[Throwable] = _onClose
@@ -130,6 +130,8 @@ class Http2TransporterTest extends FunSuite {
     val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
+
+    trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
     await(transporter())
@@ -146,6 +148,8 @@ class Http2TransporterTest extends FunSuite {
     val trans = await(transporter())
     assert(t1.count == 1)
     assert(t2.count == 0)
+
+    trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
     await(transporter())
@@ -168,6 +172,7 @@ class Http2TransporterTest extends FunSuite {
     assert(t2.count == 1)
     assert(http11Trans.status == Status.Open)
 
+    trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
     assert(http11Trans.status == Status.Closed)
@@ -188,6 +193,7 @@ class Http2TransporterTest extends FunSuite {
     assert(t2.count == 1)
     assert(http11Trans.status == Status.Open)
 
+    trans.write(LastHttpContent.EMPTY_LAST_CONTENT)
     assert(await(trans.read()).asInstanceOf[HttpResponse].getStatus == HttpResponseStatus.OK)
 
     assert(http11Trans.status == Status.Open)

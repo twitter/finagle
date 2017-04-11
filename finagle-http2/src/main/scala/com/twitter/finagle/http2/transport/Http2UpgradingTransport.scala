@@ -6,6 +6,8 @@ import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Promise, Future, Time, Return, Throw}
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
+import io.netty.handler.codec.http.LastHttpContent
+import scala.util.control.NonFatal
 
 /**
  * This transport waits for a message that the upgrade has either succeeded or
@@ -23,24 +25,41 @@ private[http2] class Http2UpgradingTransport(
 
   import Http2Transporter._
 
-  def write(any: Any): Future[Unit] = t.write(any)
+  private[this] val finishedWriting = Promise[Unit]
+  finishedWriting.setInterruptHandler { case NonFatal(exn) =>
+    finishedWriting.updateIfEmpty(Throw(exn))
+  }
+
+  def write(any: Any): Future[Unit] = {
+    val result = t.write(any)
+    if (any.isInstanceOf[LastHttpContent])
+      result.respond(finishedWriting.updateIfEmpty _)
+    result
+  }
+
+  private[this] def upgradeRejected(): Unit = synchronized {
+    p.updateIfEmpty(Return.None)
+    // we need ref to update before we can read again
+    ref.update(identity)
+  }
+
+  private[this] def upgradeSuccessful(): Unit = synchronized {
+    val casted =
+      Transport.cast[Http2ClientDowngrader.StreamMessage, Http2ClientDowngrader.StreamMessage](t)
+    val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress, params)
+    p.updateIfEmpty(Return(Some(multiplexed)))
+    ref.update { _ =>
+      unsafeCast(multiplexed.first())
+    }
+  }
+
   def read(): Future[Any] = t.read().flatMap {
     case _@UpgradeEvent.UPGRADE_REJECTED =>
-      synchronized {
-        p.updateIfEmpty(Return(None))
-        // we need ref to update before we can read again
-        ref.update(identity)
-        ref.read()
-      }
+      upgradeRejected()
+      ref.read()
     case _@UpgradeEvent.UPGRADE_SUCCESSFUL =>
-      synchronized {
-        val casted =
-          Transport.cast[Http2ClientDowngrader.StreamMessage, Http2ClientDowngrader.StreamMessage](t)
-        val multiplexed = new MultiplexedTransporter(casted, t.remoteAddress, params)
-        p.updateIfEmpty(Return(Some(multiplexed)))
-        ref.update { _ =>
-          unsafeCast(multiplexed.first())
-        }
+      finishedWriting.before {
+        upgradeSuccessful()
         ref.read()
       }
     case result =>
