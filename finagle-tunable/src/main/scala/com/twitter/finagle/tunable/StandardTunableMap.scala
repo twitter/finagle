@@ -24,6 +24,8 @@ import scala.collection.JavaConverters._
  *  i.  Instance-specific
  *  i.  All instances
  *
+ *  For more information, see
+ *  [[https://twitter.github.io/finagle/guide/Configuration.html#tunables]].
  */
 private[twitter] object StandardTunableMap {
 
