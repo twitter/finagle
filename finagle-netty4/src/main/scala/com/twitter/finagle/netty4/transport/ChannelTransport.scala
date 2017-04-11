@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.{channel => nettyChan}
 import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -12,17 +12,23 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.util.control.NonFatal
 
 /**
- * A [[Transport]] implementation based on Netty's [[Channel]].
+ * A [[Transport]] implementation based on Netty's [[nettyChan.Channel]].
  *
- * Note: During the construction, a `ChannelTransport` inserts the terminating
- * inbound channel handler into the channel's pipeline so any inbound channel
- * handlers inserted after that won't get any of the inbound traffic.
+ * @param ch the underlying netty channel
+ *
+ * @param readQueue the queue used to buffer inbound messages
+ *
+ * @note During the construction, a `ChannelTransport` inserts the terminating
+ *       inbound channel handler into the channel's pipeline so any inbound channel
+ *       handlers inserted after that won't get any of the inbound traffic.
  */
-private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any] {
+private[finagle] class ChannelTransport(
+    ch: nettyChan.Channel,
+    readQueue: AsyncQueue[Any] = new AsyncQueue[Any])
+  extends Transport[Any, Any] {
 
   import ChannelTransport._
 
-  private[this] val queue = new AsyncQueue[Any]
 
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
@@ -30,7 +36,7 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
-      // technically we should decrement `msgsNeeded` here but since we fail
+      // Technically we should decrement `msgsNeeded` here but since we fail
       // the transport on read interrupts, that becomes moot.
       fail(e)
   }
@@ -74,15 +80,13 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
     if (!failed.compareAndSet(false, true))
       return
 
-    // Do not discard existing queue items. Doing so causes a race
-    // between reading off of the transport and a peer closing it.
-    // For example, in HTTP, a remote server may send its content in
-    // many chunks and then promptly close its connection.
-    //
-    // We do have to fail the queue before fail, otherwise control is
+    // We do have to fail the queue before fail exits, otherwise control is
     // returned to netty potentially allowing subsequent offers to the queue,
-    // which should be illegal after failure.
-    queue.fail(exc, discard = false)
+    // which should be illegal after failure. We also do not discard existing
+    // queue items. Doing so causes a race between reading off of the transport
+    // and a peer closing it. For example, in HTTP, a remote server may send its
+    // content in many chunks and then promptly close its connection.
+    readQueue.fail(exc, discard = false)
 
     // Note: we have to fail the queue before fail, otherwise control is
     // returned to netty potentially allowing subsequent offers to the queue,
@@ -95,8 +99,8 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
     val op = ch.writeAndFlush(msg)
 
     val p = new Promise[Unit]
-    op.addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture): Unit =
+    op.addListener(new nettyChan.ChannelFutureListener {
+      def operationComplete(f: nettyChan.ChannelFuture): Unit =
         if (f.isSuccess) p.setDone() else {
           p.setException(ChannelException(f.cause, remoteAddress))
         }
@@ -120,7 +124,7 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
     // not recommended when `p` has interrupt handlers. `become` merges the
     // listeners of two promises, which continue to share state via Linked and
     // is a gain in space-efficiency.
-    p.become(queue.poll())
+    p.become(readQueue.poll())
 
     // Note: We don't raise on queue.poll's future, because it doesn't set an
     // interrupt handler, but perhaps we should; and perhaps we should always
@@ -155,9 +159,9 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
 
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
-  ch.pipeline.addLast(HandlerName, new ChannelInboundHandlerAdapter {
+  ch.pipeline.addLast(HandlerName, new nettyChan.ChannelInboundHandlerAdapter {
 
-    override def channelActive(ctx: ChannelHandlerContext): Unit = {
+    override def channelActive(ctx: nettyChan.ChannelHandlerContext): Unit = {
       // Upon startup we immediately begin the process of buffering at most one inbound
       // message in order to detect channel close events. Otherwise we would have
       // different buffering behavior before and after the first `Transport.read()` event.
@@ -165,22 +169,23 @@ private[finagle] class ChannelTransport(ch: Channel) extends Transport[Any, Any]
       super.channelActive(ctx)
     }
 
-    override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
+    override def channelReadComplete(ctx: nettyChan.ChannelHandlerContext): Unit = {
       // Check to see if we need more data
       ReadManager.readIfNeeded()
       super.channelReadComplete(ctx)
     }
 
-    override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
+    override def channelRead(ctx: nettyChan.ChannelHandlerContext, msg: Any): Unit = {
       ReadManager.decrement()
-      queue.offer(msg)
+
+      readQueue.offer(msg)
     }
 
-    override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+    override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
       fail(new ChannelClosedException(remoteAddress))
     }
 
-    override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable): Unit = {
+    override def exceptionCaught(ctx: nettyChan.ChannelHandlerContext, e: Throwable): Unit = {
       fail(ChannelException(e, remoteAddress))
     }
   })

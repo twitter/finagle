@@ -8,14 +8,14 @@ import io.netty.channel.{ChannelException => _, _}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
-import org.scalatest.{OneInstancePerTest, FunSuite}
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.mockito.Mockito._
 import java.security.cert.Certificate
-import javax.net.ssl.{SSLSession, SSLEngine}
+import javax.net.ssl.{SSLEngine, SSLSession}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest extends FunSuite
@@ -227,5 +227,48 @@ class ChannelTransportTest extends FunSuite
     // Called twice to buffer one inbound message to attempt to detect close events
     verify(channel, times(6)).read()
     assert("three" == Await.result(readThree, timeout))
+  }
+
+
+  test("buffered messages are not flushed on transport shutdown") {
+    val em = new EmbeddedChannel
+    val ct = Transport.cast[String, String](new ChannelTransport(em))
+    em.writeInbound("one")
+    Await.ready(ct.close())
+    assert(Await.result(ct.read(), 1.second) == "one")
+  }
+
+  test("buffered messages are not flushed on exceptions") {
+    val em = new EmbeddedChannel
+    val ct = Transport.cast[String, String](new ChannelTransport(em))
+    // buffer a message
+    em.writeInbound("one")
+
+    // channel failure -> transport is failed
+    em.pipeline().fireExceptionCaught(new Exception("boom"))
+    assert(ct.status == Status.Closed)
+
+    assert(Await.result(ct.read(), 1.second) == "one")
+  }
+
+  test("pending transport reads are failed on channel close") {
+    val em = new EmbeddedChannel
+    val ct = Transport.cast[String, String](new ChannelTransport(em))
+    val read = ct.read()
+    Await.ready(ct.close(), 1.second)
+    intercept[ChannelClosedException] { Await.result(read, 1.second) }
+  }
+
+  test("disabling autoread midstream is safe") {
+    val em = new EmbeddedChannel
+    em.config.setAutoRead(true)
+    val ct = new ChannelTransport(em)
+    val transport = Transport.cast[String, String](ct)
+    val f = ct.read()
+    em.config.setAutoRead(false)
+
+    em.writeInbound("one")
+
+    assert(ct.ReadManager.getMsgsNeeded == 0)
   }
 }
