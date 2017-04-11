@@ -128,13 +128,12 @@ class LoadBalancerFactoryTest extends FunSuite
     }
 
     var orderCalled = false
-    val order: StatsReceiver => Ordering[Address] =
-      _ => new Ordering[Address] {
-        def compare(a0: Address, a1: Address): Int = {
-          orderCalled = true
-          a0.toString.compare(a1.toString)
-        }
+    val order: Ordering[Address] = new Ordering[Address] {
+      def compare(a0: Address, a1: Address): Int = {
+        orderCalled = true
+        a0.toString.compare(a1.toString)
       }
+    }
 
     stack.make(Stack.Params.empty +
       LoadBalancerFactory.Param(mockBalancer) +

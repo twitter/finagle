@@ -105,7 +105,7 @@ object LoadBalancerFactory {
    * See [[defaultAddressOrdering]] for a way to set the ordering for the
    * entire process.
    */
-  case class AddressOrdering(ordering: StatsReceiver => Ordering[Address]) {
+  case class AddressOrdering(ordering: Ordering[Address]) {
     def mk(): (AddressOrdering, Stack.Param[AddressOrdering]) =
       (this, AddressOrdering.param)
   }
@@ -231,10 +231,8 @@ object LoadBalancerFactory {
         // note, we late bind these so that we can read the latest value of
         // `addressOrdering` if it's set to `defaultAddressOrdering`.
         val AddressOrdering(addressOrdering) = params[AddressOrdering]
-        val ordering = addressOrdering(balancerStats.scope("address_ordering"))
-
         val orderedEndpoints = endpoints.map { set =>
-          set.toVector.sortBy(_.address)(ordering)
+          set.toVector.sortBy(_.address)(addressOrdering)
         }
         loadBalancerFactory.newBalancer(orderedEndpoints, balancerStats, balancerExc)
       }

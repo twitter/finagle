@@ -1,7 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.stats.StatsReceiver
-
 /**
  * This package implements client side load balancing algorithms.
  *
@@ -15,9 +13,9 @@ import com.twitter.finagle.stats.StatsReceiver
  */
 package object loadbalancer {
 
-  @volatile private[this] var addressOrdering: StatsReceiver => Ordering[Address] =
-    new Function[StatsReceiver, Ordering[Address]] {
-      def apply(sr: StatsReceiver): Ordering[Address] = Address.OctetOrdering
+  @volatile private[this] var addressOrdering: Ordering[Address] =
+    new Ordering[Address] {
+      def compare(a0: Address, a1: Address): Int = Address.OctetOrdering.compare(a0, a1)
       override def toString: String = "Address.OctetOrdering"
     }
 
@@ -25,13 +23,9 @@ package object loadbalancer {
    * Set the default [[Address]] ordering for the entire process (outside of clients
    * which override it).
    *
-   * @param order A function from [[StatsReceiver]] to an [[Address]] ordering. Note,
-   * the statsReceiver is passed in to allow for per-client stats on the
-   * an ordering.
-   *
    * @see [[LoadBalancerFactory.AddressOrdering]] for more info.
    */
-  def defaultAddressOrdering(order: StatsReceiver => Ordering[Address]): Unit = {
+  def defaultAddressOrdering(order: Ordering[Address]): Unit = {
     addressOrdering = order
   }
 
@@ -42,5 +36,5 @@ package object loadbalancer {
    * load balancer with resolved InetAddresses. If a separate resolution process
    * is used, outside of Finagle, the default ordering should be overriden.
    */
-  def defaultAddressOrdering: StatsReceiver => Ordering[Address] = addressOrdering
+  def defaultAddressOrdering: Ordering[Address] = addressOrdering
 }

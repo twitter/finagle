@@ -48,8 +48,10 @@ object Address {
 
   /**
    * An [[Ordering]] which orders [[Address Addresses]] based on their IP.
-   * This assumes that that the [[Address]] is resolved and returns a
-   * non-deterministic ordering otherwise.
+   *
+   * @note this assumes that that the [[Address]] is resolved and returns a
+   * non-deterministic ordering otherwise or may fail with certain sorting
+   * implementations which require consistent results across comparisons.
    */
   val OctetOrdering: Ordering[Address] = new Ordering[Address] {
     private[this] def compareBytes(ba0: Array[Byte], ba1: Array[Byte]): Int = {

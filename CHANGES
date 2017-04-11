@@ -63,6 +63,9 @@ Breaking API Changes
     construction. This will break the Java API and require the additional param to
     be passed in explicitly.  ``RB_ID=911541``
 
+  * finagle-core: Change the AddressOrdering param to no longer take a StatsReceiver,
+    since orderings were simplified and are no longer composite. ``RB_ID=914113``
+
   * finagle-http: `c.t.f.http.Http` codec has disappeared as part of Netty 4 migration. Use
     `c.t.f.Http.client` or `c.t.f.Http.server` stacks instead. ``RB_ID=912427``
 
