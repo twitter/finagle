@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
 import com.twitter.io.Buf
+import java.util.Date
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -46,6 +47,10 @@ class MessageTest extends FunSuite {
     response.accept = "A,,c;param,;d,;"
     assert(response.accept.toList == "A" :: "c;param" :: ";d" :: ";" :: Nil)
     assert(response.acceptMediaTypes.toList == "a" :: "c" :: Nil)
+
+    assert(response.date == None)
+    response.date = new Date(0L)
+    assert(response.date == Some("Thu, 01 Jan 1970 00:00:00 GMT"))
   }
 
   test("charset") {
@@ -319,5 +324,9 @@ class MessageTest extends FunSuite {
 
     assert(response.contentString == "hello")
     assert(response.length        == 5)
+  }
+
+  test("httpDateFormat"){
+    assert(Message.httpDateFormat(new Date(0L)) == "Thu, 01 Jan 1970 00:00:00 GMT")
   }
 }

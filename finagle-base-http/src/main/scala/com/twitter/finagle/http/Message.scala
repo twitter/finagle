@@ -7,7 +7,7 @@ import com.twitter.util.{Closable, Duration, Future}
 import java.io._
 import java.util.{Iterator => JIterator}
 import java.nio.charset.Charset
-import java.util.{Date, TimeZone}
+import java.util.{Date, Locale, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer.{
@@ -542,7 +542,8 @@ object Message {
   val ContentTypeWwwFrom = ContentTypeWwwForm
 
   private val HttpDateFormat = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss",
-                                                          TimeZone.getTimeZone("GMT"))
+                                                          TimeZone.getTimeZone("GMT"),
+                                                          Locale.ENGLISH)
   def httpDateFormat(date: Date): String =
     HttpDateFormat.format(date) + " GMT"
 }
