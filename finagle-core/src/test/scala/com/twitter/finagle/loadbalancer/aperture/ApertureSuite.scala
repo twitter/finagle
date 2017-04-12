@@ -18,7 +18,7 @@ trait ApertureSuite {
     protected val emptyException = new Empty
     protected val maxEffort = 5
     protected def statsReceiver = NullStatsReceiver
-    protected val minAperture = 1
+    protected def minAperture = 1
     protected val useDeterministicOrdering = false
 
     protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")

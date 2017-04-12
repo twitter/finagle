@@ -29,25 +29,18 @@ import java.util.concurrent.atomic.AtomicReference
  */
 object DeterministicOrdering {
   /**
-   * An [[Event]] which tracks the current process coordinate.
+   * An ADT which represents the process coordinate.
    */
-  private[this] val coordinate: Event[Option[Double]] with Witness[Option[Double]] = Event()
-  private[this] val ref: AtomicReference[Option[Double]] = new AtomicReference(None)
-  coordinate.register(Witness(ref))
+  sealed trait Coord {
+    /**
+     * Returns a double between the range [-1.0, 1.0] which represents this
+     * process' coordinate on the coordinate space shared with its peers.
+     */
+    def value: Double
+  }
 
   /**
-   * An [[Event]] which triggers every time the process coordinate changes. This exposes
-   * a push based API for the coordinate.
-   */
-  val changes: Event[Option[Double]] = coordinate.dedup
-
-  /**
-   * Returns the current coordinate, if there is one set.
-   */
-  def apply(): Option[Double] = ref.get
-
-  /**
-   * Globally set the coordinate for this process.
+   * Defines a coordinate from a process' instance id.
    *
    * The coordinate is calculated between the range [-1.0, 1.0] and is primarily
    * a function of `instanceId` and `totalInstances`. The latter dictates the size of
@@ -68,12 +61,45 @@ object DeterministicOrdering {
    * @param totalInstances The total number of instances in this process' peer
    * cluster.
    */
+  case class FromInstanceId(
+      offset: Int,
+      instanceId: Int,
+      totalInstances: Int)
+    extends Coord {
+    require(totalInstances > 0, s"totalInstances expected to be > 0 but was $totalInstances")
+    val value: Double = {
+      val unit: Double = 1.0D / totalInstances
+      val normalizedOffset: Double = offset / Int.MaxValue.toDouble
+      (instanceId * unit + normalizedOffset) % 1.0D
+    }
+  }
+
+  /**
+   * An [[Event]] which tracks the current process coordinate.
+   */
+  private[this] val coordinate: Event[Option[Coord]] with Witness[Option[Coord]] = Event()
+  private[this] val ref: AtomicReference[Option[Coord]] = new AtomicReference(None)
+  coordinate.register(Witness(ref))
+
+  /**
+   * An [[Event]] which triggers every time the process coordinate changes. This exposes
+   * a push based API for the coordinate.
+   */
+  val changes: Event[Option[Coord]] = coordinate.dedup
+
+  /**
+   * Returns the current coordinate, if there is one set.
+   */
+  def apply(): Option[Coord] = ref.get
+
+  /**
+   * Globally set the coordinate for this process from the respective instance
+   * metadata.
+   *
+   * @see [[FromInstanceId]] for more details.
+   */
   def setCoordinate(offset: Int, instanceId: Int, totalInstances: Int): Unit = {
-    require(totalInstances > 0, "totalInstances must be > 0")
-    val unit: Double = 1.0D / totalInstances
-    val normalizedOffset: Double = offset / Int.MaxValue.toDouble
-    val coord: Double = (instanceId * unit + normalizedOffset) % 1.0D
-    coordinate.notify(Some(coord))
+    coordinate.notify(Some(FromInstanceId(offset, instanceId, totalInstances)))
   }
 
   /**
@@ -81,6 +107,6 @@ object DeterministicOrdering {
    * uses [[Aperture]] to derive a random ordering.
    */
   def unsetCoordinate(): Unit = {
-    coordinate.notify(None: Option[Double])
+    coordinate.notify(None)
   }
 }

@@ -53,6 +53,7 @@ private object Aperture {
  */
 private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self =>
   import Aperture._
+  import DeterministicOrdering._
 
   /**
    * The random number generator used to pick two nodes for
@@ -134,14 +135,38 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected class Distributor(
       vector: Vector[Node],
       originalVector: Vector[Node],
+      coordinate: Option[Coord],
       initAperture: Int)
     extends DistributorT[Node](vector)
     with P2CPick[Node] {
 
     type This = Distributor
 
-    private[this] val max = vector.size
-    private[this] val min = math.min(minAperture, vector.size)
+    private[this] val max: Int = vector.size
+    private[this] val min: Int = {
+      val default = math.min(minAperture, vector.size)
+      if (!useDeterministicOrdering) default else {
+        coordinate match {
+          // We want to additionally ensure that we get full ring coverage
+          // when there are fewer clients than servers. For example, imagine the
+          // degenerate case where we have a min aperture of size 1 and fewer
+          // clients than servers – we know that we will at most cover `size` of
+          // of the `vector.size` server ring. Thus, we need an aperture size
+          // of `vector.size` / `size`.
+          case Some(FromInstanceId(_, _, size)) if size < vector.size =>
+            val minSize: Double = vector.size / size.toDouble
+            // Since `minSize` can be fractional we do our best to approximate
+            // the size of the min size needed to cover the entire server ring.
+            // Technically, we could make this "perfect" by taking the fractional
+            // bit and translating that to a percentage of the peer group ceiling
+            // the value and the remainder flooring it, but we avoid the added
+            // complexity by just ceiling for everyone.
+            math.max(default, math.ceil(minSize).toInt)
+
+          case _ => default
+        }
+      }
+    }
 
     // We are guaranteed that writes to aperture are serialized since
     // we only expose them via the narrow, widen, etc. methods above. Those
@@ -200,19 +225,19 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      *
      * 1. If `useDeterministicOrdering` is set to true and [[DeterministicOrdering]]
      * has a coordinate set, then the coordinate is used which gives the
-     * distributor a well-defined, deterministic, order across process boundaries.
+     * distributor a well-defined, deterministic order across process boundaries.
      *
      * 2. Otherwise, the vector is sorted by a node's token field.
      */
     def rebuild(vec: Vector[Node]): This = {
       if (vec.isEmpty) {
-        new Distributor(vec, vec, aperture)
+        new Distributor(vec, vec, coordinate, aperture)
       } else {
         DeterministicOrdering() match {
           case someCoord@Some(coord) if useDeterministicOrdering =>
-            new Distributor(ringOrder(vec, coord), vec, aperture)
+            new Distributor(ringOrder(vec, coord.value), vec, someCoord, aperture)
           case _ =>
-            new Distributor(tokenOrder(vec), vec, aperture)
+            new Distributor(tokenOrder(vec), vec, None, aperture)
         }
       }
     }
@@ -227,7 +252,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   }
 
   protected def initDistributor(): Distributor =
-    new Distributor(Vector.empty, Vector.empty, 1)
+    new Distributor(Vector.empty, Vector.empty, None, 1)
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())

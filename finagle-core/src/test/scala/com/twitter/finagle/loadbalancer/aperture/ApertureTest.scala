@@ -242,4 +242,31 @@ class ApertureTest extends FunSuite with ApertureSuite {
       assert(order.indices.forall { i => order(i) == bal.distx.vector(i) })
     }
   }
+
+  test("min aperture when using DeterministicOrdering") {
+    var min: Int = 1
+    val bal = new Bal {
+      override protected def minAperture = min
+      override protected val useDeterministicOrdering = true
+    }
+
+    val numServers = 20
+    val numClients = 6
+    val offset = 0
+
+    bal.update(Vector.tabulate(numServers) { i => new Factory(i) })
+
+    for (i <- 0 until numClients) {
+      DeterministicOrdering.setCoordinate(offset, i, numClients)
+      assert(bal.aperturex == math.ceil(numServers / numClients.toDouble))
+    }
+
+    // still respect the min passed in by the user so long as it's greater
+    // than the min required to cover the ring.
+    min = numClients
+    for (i <- 0 until numClients) {
+      DeterministicOrdering.setCoordinate(offset, i, numClients)
+      assert(bal.aperturex == numClients)
+    }
+  }
 }

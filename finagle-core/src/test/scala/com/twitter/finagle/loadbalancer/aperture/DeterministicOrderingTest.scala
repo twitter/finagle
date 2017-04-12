@@ -4,8 +4,10 @@ import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class DeterministicOrderingTest extends FunSuite with GeneratorDrivenPropertyChecks {
+  import DeterministicOrdering._
+
   test("update coordinate") {
-    var coordinate: Option[Double] = None
+    var coordinate: Option[Coord] = None
     val closable = DeterministicOrdering.changes.respond(coordinate = _)
     DeterministicOrdering.setCoordinate(1, 2, 10)
     assert(coordinate.isDefined)
@@ -13,7 +15,7 @@ class DeterministicOrderingTest extends FunSuite with GeneratorDrivenPropertyChe
     assert(DeterministicOrdering() == coordinate)
 
     DeterministicOrdering.unsetCoordinate()
-    assert(!coordinate.isDefined)
+    assert(coordinate.isEmpty)
   }
 
   test("setCoordinate") {
@@ -37,7 +39,7 @@ class DeterministicOrderingTest extends FunSuite with GeneratorDrivenPropertyChe
         DeterministicOrdering.setCoordinate(offset, instanceId, numInstances)
         val sample = DeterministicOrdering()
         assert(sample.isDefined)
-        assert(sample.get >= -1.0 && sample.get <= 1.0)
+        assert(sample.get.value >= -1.0 && sample.get.value <= 1.0)
       }
     }
   }

@@ -33,8 +33,8 @@ private[twitter] object Init {
       fpoolStats.addGauge("completed_tasks") { pool.numCompletedTasks },
       FinagleStatsReceiver.addGauge("aperture_coordinate") {
         DeterministicOrdering() match {
-          case Some(coord) => coord.toFloat
-          // We know the coordinate's range is [-1, 1], so anything outside
+          case Some(coord) => coord.value.toFloat
+          // We know the coordinate's range is [-1.0, 1.0], so anything outside
           // of this can be used to signify empty.
           case None => -2f
         }
