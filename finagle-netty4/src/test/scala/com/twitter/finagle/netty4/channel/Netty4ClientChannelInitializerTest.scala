@@ -1,7 +1,10 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Stack
 import com.twitter.finagle.Stack.Params
+import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler
 import com.twitter.util.{Await, Promise}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
@@ -9,6 +12,7 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -65,5 +69,15 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
     val seen = new Array[Byte](3)
     Await.result(msgSeen, 5.seconds).readBytes(seen)
     assert(seen.toList == bytes.reverse.toList)
+  }
+
+  test("abstract channel initializer bypasses SOCKS5 proxied connections to localhost") {
+    val proxyParams = Stack.Params.empty +
+      Transporter.SocksProxy(Some(new InetSocketAddress(0)), None)
+    val init = new AbstractNetty4ClientChannelInitializer(proxyParams) {}
+    val e = new EmbeddedChannel(init)
+    e.connect(new InetSocketAddress("localhost", 12345))
+    assert(e.pipeline.get(classOf[Netty4ProxyConnectHandler]) == null)
+    assert(!e.finish())
   }
 }

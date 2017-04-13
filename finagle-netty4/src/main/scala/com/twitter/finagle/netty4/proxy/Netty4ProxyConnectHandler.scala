@@ -22,29 +22,25 @@ import java.net.{InetSocketAddress, SocketAddress}
  *       is placed before.
  */
 private[netty4] class Netty4ProxyConnectHandler(
-    proxyHandler: ProxyHandler)
+    proxyHandler: ProxyHandler,
+    bypassLocalhostConnections: Boolean = false)
   extends ChannelOutboundHandlerAdapter with ConnectPromiseDelayListeners { self =>
 
-  private[this] val proxyCodecKey: String = "netty4ProxyCodec"
-  private[this] var connectPromise: NettyFuture[Channel] = _
+  private[this] final val proxyCodecKey: String = "netty4ProxyCodec"
 
-  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
-    connectPromise = proxyHandler.connectFuture()
-    ctx.pipeline().addBefore(ctx.name(), proxyCodecKey, proxyHandler)
-    super.handlerAdded(ctx)
-  }
+  private[this] final def shouldBypassProxy(isa: InetSocketAddress): Boolean =
+    bypassLocalhostConnections && !isa.isUnresolved &&
+      (isa.getAddress.isLoopbackAddress || isa.getAddress.isLinkLocalAddress)
 
-  override def handlerRemoved(ctx: ChannelHandlerContext): Unit = {
-    ctx.pipeline().remove(proxyCodecKey)
-    super.handlerRemoved(ctx)
-  }
-
-  override def connect(
+  private[this] final def connectThroughProxy(
     ctx: ChannelHandlerContext,
     remote: SocketAddress,
     local: SocketAddress,
     promise: ChannelPromise
   ): Unit = {
+    // Upgrade the pipeline with the proxy codec pieces.
+    ctx.pipeline().addBefore(ctx.name(), proxyCodecKey, proxyHandler)
+
     val proxyConnectPromise = ctx.newPromise()
 
     // Cancel new promise if an original one is canceled.
@@ -58,13 +54,14 @@ private[netty4] class Netty4ProxyConnectHandler(
     proxyConnectPromise.addListener(proxyFailuresTo(promise))
 
     // React on satisfied proxy handshake promise.
-    connectPromise.addListener(new GenericFutureListener[NettyFuture[Channel]] {
+    proxyHandler.connectFuture.addListener(new GenericFutureListener[NettyFuture[Channel]] {
       override def operationComplete(future: NettyFuture[Channel]): Unit = {
         if (future.isSuccess) {
           // We "try" because it might be already cancelled and we don't need to handle
           // cancellations here - it's already done by `proxyCancellationsTo`.
           // Same thing about `tryFailure` below.
           if (promise.trySuccess()) {
+            ctx.pipeline().remove(proxyCodecKey)
             ctx.pipeline().remove(self)
           }
         } else {
@@ -75,18 +72,30 @@ private[netty4] class Netty4ProxyConnectHandler(
       }
     })
 
-    // We're replacing resolved InetSocketAddress with unresolved one such that
-    // Netty's `HttpProxyHandler` will prefer hostname over the IP address as a destination
-    // for a proxy server. This is a safer way to do HTTP proxy handshakes since not
-    // all HTTP proxy servers allow for IP addresses to be passed as destinations/host headers.
-    val unresolvedRemote = remote match {
-      case isa: InetSocketAddress if !isa.isUnresolved =>
-        InetSocketAddress.createUnresolved(isa.getHostName, isa.getPort)
-      case _ =>
-        remote
-    }
+    ctx.connect(remote, local, proxyConnectPromise)
+  }
 
-    ctx.connect(unresolvedRemote, local, proxyConnectPromise)
+  override def connect(
+    ctx: ChannelHandlerContext,
+    remote: SocketAddress,
+    local: SocketAddress,
+    promise: ChannelPromise
+  ): Unit = remote match {
+      case isa: InetSocketAddress if shouldBypassProxy(isa) =>
+        // We're bypassing proxies for any localhost connections.
+        ctx.pipeline().remove(self)
+        ctx.connect(remote, local, promise)
+
+      case isa: InetSocketAddress if !isa.isUnresolved =>
+        // We're replacing resolved InetSocketAddress with unresolved one such that
+        // Netty's `HttpProxyHandler` will prefer hostname over the IP address as a destination
+        // for a proxy server. This is a safer way to do HTTP proxy handshakes since not
+        // all HTTP proxy servers allow for IP addresses to be passed as destinations/host headers.
+        val unresolvedRemote = InetSocketAddress.createUnresolved(isa.getHostName, isa.getPort)
+        connectThroughProxy(ctx, unresolvedRemote, local, promise)
+
+      case _ =>
+        connectThroughProxy(ctx, remote, local, promise)
   }
 
   // We don't override either `exceptionCaught` or `channelInactive` here since `ProxyHandler`

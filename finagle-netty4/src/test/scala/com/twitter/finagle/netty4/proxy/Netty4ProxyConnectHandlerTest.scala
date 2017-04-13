@@ -33,18 +33,11 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     (hd, ch)
   }
 
-  test("upgrades/downgrades the pipeline") {
-    assert(channel.pipeline().get(classOf[ProxyHandler]) != null)
-    channel.pipeline().remove(handler)
-    assert(channel.pipeline().get(classOf[ProxyHandler]) == null)
-  }
-
   test("success") {
     val promise = channel.connect(fakeAddress)
     assert(!promise.isDone)
 
     channel.writeOutbound("foo")
-    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
     channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
 
     assert(channel.readOutbound[Any]() == null)
@@ -62,7 +55,6 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     assert(!promise.isDone)
 
     channel.writeOutbound("foo")
-    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
     channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
 
     assert(channel.readOutbound[String]() == null)

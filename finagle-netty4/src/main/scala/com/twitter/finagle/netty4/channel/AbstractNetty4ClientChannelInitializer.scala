@@ -84,7 +84,8 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
         case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
       }
 
-      pipe.addFirst("socksProxyConnect", new Netty4ProxyConnectHandler(proxyHandler))
+        pipe.addFirst("socksProxyConnect",
+          new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = true))
     }
 
     // HTTP proxy via `Netty4ProxyConnectHandler`.
@@ -94,6 +95,8 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
         case Some(c) => new HttpProxyHandler(sa, c.username, c.password)
       }
 
+      // TODO: Figure out if it makes sense to bypass localhost connections when HTTP proxy is
+      // enabled (see CSL-4409).
       pipe.addFirst("httpProxyConnect", new Netty4ProxyConnectHandler(proxyHandler))
     }
 

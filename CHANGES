@@ -137,6 +137,10 @@ Runtime Behavior Changes
   * finagle-netty4: Finagle is no longer logging the failed proxy handshake response.
     ``RB_ID=913358``
 
+  * finagle-netty4: SOCKS5 proxies are now bypassed if the connect destination is
+    localhost. This matches Finagle's prior behavior from when Netty 3 was the default
+    transport implementation. ``RB_ID=914494``
+
 6.43.0
 ------
 
