@@ -32,7 +32,7 @@ private[netty4] object exportNetty4MetricsAndRegistryEntries {
 
   private[this] val exportMetrics = Once {
 
-    if (poolReceiveBuffers()) {
+    if (poolReceiveBuffers() || usePooling()) {
       val metric = PooledByteBufAllocator.DEFAULT.metric()
       val poolingStats = stats.scope("pooling")
 
@@ -75,7 +75,7 @@ private[netty4] object exportNetty4MetricsAndRegistryEntries {
   }
 
   private[this] val exportRegistryEntries = Once {
-    if (poolReceiveBuffers()) {
+    if (poolReceiveBuffers() || usePooling()) {
       val metric = PooledByteBufAllocator.DEFAULT.metric()
 
       GlobalRegistry.get.put(
