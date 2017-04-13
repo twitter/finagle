@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.transport
 
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
@@ -270,5 +271,19 @@ class ChannelTransportTest extends FunSuite
     em.writeInbound("one")
 
     assert(ct.ReadManager.getMsgsNeeded == 0)
+  }
+
+  test("offer failures fail the transport") {
+    val em = new EmbeddedChannel
+    val ct = new ChannelTransport(em, new AsyncQueue[Any](maxPendingOffers = 1))
+    val transport = Transport.cast[String, String](ct)
+
+    // full read queue
+    em.writeInbound("full")
+
+    // rejected
+    em.writeInbound("doomed")
+
+    assert(ct.status == Status.Closed)
   }
 }

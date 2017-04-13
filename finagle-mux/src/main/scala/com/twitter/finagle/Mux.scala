@@ -84,15 +84,25 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         params => Netty4Listener(CopyingFramer, params))
 
       /**
-       * NOTE: This is temporary disabled and currently defaults to just Netty 4.
-       *
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
        * ref-counts inbound mux control messages. No application changes are
        * required to use this implementation.
        *
        * @note this is experimental and not yet tested in production.
        */
-      val Netty4RefCountingControl = Netty4
+      val Netty4RefCountingControl = MuxImpl(
+        params => Netty4Transporter.raw(
+          RefcountControlPlaneFramer,
+          _,
+          params,
+          transportFactory = new RefCountingTransport(_)
+        ),
+        params => Netty4Listener(
+          RefcountControlPlaneFramer,
+          params,
+          transportFactory = new RefCountingTransport(_)
+        )
+      )
 
       implicit val param = Stack.Param(
         // note that ref-counting toggle is dependent on n4 toggle.

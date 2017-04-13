@@ -178,7 +178,8 @@ private[finagle] class ChannelTransport(
     override def channelRead(ctx: nettyChan.ChannelHandlerContext, msg: Any): Unit = {
       ReadManager.decrement()
 
-      readQueue.offer(msg)
+      if (!readQueue.offer(msg)) // Dropped messages are fatal
+        fail(Failure(s"offer failure on $this $readQueue"))
     }
 
     override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
