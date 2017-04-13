@@ -258,6 +258,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     for (i <- 0 until numClients) {
       DeterministicOrdering.setCoordinate(offset, i, numClients)
+      // force a rebuild here since we don't want to be at the mercy
+      // of the balancer's updater.
+      bal.rebuildx()
       assert(bal.aperturex == math.ceil(numServers / numClients.toDouble))
     }
 
@@ -266,6 +269,9 @@ class ApertureTest extends FunSuite with ApertureSuite {
     min = numClients
     for (i <- 0 until numClients) {
       DeterministicOrdering.setCoordinate(offset, i, numClients)
+      // force a rebuild here since we don't want to be at the mercy
+      // of the balancer's updater.
+      bal.rebuildx()
       assert(bal.aperturex == numClients)
     }
   }
