@@ -24,7 +24,7 @@ private[finagle] object StringServer {
   val protocolLibrary = "string"
 }
 
-private[finagle] trait StringServer {
+trait StringServer {
   import StringServer._
 
   case class Server(

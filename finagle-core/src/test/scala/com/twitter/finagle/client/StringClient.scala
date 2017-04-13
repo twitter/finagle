@@ -45,7 +45,7 @@ private[finagle] object StringClient {
   val protocolLibrary = "string"
 }
 
-private[finagle] trait StringClient {
+trait StringClient {
   import StringClient._
 
   case class RichClient(underlying: Service[String, String]) {
