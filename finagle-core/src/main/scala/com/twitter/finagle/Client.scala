@@ -20,13 +20,13 @@ import java.net.SocketAddress
  * @define newService
  *
  * Create a new service which dispatches requests to `dest`.
- * See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+ * See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
  * for details on destination names.
  *
  * @define newClient
  *
  * Create a new client connected to `dest`.
- * See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+ * See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
  * for details on destination names.
  *
  * @define label

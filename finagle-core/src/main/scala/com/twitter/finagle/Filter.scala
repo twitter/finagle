@@ -23,7 +23,7 @@ import com.twitter.util.{Future, Time}
  * In other words, it converts a `Service[ReqOut, RepIn]` to a
  * `Service[ReqIn, RepOut]`.
  *
- * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters user guide]]
  *      for details and examples.
  */
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]

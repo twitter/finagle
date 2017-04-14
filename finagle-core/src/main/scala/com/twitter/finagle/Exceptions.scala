@@ -131,7 +131,7 @@ class GlobalRequestTimeoutException(timeout: Duration)
  * [[com.twitter.finagle.Resolver]] that is it configured to use and the system
  * backing it).
  *
- * [1] http://twitter.github.io/finagle/guide/Names.html
+ * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class NoBrokersAvailableException(
     val name: String,
@@ -155,7 +155,7 @@ class NoBrokersAvailableException(
  * default propagate an interrupt to its downstream, and so on. This is done to
  * conserve resources.
  *
- * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
  *      for additional details.
  */
 class CancelledRequestException(cause: Throwable)
@@ -190,7 +190,7 @@ class TooManyWaitersException extends RequestException with HasLogLevel {
  *
  * @see com.twitter.finagle.CancelledRequestException
  *
- * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
  *      for additional details.
  */
 class CancelledConnectionException(cause: Throwable)
@@ -206,7 +206,7 @@ class CancelledConnectionException(cause: Throwable)
  * connected have been marked as failed. See [[com.twitter.finagle.service.FailFastFactory]]
  * for details on this behavior.
  *
- * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s user guide]]
  *      for additional details.
  */
 class FailedFastException(message: String, private[finagle] val flags: Long = FailureFlags.Empty)

@@ -422,7 +422,7 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
  * The standard template implementation for
  * [[com.twitter.finagle.client.StackClient]].
  *
- * @see The [[http://twitter.github.io/finagle/guide/Clients.html user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html user guide]]
  *      for further details on Finagle clients and their configuration.
   * @see [[StackClient.newStack]] for the default modules used by Finagle
  *      clients.

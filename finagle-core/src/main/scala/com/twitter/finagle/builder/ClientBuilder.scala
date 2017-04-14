@@ -166,7 +166,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * A builder of Finagle [[com.twitter.finagle.Client Clients]].
  *
  * Please see the
- * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * [[https://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
  * for information on the preferred `with`-style client-construction APIs.
  *
  * {{{
@@ -239,7 +239,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *
- * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](

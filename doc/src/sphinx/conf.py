@@ -46,8 +46,8 @@ version = sbt_versions.release_to_version(release)
 extlinks = {
   'issue': ('https://github.com/twitter/finagle/issues/%s', 'issue #'),
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
-  'api': ('http://twitter.github.io/finagle/docs/%s', ''),
-  'util': ('http://twitter.github.io/util/docs/%s', ''),
+  'api': ('https://twitter.github.io/finagle/docs/%s', ''),
+  'util': ('https://twitter.github.io/util/docs/%s', ''),
   'util-app-src': ("https://github.com/twitter/util/blob/master/util-app/src/main/scala/%s", 'util-app github repo'),
   'util-core-src': ("https://github.com/twitter/util/blob/master/util-core/src/main/scala/%s", 'util-core github repo'),
   'util-stats-src': ("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),

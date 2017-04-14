@@ -120,7 +120,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * to do your own dirty work.
  *
  * Please see the
- * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * [[https://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
  * for information on the preferred `with`-style client-construction APIs.
  *
  * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
@@ -172,7 +172,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * - `maxConcurrentRequests`: Int.MaxValue
  * - `backlog`: OS-defined default value
  *
- * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs insead.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](

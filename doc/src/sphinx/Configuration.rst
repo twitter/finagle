@@ -176,7 +176,7 @@ Service Owners
 
 At runtime, the in-process `Toggle` values can be modified using TwitterServer's
 "/admin/toggles" `API endpoint
-<http://twitter.github.io/twitter-server/Admin.html#admin-toggles>`_.
+<https://twitter.github.io/twitter-server/Admin.html#admin-toggles>`_.
 This provides a quick way to try out a change in a limited fashion.
 
 For setting more permanent `Toggle` values, include a JSON configuration file at

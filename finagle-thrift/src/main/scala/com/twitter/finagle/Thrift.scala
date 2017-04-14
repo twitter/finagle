@@ -213,9 +213,9 @@ object Thrift
   /**
    * A ThriftMux `com.twitter.finagle.Client`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
@@ -393,8 +393,8 @@ object Thrift
   /**
    * A ThriftMux `com.twitter.finagle.Server`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
    */
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,

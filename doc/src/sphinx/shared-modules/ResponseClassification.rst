@@ -131,5 +131,5 @@ If you have a response classifier that categorizes ``Returns`` as
 failures, note that they will be counted in the ``StatsFilter``
 as a ``com.twitter.finagle.service.ResponseClassificationSyntheticException`` in the
 ``StatsReceiver`` to indicate when this happens. See the
-`FAQ <http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
+`FAQ <https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
 for more details.

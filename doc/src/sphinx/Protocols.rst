@@ -45,7 +45,7 @@ Using finagle-thrift
 ~~~~~~~~~~~~~~~~~~~~
 
 At Twitter, we use our open-source Thrift code-generator called
-`Scrooge <http://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
+`Scrooge <https://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:
 
 .. literalinclude:: ../../../finagle-example/src/main/thrift/logger.thrift

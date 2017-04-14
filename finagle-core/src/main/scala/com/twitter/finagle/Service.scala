@@ -48,7 +48,7 @@ object Service {
  *
  * It is the basic unit of an RPC interface.
  *
- * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
  *      for details and examples.
  *
  * @see [[com.twitter.finagle.Service.mk Service.mk]] for a convenient

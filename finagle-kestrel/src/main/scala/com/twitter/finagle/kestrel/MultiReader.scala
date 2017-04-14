@@ -205,7 +205,7 @@ object MultiReaderMemcache {
    * Create a new MultiReader which dispatches requests to `dest` using the memcache protocol.
    *
    * @param dest the name of the destination which requests are dispatched to.
-   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   *             See [[https://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
    * @param queueName the name of the queue to read from
    *
    * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
@@ -265,7 +265,7 @@ object MultiReaderThriftMux {
    * Create a new MultiReader which dispatches requests to `dest` using the thriftmux protocol.
    *
    * @param dest the name of the destination which requests are dispatched to.
-   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   *             See [[https://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
    * @param queueName the name of the queue to read from
    * @param clientId the clientid to be used
    */
@@ -336,7 +336,7 @@ object MultiReaderThrift {
    * Create a new MultiReader which dispatches requests to `dest` using the thrift protocol.
    *
    * @param dest the name of the destination which requests are dispatched to.
-   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   *             See [[https://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
    * @param queueName the name of the queue to read from
    * @param clientId the clientid to be used
    *

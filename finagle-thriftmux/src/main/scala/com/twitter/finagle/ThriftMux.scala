@@ -23,7 +23,7 @@ import scala.util.control.NonFatal
  * `com.twitter.finagle.Server` for the Thrift protocol served over
  * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
  * generated from a [[http://thrift.apache.org/docs/idl/ Thrift IDL]] by
- * [[http://twitter.github.io/scrooge/ Scrooge]] or
+ * [[https://twitter.github.io/scrooge/ Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
  *
  * == Clients ==
@@ -80,7 +80,7 @@ import scala.util.control.NonFatal
  * This object does not expose any configuration options. Both clients and servers
  * are instantiated with sane defaults. Clients are labeled with the "clnt/thrift"
  * prefix and servers with "srv/thrift". If you'd like more configuration, see the
- * [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers
+ * [[https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers
  * configuration documentation]].
  */
 object ThriftMux
@@ -137,9 +137,9 @@ object ThriftMux
   /**
    * A ThriftMux `com.twitter.finagle.Client`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(
       muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
@@ -444,9 +444,9 @@ object ThriftMux
   /**
    * A ThriftMux `com.twitter.finagle.Server`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
-   * @see [[http://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers Configuration]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#thrift Thrift]] documentation
+   * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Server(
       muxer: StackServer[mux.Request, mux.Response] = serverMuxer)

@@ -18,7 +18,7 @@ private[finagle] object MethodBuilder {
    * is constructed, as in [[MethodBuilder.newService(String)]].
    *
    * @param dest where requests are dispatched to.
-   *             See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+   *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
    */
   def from[Req, Rep](
@@ -36,7 +36,7 @@ private[finagle] object MethodBuilder {
    * is constructed, as in [[MethodBuilder.newService(String)]].
    *
    * @param dest where requests are dispatched to.
-   *             See the [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+   *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
    */
   def from[Req, Rep](

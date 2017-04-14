@@ -10,7 +10,7 @@ import scala.collection.immutable
  * name. An object may be replicated, and thus bound to multiple
  * physical locations (see [[com.twitter.finagle.Address]]).
  *
- * @see The [[http://twitter.github.io/finagle/guide/Names.html#addr user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Names.html#addr user guide]]
  *      for further details.
  */
 sealed trait Addr

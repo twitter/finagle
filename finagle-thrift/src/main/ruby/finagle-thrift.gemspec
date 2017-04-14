@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.summary     = ""
   s.description = "A Ruby client library for integrating into finagle's thrift tracing protocol"
   s.license     = 'Apache License Version 2.0'
-  s.homepage    = "http://twitter.github.io/finagle/"
+  s.homepage    = "https://twitter.github.io/finagle/"
   s.metadata    = { "source_code" => "https://github.com/twitter/finagle/tree/develop/finagle-thrift/src/main/ruby" }
 
   s.required_rubygems_version = ">= 1.3.5"

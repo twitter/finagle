@@ -63,7 +63,7 @@ connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to UR
 returns a [[com.twitter.util.Future]] representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.
 
-The [[http://twitter.github.io/finagle/ Finagle homepage]] contains useful documentation and
+The [[https://twitter.github.io/finagle/ Finagle homepage]] contains useful documentation and
 resources for using Finagle.
  */
 package object finagle {

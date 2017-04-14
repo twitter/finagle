@@ -191,7 +191,7 @@ What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?
 
 While typically, a :src:`StatsFilter <com/twitter/finagle/service/StatsFilter.scala>` counts
 `Exceptions` as failures, a user may supply a
-`ResponseClassifier <http://twitter.github.io/finagle/guide/Clients.html#response-classification>`_
+`ResponseClassifier <https://twitter.github.io/finagle/guide/Clients.html#response-classification>`_
 that treats non-Exceptions as failures. In that case, while no exceptions have occurred, a
 `ResponseClassificationSyntheticException` is used as a "synthetic" exception for
 bookkeeping purposes.

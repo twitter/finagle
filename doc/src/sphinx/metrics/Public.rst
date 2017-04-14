@@ -21,7 +21,7 @@ StatsFilter
   as failures, it will use a synthetic Exception,
   ``com.twitter.finagle.service.ResponseClassificationSyntheticException``,
   to account for these. See the
-  `FAQ <http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
+  `FAQ <https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
   for more details.
 
 **failures**
