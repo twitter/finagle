@@ -4,6 +4,8 @@ Configuration
 Clients and Servers
 -------------------
 
+.. _finagle6apis:
+
 Prior to :doc:`version 6.0 <changelog>`, the ``ClientBuilder``/``ServerBuilder`` API was the
 primary method for configuring the modules inside a Finagle :ref:`client <finagle_clients>`
 or :ref:`server <finagle_servers>`. We are moving away from this model for various
@@ -23,10 +25,15 @@ verbosity.
     .withTransport.verbose
     .newService("localhost:10000,localhost:10001")
 
+A higher-level client API, :ref:`MethodBuilder <methodbuilder>`, builds on
+the client, providing logical success rate metrics, application-level retry
+policies, per-attempt timeouts, and total timeouts.
+
 .. note:: All the examples in this user guide use the Finagle 6 API as a main configuration
           method and we encourage all the Finagle users to follow this pattern given that
           the ``ClientBuilder``/``ServerBuilder`` API will eventually be deprecated.
-          For help migrating, see :ref:`the FAQ <configuring_finagle6>` as well as
+          For help migrating, see :ref:`MethodBuilder migration <mb_cb_migration>`,
+          :ref:`the FAQ <configuring_finagle6>` as well as
           :ref:`client <finagle_clients>` and :ref:`server <finagle_servers>` configuration.
 
 In addition to ``with``-prefixed methods that provide easy-to-use and safe-to-configure
@@ -47,8 +54,9 @@ demonstrates how to use ``.configured`` to override TCP socket options provided 
     .newService("localhost:10000,localhost:10001")
 
 .. note:: The expert-level API requires deep knowledge of Finagle internals and
-          it's highly recommended to avoid it unless you're absolutely sure what
-          you're doing.
+          it's recommended to avoid it unless you're sure of what
+          you're doing or the corresponding configuration has not yet
+          been exposed through ``with``-prefixed methods.
 
 Design Principles
 ~~~~~~~~~~~~~~~~~

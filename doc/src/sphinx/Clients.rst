@@ -815,6 +815,25 @@ The filter can be configured with the following parameters:
 
 .. include:: shared-modules/ResponseClassification.rst
 
+MethodBuilder
+-------------
+
+.. warning:: These APIs are experimental and subject to change.
+
+.. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
+          We are waiting on user interest before expanding to more protocols.
+
+``MethodBuilder`` is a collection of APIs for client configuration at a higher
+level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the deprecated
+``ClientBuilder``. ``MethodBuilder`` provides:
+
+- :ref:`Logical <mb_logical_req>` success rate metrics.
+- Retries based on application-level requests and responses (e.g. an HTTP
+  503 response code or a Thrift exception).
+- Configuration of per-attempt and total timeouts.
+
+:doc:`Learn more <MethodBuilder>` about ``MethodBuilder``.
+
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark

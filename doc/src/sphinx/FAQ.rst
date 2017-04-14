@@ -95,9 +95,9 @@ finagle-thrift{,mux}, you will still need it for our patched libthrift.
 How do I configure clients and servers with Finagle 6 APIs?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle
-``Client``\s and ``Server``\s. Where the old API used ``ServerBuilder``\/``ClientBuilder``
-with ``Codec``\s, the new APIs use ``Protocol.client.newClient`` and ``Protocol.server.serve`` [#]_.
+As of :doc:`Finagle 6.x <changelog>`, we introduced a new, preferred API for constructing Finagle
+``Client``\s and ``Server``\s. Where the old API used ``ServerBuilder``\/``ClientBuilder``,
+the new APIs use ``$Protocol.client.newClient`` and ``$Protocol.server.serve`` [#]_.
 
 Old ``ClientBuilder`` APIs:
 
@@ -157,8 +157,7 @@ More configuration options and the details about them are available for
 Additionally, the Scaladocs for most methods on ``ServerBuilder`` and
 ``ClientBuilder`` include the Stack-based API's alternative. A few methods do
 not yet have one-to-one equivalents, such as ``ClientBuilder.retries`` and
-for these you should continue to use ``ClientBuilder`` along with the
-``ClientBuilder.stack`` method.
+for these you should :ref:`migrate <mb_cb_migration>` to using ``MethodBuilder``.
 
 .. [#] Protocol implementors are encouraged to provide sensible
        defaults and leave room for application specific behavior

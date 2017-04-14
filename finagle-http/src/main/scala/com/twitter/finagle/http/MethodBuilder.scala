@@ -80,13 +80,15 @@ object MethodBuilder {
    *  default value for [[MethodBuilder.withTimeoutPerRequest]].
    *
    *  - The [[ClientBuilder]] must have been constructed using
-   *  [[ClientBuilder.stack]] passing an instance of a [[ctf.Http..Client]].
+   *  [[ClientBuilder.stack]] passing an instance of a [[ctf.Http.Client]].
    *
    *  - The [[ClientBuilder]] metrics scoped to "tries" are not included
    *  as they are superseded by metrics scoped to "logical".
    *
    *  - The [[ClientBuilder]] retry policy will not be applied and must
    *  be migrated to using [[MethodBuilder.withRetryForClassifier]].
+   *
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#migrating-from-clientbuilder user guide]]
    */
   def from(
     clientBuilder: ClientBuilder[Request, Response, ClientConfig.Yes, _, _]
@@ -123,7 +125,8 @@ object MethodBuilder {
  *
  * @see [[com.twitter.finagle.Http.Client.methodBuilder]] to construct instances.
  *
- * @see [[client.MethodBuilderScaladoc]] for documentation.
+ * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
+ *      and [[client.MethodBuilderScaladoc]] for documentation.
  */
 class MethodBuilder private (
     mb: client.MethodBuilder[Request, Response])

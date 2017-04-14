@@ -105,6 +105,8 @@ private[finagle] object MethodBuilder {
  *
  * @see `methodBuilder` methods on client protocols, such as `Http.Client`
  *      or `ThriftMux.Client` for an entry point.
+ *
+ * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
  */
 private[finagle] final class MethodBuilder[Req, Rep](
     val refCounted: RefcountedClosable[Service[Req, Rep]],

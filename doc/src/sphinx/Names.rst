@@ -77,6 +77,8 @@ The name
 
 might denote the ``crawler`` service.
 
+.. _dtabs:
+
 Interpreting Paths With Delegation Tables
 -----------------------------------------
 

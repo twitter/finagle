@@ -250,12 +250,20 @@ object ThriftMux
 
     /**
      * '''Experimental:''' This API is under construction.
+     *
+     * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
     def methodBuilder(dest: String): thriftmux.MethodBuilder =
       thriftmux.MethodBuilder.from(dest, this)
 
     /**
      * '''Experimental:''' This API is under construction.
+     *
+     * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
     def methodBuilder(dest: Name): thriftmux.MethodBuilder =
       thriftmux.MethodBuilder.from(dest, this)

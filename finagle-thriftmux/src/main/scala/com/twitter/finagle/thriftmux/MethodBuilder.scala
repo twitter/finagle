@@ -26,6 +26,8 @@ object MethodBuilder {
    * @param dest where requests are dispatched to.
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
+   *
+   * @see [[ThriftMux.Client.methodBuilder(String)]]
    */
   def from(
     dest: String,
@@ -46,6 +48,8 @@ object MethodBuilder {
    * @param dest where requests are dispatched to.
    *             See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
    *             for details on destination names.
+   *
+   * @see [[ThriftMux.Client.methodBuilder(Name)]]
    */
   def from(
     dest: Name,
@@ -94,6 +98,8 @@ object MethodBuilder {
    *
    *  - The [[ClientBuilder]] retry policy will not be applied and must
    *  be migrated to using [[MethodBuilder.withRetryForClassifier]].
+   *
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#migrating-from-clientbuilder user guide]]
    */
   def from(
     clientBuilder: ClientBuilder[ThriftClientRequest, Array[Byte], ClientConfig.Yes, _, _]
@@ -148,7 +154,8 @@ object MethodBuilder {
  *
  * @see [[com.twitter.finagle.ThriftMux.Client.methodBuilder]] to construct instances.
  *
- * @see [[client.MethodBuilderScaladoc]] for documentation.
+ * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
+ *      and [[client.MethodBuilderScaladoc]] for documentation.
  */
 class MethodBuilder(
     rich: ThriftRichClient,
