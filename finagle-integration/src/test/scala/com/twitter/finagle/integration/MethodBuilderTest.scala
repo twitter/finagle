@@ -36,28 +36,30 @@ class MethodBuilderTest extends FunSuite {
     stackClient: StackClient[Req, Rep],
     req: Req,
     rep: Rep
-  ): Unit = test(s"$name client can use total method builder timeouts") {
-    val server = stackServer.serve("localhost:*", mkService(rep))
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+  ): Unit = if (!sys.props.contains("SKIP_FLAKY")) {
+    test(s"$name client can use total method builder timeouts") {
+      val server = stackServer.serve("localhost:*", mkService(rep))
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-    val methodBuilder = MethodBuilder.from(
-      s"${addr.getHostName}:${addr.getPort}", stackClient)
+      val methodBuilder = MethodBuilder.from(
+        s"${addr.getHostName}:${addr.getPort}", stackClient)
 
-    val short = methodBuilder.withTimeout.total(10.millis).newService("short")
-    val long = methodBuilder.withTimeout.total(5.seconds).newService("long")
+      val short = methodBuilder.withTimeout.total(10.millis).newService("short")
+      val long = methodBuilder.withTimeout.total(5.seconds).newService("long")
 
-    // check we get a timeout for a client with a short timeout
-    intercept[GlobalRequestTimeoutException] {
-      await(short(req))
+      // check we get a timeout for a client with a short timeout
+      intercept[GlobalRequestTimeoutException] {
+        await(short(req))
+      }
+
+      // check we get a response for a client with a long timeout
+      await(long(req))
+
+      val shortClose = short.close()
+      await(long.close())
+      await(shortClose)
+      await(server.close())
     }
-
-    // check we get a response for a client with a long timeout
-    await(long(req))
-
-    val shortClose = short.close()
-    await(long.close())
-    await(shortClose)
-    await(server.close())
   }
 
   testTotalTimeout(
@@ -98,28 +100,30 @@ class MethodBuilderTest extends FunSuite {
     stackClient: StackClient[Req, Rep],
     req: Req,
     rep: Rep
-  ): Unit = test(s"$name client can use per request method builder timeouts") {
-    val server = stackServer.serve("localhost:*", mkService(rep))
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+  ): Unit = if (!sys.props.contains("SKIP_FLAKY")) {
+    test(s"$name client can use per request method builder timeouts") {
+      val server = stackServer.serve("localhost:*", mkService(rep))
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-    val methodBuilder = MethodBuilder.from(
-      s"${addr.getHostName}:${addr.getPort}", stackClient)
+      val methodBuilder = MethodBuilder.from(
+        s"${addr.getHostName}:${addr.getPort}", stackClient)
 
-    val short = methodBuilder.withTimeout.perRequest(5.millis).newService("short")
-    val long = methodBuilder.withTimeout.perRequest(5.seconds).newService("long")
+      val short = methodBuilder.withTimeout.perRequest(5.millis).newService("short")
+      val long = methodBuilder.withTimeout.perRequest(5.seconds).newService("long")
 
-    // check we get a timeout for a client with a short timeout
-    intercept[IndividualRequestTimeoutException] {
-      await(short(req))
+      // check we get a timeout for a client with a short timeout
+      intercept[IndividualRequestTimeoutException] {
+        await(short(req))
+      }
+
+      // check we get a response for a client with a long timeout
+      await(long(req))
+
+      val shortClose = short.close()
+      await(long.close())
+      await(shortClose)
+      await(server.close())
     }
-
-    // check we get a response for a client with a long timeout
-    await(long(req))
-
-    val shortClose = short.close()
-    await(long.close())
-    await(shortClose)
-    await(server.close())
   }
 
   testPerRequestTimeout(
