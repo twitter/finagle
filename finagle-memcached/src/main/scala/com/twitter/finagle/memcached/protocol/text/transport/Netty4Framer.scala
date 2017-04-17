@@ -15,7 +15,7 @@ private[finagle] object Netty4ServerFramer extends (ChannelPipeline => Unit) {
 
   def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
-    pipeline.addLast("endec", new BufCodec)
+    pipeline.addLast("endec", BufCodec)
     pipeline.addLast("framer", new FrameHandler(new ServerFramer(StorageCommands)))
   }
 }
@@ -28,7 +28,7 @@ private[finagle] object Netty4ClientFramer extends (ChannelPipeline => Unit) {
 
   def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
-    pipeline.addLast("endec", new BufCodec)
+    pipeline.addLast("endec", BufCodec)
     pipeline.addLast("framer", new FrameHandler(new ClientFramer))
   }
 }

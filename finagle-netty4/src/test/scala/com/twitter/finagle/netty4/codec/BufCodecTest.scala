@@ -19,7 +19,7 @@ class BufCodecTest extends FunSuite
   with GeneratorDrivenPropertyChecks
   with OneInstancePerTest {
 
-  val channel = new EmbeddedChannel(new BufCodec)
+  val channel = new EmbeddedChannel(BufCodec)
 
   test("fail to decode non-ByteBuf") {
     intercept[Failure] { channel.writeInbound("foo") }

@@ -88,7 +88,7 @@ private[twitter] object Message {
     def setMsb(tag: Int): Int = tag | TagMSB
   }
 
-  private object ReplyStatus {
+  private[mux] object ReplyStatus {
     val Ok: Byte = 0
     val Error: Byte = 1
     val Nack: Byte = 2

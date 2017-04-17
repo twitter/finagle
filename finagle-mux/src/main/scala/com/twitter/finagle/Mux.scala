@@ -92,16 +92,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        */
       val Netty4RefCountingControl = MuxImpl(
         params => Netty4Transporter.raw(
-          RefcountControlPlaneFramer,
+          RefCountingFramer,
           _,
           params,
           transportFactory = new RefCountingTransport(_)
         ),
-        params => Netty4Listener(
-          RefcountControlPlaneFramer,
-          params,
-          transportFactory = new RefCountingTransport(_)
-        )
+        params => Netty4Listener(CopyingFramer, params)
       )
 
       implicit val param = Stack.Param(

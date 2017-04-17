@@ -53,7 +53,7 @@ class RefCountingTest extends FunSuite with Eventually {
     direct.writeBytes(Buf.ByteArray.Owned.extract(bogus))
 
     val e = new EmbeddedChannel()
-    com.twitter.finagle.mux.transport.RefcountControlPlaneFramer(e.pipeline())
+    mux.RefCountingFramer(e.pipeline())
     e.writeInbound(direct)
 
     val fail = intercept[Failure] {
@@ -75,11 +75,11 @@ class RefCountingTest extends FunSuite with Eventually {
     bytesWithLenHdr.foreach(direct.writeBytes(_))
 
     val e = new EmbeddedChannel()
-    com.twitter.finagle.mux.transport.RefcountControlPlaneFramer(e.pipeline())
+    mux.RefCountingFramer(e.pipeline())
     e.writeInbound(direct)
 
-    (1 to allMessageTypes.length).foreach { i =>
-      val framed: ByteBufAsBuf = e.readInbound[ByteBufAsBuf]()
+    (1 to allMessageTypes.length).foreach { _ =>
+      val framed = e.readInbound[Buf]()
       msgOuts.append(mux.Message.decode(framed))
     }
 

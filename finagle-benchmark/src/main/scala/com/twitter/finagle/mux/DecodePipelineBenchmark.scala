@@ -19,7 +19,7 @@ class DecodePipelineBenchmark extends StdBenchAnnotations {
   @Setup(Level.Iteration)
   def setup(): Unit = {
     channel = new EmbeddedChannel()
-    mux.RefcountControlPlaneFramer(channel.pipeline)
+    mux.RefCountingFramer(channel.pipeline)
   }
 
 

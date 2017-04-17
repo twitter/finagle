@@ -43,7 +43,7 @@ private[netty4] class Netty4ClientChannelInitializer(
     val pipe = ch.pipeline
 
     pipe.addLast(AnyToHeapInboundHandlerName, AnyToHeapInboundHandler)
-    pipe.addLast(BufCodecKey, new BufCodec)
+    pipe.addLast(BufCodecKey, BufCodec)
 
     framerFactory.foreach { newFramer =>
       pipe.addLast(FramerKey, new FrameHandler(newFramer()))

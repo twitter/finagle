@@ -5,6 +5,7 @@ import com.twitter.finagle.netty4.ByteBufAsBuf
 import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
+import io.netty.channel.ChannelHandler.Sharable
 
 /**
  * A ByteBuffer <-> Buf codec.
@@ -13,7 +14,8 @@ import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPro
  * protocol implementation such that the `In` and `Out` types for the
  * StackClient or StackServer will be [[Buf]].
  */
-private[finagle] class BufCodec extends ChannelDuplexHandler {
+@Sharable
+private[finagle] object BufCodec extends ChannelDuplexHandler {
 
   override def write(ctx: ChannelHandlerContext, msg: Any, p: ChannelPromise): Unit =
     msg match {

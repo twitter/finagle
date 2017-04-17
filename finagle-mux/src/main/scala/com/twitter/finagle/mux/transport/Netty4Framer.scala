@@ -10,7 +10,7 @@ import io.netty.handler.codec.{LengthFieldBasedFrameDecoder, LengthFieldPrepende
 /**
  * An implementation of a mux framer using netty4 primitives.
  */
-private[mux] abstract class Netty4Framer extends (ChannelPipeline => Unit) {
+private[mux] abstract class Netty4Framer(needsBufCodec: Boolean) extends (ChannelPipeline => Unit) {
 
   private val maxFrameLength = 0x7FFFFFFF
   private val lengthFieldOffset = 0
@@ -30,23 +30,23 @@ private[mux] abstract class Netty4Framer extends (ChannelPipeline => Unit) {
       initialBytesToStrip))
     pipeline.addLast("frameEncoder", new LengthFieldPrepender(lengthFieldLength))
     pipeline.addLast(bufferManagerName, bufferManager)
-    pipeline.addLast("bufCodec", new BufCodec)
+    if (needsBufCodec) pipeline.addLast("bufCodec", BufCodec)
   }
 }
 
 /**
  * A mux framer which copies all inbound direct buffers onto the heap.
  */
-private[finagle] object CopyingFramer extends Netty4Framer {
-  override def bufferManager: ChannelHandler = AnyToHeapInboundHandler
-  override def bufferManagerName: String = AnyToHeapInboundHandlerName
+private[finagle] object CopyingFramer extends Netty4Framer(true) {
+  def bufferManager: ChannelHandler = AnyToHeapInboundHandler
+  def bufferManagerName: String = AnyToHeapInboundHandlerName
 }
 
 /**
- * A mux framer which delegates ref-counting of control messages the mux
+ * A mux framer which delegates ref-counting of control messages to the mux
  * implementation. Non-control messages are copied to the heap.
  */
-private[finagle] object RefcountControlPlaneFramer extends Netty4Framer {
-  override def bufferManager: ChannelHandler = MuxDirectBufferHandler
-  override def bufferManagerName: String = "refCountingControlPlaneFramer"
+private[finagle] object RefCountingFramer extends Netty4Framer(false) {
+  def bufferManager: ChannelHandler = MuxDirectBufferHandler
+  def bufferManagerName: String = "refCountingControlPlaneFramer"
 }
