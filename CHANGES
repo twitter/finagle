@@ -63,6 +63,11 @@ Breaking API Changes
     construction. This will break the Java API and require the additional param to
     be passed in explicitly.  ``RB_ID=911541``
 
+  * finagle-core: The logic for tracking sessions that was in StdStackServer has been lifted into
+    a new template, ListeningStackServer where implementations define the creation of a
+    ListeningServer from a ServiceFactory, SocketAddress, and a function that tracks accepted
+    sessions. ``RB_ID=914124``
+
   * finagle-core: Change the AddressOrdering param to no longer take a StatsReceiver,
     since orderings were simplified and are no longer composite. ``RB_ID=914113``
 
