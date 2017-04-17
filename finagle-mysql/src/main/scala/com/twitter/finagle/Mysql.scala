@@ -1,13 +1,16 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.framer.LengthFieldFramer
 import com.twitter.finagle.mysql._
-import com.twitter.finagle.mysql.transport.{Packet, TransportImpl}
+import com.twitter.finagle.mysql.transport.Packet
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{NullStatsReceiver, ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
 
@@ -121,12 +124,29 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Packet
-    protected type Out = Packet
-    protected def newTransporter(addr: SocketAddress) = params[TransportImpl].transporter(params)(addr)
-    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
+    protected type In = Buf
+    protected type Out = Buf
+
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] = {
+      val framerFactory = () => {
+        new LengthFieldFramer(
+          lengthFieldBegin = 0,
+          lengthFieldLength = 3,
+          lengthAdjust = Packet.HeaderSize, // Packet size field doesn't include the header size.
+          maxFrameLength = Packet.HeaderSize + Packet.MaxBodySize,
+          bigEndian = false
+        )
+      }
+      Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
+    }
+
+    protected def newDispatcher(transport: Transport[Buf, Buf]):  Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
-      mysql.ClientDispatcher(transport, Handshake(params), num)
+      mysql.ClientDispatcher(
+        transport.map(_.toBuf, Packet.fromBuf),
+        Handshake(params),
+        num
+      )
     }
 
     /**
