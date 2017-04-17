@@ -206,7 +206,7 @@ These stats pertain to the HTTP protocol.
   responses are not automatically retried.
 
 These metrics are added by
-:src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
+:finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
 **status/<statusCode>**
