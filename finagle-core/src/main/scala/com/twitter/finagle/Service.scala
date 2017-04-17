@@ -189,6 +189,9 @@ abstract class ServiceFactory[-Req, +Rep]
 }
 
 object ServiceFactory {
+  /**
+   * @see [[constant]] for a Java compatible API.
+   */
   def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
       private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
@@ -199,6 +202,10 @@ object ServiceFactory {
       def apply(conn: ClientConnection): Future[Service[Req, Rep]] = noRelease
       def close(deadline: Time): Future[Unit] = Future.Done
     }
+
+  /** Java compatible API for [[const]] as `const` is a reserved word in Java */
+  def constant[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
+    ServiceFactory.const(service)
 
   def apply[Req, Rep](f: () => Future[Service[Req, Rep]]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
