@@ -453,11 +453,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * mechanism for specifying a set of endpoints to which this client
    * remains connected.
    */
+  @deprecated("Use ClientBuilder.dest with a com.twitter.finagle.Name", "2017-04-18")
   def cluster(
     cluster: Cluster[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     group(Group.fromCluster(cluster))
 
+  @deprecated("Use ClientBuilder.dest with a com.twitter.finagle.Name", "2017-04-18")
   def group(
     group: Group[SocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
