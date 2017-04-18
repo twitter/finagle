@@ -1,21 +1,17 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.finagle.memcached.{Client, Entry, Interpreter, InterpreterService, PartitionedClient}
+import com.twitter.finagle.memcached.{Client, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class MemcachedTest extends FunSuite with BeforeAndAfter {
 
   val NumServers = 5
@@ -205,21 +201,23 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       }
     ), TimeOut)
 
-    // shutdown one memcache host
-    servers(0).stop()
+    // We can't control the Distributor to make sure that for the set of servers, there is at least
+    // one client in the partition talking to it. Therefore, we rely on the fact that for 5
+    // backends, it's very unlikely all clients will be talking to the same server, and as such,
+    // shutting down all backends but one will trigger cache misses.
+    servers.tail.foreach(_.stop)
 
     // trigger ejection
     for (i <- 0 to 20) {
       Await.ready(client.get(s"foo$i"), TimeOut)
     }
 
-    // other hosts alive
     val clientSet =
       (0 to 20).foldLeft(Set[Client]()){ case (s, i) =>
         val c = partitionedClient.clientOf(s"foo$i")
         s + c
       }
-    assert(clientSet.size == NumServers - 1)
+    assert(clientSet.size == 1)
 
     // previously set values have cache misses
     var cacheMisses = 0
