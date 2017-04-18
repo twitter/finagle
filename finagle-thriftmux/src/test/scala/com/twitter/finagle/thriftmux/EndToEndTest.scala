@@ -686,7 +686,8 @@ class EndToEndTest extends FunSuite
         new PipeliningDispatcher(transport, NullStatsReceiver, new MockTimer)
     }
 
-    val service = await(OldPlainPipeliningThriftClient.newClient(server)())
+    val service = await(OldPlainPipeliningThriftClient.newClient(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")())
     val client = new TestService.FinagledClient(service, Protocols.binaryFactory())
     val reqs = 1 to nreqs map { i => client.query("ok" + i) }
     // Although the requests are pipelined in the client, they must be

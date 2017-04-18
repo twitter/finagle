@@ -13,7 +13,6 @@ import java.net.{InetSocketAddress, SocketAddress}
 trait ListeningServer
   extends Closable
   with Awaitable[Unit]
-  with Group[SocketAddress]
 {
   /**
    * The address to which this server is bound.

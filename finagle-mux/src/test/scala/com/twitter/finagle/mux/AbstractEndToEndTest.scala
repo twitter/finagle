@@ -61,8 +61,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       Future.value(Response(Buf.Utf8(stringer.toString)))
     })
 
-
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
@@ -83,7 +83,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       Future.value(Response(bw.owned()))
     })
 
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
     val br = ByteReader(payload)
@@ -118,9 +119,9 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     client = Mux.client
       .configured(param.Tracer(tracer))
-      .configured(param.Label("theClient"))
       .configured(clientImpl)
-      .newService(server)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "theClient")
 
     Await.result(client(Request.empty), 30.seconds)
 
@@ -212,7 +213,8 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     val server = Mux.server.configured(serverImpl).serve("localhost:*", factory)
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     // This will try until it exhausts its budget. That's o.k.
     val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
@@ -325,7 +327,9 @@ EOF
 
       val sr = new InMemoryStatsReceiver
 
-      val factory = Mux.client.configured(clientImpl).configured(param.Stats(sr)).newClient(server)
+      val factory = Mux.client.configured(clientImpl).configured(param.Stats(sr)).newClient(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
       val fclient = factory()
       eventually { assert(fclient.isDefined) }
 
@@ -377,9 +381,9 @@ EOF
 
     val client = Mux.client
       .configured(clientImpl)
-      .withLabel("client")
       .withStatsReceiver(sr)
-      .newService(server)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
 

@@ -74,6 +74,10 @@ Breaking API Changes
   * finagle-core: Change the AddressOrdering param to no longer take a StatsReceiver,
     since orderings were simplified and are no longer composite. ``RB_ID=914113``
 
+  * finagle-core: `c.t.f.ListeningServer` no longer extends `c.t.f.Group`. Use
+    `c.t.f.ListeningServer.boundAddress` to extract the address from the server.
+    ``RB_ID=914693``
+
   * finagle-core: Remove deprecated `c.t.f.group.StabilizingGroup`. Use
     `c.t.f.addr.StabilizingAddr` instead. ``RB_ID=914823``
 
