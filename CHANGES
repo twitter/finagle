@@ -156,6 +156,9 @@ Breaking API Changes
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-exp: `DarkTrafficFilter` now respects the log level when `HasLogLevel`,
+    and otherwise defaults the level to `warning` instead of `error`. ``RB_ID=914805``
+
   * finagle-netty4: Fixed connection stall on unsuccessful proxy handshakes in Finagle clients
     configured with HTTP proxy (`Transporter.HttpProxyTo`).  ``RB_ID=913358``
 
