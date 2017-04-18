@@ -243,13 +243,12 @@ object Retries {
         }
 
       /**
-       * Note: This may seem like we are always attempting service acquisition
-       * with a fixed budget (i.e. `Effort`). However, this is not always the case
-       * and is dependent on how the client is built (i.e. `newService`/`newClient`).
+       * Note: We attempt service acquisition with a fixed budget (i.e. `Effort`).
        *
-       * Clients built with `newService` compose FactoryToService as part of their stack
-       * which effectively moves service acquisition as part of service application,
-       * so all requeues are gated by [[RequeueFilter]].
+       * Clients built with `newService` compose `FactoryToService` as part of their stack,
+       * making service acquisition part of *each* service application,
+       * so we requeue service acquisition up to `Effort` times for each service application,
+       * followed by request requeues as per [[RequeueFilter]].
        *
        * Clients built with `newClient` separate requeues into two distinct phases for
        * service acquisition and service application. First, we try up to `Effort` to acquire
