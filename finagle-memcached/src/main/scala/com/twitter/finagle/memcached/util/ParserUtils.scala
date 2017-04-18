@@ -7,15 +7,6 @@ import scala.collection.mutable.ArrayBuffer
 
 object ParserUtils {
 
-  /**
-   * Prefer using `isDigits(ChannelBuffer)` or `DigitsPattern.matcher(input).matches()`
-   */
-  @deprecated("""Use "^\\d+$" if needed""", "2017-01-24")
-  val DIGITS = "^\\d+$"
-
-  @deprecated("""Use Pattern.compile(^\\d+$) instead""", "2017-01-24")
-  val DigitsPattern: Pattern = Pattern.compile(DIGITS)
-
   // Used by byteArrayStringToInt. The maximum length of a non-negative Int in chars
   private[this] val MaxLengthOfIntString = Int.MaxValue.toString.length
 

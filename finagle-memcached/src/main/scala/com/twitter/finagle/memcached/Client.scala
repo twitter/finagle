@@ -820,20 +820,6 @@ trait PartitionedClient extends Client {
     throw new UnsupportedOperationException("No logical way to perform stats without a key")
 }
 
-object PartitionedClient {
-  @deprecated("Use CacheNodeGroup.apply(hostPartWeights) instead", "7.0.0")
-  def parseHostPortWeights(hostPortWeights: String): Seq[(String, Int, Int)] =
-    hostPortWeights
-      .split(Array(' ', ','))
-      .filter(_ != "")
-      .map(_.split(":"))
-      .map {
-        case Array(host)               => (host, 11211, 1)
-        case Array(host, port)         => (host, port.toInt, 1)
-        case Array(host, port, weight) => (host, port.toInt, weight.toInt)
-      }
-}
-
 abstract class KetamaClientKey {
   def identifier: String
 }

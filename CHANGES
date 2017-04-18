@@ -117,6 +117,18 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.
     Use `c.t.f.Memcached.client` to create Memcached clients. ``RB_ID=908442``
 
+  * finagle-memcached: Remove deprecated `c.t.f.memcached.Server` class. Use
+    `c.t.f.memcached.integration.TestMemcachedServer` for a quick test server.
+    ``RB_ID=914827``
+
+  * Remove deprecated `c.t.f.memcached.PartitionedClient` object. Use
+    `c.t.f.memcached.CacheNodeGroup.apply` instead of 
+    `c.t.f.memcached.PartitionedClient.parseHostWeights`. ``RB_ID=914827``
+
+  * Remove deprecated `c.t.f.memcached.util.ParserUtils.DIGITS`. Use "^\\d+$" instead.
+    Remove deprecated `c.t.f.memcached.util.ParserUtils.DigitsPattern`. Use Pattern.compile(^\\d+$)
+    instead. ``RB_ID=914827``
+
   * finagle-memcached: Remove old `c.t.f.memcached.replicated.BaseReplicationClient` and
     `c.t.f.memcached.migration.MigrationClient`, and most `c.t.f.memcached.CachePoolCluster`
     methods. ``RB_ID=910986``
