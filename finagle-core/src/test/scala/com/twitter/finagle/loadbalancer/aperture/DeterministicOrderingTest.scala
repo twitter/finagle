@@ -4,7 +4,7 @@ import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 class DeterministicOrderingTest extends FunSuite with GeneratorDrivenPropertyChecks {
-  import DeterministicOrdering._
+ import DeterministicOrdering._
 
   test("update coordinate") {
     var coordinate: Option[Coord] = None

@@ -123,10 +123,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     bal.applyn(1000)
     assert(counts.nonzero.size == 4)
 
-    // Now close 8, which should override the set min.
-    // Note, this depends on rebuilding via exhausting `maxEffort`
-    // since simply closing a set of nodes in the aperture doesn't
-    // do anything.
+    // Now close 8
     counts.clear()
     counts.take(8).foreach(_.status = Status.Closed)
     bal.update(counts.range(10))
@@ -193,12 +190,14 @@ class ApertureTest extends FunSuite with ApertureSuite {
       f.status = Status.Closed
 
     bal.applyn(1000)
-    // The correctness of this behavior could be argued either way.
+    assert(bal.aperturex == 1)
+    // since our status sort is stable, we know that
+    // even though we rebuild, we will still only be
+    // sending load to the head.
     assert(counts.nonzero.size == 1)
-    val Seq(badkey) = counts.nonzero.toSeq
-    val goodkey = (badkey + 1) % 10
-    counts(goodkey).status = Status.Open
 
+    val goodkey = 0
+    counts(goodkey).status = Status.Open
     counts.clear()
     bal.applyn(1000)
     assert(counts.nonzero == Set(goodkey))

@@ -31,6 +31,11 @@ private[loadbalancer] trait P2CPick[Node <: NodeT[_, _]] { self: DistributorT[No
    */
   protected def bound: Int
 
+  /**
+   * Picks two nodes randomly, and uniformly, from `vector` within `bound` and
+   * selects between the two first by `status` and then by `load`. Effectively,
+   * we want to select the most healthy, least loaded of the two.
+   */
   def pick(): Node = {
     val range = bound
     if (vector.isEmpty) emptyNode

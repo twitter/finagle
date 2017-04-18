@@ -9,31 +9,8 @@ import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
 
 private object Aperture {
-  /**
-   * Returns a new vector which is sorted by a `Node`'s status. That is,
-   * the healthiest nodes are brought to the front of the collection.
-   */
-  def sortByStatus[Node <: NodeT[_, _]](vector: Vector[Node]): Vector[Node] = {
-
-    // We implement a custom linear sort to avoid using the default built-in
-    // collection sort which throws exceptions when elements under comparison
-    // change (e.g. compare(a, b) must equal compare(b, a)). This case is ignored
-    // below since having stale data has little consequence here.
-    val resultNodes = new VectorBuilder[Node]
-    val busyNodes = new ListBuffer[Node]
-    val closedNodes = new ListBuffer[Node]
-
-    vector.foreach { node =>
-      node.status match {
-        case Status.Open   => resultNodes += node
-        case Status.Busy   => busyNodes += node
-        case Status.Closed => closedNodes += node
-      }
-    }
-
-    resultNodes ++= busyNodes ++= closedNodes
-    resultNodes.result
-  }
+  val nodeToken: NodeT[_, _] => Int = { node => node.token }
+  val openNode: NodeT[_, _] => Boolean = { node => node.status == Status.Open }
 }
 
 /**
@@ -123,9 +100,12 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param vector The ordered collection over which the aperture is applied
    * and p2c selects over.
    *
-   * @param originalVector The original vector before any ordering is applied.
+   * @param original The original vector before any ordering is applied.
    * This is necessary to keep intact since the updates we receive from the
    * Balancer apply a specific ordering to the collection of nodes.
+   *
+   * @param busy The nodes which have been shuffled to the back of the collection
+   * because they are considered busy as per their `status`.
    *
    * @param coordinate The last sample read from [[DeterministicOrdering]] that
    * the distributor used.
@@ -134,7 +114,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    */
   protected class Distributor(
       vector: Vector[Node],
-      originalVector: Vector[Node],
+      original: Vector[Node],
+      busy: Vector[Node],
       coordinate: Option[Coord],
       initAperture: Int)
     extends DistributorT[Node](vector)
@@ -198,15 +179,15 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     protected def bound: Int = aperture
     protected def emptyNode = failingNode(emptyException)
 
-    def rebuild(): This = rebuild(originalVector)
+    def rebuild(): This = rebuild(original)
 
     /**
-     * Returns a new vector with the nodes sorted by `token` and `status` which is
-     * deterministic across rebuilds but random globally, since `token` is assigned
-     * randomly per process when the node is created.
+     * Returns a new vector with the nodes sorted by `token` which is
+     * deterministic across rebuilds but random globally, since `token`
+     * is assigned randomly per process when the node is created.
      */
     private[this] def tokenOrder(vec: Vector[Node]): Vector[Node] =
-      sortByStatus(vec.sortBy(_.token))
+      vec.sortBy(nodeToken)
 
     /**
      * Returns a new vector with the nodes ordered relative to the coordinate in
@@ -221,6 +202,34 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     /**
+     * Returns a new vector which is ordered by the node's status. Note, it is
+     * important that this is a stable sort since we care about the source
+     * order when using deterministic ordering.
+     */
+    private[this] def statusOrder(
+      vec: Vector[Node],
+      busyBuilder: VectorBuilder[Node]
+    ): Vector[Node] = {
+      val resultNodes = new VectorBuilder[Node]
+      val busyNodes = new ListBuffer[Node]
+      val closedNodes = new ListBuffer[Node]
+
+      val iter = vec.iterator
+      while (iter.hasNext) {
+        val node = iter.next()
+        node.status match {
+          case Status.Open   => resultNodes += node
+          case Status.Busy   => busyNodes += node
+          case Status.Closed => closedNodes += node
+        }
+      }
+
+      busyBuilder ++= busyNodes
+      resultNodes ++= busyNodes ++= closedNodes
+      resultNodes.result
+    }
+
+    /**
      * Rebuilds the distributor and sorts the vector in two possible ways:
      *
      * 1. If `useDeterministicOrdering` is set to true and [[DeterministicOrdering]]
@@ -230,29 +239,33 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * 2. Otherwise, the vector is sorted by a node's token field.
      */
     def rebuild(vec: Vector[Node]): This = {
-      if (vec.isEmpty) {
-        new Distributor(vec, vec, coordinate, aperture)
+     if (vec.isEmpty) {
+        new Distributor(vec, vec, busy, coordinate, aperture)
       } else {
         DeterministicOrdering() match {
           case someCoord@Some(coord) if useDeterministicOrdering =>
-            new Distributor(ringOrder(vec, coord.value), vec, someCoord, aperture)
+            val busyBuilder = new VectorBuilder[Node]
+            val newVec = statusOrder(ringOrder(vec, coord.value), busyBuilder)
+            new Distributor(newVec, vec, busyBuilder.result, someCoord, aperture)
           case _ =>
-            new Distributor(tokenOrder(vec), vec, None, aperture)
+            val busyBuilder = new VectorBuilder[Node]
+            val newVec = statusOrder(tokenOrder(vec), busyBuilder)
+            new Distributor(newVec, vec, busyBuilder.result, None, aperture)
         }
       }
     }
 
-    // Since Aperture is probabilistic (it uses P2C) in its selection,
-    // we don't partition and select only from healthy nodes. Instead, we
-    // rely on the near zero probability of selecting two down nodes (given
-    // the layers of retries above us). However, namers can still force
-    // rebuilds when the underlying set of nodes changes (e.g. some of the
-    // nodes were unannounced and restarted).
-    def needsRebuild: Boolean = false
+    // To reduce the amount of rebuilds needed, we rely on the probabilistic
+    // nature of the p2c pick. That is, we know that only when a significant
+    // portion of the underlying vector is unavailable will we return an
+    // unavailable node to the layer above and trigger a rebuild. We do however
+    // want to return to our "stable" ordering as soon as we notice that a
+    // previously busy node is now available.
+    def needsRebuild: Boolean = busy.exists(openNode)
   }
 
   protected def initDistributor(): Distributor =
-    new Distributor(Vector.empty, Vector.empty, None, 1)
+    new Distributor(Vector.empty, Vector.empty, Vector.empty, None, 1)
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())
