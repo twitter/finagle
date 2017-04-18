@@ -74,6 +74,11 @@ Breaking API Changes
   * finagle-core: Change the AddressOrdering param to no longer take a StatsReceiver,
     since orderings were simplified and are no longer composite. ``RB_ID=914113``
 
+  * finagle-core: Constructors for `c.t.f.ChannelException` and its subclasses now have
+    overloads that take `Option`\s instead of allowing `null`. While the existing
+    constructors remain, and forward to the new ones, this can still cause compilation
+    failures when the arguments are ambiguous. ``RB_ID=914800``
+
   * finagle-http: `c.t.f.http.Http` codec has disappeared as part of Netty 4 migration. Use
     `c.t.f.Http.client` or `c.t.f.Http.server` stacks instead. ``RB_ID=912427``
 
