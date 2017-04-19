@@ -71,7 +71,7 @@ Failure Accrual
 .. _failure_accrual_stats:
 
 The client stats under the `failure_accrual` scope track how
-:src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`
+:src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`
 manages failures.
 
 .. include:: metrics/FailureAccrual.rst

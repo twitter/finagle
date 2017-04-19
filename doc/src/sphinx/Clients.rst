@@ -631,7 +631,7 @@ The `Failure Accrual` module marks itself as unavailable based on the number of 
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`.
+The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`.
 
 See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
 ``Failure Accrual`` module.
@@ -656,8 +656,8 @@ success rate [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.successRate(
@@ -681,9 +681,8 @@ following snippet [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
-
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrual.Param(() => FailureAccrualPolicy.consecutiveFailures(

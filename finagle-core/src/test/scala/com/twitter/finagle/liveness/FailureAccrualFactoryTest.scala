@@ -1,10 +1,10 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.service._
 import com.twitter.finagle.{Status, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
 import com.twitter.finagle.param
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.toggle.flag
 import com.twitter.util._
 import java.util.concurrent.TimeUnit

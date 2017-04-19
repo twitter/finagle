@@ -7,6 +7,7 @@ import com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
+import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
@@ -23,7 +24,6 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._

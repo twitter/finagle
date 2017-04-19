@@ -8,6 +8,7 @@ import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._

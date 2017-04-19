@@ -10,11 +10,11 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.service.{FailedService, FailureAccrualFactory, ReqRep, ResponseClassifier}
+import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.Buf

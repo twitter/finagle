@@ -1,11 +1,11 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.service.{Backoff, ResponseClass, ResponseClassifier, ReqRep}
 import com.twitter.finagle.server.ServerInfo
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Level
 import com.twitter.util._
@@ -172,7 +172,7 @@ object FailureAccrualFactory {
   private[finagle] val Disabled: Param = Param.Disabled
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
+   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.liveness.FailureAccrualFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.ModuleParams[ServiceFactory[Req, Rep]] {

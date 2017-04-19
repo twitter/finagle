@@ -10,6 +10,7 @@ import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.filter.MonitorFilter
 import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.service.HttpResponseClassifier
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, ReadableCounter}
 import com.twitter.finagle.toggle.flag

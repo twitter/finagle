@@ -6,6 +6,7 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter._
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.service._
@@ -41,7 +42,7 @@ object StackClient {
    * @see [[com.twitter.finagle.service.PendingRequestFilter]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
-   * @see [[com.twitter.finagle.service.FailureAccrualFactory]]
+   * @see [[com.twitter.finagle.liveness.FailureAccrualFactory]]
    * @see [[com.twitter.finagle.service.StatsServiceFactory]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]

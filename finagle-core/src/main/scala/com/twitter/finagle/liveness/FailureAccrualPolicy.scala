@@ -1,4 +1,4 @@
-package com.twitter.finagle.service.exp
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff

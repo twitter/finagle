@@ -4,8 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.{StackClient, StringClient}
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith

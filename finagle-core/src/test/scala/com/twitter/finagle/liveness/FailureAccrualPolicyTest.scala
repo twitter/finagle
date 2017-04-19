@@ -1,8 +1,8 @@
-package com.twitter.finagle.service.exp
+package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.service.Backoff
 import com.twitter.util._
+import com.twitter.finagle.service._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

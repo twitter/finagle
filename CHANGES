@@ -10,6 +10,10 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: FailureAccrual is now production ready. It has been promoted out of
+    experimental and moved from com.twitter.finagle.service.exp to
+    com.twitter.finagle.liveness. ``RB_ID=914662``
+
   * finagle-core: SSL/TLS APIs have been changed to include methods which work
     based on an SSL configuration, and an SSL configuration and an SSL engine factory.
     ``RB_ID=911209``
@@ -33,6 +37,9 @@ Breaking API Changes
 
   * finagle-mysql: Support for Netty 3 has been removed, making Netty 4 the only transport
     implementation. ``RB_ID=914661``
+
+  * finagle-core: com.twitter.finagle.service.exp.FailureAccrualPolicy has been promoted to
+    com.twitter.finagle.liveness.FailureAccrualPolicy
 
   * finagle-commons-stats: Remove finagle-commons-stats, which was a compatibility layer
     for a deprecated stats library.  Please move to finagle-stats instead.  ``RB_ID=910964``
@@ -126,7 +133,7 @@ Breaking API Changes
     ``RB_ID=914827``
 
   * Remove deprecated `c.t.f.memcached.PartitionedClient` object. Use
-    `c.t.f.memcached.CacheNodeGroup.apply` instead of 
+    `c.t.f.memcached.CacheNodeGroup.apply` instead of
     `c.t.f.memcached.PartitionedClient.parseHostWeights`. ``RB_ID=914827``
 
   * Remove deprecated `c.t.f.memcached.util.ParserUtils.DIGITS`. Use "^\\d+$" instead.
