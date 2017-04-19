@@ -15,7 +15,7 @@ import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
  * only cautiously. Peak EWMA takes history into account, so that
  * slow behavior is penalized relative to the supplied decay time.
  *
- * @param activity An activity that updates with the set of node pairs
+ * @param endpoints An activity that updates with the set of node pairs
  * over which we distribute load.
  *
  * @param decayTime The window of latency observations.
