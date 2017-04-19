@@ -183,7 +183,7 @@ private[twitter] class ClientSession(
     val readStamp = lock.readLock()
     try state match {
       case Dispatching | Leasing(_) => processAndWrite(msg)
-      case Draining | Drained => FutureNackException
+      case Draining | Drained => Failure.FutureRetryableNackFailure
     } finally lock.unlockRead(readStamp)
   }
 
@@ -233,9 +233,6 @@ private[twitter] class ClientSession(
 }
 
 private object ClientSession {
-  val FutureNackException: Future[Nothing] = Future.exception(
-    Failure.rejected("The request was Nacked by the server"))
-
   val FuturePingNack: Future[Nothing] = Future.exception(Failure(
     "A ping is already outstanding on this session."))
 

@@ -153,6 +153,22 @@ object Failure {
   val NonRetryable: Long = FailureFlags.NonRetryable
 
   /**
+   * Representation of a nack response that is retryable
+   */
+  val RetryableNackFailure: Failure = Failure.rejected("The request was Nacked by the server")
+
+  /**
+   * Representation of a future nack response that is retryable
+   */
+  val FutureRetryableNackFailure: Future[Nothing] = Future.exception(RetryableNackFailure)
+
+  /**
+   * Representation of a nack response that is non-retryable
+   */
+  val NonRetryableNackFailure: Failure =
+    Failure("The request was Nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
+
+  /**
    * Flag naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = FailureFlags.Naming

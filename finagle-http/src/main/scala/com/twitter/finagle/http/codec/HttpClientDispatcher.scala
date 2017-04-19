@@ -1,5 +1,6 @@
 package com.twitter.finagle.http.codec
 
+import com.twitter.finagle.Failure
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
@@ -78,11 +79,11 @@ private[finagle] class HttpClientDispatcher(
       // Drain the Transport into Response body.
       trans.read().flatMap {
         case Multi(res, readFinished) if HttpNackFilter.isRetryableNack(res) =>
-          p.updateIfEmpty(Throw(HttpNackFilter.RetryableNackFailure))
+          p.updateIfEmpty(Throw(Failure.RetryableNackFailure))
           swallowNackBody(res).before(readFinished)
 
         case Multi(res, readFinished) if HttpNackFilter.isNonRetryableNack(res) =>
-          p.updateIfEmpty(Throw(HttpNackFilter.NonRetryableNackFailure))
+          p.updateIfEmpty(Throw(Failure.NonRetryableNackFailure))
           swallowNackBody(res).before(readFinished)
 
         case Multi(res, readFinished) =>

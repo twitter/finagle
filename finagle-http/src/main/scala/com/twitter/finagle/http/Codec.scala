@@ -254,7 +254,7 @@ private case class Http(
         params: Stack.Params
       ): ServiceFactory[Request, Response] = {
         val finagle.param.Stats(stats) = params[finagle.param.Stats]
-        new HttpNackFilter(stats)
+        HttpNackFilter.newFilter(stats)
           .andThen(new DtabFilter.Extractor)
           .andThen(new ServerContextFilter[Request, Response])
           .andThenIf(!_streaming -> new PayloadSizeFilter[Request, Response](

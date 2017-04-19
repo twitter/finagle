@@ -2,7 +2,6 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{Status, StreamClosedException, FailureFlags, Stack, Failure}
-import com.twitter.finagle.http.filter.HttpNackFilter.{RetryableNackFailure, NonRetryableNackFailure}
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.param.Stats
@@ -105,8 +104,8 @@ private[http2] class MultiplexedTransporter(
     case Message(msg, streamId) => tryToInitializeQueue(streamId).offer(msg)
     case GoAway(msg, lastStreamId) => handleGoaway(msg, lastStreamId)
     case Rst(streamId, errorCode) =>
-      val error = if (errorCode == Http2Error.REFUSED_STREAM.code) RetryableNackFailure
-      else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) NonRetryableNackFailure
+      val error = if (errorCode == Http2Error.REFUSED_STREAM.code) Failure.RetryableNackFailure
+      else if (errorCode == Http2Error.ENHANCE_YOUR_CALM.code) Failure.NonRetryableNackFailure
       else new StreamClosedException(addr, streamId.toString)
 
       tryToInitializeQueue(streamId).fail(error)

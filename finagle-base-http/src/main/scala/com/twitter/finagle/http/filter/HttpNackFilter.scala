@@ -17,16 +17,17 @@ import com.twitter.util.Future
  * Clients who don't recognize the header treat the response the same way as
  * other 503 response.
  */
-private[finagle] object HttpNackFilter {
+object HttpNackFilter {
+  /** The `Role` assigned to a `HttpNackFilter` within a `Stack`. */
   val role: Stack.Role = Stack.Role("HttpNack")
 
-  val RetryableNackFailure = Failure.rejected("The request was nacked by the server")
-
-  val NonRetryableNackFailure =
-    Failure("The request was nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
-
+  /** Header name for retryable nack responses */
   val RetryableNackHeader: String = "finagle-http-nack"
+
+  /** Header name for non-retryable nack responses */
   val NonRetryableNackHeader: String = "finagle-http-nonretryable-nack"
+
+  /** Response status for a nacked request */
   val ResponseStatus: Status = Status.ServiceUnavailable
 
   private val RetryableNackBody = Buf.Utf8("Request was not processed by the server due to an error and is safe to retry")
@@ -34,13 +35,13 @@ private[finagle] object HttpNackFilter {
 
   private val NonRetryableNackFlags = Failure.Rejected|Failure.NonRetryable
 
-  def isRetryableNack(rep: Response): Boolean =
+  private[finagle] def isRetryableNack(rep: Response): Boolean =
     rep.status == ResponseStatus && rep.headerMap.contains(RetryableNackHeader)
 
-  def isNonRetryableNack(rep: Response): Boolean =
+  private[finagle] def isNonRetryableNack(rep: Response): Boolean =
     rep.status == ResponseStatus && rep.headerMap.contains(NonRetryableNackHeader)
 
-  def module: Stackable[ServiceFactory[Request, Response]] =
+  private[finagle] def module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module1[param.Stats,ServiceFactory[Request, Response]] {
       val role: Stack.Role = HttpNackFilter.role
       val description = "Convert rejected requests to 503s, respecting retryability"
@@ -53,9 +54,13 @@ private[finagle] object HttpNackFilter {
         new HttpNackFilter(stats).andThen(next)
       }
     }
+
+  /** Construct a new HttpNackFilter */
+  private[finagle] def newFilter(statsReceiver: StatsReceiver): SimpleFilter[Request, Response] =
+    new HttpNackFilter(statsReceiver)
 }
 
-private[finagle] class HttpNackFilter(statsReceiver: StatsReceiver)
+private class HttpNackFilter(statsReceiver: StatsReceiver)
   extends SimpleFilter[Request, Response] {
   import HttpNackFilter._
 

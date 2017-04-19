@@ -156,13 +156,13 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
 
       case Return(Message.RdispatchNack(_, contexts)) =>
         val exn = MuxFailure.fromContexts(contexts) match {
-          case Some(f) => Failure(NackedException.why, f.finagleFlags)
-          case None => NackedException
+          case Some(f) => Failure(Failure.RetryableNackFailure.why, f.finagleFlags)
+          case None => Failure.RetryableNackFailure
         }
         Future.exception(exn)
 
       case Return(Message.RreqNack(_)) =>
-        FutureNackedException
+        Failure.FutureRetryableNackFailure
 
       case t@Throw(_) => Future.const(t.cast[Response])
       case Return(m) => Future.exception(Failure(s"unexpected response: $m"))
@@ -200,8 +200,6 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
 }
 
 private object ReqRepFilter {
-  val NackedException = Failure.rejected("The request was Nacked by the server")
-  val FutureNackedException = Future.exception(NackedException)
 
   /** Indicates if our peer can accept `Tdispatch` messages. */
   object CanDispatch extends Enumeration {
