@@ -93,6 +93,9 @@ Breaking API Changes
     constructors remain, and forward to the new ones, this can still cause compilation
     failures when the arguments are ambiguous. ``RB_ID=914800``
 
+  * finagle-core: Remove MimimumSetCluster since it has been deperecated for quite
+    some time. Instead, use finagle logical destinations via `Name`s. ``RB_ID=914849``
+
   * finagle-http: `c.t.f.http.Http` codec has disappeared as part of Netty 4 migration. Use
     `c.t.f.Http.client` or `c.t.f.Http.server` stacks instead. ``RB_ID=912427``
 
