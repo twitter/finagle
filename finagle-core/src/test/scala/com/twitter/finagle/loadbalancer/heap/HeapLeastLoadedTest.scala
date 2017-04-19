@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer.heap
 
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle._
-import com.twitter.util.{Activity, Await, Future, Time}
+import com.twitter.util.{Var, ReadWriteVar, Activity, Await, Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.scalatest.FunSuite
 import org.scalatest.junit.AssertionsForJUnit
@@ -39,7 +39,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     val statsReceiver = new InMemoryStatsReceiver
     val half1, half2 = 0 until N/2 map { i => new LoadedFactory(i.toString) }
     val factories = half1 ++ half2
-    val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](factories:_*)
+    val mutableFactories = new ReadWriteVar(factories)
     val nonRng = new Random {
       private[this] val i = new AtomicInteger(0)
       override def nextInt(n: Int) = i.incrementAndGet() % n
@@ -48,7 +48,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     val exc = new NoBrokersAvailableException
 
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(group.set.map(set => Activity.Ok(set.toVector))),
+      Activity(mutableFactories.map(set => Activity.Ok(set.toVector))),
       statsReceiver,
       exc,
       nonRng)
@@ -61,9 +61,9 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
   }
 
   test("balancer with empty cluster has Closed status") {
-    val emptyCluster = Group.empty[ServiceFactory[Unit, LoadedFactory]]
+    val emptyFactories = Var.value(Seq.empty[ServiceFactory[Unit, LoadedFactory]])
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(emptyCluster.set.map(set => Activity.Ok(set.toVector))),
+      Activity(emptyFactories.map(set => Activity.Ok(set.toVector))),
       NullStatsReceiver,
       new NoBrokersAvailableException,
       new Random
@@ -76,10 +76,10 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
       val node = new LoadedFactory("1")
       node._status = status
 
-      val cluster = Group.mutable[ServiceFactory[Unit, LoadedFactory]](node)
+      val factories = Var.value(Seq(node))
 
       val b = new HeapLeastLoaded[Unit, LoadedFactory](
-        Activity(cluster.set.map(set => Activity.Ok(set.toVector))),
+        Activity(factories.map(set => Activity.Ok(set.toVector))),
         NullStatsReceiver,
         new NoBrokersAvailableException,
         new Random
@@ -135,7 +135,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     // add newFactory to the heap balancer. Initially it has
     // load 0, so the next two make()() should both pick
     // newFactory
-    group() += newFactory
+    mutableFactories.update(factories :+ newFactory)
     Await.result(b())
     assert(newFactory.load == 1)
     Await.result(b())
@@ -144,7 +144,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     // remove newFactory from the heap balancer.
     // Further calls to make()() should not affect the
     // load on newFactory
-    group() -= newFactory
+    mutableFactories.update(factories)
     val made2 = Seq.fill(N) { Await.result(b()) }
     for (f <- factories) assert(f.load == 3)
     assert(newFactory.load == 2)
@@ -155,11 +155,11 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     import ctx._
 
     val made = Seq.fill(N) { Await.result(b()) }
-    group() += newFactory
+    mutableFactories.update(factories :+ newFactory)
     val made2 = Await.result(b())
     for (f <- factories :+ newFactory) assert(f.load == 1)
 
-    group() -= newFactory
+    mutableFactories.update(factories)
     made2.close()
     assert(newFactory.load == 0)
   }
@@ -169,7 +169,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     import ctx._
 
     val made = Seq.fill(N) { Await.result(b()) }
-    group() --= half1
+    mutableFactories.update(half2)
     Await.result(b()).close()
     for (f <- half1) assert(f.isClosed)
   }
@@ -192,13 +192,13 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     assertGauge("available", 10)
     assertGauge("size", 10)
 
-    group() += newFactory
+    mutableFactories.update(factories :+ newFactory)
     Await.result(b())
     assertGauge("available", 11)
     assertGauge("size", 11)
     assertCounter("adds", 11)
 
-    group() -= newFactory
+    mutableFactories.update(factories)
     Await.result(b())
     assertGauge("available", 10)
     assertGauge("size", 10)
@@ -236,7 +236,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     val ctx = new Ctx
     import ctx._
     // Use 2 nodes for this test
-    factories.drop(2).foreach(n => group() -= n)
+    mutableFactories.update(factories.drop(factories.size - 2))
 
     // Sequentially issue requests to the 2 nodes.
     // Requests should end up getting serviced by more than just one
@@ -282,7 +282,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     assert(factories(1).load == 1)
 
     factories(1).setStatus(Status.Open)
-    group() -= factories(1)
+    mutableFactories.update(factories.take(1) ++ factories.drop(2))
 
     for (_ <- 0 until N) b()
     assert(factories(1).load == 1)
@@ -317,11 +317,10 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     import ctx._
 
     val factories = Seq(new LoadedFactory("left"), new LoadedFactory("right"))
-    val group = Group.mutable[ServiceFactory[Unit, LoadedFactory]](
-      factories:_*)
+    val mutableFactories = new ReadWriteVar(factories)
 
     val b = new HeapLeastLoaded[Unit, LoadedFactory](
-      Activity(group.set.map(set => Activity.Ok(set.toVector))),
+      Activity(mutableFactories.map(set => Activity.Ok(set.toVector))),
       statsReceiver,
       new NoBrokersAvailableException,
       new Random
@@ -342,7 +341,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     assert(factories(0).load == 502)
     assert(factories(1).load == 1502)
 
-    group() -= factories(1)
+    mutableFactories.update(factories.take(1) ++ factories.drop(2))
 
     for (_ <- 0 until 1000) b()
     assert(factories(0).load == 1502)
