@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.{Command => _, _}
 import com.twitter.io.Buf
 
 /**

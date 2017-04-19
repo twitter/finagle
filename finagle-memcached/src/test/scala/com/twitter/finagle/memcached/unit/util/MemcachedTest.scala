@@ -12,7 +12,6 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
-import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.FunSuite

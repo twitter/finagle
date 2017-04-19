@@ -35,6 +35,8 @@ abstract class AbstractDecodingToCommand[C] {
   def decode(decoding: Decoding): C = decoding match {
     case Tokens(tokens) => parseNonStorageCommand(tokens)
     case TokensWithData(tokens, data, casUnique) => parseStorageCommand(tokens, data, casUnique)
+    case other => throw new IllegalArgumentException(
+      s"Expecting `Tokens` or `TokensWithData`, got $other")
   }
 
   protected def parseNonStorageCommand(tokens: Seq[Buf]): C

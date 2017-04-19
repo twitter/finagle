@@ -1,17 +1,14 @@
 package com.twitter.finagle.memcached
 
-import _root_.java.io.ByteArrayInputStream
 import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
-import com.twitter.concurrent.Spool.*::
-import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
+import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable

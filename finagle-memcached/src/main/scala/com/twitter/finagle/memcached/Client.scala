@@ -1,18 +1,15 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import _root_.java.net.{InetSocketAddress, SocketAddress}
 import _root_.java.nio.charset.StandardCharsets
 import com.twitter.bijection.Bijection
 import com.twitter.concurrent.Broker
-import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
+import com.twitter.finagle.builder.{ClientBuilder, ClientConfig}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
-import com.twitter.finagle.memcached.exp.LocalMemcached
-import com.twitter.finagle.memcached.protocol.{text, _}
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}

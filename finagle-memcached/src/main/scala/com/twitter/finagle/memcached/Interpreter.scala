@@ -141,7 +141,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
         map.lock(key) { data =>
           apply(Incr(key, -value))
         }
-      case Quit() =>
+      case _ =>
         NoOp()
     }
   }

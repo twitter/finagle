@@ -41,5 +41,6 @@ junit_tests(
     'util/util-stats/src/main/scala:scala',
     'util/util-zk-test',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
 )

@@ -30,6 +30,7 @@ scala_library(
     'util/util-registry/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
   # Exposes a service-loaded class.
   scope='forced',

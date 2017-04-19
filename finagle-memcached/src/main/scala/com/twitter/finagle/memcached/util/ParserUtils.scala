@@ -1,8 +1,6 @@
 package com.twitter.finagle.memcached.util
 
 import com.twitter.io.Buf
-import java.util.regex.Pattern
-import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.mutable.ArrayBuffer
 
 object ParserUtils {

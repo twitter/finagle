@@ -14,5 +14,6 @@ java_library(
     'util/util-function/src/main/java:java',
     'util/util-stats/src/main/scala:scala',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )
