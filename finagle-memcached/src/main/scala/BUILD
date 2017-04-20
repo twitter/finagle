@@ -7,7 +7,6 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
-    '3rdparty/jvm/com/google/code/gson',
     '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/com/google/inject:guice',
     '3rdparty/jvm/com/twitter/bijection:core',
@@ -20,8 +19,6 @@ scala_library(
     'finagle/finagle-netty4',
     'finagle/finagle-serversets',
     'finagle/finagle-toggle/src/main/scala:scala',
-    'src/java/com/twitter/common/io:io',
-    'src/java/com/twitter/common/io:json',
     'util/util-app/src/main/scala:scala',
     'util/util-collection/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',

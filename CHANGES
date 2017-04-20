@@ -162,6 +162,8 @@ Breaking API Changes
   * finagle-memcached: Remove old `c.t.f.memcached.migration.DarkRead`, and
     `c.t.f.memcached.migration.DarkWrite`. ``RB_ID=911367``
 
+  * finagle-memcached: Remove `c.t.f.memcached.CachePoolConfig`. ``RB_ID=914623``
+
   * finagle-mux: Netty 3 implementation of Mux is removed. Default is
     Netty 4. ``RB_ID=914239``
 
@@ -197,6 +199,12 @@ Runtime Behavior Changes
   * finagle-netty4: SOCKS5 proxies are now bypassed if the connect destination is
     localhost. This matches Finagle's prior behavior from when Netty 3 was the default
     transport implementation. ``RB_ID=914494``
+
+
+Dependencies
+~~~~~~~~~~~~
+
+  * finagle-memcached: Remove dependency on com.twitter.common:io-json. ``RB_ID=914623``
 
 6.43.0
 ------

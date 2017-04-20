@@ -513,7 +513,6 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       guavaLib,
-      "com.twitter.common" % "io-json" % "0.0.54",
       "com.twitter" %% "bijection-core" % "0.9.4",
       "com.twitter" % "libthrift" % libthriftVersion
     ),

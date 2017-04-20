@@ -1,8 +1,6 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.net.{SocketAddress, InetSocketAddress}
-import com.google.gson.GsonBuilder
-import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.zookeeper._
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
@@ -136,21 +134,3 @@ object CacheNodeGroup {
     }
   }
 }
-
-/**
- * Cache pool config data object
- */
-object CachePoolConfig {
-  val jsonCodec: Codec[CachePoolConfig] =
-    JsonCodec.create(classOf[CachePoolConfig],
-      new GsonBuilder().setExclusionStrategies(JsonCodec.getThriftExclusionStrategy()).create())
-}
-
-/**
- * Cache pool config data format
- * Currently this data format is only used by ZookeeperCachePoolManager to read the config data
- * from zookeeper serverset parent node, and the expected cache pool size is the only attribute
- * we need for now. In the future this can be extended for other config attributes like cache
- * pool migrating state, backup cache servers list, or replication role, etc
- */
-case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = false)
