@@ -15,9 +15,6 @@ import com.twitter.jvm.Jvm
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
-import java.util.Collections
-import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConverters._
 
 object StackServer {
 
@@ -193,15 +190,13 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       // session resources per ListeningServer. Note, draining
       // in-flight requests is expected to be managed by the session,
       // so we can simply `close` all sessions here.
-      val sessions = Collections.newSetFromMap(
-        new ConcurrentHashMap[Closable, java.lang.Boolean])
-
+      val sessions = new Closables
 
       val underlying = server.newListeningServer(serviceFactory, addr) { session =>
         registry.register(session.remoteAddress)
-        sessions.add(session)
+        sessions.register(session)
         session.onClose.ensure {
-          sessions.remove(session)
+          sessions.unregister(session)
           registry.unregister(session.remoteAddress)
         }
       }
@@ -222,10 +217,11 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         // However we don't want to wait on the above because it will only complete
         // when #4 is finished.  So we ignore it and close everything else.  Note that
         // closing the connections here will do #2 and drain them via the Dispatcher.
-        val everythingElse = factory :: sessions.asScala.toList
+        val closingSessions = sessions.close(deadline)
+        val closingFactory = factory.close(deadline)
 
         // and once they're drained we can then wait on the listener physically closing them
-        Closable.all(everythingElse: _*).close(deadline).before(ulClosed)
+        Future.join(Seq(closingSessions, closingFactory)).before(ulClosed)
       }
 
       def boundAddress = underlying.boundAddress
