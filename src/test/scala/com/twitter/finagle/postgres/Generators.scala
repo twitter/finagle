@@ -62,7 +62,7 @@ object Generators {
   // arbitrary string that only contains valid UTF-8 characters
   val utf8 = StandardCharsets.UTF_8.newEncoder()
   implicit val arbUTF8String = Arbitrary(arbitrary[String].filter {
-    str => utf8.canEncode(str) && !str.contains('\0')
+    str => utf8.canEncode(str) && !str.contains('\u0000')
   })
 
   // TODO: can empty maps be supported?
