@@ -10,7 +10,7 @@ import com.twitter.util.Activity
  * An O(1), concurrent, least-loaded fair load balancer. This uses the ideas
  * behind "power of 2 choices" [1].
  *
- * @param activity An activity that updates with the set of nodes over which
+ * @param endpoints An activity that updates with the set of nodes over which
  * we distribute load.
  *
  * @param maxEffort the maximum amount of "effort" we're willing to
