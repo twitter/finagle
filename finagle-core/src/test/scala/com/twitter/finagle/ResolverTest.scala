@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Time, Return, Throw, Var}
-import java.net.InetSocketAddress
+import com.twitter.util.{Future, Time, Var}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -56,20 +55,6 @@ class ResolverTest extends FunSuite {
     Var.sample(binding) match {
       case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
         assert(addrs.head == TestAddr("xyz"))
-      case _ => fail()
-    }
-  }
-
-  test("Resolver.resolve (backwards compat.)") {
-    val exc = new Exception
-    ConstResolver(Addr.Failed(exc)).resolve("blah") match {
-      case Throw(`exc`) =>
-      case _ => fail()
-    }
-
-    val sockaddr = new InetSocketAddress(0)
-    ConstResolver(Addr.Bound(Address(sockaddr))).resolve("blah") match {
-      case Return(g) => assert(g() == Set(sockaddr))
       case _ => fail()
     }
   }

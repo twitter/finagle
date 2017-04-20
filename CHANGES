@@ -101,6 +101,10 @@ Breaking API Changes
   * finagle-core: Remove MimimumSetCluster since it has been deperecated for quite
     some time. Instead, use finagle logical destinations via `Name`s. ``RB_ID=914849``
 
+  * finagle-core: Remove deprecated `c.t.f.Resolver.resolve`. Use `c.t.f.Resolver.bind`
+    instead. Remove deprecated `c.t.f.BaseResolver.resolve`. Use `c.t.f.Resolver.eval`
+    instead. ``RB_ID=914986``
+
   * finagle-http: `c.t.f.http.Http` codec has disappeared as part of Netty 4 migration. Use
     `c.t.f.Http.client` or `c.t.f.Http.server` stacks instead. ``RB_ID=912427``
 
