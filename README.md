@@ -26,6 +26,7 @@ public API breaks and changes in runtime behavior.
 * Source: https://github.com/twitter/finagle/
 * Mailing List: [finaglers@googlegroups.com](https://groups.google.com/forum/#!forum/finaglers)
 * Chat: https://gitter.im/twitter/finagle
+* Blog: https://finagle.github.io/blog/
 
 Finagle is an extensible RPC system for the JVM, used to construct
 high-concurrency servers. Finagle implements uniform client and server APIs for
