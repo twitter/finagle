@@ -4,14 +4,11 @@ import _root_.java.net.{SocketAddress, InetSocketAddress}
 import com.google.gson.GsonBuilder
 import com.twitter.common.io.{Codec,JsonCodec}
 import com.twitter.common.zookeeper._
-import com.twitter.concurrent.Spool
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
-import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory}
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
-import scala.collection.mutable
 
 object CacheNode {
 
@@ -141,64 +138,6 @@ object CacheNodeGroup {
 }
 
 /**
- * Cache specific cluster implementation.
- * - A cache pool is a Cluster of cache nodes.
- * - cache pool requires a underlying pool manager as the source of the cache nodes
- * - the underlying pool manager encapsulates logic of monitoring the cache node changes and
- * deciding when to update the cache pool cluster
- */
-object CachePoolCluster {
-  /**
-   *  Cache pool based on a static list
-   *
-   * @param cacheNodeSet static set of cache nodes to construct the cluster
-   */
-  def newStaticCluster(cacheNodeSet: Set[CacheNode]) = new StaticCachePoolCluster(cacheNodeSet)
-}
-
-trait CachePoolCluster extends Cluster[CacheNode] {
-  /**
-   * Cache pool snapshot and future changes
-   * These two should only change when a key-ring rehashing is needed (e.g. cache pool
-   * initialization, migration, expansion, etc), thus we only let the underlying pool manager
-   * to change them
-   */
-  private[this] val cachePool = new mutable.HashSet[CacheNode]
-  private[this] var cachePoolChanges = new Promise[Spool[Cluster.Change[CacheNode]]]
-
-  def snap: (Seq[CacheNode], Future[Spool[Cluster.Change[CacheNode]]]) = cachePool synchronized {
-    (cachePool.toSeq, cachePoolChanges)
-  }
-
-  /**
-   * TODO: pick up new rev of Cluster once it's ready
-   * Soon enough the Cluster will be defined in a way that we can directly managing the managers
-   * in a more flexible way, by then we should be able to do batch update we want here. For now,
-   * the updating pool is still done one by one.
-   */
-  final protected[this] def updatePool(newSet: Set[CacheNode]) = cachePool synchronized  {
-    val added = newSet &~ cachePool
-    val removed = cachePool &~ newSet
-
-    // modify cachePool and cachePoolChanges
-    removed foreach { node =>
-      cachePool -= node
-      appendUpdate(Cluster.Rem(node))
-    }
-    added foreach { node =>
-      cachePool += node
-      appendUpdate(Cluster.Add(node))
-    }
-  }
-
-  private[this] def appendUpdate(update: Cluster.Change[CacheNode]) = cachePool synchronized  {
-    val newTail = new Promise[Spool[Cluster.Change[CacheNode]]]
-    cachePoolChanges() = Return(update *:: newTail)
-    cachePoolChanges = newTail
-  }
-}
-
-/**
  * Cache pool config data object
  */
 object CachePoolConfig {
@@ -215,13 +154,3 @@ object CachePoolConfig {
  * pool migrating state, backup cache servers list, or replication role, etc
  */
 case class CachePoolConfig(cachePoolSize: Int, detectKeyRemapping: Boolean = false)
-
-/**
- *  Cache pool based on a static list
- *
- * @param cacheNodeSet static set of cache nodes to construct the cluster
- */
-class StaticCachePoolCluster(cacheNodeSet: Set[CacheNode]) extends CachePoolCluster {
-  // The cache pool will updated once and only once as the underlying pool never changes
-  updatePool(cacheNodeSet)
-}
