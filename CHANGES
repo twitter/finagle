@@ -7,6 +7,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+* finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
+  Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
+
 6.44.0
 ------
 
@@ -137,7 +143,7 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
     - `apply(name: Name)`
     - `apply(host: String)`
-
+    
     Use `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=908442``
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.

@@ -144,7 +144,6 @@ private object BaseClient {
  */
 trait BaseClient[T] {
   import BaseClient._
-  import ClientConstants._
 
   /**
    * Deserialize from the bytes in a `Buf` into the client's type, `T`.
@@ -206,42 +205,6 @@ trait BaseClient[T] {
    * @return true if stored, false if not stored
    */
   def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean]
-
-  /**
-   * Perform a CAS operation on the key, only if the value has not
-   * changed since the value was last retrieved, and `casUnique`
-   * extracted from a `gets` command.  We treat the "cas unique" token
-   * opaquely, but in reality it is a string-encoded u64.
-   *
-   * $flags
-   *
-   * $expiry
-   *
-   * @return true if replaced, false if not
-   * @note this is superceded by [[checkAndSet]] which returns a higher fidelity
-   *       return value
-   */
-  @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
-  final def cas(
-    key: String, flags: Int, expiry: Time, value: T, casUnique: Buf
-  ): Future[JBoolean] =
-    checkAndSet(key, flags, expiry, value, casUnique).flatMap(CasFromCheckAndSet)
-
-  /**
-   * Perform a CAS operation on the key, only if the value has not
-   * changed since the value was last retrieved, and `casUnique`
-   * extracted from a `gets` command.  We treat the "cas unique" token
-   * opaquely, but in reality it is a string-encoded u64.
-   *
-   * Neither flags nor expiry are supplied.
-   *
-   * @return true if replaced, false if not
-   * @note this is superceded by [[checkAndSet]] which returns a higher fidelity
-   *       return value
-   */
-  @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
-  final def cas(key: String, value: T, casUnique: Buf): Future[JBoolean] =
-    cas(key, 0, Time.epoch, value, casUnique)
 
   /**
    * Perform a CAS operation on the key, only if the value has not
