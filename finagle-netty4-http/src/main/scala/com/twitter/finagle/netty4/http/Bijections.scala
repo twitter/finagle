@@ -46,29 +46,25 @@ private[finagle] object Bijections {
       result
     }
 
-    private[this] def copyHeadersAndBody(nettyMsg: NettyHttp.HttpMessage, finMsg: FinagleHttp.Message): Unit = {
-      writeNettyHeadersToFinagle(nettyMsg.headers, finMsg.headerMap)
-      nettyMsg match {
-        case hasContent: NettyHttp.HttpContent =>
-          finMsg.content = ByteBufAsBuf.Owned(hasContent.content)
-        case _ =>
-      }
-    }
-
     def fullRequestToFinagle(
       r: NettyHttp.FullHttpRequest,
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = {
 
+      val payload = ByteBufAsBuf.Owned(r.content)
+
       val result = FinagleHttp.Request(
         method = methodToFinagle(r.method),
         uri = r.uri,
         version = versionToFinagle(r.protocolVersion),
-        reader = BufReader(ByteBufAsBuf.Owned(r.content)),
+        reader = BufReader(payload),
         remoteAddr = remoteAddr
       )
+
       result.setChunked(false)
-      copyHeadersAndBody(r, result)
+      writeNettyHeadersToFinagle(r.headers, result.headerMap)
+      result.content = payload
+
       result
     }
 
@@ -92,13 +88,18 @@ private[finagle] object Bijections {
     }
 
     def fullResponseToFinagle(rep: NettyHttp.FullHttpResponse): FinagleHttp.Response = {
+      val payload = ByteBufAsBuf.Owned(rep.content)
+
       val resp = FinagleHttp.Response(
         versionToFinagle(rep.protocolVersion),
         statusToFinagle(rep.status),
-        BufReader(ByteBufAsBuf.Owned(rep.content))
+        BufReader(payload)
       )
+
       resp.setChunked(false)
-      copyHeadersAndBody(rep, resp)
+      writeNettyHeadersToFinagle(rep.headers, resp.headerMap)
+      resp.content = payload
+
       resp
     }
   }

@@ -7,20 +7,30 @@ import io.netty.util.ByteProcessor
 
 private[finagle] object ByteBufAsBuf {
 
+  // Assuming that bb.hasArray.
+  private final def heapToBuf(bb: ByteBuf): Buf.ByteArray = {
+    val begin = bb.arrayOffset + bb.readerIndex
+    val end = begin + bb.readableBytes
+    new Buf.ByteArray(bb.array, begin, end)
+  }
+
   object Owned {
     /**
-     * Construct a [[Buf]] wrapper for ``ByteBuf``.
+     * Construct a [[Buf]] wrapper for `ByteBuf`.
      *
      * @note this wrapper does not support ref-counting and therefore should either
      *       be used with unpooled and non-leak detecting allocators or managed
      *       via the ref-counting methods of the wrapped `buf`. Non-empty buffers
      *       are `retain`ed.
+     *
+     * @note if the given is backed by a heap array, it will be coerced into `Buf.ByteArray`
+     *       and then released. This basically means it's only safe to use this smart constructor
+     *       with unpooled heap buffers.
      */
     def apply(buf: ByteBuf): Buf =
-      if (buf.readableBytes == 0)
-        Buf.Empty
-      else
-        new ByteBufAsBuf(buf)
+      if (buf.readableBytes == 0) Buf.Empty
+      else if (buf.hasArray) try heapToBuf(buf) finally buf.release()
+      else new ByteBufAsBuf(buf)
 
     /**
      * Extract a [[ByteBufAsBuf]]'s underlying ByteBuf without copying.
@@ -36,12 +46,17 @@ private[finagle] object ByteBufAsBuf {
   object Shared {
     /**
      * Construct a [[Buf]] by copying `ByteBuf`.
+     *
+     * @note if the given is backed by a heap array, it will be coerced into `Buf.ByteArray`
+     *       and then released.
      */
     def apply(buf: ByteBuf): Buf =
-      if (buf.readableBytes == 0)
-        Buf.Empty
-      else
-        new ByteBufAsBuf(buf.copy())
+      if (buf.readableBytes == 0) Buf.Empty
+      else if (buf.hasArray) {
+        val copy = buf.copy()
+        try heapToBuf(copy) finally copy.release()
+      }
+      else new ByteBufAsBuf(buf.copy())
 
     /**
      * Extract a copy of the [[ByteBufAsBuf]]'s underlying ByteBuf.
@@ -96,12 +111,8 @@ private[finagle] class ByteBufAsBuf(
   }
 
   protected def unsafeByteArrayBuf: Option[ByteArray] =
-    if (underlying.hasArray) {
-      val bytes = underlying.array
-      val begin = underlying.arrayOffset + underlying.readerIndex
-      val end = begin + underlying.readableBytes
-      Some(new Buf.ByteArray(bytes, begin, end))
-    } else None
+    if (underlying.hasArray) Some(ByteBufAsBuf.heapToBuf(underlying))
+    else None
 
   def length: Int = underlying.readableBytes
 
