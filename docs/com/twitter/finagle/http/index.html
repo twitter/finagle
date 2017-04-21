@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -333,24 +333,6 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="../filter/index.html">
               <span class="name">filter</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
             </a>
       </span>
       
@@ -560,12 +542,6 @@ their name.">
                           HeaderMap
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Http$.html" title=""></a>
-                        <a class="class" href="Http.html" title=""></a>
-                        <a href="Http.html" title="">
-                          Http
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers."></a>
                         <a href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers.">
@@ -612,6 +588,12 @@ their name.">
                         <a class="class" href="Method.html" title="Represents the HTTP method."></a>
                         <a href="Method.html" title="Represents the HTTP method.">
                           Method
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
+                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
+                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                          MethodBuilder
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -788,6 +770,24 @@ its credentials from a provided CredentialSource...">
       <span class="symbol">
         <a title="" href="../kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1598,36 +1598,6 @@ the <i>message</i>
 get(&quot;Accept&quot;).</p><p>The map is a multi-map.  Use <a href="HeaderMap.html#getAll(key:String):Seq[String]" class="extmbr" name="com.twitter.finagle.http.HeaderMap#getAll">getAll</a> to get all values for a key.  Use <a href="HeaderMap.html#add(k:String,date:java.util.Date):com.twitter.finagle.http.HeaderMap" class="extmbr" name="com.twitter.finagle.http.HeaderMap#add">add</a>
 to append a key-value.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.Http" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpextendsCodecFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withProductwithSerializable"></a><a id="Http:Http"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#HttpextendsCodecFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Http.html">
-              <span class="name">Http</span>
-            </a><span class="params">(<span name="_compressionLevel">_compressionLevel: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="_maxRequestSize">_maxRequestSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>, <span name="_maxResponseSize">_maxResponseSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.megabytes</a></span></span></span>, <span name="_decompressionEnabled">_decompressionEnabled: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="_channelBufferUsageTracker">_channelBufferUsageTracker: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="codec/ChannelBufferUsageTracker.html" class="extype" name="com.twitter.finagle.http.codec.ChannelBufferUsageTracker">ChannelBufferUsageTracker</a>] = <span class="symbol">None</span></span>, <span name="_annotateCipherHeader">_annotateCipherHeader: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="_enableTracing">_enableTracing: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>, <span name="_maxInitialLineLength">_maxInitialLineLength: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">4096.bytes</a></span></span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">8192.bytes</a></span></span></span>, <span name="_streaming">_streaming: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>, <span name="_statsReceiver">_statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../index.html">NullStatsReceiver</a></span></span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">_compressionLevel</dt><dd class="cmt"><p>The compression level to use. If passed the default value (-1) then use
-<span class="extype" name="com.twitter.finagle.http.codec.TextualContentCompressor">TextualContentCompressor</span> which will
-compress text-like content-types with the default compression level (6). Otherwise, use
-<span class="extype" name="org.jboss.netty.handler.codec.http.HttpContentCompressor">HttpContentCompressor</span> for all
-content-types with specified compression level.</p></dd><dt class="param">_maxRequestSize</dt><dd class="cmt"><p>The maximum size of the inbound request an HTTP server constructed with
-this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
-<code>Int.MaxValue</code> bytes). Use streaming/chunked requests to handle larger messages.</p></dd><dt class="param">_maxResponseSize</dt><dd class="cmt"><p>The maximum size of the inbound response an HTTP client constructed with
-this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
-<code>Int.MaxValue</code> bytes). Use streaming/chunked requests to handle larger messages.</p></dd><dt class="param">_streaming</dt><dd class="cmt"><p>Streaming allows applications to work with HTTP messages
-that have large (or infinite) content bodies. When this flag is set to
-<code>true</code>, the message content is available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>,
-which gives the application a handle to the byte stream. If <code>false</code>, the
-entire message content is buffered into a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a>.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.http.HttpMuxHandler" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="HttpMuxHandlerextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="HttpMuxHandler:HttpMuxHandler"></a>
       <span class="permalink">
@@ -1729,6 +1699,40 @@ methods, though only one set of methods should be used.
       <p class="shortcomment cmt">Represents the HTTP method.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the HTTP method.</p><p>The method is a case-sensitive string defined as part of the request
 line of the HTTP protocol.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>https://tools.ietf.org/html/rfc7230#section-3.1.1</p></span><span class="cmt"><p>For Java-friendly enums, see <a href="Methods.html" class="extype" name="com.twitter.finagle.http.Methods">com.twitter.finagle.http.Methods</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.MethodBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MethodBuilderextendsMethodBuilderScaladoc[com.twitter.finagle.http.MethodBuilder]"></a><a id="MethodBuilder:MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#MethodBuilderextendsMethodBuilderScaladoc[com.twitter.finagle.http.MethodBuilder]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Experimental: This API is under construction." href="MethodBuilder.html">
+              <span class="name">MethodBuilder</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.client.MethodBuilderScaladoc">MethodBuilderScaladoc</span>[<a href="MethodBuilder.html" class="extype" name="com.twitter.finagle.http.MethodBuilder">MethodBuilder</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt"><b>Experimental:</b> This API is under construction.</p><div class="fullcomment"><div class="comment cmt"><p><b>Experimental:</b> This API is under construction.
+</p></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p>A client that has timeouts and retries on a 418 status code.</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.service.{ReqRep, ResponseClass}
+<span class="kw">import</span> com.twitter.util.Return
+
+<span class="kw">val</span> client: Http.Client = ???
+client.methodBuilder(<span class="lit">"inet!example.com:80"</span>)
+  .withTimeoutPerRequest(<span class="num">50.</span>milliseconds)
+  .withTimeoutTotal(<span class="num">100.</span>milliseconds)
+  .withRetryForClassifier {
+    <span class="kw">case</span> ReqRep(_, Return(rep)) <span class="kw">if</span> rep.statusCode == <span class="num">418</span> <span class="kw">=&gt;</span> ResponseClass.RetryableFailure
+  }
+  .newService(<span class="lit">"an_endpoint_name"</span>)</pre></li></ol>
+            </div><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>
+     and <span class="extype" name="client.MethodBuilderScaladoc">client.MethodBuilderScaladoc</span> for documentation.</p></span><span class="cmt"><p><a href="../Http$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.http.MethodBuilder" class="extmbr" name="com.twitter.finagle.Http.Client#methodBuilder">com.twitter.finagle.Http.Client.methodBuilder</a> to construct instances.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ParamMapextendsMap[String,String]withMapLike[String,String,com.twitter.finagle.http.ParamMap]"></a><a id="ParamMap:ParamMap"></a>
       <span class="permalink">
@@ -2149,24 +2153,6 @@ instances directly.</p></dd></dl></div>
       </span>
       
       
-    </li><li name="com.twitter.finagle.http.Http" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Http"></a><a id="Http:Http"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/index.html#Http" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Http$.html">
-              <span class="name">Http</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.http.HttpMuxer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HttpMuxer"></a><a id="HttpMuxer:HttpMuxer"></a>
       <span class="permalink">
@@ -2294,6 +2280,24 @@ instances directly.</p></dd></dl></div>
       </span>
       
       
+    </li><li name="com.twitter.finagle.http.MethodBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodBuilder"></a><a id="MethodBuilder:MethodBuilder"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/index.html#MethodBuilder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Experimental: This API is under construction." href="MethodBuilder$.html">
+              <span class="name">MethodBuilder</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt"><b>Experimental:</b> This API is under construction.</p>
     </li><li name="com.twitter.finagle.http.ParamMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ParamMap"></a><a id="ParamMap:ParamMap"></a>
       <span class="permalink">

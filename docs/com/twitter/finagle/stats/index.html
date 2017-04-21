@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="../kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -873,20 +873,6 @@ finagle clients and servers.
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CommonsExporter.html" title="A TwitterServer exporter for commons stats that's compatible with the old
-AbstractApplication behavior."></a>
-                        <a href="CommonsExporter.html" title="A TwitterServer exporter for commons stats that's compatible with the old
-AbstractApplication behavior.">
-                          CommonsExporter
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="CommonsStatsReceiver.html" title=""></a>
-                        <a href="CommonsStatsReceiver.html" title="">
-                          CommonsStatsReceiver
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="DefaultStatsReceiver$.html" title="A &quot;default&quot; StatsReceiver loaded by Finagle's
 com.twitter.finagle.util.LoadService mechanism."></a>
                         <a href="DefaultStatsReceiver$.html" title="A &quot;default&quot; StatsReceiver loaded by Finagle's
@@ -1313,51 +1299,7 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.stats.CommonsExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CommonsExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withHttpMuxHandler"></a><a id="CommonsExporter:CommonsExporter"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#CommonsExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withHttpMuxHandler" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A TwitterServer exporter for commons stats that's compatible with the old
-AbstractApplication behavior." href="CommonsExporter.html">
-              <span class="name">CommonsExporter</span>
-            </a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <a href="../http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A TwitterServer exporter for commons stats that's compatible with the old
-AbstractApplication behavior.</p><div class="fullcomment"><div class="comment cmt"><p>A TwitterServer exporter for commons stats that's compatible with the old
-AbstractApplication behavior.</p><p>Please note that commons stats histograms rely on being sampled.  We don't
-sample them on your behalf, so you must set up sampling.  commons stats
-has a TimeSeriesRepositoryImpl that might be useful[0].</p><p>However, broadly, we would discourage you from using commons stats if
-possible.  This is intended as a tool to help you migrate away from commons
-stats, so if you aren't already using it, please don't start!</p><p>[0]: https://github.com/twitter/commons/blob/master/src/java/com/twitter/common/stats/TimeSeriesRepositoryImpl.java#L118
-</p></div></div>
-    </li><li name="com.twitter.finagle.stats.CommonsStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CommonsStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a><a id="CommonsStatsReceiver:CommonsStatsReceiver"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#CommonsStatsReceiverextendsStatsReceiverWithCumulativeGauges" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="CommonsStatsReceiver.html">
-              <span class="name">CommonsStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.stats.HostMetricsExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.stats.HostMetricsExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HostMetricsExporterextendsJsonExporterwithHttpMuxHandler"></a><a id="HostMetricsExporter:HostMetricsExporter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/stats/index.html#HostMetricsExporterextendsJsonExporterwithHttpMuxHandler" title="Permalink">

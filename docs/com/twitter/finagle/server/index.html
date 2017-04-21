@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="../kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -780,6 +780,12 @@ the given SocketAddress.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="trait" href="ListeningStackServer.html" title="The standard template for creating a concrete representation of a StackServer."></a>
+                        <a href="ListeningStackServer.html" title="The standard template for creating a concrete representation of a StackServer.">
+                          ListeningStackServer
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="NullListener$.html" title="An empty Listener that can be used as a placeholder."></a>
                         <a href="NullListener$.html" title="An empty Listener that can be used as a placeholder.">
                           NullListener
@@ -808,10 +814,10 @@ com.twitter.finagle.Stack.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="StdStackServer.html" title="A standard template implementation for
-com.twitter.finagle.server.StackServer."></a>
-                        <a href="StdStackServer.html" title="A standard template implementation for
-com.twitter.finagle.server.StackServer.">
+                        <a class="trait" href="StdStackServer.html" title="A standard template implementation for com.twitter.finagle.server.StackServer
+that uses the transport + dispatcher pattern."></a>
+                        <a href="StdStackServer.html" title="A standard template implementation for com.twitter.finagle.server.StackServer
+that uses the transport + dispatcher pattern.">
                           StdStackServer
                         </a>
                       </li><li name="com.twitter.finagle.serverset2" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1199,6 +1205,26 @@ connection. It is furnished with a typed <code>Transport</code> representing
 this connection.</p><p>The returned <code>ListeningServer</code> is used to inspect the server, and
 is also used to shut it down.
 </p></div></div>
+    </li><li name="com.twitter.finagle.server.ListeningStackServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ListeningStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.ListeningStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]"></a><a id="ListeningStackServer[Req,Rep,This&lt;:ListeningStackServer[Req,Rep,This]]:ListeningStackServer[Req,Rep,This]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/server/index.html#ListeningStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.ListeningStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="The standard template for creating a concrete representation of a StackServer." href="ListeningStackServer.html">
+              <span class="name">ListeningStackServer</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.ListeningStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.ListeningStackServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>] with <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>] with <a href="../param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>] with <a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.ListeningStackServer.This">This</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The standard template for creating a concrete representation of a <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The standard template for creating a concrete representation of a <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> for a further refined <code>StackServer</code> template which uses the
+     transport + dispatcher pattern.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.ServerInfo" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ServerInfoextendsAnyRef"></a><a id="ServerInfo:ServerInfo"></a>
       <span class="permalink">
@@ -1237,7 +1263,7 @@ parameterized." href="StackBasedServer.html">
       
       <p class="shortcomment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a> that is
 parameterized.</p>
-    </li><li name="com.twitter.finagle.server.StackServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.server.StackServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StackServer[Req,Rep]extendsStackBasedServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackServer[Req,Rep]]"></a><a id="StackServer[Req,Rep]:StackServer[Req,Rep]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/server/index.html#StackServer[Req,Rep]extendsStackBasedServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackServer[Req,Rep]]" title="Permalink">
@@ -1256,11 +1282,13 @@ com.twitter.finagle.Stack." href="StackServer.html">
       </span>
       
       <p class="shortcomment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that composes a
-<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a>.</p>
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that composes a
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a> for a template implementation that tracks session resources.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]"></a><a id="StdStackServer[Req,Rep,This&lt;:StdStackServer[Req,Rep,This]]:StdStackServer[Req,Rep,This]"></a>
+      <a id="StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsListeningStackServer[Req,Rep,This]"></a><a id="StdStackServer[Req,Rep,This&lt;:StdStackServer[Req,Rep,This]]:StdStackServer[Req,Rep,This]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/server/index.html#StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/server/index.html#StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsListeningStackServer[Req,Rep,This]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1269,17 +1297,17 @@ com.twitter.finagle.Stack." href="StackServer.html">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="A standard template implementation for
-com.twitter.finagle.server.StackServer." href="StdStackServer.html">
+        <a title="A standard template implementation for com.twitter.finagle.server.StackServer
+that uses the transport + dispatcher pattern." href="StdStackServer.html">
               <span class="name">StdStackServer</span>
-            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">A standard template implementation for
-<a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A standard template implementation for
-<a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>.
+      <p class="shortcomment cmt">A standard template implementation for <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>
+that uses the transport + dispatcher pattern.</p><div class="fullcomment"><div class="comment cmt"><p>A standard template implementation for <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>
+that uses the transport + dispatcher pattern.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StackServer$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.server.StackServer#newStack">StackServer.newStack</a> for the default modules used by Finagle
-     servers.</p></span><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Servers.html" target="_blank">user guide</a>
+     servers.</p></span><span class="cmt"><p><a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> for a generic representation of a stack server.</p></span><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Servers.html" target="_blank">user guide</a>
      for further details on Finagle servers and their configuration.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.Transformer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="Transformer[Req,Rep]:Transformer[Req,Rep]"></a>

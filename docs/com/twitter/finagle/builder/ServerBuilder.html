@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.builder" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -203,14 +203,6 @@ resources for using Finagle.
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">
                           IncompleteSpecification
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="MinimumSetCluster.html" title="A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set."></a>
-                        <a href="MinimumSetCluster.html" title="A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set.">
-                          MinimumSetCluster
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -290,7 +282,7 @@ a port).">
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A handy Builder for constructing Servers (i.e., binding Services to
 a port).  This class is subclassable. Override copy() and build()
 to do your own dirty work.</p><p>Please see the
-<a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
+<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
 for information on the preferred <code>with</code>-style client-construction APIs.</p><p>The main class to use is <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>, as so</p><pre>ServerBuilder()
   .codec(Http)
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
@@ -320,7 +312,7 @@ make sure that you know exactly how they will affect your application --
 these options are typically only changed by expert users.</p><p>- <code>openConnectionsThresholds</code>: None
 - <code>maxConcurrentRequests</code>: Int.MaxValue
 - <code>backlog</code>: OS-defined default value
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -1340,10 +1332,48 @@ discretion of <code>server</code> itself and the protocol implementation.</p></d
         <span class="name">tls</span><span class="params">(<span name="certificatePath">certificatePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="keyPath">keyPath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="caCertificatePath">caCertificatePath: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="ciphers">ciphers: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="nextProtos">nextProtos: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
-      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
+      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.server.withTransport.tls(...)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,engineFactory:com.twitter.finagle.ssl.server.SslServerEngineFactory):ServerBuilder.this.This"></a><a id="tls(SslServerConfiguration,SslServerEngineFactory):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,engineFactory:com.twitter.finagle.ssl.server.SslServerEngineFactory):ServerBuilder.this.This" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/server/SslServerConfiguration.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerConfiguration">SslServerConfiguration</a></span>, <span name="engineFactory">engineFactory: <a href="../ssl/server/SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.server.withTransport.tls(config, engineFactory)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration):ServerBuilder.this.This"></a><a id="tls(SslServerConfiguration):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration):ServerBuilder.this.This" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/server/SslServerConfiguration.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerConfiguration">SslServerConfiguration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.server.withTransport.tls(config)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">

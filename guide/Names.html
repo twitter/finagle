@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Names and Naming in Finagle &#8212; Finagle 6.43.0 documentation</title>
+    <title>Names and Naming in Finagle &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
     <link rel="next" title="Protocols" href="Protocols.html" />
     <link rel="prev" title="Contexts" href="Contexts.html" />
    
@@ -73,19 +73,19 @@
 <h1>Names and Naming in Finagle<a class="headerlink" href="#names-and-naming-in-finagle" title="Permalink to this headline">¶</a></h1>
 <p id="finagle-names">Finagle uses <em>names</em> <a class="footnote-reference" href="#names" id="id1">[1]</a> to identify network locations. Names must be
 supplied when constructing a Finagle client through
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder.dest</a>
-or through implementations of <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Client">Client</a>.</p>
-<p>Names are represented by the data-type <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Name">Name</a> comprising two variants:</p>
+<a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ClientBuilder">ClientBuilder.dest</a>
+or through implementations of <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Client">Client</a>.</p>
+<p>Names are represented by the data-type <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Name">Name</a> comprising two variants:</p>
 <dl class="docutils">
 <dt><code class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Bound(va:</span> <span class="pre">Var[Addr])</span></code></dt>
 <dd>Identifies a set of network locations. <code class="docutils literal"><span class="pre">Var[Addr]</span></code> (see <a class="reference internal" href="#addr"><span class="std std-ref">Addr</span></a>)
 represents a set of changeable Internet addresses &#8212; or host,
 port pairs &#8212; described below.</dd>
 <dt><code class="docutils literal"><span class="pre">case</span> <span class="pre">class</span> <span class="pre">Name.Path(path:</span> <span class="pre">Path)</span></code></dt>
-<dd>Represents a name denoted by a hierarchical <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Path">path</a>, represented by a sequence of byte
+<dd>Represents a name denoted by a hierarchical <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Path">path</a>, represented by a sequence of byte
 strings.</dd>
 </dl>
-<p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Resolver$">Resolver.eval</a> parses strings
+<p><a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Resolver$">Resolver.eval</a> parses strings
 into <cite>Names</cite>. Strings of the form</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>scheme!arg
 </pre></div>
@@ -101,7 +101,7 @@ predictably, uses DNS for this job.</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>zk!myzkhost.mycompany.com:2181!/my/zk/path
 </pre></div>
 </div>
-<p>reads a <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> at the path <code class="docutils literal"><span class="pre">/my/zk/path</span></code> on the ZooKeeper ensemble
+<p>reads a <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> at the path <code class="docutils literal"><span class="pre">/my/zk/path</span></code> on the ZooKeeper ensemble
 named by <code class="docutils literal"><span class="pre">myzkhost.mycompany.com:2181</span></code>.</p>
 <p>When a scheme is absent, <cite>inet</cite> is used; thus</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>twitter.com:8080
@@ -124,7 +124,7 @@ identify <em>where</em> the network location(s) are.</p>
 <p>might denote the <code class="docutils literal"><span class="pre">crawler</span></code> service.</p>
 </div>
 <div class="section" id="interpreting-paths-with-delegation-tables">
-<h2>Interpreting Paths With Delegation Tables<a class="headerlink" href="#interpreting-paths-with-delegation-tables" title="Permalink to this headline">¶</a></h2>
+<span id="dtabs"></span><h2>Interpreting Paths With Delegation Tables<a class="headerlink" href="#interpreting-paths-with-delegation-tables" title="Permalink to this headline">¶</a></h2>
 <p>A delegation table (or &#8220;dtab&#8221;) defines the namespace for a Finagle
 transaction. A dtab comprises an ordered list of delegations which
 together define how a path is interpreted. A delegation is a rewrite
@@ -170,7 +170,7 @@ specially by Finagle, similarly to resolver schemes. Paths of the form</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/$/namer/path..
 </pre></div>
 </div>
-<p>uses the given <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Namer">Namer</a> to interpret the
+<p>uses the given <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Namer">Namer</a> to interpret the
 remaining path. This allows Finagle to translate paths into addresses. For
 example</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/$/inet/localhost/8080
@@ -180,7 +180,7 @@ example</p>
 <div class="highlight-text"><div class="highlight"><pre><span></span>/$/com.twitter.serverset/zk.local.twitter.com:2181/foo/bar
 </pre></div>
 </div>
-<p>is the path describing the <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/foo/bar</span></code> on the ZooKeeper
+<p>is the path describing the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/foo/bar</span></code> on the ZooKeeper
 ensemble <code class="docutils literal"><span class="pre">zk.local.twitter.com:2181</span></code>.</p>
 <p>Dtabs may contain line-oriented comments beginning with <code class="docutils literal"><span class="pre">#</span></code>. <code class="docutils literal"><span class="pre">#</span></code>
 must be preceded by a whitespace character or delimiter such as <code class="docutils literal"><span class="pre">;</span></code>,
@@ -224,7 +224,7 @@ example follows.</p>
 6.      /$/com.twitter.serverset/zk.local.twitter.com:2181/prod/crawler
 </pre></div>
 </div>
-<p>We&#8217;ve turned the path /s/crawler into the <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/prod/crawler</span></code>
+<p>We&#8217;ve turned the path /s/crawler into the <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <code class="docutils literal"><span class="pre">/prod/crawler</span></code>
 on <cite>zk.local.twitter.com:2181</cite>. We use the <code class="docutils literal"><span class="pre">#</span></code> character to denote
 handlers &#8212; the path <code class="docutils literal"><span class="pre">/s#</span></code> &#8220;handles&#8221; <code class="docutils literal"><span class="pre">/s</span></code> and so on. To
 see why this indirection is necessary, consider redefining <code class="docutils literal"><span class="pre">/s</span></code> by
@@ -305,17 +305,17 @@ want to replace an individual component in a distributed system with a
 development version of that component. This can be done by
 orchestrating the originator (for example, an HTTP frontend) to add a
 delegation expressing this override.</p>
-<p>Finagle has protocol support for delegation passing in <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">TTwitter</span></a>, <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a>, its variant <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$">ThriftMux</a>, and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Http$">HTTP</a>. When these protocols are used,
+<p>Finagle has protocol support for delegation passing in <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span class="std std-ref">TTwitter</span></a>, <a class="reference internal" href="Protocols.html#mux"><span class="std std-ref">Mux</span></a>, its variant <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/ThriftMux$">ThriftMux</a>, and <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Http$">HTTP</a>. When these protocols are used,
 delegations that are added dynamically to a request are in effect
 throughout the distributed request graph &#8212; i.e. scope of the
 namespace is a transaction. Delegations are added dynamically through
-the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Dtab$">Dtab</a> API.</p>
+the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Dtab$">Dtab</a> API.</p>
 <p>(This is a powerful facility that should be used with care.)</p>
 </div>
 <div class="section" id="addr">
 <span id="id2"></span><h2>Addr<a class="headerlink" href="#addr" title="Permalink to this headline">¶</a></h2>
 <p><cite>Name.Bound</cite> comprises a <code class="docutils literal"><span class="pre">Var[Addr]</span></code>, representing a dynamically
-changing <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Addr">Addr</a>. (<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.util.Var">Var</a> implements a form of self-adjusting
+changing <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Addr">Addr</a>. (<a class="reference external" href="https://twitter.github.io/util/docs/com/twitter/util/Var">Var</a> implements a form of self-adjusting
 computation); <code class="docutils literal"><span class="pre">Addrs</span></code> are in one of 3 states:</p>
 <dl class="docutils">
 <dt><code class="docutils literal"><span class="pre">Addr.Pending</span></code></dt>
@@ -330,7 +330,7 @@ or Zookeeper operation completion.</dd>
 concrete endpoints.</dd>
 </dl>
 <p>We now see that a <code class="docutils literal"><span class="pre">Var[Addr]</span></code> is capable of representing a moving target,
-for example a dynamic <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a>.</p>
+for example a dynamic <a class="reference external" href="https://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a>.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="names" rules="none">
 <colgroup><col class="label" /><col /></colgroup>

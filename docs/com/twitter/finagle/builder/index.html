@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -219,14 +219,6 @@ resources for using Finagle.
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">
                           IncompleteSpecification
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="MinimumSetCluster.html" title="A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set."></a>
-                        <a href="MinimumSetCluster.html" title="A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set.">
-                          MinimumSetCluster
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -419,24 +411,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -505,6 +479,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="../kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1214,7 +1206,7 @@ generator.
       </span>
       
       <p class="shortcomment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the
-<a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
+<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
 for information on the preferred <code>with</code>-style client-construction APIs.</p><pre><span class="kw">val</span> client = ClientBuilder()
   .codec(Http)
   .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
@@ -1247,7 +1239,7 @@ affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
    of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span>
-</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientConfigEvidence" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]extendsAnyRef"></a><a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]:ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]"></a>
@@ -1334,7 +1326,7 @@ a port)." href="ServerBuilder.html">
 a port).</p><div class="fullcomment"><div class="comment cmt"><p>A handy Builder for constructing Servers (i.e., binding Services to
 a port).  This class is subclassable. Override copy() and build()
 to do your own dirty work.</p><p>Please see the
-<a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
+<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
 for information on the preferred <code>with</code>-style client-construction APIs.</p><p>The main class to use is <a href="ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>, as so</p><pre>ServerBuilder()
   .codec(Http)
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
@@ -1364,7 +1356,7 @@ make sure that you know exactly how they will affect your application --
 these options are typically only changed by expert users.</p><p>- <code>openConnectionsThresholds</code>: None
 - <code>maxConcurrentRequests</code>: Int.MaxValue
 - <code>backlog</code>: OS-defined default value
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuildertoTwitterService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerBuildertoTwitterService[Req,Rep]extendsService"></a><a id="ServerBuildertoTwitterService[Req,Rep]:ServerBuildertoTwitterService[Req,Rep]"></a>
@@ -1447,32 +1439,6 @@ these options are typically only changed by expert users.</p><p>- <code>openConn
 to express membership in a cluster of servers that provide a
 specific service.</p><p>Note that a Cluster can be elastic: members can join or leave at
 any time.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.MinimumSetCluster" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MinimumSetCluster[T]extendsCluster[T]"></a><a id="MinimumSetCluster[T]:MinimumSetCluster[T]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#MinimumSetCluster[T]extendsCluster[T]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set." href="MinimumSetCluster.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">MinimumSetCluster</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.MinimumSetCluster.T">T</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set.</p><div class="fullcomment"><div class="comment cmt"><p>A Cluster implementation that guarantees a minimum set while allowing you
-to specify a Cluster to supplement the initial static set. All operations
-that would remove entries in the minimum set are censored and counted.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               

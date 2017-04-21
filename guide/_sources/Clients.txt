@@ -631,7 +631,7 @@ The `Failure Accrual` module marks itself as unavailable based on the number of 
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`.
+The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`.
 
 See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
 ``Failure Accrual`` module.
@@ -656,8 +656,8 @@ success rate [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.successRate(
@@ -681,9 +681,8 @@ following snippet [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
-
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrual.Param(() => FailureAccrualPolicy.consecutiveFailures(
@@ -814,6 +813,25 @@ The filter can be configured with the following parameters:
 .. _response_classification:
 
 .. include:: shared-modules/ResponseClassification.rst
+
+MethodBuilder
+-------------
+
+.. warning:: These APIs are experimental and subject to change.
+
+.. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
+          We are waiting on user interest before expanding to more protocols.
+
+``MethodBuilder`` is a collection of APIs for client configuration at a higher
+level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the deprecated
+``ClientBuilder``. ``MethodBuilder`` provides:
+
+- :ref:`Logical <mb_logical_req>` success rate metrics.
+- Retries based on application-level requests and responses (e.g. an HTTP
+  503 response code or a Thrift exception).
+- Configuration of per-attempt and total timeouts.
+
+:doc:`Learn more <MethodBuilder>` about ``MethodBuilder``.
 
 .. rubric:: Footnotes
 

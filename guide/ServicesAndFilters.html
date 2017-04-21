@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Services &amp; Filters &#8212; Finagle 6.43.0 documentation</title>
+    <title>Services &amp; Filters &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
     <link rel="next" title="Configuration" href="Configuration.html" />
     <link rel="prev" title="Concurrent Programming with Futures" href="Futures.html" />
    
@@ -90,7 +90,7 @@ of a service is used through a client; a server <em>implements</em> a <code clas
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 
-<span class="k">val</span> <span class="n">httpService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Request</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">httpService</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
 
 <span class="n">httpService</span><span class="o">(</span><span class="nc">Request</span><span class="o">(</span><span class="s">&quot;/foo/bar&quot;</span><span class="o">)).</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
   <span class="n">println</span><span class="o">(</span><span class="s">&quot;received response &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">.</span><span class="n">contentString</span><span class="o">)</span>

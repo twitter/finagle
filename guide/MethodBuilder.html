@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MethodBuilder &#8212; Finagle 6.44.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.44.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body role="document">
+  
+  
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="methodbuilder">
+<h1>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">These APIs are experimental and subject to change.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
+We are waiting on user interest before expanding to more protocols.</p>
+</div>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
+level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><span class="std std-ref">Finagle 6 APIs</span></a> while improving upon the deprecated
+<code class="docutils literal"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal"><span class="pre">MethodBuilder</span></code> provides:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</li>
+<li>Retries based on application-level requests and responses (e.g. an HTTP
+503 response code or a Thrift exception).</li>
+<li>Configuration of per-attempt and total timeouts.</li>
+</ul>
+<p>All of these can be customized per method (or endpoint) while sharing a single
+underlying Finagle client. Concretely, a single service might offer both
+<cite>GET statuses/show/:id</cite> as well as <cite>POST statuses/update</cite>, whilst each having wildly
+different characteristics. The <cite>GET</cite> is idempotent and has a tight latency distribution
+while the <cite>POST</cite> is not idempotent and has a wide latency distribution. If users want
+different configurations, without <code class="docutils literal"><span class="pre">MethodBuilder</span></code> they must create separate
+Finagle clients for each grouping. While long-lived clients in Finagle are not
+expensive, they are not free. They create duplicate metrics and waste heap,
+file descriptors, and CPU.</p>
+<p id="mb-example-http">Turning the example into code, first in Scala:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
+
+<span class="c1">// other StackClient configuration done here, e.g. `withSessionQualifier`</span>
+<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="n">stackClient</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+
+<span class="c1">// a `Service` for &quot;GET statuses/show/:id&quot; with relatively tight timeouts</span>
+<span class="c1">// and a liberal retry policy.</span>
+<span class="k">val</span> <span class="n">statusesShow</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
+  <span class="c1">// 25 millisecond timeout per attempt. this applies to the initial</span>
+  <span class="c1">// attempt and each retry, if any.</span>
+  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">25.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="c1">// 50 milliseconds timeout in total, including retries</span>
+  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">50.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="c1">// retry all HTTP 4xx and 5xx responses</span>
+  <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">&gt;=</span> <span class="mi">400</span> <span class="o">&amp;&amp;</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">&lt;=</span> <span class="mi">599</span> <span class="k">=&gt;</span>
+      <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
+  <span class="o">}</span>
+  <span class="c1">// build the service</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="o">)</span>
+
+<span class="c1">// a `Service` for &quot;POST statuses/update&quot; with relatively loose timeouts</span>
+<span class="c1">// and a retry policy tailored to this endpoint.</span>
+<span class="k">val</span> <span class="n">statusesUpdate</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">builder</span>
+  <span class="c1">// 200 millisecond timeouts per attempt. this applies to the initial</span>
+  <span class="c1">// attempt and each retry, if any.</span>
+  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="c1">// 500 milliseconds timeouts in total, including retries</span>
+  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">500.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="c1">// retry only a specific HTTP response code</span>
+  <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">418</span> <span class="k">=&gt;</span> <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
+  <span class="o">}</span>
+  <span class="c1">// build the service</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;update_status&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>A similar example, for Java:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">com.twitter.finagle.Http</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.Service</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Request</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.finagle.http.Response</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.twitter.util.Duration</span><span class="o">;</span>
+
+<span class="n">Service</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">,</span> <span class="n">Response</span><span class="o">&gt;</span> <span class="n">exampleService</span> <span class="o">=</span>
+  <span class="n">Http</span><span class="o">.</span><span class="na">client</span><span class="o">().</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">withTimeoutTotal</span><span class="o">(</span><span class="n">Duration</span><span class="o">.</span><span class="na">fromMilliseconds</span><span class="o">(</span><span class="mi">50</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">withTimeoutPerRequest</span><span class="o">(</span><span class="n">Duration</span><span class="o">.</span><span class="na">fromMilliseconds</span><span class="o">(</span><span class="mi">25</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">newService</span><span class="o">(</span><span class="s">&quot;java_example&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+<div class="section" id="retries">
+<h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> defaults to using the client&#8217;s <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a>
+to retry failures that are marked as retryable
+(<code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClass.RetryableFailure</span></code>).</p>
+<p>A budget is used to prevent retries from overwhelming
+the backend service. The budget is shared across clients created from
+an initial <code class="docutils literal"><span class="pre">MethodBuilder</span></code>. As such, even if the retry rules
+deem the request retryable, it may not be retried if there is insufficient
+budget.</p>
+<p>Finagle automatically retries failures that are known to be safe
+to retry via <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RequeueFilter.scala">RequeueFilter</a>.
+This includes <code class="docutils literal"><span class="pre">com.twitter.finagle.WriteException</span> <span class="pre">WriteExceptions</span></code> and
+<a class="reference internal" href="Glossary.html#glossary-nack"><span class="std std-ref">retryable nacks</span></a>. As these should have already been retried,
+<code class="docutils literal"><span class="pre">MethodBuilder</span></code> will avoid retrying them again at this layer.</p>
+<p>The <a class="reference internal" href="Clients.html#response-classification"><span class="std std-ref">classifier</span></a> set by <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code> is also used
+to determine the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> success metrics of the client.</p>
+</div>
+<div class="section" id="timeouts">
+<h2>Timeouts<a class="headerlink" href="#timeouts" title="Permalink to this headline">¶</a></h2>
+<p>For per-request timeouts the defaults come from the client&#8217;s configuration
+for <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter.Param</a>
+which is typically set on a client via <code class="docutils literal"><span class="pre">com.twitter.finagle.$Protocol.withRequestTimeout</span></code>.</p>
+<p>For total total timeouts, the defaults come from the client&#8217;s configuration
+for <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter.TotalTimeout</a>.</p>
+<p>The total timeout is how long the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical request</span></a> is given to complete. This includes
+the time spent on developer configured retries as well as automatic retries issued by
+Finagle. Per request timeouts apply to each attempt issued, irrespective of if
+it is the initial request, a Finagle requeue, or a retry based on the developer&#8217;s policy.</p>
+<p>Take a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> configured with 100 ms per-request timeout,
+150 ms total timeout, and a policy that will retry all timeouts as an example.
+If the first request to the backend gets a retryable nack back in 10 ms,
+Finagle will automatically issue a retry with 100 ms for its timeout.
+If this retry happens to time out, the application level retry policy on
+the <code class="docutils literal"><span class="pre">MethodBuilder</span></code> applies, and this retry will have 40 ms remaining (150 ms total
+- 10 ms - 100 ms).</p>
+</div>
+<div class="section" id="metrics">
+<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<p>Metrics are scoped to your client&#8217;s label and method name.</p>
+<ul class="simple">
+<li><cite>clnt/your_client_label/method_name/logical/requests</cite> — A counter of the total
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes and failures.
+This does not include any retries.</li>
+<li><cite>clnt/your_client_label/method_name/logical/success</cite> — A counter of the total
+number of <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> successes.</li>
+<li><cite>clnt/your_client_label/method_name/logical/request_latency_ms</cite> — A stat of
+the latency of the <a class="reference internal" href="#mb-logical-req"><span class="std std-ref">logical</span></a> requests, in milliseconds.</li>
+<li><cite>clnt/your_client_label/method_name/retries</cite> — A stat of the number of times
+requests are retried.</li>
+</ul>
+<p>For example:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">statusesShow</span> <span class="k">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;get_statuses&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Will produce the following metrics:</p>
+<ul class="simple">
+<li><cite>clnt/example_client/get_statuses/logical/requests</cite></li>
+<li><cite>clnt/example_client/get_statuses/logical/success</cite></li>
+<li><cite>clnt/example_client/get_statuses/logical/request_latency_ms</cite></li>
+<li><cite>clnt/example_client/get_statuses/retries</cite></li>
+</ul>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> adds itself into the process registry which allows
+for introspection of runtime configuration via TwitterServer&#8217;s <cite>/admin/registry.json</cite>
+<a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-registry-json">endpoint</a>.</p>
+</div>
+<div class="section" id="lifecycle">
+<h2>Lifecycle<a class="headerlink" href="#lifecycle" title="Permalink to this headline">¶</a></h2>
+<p>A <code class="docutils literal"><span class="pre">MethodBuilder</span></code> is tied to a single logical destination via a
+<a class="reference internal" href="Names.html#finagle-names"><span class="std std-ref">Name</span></a>, though using <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a> allows
+clients to talk to different physical locations.</p>
+<p>Because <code class="docutils literal"><span class="pre">MethodBuilder</span></code> is immutable, its methods chain together, and create
+new instances backed by the original underlying client. This allows for common
+customizations to be shared across endpoints:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Return</span>
+
+<span class="c1">// the `Services` below will use these settings unless they are</span>
+<span class="c1">// explicitly changed.</span>
+<span class="k">val</span> <span class="n">base</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8080&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withRetryDisabled</span>
+  <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">longerTimeout</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">base</span>
+  <span class="c1">// changes the timeout, while leaving retries disabled</span>
+  <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">500.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;longer_timeout&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">retryOn418s</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">base</span>
+  <span class="c1">// keeps the 200 ms timeout, while changing the retry policy</span>
+  <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Return</span><span class="o">(</span><span class="n">rep</span><span class="o">))</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">statusCode</span> <span class="o">==</span> <span class="mi">418</span> <span class="k">=&gt;</span>
+      <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
+  <span class="o">}</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;retry_teapots&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>As a consequence of the Finagle client being shared, its underlying
+resources (e.g. connections) are shared as well. Specifically, all
+<code class="docutils literal"><span class="pre">Service</span></code>s constructed by a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> must be <code class="docutils literal"><span class="pre">close</span></code>-ed
+for the underlying resources to be closed.</p>
+<p>One other effect of sharing the Finagle client is that the load balancer
+and connection pool (when applicable, e.g. HTTP/1.1) are shared resources
+as well. For most usage patterns this is unlikely to be an issue. In some cases,
+it may manifest as poor distribution of the different method&#8217;s requests across
+backends. Should it be an issue, we recommend creating and using
+separate Finagle clients for those methods.</p>
+</div>
+<div class="section" id="migrating-from-clientbuilder">
+<span id="mb-cb-migration"></span><h2>Migrating from ClientBuilder<a class="headerlink" href="#migrating-from-clientbuilder" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is in part intended as a replacement for <code class="docutils literal"><span class="pre">ClientBuilder</span></code> and
+as such there is relatively easy migration path. Users should prefer using the
+Finagle 6 style <code class="docutils literal"><span class="pre">StackClient</span></code>s directly for creating a <code class="docutils literal"><span class="pre">MethodBuilder</span></code> and
+work on migrating their code off of <code class="docutils literal"><span class="pre">ClientBuilder</span></code>.</p>
+<p>Notes and caveats:</p>
+<ul class="simple">
+<li>Metrics will be scoped to the <code class="docutils literal"><span class="pre">ClientBuilder.name</span></code> and then the method name.</li>
+<li>Total timeout defaults to using the <code class="docutils literal"><span class="pre">ClientBuilder.timeout</span></code> configuration.</li>
+<li>Per-request timeout defaults to using the <code class="docutils literal"><span class="pre">ClientBuilder.requestTimeout</span></code> configuration.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> metrics scoped to &#8220;tries&#8221; are not included. These
+are superseded by the logical <code class="docutils literal"><span class="pre">MethodBuilder</span></code> metrics.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> retry policy will be applied and users must migrate
+to using <code class="docutils literal"><span class="pre">withRetryForClassifier</span></code>.</li>
+<li>The <code class="docutils literal"><span class="pre">ClientBuilder</span></code> must have a destination set via one of
+<code class="docutils literal"><span class="pre">hosts</span></code>, <code class="docutils literal"><span class="pre">addrs</span></code>, <code class="docutils literal"><span class="pre">dest</span></code>, <code class="docutils literal"><span class="pre">cluster</span></code>, or <code class="docutils literal"><span class="pre">group</span></code>.</li>
+</ul>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.client.ClientBuilder</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="n">http</span><span class="o">,</span> <span class="nc">Http</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">()</span>
+<span class="k">val</span> <span class="n">clientBuilder</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
+  <span class="o">.</span><span class="n">name</span><span class="o">(</span><span class="s">&quot;example_client&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">stack</span><span class="o">(</span><span class="n">stackClient</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">hosts</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">methodBuilder</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">MethodBuilder</span><span class="o">.</span><span class="n">from</span><span class="o">(</span><span class="n">clientBuilder</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="application-level-failure-handling">
+<h2>Application-level failure handling<a class="headerlink" href="#application-level-failure-handling" title="Permalink to this headline">¶</a></h2>
+<p>While <code class="docutils literal"><span class="pre">MethodBuilder</span></code> encourages developers to consider
+failure modes in the broadest sense through response classification,
+this is often insufficient for application developers who need to
+do more than that. Examples include logging, fallback to a different
+data source, hiding functionality, and more. As <code class="docutils literal"><span class="pre">MethodBuilder</span></code>
+gives you a standard <a class="reference internal" href="ServicesAndFilters.html#services"><span class="std std-ref">Service</span></a>, developers are encouraged
+to compose them with <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filters</span></a> and/or transform the
+<code class="docutils literal"><span class="pre">Service</span></code>s returned <a class="reference internal" href="Futures.html#future-failure"><span class="std std-ref">Future</span></a> to handle more
+granular failures.</p>
+</div>
+<div class="section" id="using-with-thriftmux">
+<h2>Using with ThriftMux<a class="headerlink" href="#using-with-thriftmux" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#mb-example-http"><span class="std std-ref">Above</span></a> we saw an example using HTTP. Next
+let&#8217;s walk through a ThriftMux example, using a hypothetical
+social graph service with two endpoints, <cite>followers</cite> and <cite>follow</cite>,
+where <cite>followers</cite> is idempotent and has a tight latency profile
+and <cite>follow</cite> is only retryable for a specific error code and has a wide
+latency distribution. Given the IDL:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>#@namespace scala com.twitter.finagle.example.graph
+
+exception NotFoundException { 1: i32 code }
+
+service GraphService {
+  i32 followers(1: i64 user_id) throws (1: NotFoundException ex)
+  i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
+}
+</pre></div>
+</div>
+<p>We create <code class="docutils literal"><span class="pre">MethodBuilder</span></code>s which work on Scrooge&#8217;s generated
+Service-per-method, <code class="docutils literal"><span class="pre">ServiceIface</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Scrooge does not yet generate <code class="docutils literal"><span class="pre">ServiceIface</span></code> for Java users,
+so this is limited to Scala.</p>
+</div>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">ReqRep</span><span class="o">,</span> <span class="nc">ResponseClass</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Throw</span>
+
+<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">builder</span> <span class="k">=</span> <span class="n">stackClient</span><span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="o">)</span>
+
+<span class="c1">// `Service` for &quot;followers&quot; with tight timeouts and liberal retry policy</span>
+<span class="k">val</span> <span class="n">followers</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GraphService.Followers.Args</span>, <span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">builder</span>
+    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">50.</span><span class="n">milliseconds</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">withRetryForClassifier</span><span class="o">(</span><span class="nc">ThriftMuxResponseClassifier</span><span class="o">.</span><span class="nc">ThriftExceptionsAsFailures</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">followers</span>
+
+<span class="c1">// `Service` for &quot;follow&quot;</span>
+<span class="k">val</span> <span class="n">follow</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">GraphService.Follow.Args</span>, <span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">builder</span>
+    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">withTimeoutTotal</span><span class="o">(</span><span class="mf">300.</span><span class="n">milliseconds</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">withRetryForClassifier</span> <span class="o">{</span>
+      <span class="k">case</span> <span class="nc">ReqRep</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Throw</span><span class="o">(</span><span class="nc">NotFoundException</span><span class="o">(</span><span class="n">code</span><span class="o">)))</span> <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">5</span> <span class="k">=&gt;</span>
+        <span class="nc">ResponseClass</span><span class="o">.</span><span class="nc">RetryableFailure</span>
+    <span class="o">}</span>
+    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;follow&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">follow</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logical-request-definition">
+<span id="mb-logical-req"></span><h2>Logical request definition<a class="headerlink" href="#logical-request-definition" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code>&#8216;s logical requests represent the result of the
+initial request, after any retries have occurred. Concretely, should a request result
+in a retryable failure on the first attempt, but succeed upon retry, this considered
+a single successful logical request while the logical request latency is the sum of
+both the initial attempt and the retry.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">MethodBuilder</a><ul>
+<li><a class="reference internal" href="#retries">Retries</a></li>
+<li><a class="reference internal" href="#timeouts">Timeouts</a></li>
+<li><a class="reference internal" href="#metrics">Metrics</a></li>
+<li><a class="reference internal" href="#lifecycle">Lifecycle</a></li>
+<li><a class="reference internal" href="#migrating-from-clientbuilder">Migrating from ClientBuilder</a></li>
+<li><a class="reference internal" href="#application-level-failure-handling">Application-level failure handling</a></li>
+<li><a class="reference internal" href="#using-with-thriftmux">Using with ThriftMux</a></li>
+<li><a class="reference internal" href="#logical-request-definition">Logical request definition</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2017 Twitter, Inc.</div>
+  
+  </body>
+</html>

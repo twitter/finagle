@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -212,41 +212,12 @@ exchanged between a mysql client and server.">
                           MysqlBufWriter
                         </a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets."></a>
-                        <a href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets.">
-                          MysqlClientPipelineFactory
-                        </a>
-                      </li><li class="current-entities indented5">
                         <a class="object" href="Packet$.html" title=""></a>
                         <a class="class" href="Packet.html" title="A logical packet exchanged between the mysql
 server and client."></a>
                         <a href="Packet.html" title="A logical packet exchanged between the mysql
 server and client.">
                           Packet
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketEncoder.html" title=""></a>
-                        <a href="PacketEncoder.html" title="">
-                          PacketEncoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames."></a>
-                        <a href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames.">
-                          PacketFrameDecoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <a class="object" href="TransportImpl$.html" title="Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]."></a>
-                        <a class="class" href="TransportImpl.html" title=""></a>
-                        <a href="TransportImpl.html" title="">
-                          TransportImpl
                         </a>
                       </li>
               </ul>
@@ -271,7 +242,7 @@ a Transporter[Packet, Packet]."></a>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MysqlBufWriter</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span> with <span class="extype" name="com.twitter.finagle.util.ProxyBufWriter">ProxyBufWriter</span></span>
+        <span class="name">MysqlBufWriter</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteWriter" class="extype" target="_top">ProxyByteWriter</a></span>
       </span>
       </h4>
 
@@ -280,7 +251,7 @@ a Transporter[Packet, Packet]."></a>
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.util.ProxyBufWriter">ProxyBufWriter</span>, <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteWriter" class="extype" target="_top">ProxyByteWriter</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -306,7 +277,7 @@ a Transporter[Packet, Packet]."></a>
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufWriter"><span>MysqlBufWriter</span></li><li class="in" name="com.twitter.finagle.util.ProxyBufWriter"><span>ProxyBufWriter</span></li><li class="in" name="com.twitter.finagle.util.BufWriter"><span>BufWriter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufWriter"><span>MysqlBufWriter</span></li><li class="in" name="com.twitter.io.ProxyByteWriter"><span>ProxyByteWriter</span></li><li class="in" name="com.twitter.io.ByteWriter"><span>ByteWriter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -605,7 +576,7 @@ a Transporter[Packet, Packet]."></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufWriter#owned" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.io.ProxyByteWriter#owned" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="owned():com.twitter.io.Buf"></a><a id="owned():Buf"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#owned():com.twitter.io.Buf" title="Permalink">
@@ -620,13 +591,7 @@ a Transporter[Packet, Packet]."></a>
         <span class="name">owned</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       
-      <p class="shortcomment cmt">In keeping with <span class="extype" name="Buf">Buf</span> terminology, creates a potential zero-copy <span class="extype" name="Buf">Buf</span>
-which has a reference to the same region as the <span class="extype" name="BufWriter">BufWriter</span>.</p><div class="fullcomment"><div class="comment cmt"><p>In keeping with <span class="extype" name="Buf">Buf</span> terminology, creates a potential zero-copy <span class="extype" name="Buf">Buf</span>
-which has a reference to the same region as the <span class="extype" name="BufWriter">BufWriter</span>. That is, if
-any methods called on the builder are propagated to the returned <span class="extype" name="Buf">Buf</span>.
-By definition, the builder owns the region it is writing to so this is
-the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufWriter → BufWriter</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteWriter → ByteWriter</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -725,10 +690,10 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeByte(b:Int):com.twitter.finagle.util.BufWriter"></a><a id="writeByte(Int):BufWriter"></a>
+    </li><li name="com.twitter.io.ByteWriter#writeByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeByte(b:Int):ByteWriter.this.type"></a><a id="writeByte(Int):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeByte(b:Int):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeByte(b:Int):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -737,15 +702,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeByte</span><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeByte</span><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 8 bits of <code>b</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Write 8 bits of <code>b</code>. The remaining 24 bits are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeBytes(bs:Array[Byte]):com.twitter.finagle.util.BufWriter"></a><a id="writeBytes(Array[Byte]):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeBytes(bs:Array[Byte]):ByteWriter.this.type"></a><a id="writeBytes(Array[Byte]):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeBytes(bs:Array[Byte]):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeBytes(bs:Array[Byte]):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -754,15 +718,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeBytes</span><span class="params">(<span name="bs">bs: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeBytes</span><span class="params">(<span name="bs">bs: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write all the bytes from <code>bs</code> into the running <span class="extype" name="Buf">Buf</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Write all the bytes from <code>bs</code> into the running <span class="extype" name="Buf">Buf</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeDoubleBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeDoubleBE(d:Double):com.twitter.finagle.util.BufWriter"></a><a id="writeDoubleBE(Double):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeDoubleBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeDoubleBE(d:Double):ByteWriter.this.type"></a><a id="writeDoubleBE(Double):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeDoubleBE(d:Double):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeDoubleBE(d:Double):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -771,15 +734,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeDoubleBE</span><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeDoubleBE</span><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 64 bits from <code>d</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 64 bits from <code>d</code> in big-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeDoubleLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeDoubleLE(d:Double):com.twitter.finagle.util.BufWriter"></a><a id="writeDoubleLE(Double):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeDoubleLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeDoubleLE(d:Double):ByteWriter.this.type"></a><a id="writeDoubleLE(Double):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeDoubleLE(d:Double):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeDoubleLE(d:Double):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -788,15 +750,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeDoubleLE</span><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeDoubleLE</span><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 64 bits from <code>d</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 64 bits from <code>d</code> in little-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeFloatBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeFloatBE(f:Float):com.twitter.finagle.util.BufWriter"></a><a id="writeFloatBE(Float):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeFloatBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeFloatBE(f:Float):ByteWriter.this.type"></a><a id="writeFloatBE(Float):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeFloatBE(f:Float):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeFloatBE(f:Float):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -805,15 +766,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeFloatBE</span><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeFloatBE</span><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 32 bits from <code>f</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 32 bits from <code>f</code> in big-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeFloatLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeFloatLE(f:Float):com.twitter.finagle.util.BufWriter"></a><a id="writeFloatLE(Float):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeFloatLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeFloatLE(f:Float):ByteWriter.this.type"></a><a id="writeFloatLE(Float):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeFloatLE(f:Float):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeFloatLE(f:Float):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -822,15 +782,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeFloatLE</span><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeFloatLE</span><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 32 bits from <code>f</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 32 bits from <code>f</code> in little-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeIntBE(i:Long):com.twitter.finagle.util.BufWriter"></a><a id="writeIntBE(Long):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeIntBE(i:Long):ByteWriter.this.type"></a><a id="writeIntBE(Long):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeIntBE(i:Long):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeIntBE(i:Long):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -839,15 +798,14 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeIntBE</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeIntBE</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 32 bits from <code>i</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 32 bits from <code>i</code> in big-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeIntLE(i:Long):com.twitter.finagle.util.BufWriter"></a><a id="writeIntLE(Long):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeIntLE(i:Long):ByteWriter.this.type"></a><a id="writeIntLE(Long):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeIntLE(i:Long):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeIntLE(i:Long):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -856,11 +814,10 @@ the natural way to coerce a builder to a <span class="extype" name="Buf">Buf</sp
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeIntLE</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeIntLE</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 32 bits from <code>i</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 32 bits from <code>i</code> in little-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter#writeLengthCodedBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="writeLengthCodedBytes(bytes:Array[Byte]):com.twitter.finagle.mysql.transport.MysqlBufWriter"></a><a id="writeLengthCodedBytes(Array[Byte]):MysqlBufWriter"></a>
       <span class="permalink">
@@ -897,10 +854,10 @@ client/server protocol.</p>
 protocol in the given charset.</p><div class="fullcomment"><div class="comment cmt"><p>Writes a length coded string using the MySQL Client/Server
 protocol in the given charset.
 </p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write to buffer.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeLongBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeLongBE(l:Long):com.twitter.finagle.util.BufWriter"></a><a id="writeLongBE(Long):BufWriter"></a>
+    </li><li name="com.twitter.io.ByteWriter#writeLongBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeLongBE(l:Long):ByteWriter.this.type"></a><a id="writeLongBE(Long):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeLongBE(l:Long):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeLongBE(l:Long):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -909,15 +866,14 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLongBE</span><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeLongBE</span><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 64 bits from <code>l</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 64 bits from <code>l</code> in big-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeLongLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeLongLE(l:Long):com.twitter.finagle.util.BufWriter"></a><a id="writeLongLE(Long):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeLongLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeLongLE(l:Long):ByteWriter.this.type"></a><a id="writeLongLE(Long):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeLongLE(l:Long):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeLongLE(l:Long):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -926,15 +882,14 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeLongLE</span><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeLongLE</span><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 64 bits from <code>l</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 64 bits from <code>l</code> in little-endian order.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeMediumBE(m:Int):com.twitter.finagle.util.BufWriter"></a><a id="writeMediumBE(Int):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeMediumBE(m:Int):ByteWriter.this.type"></a><a id="writeMediumBE(Int):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeMediumBE(m:Int):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeMediumBE(m:Int):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -943,16 +898,14 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeMediumBE</span><span class="params">(<span name="m">m: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeMediumBE</span><span class="params">(<span name="m">m: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 24 bits from <code>m</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 24 bits from <code>m</code> in big-endian order. The remaining
-8 bits are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeMediumLE(m:Int):com.twitter.finagle.util.BufWriter"></a><a id="writeMediumLE(Int):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeMediumLE(m:Int):ByteWriter.this.type"></a><a id="writeMediumLE(Int):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeMediumLE(m:Int):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeMediumLE(m:Int):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -961,12 +914,10 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeMediumLE</span><span class="params">(<span name="m">m: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeMediumLE</span><span class="params">(<span name="m">m: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 24 bits from <code>m</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 24 bits from <code>m</code> in little-endian order. The remaining
-8 bits are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter#writeNullTerminatedString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writeNullTerminatedString(s:String):com.twitter.finagle.mysql.transport.MysqlBufWriter"></a><a id="writeNullTerminatedString(String):MysqlBufWriter"></a>
       <span class="permalink">
@@ -985,10 +936,10 @@ protocol in the given charset.
       <p class="shortcomment cmt">Writes a null terminated string onto the buffer encoded as UTF-8
 </p><div class="fullcomment"><div class="comment cmt"><p>Writes a null terminated string onto the buffer encoded as UTF-8
 </p></div><dl class="paramcmts block"><dt class="param">s</dt><dd class="cmt"><p>String to write.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeShortBE(s:Int):com.twitter.finagle.util.BufWriter"></a><a id="writeShortBE(Int):BufWriter"></a>
+    </li><li name="com.twitter.io.ByteWriter#writeShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeShortBE(s:Int):ByteWriter.this.type"></a><a id="writeShortBE(Int):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeShortBE(s:Int):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeShortBE(s:Int):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -997,16 +948,14 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeShortBE</span><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeShortBE</span><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 16 bits from <code>s</code> in big-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 16 bits from <code>s</code> in big-endian order. The remaining
-16 bits are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.BufWriter#writeShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeShortLE(s:Int):com.twitter.finagle.util.BufWriter"></a><a id="writeShortLE(Int):BufWriter"></a>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
+    </li><li name="com.twitter.io.ByteWriter#writeShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeShortLE(s:Int):ByteWriter.this.type"></a><a id="writeShortLE(Int):MysqlBufWriter.this.type"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeShortLE(s:Int):com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writeShortLE(s:Int):ByteWriter.this.type" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1015,12 +964,10 @@ protocol in the given charset.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeShortLE</span><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writeShortLE</span><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a>.this.type</span>
       </span>
       
-      <p class="shortcomment cmt">Write 16 bits from <code>s</code> in little-endian order.</p><div class="fullcomment"><div class="comment cmt"><p>Write 16 bits from <code>s</code> in little-endian order. The remaining
-16 bits are ignored.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BufWriter</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ByteWriter</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter#writeVariableLong" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writeVariableLong(length:Long):com.twitter.finagle.mysql.transport.MysqlBufWriter"></a><a id="writeVariableLong(Long):MysqlBufWriter"></a>
       <span class="permalink">
@@ -1042,9 +989,9 @@ Client/Server protocol. Refer to MySQL documentation for
 more information.
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter#writer" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writer:com.twitter.finagle.util.BufWriter"></a><a id="writer:BufWriter"></a>
+      <a id="writer:com.twitter.io.ByteWriter"></a><a id="writer:ByteWriter"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writer:com.twitter.finagle.util.BufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufWriter.html#writer:com.twitter.io.ByteWriter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1053,10 +1000,10 @@ more information.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">writer</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></span>
+        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a> → ProxyBufWriter</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufWriter">MysqlBufWriter</a> → ProxyByteWriter</dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1067,10 +1014,10 @@ more information.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.util.ProxyBufWriter">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.ProxyBufWriter">ProxyBufWriter</span></h3>
-            </div><div class="parent" name="com.twitter.finagle.util.BufWriter">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span></h3>
+        <div class="parent" name="com.twitter.io.ProxyByteWriter">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteWriter" class="extype" target="_top">ProxyByteWriter</a></h3>
+            </div><div class="parent" name="com.twitter.io.ByteWriter">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

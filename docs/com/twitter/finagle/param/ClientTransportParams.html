@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -896,11 +896,11 @@ on this client. The TLS/SSL sessions are configured using the given <code>contex
         <span class="name">tls</span><span class="params">(<span name="context">context: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) with no hostname validation
-on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) with no hostname validation
-on this client. The TLS/SSL sessions are configured using the given <code>context</code>.
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) with no hostname validation
+on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables SSL/TLS support (connection encrypting) with no hostname validation
+on this client. The SSL/TLS are configured using the given <code>context</code>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>It's recommended to not use <span class="extype" name="SSLContext">SSLContext</span> directly, but rely on Finagle to pick
-      the most efficient TLS/SSL implementation available on your platform.</p></span></dd></dl></div>
+      the most efficient SSL/TLS available on your platform.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(hostname:String):A"></a><a id="tls(String):A"></a>
       <span class="permalink">
@@ -916,7 +916,7 @@ on this client. The TLS/SSL sessions are configured using the given <code>contex
         <span class="name">tls</span><span class="params">(<span name="hostname">hostname: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this client.
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables SSL/TLS support (connection encrypting) on this client.
 Hostname verification will be provided against the given <code>hostname</code>.
 </p></div></div>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -934,9 +934,41 @@ Hostname verification will be provided against the given <code>hostname</code>.
         <span class="name">tls</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this client.
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables SSL/TLS support (connection encrypting) on this client.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Given that this uses default <span class="extype" name="SSLContext">SSLContext</span>, all configuration params (trust/key stores)
       should be passed as Java system properties.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,engineFactory:com.twitter.finagle.ssl.client.SslClientEngineFactory):A"></a><a id="tls(SslClientConfiguration,SslClientEngineFactory):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,engineFactory:com.twitter.finagle.ssl.client.SslClientEngineFactory):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/client/SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a></span>, <span name="engineFactory">engineFactory: <a href="../ssl/client/SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration):A"></a><a id="tls(SslClientConfiguration):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/client/SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tlsWithoutValidation" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tlsWithoutValidation:A"></a>
       <span class="permalink">

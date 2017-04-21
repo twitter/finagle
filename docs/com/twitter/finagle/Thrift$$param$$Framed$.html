@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -600,6 +600,28 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.Stack.Param#show" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="show(p:P):Seq[(String,()=&gt;String)]"></a><a id="show(Framed):Seq[(String,()⇒String)]"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Thrift$$param$$Framed$.html#show(p:P):Seq[(String,()=&gt;String)]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">show</span><span class="params">(<span name="p">p: <a href="Thrift$$param$$Framed.html" class="extype" name="com.twitter.finagle.Thrift.param.Framed">Framed</a></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, () ⇒ <span class="extype" name="scala.Predef.String">String</span>)]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Method invoked to generate a way to display a P-typed param, which takes the form
+Seq[(key, () =&gt; value)], where <code>key</code> and <code>value</code> are the variable names and values for
+public member variables in the class.</p><div class="fullcomment"><div class="comment cmt"><p>Method invoked to generate a way to display a P-typed param, which takes the form
+Seq[(key, () =&gt; value)], where <code>key</code> and <code>value</code> are the variable names and values for
+public member variables in the class. The function <code>() =&gt; value</code> is invoked to display the
+current value of a member variable.</p><p>This should be overriden by param classes that do not implement <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">scala.Product</a>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

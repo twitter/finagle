@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -210,41 +210,12 @@ exchanged between a mysql client and server.">
                           MysqlBufWriter
                         </a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets."></a>
-                        <a href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets.">
-                          MysqlClientPipelineFactory
-                        </a>
-                      </li><li class="current-entities indented5">
                         <a class="object" href="Packet$.html" title=""></a>
                         <a class="class" href="Packet.html" title="A logical packet exchanged between the mysql
 server and client."></a>
                         <a href="Packet.html" title="A logical packet exchanged between the mysql
 server and client.">
                           Packet
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketEncoder.html" title=""></a>
-                        <a href="PacketEncoder.html" title="">
-                          PacketEncoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames."></a>
-                        <a href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames.">
-                          PacketFrameDecoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <a class="object" href="TransportImpl$.html" title="Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]."></a>
-                        <a class="class" href="TransportImpl.html" title=""></a>
-                        <a href="TransportImpl.html" title="">
-                          TransportImpl
                         </a>
                       </li>
               </ul>
@@ -310,9 +281,9 @@ a Transporter[Packet, Packet]."></a>
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.mysql.transport.MysqlBufReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MysqlBufReaderextendsProxyBufReader"></a><a id="MysqlBufReader:MysqlBufReader"></a>
+      <a id="MysqlBufReaderextendsProxyByteReader"></a><a id="MysqlBufReader:MysqlBufReader"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufReaderextendsProxyBufReader" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufReaderextendsProxyByteReader" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -323,14 +294,14 @@ a Transporter[Packet, Packet]."></a>
       <span class="symbol">
         <a title="" href="MysqlBufReader.html">
               <span class="name">MysqlBufReader</span>
-            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.ProxyBufReader">ProxyBufReader</span></span>
+            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></span>
       </span>
       
       
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MysqlBufWriterextendsBufWriterwithProxyBufWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
+      <a id="MysqlBufWriterextendsByteWriterwithProxyByteWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufWriterextendsBufWriterwithProxyBufWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufWriterextendsByteWriterwithProxyByteWriter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -341,7 +312,7 @@ a Transporter[Packet, Packet]."></a>
       <span class="symbol">
         <a title="" href="MysqlBufWriter.html">
               <span class="name">MysqlBufWriter</span>
-            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span> with <span class="extype" name="com.twitter.finagle.util.ProxyBufWriter">ProxyBufWriter</span></span>
+            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteWriter" class="extype" target="_top">ProxyByteWriter</a></span>
       </span>
       
       
@@ -368,65 +339,6 @@ server and client.</p><div class="fullcomment"><div class="comment cmt"><p>A log
 server and client. A packet consists of a header
 (size, sequence number) and a body.
 </p></div></div>
-    </li><li name="com.twitter.finagle.mysql.transport.PacketEncoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="PacketEncoderextendsSimpleChannelDownstreamHandler"></a><a id="PacketEncoder:PacketEncoder"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#PacketEncoderextendsSimpleChannelDownstreamHandler" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="PacketEncoder.html">
-              <span class="name">PacketEncoder</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelDownstreamHandler">SimpleChannelDownstreamHandler</span></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.mysql.transport.PacketFrameDecoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="PacketFrameDecoderextendsFrameDecoder"></a><a id="PacketFrameDecoder:PacketFrameDecoder"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#PacketFrameDecoderextendsFrameDecoder" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Decodes logical MySQL packets that could be fragmented across
-frames." href="PacketFrameDecoder.html">
-              <span class="name">PacketFrameDecoder</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.frame.FrameDecoder">FrameDecoder</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Decodes logical MySQL packets that could be fragmented across
-frames.</p><div class="fullcomment"><div class="comment cmt"><p>Decodes logical MySQL packets that could be fragmented across
-frames. MySQL packets are a length encoded set of bytes written
-in little endian byte order.
-</p></div></div>
-    </li><li name="com.twitter.finagle.mysql.transport.TransportImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TransportImplextendsProductwithSerializable"></a><a id="TransportImpl:TransportImpl"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#TransportImplextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="TransportImpl.html">
-              <span class="name">TransportImpl</span>
-            </a><span class="params">(<span name="transporter">transporter: (<a href="../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="../../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>, <a href="Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
     </li></ol>
             </div>
 
@@ -457,26 +369,6 @@ exchanged between a mysql client and server." href="MysqlBuf$.html">
 exchanged between a mysql client and server.</p><div class="fullcomment"><div class="comment cmt"><p>MysqlBuf provides convenience methods for reading/writing a logical packet
 exchanged between a mysql client and server. All data is little endian ordered.
 </p></div></div>
-    </li><li name="com.twitter.finagle.mysql.transport.MysqlClientPipelineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MysqlClientPipelineFactory"></a><a id="MysqlClientPipelineFactory:MysqlClientPipelineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlClientPipelineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets." href="MysqlClientPipelineFactory$.html">
-              <span class="name">MysqlClientPipelineFactory</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets.</p>
     </li><li name="com.twitter.finagle.mysql.transport.Packet" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Packet"></a><a id="Packet:Packet"></a>
       <span class="permalink">
@@ -495,29 +387,6 @@ traffic in terms of mysql logical packets.</p>
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.transport.TransportImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="TransportImpl"></a><a id="TransportImpl:TransportImpl"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#TransportImpl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]." href="TransportImpl$.html">
-              <span class="name">TransportImpl</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet].</p><div class="fullcomment"><div class="comment cmt"><p>Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]. The current default is toggled from netty3
-to netty4 by the &quot;com.twitter.finagle.mysql.UseNetty4&quot; toggle.</p><p>TODO(jparker): Convert this to Transporter[Buf, Buf] and adjust accordingly.
-</p></div></div>
     </li>
               </ol>
             </div>

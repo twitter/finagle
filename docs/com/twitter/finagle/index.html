@@ -150,7 +150,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
@@ -335,24 +335,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -421,6 +403,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1175,7 +1175,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -1890,7 +1890,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
@@ -2020,7 +2020,7 @@ name." href="Addr.html">
 name.</p><div class="fullcomment"><div class="comment cmt"><p>An address identifies the location of an object--it is a bound
 name. An object may be replicated, and thus bound to multiple
 physical locations (see <a href="Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>).
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Names.html#addr" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Names.html#addr" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Address" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="AddressextendsAnyRef"></a><a id="Address:Address"></a>
@@ -2198,7 +2198,7 @@ rather requests are taxed with session establishment when necessary.
 For example, this exception can occur if a request is interrupted while waiting for
 an available session or if an interrupt is propagated from a Finagle server
 during session establishment.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
      for additional details.</p></span><span class="cmt"><p>com.twitter.finagle.CancelledRequestException</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.CancelledRequestException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CancelledRequestExceptionextendsRequestExceptionwithHasLogLevel"></a><a id="CancelledRequestException:CancelledRequestException"></a>
@@ -2223,7 +2223,7 @@ an upstream service. In such cases, the pending Future is interrupted with
 this exception. The client will cancel its pending request which will by
 default propagate an interrupt to its downstream, and so on. This is done to
 conserve resources.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception" target="_blank">user guide</a>
      for additional details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ChannelBufferUsageException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ChannelBufferUsageExceptionextendsException"></a><a id="ChannelBufferUsageException:ChannelBufferUsageException"></a>
@@ -2249,9 +2249,9 @@ org.jboss.netty.buffer.ChannelBuffer." href="ChannelBufferUsageException.html">
 usage in public APIs.
 </p></div></div>
     </li><li name="com.twitter.finagle.ChannelClosedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ChannelClosedExceptionextendsChannelExceptionwithNoStackTrace"></a><a id="ChannelClosedException:ChannelClosedException"></a>
+      <a id="ChannelClosedExceptionextendsChannelException"></a><a id="ChannelClosedException:ChannelClosedException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#ChannelClosedExceptionextendsChannelExceptionwithNoStackTrace" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#ChannelClosedExceptionextendsChannelException" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2263,7 +2263,7 @@ usage in public APIs.
         <a title="Indicates that a given channel was closed, for instance if the connection
 was reset by a peer or a proxy." href="ChannelClosedException.html">
               <span class="name">ChannelClosedException</span>
-            </a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></span>
+            </a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that a given channel was closed, for instance if the connection
@@ -2300,7 +2300,7 @@ was reset by a peer or a proxy.</p>
       <span class="symbol">
         <a title="Default implementation for WriteException that wraps an underlying exception." href="ChannelWriteException.html">
               <span class="name">ChannelWriteException</span>
-            </a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Default implementation for <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> that wraps an underlying exception.</p>
@@ -2411,9 +2411,9 @@ factories in one (when available)." href="CodecFactory.html">
       <p class="shortcomment cmt">A combined codec factory provides both client and server codec
 factories in one (when available).</p>
     </li><li name="com.twitter.finagle.ConnectionFailedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConnectionFailedExceptionextendsChannelExceptionwithNoStackTrace"></a><a id="ConnectionFailedException:ConnectionFailedException"></a>
+      <a id="ConnectionFailedExceptionextendsChannelException"></a><a id="ConnectionFailedException:ConnectionFailedException"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#ConnectionFailedExceptionextendsChannelExceptionwithNoStackTrace" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#ConnectionFailedExceptionextendsChannelException" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2424,7 +2424,7 @@ factories in one (when available).</p>
       <span class="symbol">
         <a title="Indicates that the client failed to establish a connection." href="ConnectionFailedException.html">
               <span class="name">ConnectionFailedException</span>
-            </a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></span>
+            </a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that the client failed to establish a connection.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that the client failed to establish a connection. Typically this
@@ -2445,7 +2445,7 @@ particular category of connection failure.
       <span class="symbol">
         <a title="Indicates that connecting to a given remoteAddress was refused." href="ConnectionRefusedException.html">
               <span class="name">ConnectionRefusedException</span>
-            </a><span class="params">(<span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that connecting to a given <code>remoteAddress</code> was refused.</p>
@@ -2514,7 +2514,7 @@ delegation rules. Together, these describe how to bind a
 <a href="Path.html" class="extype" name="com.twitter.finagle.Path">com.twitter.finagle.Path</a> to a set of
 <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">com.twitter.finagle.Addr</a>. <a href="naming/DefaultInterpreter$.html" class="extype" name="com.twitter.finagle.naming.DefaultInterpreter">com.twitter.finagle.naming.DefaultInterpreter</a>
 implements the default binding stategy.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.DtabBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DtabBuilderextendsBuilder[com.twitter.finagle.Dentry,com.twitter.finagle.Dtab]"></a><a id="DtabBuilder:DtabBuilder"></a>
@@ -2581,7 +2581,7 @@ connected have been marked as failed.</p><div class="fullcomment"><div class="co
 request failed because all hosts in the cluster to which the client is
 connected have been marked as failed. See <span class="extype" name="com.twitter.finagle.service.FailFastFactory">com.twitter.finagle.service.FailFastFactory</span>
 for details on this behavior.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s" target="_blank">user guide</a>
      for additional details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Failure" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FailureextendsExceptionwithNoStackTracewithHasLogLevelwithFailureFlags[com.twitter.finagle.Failure]"></a><a id="Failure:Failure"></a>
@@ -2632,7 +2632,7 @@ converts back and forth between Thrift structs. Again, your service
 deals with plain objects:</p><pre>[ThriftIn -&gt; (<span class="std">String</span>  -&gt;  <span class="std">Int</span>) -&gt; ThriftOut]</pre><p>Thus, a <code>Filter[A, B, C, D]</code> converts a <code>Service[C, D]</code> to a <code>Service[A, B]</code>.
 In other words, it converts a <code>Service[ReqOut, RepIn]</code> to a
 <code>Service[ReqIn, RepOut]</code>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters" target="_blank">user guide</a>
      for details and examples.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.GlobalRequestTimeoutException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GlobalRequestTimeoutExceptionextendsRequestTimeoutException"></a><a id="GlobalRequestTimeoutException:GlobalRequestTimeoutException"></a>
@@ -2750,9 +2750,9 @@ could be a single request-retry performed as a constituent of an
 application-level RPC.
 </p></div></div>
     </li><li name="com.twitter.finagle.ListeningServer" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ListeningServerextendsClosablewithAwaitable[Unit]withGroup[java.net.SocketAddress]"></a><a id="ListeningServer:ListeningServer"></a>
+      <a id="ListeningServerextendsClosablewithAwaitable[Unit]"></a><a id="ListeningServer:ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#ListeningServerextendsClosablewithAwaitable[Unit]withGroup[java.net.SocketAddress]" title="Permalink">
+      <a href="../../../com/twitter/finagle/index.html#ListeningServerextendsClosablewithAwaitable[Unit]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -2764,7 +2764,7 @@ application-level RPC.
         <a title="Trait ListeningServer represents a bound and listening
 server." href="ListeningServer.html">
               <span class="name">ListeningServer</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Awaitable" class="extype" target="_top">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>] with <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
+            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Awaitable" class="extype" target="_top">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Trait ListeningServer represents a bound and listening
@@ -2889,7 +2889,7 @@ the hood to resolve the destination names into the <code>Name</code> representat
 of the appropriate cluster.</p><p>As names are bound, a <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> may elect
 to bind only a <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a> prefix, leaving an
 unbound residual name to be processed by a downstream Namer.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="NameTree[+T]extendsAnyRef"></a><a id="NameTree[+T]:NameTree[T]"></a>
@@ -2970,7 +2970,7 @@ owners of the service to which the client is attempting to connect and verify
 that the service is operational. If so, then investigate the service
 discovery mechanism that the client is using (e.g. the
 <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">com.twitter.finagle.Resolver</a> that is it configured to use and the system
-backing it).</p><p>[1] http://twitter.github.io/finagle/guide/Names.html
+backing it).</p><p>[1] https://twitter.github.io/finagle/guide/Names.html
 </p></div></div>
     </li><li name="com.twitter.finagle.NotServableException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NotServableExceptionextendsRequestException"></a><a id="NotServableException:NotServableException"></a>
@@ -3036,7 +3036,7 @@ hierarchically-addressed object." href="Path.html">
       <p class="shortcomment cmt">A Path comprises a sequence of byte buffers naming a
 hierarchically-addressed object.</p><div class="fullcomment"><div class="comment cmt"><p>A Path comprises a sequence of byte buffers naming a
 hierarchically-addressed object.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Names.html#paths" target="_blank">user guide</a>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Names.html#paths" target="_blank">user guide</a>
      for further details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ProxyAnnouncement" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ProxyAnnouncementextendsAnnouncementwithProxy"></a><a id="ProxyAnnouncement:ProxyAnnouncement"></a>
@@ -3310,7 +3310,7 @@ otherwise terminated.</p></div></div>
       
       <p class="shortcomment cmt">A <code>Service</code> is an asynchronous function from a <code>Request</code> to a <code>Future[Response]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Service</code> is an asynchronous function from a <code>Request</code> to a <code>Future[Response]</code>.</p><p>It is the basic unit of an RPC interface.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Service$.html#mk[Req,Rep](f:Req=&gt;com.twitter.util.Future[Rep]):com.twitter.finagle.Service[Req,Rep]" class="extmbr" name="com.twitter.finagle.Service#mk">Service.mk</a> for a convenient
-    way to create new instances.</p></span><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/ServicesAndFilters.html#services" target="_blank">user guide</a>
+    way to create new instances.</p></span><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/ServicesAndFilters.html#services" target="_blank">user guide</a>
      for details and examples.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceClosedException" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServiceClosedExceptionextendsExceptionwithServiceException"></a><a id="ServiceClosedException:ServiceClosedException"></a>
@@ -3569,7 +3569,7 @@ specified as a <code>serviceName</code>. The &quot;unspecified&quot; value is us
         <a title="Indicates that an error occurred while an SSL handshake was being performed
 with a server at a given remoteAddress." href="SslHandshakeException.html">
               <span class="name">SslHandshakeException</span>
-            </a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Indicates that an error occurred while an SSL handshake was being performed
@@ -3839,7 +3839,7 @@ com.twitter.finagle.transport.Transport." href="TransportException.html">
         <a title="A catch-all exception class for uncategorized
 ChannelExceptions." href="UnknownChannelException.html">
               <span class="name">UnknownChannelException</span>
-            </a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="remoteAddress">remoteAddress: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="ex">ex: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>, <span name="remoteAddr">remoteAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A catch-all exception class for uncategorized
@@ -4135,6 +4135,24 @@ their corresponding backup requests succeeded first. See
       <span class="symbol">
         <a title="" href="ChannelException$.html">
               <span class="name">ChannelException</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ChannelWriteException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ChannelWriteException"></a><a id="ChannelWriteException:ChannelWriteException"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#ChannelWriteException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ChannelWriteException$.html">
+              <span class="name">ChannelWriteException</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
@@ -4872,7 +4890,7 @@ com.twitter.finagle.mux." href="ThriftMux$.html">
 <code>com.twitter.finagle.Server</code> for the Thrift protocol served over
 <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. Rich interfaces are provided to adhere to those
 generated from a <a href="http://thrift.apache.org/docs/idl/" target="_blank">Thrift IDL</a> by
-<a href="http://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
+<a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
@@ -4889,7 +4907,7 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
 })</pre><p>This object does not expose any configuration options. Both clients and servers
 are instantiated with sane defaults. Clients are labeled with the &quot;clnt/thrift&quot;
 prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration, see the
-<a href="http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
+<a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
 </p></div></div>
     </li><li name="com.twitter.finagle.WriteException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WriteException"></a><a id="WriteException:WriteException"></a>

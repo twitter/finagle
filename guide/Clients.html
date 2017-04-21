@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 6.43.0 documentation</title>
+    <title>Clients &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -598,7 +598,7 @@ Finagle doesn&#8217;t have any other path to choose.</p>
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailureAccrualFactory.scala">FailureAccrualFactory</a>.</p>
+The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/FailureAccrualFactory.scala">FailureAccrualFactory</a>.</p>
 <p>See <a class="reference internal" href="Metrics.html#failure-accrual-stats"><span class="std std-ref">Failure Accrual Stats</span></a> for stats exported from the
 <code class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module.</p>
 <p>The <code class="docutils literal"><span class="pre">FailureAccrualFactory</span></code> is configurable in terms of used policy to determine whether to mark
@@ -617,8 +617,8 @@ durations for which an endpoint is marked dead.</p>
 success rate <a class="footnote-reference" href="#example" id="id24">[3]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">FailureAccrualFactory</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.exp.FailureAccrualPolicy</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">FailureAccrualFactory</span><span class="o">.</span><span class="nc">Param</span><span class="o">(()</span> <span class="k">=&gt;</span> <span class="nc">FailureAccrualPolicy</span><span class="o">.</span><span class="n">successRate</span><span class="o">(</span>
@@ -640,9 +640,8 @@ dead for</li>
 following snippet <a class="footnote-reference" href="#example" id="id26">[3]</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.</span><span class="o">{</span><span class="nc">Backoff</span><span class="o">,</span> <span class="nc">FailureAccrualFactory</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.exp.FailureAccrualPolicy</span>
-
+<span class="k">import</span> <span class="nn">com.twitter.finagle.liveness.</span><span class="o">{</span><span class="nc">FailureAccrualFactory</span><span class="o">,</span> <span class="nc">FailureAccrualPolicy</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.Backoff</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">FailureAccrual</span><span class="o">.</span><span class="nc">Param</span><span class="o">(()</span> <span class="k">=&gt;</span> <span class="nc">FailureAccrualPolicy</span><span class="o">.</span><span class="n">consecutiveFailures</span><span class="o">(</span>
@@ -870,8 +869,31 @@ decision.</p>
 failures, note that they will be counted in the <code class="docutils literal"><span class="pre">StatsFilter</span></code>
 as a <code class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></code> in the
 <code class="docutils literal"><span class="pre">StatsReceiver</span></code> to indicate when this happens. See the
-<a class="reference external" href="http://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
+<a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception">FAQ</a>
 for more details.</p>
+</div>
+</div>
+<div class="section" id="methodbuilder">
+<h2>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">These APIs are experimental and subject to change.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
+We are waiting on user interest before expanding to more protocols.</p>
+</div>
+<p><code class="docutils literal"><span class="pre">MethodBuilder</span></code> is a collection of APIs for client configuration at a higher
+level than the  <a class="reference internal" href="Configuration.html#finagle6apis"><span class="std std-ref">Finagle 6 APIs</span></a> while improving upon the deprecated
+<code class="docutils literal"><span class="pre">ClientBuilder</span></code>. <code class="docutils literal"><span class="pre">MethodBuilder</span></code> provides:</p>
+<ul class="simple">
+<li><a class="reference internal" href="MethodBuilder.html#mb-logical-req"><span class="std std-ref">Logical</span></a> success rate metrics.</li>
+<li>Retries based on application-level requests and responses (e.g. an HTTP
+503 response code or a Thrift exception).</li>
+<li>Configuration of per-attempt and total timeouts.</li>
+</ul>
+<p><a class="reference internal" href="MethodBuilder.html"><span class="doc">Learn more</span></a> about <code class="docutils literal"><span class="pre">MethodBuilder</span></code>.</p>
 <p class="rubric">Footnotes</p>
 <table class="docutils footnote" frame="void" id="backoff" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -955,7 +977,6 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 </table>
 </div>
 </div>
-</div>
 
 
           </div>
@@ -1017,6 +1038,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 <li><a class="reference internal" href="#other-details">Other Details</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#methodbuilder">MethodBuilder</a></li>
 </ul>
 </li>
 </ul>

@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -225,6 +225,24 @@ com.twitter.finagle.factory.LoadBalancerFactory.Dest
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="EndpointerModule.html" title="A module that hooks in a ServiceFactory that directly makes connections,
+intended to be used as the last ServiceFactory in the stack, the
+endpointer."></a>
+                        <a href="EndpointerModule.html" title="A module that hooks in a ServiceFactory that directly makes connections,
+intended to be used as the last ServiceFactory in the stack, the
+endpointer.">
+                          EndpointerModule
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="EndpointerStackClient.html" title="The standard template implementation for
+com.twitter.finagle.client.StackClient."></a>
+                        <a href="EndpointerStackClient.html" title="The standard template implementation for
+com.twitter.finagle.client.StackClient.">
+                          EndpointerStackClient
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection and
 request timeouts on a per-endpoint basis."></a>
                         <a href="LatencyCompensation$.html" title="Latency compensation enables the modification of connection and
@@ -257,10 +275,8 @@ per-endpoint basis.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="StdStackClient.html" title="The standard template implementation for
-com.twitter.finagle.client.StackClient."></a>
-                        <a href="StdStackClient.html" title="The standard template implementation for
-com.twitter.finagle.client.StackClient.">
+                        <a class="trait" href="StdStackClient.html" title=""></a>
+                        <a href="StdStackClient.html" title="">
                           StdStackClient
                         </a>
                       </li><li class="current-entities indented4">
@@ -398,24 +414,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -484,6 +482,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="../kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1220,6 +1236,52 @@ cached. This is applied to connections that number greater than
 the low watermark but fewer than the high.</p></dd><dt class="param">maxWaiters</dt><dd class="cmt"><p>The maximum number of connection requests that
 are queued when the connection concurrency exceeds the high
 watermark.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.EndpointerModule" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EndpointerModule[Req,Rep]extendsStack.Module[com.twitter.finagle.ServiceFactory[Req,Rep]]"></a><a id="EndpointerModule[Req,Rep]:EndpointerModule[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#EndpointerModule[Req,Rep]extendsStack.Module[com.twitter.finagle.ServiceFactory[Req,Rep]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A module that hooks in a ServiceFactory that directly makes connections,
+intended to be used as the last ServiceFactory in the stack, the
+endpointer." href="EndpointerModule.html">
+              <span class="name">EndpointerModule</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Module</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerModule.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.EndpointerModule.Rep">Rep</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A module that hooks in a <code>ServiceFactory</code> that directly makes connections,
+intended to be used as the last <code>ServiceFactory</code> in the stack, the
+endpointer.</p>
+    </li><li name="com.twitter.finagle.client.EndpointerStackClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="EndpointerStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.EndpointerStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withClientParams[This]withWithClientAdmissionControl[This]withWithClientTransport[This]withWithClientSession[This]withWithSessionQualifier[This]"></a><a id="EndpointerStackClient[Req,Rep,This&lt;:EndpointerStackClient[Req,Rep,This]]:EndpointerStackClient[Req,Rep,This]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#EndpointerStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.EndpointerStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withClientParams[This]withWithClientAdmissionControl[This]withWithClientTransport[This]withWithClientSession[This]withWithSessionQualifier[This]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="The standard template implementation for
+com.twitter.finagle.client.StackClient." href="EndpointerStackClient.html">
+              <span class="name">EndpointerStackClient</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/WithClientTransport.html" class="extype" name="com.twitter.finagle.param.WithClientTransport">WithClientTransport</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/WithClientSession.html" class="extype" name="com.twitter.finagle.param.WithClientSession">WithClientSession</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>] with <a href="../param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a>[<span class="extype" name="com.twitter.finagle.client.EndpointerStackClient.This">This</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The standard template implementation for
+<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The standard template implementation for
+<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StackClient$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.client.StackClient#newStack">StackClient.newStack</a> for the default modules used by Finagle
+     clients.</p></span><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html" target="_blank">user guide</a>
+     for further details on Finagle clients and their configuration.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StackBasedClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StackBasedClient[Req,Rep]extendsClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackBasedClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackBasedClient[Req,Rep]]"></a><a id="StackBasedClient[Req,Rep]:StackBasedClient[Req,Rep]"></a>
       <span class="permalink">
@@ -1263,10 +1325,10 @@ Stack." href="StackClient.html">
       
       <p class="shortcomment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that composes a
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p>
-    </li><li name="com.twitter.finagle.client.StdStackClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withClientParams[This]withWithClientAdmissionControl[This]withWithClientTransport[This]withWithClientSession[This]withWithSessionQualifier[This]"></a><a id="StdStackClient[Req,Rep,This&lt;:StdStackClient[Req,Rep,This]]:StdStackClient[Req,Rep,This]"></a>
+    </li><li name="com.twitter.finagle.client.StdStackClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsEndpointerStackClient[Req,Rep,This]"></a><a id="StdStackClient[Req,Rep,This&lt;:StdStackClient[Req,Rep,This]]:StdStackClient[Req,Rep,This]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/index.html#StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withClientParams[This]withWithClientAdmissionControl[This]withWithClientTransport[This]withWithClientSession[This]withWithSessionQualifier[This]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsEndpointerStackClient[Req,Rep,This]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1275,18 +1337,12 @@ Stack." href="StackClient.html">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="The standard template implementation for
-com.twitter.finagle.client.StackClient." href="StdStackClient.html">
+        <a title="" href="StdStackClient.html">
               <span class="name">StdStackClient</span>
-            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/WithClientTransport.html" class="extype" name="com.twitter.finagle.param.WithClientTransport">WithClientTransport</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/WithClientSession.html" class="extype" name="com.twitter.finagle.param.WithClientSession">WithClientSession</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>] with <a href="../param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">The standard template implementation for
-<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The standard template implementation for
-<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StackClient$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.client.StackClient#newStack">StackClient.newStack</a> for the default modules used by Finagle
-     clients.</p></span><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Clients.html" target="_blank">user guide</a>
-     for further details on Finagle clients and their configuration.</p></span></dd></dl></div>
+      
     </li><li name="com.twitter.finagle.client.Transformer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="Transformer[Req,Rep]:Transformer[Req,Rep]"></a>
       <span class="permalink">
@@ -1304,9 +1360,9 @@ com.twitter.finagle.client.StackClient." href="StdStackClient.html">
       
       <p class="shortcomment cmt">Transform a service factory stack.</p>
     </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="Transporter[In,Out]extendsClosable"></a><a id="Transporter[In,Out]:Transporter[In,Out]"></a>
+      <a id="Transporter[In,Out]extendsAnyRef"></a><a id="Transporter[In,Out]:Transporter[In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out]extendsClosable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out]extendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1317,7 +1373,7 @@ com.twitter.finagle.client.StackClient." href="StdStackClient.html">
       <span class="symbol">
         <a title="Transporters construct a Future[Transport[In, Out]]." href="Transporter.html">
               <span class="name">Transporter</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
+            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are

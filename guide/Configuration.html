@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &#8212; Finagle 6.43.0 documentation</title>
+    <title>Configuration &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -73,7 +73,7 @@
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="clients-and-servers">
 <h2>Clients and Servers<a class="headerlink" href="#clients-and-servers" title="Permalink to this headline">¶</a></h2>
-<p>Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
+<p id="finagle6apis">Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
 primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
 or <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a>. We are moving away from this model for various
 <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">reasons</span></a>.</p>
@@ -89,12 +89,16 @@ verbosity.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
+<p>A higher-level client API, <span class="xref std std-ref">MethodBuilder</span>, builds on
+the client, providing logical success rate metrics, application-level retry
+policies, per-attempt timeouts, and total timeouts.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
 method and we encourage all the Finagle users to follow this pattern given that
 the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
-For help migrating, see <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">the FAQ</span></a> as well as
+For help migrating, see <a class="reference internal" href="MethodBuilder.html#mb-cb-migration"><span class="std std-ref">MethodBuilder migration</span></a>,
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">the FAQ</span></a> as well as
 <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a> and <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a> configuration.</p>
 </div>
 <p>In addition to <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods that provide easy-to-use and safe-to-configure
@@ -114,8 +118,9 @@ demonstrates how to use <code class="docutils literal"><span class="pre">.config
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The expert-level API requires deep knowledge of Finagle internals and
-it&#8217;s highly recommended to avoid it unless you&#8217;re absolutely sure what
-you&#8217;re doing.</p>
+it&#8217;s recommended to avoid it unless you&#8217;re sure of what
+you&#8217;re doing or the corresponding configuration has not yet
+been exposed through <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods.</p>
 </div>
 <div class="section" id="design-principles">
 <h3>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h3>
@@ -224,7 +229,7 @@ using:</p>
 <div class="section" id="service-owners">
 <h4>Service Owners<a class="headerlink" href="#service-owners" title="Permalink to this headline">¶</a></h4>
 <p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer&#8217;s
-&#8220;/admin/toggles&#8221; <a class="reference external" href="http://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
+&#8220;/admin/toggles&#8221; <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
 This provides a quick way to try out a change in a limited fashion.</p>
 <p>For setting more permanent <cite>Toggle</cite> values, include a JSON configuration file at
 <cite>resources/com/twitter/toggles/configs/$libraryName-service.json</cite>.
@@ -237,6 +242,87 @@ These environment-specific configs must be placed at
 where the <cite>environment</cite> from
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>
 is used to determine which one to load.</p>
+</div>
+</div>
+</div>
+<div class="section" id="tunables">
+<span id="id1"></span><h2>Tunables<a class="headerlink" href="#tunables" title="Permalink to this headline">¶</a></h2>
+<p><cite>Tunables</cite> are a mechanism for service owners to dynamically change configuration
+parameters of clients and servers at runtime.</p>
+<div class="section" id="id2">
+<h3>Concepts<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a Function0;
+it produces a value when applied. Dynamic configuration facilitates this value changing
+across invokations at runtime.</p>
+<p><cite>Tunables</cite> are accessed by means of a
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>, which contains all the
+<cite>Tunables</cite> for a given id (ids are keys for distinguishing <cite>TunableMaps</cite>; each client might
+have a separate <cite>TunableMap</cite> that is used for configuration, and the id might be the client label).</p>
+</div>
+<div class="section" id="id3">
+<h3>Usage<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>Accessing the <cite>TunableMap</cite> for a given id is done via
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-tunable/src/main/scala/com/twitter/finagle/tunable/StandardTunableMap.scala">StandardTunableMap</a>,
+using <cite>StandardTunableMap.apply(&#8220;myId&#8221;)</cite>.
+The returned map composes in-memory, local-file, and service-loaded configurations.</p>
+<p>Here is an example of configuring the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a>
+on an HTTP client with a <cite>Tunable</cite>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.service.TimeoutFilter</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.tunable.StandardTunableMap</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.tunable.</span><span class="o">{</span><span class="nc">Tunable</span><span class="o">,</span> <span class="nc">TunableMap</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">clientId</span> <span class="k">=</span> <span class="s">&quot;exampleClient&quot;</span>
+<span class="k">val</span> <span class="n">timeoutTunableId</span> <span class="k">=</span> <span class="s">&quot;com.example.service.Timeout&quot;</span>
+
+<span class="k">val</span> <span class="n">tunables</span><span class="k">:</span> <span class="kt">TunableMap</span> <span class="o">=</span> <span class="nc">StandardTunableMap</span><span class="o">(</span><span class="n">clientId</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">timeoutTunable</span><span class="k">:</span> <span class="kt">Tunable</span><span class="o">[</span><span class="kt">Duration</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">tunables</span><span class="o">(</span><span class="nc">TunableMap</span><span class="o">.</span><span class="nc">Key</span><span class="o">[</span><span class="kt">Duration</span><span class="o">](</span><span class="n">timeoutTunableId</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="n">clientId</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">TimeoutFilter</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span><span class="n">timeoutTunable</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Configuration<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The value of a given <cite>Tunable</cite> is the result of the composition of in-memory, local-file,
+and service-loaded configurations, in that order. If a configuration does not exist, the value
+from the next configuration is used.</p>
+<p>For example, if a server starts up with a file-based configuration for a given id, those values will
+be used. If the in-memory configuration is then set, those new values will be used.</p>
+<div class="section" id="in-memory">
+<h4>In-Memory<a class="headerlink" href="#in-memory" title="Permalink to this headline">¶</a></h4>
+<p>The <cite>Tunable</cite> values used by a given instance can be modified using TwitterServer&#8217;s
+&#8220;/admin/tunables&#8221; <a class="reference external" href="https://twitter.github.io/twitter-server/Admin.html#admin-tunables">API endpoint</a>.</p>
+</div>
+<div class="section" id="file-based">
+<h4>File-Based<a class="headerlink" href="#file-based" title="Permalink to this headline">¶</a></h4>
+<p>File-based configurations are defined in JSON files with the format specified in
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/JsonTunableMapper.scala">JsonTunableMapper</a>.</p>
+<p>Per-environment and per-instance configurations are supported. Configurations for a given id are
+composed from files located at <cite>resources/com/twitter/tunables/</cite>, in the following order:</p>
+<ol class="arabic simple">
+<li>$id/$env/instance-$instance.json</li>
+<li>$id/$env/instances.json</li>
+<li>$id/instance-$instance.json</li>
+<li>$id/instances.json</li>
+</ol>
+<p>Where $env and $instance are the environment and instance id given by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>.</p>
+</div>
+<div class="section" id="service-loaded">
+<h4>Service-Loaded<a class="headerlink" href="#service-loaded" title="Permalink to this headline">¶</a></h4>
+<p>A service-loaded <cite>TunableMap</cite> is loaded through
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-app/src/main/scala/com/twitter/app/LoadService.scala">LoadService</a>. For a given id,
+<cite>StandardTunableMap</cite> uses <cite>LoadService</cite> to get a
+<a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/ServiceLoadedTunableMap.scala">ServiceLoadedTunableMap</a>
+with a matching id.</p>
 </div>
 </div>
 </div>
@@ -272,6 +358,17 @@ is used to determine which one to load.</p>
 <li><a class="reference internal" href="#setting-toggle-values">Setting Toggle Values</a><ul>
 <li><a class="reference internal" href="#library-owners">Library Owners</a></li>
 <li><a class="reference internal" href="#service-owners">Service Owners</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tunables">Tunables</a><ul>
+<li><a class="reference internal" href="#id2">Concepts</a></li>
+<li><a class="reference internal" href="#id3">Usage</a></li>
+<li><a class="reference internal" href="#id4">Configuration</a><ul>
+<li><a class="reference internal" href="#in-memory">In-Memory</a></li>
+<li><a class="reference internal" href="#file-based">File-Based</a></li>
+<li><a class="reference internal" href="#service-loaded">Service-Loaded</a></li>
 </ul>
 </li>
 </ul>

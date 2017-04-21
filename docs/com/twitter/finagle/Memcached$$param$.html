@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -321,26 +321,6 @@ and per-node load-balancing.">
       </span>
       
       
-    </li><li name="com.twitter.finagle.Memcached.param.MemcachedImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MemcachedImplextendsProductwithSerializable"></a><a id="MemcachedImpl:MemcachedImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Memcached$$param$.html#MemcachedImplextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Configure the Transporter and Listener implementation
-used by Memcached." href="Memcached$$param$$MemcachedImpl.html">
-              <span class="name">MemcachedImpl</span>
-            </a><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Configure the <span class="extype" name="Transporter">Transporter</span> and <span class="extype" name="Listener">Listener</span> implementation
-used by Memcached.</p>
     </li><li name="com.twitter.finagle.Memcached.param.NumReps" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NumRepsextendsProductwithSerializable"></a><a id="NumReps:NumReps"></a>
       <span class="permalink">
@@ -733,24 +713,6 @@ used by Memcached.</p>
       <span class="symbol">
         <a title="" href="Memcached$$param$$KeyHasher$.html">
               <span class="name">KeyHasher</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.Memcached.param.MemcachedImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MemcachedImpl"></a><a id="MemcachedImpl:MemcachedImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Memcached$$param$.html#MemcachedImpl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Memcached$$param$$MemcachedImpl$.html">
-              <span class="name">MemcachedImpl</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       

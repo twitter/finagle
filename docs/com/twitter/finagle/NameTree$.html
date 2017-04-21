@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1182,7 +1182,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -2316,7 +2316,7 @@ name       ::= path | <span class="lit">'!'</span> | <span class="lit">'~'</span
 weight     ::= [<span class="num">0</span>-<span class="num">9</span>]*\.?[<span class="num">0</span>-<span class="num">9</span>]+</pre><p>For example:</p><pre>/foo &amp; /bar | /baz | $</pre><p>parses in to the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a></p><pre>Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)</pre><p>The production <code>path</code> is documented at <a href="Path$.html" class="extype" name="com.twitter.finagle.Path">Path.read</a>.
 </p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IllegalArgumentException"><code>IllegalArgumentException</code></span> when the string does not
 represent a valid name tree.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.NameTree#show" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.NameTree#show" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="show[T](tree:com.twitter.finagle.NameTree[T])(implicitevidence$1:com.twitter.finagle.util.Showable[T]):String"></a><a id="show[T](NameTree[T])(Showable[T]):String"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/NameTree$.html#show[T](tree:com.twitter.finagle.NameTree[T])(implicitevidence$1:com.twitter.finagle.util.Showable[T]):String" title="Permalink">
@@ -2331,7 +2331,11 @@ represent a valid name tree.</p></span></dd></dl></div>
         <span class="name">show</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.show.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="util/Showable.html" class="extype" name="com.twitter.finagle.util.Showable">Showable</a>[<span class="extype" name="com.twitter.finagle.NameTree.show.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       
-      <p class="shortcomment cmt">A string parseable by <a href="#read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" class="extmbr" name="com.twitter.finagle.NameTree#read">NameTree.read</a>.</p>
+      <p class="shortcomment cmt">A string parseable by <a href="#read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" class="extmbr" name="com.twitter.finagle.NameTree#read">NameTree.read</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A string parseable by <a href="#read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" class="extmbr" name="com.twitter.finagle.NameTree#read">NameTree.read</a>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@tailrec</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree#simplify" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="simplify[T](tree:com.twitter.finagle.NameTree[T]):com.twitter.finagle.NameTree[T]"></a><a id="simplify[T](NameTree[T]):NameTree[T]"></a>
       <span class="permalink">

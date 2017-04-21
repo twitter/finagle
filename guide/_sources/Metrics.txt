@@ -71,7 +71,7 @@ Failure Accrual
 .. _failure_accrual_stats:
 
 The client stats under the `failure_accrual` scope track how
-:src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`
+:src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`
 manages failures.
 
 .. include:: metrics/FailureAccrual.rst
@@ -206,7 +206,7 @@ These stats pertain to the HTTP protocol.
   responses are not automatically retried.
 
 These metrics are added by
-:src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
+:finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
 **status/<statusCode>**

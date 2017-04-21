@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1182,7 +1182,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -2330,44 +2330,7 @@ provided (i.e. no &quot;label=&lt;addr&gt;&quot;), then the empty string is retu
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.BaseResolver#resolve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolve(addr:String):com.twitter.util.Try[com.twitter.finagle.Group[java.net.SocketAddress]]"></a><a id="resolve(String):Try[Group[SocketAddress]]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Resolver$.html#resolve(addr:String):com.twitter.util.Try[com.twitter.finagle.Group[java.net.SocketAddress]]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use Resolver.eval">resolve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Resolve a group from an address, a string.</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a group from an address, a string. Resolve uses
-<code>Resolver</code>s to do this. These are loaded via the Java
-<a href="http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html" target="_blank">ServiceLoader</a>
-mechanism. The default resolver is &quot;inet&quot;, resolving DNS
-name/port pairs.</p><p>Target names have a simple grammar: The name of the resolver
-precedes the name of the address to be resolved, separated by
-an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
-resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
-resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
-<a href="LabelledGroup.html" class="extype" name="com.twitter.finagle.LabelledGroup">com.twitter.finagle.LabelledGroup</a>. By default, this name is
-simply the <code>addr</code> string, but it can be overridden by prefixing
-a name separated by an equals sign from the rest of the addr.
-For example, the addr &quot;www=inet!google.com:80&quot; resolves
-&quot;google.com:80&quot; with the inet resolver, but the returned group's
-<a href="LabelledGroup.html" class="extype" name="com.twitter.finagle.LabelledGroup">com.twitter.finagle.LabelledGroup</a> name is &quot;www&quot;.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use Resolver.eval</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

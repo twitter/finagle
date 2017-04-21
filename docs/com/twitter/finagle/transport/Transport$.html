@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.transport" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -186,14 +186,6 @@ for writing); useful for testing.">
                         <a class="class" href="StatsTransport.html" title="A TransportProxy that collects stats on read/write operations for underlying."></a>
                         <a href="StatsTransport.html" title="A TransportProxy that collects stats on read/write operations for underlying.">
                           StatsTransport
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="TlsConfig$.html" title=""></a>
-                        <a class="trait" href="TlsConfig.html" title="An ADT representing a Link(https://en.wikipedia.org/wiki/Transport_Layer_Security,Text(TLS)) config used
-by the underlying transport implementation."></a>
-                        <a href="TlsConfig.html" title="An ADT representing a Link(https://en.wikipedia.org/wiki/Transport_Layer_Security,Text(TLS)) config used
-by the underlying transport implementation.">
-                          TlsConfig
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title="A collection of com.twitter.finagle.Stack.Param's useful for configuring
@@ -405,24 +397,6 @@ If None, the implementation default is used.</p></dd></dl></div>
       </span>
       
       <p class="shortcomment cmt">$param the SSL/TLS server configuration for a <code>Transport</code>.</p>
-    </li><li name="com.twitter.finagle.transport.Transport.Tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TlsextendsProductwithSerializable"></a><a id="Tls:Tls"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#TlsextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="$param the TLS config for a Transport (default: disabled)." href="Transport$$Tls.html">
-              <span class="name">Tls</span>
-            </a><span class="params">(<span name="config">config: <a href="TlsConfig.html" class="extype" name="com.twitter.finagle.transport.TlsConfig">TlsConfig</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">$param the TLS config for a <code>Transport</code> (default: disabled).</p>
     </li><li name="com.twitter.finagle.transport.Transport.Verbose" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="VerboseextendsProductwithSerializable"></a><a id="Verbose:Verbose"></a>
       <span class="permalink">
@@ -929,24 +903,6 @@ for example.
       <span class="symbol">
         <a title="" href="Transport$$ServerSsl$.html">
               <span class="name">ServerSsl</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.transport.Transport.Tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Tls"></a><a id="Tls:Tls"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport$.html#Tls" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Transport$$Tls$.html">
-              <span class="name">Tls</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       

@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -427,6 +409,24 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../liveness/index.html">
+              <span class="name">liveness</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer" visbl="pub" class="indented4 current" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="loadbalancer"></a><a id="loadbalancer:loadbalancer"></a>
       <span class="permalink">
@@ -448,6 +448,24 @@ via the <a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadb
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="aperture"></a><a id="aperture:aperture"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#aperture" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="aperture/index.html">
+              <span class="name">aperture</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -1218,7 +1236,48 @@ for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                <li name="com.twitter.finagle.loadbalancer#defaultAddressOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultAddressOrdering:Ordering[com.twitter.finagle.Address]"></a><a id="defaultAddressOrdering:Ordering[Address]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#defaultAddressOrdering:Ordering[com.twitter.finagle.Address]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultAddressOrdering</span><span class="result">: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
+<code>defaultAddressOrdering</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
+<code>defaultAddressOrdering</code>. If no value is set, <a href="../Address$.html#OctetOrdering:Ordering[com.twitter.finagle.Address]" class="extmbr" name="com.twitter.finagle.Address#OctetOrdering">Address.OctetOrdering</a>
+is used with the assumption that hosts resolved via Finagle provide the
+load balancer with resolved InetAddresses. If a separate resolution process
+is used, outside of Finagle, the default ordering should be overriden.
+</p></div></div>
+    </li><li name="com.twitter.finagle.loadbalancer#defaultAddressOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultAddressOrdering(order:Ordering[com.twitter.finagle.Address]):Unit"></a><a id="defaultAddressOrdering(Ordering[Address]):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#defaultAddressOrdering(order:Ordering[com.twitter.finagle.Address]):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultAddressOrdering</span><span class="params">(<span name="order">order: <span class="extype" name="scala.Ordering">Ordering</span>[<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the default <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering for the entire process (outside of clients
+which override it).</p><div class="fullcomment"><div class="comment cmt"><p>Set the default <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering for the entire process (outside of clients
+which override it).
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="LoadBalancerFactory$$AddressOrdering.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.AddressOrdering">LoadBalancerFactory.AddressOrdering</a> for more info.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Balancers"></a><a id="Balancers:Balancers"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/loadbalancer/index.html#Balancers" title="Permalink">
@@ -1237,7 +1296,8 @@ for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class
       
       <p class="shortcomment cmt">Constructor methods for various load balancers.</p><div class="fullcomment"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
 specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
-to easily inject a balancer into the Finagle stack via client configuration.
+to easily inject a balancer into the Finagle client stack via the
+<code>withLoadBalancer</code> method.
 </p></div><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p>configuring a client with a load balancer</p><pre>$Protocol.client
   .withLoadBalancer(Balancers.aperture())

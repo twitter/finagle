@@ -4,6 +4,8 @@ Configuration
 Clients and Servers
 -------------------
 
+.. _finagle6apis:
+
 Prior to :doc:`version 6.0 <changelog>`, the ``ClientBuilder``/``ServerBuilder`` API was the
 primary method for configuring the modules inside a Finagle :ref:`client <finagle_clients>`
 or :ref:`server <finagle_servers>`. We are moving away from this model for various
@@ -23,10 +25,15 @@ verbosity.
     .withTransport.verbose
     .newService("localhost:10000,localhost:10001")
 
+A higher-level client API, :ref:`MethodBuilder <methodbuilder>`, builds on
+the client, providing logical success rate metrics, application-level retry
+policies, per-attempt timeouts, and total timeouts.
+
 .. note:: All the examples in this user guide use the Finagle 6 API as a main configuration
           method and we encourage all the Finagle users to follow this pattern given that
           the ``ClientBuilder``/``ServerBuilder`` API will eventually be deprecated.
-          For help migrating, see :ref:`the FAQ <configuring_finagle6>` as well as
+          For help migrating, see :ref:`MethodBuilder migration <mb_cb_migration>`,
+          :ref:`the FAQ <configuring_finagle6>` as well as
           :ref:`client <finagle_clients>` and :ref:`server <finagle_servers>` configuration.
 
 In addition to ``with``-prefixed methods that provide easy-to-use and safe-to-configure
@@ -47,8 +54,9 @@ demonstrates how to use ``.configured`` to override TCP socket options provided 
     .newService("localhost:10000,localhost:10001")
 
 .. note:: The expert-level API requires deep knowledge of Finagle internals and
-          it's highly recommended to avoid it unless you're absolutely sure what
-          you're doing.
+          it's recommended to avoid it unless you're sure of what
+          you're doing or the corresponding configuration has not yet
+          been exposed through ``with``-prefixed methods.
 
 Design Principles
 ~~~~~~~~~~~~~~~~~
@@ -176,7 +184,7 @@ Service Owners
 
 At runtime, the in-process `Toggle` values can be modified using TwitterServer's
 "/admin/toggles" `API endpoint
-<http://twitter.github.io/twitter-server/Admin.html#admin-toggles>`_.
+<https://twitter.github.io/twitter-server/Admin.html#admin-toggles>`_.
 This provides a quick way to try out a change in a limited fashion.
 
 For setting more permanent `Toggle` values, include a JSON configuration file at
@@ -191,3 +199,95 @@ These environment-specific configs must be placed at
 where the `environment` from
 :finagle-toggle-src:`ServerInfo.apply() <com/twitter/finagle/server/ServerInfo.scala>`
 is used to determine which one to load.
+
+.. _tunables:
+
+Tunables
+--------
+
+`Tunables` are a mechanism for service owners to dynamically change configuration
+parameters of clients and servers at runtime.
+
+Concepts
+~~~~~~~~
+
+A :util-tunable-src:`Tunable <com/twitter/util/tunable/Tunable.scala>` is like a Function0;
+it produces a value when applied. Dynamic configuration facilitates this value changing
+across invokations at runtime.
+
+`Tunables` are accessed by means of a
+:util-tunable-src:`TunableMap <com/twitter/util/tunable/TunableMap.scala>`, which contains all the
+`Tunables` for a given id (ids are keys for distinguishing `TunableMaps`; each client might
+have a separate `TunableMap` that is used for configuration, and the id might be the client label).
+
+Usage
+~~~~~
+
+Accessing the `TunableMap` for a given id is done via
+:finagle-tunable-src:`StandardTunableMap <com/twitter/finagle/tunable/StandardTunableMap.scala>`,
+using `StandardTunableMap.apply("myId")`.
+The returned map composes in-memory, local-file, and service-loaded configurations.
+
+Here is an example of configuring the :src:`TimeoutFilter <com/twitter/finagle/service/TimeoutFilter.scala>`
+on an HTTP client with a `Tunable`:
+
+.. code-block:: scala
+
+  package com.example.service
+
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.service.TimeoutFilter
+  import com.twitter.finagle.tunable.StandardTunableMap
+  import com.twitter.util.Duration
+  import com.twitter.util.tunable.{Tunable, TunableMap}
+
+  val clientId = "exampleClient"
+  val timeoutTunableId = "com.example.service.Timeout"
+
+  val tunables: TunableMap = StandardTunableMap(clientId)
+  val timeoutTunable: Tunable[Duration] =
+    tunables(TunableMap.Key[Duration](timeoutTunableId))
+
+  val client = Http.client
+    .withLabel(clientId)
+    .configured(TimeoutFilter.Param(timeoutTunable))
+    .newService("localhost:10000")
+
+Configuration
+~~~~~~~~~~~~~
+The value of a given `Tunable` is the result of the composition of in-memory, local-file,
+and service-loaded configurations, in that order. If a configuration does not exist, the value
+from the next configuration is used. 
+
+For example, if a server starts up with a file-based configuration for a given id, those values will
+be used. If the in-memory configuration is then set, those new values will be used.
+
+In-Memory
+^^^^^^^^^
+The `Tunable` values used by a given instance can be modified using TwitterServer's
+"/admin/tunables" `API endpoint <https://twitter.github.io/twitter-server/Admin.html#admin-tunables>`_.
+
+File-Based
+^^^^^^^^^^
+
+File-based configurations are defined in JSON files with the format specified in
+:util-tunable-src:`JsonTunableMapper <com/twitter/util/tunable/JsonTunableMapper.scala>`.
+
+Per-environment and per-instance configurations are supported. Configurations for a given id are
+composed from files located at `resources/com/twitter/tunables/`, in the following order:
+
+1. $id/$env/instance-$instance.json
+2. $id/$env/instances.json
+3. $id/instance-$instance.json
+4. $id/instances.json
+
+Where $env and $instance are the environment and instance id given by
+:finagle-toggle-src:`ServerInfo.apply() <com/twitter/finagle/server/ServerInfo.scala>`.
+
+Service-Loaded
+^^^^^^^^^^^^^^
+A service-loaded `TunableMap` is loaded through
+:util-app-src:`LoadService <com/twitter/app/LoadService.scala>`. For a given id,
+`StandardTunableMap` uses `LoadService` to get a
+:util-tunable-src:`ServiceLoadedTunableMap <com/twitter/util/tunable/ServiceLoadedTunableMap.scala>`
+with a matching id.

@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -227,24 +227,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.migration" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="migration"></a><a id="migration:migration"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#migration" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="migration/index.html">
-              <span class="name">migration</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.protocol" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="protocol"></a><a id="protocol:protocol"></a>
       <span class="permalink">
@@ -263,35 +245,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.replication" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="replication"></a><a id="replication:replication"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#replication" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Package replication implements a base cache client that can manage multiple cache replicas." href="replication/index.html">
-              <span class="name">replication</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Package replication implements a base cache client that can manage multiple cache replicas.</p><div class="fullcomment"><div class="comment cmt"><p>Package replication implements a base cache client that can manage multiple cache replicas.</p><p>The base replication client will forward cache command to all replicas, as well as collect and
-aggregate each replica's response into a ReplicationStatus object representing the replication
-consistency. The BaseReplicationClient will not handle the consistency between replicas in anyway,
-but only to report its view of the replication state. For instance, BaseReplicationClient provides
-interfaces similar to generic memcache client but always returns ReplicationStatus object which
-can be one of these three forms:</p><ul><li>ConsistentReplication, indicating a consistent state across all replicas</li><li>InconsistentReplication, indicating an inconsistent state across all replicas</li><li>FailedReplication, indicating a failure state</li></ul><p>By checking the returned ReplicationStatus object, one can tell the cache replication status and
-then handle it with application specific logic.</p><p>In addition to a base replication client, a simple replication client wrapper that's compatible
-with generic cache client interface is also provided. The SimpleReplicationClient only supports
-a subset of all memcached commands for now, and will succeed only if the command succeed on all
-cache replicas. In a more complicate caching scenario, this simple/naive replication client may
-not be applicable.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.util" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="util"></a><a id="util:util"></a>
       <span class="permalink">
@@ -327,12 +280,6 @@ not be applicable.
                         <a class="object" href="" title=""></a>
                         <a href="" title="">
                           CacheNodeGroup
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="CachePoolCluster$.html" title="Cache specific cluster implementation."></a>
-                        <a class="trait" href="CachePoolCluster.html" title=""></a>
-                        <a href="CachePoolCluster.html" title="">
-                          CachePoolCluster
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="CachePoolConfig$.html" title="Cache pool config data object
@@ -414,12 +361,6 @@ we need for now.">
                           KetamaClient
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="KetamaClientBuilder$.html" title=""></a>
-                        <a class="class" href="KetamaClientBuilder.html" title=""></a>
-                        <a href="KetamaClientBuilder.html" title="">
-                          KetamaClientBuilder
-                        </a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="KetamaClientKey$.html" title=""></a>
                         <a class="class" href="KetamaClientKey.html" title=""></a>
                         <a href="KetamaClientKey.html" title="">
@@ -444,7 +385,7 @@ we need for now.">
                           PHPMemCacheClientBuilder
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="PartitionedClient$.html" title=""></a>
+                        <span class="separator"></span>
                         <a class="trait" href="PartitionedClient.html" title="A partitioned client is a client that delegates to an actual client based on
 the key value."></a>
                         <a href="PartitionedClient.html" title="A partitioned client is a client that delegates to an actual client based on
@@ -474,20 +415,6 @@ the key value.">
                         <a class="class" href="RubyMemCacheClientBuilder.html" title="Builder for memcache-client (MemCache) compatible client."></a>
                         <a href="RubyMemCacheClientBuilder.html" title="Builder for memcache-client (MemCache) compatible client.">
                           RubyMemCacheClientBuilder
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="Server.html" title="An in-process memcached server."></a>
-                        <a href="Server.html" title="An in-process memcached server.">
-                          Server
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StaticCachePoolCluster.html" title=" Cache pool based on a static list
-"></a>
-                        <a href="StaticCachePoolCluster.html" title=" Cache pool based on a static list
-">
-                          StaticCachePoolCluster
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="TwemcacheClient$.html" title=""></a>
@@ -520,13 +447,6 @@ with Twitter cache pools.">
                         <a class="class" href="TwitterCacheResolverException.html" title="Indicates that an error occurred while resolving a cache address."></a>
                         <a href="TwitterCacheResolverException.html" title="Indicates that an error occurred while resolving a cache address.">
                           TwitterCacheResolverException
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ZookeeperCachePoolCluster$.html" title="ZooKeeper based cache pool cluster companion object
-"></a>
-                        <a class="class" href="ZookeeperCachePoolCluster.html" title="Zookeeper based cache pool cluster with a serverset as the underlying pool."></a>
-                        <a href="ZookeeperCachePoolCluster.html" title="Zookeeper based cache pool cluster with a serverset as the underlying pool.">
-                          ZookeeperCachePoolCluster
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="ZookeeperStateMonitor$.html" title=""></a>

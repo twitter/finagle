@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1182,7 +1182,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -2188,7 +2188,7 @@ and as such are implemented separately.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](name:com.twitter.finagle.Name,label:String,cls:Class[_]):Iface"></a><a id="newIface[Iface](Name,String,Class[_]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](name:com.twitter.finagle.Name,label:String,cls:Class[_]):Iface" title="Permalink">
@@ -2204,9 +2204,11 @@ and as such are implemented separately.
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](dest:com.twitter.finagle.Name,label:String)(implicitevidence$3:scala.reflect.ClassTag[Iface]):Iface"></a><a id="newIface[Iface](Name,String)(ClassTag[Iface]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](dest:com.twitter.finagle.Name,label:String)(implicitevidence$3:scala.reflect.ClassTag[Iface]):Iface" title="Permalink">
@@ -2222,9 +2224,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](dest:String,label:String)(implicitevidence$2:scala.reflect.ClassTag[Iface]):Iface"></a><a id="newIface[Iface](String,String)(ClassTag[Iface]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](dest:String,label:String)(implicitevidence$2:scala.reflect.ClassTag[Iface]):Iface" title="Permalink">
@@ -2240,9 +2244,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](dest:String)(implicitevidence$1:scala.reflect.ClassTag[Iface]):Iface"></a><a id="newIface[Iface](String)(ClassTag[Iface]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](dest:String)(implicitevidence$1:scala.reflect.ClassTag[Iface]):Iface" title="Permalink">
@@ -2258,9 +2264,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](dest:String,label:String,cls:Class[_]):Iface"></a><a id="newIface[Iface](String,String,Class[_]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](dest:String,label:String,cls:Class[_]):Iface" title="Permalink">
@@ -2276,9 +2284,11 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
-    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
+    </li><li name="com.twitter.finagle.ThriftRichClient#newIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newIface[Iface](dest:String,cls:Class[_]):Iface"></a><a id="newIface[Iface](String,Class[_]):Iface"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftRichClient.html#newIface[Iface](dest:String,cls:Class[_]):Iface" title="Permalink">
@@ -2294,8 +2304,10 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
       </span>
       
       <p class="shortcomment cmt">Create a new client of type <code>Iface</code>, which must be generated
-by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a> or
-<a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p>
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client of type <code>Iface</code>, which must be generated
+<a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</a>.</p><p>For Scala generated code, the <code>Class</code> passed in should be
+either <code>ServiceName$FutureIface</code> or <code>ServiceName[Future]</code>.</p><p>For Java generated code, the <code>Class</code> passed in should be
+<code>ServiceName$ServiceIface</code>.</p></div></div>
     </li><li name="com.twitter.finagle.ThriftRichClient#newMethodIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newMethodIface[ServiceIface,FutureIface](serviceIface:ServiceIface)(implicitbuilder:com.twitter.finagle.thrift.MethodIfaceBuilder[ServiceIface,FutureIface]):FutureIface"></a><a id="newMethodIface[ServiceIface,FutureIface](ServiceIface)(MethodIfaceBuilder[ServiceIface,FutureIface]):FutureIface"></a>
       <span class="permalink">

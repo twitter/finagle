@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -178,6 +178,24 @@ via the <a href="" class="extype" name="com.twitter.finagle.loadbalancer.Balance
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aperture"></a><a id="aperture:aperture"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#aperture" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="aperture/index.html">
+              <span class="name">aperture</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
       <span class="permalink">
@@ -261,7 +279,8 @@ stats to be toggled.">
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
 specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
-to easily inject a balancer into the Finagle stack via client configuration.
+to easily inject a balancer into the Finagle client stack via the
+<code>withLoadBalancer</code> method.
 </p></div><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p>configuring a client with a load balancer</p><pre>$Protocol.client
   .withLoadBalancer(Balancers.aperture())
@@ -387,24 +406,22 @@ for more details.</p></span></dd></dl><div class="toggleContainer block">
         <span class="name">MaxEffort</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">This is a fixed number of retries, a LB are willing to make if the dead
-node is returned from the underlying distributor.</p><div class="fullcomment"><div class="comment cmt"><p>This is a fixed number of retries, a LB are willing to make if the dead
-node is returned from the underlying distributor.</p><p>For randomized LBs (P2C/LeastLoaded, P2C/EWMA, and Aperture) this value
-has an additional meaning: it determines how often the LB will be failing
-to pick a healthy node out of the partially-unhealthy replica set. For
-example, imagine that half of the replica set is down, the probably of
-picking two dead nodes is 0.25. If we repeat that process for 5 times,
-the total probability of seeing 5 dead nodes in a row, will be
+      <p class="shortcomment cmt">This is the default for the fixed number of retries an LB implementation is willing
+to make if an unavailable (Status != Open) node is returned from the underlying pick.</p><div class="fullcomment"><div class="comment cmt"><p>This is the default for the fixed number of retries an LB implementation is willing
+to make if an unavailable (Status != Open) node is returned from the underlying pick.</p><p>For randomized LBs (P2C* and Aperture*) this can be interpreted as a probability.
+For example, imagine that half of the replica set is down, the probability of
+picking two unavailable nodes is 0.25. If we repeat that process for 5 times,
+the total probability of seeing 5 unavailable nodes in a row, will be
 (0.25 ^ 5) = 0.1%. This means that if half of the cluster is down, the
 LB will be making a bad choice (when better choice may have been available)
 for 0.1% of requests.</p><p>Please, note that this doesn't mean that 0.1% of requests will be failed
-by P2C operating on a half-dead cluster since there is an additional layer
-of requeues (see <code>Retries</code> module) involved above those &quot;bad picks&quot;.
+by P2C operating on a half-dead cluster since Finagle clients have additional
+layers of requeues above the load balancer.
 </p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperture" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperture(Duration,Double,Double,Int,Int,Rng):LoadBalancerFactory"></a>
+      <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperture(Duration,Double,Double,Int,Int,Rng,Boolean):LoadBalancerFactory"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/loadbalancer/Balancers$.html#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/Balancers$.html#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -413,17 +430,93 @@ of requeues (see <code>Retries</code> module) involved above those &quot;bad pic
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">aperture</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2.0</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+        <span class="name">aperture</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2.0</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>, <span name="useDeterministicOrdering">useDeterministicOrdering: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">The aperture load-band balancer balances load to the smallest
-subset (&quot;aperture&quot;) of services so that:</p><div class="fullcomment"><div class="comment cmt"><p>The aperture load-band balancer balances load to the smallest
-subset (&quot;aperture&quot;) of services so that:</p><ol class="decimal"><li>The concurrent load, measured over a window specified by
-    <code>smoothWin</code>, to each service stays within the load band, delimited
-    by <code>lowLoad</code> and <code>highLoad</code>.</li></ol><p> 2. Services receive load proportional to the ratio of their
-    weights.</p><p>Unavailable services are not counted--the aperture expands as
-needed to cover those that are available.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
+      <p class="shortcomment cmt">The aperture load-band balancer balances load to the smallest subset (&quot;aperture&quot;) of
+services so that the concurrent load to each service, measured over a window specified
+by <code>smoothWin</code>, stays within the load band delimited by <code>lowLoad</code> and <code>highLoad</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The aperture load-band balancer balances load to the smallest subset (&quot;aperture&quot;) of
+services so that the concurrent load to each service, measured over a window specified
+by <code>smoothWin</code>, stays within the load band delimited by <code>lowLoad</code> and <code>highLoad</code>.</p><p>For example, if the load band is [0.5, 2], the aperture will be adjusted so that no
+service inside the aperture has a load less than 0.5 or more than 2, so long as
+offered load (or concurrency) permits it.</p><p>The default load band, [0.5, 2], matches closely the load distribution
+given by least-loaded without any aperture windowing.</p><p>Among the benefits of aperture balancing are:</p><ol class="decimal"><li>A client uses resources commensurate to offered load. In particular,
+    it does not have to open sessions with every service in a large cluster.
+    This is especially important when offered load and cluster capacity
+    are mismatched.
+ 2. It balances over fewer, and thus warmer, services. This enhances the
+    efficacy of the fail-fast mechanisms, etc. This also means that clients pay
+    the penalty of session establishment less frequently.
+ 3. It increases the efficacy of least-loaded balancing which, in order to
+    work well, requires concurrent load. The load-band balancer effectively
+    arranges load in a manner that ensures a higher level of per-service
+    concurrency.
+</li></ol></div><dl class="paramcmts block"><dt class="param">smoothWin</dt><dd class="cmt"><p>The time window to use when calculating the rps observed by this
+load balancer instance. The smoothed rps value is then used to determine the size of
+the aperture (along with the <code>lowLoad</code> and <code>highLoad</code> parameters).</p></dd><dt class="param">lowLoad</dt><dd class="cmt"><p>The lower threshold on average load (as calculated by rps over
+smooth window / # of endpoints). Once this threshold is reached, the aperture is
+narrowed. Put differently, if there is an average of <code>lowLoad</code> requests across
+the endpoints, then we are not concentrating our concurrency well, so we narrow
+the aperture.</p></dd><dt class="param">highLoad</dt><dd class="cmt"><p>The upper threshold on average load (as calculated by rps / #
+of instances). Once this threshold is reached, the aperture is widened. Put differently,
+if there is an average of <code>highLoad</code> requests across the endpoints, then we are
+over subscribing the endpoints and need to widen the aperture.</p></dd><dt class="param">minAperture</dt><dd class="cmt"><p>The minimum aperture allowed. Note, this value is checked to
+ensure that it is not larger than the number of endpoints.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>This is the fixed number of retries the LB is willing to make
+if an unavailable node (Status != Open) is returned from the underlying pick.
+See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+deterministic tests.</p></dd><dt class="param">useDeterministicOrdering</dt><dd class="cmt"><p>Enables the aperture instance to make use of
+the coordinate in <span class="extype" name="DeterministicOrdering">DeterministicOrdering</span> to calculate an order for the
+endpoints. In short, this allows coordination for apertures across process
+boundaries to avoid load concentration when deployed in a distributed system.
+See <span class="extype" name="DeterministicOrdering">DeterministicOrdering</span> for more details.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
+for more details.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperturePeakEwma" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aperturePeakEwma(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperturePeakEwma(Duration,Double,Double,Int,Int,Rng,Boolean):LoadBalancerFactory"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/Balancers$.html#aperturePeakEwma(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aperturePeakEwma</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">15.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2.0</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>, <span name="useDeterministicOrdering">useDeterministicOrdering: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Like <a href="#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#aperture">aperture</a> but but using the Peak EWMA (exponentially weight moving average)
+load metric.</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#aperture">aperture</a> but but using the Peak EWMA (exponentially weight moving average)
+load metric.</p><p>Peak EWMA uses a moving average over an endpoint's round-trip time (RTT) that is
+highly sensitive to peaks. This average is then weighted by the number of outstanding
+requests. Effectively, increasing our resolution per-request and providing a higher
+fidelity measurement of server responsiveness compared to the standard least loaded.
+It is designed to react to slow endpoints more quickly than least-loaded by penalizing
+them when they exhibit slow response times. This load metric operates under the
+assumption that a loaded endpoint takes time to recover and so it is generally safe
+for the advertised load to incorporate an endpoint's history. However, this
+assumption breaks down in the presence of long polling clients.
+</p></div><dl class="paramcmts block"><dt class="param">smoothWin</dt><dd class="cmt"><p>The time window to use when calculating the rps observed by this
+load balancer instance. The smoothed rps value is used to determine the size of
+aperture (along with the lowLoad and highLoad parameters). In the context of
+peakEwma, this value is also used to average over the latency observed per endpoint.
+It's unlikely that you would want to measure the latency on a different time scale
+than rps, so we couple the two.</p></dd><dt class="param">lowLoad</dt><dd class="cmt"><p>The lower threshold on average load (as calculated by rps over
+smooth window / # of endpoints). Once this threshold is reached, the aperture is
+narrowed. Put differently, if there is an average of <code>lowLoad</code> requests across
+the endpoints, then we are not concentrating our concurrency well, so we narrow
+the aperture.</p></dd><dt class="param">highLoad</dt><dd class="cmt"><p>The upper threshold on average load (as calculated by rps / #
+of instances). Once this threshold is reached, the aperture is widened. Put differently,
+if there is an average of <code>highLoad</code> requests across the endpoints, then we are
+over subscribing the endpoints and need to widen the aperture.</p></dd><dt class="param">minAperture</dt><dd class="cmt"><p>The minimum aperture allowed. Note, this value is checked to
+ensure that it is not larger than the number of endpoints.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>This is the fixed number of retries the LB is willing to make
+if an unavailable node (Status != Open) is returned from the underlying pick.
+See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+deterministic tests.</p></dd><dt class="param">useDeterministicOrdering</dt><dd class="cmt"><p>Enables the aperture instance to make use of
+the coordinate in <span class="extype" name="DeterministicOrdering">DeterministicOrdering</span> to calculate an order for the
+endpoints. In short, this allows coordination for apertures across process
+boundaries to avoid load concentration when deployed in a distributed system.
+See <span class="extype" name="DeterministicOrdering">DeterministicOrdering</span> for more details.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -564,9 +657,9 @@ for more details.</p></span></dd></dl></div>
         <span class="name">heap</span><span class="params">(<span name="rng">rng: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.Random" class="extype" target="_top">Random</a> = <span class="symbol">new Random</span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">An efficient strictly least-loaded balancer that maintains
-an internal heap to select least-loaded endpoints.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains
-an internal heap to select least-loaded endpoints.
+      <p class="shortcomment cmt">An efficient strictly least-loaded balancer that maintains an internal heap to
+select least-loaded endpoints.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains an internal heap to
+select least-loaded endpoints.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -648,10 +741,11 @@ for more details.</p></span></dd></dl></div>
         <span class="name">p2c</span><span class="params">(<span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">An O(1), concurrent, least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, least-loaded fair load balancer.
-This uses the ideas behind &quot;power of 2 choices&quot; [1].
-</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
-expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+      <p class="shortcomment cmt">An O(1), concurrent, least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, least-loaded fair load balancer. This uses the ideas
+behind &quot;power of 2 choices&quot; [1].
+</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>This is the fixed number of retries the LB is willing to make
+if an unavailable node (Status != Open) is returned from the underlying pick.
+See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.
 [1] Michael Mitzenmacher. 2001. The Power of Two Choices in
 Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
@@ -671,16 +765,20 @@ Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
         <span class="name">p2cPeakEwma</span><span class="params">(<span name="decayTime">decayTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../index.html">10.seconds</a></span></span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA load metric.</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA load metric.</p><p>Peak EWMA uses a moving average over an endpoint's round-trip time (RTT) that is
+      <p class="shortcomment cmt">Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA (exponentially weight moving average)
+load metric.</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA (exponentially weight moving average)
+load metric.</p><p>Peak EWMA uses a moving average over an endpoint's round-trip time (RTT) that is
 highly sensitive to peaks. This average is then weighted by the number of outstanding
-requests, effectively increasing our resolution per-request. It is designed to react
-to slow endpoints more quickly than least-loaded by penalizing them when they exhibit
-slow response times. This load metric operates under the assumption that a loaded
-endpoint takes time to recover and so it is generally safe for the advertised load
-to incorporate an endpoint's history. However, this assumption breaks down in the
-presence of long polling clients.
-</p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
-expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+requests. Effectively, increasing our resolution per-request and providing a higher
+fidelity measurement of server responsiveness compared to the standard least loaded.
+It is designed to react to slow endpoints more quickly than least-loaded by penalizing
+them when they exhibit slow response times. This load metric operates under the
+assumption that a loaded endpoint takes time to recover and so it is generally safe
+for the advertised load to incorporate an endpoint's history. However, this
+assumption breaks down in the presence of long polling clients.
+</p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>This is the fixed number of retries the LB is willing to make
+if an unavailable node (Status != Open) is returned from the underlying pick.
+See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#roundRobin" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -698,14 +796,15 @@ for more details.</p></span></dd></dl></div>
         <span class="name">roundRobin</span><span class="params">(<span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
       
-      <p class="shortcomment cmt">A simple round robin balancer that chooses the next backend in
-the list for each request.</p><div class="fullcomment"><div class="comment cmt"><p>A simple round robin balancer that chooses the next backend in
-the list for each request.</p><p>WARNING: Unlike other balancers available in finagle, this does
+      <p class="shortcomment cmt">A simple round robin balancer that chooses the next endpoint in the list
+for each request.</p><div class="fullcomment"><div class="comment cmt"><p>A simple round robin balancer that chooses the next endpoint in the list
+for each request.</p><p>WARNING: Unlike other balancers available in finagle, this does
 not take latency into account and will happily direct load to
 slow or oversubscribed services. We recommend using one of the
 other load balancers for typical production use.
-</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
-expend on a load balancing decision without reweighing.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>This is the fixed number of retries the LB is willing to make
+if an unavailable node (Status != Open) is returned from the underlying pick.
+See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

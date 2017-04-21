@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1182,7 +1182,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -1884,7 +1884,7 @@ finagle, for example <a href="Http$.html" class="extype" name="com.twitter.finag
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="Mysql$.html" class="extype" name="com.twitter.finagle.Mysql">Mysql</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="Redis$.html" class="extype" name="com.twitter.finagle.Redis">Redis</a>, <a href="Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>, <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></div>
+            <div class="subClasses hiddenContent"><a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="Kestrel$$Client.html" class="extype" name="com.twitter.finagle.Kestrel.Client">Client</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="Mysql$.html" class="extype" name="com.twitter.finagle.Mysql">Mysql</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="Redis$.html" class="extype" name="com.twitter.finagle.Redis">Redis</a>, <a href="Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a>, <a href="ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>, <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>, <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></div>
           </div></div>
         
 
@@ -1950,7 +1950,7 @@ finagle, for example <a href="Http$.html" class="extype" name="com.twitter.finag
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
@@ -1969,7 +1969,7 @@ The label is used to display stats, etc.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
     </li></ol>
@@ -2198,7 +2198,7 @@ The label is used to display stats, etc.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2217,7 +2217,7 @@ The label is used to display stats, etc.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2236,7 +2236,7 @@ for details on destination names.
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2255,7 +2255,7 @@ for details on destination names.
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2394,48 +2394,7 @@ for details on destination names.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="newClient(Group[SocketAddress]):ServiceFactory[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Client.html#newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.Client.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Client.Rep">Rep</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]"></a><a id="newService(Group[SocketAddress]):Service[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Client.html#newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Client.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Client.Rep">Rep</span>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

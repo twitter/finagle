@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -594,7 +594,7 @@ wait for the first message to arrive.</p><p>Example with a custom client builder
       
       <p class="shortcomment cmt">Create a new MultiReader which dispatches requests to <code>dest</code> using the memcache protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new MultiReader which dispatches requests to <code>dest</code> using the memcache protocol.
 </p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>the name of the destination which requests are dispatched to.
-            See <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">Names</a> for more detail.</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from
+            See <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">Names</a> for more detail.</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from
 TODO: <code>dest</code> is eagerly resolved at client creation time, so name resolution does not
 behave dynamically with respect to local dtabs (unlike
 <span class="extype" name="com.twitter.finagle.factory.BindingFactory">com.twitter.finagle.factory.BindingFactory</span>. In practice this is not a problem since

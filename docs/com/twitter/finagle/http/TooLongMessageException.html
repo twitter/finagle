@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -362,12 +362,6 @@ their name.">
                           HeaderMap
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Http$.html" title=""></a>
-                        <a class="class" href="Http.html" title=""></a>
-                        <a href="Http.html" title="">
-                          Http
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers."></a>
                         <a href="HttpMuxHandler.html" title="Trait HttpMuxHandler is used for service-loading HTTP handlers.">
@@ -414,6 +408,12 @@ their name.">
                         <a class="class" href="Method.html" title="Represents the HTTP method."></a>
                         <a href="Method.html" title="Represents the HTTP method.">
                           Method
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
+                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
+                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                          MethodBuilder
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -1151,13 +1151,14 @@ calling.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></dd></dl></div>
+      <p class="shortcomment cmt">The <code>SocketAddress</code> of the remote peer.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>SocketAddress</code> of the remote peer.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><code>null</code> if not available.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></dd></dl></div>
     </li><li name="com.twitter.finagle.HasRemoteInfo#remoteInfo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remoteInfo():com.twitter.finagle.context.RemoteInfo"></a><a id="remoteInfo():RemoteInfo"></a>
       <span class="permalink">

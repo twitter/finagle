@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &#8212; Finagle 6.43.0 documentation</title>
+    <title>FAQ &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
     <link rel="next" title="Glossary of Terms" href="Glossary.html" />
     <link rel="prev" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
    
@@ -117,11 +117,11 @@ However, this will still hold if the client call was in the context
 of a Future combinator (ex. <cite>Future#select</cite>, <cite>Future#join</cite>, etc.)</td></tr>
 </tbody>
 </table>
-<p>This is the source of the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.CancelledRequestException">CancelledRequestException</a> &#8211;
+<p>This is the source of the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/CancelledRequestException">CancelledRequestException</a> &#8211;
 when a Finagle client receives the cancellation interrupt while a request is pending, it
 fails that request with this exception. A special case of this is when a request is in the process
-of establishing a session and is instead interrupted with a <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.CancelledConnectException">CancelledConnectException</a></p>
-<p>You can disable this behavior by using the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>:</p>
+of establishing a session and is instead interrupted with a <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/CancelledConnectionException">CancelledConnectionException</a></p>
+<p>You can disable this behavior by using the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/filter/MaskCancelFilter">MaskCancelFilter</a>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.filter.MaskCancelFilter</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span>
@@ -153,12 +153,12 @@ finagle-thrift{,mux}, you will still need it for our patched libthrift.</p>
 </div>
 <div class="section" id="how-do-i-configure-clients-and-servers-with-finagle-6-apis">
 <span id="configuring-finagle6"></span><h3>How do I configure clients and servers with Finagle 6 APIs?<a class="headerlink" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis" title="Permalink to this headline">¶</a></h3>
-<p>As of <a class="reference internal" href="changelog.html"><span class="doc">6.x</span></a>, We introduced a new, preferred API for constructing Finagle
-<code class="docutils literal"><span class="pre">Client</span></code>s and <code class="docutils literal"><span class="pre">Server</span></code>s. Where the old API used <code class="docutils literal"><span class="pre">ServerBuilder</span></code>/<code class="docutils literal"><span class="pre">ClientBuilder</span></code>
-with <code class="docutils literal"><span class="pre">Codec</span></code>s, the new APIs use <code class="docutils literal"><span class="pre">Protocol.client.newClient</span></code> and <code class="docutils literal"><span class="pre">Protocol.server.serve</span></code> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
+<p>As of <a class="reference internal" href="changelog.html"><span class="doc">Finagle 6.x</span></a>, we introduced a new, preferred API for constructing Finagle
+<code class="docutils literal"><span class="pre">Client</span></code>s and <code class="docutils literal"><span class="pre">Server</span></code>s. Where the old API used <code class="docutils literal"><span class="pre">ServerBuilder</span></code>/<code class="docutils literal"><span class="pre">ClientBuilder</span></code>,
+the new APIs use <code class="docutils literal"><span class="pre">$Protocol.client.newClient</span></code> and <code class="docutils literal"><span class="pre">$Protocol.server.serve</span></code> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
 <p>Old <code class="docutils literal"><span class="pre">ClientBuilder</span></code> APIs:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.builder.ClientBuilder</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.builder.ClientBuilder</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.stats.StatsReceiver</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Tracer</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
@@ -169,7 +169,7 @@ with <code class="docutils literal"><span class="pre">Codec</span></code>s, the 
 <span class="k">val</span> <span class="n">connectTimeout</span><span class="k">:</span> <span class="kt">Duration</span> <span class="o">=</span> <span class="o">???</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
-  <span class="o">.</span><span class="n">codec</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">stack</span><span class="o">(</span><span class="nc">Http</span><span class="o">.</span><span class="n">client</span><span class="o">)</span>
   <span class="o">.</span><span class="n">name</span><span class="o">(</span><span class="s">&quot;clientname&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">reportTo</span><span class="o">(</span><span class="n">statsReceiver</span><span class="o">)</span>
   <span class="o">.</span><span class="n">tracer</span><span class="o">(</span><span class="n">tracer</span><span class="o">)</span>
@@ -210,8 +210,7 @@ with <code class="docutils literal"><span class="pre">Codec</span></code>s, the 
 Additionally, the Scaladocs for most methods on <code class="docutils literal"><span class="pre">ServerBuilder</span></code> and
 <code class="docutils literal"><span class="pre">ClientBuilder</span></code> include the Stack-based API&#8217;s alternative. A few methods do
 not yet have one-to-one equivalents, such as <code class="docutils literal"><span class="pre">ClientBuilder.retries</span></code> and
-for these you should continue to use <code class="docutils literal"><span class="pre">ClientBuilder</span></code> along with the
-<code class="docutils literal"><span class="pre">ClientBuilder.stack</span></code> method.</p>
+for these you should <a class="reference internal" href="MethodBuilder.html#mb-cb-migration"><span class="std std-ref">migrate</span></a> to using <code class="docutils literal"><span class="pre">MethodBuilder</span></code>.</p>
 <table class="docutils footnote" frame="void" id="id4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
@@ -241,7 +240,7 @@ the visibility into which endpoints are up.</p>
 <h3>What is a com.twitter.finagle.service.ResponseClassificationSyntheticException?<a class="headerlink" href="#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception" title="Permalink to this headline">¶</a></h3>
 <p>While typically, a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">StatsFilter</a> counts
 <cite>Exceptions</cite> as failures, a user may supply a
-<a class="reference external" href="http://twitter.github.io/finagle/guide/Clients.html#response-classification">ResponseClassifier</a>
+<a class="reference external" href="https://twitter.github.io/finagle/guide/Clients.html#response-classification">ResponseClassifier</a>
 that treats non-Exceptions as failures. In that case, while no exceptions have occurred, a
 <cite>ResponseClassificationSyntheticException</cite> is used as a &#8220;synthetic&#8221; exception for
 bookkeeping purposes.</p>
@@ -264,7 +263,7 @@ not ephemeral.</p>
 <p><em>Connecting Pooling Metrics</em></p>
 <p>With Mux, Finagle multiplexes several requests onto a single connection. As a
 consequence, traditional forms of connection-pooling are no longer required. Thus
-Mux employs <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool">com.twitter.finagle.pool.SingletonPool</a>,
+Mux employs <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/pool/SingletonPool">SingletonPool</a>,
 which exposes new stats:</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">connects</span></code>, <code class="docutils literal"><span class="pre">connections</span></code>, and <code class="docutils literal"><span class="pre">closes</span></code> stats should drop, since
@@ -279,7 +278,7 @@ pertain to connection pool implementations not used by Mux, so they disappear
 from stats output.</li>
 </ul>
 <p><em>ClientBuilder configuration</em></p>
-<p>Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>
+<p>Certain <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ClientBuilder">ClientBuilder</a>
 settings related to connection pooling become obsolete:
 <code class="docutils literal"><span class="pre">hostConnectionCoresize</span></code>, <code class="docutils literal"><span class="pre">hostConnectionLimit</span></code>, <code class="docutils literal"><span class="pre">hostConnectionIdleTime</span></code>,
 <code class="docutils literal"><span class="pre">hostConnectionMaxWaiters</span></code>, and <code class="docutils literal"><span class="pre">expHostConnectionBufferSize</span></code></p>
@@ -293,12 +292,12 @@ be impacted:</p>
 <li>Obsolete stats: <code class="docutils literal"><span class="pre">idle/idle</span></code>, <code class="docutils literal"><span class="pre">idle/refused</span></code>, and <code class="docutils literal"><span class="pre">idle/closed</span></code></li>
 </ul>
 <p><em>ServerBuilder configuration</em>
-Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>
+Certain <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ServerBuilder">ServerBuilder</a>
 connection management settings become obsolete: <code class="docutils literal"><span class="pre">openConnectionsThresholds</span></code>.</p>
 </div>
 <div class="section" id="what-is-thriftmux">
 <h3>What is ThriftMux?<a class="headerlink" href="#what-is-thriftmux" title="Permalink to this headline">¶</a></h3>
-<p id="whats-thriftmux"><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$">ThriftMux</a>
+<p id="whats-thriftmux"><a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/ThriftMux$">ThriftMux</a>
 is an implementation of the Thrift protocol built on top of Mux.</p>
 </div>
 </div>

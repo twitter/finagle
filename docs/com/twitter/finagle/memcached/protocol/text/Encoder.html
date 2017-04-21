@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -240,28 +240,10 @@ resources for using Finagle.
                           Encoder
                         </a>
                       </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="object" href="ExceptionHandler$.html" title=""></a>
-                        <a class="class" href="ExceptionHandler.html" title=""></a>
-                        <a href="ExceptionHandler.html" title="">
+                        <a href="ExceptionHandler$.html" title="">
                           ExceptionHandler
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <a class="object" href="Memcached$.html" title=""></a>
-                        <a class="class" href="Memcached.html" title=""></a>
-                        <a href="Memcached.html" title="">
-                          Memcached
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="object" href="MemcachedClientPipelineFactory$.html" title=""></a>
-                        <a href="MemcachedClientPipelineFactory$.html" title="">
-                          MemcachedClientPipelineFactory
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="object" href="MemcachedServerPipelineFactory$.html" title=""></a>
-                        <a href="MemcachedServerPipelineFactory$.html" title="">
-                          MemcachedServerPipelineFactory
                         </a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
@@ -312,7 +294,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Encoder</span><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder">OneToOneEncoder</span></span>
+        <span class="name">Encoder</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
 
@@ -321,7 +303,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder">OneToOneEncoder</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -347,7 +329,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.memcached.protocol.text.Encoder"><span>Encoder</span></li><li class="in" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder"><span>OneToOneEncoder</span></li><li class="in" name="org.jboss.netty.channel.ChannelDownstreamHandler"><span>ChannelDownstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.memcached.protocol.text.Encoder"><span>Encoder</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -479,10 +461,10 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder#doEncode" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="doEncode(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.MessageEvent):Boolean"></a><a id="doEncode(ChannelHandlerContext,MessageEvent):Boolean"></a>
+    </li><li name="com.twitter.finagle.memcached.protocol.text.Encoder#encode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="encode(message:com.twitter.finagle.memcached.protocol.text.Decoding):com.twitter.io.Buf"></a><a id="encode(Decoding):Buf"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/Encoder.html#doEncode(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.MessageEvent):Boolean" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/Encoder.html#encode(message:com.twitter.finagle.memcached.protocol.text.Decoding):com.twitter.io.Buf" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -491,32 +473,10 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">doEncode</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">encode</span><span class="params">(<span name="message">message: <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$oneone.html" class="extype" name="org.jboss.netty.handler.codec.oneone">org.jboss.netty.handler.codec.oneone</a>] </dd><dt>Definition Classes</dt><dd>OneToOneEncoder</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
       
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.protocol.text.Encoder#encode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="encode(context:org.jboss.netty.channel.ChannelHandlerContext,channel:org.jboss.netty.channel.Channel,message:Object):com.twitter.io.Buf"></a><a id="encode(ChannelHandlerContext,Channel,AnyRef):Buf"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/Encoder.html#encode(context:org.jboss.netty.channel.ChannelHandlerContext,channel:org.jboss.netty.channel.Channel,message:Object):com.twitter.io.Buf" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encode</span><span class="params">(<span name="context">context: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="channel">channel: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>, <span name="message">message: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.protocol.text.Encoder">Encoder</a> → OneToOneEncoder</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -587,28 +547,6 @@ resources for using Finagle.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder#handleDownstream" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="handleDownstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit"></a><a id="handleDownstream(ChannelHandlerContext,ChannelEvent):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/Encoder.html#handleDownstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">handleDownstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OneToOneEncoder → ChannelDownstreamHandler</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Exception]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -797,13 +735,7 @@ resources for using Finagle.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder">OneToOneEncoder</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.ChannelDownstreamHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.ChannelHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

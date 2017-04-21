@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.addr" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -337,24 +337,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.group" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="group"></a><a id="group:group"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#group" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="group/index.html">
-              <span class="name">group</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
       <span class="permalink">
@@ -423,6 +405,24 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a title="" href="kestrel/index.html">
               <span class="name">kestrel</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="liveness"></a><a id="liveness:liveness"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#liveness" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="liveness/index.html">
+              <span class="name">liveness</span>
             </a>
       </span>
       
@@ -1182,7 +1182,7 @@ was reset by a peer or a proxy.">
                           ChannelException
                         </a>
                       </li><li class="current-entities indented3">
-                        <span class="separator"></span>
+                        <a class="object" href="ChannelWriteException$.html" title=""></a>
                         <a class="class" href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception."></a>
                         <a href="ChannelWriteException.html" title="Default implementation for WriteException that wraps an underlying exception.">
                           ChannelWriteException
@@ -1873,7 +1873,7 @@ request.">
 <code>com.twitter.finagle.Server</code> for the Thrift protocol served over
 <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. Rich interfaces are provided to adhere to those
 generated from a <a href="http://thrift.apache.org/docs/idl/" target="_blank">Thrift IDL</a> by
-<a href="http://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
+<a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
@@ -1890,7 +1890,7 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
 })</pre><p>This object does not expose any configuration options. Both clients and servers
 are instantiated with sane defaults. Clients are labeled with the &quot;clnt/thrift&quot;
 prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration, see the
-<a href="http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
+<a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -1962,7 +1962,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
       </span>
       
       <p class="shortcomment cmt">A ThriftMux <code>com.twitter.finagle.Client</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A ThriftMux <code>com.twitter.finagle.Client</code>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Protocols.html#mux" target="_blank">Mux</a> documentation</p></span><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Protocols.html#thrift" target="_blank">Thrift</a> documentation</p></span><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">Configuration</a> documentation</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Protocols.html#mux" target="_blank">Mux</a> documentation</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Protocols.html#thrift" target="_blank">Thrift</a> documentation</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">Configuration</a> documentation</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerextendsStackBasedServer[Array[Byte],Array[Byte]]withThriftRichServerwithStack.Parameterized[com.twitter.finagle.ThriftMux.Server]withCommonParams[com.twitter.finagle.ThriftMux.Server]withWithServerTransport[com.twitter.finagle.ThriftMux.Server]withWithServerSession[com.twitter.finagle.ThriftMux.Server]withWithServerAdmissionControl[com.twitter.finagle.ThriftMux.Server]withProductwithSerializable"></a><a id="Server:Server"></a>
       <span class="permalink">
@@ -1981,7 +1981,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
       </span>
       
       <p class="shortcomment cmt">A ThriftMux <code>com.twitter.finagle.Server</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A ThriftMux <code>com.twitter.finagle.Server</code>.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Protocols.html#mux" target="_blank">Mux</a> documentation</p></span><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Protocols.html#thrift" target="_blank">Thrift</a> documentation</p></span><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">Configuration</a> documentation</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Protocols.html#mux" target="_blank">Mux</a> documentation</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Protocols.html#thrift" target="_blank">Thrift</a> documentation</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">Configuration</a> documentation</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerMuxerextendsStdStackServer[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.ThriftMux.ServerMuxer]withProductwithSerializable"></a><a id="ServerMuxer:ServerMuxer"></a>
       <span class="permalink">
@@ -2256,7 +2256,7 @@ tracing support).
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2275,7 +2275,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2294,7 +2294,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2313,7 +2313,7 @@ for details on destination names.
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2332,7 +2332,7 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2351,7 +2351,7 @@ for details on destination names.
       </span>
       
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
-See the <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
+See the <a href="https://twitter.github.io/finagle/guide/Names.html" target="_blank">user guide</a>
 for details on destination names.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -2732,45 +2732,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Client#newClient" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a><a id="newClient(Group[SocketAddress]):ServiceFactory[ThriftClientRequest,Array[Byte]]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$.html#newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.Client#newService" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]"></a><a id="newService(Group[SocketAddress]):Service[ThriftClientRequest,Array[Byte]]"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$.html#newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use destination names</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftMux#withClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.ThriftMux#withClientId" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withClientId(clientId:com.twitter.finagle.thrift.ClientId):com.twitter.finagle.ThriftMux.Client"></a><a id="withClientId(ClientId):Client"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftMux$.html#withClientId(clientId:com.twitter.finagle.thrift.ClientId):com.twitter.finagle.ThriftMux.Client" title="Permalink">

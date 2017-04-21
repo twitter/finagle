@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty4" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -198,11 +198,11 @@ the netty4 event loop.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="DirectToHeapInboundHandler$.html" title="An inbound channel handler that copies direct byte buffers onto the JVM heap
+                        <a class="object" href="AnyToHeapInboundHandler$.html" title="An inbound channel handler that copies byte buffers onto the JVM heap
 and gives them a deterministic lifecycle."></a>
-                        <a href="DirectToHeapInboundHandler$.html" title="An inbound channel handler that copies direct byte buffers onto the JVM heap
+                        <a href="AnyToHeapInboundHandler$.html" title="An inbound channel handler that copies byte buffers onto the JVM heap
 and gives them a deterministic lifecycle.">
-                          DirectToHeapInboundHandler
+                          AnyToHeapInboundHandler
                         </a>
                       </li><li name="com.twitter.finagle.netty4.http" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="http"></a><a id="http:http"></a>
@@ -326,10 +326,10 @@ and gives them a deterministic lifecycle.">
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.netty4.channel.DirectToHeapInboundHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DirectToHeapInboundHandler"></a><a id="DirectToHeapInboundHandler:DirectToHeapInboundHandler"></a>
+                <li name="com.twitter.finagle.netty4.channel.AnyToHeapInboundHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AnyToHeapInboundHandler"></a><a id="AnyToHeapInboundHandler:AnyToHeapInboundHandler"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/netty4/channel/index.html#DirectToHeapInboundHandler" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/netty4/channel/index.html#AnyToHeapInboundHandler" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -338,14 +338,14 @@ and gives them a deterministic lifecycle.">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="An inbound channel handler that copies direct byte buffers onto the JVM heap
-and gives them a deterministic lifecycle." href="DirectToHeapInboundHandler$.html">
-              <span class="name">DirectToHeapInboundHandler</span>
+        <a title="An inbound channel handler that copies byte buffers onto the JVM heap
+and gives them a deterministic lifecycle." href="AnyToHeapInboundHandler$.html">
+              <span class="name">AnyToHeapInboundHandler</span>
             </a><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span></span>
       </span>
       
-      <p class="shortcomment cmt">An inbound channel handler that copies direct byte buffers onto the JVM heap
-and gives them a deterministic lifecycle.</p><div class="fullcomment"><div class="comment cmt"><p>An inbound channel handler that copies direct byte buffers onto the JVM heap
+      <p class="shortcomment cmt">An inbound channel handler that copies byte buffers onto the JVM heap
+and gives them a deterministic lifecycle.</p><div class="fullcomment"><div class="comment cmt"><p>An inbound channel handler that copies byte buffers onto the JVM heap
 and gives them a deterministic lifecycle. This handler also makes sure to
 use the unpooled byte buffer (regardless of what channel's allocator is) as
 its destination thereby defining a clear boundaries between pooled and unpooled
@@ -357,12 +357,8 @@ environments.
       to application space you don't need this handler in your pipeline. Every
       other use case needs this handler or you will with very high probability
       incur a direct buffer leak.</p></span>, <span class="cmt"><p>This handler recognizes both ByteBuf's and ByteBufHolder's (think of HTTP
-      messages extending ByteBufHolder's in Netty).</p></span>, <span class="cmt"><p>If the input buffer is direct but not readable it's still guaranteed to be
-      released and replaced with a heap buffer of equivalent capacity.</p></span>, <span class="cmt"><p>This handler will bypass all heap buffers since there is no way to tell
-      if they are pooled or not. However, given that it's not expected to
-      receive a heap buffer on the inbound path when pooling is enabled, the
-      &quot;bypass heap buffers&quot; code path only exists to accommodate pipelines
-      with unpooled allocators.</p></span></dd></dl></div>
+      messages extending ByteBufHolder's in Netty).</p></span>, <span class="cmt"><p>If the input buffer is not readable it's still guaranteed to be released
+      and replaced with EmptyByteBuf.</p></span></dd></dl></div>
     </li>
               </ol>
             </div>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &#8212; Finagle 6.43.0 documentation</title>
+    <title>Extending Finagle &#8212; Finagle 6.44.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '6.43.0',
+        VERSION:     '6.44.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="top" title="Finagle 6.43.0 documentation" href="../index.html" />
+    <link rel="top" title="Finagle 6.44.0 documentation" href="../index.html" />
     <link rel="next" title="Twitter Futures" href="Futures.html" />
     <link rel="prev" title="Glossary of Terms" href="../Glossary.html" />
    
@@ -93,7 +93,7 @@ $ ./sbt run
 <h2>Stack<a class="headerlink" href="#stack" title="Permalink to this headline">¶</a></h2>
 <p>Finagle&#8217;s clients and servers comprise many relatively simple
 components, arranged together in a stack. Each component is a
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.ServiceFactory">ServiceFactory</a> that
+<a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/ServiceFactory">ServiceFactory</a> that
 composes other service factories. We&#8217;ve seen this before:
 <span class="xref doc">filters</span> are a kind of component.</p>
 <p>This allows us to create simple components that we arrange into a
@@ -110,26 +110,26 @@ becomes onerous; it become very difficult to:</p>
 <li>parameterize each component, for example to set the sizes of
 connection pools</li>
 <li>inject dependencies such as
-<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> implementations</li>
+<a class="reference external" href="https://twitter.github.io/util/docs/com/twitter/finagle/stats/StatsReceiver">StatsReceiver</a> implementations</li>
 <li>rearrange any part of the stack, for example to remove an
 unused timeout filter</li>
 <li>modify the stack for a specific use, for example to replace
 the connection pooling implementation or the load balancer</li>
 </ul>
-<p>Traditionally, the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> performed this duty in
+<p>Traditionally, the <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ClientBuilder">ClientBuilder</a> and <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/builder/ServerBuilder">ServerBuilder</a> performed this duty in
 the manner just described. While it worked well for a while, it
 ultimately proved inflexible. With the needs and requirements of the
 various protocol implementations like <a class="reference internal" href="../Protocols.html#mux"><span class="std std-ref">Mux&#8217;s</span></a>, as well as
 more sophisticated new features, the builders became unworkable
 monoliths.</p>
-<p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack">Stack</a> formalizes the concept of a
+<p><a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Stack">Stack</a> formalizes the concept of a
 <em>stackable</em> component and treats a sequence of stackable components as
 a first-class (immutable) value that may be manipulated like any other
 collection. For example, modules may be inserted or removed from the
 stack; you can map one stack to another, for example when
 parameterizing individual modules.</p>
 <p>The stack abstraction also formalizes the concept of a <em>parameter</em>—i.e.
-a map of values used to construct an object. <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack$.Params">Stack.Params</a>
+a map of values used to construct an object. <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Stack$$Params">Stack.Params</a>
 is a kind of type-safe map used to hold parameters.</p>
 <p><code class="docutils literal"><span class="pre">Stack</span></code> and <code class="docutils literal"><span class="pre">Param</span></code> work together like this: <code class="docutils literal"><span class="pre">Stack</span></code> represents the stack
 of modules. These modules aren&#8217;t <em>materialized</em>. Rather, they represent
@@ -137,8 +137,8 @@ a constructor for a <code class="docutils literal"><span class="pre">ServiceFact
 to extract the final <code class="docutils literal"><span class="pre">ServiceFactory</span></code> that represents the entirety of the stack,
 we simply call <code class="docutils literal"><span class="pre">stack.make(params)</span></code>.</p>
 <p>Finagle defines default (polymorphic) stacks for both
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.StackClient$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">clients</a> and
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.server.StackServer$&#64;newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">servers</a>.</p>
+<a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/client/StackClient$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">clients</a> and
+<a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/server/StackServer$#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]">servers</a>.</p>
 <p>We&#8217;ll now discuss the constituent parts of Finagle&#8217;s clients and servers.</p>
 </div>
 <div class="section" id="transport-layer">
@@ -350,7 +350,7 @@ pipeline, the types have different namespaces but look much the same in Netty 3 
 </div>
 <div class="section" id="transporter">
 <h2>Transporter<a class="headerlink" href="#transporter" title="Permalink to this headline">¶</a></h2>
-<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/clients/Transporter.scala">Transporter</a> is responsible for connecting
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/Transporter.scala">Transporter</a> is responsible for connecting
 a <a class="reference internal" href="#transport-interface"><span class="std std-ref">Transport</span></a> to a peer; it establishes a session. Finagle provides
 a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Transporter.scala">Netty3Transporter</a> and a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/com/twitter/finagle/netty4/Netty4Transporter.scala">Netty4Transporter</a>,

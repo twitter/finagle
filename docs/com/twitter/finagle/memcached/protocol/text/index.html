@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -238,28 +238,10 @@ resources for using Finagle.
                           Encoder
                         </a>
                       </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="object" href="ExceptionHandler$.html" title=""></a>
-                        <a class="class" href="ExceptionHandler.html" title=""></a>
-                        <a href="ExceptionHandler.html" title="">
+                        <a href="ExceptionHandler$.html" title="">
                           ExceptionHandler
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <a class="object" href="Memcached$.html" title=""></a>
-                        <a class="class" href="Memcached.html" title=""></a>
-                        <a href="Memcached.html" title="">
-                          Memcached
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="object" href="MemcachedClientPipelineFactory$.html" title=""></a>
-                        <a href="MemcachedClientPipelineFactory$.html" title="">
-                          MemcachedClientPipelineFactory
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="object" href="MemcachedServerPipelineFactory$.html" title=""></a>
-                        <a href="MemcachedServerPipelineFactory$.html" title="">
-                          MemcachedServerPipelineFactory
                         </a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
@@ -367,9 +349,9 @@ resources for using Finagle.
       
       
     </li><li name="com.twitter.finagle.memcached.protocol.text.Encoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="EncoderextendsOneToOneEncoder"></a><a id="Encoder:Encoder"></a>
+      <a id="EncoderextendsAnyRef"></a><a id="Encoder:Encoder"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#EncoderextendsOneToOneEncoder" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#EncoderextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -380,25 +362,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="" href="Encoder.html">
               <span class="name">Encoder</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.oneone.OneToOneEncoder">OneToOneEncoder</span></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.memcached.protocol.text.ExceptionHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ExceptionHandlerextendsSimpleChannelUpstreamHandler"></a><a id="ExceptionHandler:ExceptionHandler"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#ExceptionHandlerextendsSimpleChannelUpstreamHandler" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ExceptionHandler.html">
-              <span class="name">ExceptionHandler</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelUpstreamHandler">SimpleChannelUpstreamHandler</span></span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
       
@@ -474,27 +438,6 @@ resources for using Finagle.
       </span>
       
       
-    </li><li name="com.twitter.finagle.memcached.protocol.text.Memcached" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MemcachedextendsCodecFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]"></a><a id="Memcached:Memcached"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#MemcachedextendsCodecFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Memcached.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2016-12-22) Use com.twitter.finagle.Memcached.client to create clients">Memcached</span>
-            </a><span class="result"> extends <a href="../../../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<a href="../Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-22)</i> Use <code>com.twitter.finagle.Memcached.client to create clients</code></p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -539,73 +482,13 @@ resources for using Finagle.
       </span>
       
       
-    </li><li name="com.twitter.finagle.memcached.protocol.text.MemcachedClientPipelineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MemcachedClientPipelineFactory"></a><a id="MemcachedClientPipelineFactory:MemcachedClientPipelineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#MemcachedClientPipelineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="MemcachedClientPipelineFactory$.html">
-              <span class="name">MemcachedClientPipelineFactory</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.memcached.protocol.text.MemcachedServerPipelineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MemcachedServerPipelineFactory"></a><a id="MemcachedServerPipelineFactory:MemcachedServerPipelineFactory"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#MemcachedServerPipelineFactory" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="MemcachedServerPipelineFactory$.html">
-              <span class="name">MemcachedServerPipelineFactory</span>
-            </a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
-      </span>
-      
-      
     </li>
               </ol>
             </div>
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.memcached.protocol.text.Memcached" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Memcached"></a><a id="Memcached:Memcached"></a>
-      <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/memcached/protocol/text/index.html#Memcached" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Memcached$.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2016-12-22) Use com.twitter.finagle.Memcached.client to create clients">Memcached</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-22)</i> Use <code>com.twitter.finagle.Memcached.client to create clients</code></p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

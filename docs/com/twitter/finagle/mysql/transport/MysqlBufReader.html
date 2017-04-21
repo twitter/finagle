@@ -152,7 +152,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
 returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
-future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -212,41 +212,12 @@ exchanged between a mysql client and server.">
                           MysqlBufWriter
                         </a>
                       </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="object" href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets."></a>
-                        <a href="MysqlClientPipelineFactory$.html" title="A Netty3 pipeline that is responsible for framing network
-traffic in terms of mysql logical packets.">
-                          MysqlClientPipelineFactory
-                        </a>
-                      </li><li class="current-entities indented5">
                         <a class="object" href="Packet$.html" title=""></a>
                         <a class="class" href="Packet.html" title="A logical packet exchanged between the mysql
 server and client."></a>
                         <a href="Packet.html" title="A logical packet exchanged between the mysql
 server and client.">
                           Packet
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketEncoder.html" title=""></a>
-                        <a href="PacketEncoder.html" title="">
-                          PacketEncoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames."></a>
-                        <a href="PacketFrameDecoder.html" title="Decodes logical MySQL packets that could be fragmented across
-frames.">
-                          PacketFrameDecoder
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <a class="object" href="TransportImpl$.html" title="Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]."></a>
-                        <a class="class" href="TransportImpl.html" title=""></a>
-                        <a href="TransportImpl.html" title="">
-                          TransportImpl
                         </a>
                       </li>
               </ul>
@@ -271,7 +242,7 @@ a Transporter[Packet, Packet]."></a>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MysqlBufReader</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.ProxyBufReader">ProxyBufReader</span></span>
+        <span class="name">MysqlBufReader</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></span>
       </span>
       </h4>
 
@@ -280,7 +251,7 @@ a Transporter[Packet, Packet]."></a>
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.util.ProxyBufReader">ProxyBufReader</span>, <span class="extype" name="com.twitter.finagle.util.BufReader">BufReader</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a>, <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -306,7 +277,7 @@ a Transporter[Packet, Packet]."></a>
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufReader"><span>MysqlBufReader</span></li><li class="in" name="com.twitter.finagle.util.ProxyBufReader"><span>ProxyBufReader</span></li><li class="in" name="com.twitter.finagle.util.BufReader"><span>BufReader</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufReader"><span>MysqlBufReader</span></li><li class="in" name="com.twitter.io.ProxyByteReader"><span>ProxyByteReader</span></li><li class="in" name="com.twitter.io.ByteReader"><span>ByteReader</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -588,7 +559,7 @@ a Transporter[Packet, Packet]."></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.io.ProxyByteReader#readAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readAll():com.twitter.io.Buf"></a><a id="readAll():Buf"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readAll():com.twitter.io.Buf" title="Permalink">
@@ -603,12 +574,8 @@ a Transporter[Packet, Packet]."></a>
         <span class="name">readAll</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       
-      <p class="shortcomment cmt">Like <code>read</code>, but extracts the remainder of bytes from cursor
-to the length.</p><div class="fullcomment"><div class="comment cmt"><p>Like <code>read</code>, but extracts the remainder of bytes from cursor
-to the length. Note, this advances the cursor to the end of
-the buf.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readByte():Byte"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readByte():Byte" title="Permalink">
@@ -623,9 +590,8 @@ the buf.
         <span class="name">readByte</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 8 bits and interpret as a signed integer, advancing the byte cursor by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 8 bits and interpret as a signed integer, advancing the byte cursor by 1.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readBytes(n:Int):com.twitter.io.Buf"></a><a id="readBytes(Int):Buf"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readBytes(n:Int):com.twitter.io.Buf" title="Permalink">
@@ -640,12 +606,8 @@ the buf.
         <span class="name">readBytes</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a new buffer representing a slice of this buffer, delimited
-by the indices <code>[cursor, remaining)</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a new buffer representing a slice of this buffer, delimited
-by the indices <code>[cursor, remaining)</code>. Out of bounds indices are truncated.
-Negative indices are not accepted.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readDoubleBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readDoubleBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readDoubleBE():Double"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readDoubleBE():Double" title="Permalink">
@@ -660,9 +622,8 @@ Negative indices are not accepted.
         <span class="name">readDoubleBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 64 bits and interpret as a big endian floating point, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 64 bits and interpret as a big endian floating point, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readDoubleLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readDoubleLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readDoubleLE():Double"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readDoubleLE():Double" title="Permalink">
@@ -677,9 +638,8 @@ Negative indices are not accepted.
         <span class="name">readDoubleLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 64 bits and interpret as a little endian floating point, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 64 bits and interpret as a little endian floating point, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readFloatBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readFloatBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readFloatBE():Float"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readFloatBE():Float" title="Permalink">
@@ -694,9 +654,8 @@ Negative indices are not accepted.
         <span class="name">readFloatBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a big endian floating point, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a big endian floating point, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readFloatLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readFloatLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readFloatLE():Float"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readFloatLE():Float" title="Permalink">
@@ -711,9 +670,8 @@ Negative indices are not accepted.
         <span class="name">readFloatLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Float" class="extype" target="_top">Float</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a little endian floating point, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a little endian floating point, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readIntBE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readIntBE():Int" title="Permalink">
@@ -728,9 +686,8 @@ Negative indices are not accepted.
         <span class="name">readIntBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a big endian integer, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a big endian integer, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readIntLE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readIntLE():Int" title="Permalink">
@@ -745,8 +702,7 @@ Negative indices are not accepted.
         <span class="name">readIntLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a little endian int, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a little endian int, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader#readLengthCodedBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readLengthCodedBytes():Array[Byte]"></a>
       <span class="permalink">
@@ -788,7 +744,7 @@ Client/Server protocol. Uses <code>charset</code> to decode the string.
 For more details refer to MySQL documentation.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a MySQL length coded String starting at
 offset.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readLongBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.io.ProxyByteReader#readLongBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readLongBE():Long"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readLongBE():Long" title="Permalink">
@@ -803,9 +759,8 @@ offset.</p></dd></dl></div>
         <span class="name">readLongBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 64 bits and interpret as a big endian integer, advancing the byte cursor by 8.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 64 bits and interpret as a big endian integer, advancing the byte cursor by 8.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readLongLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readLongLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readLongLE():Long"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readLongLE():Long" title="Permalink">
@@ -820,9 +775,8 @@ offset.</p></dd></dl></div>
         <span class="name">readLongLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 64 bits and interpret as a little endian integer, advancing the byte cursor by 8.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 64 bits and interpret as a little endian integer, advancing the byte cursor by 8.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readMediumBE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readMediumBE():Int" title="Permalink">
@@ -837,9 +791,8 @@ offset.</p></dd></dl></div>
         <span class="name">readMediumBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 24 bits and interpret as a big endian integer, advancing the byte cursor by 3.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 24 bits and interpret as a big endian integer, advancing the byte cursor by 3.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readMediumLE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readMediumLE():Int" title="Permalink">
@@ -854,8 +807,7 @@ offset.</p></dd></dl></div>
         <span class="name">readMediumLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 24 bits and interpret as a little endian integer, advancing the byte cursor by 3.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 24 bits and interpret as a little endian integer, advancing the byte cursor by 3.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader#readNullTerminatedBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readNullTerminatedBytes():Array[Byte]"></a>
       <span class="permalink">
@@ -890,7 +842,7 @@ offset.</p></dd></dl></div>
       
       <p class="shortcomment cmt">Reads a null-terminated UTF-8 encoded string
 </p>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.io.ProxyByteReader#readShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readShortBE():Short"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readShortBE():Short" title="Permalink">
@@ -905,9 +857,8 @@ offset.</p></dd></dl></div>
         <span class="name">readShortBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 16 bits and interpret as a big endian integer, advancing the byte cursor by 2.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 16 bits and interpret as a big endian integer, advancing the byte cursor by 2.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readShortLE():Short"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readShortLE():Short" title="Permalink">
@@ -922,9 +873,8 @@ offset.</p></dd></dl></div>
         <span class="name">readShortLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 16 bits and interpret as a little endian integer, advancing the byte cursor by 2.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 16 bits and interpret as a little endian integer, advancing the byte cursor by 2.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedByte():Short"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedByte():Short" title="Permalink">
@@ -939,9 +889,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedByte</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 8 bits and interpret as an unsigned integer, advancing the byte cursor by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 8 bits and interpret as an unsigned integer, advancing the byte cursor by 1.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedIntBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedIntBE():Long"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedIntBE():Long" title="Permalink">
@@ -956,9 +905,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedIntBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedIntLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedIntLE():Long"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedIntLE():Long" title="Permalink">
@@ -973,9 +921,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedIntLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 32 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 4.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 32 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 4.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedMediumBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedMediumBE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedMediumBE():Int" title="Permalink">
@@ -990,9 +937,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedMediumBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 24 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 3.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 24 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 3.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedMediumLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedMediumLE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedMediumLE():Int" title="Permalink">
@@ -1007,9 +953,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedMediumLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 24 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 3.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 24 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 3.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedShortBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedShortBE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedShortBE():Int" title="Permalink">
@@ -1024,9 +969,8 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedShortBE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 16 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 2.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 16 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 2.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#readUnsignedShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedShortLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedShortLE():Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedShortLE():Int" title="Permalink">
@@ -1041,8 +985,7 @@ offset.</p></dd></dl></div>
         <span class="name">readUnsignedShortLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">Extract 16 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 2.</p><div class="fullcomment"><div class="comment cmt"><p>Extract 16 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 2.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader#readVariableLong" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readVariableLong():Long"></a>
       <span class="permalink">
@@ -1065,9 +1008,9 @@ documentation.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a numeric value representing the number of
 bytes expected to follow.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufReader#reader" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="reader:com.twitter.finagle.util.BufReader"></a><a id="reader:BufReader"></a>
+      <a id="reader:com.twitter.io.ByteReader"></a><a id="reader:ByteReader"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#reader:com.twitter.finagle.util.BufReader" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#reader:com.twitter.io.ByteReader" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1076,11 +1019,11 @@ bytes expected to follow.</p></dd></dl></div>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">reader</span><span class="result">: <span class="extype" name="com.twitter.finagle.util.BufReader">BufReader</span></span>
+        <span class="name">reader</span><span class="result">: <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufReader">MysqlBufReader</a> → ProxyBufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#remaining" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.mysql.transport.MysqlBufReader">MysqlBufReader</a> → ProxyByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#remaining" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remaining:Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#remaining:Int" title="Permalink">
@@ -1095,9 +1038,8 @@ bytes expected to follow.</p></dd></dl></div>
         <span class="name">remaining</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">The remainder of bytes that the reader is capable of reading.</p><div class="fullcomment"><div class="comment cmt"><p>The remainder of bytes that the reader is capable of reading.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#remainingUntil" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#remainingUntil" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remainingUntil(byte:Byte):Int"></a><a id="remainingUntil(Byte):Int"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#remainingUntil(byte:Byte):Int" title="Permalink">
@@ -1112,11 +1054,8 @@ bytes expected to follow.</p></dd></dl></div>
         <span class="name">remainingUntil</span><span class="params">(<span name="byte">byte: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       
-      <p class="shortcomment cmt">The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).</p><div class="fullcomment"><div class="comment cmt"><p>The remainder of bytes until the first occurrence of <code>byte</code> (exclusive).
-Returns <code>-1</code> when <code>byte</code> is not found on the underlying <span class="extype" name="Buf">Buf</span>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd><dt>Note</dt><dd><span class="cmt"><p>All util and finagle Buf implementations will not copy onto
-      the heap, but for other implementations, it may trigger a copy.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.util.ProxyBufReader#skip" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#skip" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="skip(n:Int):Unit"></a><a id="skip(Int):Unit"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#skip(n:Int):Unit" title="Permalink">
@@ -1131,8 +1070,7 @@ Returns <code>-1</code> when <code>byte</code> is not found on the underlying <s
         <span class="name">skip</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Skip over the next <code>n</code> bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Skip over the next <code>n</code> bytes.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyBufReader → BufReader</dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="UnderflowException"><code>UnderflowException</code></span> if there are &lt; <code>n</code> bytes available</p></span></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1258,10 +1196,10 @@ Returns <code>-1</code> when <code>byte</code> is not found on the underlying <s
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.util.ProxyBufReader">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.ProxyBufReader">ProxyBufReader</span></h3>
-            </div><div class="parent" name="com.twitter.finagle.util.BufReader">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.BufReader">BufReader</span></h3>
+        <div class="parent" name="com.twitter.io.ProxyByteReader">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></h3>
+            </div><div class="parent" name="com.twitter.io.ByteReader">
+              <h3>Inherited from <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
