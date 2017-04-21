@@ -71,7 +71,7 @@ private class IdlingFactory[Req, Rep](
  * for up to (TTI * 2) minutes, with the caveat that we never expire
  * the last, least-idle entry.
  */
-private[finagle] class ServiceFactoryCache[Key, Req, Rep](
+class ServiceFactoryCache[Key, Req, Rep](
     newFactory: Key => ServiceFactory[Req, Rep],
     timer: Timer,
     statsReceiver: StatsReceiver = NullStatsReceiver,
@@ -229,13 +229,7 @@ private[finagle] class ServiceFactoryCache[Key, Req, Rep](
     Closable.all(closables: _*).close(deadline)
   }
 
-  private[this] val svcFacStatusFn: ServiceFactory[Req, Rep] => Status =
-    svcFac => svcFac.status
-
-  def status: Status =
-    Status.bestOf(cache.values.asScala, svcFacStatusFn)
-
-  def status(key: Key): Status = {
+  private[finagle] def status(key: Key): Status = {
     val readStamp = lock.readLock()
     try {
       val svcFac = cache.get(key)
