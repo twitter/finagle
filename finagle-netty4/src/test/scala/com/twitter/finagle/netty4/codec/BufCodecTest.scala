@@ -6,7 +6,6 @@ import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.ByteBuffer
-import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
@@ -45,7 +44,7 @@ class BufCodecTest extends FunSuite
     result <- Gen.oneOf(
       Buf.ByteArray.Owned(bytes.toArray, begin, end),
       Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes.toArray, begin, end - begin)),
-      ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes.toArray, begin, end - begin))
+      ByteBufAsBuf(Unpooled.wrappedBuffer(bytes.toArray, begin, end - begin))
     )
   } yield result
 
@@ -59,7 +58,7 @@ class BufCodecTest extends FunSuite
   test("encode composite/byte-array") {
     forAll(genBuf) { in: Buf =>
       assert(channel.writeOutbound(in))
-      assert(in == ByteBufAsBuf.Owned(channel.readOutbound[ByteBuf]()))
+      assert(in == ByteBufAsBuf(channel.readOutbound[ByteBuf]()))
     }
 
     assert(!channel.finish())
@@ -67,7 +66,7 @@ class BufCodecTest extends FunSuite
 
   test("bypass direct ByteBufs") {
     val bb = Unpooled.directBuffer(3).writeBytes("foo".getBytes("UTF-8"))
-    assert(channel.writeOutbound(ByteBufAsBuf.Owned(bb)))
+    assert(channel.writeOutbound(ByteBufAsBuf(bb)))
     assert(channel.readOutbound[ByteBuf]() eq bb)
     assert(!channel.finish())
   }

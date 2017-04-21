@@ -13,7 +13,7 @@ class BufsTest extends FunSuite {
     val n4buf = Unpooled.directBuffer(1)
     n4buf.writeByte(1)
     assert(n4buf.refCnt() == 1)
-    val wrapped = ByteBufAsBuf.Owned(n4buf)
+    val wrapped = ByteBufAsBuf(n4buf)
     Bufs.releaseDirect(wrapped)
     assert(n4buf.refCnt() == 0)
   }
@@ -32,7 +32,7 @@ class BufsTest extends FunSuite {
     n4bufs(2).writeByte(3)
 
     assert(n4bufs.forall(_.refCnt() == 1))
-    val wrapped = Buf(n4bufs.map(ByteBufAsBuf.Owned(_)))
+    val wrapped = Buf(n4bufs.map(ByteBufAsBuf(_)))
 
     Bufs.releaseDirect(wrapped)
     assert(n4bufs.forall(_.refCnt() == 0))
@@ -44,7 +44,7 @@ class BufsTest extends FunSuite {
     n4buf.writeByte(2)
     n4buf.writeByte(3)
     assert(n4buf.refCnt() == 1)
-    val wrapped = ByteBufAsBuf.Owned(n4buf)
+    val wrapped = ByteBufAsBuf(n4buf)
     val res: Buf = Bufs.copyAndReleaseDirect(wrapped)
     assert(n4buf.refCnt() == 0)
     assert(Buf.slowHexString(res) == "010203")
@@ -62,7 +62,7 @@ class BufsTest extends FunSuite {
     n4bufs(0).writeByte(1)
     n4bufs(1).writeByte(2)
     n4bufs(2).writeByte(3)
-    val wrapped = Buf(n4bufs.map(ByteBufAsBuf.Owned(_)))
+    val wrapped = Buf(n4bufs.map(ByteBufAsBuf(_)))
     val res: Buf = Bufs.copyAndReleaseDirect(wrapped)
     assert(n4bufs.forall(_.refCnt() == 0))
 

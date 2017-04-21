@@ -56,7 +56,7 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit =
     msg match {
-      case bb: ByteBuf => ctx.fireChannelRead(ByteBufAsBuf.Owned(bb))
+      case bb: ByteBuf => ctx.fireChannelRead(ByteBufAsBuf(bb))
       case typ => ctx.fireExceptionCaught(Failure(
           s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf"))
     }

@@ -75,11 +75,11 @@ private[http] object StreamTransports {
     case chunk: NettyHttp.HttpContent if chunk.content.readableBytes == 0 =>
       Buf.Empty
     case chunk: NettyHttp.HttpContent =>
-      ByteBufAsBuf.Owned(chunk.content)
+      ByteBufAsBuf(chunk.content)
   }
 
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
-    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Owned(buf))
+    new NettyHttp.DefaultHttpContent(BufAsByteBuf(buf))
 
   /**
    * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.

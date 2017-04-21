@@ -110,7 +110,7 @@ class StreamTransportsTest extends FunSuite {
       Future.None
 
     case chunk: HttpContent =>
-      Future.value(Some(ByteBufAsBuf.Owned(chunk.content.duplicate)))
+      Future.value(Some(ByteBufAsBuf(chunk.content.duplicate)))
   }
 
 

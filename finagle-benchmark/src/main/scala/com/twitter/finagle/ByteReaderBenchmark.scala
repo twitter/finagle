@@ -41,14 +41,14 @@ class ByteReaderBenchmark extends StdBenchAnnotations {
   @Setup(Level.Iteration)
   def setup(): Unit = {
     if (needsReset(heapReader)) {
-      val heapByteBuf = ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes))
+      val heapByteBuf = ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
       heapReader = ByteReader(heapByteBuf)
     }
 
     if (needsReset(directReader) || directByteBufNeedsReset) {
       val direct = Unpooled.directBuffer(Size)
       directByteBuf = direct.writeBytes(bytes)
-      directReader = ByteReader(ByteBufAsBuf.Owned(directByteBuf))
+      directReader = ByteReader(ByteBufAsBuf(directByteBuf))
     }
   }
 

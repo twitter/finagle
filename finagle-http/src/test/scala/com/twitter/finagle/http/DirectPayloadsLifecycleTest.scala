@@ -15,7 +15,7 @@ class DirectPayloadsLifecycleTest extends FunSuite {
   def doTest(name: String, client: FinagleHttp.Client, server: FinagleHttp.Server): Unit = {
     def assertNonDirect(b: Buf): Unit = b match {
       case Buf.ByteBuffer(byteBuffer) => assert(!byteBuffer.isDirect)
-      case ByteBufAsBuf.Owned(byteBuf) => assert(!byteBuf.isDirect)
+      case ByteBufAsBuf(byteBuf) => assert(!byteBuf.isDirect)
       case _ => () // other cases are guaranteed to be backed by heap buffers
     }
 

@@ -51,7 +51,7 @@ private[finagle] object Bijections {
       remoteAddr: InetSocketAddress
     ): FinagleHttp.Request = {
 
-      val payload = ByteBufAsBuf.Owned(r.content)
+      val payload = ByteBufAsBuf(r.content)
 
       val result = FinagleHttp.Request(
         method = methodToFinagle(r.method),
@@ -88,7 +88,7 @@ private[finagle] object Bijections {
     }
 
     def fullResponseToFinagle(rep: NettyHttp.FullHttpResponse): FinagleHttp.Response = {
-      val payload = ByteBufAsBuf.Owned(rep.content)
+      val payload = ByteBufAsBuf(rep.content)
 
       val resp = FinagleHttp.Response(
         versionToFinagle(rep.protocolVersion),
@@ -141,7 +141,7 @@ private[finagle] object Bijections {
       new NettyHttp.DefaultFullHttpResponse(
         versionToNetty(r.version),
         statusToNetty(r.status),
-        BufAsByteBuf.Owned(r.content),
+        BufAsByteBuf(r.content),
         headersToNetty(r.headerMap),
         NettyHttp.EmptyHttpHeaders.INSTANCE // only chunked messages have trailing headers
       )
@@ -171,7 +171,7 @@ private[finagle] object Bijections {
           versionToNetty(r.version),
           methodToNetty(r.method),
           r.uri,
-          BufAsByteBuf.Owned(r.content),
+          BufAsByteBuf(r.content),
           headersToNetty(r.headerMap),
           NettyHttp.EmptyHttpHeaders.INSTANCE // finagle-http doesn't support trailing headers
         )

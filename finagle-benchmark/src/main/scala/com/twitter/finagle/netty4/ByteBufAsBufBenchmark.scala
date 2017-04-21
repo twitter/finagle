@@ -26,18 +26,18 @@ class ByteBufAsBufBenchmark extends StdBenchAnnotations {
     val end = start + size
     bytes = 0.until(cap).map(_.toByte).toArray
 
-    byteBuf = ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes, start, size))
+    byteBuf = ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, start, size))
     byteArrayBuf = Buf.ByteArray.Owned(bytes, start, end)
     concatBuf = byteArrayBuf.slice(0, size / 2).concat(byteArrayBuf.slice(size / 2, size))
 
     val direct = Unpooled.directBuffer(cap)
     direct.writeBytes(bytes, start, size)
-    byteBufDirect = ByteBufAsBuf.Owned(direct)
+    byteBufDirect = ByteBufAsBuf(direct)
   }
 
   @TearDown(Level.Iteration)
   def tearDown(): Unit =
-    ByteBufAsBuf.Owned.extract(byteBufDirect).release()
+    ByteBufAsBuf.extract(byteBufDirect).release()
 
   @Benchmark
   def equalityByteBufByteBuf(): Boolean =
@@ -71,7 +71,7 @@ class ByteBufAsBufBenchmark extends StdBenchAnnotations {
   @Warmup(iterations = 5)
   @Measurement(iterations = 5)
   def hashCodeBaseline(): Buf =
-    ByteBufAsBuf.Owned(Unpooled.wrappedBuffer(bytes, 1, size + 1))
+    ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, 1, size + 1))
 
   // subtract the results of the Baseline run to get the results
   @Benchmark
