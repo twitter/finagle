@@ -188,6 +188,9 @@ object ThriftMux
     def withProtocolFactory(pf: TProtocolFactory): Client =
       configured(Thrift.param.ProtocolFactory(pf))
 
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided stack.
+     */
     def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Client =
       this.copy(muxer = muxer.withStack(stack))
 
@@ -489,6 +492,23 @@ object ThriftMux
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
       configured(Thrift.param.ProtocolFactory(pf))
+
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.
+     */
+    def withStack(stack: Stack[ServiceFactory[mux.Request, mux.Response]]): Server =
+      this.copy(muxer = muxer.withStack(stack))
+
+    /**
+     * Prepends `filter` to the top of the server. That is, after materializing
+     * the server (newService) `filter` will be the first element which requests
+     * flow through. This is a familiar chaining combinator for filters.
+     */
+    def filtered(filter: Filter[mux.Request, mux.Response, mux.Request, mux.Response]): Server = {
+      val role = Stack.Role(filter.getClass.getSimpleName)
+      val stackable = Filter.canStackFromFac.toStackable(role, filter)
+      withStack(stackable +: stack)
+    }
 
     /**
      * Produce a [[com.twitter.finagle.Thrift.Server]] with the specified max

@@ -805,6 +805,63 @@ class EndToEndTest extends FunSuite
     await(server.close())
   }
 
+  test("ThriftMux servers are filtered") {
+    val filter1 = new SimpleFilter[mux.Request, mux.Response] {
+      override def apply(request: mux.Request, service: Service[mux.Request, mux.Response]): Future[mux.Response] = {
+        service(request).rescue {
+          case _ => Future.exception(new FailedFastException("still unhappy"))
+        }
+      }
+    }
+
+    val filter2 = new SimpleFilter[mux.Request, mux.Response] {
+      override def apply(request: mux.Request, service: Service[mux.Request, mux.Response]): Future[mux.Response] = {
+        service(request).rescue {
+          case _: FailedFastException => Future.exception(new FailedFastException("still no"))
+        }
+      }
+    }
+
+    // one filtered
+    val server1 = ThriftMux.server
+      .filtered(filter1)
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.FutureIface {
+          def query(x: String) = Future.exception(Failure.rejected("unhappy"))
+        })
+
+    val client1 = ThriftMux.client
+      .newIface[TestService.FutureIface](Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])), "client1")
+
+    // server1 filtered once and reply exception "still unhappy"
+    val ex1 = intercept[com.twitter.finagle.mux.ServerApplicationError] {
+      await(client1.query("hi"))
+    }
+    assert(ex1.getMessage.contains("still unhappy"))
+
+    // call filtered twice with two filters
+    val server2 = ThriftMux.server
+      .filtered(filter1)
+      .filtered(filter2)
+      .serveIface(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        new TestService.FutureIface {
+          def query(x: String) = Future.exception(Failure.rejected("unhappy"))
+        })
+
+    val client2 = ThriftMux.client
+      .newIface[TestService.FutureIface](Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client2")
+
+    // server2 filtered twice and the last filter reply exception "still no"
+    val ex2 = intercept[com.twitter.finagle.mux.ServerApplicationError] {
+      await(client2.query("hi again"))
+    }
+    assert(ex2.getMessage.contains("still no"))
+    await(server1.close())
+    await(server2.close())
+  }
+
   test("downgraded pipelines are properly scoped") {
     val sr = new InMemoryStatsReceiver
 

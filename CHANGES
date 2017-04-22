@@ -25,6 +25,9 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-thriftmux: Allow ThriftMux.Servers to be filtered, also add `withStack`
+    method to server side as well. ``RB_ID=915095``
+
   * finagle-core: FailureAccrual is now production ready. It has been promoted out of
     experimental and moved from com.twitter.finagle.service.exp to
     com.twitter.finagle.liveness. ``RB_ID=914662``

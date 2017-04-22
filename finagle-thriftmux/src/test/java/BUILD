@@ -7,6 +7,7 @@ junit_tests(
     'finagle/finagle-thrift/src/main/scala:scala',
     'finagle/finagle-thriftmux',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
+    'finagle/finagle-mux/src/main/scala:scala',
     'scrooge/scrooge-core/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
