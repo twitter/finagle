@@ -534,7 +534,6 @@ private[memcached] object ClientConstants {
  */
 protected class ConnectedClient(protected val service: Service[Command, Response]) extends Client {
   import ClientConstants._
-  import scala.collection.breakOut
 
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
     val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
@@ -553,9 +552,9 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
     } handle {
-      case t: RequestException => GetResult(failures = (keys.map { (_, t) }).toMap)
-      case t: ChannelException => GetResult(failures = (keys.map { (_, t) }).toMap)
-      case t: ServiceException => GetResult(failures = (keys.map { (_, t) }).toMap)
+      case t: RequestException => GetResult(failures = keys.map { (_, t) }(breakOut))
+      case t: ChannelException => GetResult(failures = keys.map { (_, t) }(breakOut))
+      case t: ServiceException => GetResult(failures = keys.map { (_, t) }(breakOut))
     }
   }
 
@@ -696,7 +695,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def stats(args: Option[String]): Future[Seq[String]] = {
     val statArgs: Seq[Buf] = args match {
       case None => Seq(Buf.Empty)
-      case Some(args) => args.split(" ").map(nonEmptyStringToBuf).toSeq
+      case Some(args) => args.split(" ").map(nonEmptyStringToBuf)(breakOut)
     }
     service(Stats(statArgs)).flatMap {
       case InfoLines(lines) => Future {
@@ -729,7 +728,7 @@ trait PartitionedClient extends Client {
     keys: Iterable[String])(f: (Client, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
-      keys.groupBy(clientOf).map(Function.tupled(f)).toSeq
+      keys.groupBy(clientOf).map(Function.tupled(f))(breakOut)
     )
   }
 
@@ -1201,7 +1200,7 @@ case class RubyMemCacheClientBuilder(
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
     copy(_nodes = CacheNodeGroup(hostPortWeights).members.map {
       node: CacheNode => (node.host, node.port, node.weight)
-    }.toSeq)
+    }(breakOut))
 
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): RubyMemCacheClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
@@ -1247,7 +1246,7 @@ case class PHPMemCacheClientBuilder(
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
     copy(_nodes = CacheNodeGroup(hostPortWeights).members.map {
       node: CacheNode => (node.host, node.port, node.weight)
-    }.toSeq)
+    }(breakOut))
 
   def hashName(hashName: String): PHPMemCacheClientBuilder =
     copy(_hashName = Some(hashName))

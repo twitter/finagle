@@ -7,13 +7,15 @@ import com.twitter.io.Buf
 import com.twitter.ostrich.stats.{StatsListener, Stats => FStats}
 import com.twitter.util.Future
 import com.twitter.util.registry.GlobalRegistry
+import scala.collection.breakOut
+import scala.util.matching.Regex
 
 object ostrichFilterRegex extends GlobalFlag(Seq.empty[String], "Ostrich filter regex")
 
 class OstrichExporter extends HttpMuxHandler {
   val pattern = "/stats.json"
 
-  val regexes = ostrichFilterRegex().toList.map(_.r)
+  val regexes: List[Regex] = ostrichFilterRegex().map(_.r)(breakOut)
 
   GlobalRegistry.get.put(
     Seq("stats", "ostrich", "counters_latched"),
