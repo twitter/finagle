@@ -228,29 +228,29 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
     updater(Invoke(fn))
 
   @tailrec
-  private[this] def pick(nodes: Distributor, count: Int): Node = {
+  private[this] def pick(count: Int): Node = {
     if (count == 0)
       return null.asInstanceOf[Node]
 
     val n = dist.pick()
     if (n.factory.status == Status.Open) n
-    else pick(nodes, count-1)
+    else pick(count-1)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    val d = dist
+    val snap = dist
 
-    var n = pick(d, maxEffort)
-    if (n == null) {
+    var node = pick(maxEffort)
+    if (node == null) {
       maxEffortExhausted.incr()
       rebuild()
-      n = dist.pick()
+      node = dist.pick()
     }
 
-    val f = n(conn)
-    if (d.needsRebuild && d == dist)
+    if (snap.eq(dist) && snap.needsRebuild)
       rebuild()
-    f
+
+    node(conn)
   }
 
   def close(deadline: Time): Future[Unit] = {
