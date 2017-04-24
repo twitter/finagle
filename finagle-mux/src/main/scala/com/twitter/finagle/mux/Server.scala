@@ -198,6 +198,7 @@ private[twitter] class ServerDispatcher(
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val duplicateTagCounter = statsReceiver.counter("duplicate_tag")
   private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
+  private[this] val legacyReqCounter = statsReceiver.counter("legacy_req")
 
   private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
@@ -212,68 +213,74 @@ private[twitter] class ServerDispatcher(
   private[this] def isAccepting: Boolean =
     !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
 
-  private[this] def process(m: Message): Unit = m match {
-    case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
-      lessor.observeArrival()
-      val elapsed = Stopwatch.start()
+  private[this] def process(m: Message): Unit = {
+    if (m.isInstanceOf[Message.Treq])
+      legacyReqCounter.incr()
 
-      val reply: Try[Message] => Future[Unit] = {
-        case Return(rep) =>
-          lessor.observe(elapsed())
-          write(rep)
-        case Throw(exc) =>
-          log.log(Level.WARNING, s"Error processing message $m", exc)
-          write(Message.Rerr(m.tag, exc.toString))
-      }
+    m match {
+      case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
+        lessor.observeArrival()
+        val elapsed = Stopwatch.start()
 
-      if (!tracker.isTracking(m.tag)) {
-        tracker.track(m.tag, service(m))(reply)
-      } else {
-        // This can mean two things:
-        //
-        // 1. We have a pathalogical client which is sending duplicate tags.
-        // We push the responsibility of resolving the duplicate on the client
-        // and service the request.
-        //
-        // 2. We lost a race with the client where it reused a tag before we were
-        // able to cleanup the tracker. This is possible since we cleanup state on
-        // write closures which can be executed on a separate thread from the event
-        // loop thread (in netty3). We take extra precaution in the `ChannelTransport.write`
-        // to a avoid this, but technically it isn't guaranteed by netty3.
-        //
-        // In both cases, we forfeit the ability to track (and thus drain or interrupt)
-        // the request, but we can still service it.
-        log.fine(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
-        duplicateTagCounter.incr()
-        service(m).transform(reply)
-      }
+        val reply: Try[Message] => Future[Unit] = {
+          case Return(rep) =>
+            lessor.observe(elapsed())
+            write(rep)
+          case Throw(exc) =>
+            log.log(Level.WARNING, s"Error processing message $m", exc)
+            write(Message.Rerr(m.tag, exc.toString))
+        }
 
-    // Dispatch when !isAccepting
-    case d: Message.Tdispatch =>
-      write(Message.RdispatchNack(d.tag, Nil))
-    case r: Message.Treq =>
-      write(Message.RreqNack(r.tag))
+        if (!tracker.isTracking(m.tag)) {
+          tracker.track(m.tag, service(m))(reply)
 
-    case _: Message.Tping =>
-      service(m).respond {
-        case Return(rep) => write(rep)
-        case Throw(exc) => write(Message.Rerr(m.tag, exc.toString))
-      }
+        } else {
+          // This can mean two things:
+          //
+          // 1. We have a pathalogical client which is sending duplicate tags.
+          // We push the responsibility of resolving the duplicate on the client
+          // and service the request.
+          //
+          // 2. We lost a race with the client where it reused a tag before we were
+          // able to cleanup the tracker. This is possible since we cleanup state on
+          // write closures which can be executed on a separate thread from the event
+          // loop thread (in netty3). We take extra precaution in the `ChannelTransport.write`
+          // to a avoid this, but technically it isn't guaranteed by netty3.
+          //
+          // In both cases, we forfeit the ability to track (and thus drain or interrupt)
+          // the request, but we can still service it.
+          log.fine(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
+          duplicateTagCounter.incr()
+          service(m).transform(reply)
+        }
 
-    case Message.Tdiscarded(tag, why) =>
-      tracker.get(tag) match {
-        case Some(reply) =>
-          reply.raise(new ClientDiscardedRequestException(why))
-        case None =>
-          orphanedTdiscardCounter.incr()
-      }
+      // Dispatch when !isAccepting
+      case d: Message.Tdispatch =>
+        write(Message.RdispatchNack(d.tag, Nil))
+      case r: Message.Treq =>
+        write(Message.RreqNack(r.tag))
 
-    case Message.Rdrain(1) if state.get == State.Draining =>
-      tracker.drain()
+      case _: Message.Tping =>
+        service(m).respond {
+          case Return(rep) => write(rep)
+          case Throw(exc) => write(Message.Rerr(m.tag, exc.toString))
+        }
 
-    case m: Message =>
-      val rerr = Message.Rerr(m.tag, s"Unexpected mux message type ${m.typ}")
-      write(rerr)
+      case Message.Tdiscarded(tag, why) =>
+        tracker.get(tag) match {
+          case Some(reply) =>
+            reply.raise(new ClientDiscardedRequestException(why))
+          case None =>
+            orphanedTdiscardCounter.incr()
+        }
+
+      case Message.Rdrain(1) if state.get == State.Draining =>
+        tracker.drain()
+
+      case m: Message =>
+        val rerr = Message.Rerr(m.tag, s"Unexpected mux message type ${m.typ}")
+        write(rerr)
+    }
   }
 
   private[this] def loop(): Unit =
