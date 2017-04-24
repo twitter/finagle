@@ -185,7 +185,6 @@ object Finagle extends Build {
     finagleHttp,
     finagleBaseHttp,
     finagleHttp2,
-    finagleStream,
     finagleThrift,
     finagleMemcached,
     finagleKestrel,
@@ -480,15 +479,6 @@ object Finagle extends Build {
       nettyLib
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleNetty4, finagleNetty4Http, finagleBaseHttp)
-
-  lazy val finagleStream = Project(
-    id = "finagle-stream",
-    base = file("finagle-stream"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-stream"
-  ).dependsOn(finagleCore)
 
   lazy val finagleThrift = Project(
     id = "finagle-thrift",

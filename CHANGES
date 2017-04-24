@@ -10,24 +10,26 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
-  * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly. 
+  * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-* finagle-kestrel: Remove deprecated methods on `c.t.f.kestrel.MultiReader`:
+  * finagle-kestrel: Remove deprecated methods on `c.t.f.kestrel.MultiReader`:
     - `apply(cluster: Cluster[SocketAddress], queueName: String)`
     - `apply(clients: Seq[Client], queueName: String)`
     - `apply(handles: ju.Iterator[ReadHandle])`
     - `newBuilder(cluster: Cluster[SocketAddress], queueName: String)`
     - `merge(readHandleCluster: Cluster[ReadHandle])`
-  Use the `c.t.f.Var[Addr]`-based `apply` methods on `c.t.f.kestrel.MultiReaderMemcache` or `c.t.f.kestrel.MultiReaderThriftMux` instead. ``RB_ID=914910``
+    Use the `c.t.f.Var[Addr]`-based `apply` methods on `c.t.f.kestrel.MultiReaderMemcache` or `c.t.f.kestrel.MultiReaderThriftMux` instead. ``RB_ID=914910``
 
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
 
+  * finagle-stream: Removed from the project. ``RB_ID=915200``
+    https://finagle.github.io/blog/2017/04/06/announce-removals/
 
 6.44.0
 ------
