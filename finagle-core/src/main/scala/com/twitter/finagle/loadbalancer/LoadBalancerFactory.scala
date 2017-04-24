@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
+import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Future, Time, Var}
@@ -187,6 +188,27 @@ object LoadBalancerFactory {
           reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
         }
 
+        val sessionIdleTime = loadBalancerFactory match {
+          // If no session idle time is set and we are using aperture,
+          // we want to configure one such that sessions which fall out
+          // of the aperture window are reclaimed.
+          case f: ApertureFactory if !params.contains[ExpiringService.Param] =>
+            // We set the idleTime as a function of the aperture's smooth window.
+            // The aperture growth is dampened by this window so after X windows
+            // have passed, we can be sufficiently confident that an idle session
+            // is no longer needed. We choose a default of 10 for X which should
+            // give us a high degree of confidence and, based on the default smooth
+            // windows, should be on the order of minutes.
+            f.smoothWin * 10
+          case _ => params[ExpiringService.Param].idleTime
+        }
+
+        val endpointParams = params +
+          Transporter.EndpointAddr(addr) +
+          param.Stats(stats) +
+          param.Monitor(composite) +
+          params[ExpiringService.Param].copy(idleTime = sessionIdleTime)
+
         // While constructing a single endpoint stack is fairly cheap,
         // creating a large number of them can be expensive. On server
         // set change, if the set of endpoints is large, and we
@@ -200,10 +222,7 @@ object LoadBalancerFactory {
           def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             synchronized {
               if (isClosed) return Future.exception(new ServiceClosedException)
-              if (underlying == null) underlying = next.make(params +
-                Transporter.EndpointAddr(addr) +
-                param.Stats(stats) +
-                param.Monitor(composite))
+              if (underlying == null) underlying = next.make(endpointParams)
             }
             underlying(conn)
           }
