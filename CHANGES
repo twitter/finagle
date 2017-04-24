@@ -28,6 +28,9 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
 
+  * finagle-native: Removed from the project. ``RB_ID=915204``
+    https://finagle.github.io/blog/2017/04/06/announce-removals/
+
   * finagle-stream: Removed from the project. ``RB_ID=915200``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
