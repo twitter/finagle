@@ -1,12 +1,11 @@
 package com.twitter.finagle.netty4.codec
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.netty4.ByteBufAsBuf
+import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
 import com.twitter.io.Buf
-import io.netty.buffer.{ByteBuf, Unpooled}
+import io.netty.buffer.{ByteBuf, ByteBufUtil, EmptyByteBuf, Unpooled}
 import io.netty.channel.embedded.EmbeddedChannel
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{FunSuite, OneInstancePerTest}
@@ -20,6 +19,40 @@ class BufCodecTest extends FunSuite
 
   val channel = new EmbeddedChannel(BufCodec)
 
+  def genArrayBeginAndEnd: Gen[(Array[Byte], Int, Int)] = for {
+    capacity <- Gen.choose(1, 100)
+    bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
+    begin <- Gen.choose(0, capacity)
+    end <- Gen.choose(begin, capacity)
+  } yield (bytes.toArray, begin, end)
+
+  def genRegularBuf: Gen[Buf] = for {
+    (bytes, begin, end) <- genArrayBeginAndEnd
+    result <- Gen.oneOf(
+      Buf.ByteArray.Owned(bytes, begin, end),
+      Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes, begin, end - begin)),
+      ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, begin, end - begin))
+    )
+  } yield result
+
+  def genCompositeBuf: Gen[Buf] = for {
+    length <- Gen.choose(1, 5)
+    bufs <- Gen.listOfN(length, genRegularBuf)
+  } yield Buf(bufs)
+
+  def genBuf: Gen[Buf] = Gen.oneOf(genCompositeBuf, genRegularBuf)
+
+  def genRegularByteBuf: Gen[ByteBuf] = for {
+    (bytes, begin, end) <- genArrayBeginAndEnd
+  } yield Unpooled.wrappedBuffer(bytes, begin, end - begin)
+
+  def genCompositeByteBuf: Gen[ByteBuf] = for {
+    length <- Gen.choose(1, 5)
+    byteBufs <- Gen.listOfN(length, genRegularByteBuf)
+  } yield Unpooled.wrappedBuffer(byteBufs: _*)
+
+  def genByteBuf: Gen[ByteBuf] = Gen.oneOf(genRegularByteBuf, genCompositeByteBuf)
+
   test("fail to decode non-ByteBuf") {
     intercept[Failure] { channel.writeInbound("foo") }
     assert(!channel.finish())
@@ -31,32 +64,19 @@ class BufCodecTest extends FunSuite
   }
 
   test("decode") {
-    assert(channel.writeInbound(Unpooled.wrappedBuffer("hello".getBytes(StandardCharsets.UTF_8))))
-    assert(channel.readInbound[Buf]() == Buf.Utf8("hello"))
+    forAll(genByteBuf) { in =>
+      assert(channel.writeInbound(in.retainedDuplicate()))
+      assert(ByteBufUtil.equals(in, BufAsByteBuf(channel.readInbound[Buf])))
+
+      // BufCodec also makes sure to release the inbound buffer.
+      assert(in.isInstanceOf[EmptyByteBuf] || in.release())
+    }
+
     assert(!channel.finish())
   }
 
-  def genRegularBuf: Gen[Buf] = for {
-    capacity <- Gen.choose(1, 100)
-    bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
-    begin <- Gen.choose(0, capacity)
-    end <- Gen.choose(begin, capacity)
-    result <- Gen.oneOf(
-      Buf.ByteArray.Owned(bytes.toArray, begin, end),
-      Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes.toArray, begin, end - begin)),
-      ByteBufAsBuf(Unpooled.wrappedBuffer(bytes.toArray, begin, end - begin))
-    )
-  } yield result
-
-  def genCompositeBuf: Gen[Buf] = for {
-    length <- Gen.choose(1, 5)
-    bufs <- Gen.listOfN(length, genRegularBuf)
-  } yield Buf(bufs)
-
-  def genBuf: Gen[Buf] = Gen.oneOf(genCompositeBuf, genRegularBuf)
-
-  test("encode composite/byte-array") {
-    forAll(genBuf) { in: Buf =>
+  test("encode") {
+    forAll(genBuf) { in =>
       assert(channel.writeOutbound(in))
       assert(in == ByteBufAsBuf(channel.readOutbound[ByteBuf]()))
     }
@@ -64,14 +84,14 @@ class BufCodecTest extends FunSuite
     assert(!channel.finish())
   }
 
-  test("bypass direct ByteBufs") {
+  test("bypass outbound direct ByteBufs") {
     val bb = Unpooled.directBuffer(3).writeBytes("foo".getBytes("UTF-8"))
     assert(channel.writeOutbound(ByteBufAsBuf(bb)))
     assert(channel.readOutbound[ByteBuf]() eq bb)
     assert(!channel.finish())
   }
 
-  test("bypass direct ByteBuffers") {
+  test("bypass outbound direct ByteBuffers") {
     val bb = ByteBuffer.allocateDirect(3).put("foo".getBytes("UTF-8"))
     assert(channel.writeOutbound(Buf.ByteBuffer.Owned(bb)))
     assert(channel.readOutbound[ByteBuf]().nioBuffer().compareTo(bb) == 0)

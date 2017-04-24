@@ -10,6 +10,9 @@ import io.netty.channel.ChannelHandler.Sharable
 /**
  * A ByteBuffer <-> Buf codec.
  *
+ * @note this handler guarantees to only emit instances of [[Buf.ByteArray]]
+ *       as well as to release the inbound [[ByteBuf]].
+ *
  * @note this is intended to be installed after framing in a Finagle
  * protocol implementation such that the `In` and `Out` types for the
  * StackClient or StackServer will be [[Buf]].
@@ -56,7 +59,12 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit =
     msg match {
-      case bb: ByteBuf => ctx.fireChannelRead(ByteBufAsBuf(bb))
+      case bb: ByteBuf =>
+        val array = new Array[Byte](bb.readableBytes)
+        try bb.readBytes(array) finally bb.release()
+
+        ctx.fireChannelRead(new Buf.ByteArray(array, 0, array.length))
+
       case typ => ctx.fireExceptionCaught(Failure(
           s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf"))
     }
