@@ -16,8 +16,18 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+* finagle-kestrel: Remove deprecated methods on `c.t.f.kestrel.MultiReader`:
+    - `apply(cluster: Cluster[SocketAddress], queueName: String)`
+    - `apply(clients: Seq[Client], queueName: String)`
+    - `apply(handles: ju.Iterator[ReadHandle])`
+    - `newBuilder(cluster: Cluster[SocketAddress], queueName: String)`
+    - `merge(readHandleCluster: Cluster[ReadHandle])`
+  Use the `c.t.f.Var[Addr]`-based `apply` methods on `c.t.f.kestrel.MultiReaderMemcache` or `c.t.f.kestrel.MultiReaderThriftMux` instead. ``RB_ID=914910``
+
+
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
+
 
 6.44.0
 ------

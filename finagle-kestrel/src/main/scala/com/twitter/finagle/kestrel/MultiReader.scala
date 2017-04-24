@@ -9,10 +9,7 @@ import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
-import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.atomic.AtomicInteger
-import _root_.java.{util => ju}
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
@@ -439,38 +436,6 @@ object MultiReader {
   def apply(va: Var[Addr], queueName: String): ClusterMultiReaderBuilder = {
     val config = ClusterMultiReaderConfig(va, queueName)
     new ClusterMultiReaderBuilder(config)
-  }
-
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def apply(cluster: Cluster[SocketAddress], queueName: String): ClusterMultiReaderBuilder = {
-    val Name.Bound(va) = Name.fromGroup(Group.fromCluster(cluster))
-    apply(va, queueName)
-  }
-
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def apply(clients: Seq[Client], queueName: String): ReadHandle =
-    apply(clients map { _.readReliably(queueName) })
-
-  /**
-   * A java friendly interface: we use scala's implicit conversions to
-   * feed in a {{java.util.Iterator<ReadHandle>}}
-   */
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def apply(handles: ju.Iterator[ReadHandle]): ReadHandle =
-    MultiReaderHelper.merge(Var.value(Return(handles.toSet)))
-
-
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def apply(handles: Seq[ReadHandle]): ReadHandle =
-    MultiReaderHelper.merge(Var.value(Return(handles.toSet)))
-
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def newBuilder(cluster: Cluster[SocketAddress], queueName: String) = apply(cluster, queueName)
-
-  @deprecated("Use Var[Addr]-based `apply` method", "6.8.2")
-  def merge(readHandleCluster: Cluster[ReadHandle]): ReadHandle = {
-    val varTrySet = Group.fromCluster(readHandleCluster).set map { Try(_) }
-    MultiReaderHelper.merge(varTrySet)
   }
 }
 
