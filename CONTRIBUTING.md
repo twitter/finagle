@@ -36,7 +36,7 @@ The workflow that we support:
 
 There are a number of things we like to see in pull requests. Depending
 on the scope of your change, there may not be many to take care of, but
-please scan this list and see which apply. Its okay if something is missed,
+please scan this list and see which apply. It's okay if something is missed;
 the maintainers will help out during code review.
 
 1. Include [tests](CONTRIBUTING.md#testing).
@@ -72,7 +72,7 @@ Travis CI more useful for development, but for now you don't need to worry if
 it's failing (assuming that you are able to build and test your changes
 locally).
 
-### Proprerty-based testing
+### Property-based testing
 
 When appropriate, use [ScalaCheck][scalacheck] to write property-based
 tests for your code. This will often produce more thorough and effective
