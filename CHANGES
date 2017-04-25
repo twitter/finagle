@@ -24,6 +24,8 @@ Breaking API Changes
     - `merge(readHandleCluster: Cluster[ReadHandle])`
     Use the `c.t.f.Var[Addr]`-based `apply` methods on `c.t.f.kestrel.MultiReaderMemcache` or `c.t.f.kestrel.MultiReaderThriftMux` instead. ``RB_ID=914910``
 
+  * finagle-kestrel: Removed from the project. ``RB_ID=915221``
+    https://finagle.github.io/blog/2017/04/06/announce-removals/
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``

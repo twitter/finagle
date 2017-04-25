@@ -12,7 +12,6 @@ java_library(
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-http/src/main/scala:scala',
-    'finagle/finagle-kestrel',
     'finagle/finagle-thrift',
     'scrooge/scrooge-core/src/main/scala:scala',
     'util/util-core',

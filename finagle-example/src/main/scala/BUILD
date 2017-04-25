@@ -17,7 +17,6 @@ scala_library(
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
-    'finagle/finagle-kestrel/src/main/scala:scala',
     'finagle/finagle-memcached/src/main/scala:scala',
     'ostrich/src/main/scala:scala',
     'util/util-app/src/main/scala:scala',

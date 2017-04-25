@@ -187,7 +187,6 @@ object Finagle extends Build {
     finagleHttp2,
     finagleThrift,
     finagleMemcached,
-    finagleKestrel,
     finagleMux,
     finagleThriftMux,
     finagleMySQL,
@@ -514,22 +513,6 @@ object Finagle extends Build {
   finagleStats,
   finagleToggle)
 
-  lazy val finagleKestrel = Project(
-    id = "finagle-kestrel",
-    base = file("finagle-kestrel"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-kestrel",
-    libraryDependencies ++= scroogeLibs :+ caffeineLib
-  ).dependsOn(
-    finagleCore,
-    finagleMemcached,
-    finagleNetty4,
-    finagleThrift,
-    finagleThriftMux,
-    finagleToggle)
-
   lazy val finagleRedis = Project(
     id = "finagle-redis",
     base = file("finagle-redis"),
@@ -621,7 +604,6 @@ object Finagle extends Build {
     finagleCore,
     finagleHttp,
     finagleMemcached,
-    finagleKestrel,
     finagleMySQL,
     finagleOstrich4,
     finagleRedis,
