@@ -23,7 +23,9 @@ class MultiplexedTransporterTest extends FunSuite {
     override val onClose: Future[Throwable] = Future.never
   }
 
-  test("MultiplexedTransporter children should kill themselves when born with a bad stream id") {
+  val H1Req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
+
+  test("MultiplexedTransporter children should kill themselves when given a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
@@ -32,6 +34,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
     val first = multi().get
     val second = multi().get
+
+    first.write(H1Req)
+    second.write(H1Req)
 
     assert(!first.onClose.isDefined)
     assert(second.onClose.isDefined)
@@ -51,10 +56,12 @@ class MultiplexedTransporterTest extends FunSuite {
     val child = multi().get
 
     assert(!child.onClose.isDefined)
-    child.write(LastHttpContent.EMPTY_LAST_CONTENT)
+    child.write(H1Req)
     readq.offer(Message(LastHttpContent.EMPTY_LAST_CONTENT, Int.MaxValue))
     child.read()
 
+    // Grow the bad ID
+    child.write(H1Req)
     assert(child.onClose.isDefined)
     val exn = intercept[StreamIdOverflowException] {
       throw Await.result(child.onClose, 5.seconds)
@@ -70,6 +77,8 @@ class MultiplexedTransporterTest extends FunSuite {
     multi.setStreamId(2)
 
     val child = multi().get
+
+    child.write(H1Req)
 
     assert(child.onClose.isDefined)
     val exn = intercept[IllegalStreamIdException] {
@@ -100,25 +109,29 @@ class MultiplexedTransporterTest extends FunSuite {
 
     val c1, c3 = multi().get
 
-    val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
     val res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer("whatever", StandardCharsets.UTF_8))
 
     // Both streams make a request
-    c1.write(req)
-    c3.write(req)
+    c1.write(H1Req)
+    c3.write(H1Req)
 
     // Serve one response and GOAWAY
     readq.offer(Message(res, 1))
     readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1))
 
+    // Despite the GOAWAY, this child should be busy until it has been read
+    assert(c1.status == Status.Open)
+    assert(c3.status == Status.Closed)
+
     assert(Await.result(c1.read(), 5.seconds) == res)
+
+    assert(c1.status == Status.Closed)
+
+    // Despite the GOAWAY, this child should remain open until it has been read
 
     intercept[StreamClosedException] {
       Await.result(c3.read(), 5.seconds)
     }
-
-    assert(c1.status == Status.Closed)
-    assert(c3.status == Status.Closed)
   }
 
   test("MultiplexedTransporter reflects detector status") {
@@ -132,5 +145,66 @@ class MultiplexedTransporterTest extends FunSuite {
     assert(multi.status == Status.Open)
     cur = Status.Busy
     assert(multi.status == Status.Busy)
+  }
+
+  test("MultiplexedTransporter call to first() provides child with streamId == 1") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
+    assert(multi.first().asInstanceOf[multi.ChildTransport].curId == 1)
+  }
+
+  test("MultiplexedTransporter children increment stream ID only on write") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
+
+    val cA, cB = multi().get.asInstanceOf[multi.ChildTransport]
+
+    cB.write(H1Req)
+    cA.write(H1Req)
+
+    // An attempt to hide implementation details.
+    assert(cA.curId - cB.curId == 2)
+  }
+
+  test("Idle children kill themselves when read") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
+
+    val child = multi().get
+
+    val thrown = intercept[BadChildStateException] {
+      Await.result(child.read(), 5.seconds)
+    }
+
+    assert(thrown.isFlagged(FailureFlags.NonRetryable))
+    assert(child.status == Status.Closed)
+  }
+
+  test("Children can be closed multiple times, but keep the first reason") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
+
+    val child = multi().get.asInstanceOf[multi.ChildTransport]
+
+    val t1 = new Throwable("derp")
+    val t2 = new Throwable("blam")
+
+    child.closeWith(t1)
+    child.closeWith(t2)
+
+    val thrown = intercept[Throwable] {
+      Await.result(child.read(), 5.seconds)
+    }
+
+    assert(thrown.getMessage.equals("derp"))
+
   }
 }
