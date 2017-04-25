@@ -27,6 +27,9 @@ Breaking API Changes
   * finagle-kestrel: Removed from the project. ``RB_ID=915221``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
+  * finagle-mdns: Removed from the project. ``RB_ID=915216``
+    https://finagle.github.io/blog/2017/04/06/announce-removals/
+
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
 

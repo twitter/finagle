@@ -178,7 +178,6 @@ object Finagle extends Build {
     finagleException,
     finagleIntegration,
     finagleExp,
-    finagleMdns,
     finagleOstrich4,
 
     // Protocols
@@ -578,16 +577,6 @@ object Finagle extends Build {
     ).settings(
       name := "finagle-exp"
     ).dependsOn(finagleCore, finagleThrift)
-
-  lazy val finagleMdns = Project(
-    id = "finagle-mdns",
-    base = file("finagle-mdns"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-mdns",
-    libraryDependencies += "org.jmdns" % "jmdns" % "3.5.1"
-  ).dependsOn(finagleCore)
 
   lazy val finagleExample = Project(
     id = "finagle-example",

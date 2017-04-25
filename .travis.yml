@@ -14,7 +14,6 @@ env:
     - PROJECT=finagle-http
     - PROJECT=finagle-http2
     - PROJECT=finagle-integration
-    - PROJECT=finagle-mdns
     - PROJECT=finagle-mux
     - PROJECT=finagle-mysql
     - PROJECT=finagle-netty4
