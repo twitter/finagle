@@ -18,7 +18,6 @@ env:
     - PROJECT=finagle-mysql
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
-    - PROJECT=finagle-ostrich4
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats

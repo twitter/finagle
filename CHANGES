@@ -36,6 +36,9 @@ Breaking API Changes
   * finagle-native: Removed from the project. ``RB_ID=915204``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
+  * finagle-ostrich4: Removed from the project. ``RB_ID=915327``
+    https://finagle.github.io/blog/2017/04/06/announce-removals/
+
   * finagle-stream: Removed from the project. ``RB_ID=915200``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 

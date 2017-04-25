@@ -15,7 +15,6 @@ object Finagle extends Build {
 
   val libVersion = "6.44.0" + suffix
   val utilVersion = "6.43.0" + suffix
-  val ostrichVersion = "9.27.0" + suffix
   val scroogeVersion = "4.16.0" + suffix
 
   val libthriftVersion = "0.5.0-7"
@@ -38,7 +37,6 @@ object Finagle extends Build {
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.0.Final" % "test"
-  val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.8.4"
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -178,7 +176,6 @@ object Finagle extends Build {
     finagleException,
     finagleIntegration,
     finagleExp,
-    finagleOstrich4,
 
     // Protocols
     finagleHttp,
@@ -285,20 +282,6 @@ object Finagle extends Build {
       util("stats")
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleToggle)
-
-  lazy val finagleOstrich4 = Project(
-    id = "finagle-ostrich4",
-    base = file("finagle-ostrich4"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-ostrich4",
-    libraryDependencies ++= Seq(
-      ostrichLib,
-      util("registry"),
-      util("stats")
-    )
-  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStats = Project(
     id = "finagle-stats",
@@ -594,7 +577,6 @@ object Finagle extends Build {
     finagleHttp,
     finagleMemcached,
     finagleMySQL,
-    finagleOstrich4,
     finagleRedis,
     finagleStats,
     finagleThrift)
@@ -629,7 +611,6 @@ object Finagle extends Build {
     finagleMemcached,
     finagleMux,
     finagleNetty4,
-    finagleOstrich4,
     finagleStats,
     finagleThriftMux,
     finagleZipkin
