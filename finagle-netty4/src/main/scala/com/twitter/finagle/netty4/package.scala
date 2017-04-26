@@ -66,6 +66,4 @@ package object netty4 {
       System.setProperty("io.netty.allocator.maxOrder", "7")
     }
   }
-
-  private[finagle] val AnyToHeapInboundHandlerName = "anyToHeap"
 }

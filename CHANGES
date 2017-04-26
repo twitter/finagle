@@ -43,6 +43,9 @@ Breaking API Changes
   * finagle-native: Removed from the project. ``RB_ID=915204``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
+  * finagle-netty4: `AnyToHeapInboundHandler` is gone. Use `BufCodec` while designing
+    new Finagle protocols. ``RB_ID=915251``
+
   * finagle-ostrich4: Removed from the project. ``RB_ID=915327``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
