@@ -8,6 +8,7 @@ import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Transporter, Http2Listener}
@@ -111,9 +112,10 @@ object Http extends Client[Request, Response] with HttpRichClient
       "Netty4"
     ) +
     param.ProtocolLibrary("http/2") +
-    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1")))
-  // we disable failfast so that we can use regular requeueing on http2 stream
-  // acquisition failures
+    netty4.ssl.Alpn(ApplicationProtocols.Supported(Seq("h2", "http/1.1"))) +
+    FailureDetector.Param(FailureDetector.NullConfig)
+    // The threshold failure detector doesn't seem to work properly for
+    // h2, so we're turning it off until we have time to investigate it.
 
   private val protocolLibrary = param.ProtocolLibrary("http")
 
