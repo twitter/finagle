@@ -3,7 +3,7 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle._
 import com.twitter.util.{Future, Return, Throw}
 
-private[finagle] object TraceInitializerFilter {
+object TraceInitializerFilter {
   val role = Stack.Role("TraceInitializerFilter")
 
   private[finagle] class Module[Req, Rep](newId: Boolean)
@@ -21,15 +21,15 @@ private[finagle] object TraceInitializerFilter {
    * Create a new stack module for clients. On each request a
    * [[com.twitter.finagle.tracing.Tracer]] will pushed and the next TraceId will be set
    */
-  def clientModule[Req, Rep] = new Module[Req, Rep](true)
+  private[finagle] def clientModule[Req, Rep] = new Module[Req, Rep](true)
 
   /**
    * Create a new stack module for servers. On each request a
    * [[com.twitter.finagle.tracing.Tracer]] will pushed.
    */
-  def serverModule[Req, Rep] = new Module[Req, Rep](false)
+  private[finagle] def serverModule[Req, Rep] = new Module[Req, Rep](false)
 
-  def empty[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  private[finagle] def empty[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role = TraceInitializerFilter.role
       val description = "Empty Stackable, used Default(Client|Server)"
