@@ -200,3 +200,26 @@ other useful methods are available on :api:`mysql.Client <com/twitter/finagle/my
 from the call to `newRichClient`.
 
 For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.
+
+HTTP
+----
+Finagle supports both HTTP/1 and HTTP/2. Details can be found in *finagle-http* and *finagle-http2*.
+
+**Headers**
+
+Finagle sets certain request/response headers to transmit additional metadata.
+
+`Finagle-Ctx-com.twitter.finagle.Retries`
+  The number of times this request has been retried. See :finagle-http-src:`HttpContext.scala <com/twitter/finagle/http/codec/HttpContext.scala>`
+
+`Finagle-Ctx-com.twitter.finagle.Deadline`
+  The time by which this request must be satisfied. See :finagle-http-src:`HttpContext.scala <com/twitter/finagle/http/codec/HttpContext.scala>`
+
+`dtab-local`
+  A list of dtab overrides for this request. See :finagle-http-src:`HttpDtab.scala <com/twitter/finagle/http/codec/HttpDtab.scala>` and :ref:`dtabs <dtabs>`.
+
+`finagle-http-nack`
+  Makes finagle treat this reply as a retryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
+
+`finagle-http-nonretryable-nack`
+  Makes finagle treat this reply as a nonretryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
