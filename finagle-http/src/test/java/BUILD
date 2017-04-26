@@ -6,6 +6,7 @@ junit_tests(
     'finagle/finagle-core/src/main/java:java',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http',
+    'finagle/finagle-http2',
     'util/util-core/src/main/java:java',
     'util/util-core/src/main/scala:scala',
   ],

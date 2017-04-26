@@ -326,6 +326,8 @@ object Thrift
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
 
+    override def withStack(stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]): Client =
       super.filtered(filter)
@@ -454,6 +456,8 @@ object Thrift
       super.withExceptionStatsHandler(exceptionStatsHandler)
     override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
 
+    override def withStack(stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]]): Server =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

@@ -5,7 +5,7 @@ import com.twitter.finagle.framer.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
@@ -202,6 +202,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
 
+    override def withStack(stack: Stack[ServiceFactory[Request, Result]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Request, Result, Request, Result]): Client =
       super.filtered(filter)

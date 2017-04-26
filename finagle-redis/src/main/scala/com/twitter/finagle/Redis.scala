@@ -4,8 +4,7 @@ import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.param.{
-  ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -103,6 +102,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
 
+    override def withStack(stack: Stack[ServiceFactory[Command, Reply]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Reply, Command, Reply]): Client =
       super.filtered(filter)

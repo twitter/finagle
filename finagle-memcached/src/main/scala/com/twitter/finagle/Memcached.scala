@@ -365,6 +365,8 @@ object Memcached extends finagle.Client[Command, Response]
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
 
+    override def withStack(stack: Stack[ServiceFactory[Command, Response]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Command, Response, Command, Response]): Client =
       super.filtered(filter)
@@ -428,6 +430,8 @@ object Memcached extends finagle.Client[Command, Response]
       super.withExceptionStatsHandler(exceptionStatsHandler)
     override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
 
+    override def withStack(stack: Stack[ServiceFactory[Command, Response]]): Server =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 

@@ -352,6 +352,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       super.withExceptionStatsHandler(exceptionStatsHandler)
     override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
 
+    override def withStack(stack: Stack[ServiceFactory[Request, Response]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Client =
       super.configuredParams(newParams)
@@ -488,6 +490,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       super.withExceptionStatsHandler(exceptionStatsHandler)
     override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
 
+    override def withStack(stack: Stack[ServiceFactory[Request, Response]]): Server =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
     override def configuredParams(newParams: Stack.Params): Server =
       super.configuredParams(newParams)

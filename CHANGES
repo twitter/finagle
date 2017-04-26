@@ -13,6 +13,13 @@ New Features
   * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle: Fixed Java API for `withStack` for Client and Server implementations.
+    Java users now get the correct types for calls such as `c.t.f.Http.client().withStack`
+    and `c.t.f.Http.server().withStack`. ``RB_ID=915440``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
