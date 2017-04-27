@@ -11,7 +11,11 @@ import java.util.{Calendar, TimeZone}
  * Defines a Value ADT that represents the domain of values
  * received from a mysql server.
  */
-sealed trait Value
+sealed trait Value {
+  def mapToOpt[T : TypeExtractor]: Option[T] = mapTo[Option[T]]
+  def mapTo[T : TypeExtractor]: T =
+    implicitly[TypeExtractor[T]].extractFrom(this).getOrElse(throw new RuntimeException(s"Cannot extract a requested value from $this"))
+}
 case class ByteValue(b: Byte) extends Value
 case class ShortValue(s: Short) extends Value
 case class IntValue(i: Int) extends Value
