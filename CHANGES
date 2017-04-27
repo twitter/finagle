@@ -23,6 +23,9 @@ Bug Fixes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Remove deprecated `c.t.f.Deadline`. Use `c.t.f.context.Deadline` instead.
+    ``RB_ID=915550``
+
   * finagle-kestrel: Remove deprecated methods on `c.t.f.kestrel.MultiReader`:
     - `apply(cluster: Cluster[SocketAddress], queueName: String)`
     - `apply(clients: Seq[Client], queueName: String)`
