@@ -12,13 +12,6 @@ import com.twitter.util.{Activity, Duration, Future, Time}
 import scala.util.Random
 
 /**
- * A [[LoadBalancerFactory]] for Aperture implementations which exposes configuration
- * that is useful to inspect. For example, this is used to configure other parts
- * of a Finagle client when detected.
- */
-private abstract class ApertureFactory(val smoothWin: Duration) extends LoadBalancerFactory
-
-/**
  * Constructor methods for various load balancers. The methods take balancer
  * specific parameters and return a [[LoadBalancerFactory]] that allows you
  * to easily inject a balancer into the Finagle client stack via the
@@ -229,7 +222,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
     useDeterministicOrdering: Boolean = false
-  ): LoadBalancerFactory = new ApertureFactory(smoothWin) {
+  ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "ApertureLeastLoaded"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
@@ -301,7 +294,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
     useDeterministicOrdering: Boolean = false
-  ): LoadBalancerFactory = new ApertureFactory(smoothWin) {
+  ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "AperturePeakEwma"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],

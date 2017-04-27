@@ -1,19 +1,19 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.conversions.time._
-import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.service.ExpiringService
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.util.{Activity, Await, Duration, Future, Var}
+import com.twitter.util.{Activity, Await, Future, Var}
 import java.net.{InetAddress, InetSocketAddress}
+import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class LoadBalancerFactoryTest extends FunSuite
   with StringClient
   with StringServer
@@ -143,62 +143,5 @@ class LoadBalancerFactoryTest extends FunSuite
     assert(orderCalled)
     val sortedAddresses: Seq[String] = addresses.sortBy(_.toString).map(_.toString)
     eps.indices.foreach { i => assert(eps(i) == sortedAddresses(i)) }
-  }
-
-  test("idleTime when using Aperture") {
-    val echoSf = ServiceFactory.const[Int, Int](
-      Service.mk[Int, Int](req => Future.value(req)))
-
-    val leaf: Stack[ServiceFactory[Int, Int]] = Stack.Leaf(Stack.Role("leaf"), echoSf)
-
-    var idleTime: Option[Duration] = None
-    val endpoint = new Stack.Module1[ExpiringService.Param, ServiceFactory[Int, Int]] {
-      def role = Stack.Role("snooper")
-      def description = "param snooper"
-      def make(idleness: ExpiringService.Param, next: ServiceFactory[Int, Int]) = {
-        idleTime = Some(idleness.idleTime)
-        ServiceFactory.const(Service.mk(i => Future.value(i)))
-      }
-    }.toStack(leaf)
-
-    val stack = LoadBalancerFactory.module[Int, Int].toStack(endpoint)
-
-    // we need to supply finagle with a destination so that we can create
-    // the endpoint stacks.
-    def makeStack(params: Stack.Params): ServiceFactory[Int, Int] = {
-      val echoAddress = finagle.exp.Address(echoSf)
-      val dest = LoadBalancerFactory.Dest(Var(Addr.Bound(echoAddress)))
-      stack.make(params + dest)
-    }
-
-    idleTime = None
-    val noIdleTime = makeStack(Stack.Params.empty)
-    Await.result(noIdleTime())
-    assert(idleTime == Some(Duration.Top))
-
-    idleTime = None
-    val withIdleTime = makeStack(Stack.Params.empty +
-      ExpiringService.Param(1.second, Duration.Top))
-    Await.result(withIdleTime())
-    assert(idleTime == Some(1.second))
-
-    idleTime = None
-    val usingAperture0 = makeStack(Stack.Params.empty +
-      LoadBalancerFactory.Param(Balancers.aperture(smoothWin = 10.seconds)))
-    Await.result(usingAperture0())
-    assert(idleTime == Some(100.seconds))
-
-    idleTime = None
-    val usingAperture1 = makeStack(Stack.Params.empty +
-      LoadBalancerFactory.Param(Balancers.aperturePeakEwma(smoothWin = 15.seconds)))
-    Await.result(usingAperture1())
-    assert(idleTime == Some(150.seconds))
-
-    idleTime = None
-    val usingBoth = makeStack(Stack.Params.empty +
-      LoadBalancerFactory.Param(Balancers.aperturePeakEwma(smoothWin = 15.seconds)) +
-      ExpiringService.Param(10.seconds, Duration.Top))
-    Await.result(usingBoth())
-    assert(idleTime == Some(10.seconds))
   }
 }
