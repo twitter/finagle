@@ -538,9 +538,6 @@ object Message {
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
   val ContentTypeWwwForm    = MediaType.WwwForm + ";" + CharsetUtf8
 
-  @deprecated("Use ContentTypeWwwForm instead", "2017-01-06")
-  val ContentTypeWwwFrom = ContentTypeWwwForm
-
   private val HttpDateFormat = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss",
                                                           TimeZone.getTimeZone("GMT"),
                                                           Locale.ENGLISH)
