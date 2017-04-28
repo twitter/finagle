@@ -64,6 +64,10 @@ Breaking API Changes
   * finagle-stream: Removed from the project. ``RB_ID=915200``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
+  * finagle-thrift: Remove deprecated `c.t.f.thrift.transport.netty3.ThriftServerBufferedCodec`
+    and `c.t.f.thrift.transport.netty3.ThriftServerBufferedCodecFactory`. Use the `c.t.f.Thrift`
+    object to build a server. ``RB_ID=915656``
+
 6.44.0
 ------
 
