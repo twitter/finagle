@@ -238,7 +238,7 @@ object SpnegoAuthenticator {
         var tokenOut: Token = null
         do {
           tokenOut = subjectDoAction(initContextAction(context, tokenIn))
-        } while (tokenOut == null);
+        } while (tokenOut == null)
         tokenOut
       }
 

@@ -341,7 +341,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
   test("ClientBuilder should be properly instrumented on success") {
     val always = new Service[String, String] {
-      def apply(request: String) = Future.value("pong");
+      def apply(request: String) = Future.value("pong")
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
@@ -381,7 +381,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
   test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
     val always = new Service[String, String] {
-      def apply(request: String) = Future.value("pong");
+      def apply(request: String) = Future.value("pong")
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
