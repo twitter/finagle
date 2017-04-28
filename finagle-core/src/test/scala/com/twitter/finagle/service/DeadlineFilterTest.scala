@@ -12,6 +12,7 @@ import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+  import DeadlineFilter.DeadlineExceededException
 
   val promise = new Promise[String]
   val service = new Service[String, String] {
@@ -75,10 +76,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
         tc.advance(2.seconds)
-        val f = intercept[Failure] {
+        val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
-        assert(f.why.contains("exceeded request deadline"))
+        assert(f.getMessage.contains("exceeded request deadline"))
         assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
@@ -94,7 +95,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         tc.advance(2.seconds)
 
         // 5 tokens should have been added, so we should be able to reject
-        val f = intercept[Failure] {
+        val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
         assert(f.isFlagged(Failure.NonRetryable))
@@ -112,7 +113,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
 
         // 5 tokens should have been added, so we should be able to reject
-        val f = intercept[Failure] {
+        val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
         assert(f.isFlagged(Failure.NonRetryable))
@@ -127,7 +128,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
         tc.advance(2.seconds)
-        val f = intercept[Failure] {
+        val f = intercept[DeadlineExceededException] {
           Await.result(deadlineService("marco"), 1.second)
         }
         assert(f.isFlagged(Failure.NonRetryable))

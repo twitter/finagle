@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.logging.Level
+import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
 
 
@@ -14,7 +14,7 @@ import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
  * For servers, DeadlineFilter.module should be pushed onto the stack after the stats filters so
  * stats are recorded for the request, and before TimeoutFilter where a new Deadline is set.
  * For clients, DeadlineFilter.module should be after the stats filters; higher in the stack is
- * preferable so requests are rejected as early as possible. 
+ * preferable so requests are rejected as early as possible.
  *
  * @note Deadlines cross process boundaries and can span multiple nodes in a call graph.
  *       Even if a direct caller doesn't set a deadline, the server may still receive one and thus
@@ -87,6 +87,21 @@ object DeadlineFilter {
         }
       }
     }
+
+  class DeadlineExceededException(
+      timestamp: Time,
+      deadline: Time,
+      elapsed: Duration,
+      now: Time,
+      private[finagle] val flags: Long = Failure.NonRetryable | Failure.Rejected)
+    extends Exception(s"exceeded request deadline of ${deadline - timestamp} "
+      + s"by $elapsed. Deadline expired at $deadline and now it is $now.")
+    with FailureFlags[DeadlineExceededException]
+    with HasLogLevel {
+      def logLevel: Level = Level.DEBUG
+      protected def copyWithFlags(flags: Long): DeadlineExceededException =
+        new DeadlineExceededException(timestamp, deadline, elapsed, now, flags)
+  }
 }
 
 /**
@@ -109,6 +124,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
     statsReceiver: StatsReceiver,
     nowMillis: () => Long = Stopwatch.systemMillis)
   extends SimpleFilter[Req, Rep] {
+  import DeadlineFilter.DeadlineExceededException
 
   require(rejectPeriod.inSeconds >= 1 && rejectPeriod.inSeconds <= 60,
     s"rejectPeriod must be [1 second, 60 seconds]: $rejectPeriod")
@@ -127,12 +143,6 @@ private[finagle] class DeadlineFilter[Req, Rep](
   private[this] val rejectBucket = TokenBucket.newLeakyBucket(
     rejectPeriod, 0, nowMillis)
 
-  private[this] def newException(timestamp: Time, deadline: Time, elapsed: Duration, now: Time) =
-    new Failure(
-      s"exceeded request deadline of ${deadline - timestamp} " +
-      s"by $elapsed. Deadline expired at $deadline and now it is $now.",
-      flags = Failure.NonRetryable | Failure.Rejected, logLevel = Level.DEBUG)
-
   // The request is rejected if the set deadline has expired and there are at least
   // `rejectWithdrawal` tokens in `rejectBucket`. Otherwise, the request is
   // serviced and `serviceDeposit` tokens are added to `rejectBucket`.
@@ -150,7 +160,9 @@ private[finagle] class DeadlineFilter[Req, Rep](
           // There are enough tokens to reject the request
           if (rejectBucket.tryGet(rejectWithdrawal)) {
             rejectedStat.incr()
-            Future.exception(newException(timestamp, deadline, exceeded, now))
+            Future.exception(
+              new DeadlineExceededException(timestamp, deadline, exceeded, now)
+            )
           } else {
             rejectBucket.put(serviceDeposit)
             service(request)
