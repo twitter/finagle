@@ -32,6 +32,9 @@ Breaking API Changes
   * finagle-http: Remove deprecated `c.t.f.http.HttpMuxer.pattern`. Specify a route
     using `c.t.f.http.HttpMuxer.route(pattern, this)` instead. ``RB_ID=915551``
 
+  * finagle-http: Remove deprecated `c.t.f.http.filter.ValidateRequestFilter`. Create a custom
+    filter if this behavior is needed. ``RB_ID=915548``
+
   * finagle-kestrel: Remove deprecated methods on `c.t.f.kestrel.MultiReader`:
     - `apply(cluster: Cluster[SocketAddress], queueName: String)`
     - `apply(clients: Seq[Client], queueName: String)`
