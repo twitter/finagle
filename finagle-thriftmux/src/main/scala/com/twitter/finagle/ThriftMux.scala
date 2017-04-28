@@ -320,22 +320,6 @@ object ThriftMux
     client.newService(dest, label)
 
   /**
-   * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
-   * client ID.
-   */
-  @deprecated("Use `ThriftMux.client.withClientId`", "6.22.0")
-  def withClientId(clientId: ClientId): Client =
-    client.withClientId(clientId)
-
-  /**
-   * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
-   * protocolFactory.
-   */
-  @deprecated("Use `ThriftMux.client.withProtocolFactory`", "6.22.0")
-  def withProtocolFactory(pf: TProtocolFactory): Client =
-    client.withProtocolFactory(pf)
-
-  /**
    * A server for the Thrift protocol served over [[com.twitter.finagle.mux]].
    * ThriftMuxServer is backwards-compatible with Thrift clients that use the
    * framed transport and binary protocol. It switches to the backward-compatible

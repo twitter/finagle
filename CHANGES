@@ -68,6 +68,10 @@ Breaking API Changes
     and `c.t.f.thrift.transport.netty3.ThriftServerBufferedCodecFactory`. Use the `c.t.f.Thrift`
     object to build a server. ``RB_ID=915656``
 
+  * finagle-thriftmux: Remove deprecated `c.t.f.ThrifMux.withClientId`. Use
+    `c.t.f.ThriftMux.client.withClientId`. Remove deprecated `c.t.f.ThrifMux.withProtocolFactory`.
+    Use `c.t.f.ThriftMux.client.withProtocolFactory`. ``RB_ID=915655``
+
 6.44.0
 ------
 
