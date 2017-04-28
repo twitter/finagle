@@ -120,7 +120,7 @@ object HttpMuxer extends Service[Request, Response] {
   private[this] val log = Logger.getLogger(getClass.getName)
 
   for (handler <- LoadService[HttpMuxHandler]()) {
-    log.info("HttpMuxer[%s] = %s(%s)".format(handler.pattern, handler.getClass.getName, handler))
+    log.info("HttpMuxer[%s] = %s(%s)".format(handler.route.pattern, handler.getClass.getName, handler))
     addHandler(handler.route)
   }
 }
@@ -142,10 +142,7 @@ object HttpMuxers {
  * Trait HttpMuxHandler is used for service-loading HTTP handlers.
  */
 trait HttpMuxHandler extends Service[Request, Response] {
-  /** The pattern that this handler gets bound to */
-  @deprecated("Use route(pattern, this) instead", "2016-11-08")
-  val pattern: String
 
   /** Configures the route for this handler */
-  def route: Route = Route(pattern, this)
+  def route: Route
 }

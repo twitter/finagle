@@ -337,8 +337,8 @@ class MetricsExporter(val registry: Metrics)
 {
   def this() = this(MetricsStatsReceiver.defaultRegistry)
   val pattern = "/admin/metrics.json"
-  override def route: Route = Route(
-    pattern = this.pattern,
+  def route: Route = Route(
+    pattern = pattern,
     handler = this,
     index = Some(RouteIndex(
       alias = "Metrics",
