@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 /**
  * An implementation of [[Timer]] based on Netty 4 [[io.netty.util.Timer]].
  */
-private final class Netty4Timer(underlying: io.netty.util.Timer) extends Timer {
+private[netty4] class Netty4Timer(protected val underlying: io.netty.util.Timer) extends Timer {
 
   protected def scheduleOnce(when: Time)(f: => Unit): TimerTask =
     new TimerTask {
@@ -40,4 +40,6 @@ private final class Netty4Timer(underlying: io.netty.util.Timer) extends Timer {
     }
 
   def stop(): Unit = underlying.stop()
+
+  override def toString: String = "Netty4Timer"
 }
