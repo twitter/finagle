@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.ssl.{Alpn, SslConnectHandler}
+import com.twitter.finagle.netty4.ssl.Alpn
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, SessionVerifier}
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
 import com.twitter.finagle.transport.Transport
@@ -81,18 +81,18 @@ private[netty4] class Netty4ClientSslHandler(
   private[this] def createSslConnectHandler(
     sslHandler: SslHandler,
     config: SslClientConfiguration
-  ): SslConnectHandler = {
+  ): SslClientConnectHandler = {
     val sessionValidation = config.hostname
       .map(SessionVerifier.hostname)
       .getOrElse(SessionVerifier.AlwaysValid)
 
-    new SslConnectHandler(sslHandler, sessionValidation)
+    new SslClientConnectHandler(sslHandler, sessionValidation)
   }
 
   private[this] def addHandlersToPipeline(
     pipeline: ChannelPipeline,
     sslHandler: SslHandler,
-    sslConnectHandler: SslConnectHandler
+    sslConnectHandler: SslClientConnectHandler
   ): Unit = {
     pipeline.addFirst("sslConnect", sslConnectHandler)
     pipeline.addFirst("ssl", sslHandler)
@@ -113,7 +113,7 @@ private[netty4] class Netty4ClientSslHandler(
       val combined: SslClientConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(address, combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      val sslConnectHandler: SslConnectHandler = createSslConnectHandler(sslHandler, combined)
+      val sslConnectHandler: SslClientConnectHandler = createSslConnectHandler(sslHandler, combined)
       addHandlersToPipeline(ch.pipeline(), sslHandler, sslConnectHandler)
     }
   }

@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.transport.Transport
-import io.netty.channel.{ChannelInitializer, Channel}
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer}
 import io.netty.channel.ChannelHandler.Sharable
 
 /**
@@ -11,10 +11,10 @@ import io.netty.channel.ChannelHandler.Sharable
 private[netty4] class ServerBridge[In, Out](
     transportFac: Channel => Transport[In, Out],
     serveTransport: Transport[In, Out] => Unit)
-  extends ChannelInitializer[Channel] {
+  extends ChannelInboundHandlerAdapter {
 
-  def initChannel(ch: Channel): Unit = {
-    val transport: Transport[In, Out] = transportFac(ch)
+  override def channelActive(ctx: ChannelHandlerContext): Unit = {
+    val transport: Transport[In, Out] = transportFac(ctx.channel())
     serveTransport(transport)
   }
 }

@@ -143,7 +143,7 @@ private[finagle] class ChannelTransport(
     closed.unit
   }
 
-  val peerCertificate: Option[Certificate] = ch.pipeline.get(classOf[SslHandler]) match {
+  def peerCertificate: Option[Certificate] = ch.pipeline.get(classOf[SslHandler]) match {
     case null => None
     case handler =>
       try {
