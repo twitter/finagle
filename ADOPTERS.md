@@ -60,6 +60,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
   * ["Introducing Routemaster"][8]
+* [Spright](https://spright.com/)
 * [StumbleUpon](https://www.stumbleupon.com/)
 * [Südtirol Pass](https://www.sii.bz.it/)
 * [Talenteca](https://www.talenteca.com/)
