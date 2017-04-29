@@ -114,7 +114,7 @@ class ChannelTransport[In, Out](ch: Channel)
     // more consistent threading model where callbacks are invoked
     // on the event loop thread.
     ch.getPipeline().sendDownstream(
-      new DownstreamMessageEvent(ch, writeFuture, msg, null));
+      new DownstreamMessageEvent(ch, writeFuture, msg, null))
 
     // We avoid setting an interrupt handler on the future exposed
     // because the backing opertion isn't interruptible.

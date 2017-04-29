@@ -76,8 +76,10 @@ class StatusTest
 
   test("Ordering spot check") {
     val ord = Array(Status.Closed, Status.Busy, Status.Open)
-    val idx2 = for { left <- Gen.choose(0, ord.length-1);
-      right <- Gen.choose(0, ord.length-1) } yield (left, right)
+    val idx2 = for {
+      left <- Gen.choose(0, ord.length - 1)
+      right <- Gen.choose(0, ord.length - 1)
+    } yield (left, right)
 
     forAll(idx2) { case (left, right) =>
       assert(Ordering[Status].compare(ord(left), ord(right)).signum == (left - right).signum)
