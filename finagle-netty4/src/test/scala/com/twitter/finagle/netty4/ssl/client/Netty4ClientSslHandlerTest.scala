@@ -2,10 +2,8 @@ package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.ssl.SslConnectHandler
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
-import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.TempFile
 import io.netty.channel.embedded.EmbeddedChannel
@@ -56,7 +54,7 @@ class Netty4ClientSslHandlerTest extends FunSuite {
     val sslHandler = pipeline.get(classOf[SslHandler])
     assert(sslHandler == null)
 
-    val sslConnectHandler = pipeline.get(classOf[SslConnectHandler])
+    val sslConnectHandler = pipeline.get(classOf[SslClientConnectHandler])
     assert(sslConnectHandler == null)
 
     ch.finishAndReleaseAll()
@@ -83,7 +81,7 @@ class Netty4ClientSslHandlerTest extends FunSuite {
       val sslHandler = pipeline.get(classOf[SslHandler])
       assert(sslHandler != null)
 
-      val sslConnectHandler = pipeline.get(classOf[SslConnectHandler])
+      val sslConnectHandler = pipeline.get(classOf[SslClientConnectHandler])
       assert(sslConnectHandler != null)
 
       val sslEngine = sslHandler.engine()
