@@ -449,24 +449,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(BindingFactory.BaseDtab(baseDtab))
 
   /**
-   * Specify a cluster directly.  A
-   * [[com.twitter.finagle.builder.Cluster]] defines a dynamic
-   * mechanism for specifying a set of endpoints to which this client
-   * remains connected.
-   */
-  @deprecated("Use ClientBuilder.dest with a com.twitter.finagle.Name", "2017-04-18")
-  def cluster(
-    cluster: Cluster[SocketAddress]
-  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    group(Group.fromCluster(cluster))
-
-  @deprecated("Use ClientBuilder.dest with a com.twitter.finagle.Name", "2017-04-18")
-  def group(
-    group: Group[SocketAddress]
-  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(Name.fromGroup(group))
-
-  /**
    * Specify a load balancer.  The load balancer implements
    * a strategy for choosing one host from a set to service a request.
    *

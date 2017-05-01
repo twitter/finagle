@@ -1,10 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.conversions.time._
-import com.twitter.finagle.GlobalRequestTimeoutException
-import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
-import com.twitter.util.Await
-import java.net.SocketAddress
+import com.twitter.finagle.integration.DynamicCluster
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -89,26 +85,5 @@ class ClusterTest extends FunSuite {
   test("Cluster ready should always be defined on StaticCluster") {
     val cluster = new StaticCluster[Int](Seq[Int](1, 2))
     assert(cluster.ready.isDefined)
-  }
-
-  // Cluster initialization should honor global timeout as well as timeout specified
-  // together with the requests
-  test("Cluster ready should honor timeout while waiting for cluster to initialize") {
-    val cluster = new DynamicCluster[SocketAddress](Seq.empty)
-    val client = ClientBuilder()
-      .cluster(cluster)
-      .codec(StringCodec)
-      .hostConnectionLimit(1)
-      .timeout(100.millis) //global time out
-      .build()
-
-    intercept[GlobalRequestTimeoutException] {
-      Await.result(client("hello1"), 5.seconds)
-    }
-
-    // It also should honor timeout specified with the request
-    intercept[com.twitter.util.TimeoutException] {
-      Await.result(client("hello2"), 10.milliseconds)
-    }
   }
 }
