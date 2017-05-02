@@ -4,7 +4,7 @@ import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Tra
 import com.twitter.finagle.framer.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
-import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.{Netty4Transporter, Netty4HashedWheelTimer}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
@@ -97,6 +97,20 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     }
   }
 
+  object Client {
+    private val params: Stack.Params = StackClient.defaultParams +
+      ProtocolLibrary("mysql") +
+      Timer(Netty4HashedWheelTimer) +
+      DefaultPool.Param(
+        low = 0, high = 1, bufferSize = 0,
+        idleTime = Duration.Top,
+        maxWaiters = Int.MaxValue
+      )
+
+    private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
+      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
+  }
+
   /**
    * Implements a mysql client in terms of a
    * [[com.twitter.finagle.client.StackClient]]. The client inherits a wealth
@@ -107,13 +121,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * client which exposes a rich mysql api.
    */
   case class Client(
-      stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
-        .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable),
-      params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
-          low = 0, high = 1, bufferSize = 0,
-          idleTime = Duration.Top,
-          maxWaiters = Int.MaxValue) +
-        ProtocolLibrary("mysql"))
+      stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
+      params: Stack.Params = Client.params)
     extends StdStackClient[Request, Result, Client]
     with WithSessionPool[Client]
     with WithDefaultLoadBalancer[Client]

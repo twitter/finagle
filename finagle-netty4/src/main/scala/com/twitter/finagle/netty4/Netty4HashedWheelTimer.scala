@@ -44,7 +44,7 @@ private object timerTickDuration extends GlobalFlag[Duration](
  *       Netty's timer maintain its internal `pendingTimeouts` counter. We wont' need it
  *       after https://github.com/netty/netty/pull/6682 is merged.
  */
-private object Netty4HashedWheelTimer extends Netty4Timer(new io.netty.util.HashedWheelTimer(
+private[finagle] object Netty4HashedWheelTimer extends Netty4Timer(new io.netty.util.HashedWheelTimer(
   new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */true),
   timerTickDuration().inMilliseconds, TimeUnit.MILLISECONDS,
   timerTicksPerWheel(),

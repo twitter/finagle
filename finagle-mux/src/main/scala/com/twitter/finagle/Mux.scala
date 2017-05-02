@@ -8,8 +8,8 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
+import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.param.{ProtocolLibrary, Timer, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
@@ -169,7 +169,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         }
     }
 
-    val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
+    private val params: Stack.Params = StackClient.defaultParams +
+      ProtocolLibrary("mux") +
+      Timer(Netty4HashedWheelTimer)
+
+    private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
@@ -189,7 +193,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   case class Client(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
-      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("mux"))
+      params: Stack.Params = Client.params)
     extends StdStackClient[mux.Request, mux.Response, Client]
     with WithDefaultLoadBalancer[Client] {
 
@@ -246,10 +250,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   private[finagle] class ServerProtoTracing extends ProtoTracing("srv", StackServer.Role.protoTracing)
 
   object Server {
-    val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
+    private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
       .remove(TraceInitializerFilter.role)
       .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+
+    private val params: Stack.Params = StackServer.defaultParams +
+      ProtocolLibrary("mux") +
+      Timer(Netty4HashedWheelTimer)
 
     /**
      * Returns the headers that a server sends to a client.
@@ -271,7 +279,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   case class Server(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
-      params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("mux"))
+      params: Stack.Params = Server.params)
     extends StdStackServer[mux.Request, mux.Response, Server] {
 
     protected def copy1(

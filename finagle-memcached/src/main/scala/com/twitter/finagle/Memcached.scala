@@ -17,7 +17,7 @@ import com.twitter.finagle.memcached.protocol.text.CommandToEncoding
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -197,12 +197,13 @@ object Memcached extends finagle.Client[Command, Response]
      * load balancer to `p2cPeakEwma` as we have experience improved tail
      * latencies when coupled with the pipelining dispatcher.
      */
-    val defaultParams: Stack.Params = StackClient.defaultParams +
+    private val params: Stack.Params = StackClient.defaultParams +
       FailureAccrualFactory.Param(defaultFailureAccrualPolicy) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       PendingRequestFilter.Param(limit = defaultPendingRequestLimit) +
-      finagle.param.ProtocolLibrary(ProtocolLibraryName)
+      ProtocolLibrary(ProtocolLibraryName) +
+      Timer(Netty4HashedWheelTimer)
 
     /**
      * A default client stack which supports the pipelined memcached client.
@@ -210,7 +211,7 @@ object Memcached extends finagle.Client[Command, Response]
      * duplicate endpoints to eliminate head of line blocking. Each endpoint
      * has a single pipelined connection.
      */
-    def newStack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
+    private val stack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
       .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
       .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
       .replace(ClientTracingFilter.role, MemcachedTracingFilter.Module)
@@ -242,8 +243,8 @@ object Memcached extends finagle.Client[Command, Response]
    * and per-node load-balancing.
    */
   case class Client(
-      stack: Stack[ServiceFactory[Command, Response]] = Client.newStack,
-      params: Stack.Params = Client.defaultParams)
+      stack: Stack[ServiceFactory[Command, Response]] = Client.stack,
+      params: Stack.Params = Client.params)
     extends StdStackClient[Command, Response, Client]
     with MemcachedRichClient {
 
@@ -384,8 +385,9 @@ object Memcached extends finagle.Client[Command, Response]
     /**
      * Default stack parameters used for memcached server.
      */
-    val defaultParams: Stack.Params = StackServer.defaultParams +
-      finagle.param.ProtocolLibrary("memcached")
+    private val params: Stack.Params = StackServer.defaultParams +
+      ProtocolLibrary("memcached") +
+      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -393,7 +395,7 @@ object Memcached extends finagle.Client[Command, Response]
    */
   case class Server(
       stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
-      params: Stack.Params = Server.defaultParams)
+      params: Stack.Params = Server.params)
     extends StdStackServer[Command, Response, Server] {
 
     protected def copy1(

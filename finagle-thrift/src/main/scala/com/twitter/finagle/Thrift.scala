@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -206,8 +207,12 @@ object Thrift
       }
 
     // We must do 'preparation' this way in order to let Finagle set up tracing & so on.
-    val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = StackClient.newStack
+    private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = StackClient.newStack
       .replace(StackClient.Role.prepConn, preparer)
+
+    private val params: Stack.Params = StackClient.defaultParams +
+      ProtocolLibrary("thrift")
+      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -219,7 +224,7 @@ object Thrift
    */
   case class Client(
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift"))
+      params: Stack.Params = Client.params)
     extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
     with WithSessionPool[Client]
     with WithDefaultLoadBalancer[Client]
@@ -388,8 +393,12 @@ object Thrift
       }
     }
 
-    val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
+    private val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack
       .replace(StackServer.Role.preparer, preparer)
+
+    private val params: Stack.Params = StackServer.defaultParams +
+      ProtocolLibrary("thrift")
+      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -400,7 +409,7 @@ object Thrift
    */
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
-    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift")
+    params: Stack.Params = Server.params
   ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
     protected def copy1(
       stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = this.stack,

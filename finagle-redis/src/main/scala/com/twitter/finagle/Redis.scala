@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty4.Netty4Transporter
+import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
@@ -42,19 +42,20 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     /**
      * Default stack parameters used for redis client.
      */
-    val defaultParams: Stack.Params = StackClient.defaultParams +
-      param.ProtocolLibrary("redis")
+    private val params: Stack.Params = StackClient.defaultParams +
+      param.ProtocolLibrary("redis") +
+      param.Timer(Netty4HashedWheelTimer)
 
     /**
      * A default client stack which supports the pipelined redis client.
      */
-    def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
+    private val stack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
       .insertBefore(DefaultPool.Role, RedisPool.module)
   }
 
   case class Client(
-      stack: Stack[ServiceFactory[Command, Reply]] = Client.newStack,
-      params: Stack.Params = Client.defaultParams)
+      stack: Stack[ServiceFactory[Command, Reply]] = Client.stack,
+      params: Stack.Params = Client.params)
     extends StdStackClient[Command, Reply, Client]
     with WithDefaultLoadBalancer[Client]
     with RedisRichClient {

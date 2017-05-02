@@ -11,7 +11,8 @@ import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, Ser
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.http2.{Http2Transporter, Http2Listener}
+import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
+import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
@@ -22,7 +23,7 @@ import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * A rich HTTP/1.1 client with a *very* basic URL fetcher. (It does not handle
@@ -169,7 +170,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     }
 
   object Client {
-    val stack: Stack[ServiceFactory[Request, Response]] =
+    private val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
         .insertBefore(StackClient.Role.prepConn, ClientContextFilter.module)
         .replace(StackClient.Role.prepConn, DelayedRelease.module)
@@ -182,7 +183,9 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackClient.defaultParams +
         protocolLibrary +
-        responseClassifierParam
+        responseClassifierParam +
+        param.Timer(Netty4HashedWheelTimer)
+
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
   }
@@ -370,7 +373,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     client.newClient(dest, label)
 
   object Server {
-    val stack: Stack[ServiceFactory[Request, Response]] =
+    private val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
@@ -381,7 +384,9 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackServer.defaultParams +
         protocolLibrary +
-        responseClassifierParam
+        responseClassifierParam +
+        param.Timer(Netty4HashedWheelTimer)
+
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
   }
