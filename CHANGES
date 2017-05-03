@@ -69,6 +69,13 @@ Breaking API Changes
   * finagle-ostrich4: Removed from the project. ``RB_ID=915327``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 
+  * finagle-redis: `ChannelBuffer` methods and converters are removed. Use `Buf`-based API
+    instead. Removed APIs: ``RB_ID=916015``
+
+      - `c.t.f.redis.NettyConverters`
+      - `c.t.f.redis.util.StringToChannelBuffer`
+      - `c.t.f.redis.Client.watch(Seq[ChannelBuffer])`
+
   * finagle-stream: Removed from the project. ``RB_ID=915200``
     https://finagle.github.io/blog/2017/04/06/announce-removals/
 

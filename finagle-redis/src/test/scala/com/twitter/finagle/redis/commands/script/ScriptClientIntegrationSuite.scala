@@ -7,8 +7,6 @@ import com.twitter.finagle.redis.{Client, ServerError}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.math.BigInteger
-import java.nio.charset.StandardCharsets.UTF_8
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -18,18 +16,9 @@ import org.scalatest.junit.JUnitRunner
 class ScriptClientIntegrationSuite extends RedisClientTest {
   def stringToBuffer(s: String): Buf = Buf.Utf8(s)
 
-  def stringToChannelBuffer(s: String): ChannelBuffer =
-    ChannelBuffers.wrappedBuffer(s.getBytes(UTF_8))
-
 
   def stringsToBuffers(s: String*): Seq[Buf] =
     s.map(stringToBuffer)
-
-  def stringsToChannelBuffers(s: String*): Seq[ChannelBuffer] =
-    s.map(stringToChannelBuffer)
-
-  def stringToChannelBufferMap(pairs: (String, String)*): Map[ChannelBuffer, ChannelBuffer] =
-    Map(pairs.map({p => (stringToChannelBuffer(p._1), stringToChannelBuffer(p._2))}) :_*)
 
   def bufferToString(buffer: Buf): String =
     Buf.Utf8.unapply(buffer).get

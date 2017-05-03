@@ -3,25 +3,20 @@ package com.twitter.finagle.redis.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.SentinelClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.finagle.redis.util.{BufToString, CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.BufToString
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Await, Awaitable, Future, Time}
-import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import scala.language.implicitConversions
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
 final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   val log = Logger(getClass)
-
-  implicit def s2cb(s: String) = StringToChannelBuffer(s)
-  implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
   val sentinelCount = 3
   val masterCount = 2

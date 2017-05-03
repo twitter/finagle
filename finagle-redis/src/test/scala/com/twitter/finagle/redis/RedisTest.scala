@@ -6,7 +6,6 @@ import com.twitter.finagle.redis.util._
 import com.twitter.finagle.Redis
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
-import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import org.scalacheck.{Arbitrary, Gen}
@@ -14,8 +13,6 @@ import java.net.InetSocketAddress
 import scala.language.implicitConversions
 
 trait RedisTest extends FunSuite {
-
-  protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
 
   protected val bufFoo = Buf.Utf8("foo")
   protected val bufBar = Buf.Utf8("bar")

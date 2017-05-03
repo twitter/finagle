@@ -3,7 +3,6 @@ package com.twitter.finagle.redis.util
 import com.twitter.finagle.redis.protocol._
 import com.twitter.io.Buf
 import java.nio.charset.{Charset, StandardCharsets}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 trait ErrorConversion {
   def getException(msg: String): Throwable
@@ -44,35 +43,12 @@ object StringToBytes {
     }
 }
 
-object StringToChannelBuffer {
-  def apply(string: String, charset: Charset = StandardCharsets.UTF_8) = {
-    ChannelBuffers.wrappedBuffer(string.getBytes(charset))
-  }
-}
-
 object StringToBuf {
   def apply(string: String): Buf = Buf.Utf8(string)
 }
 
 object BufToString {
   def apply(buf: Buf): String = Buf.Utf8.unapply(buf).get
-}
-
-object CBToString {
-  def apply(arg: ChannelBuffer, charset: Charset = StandardCharsets.UTF_8) = {
-    arg.toString(charset)
-  }
-  def fromList(args: Seq[ChannelBuffer], charset: Charset = StandardCharsets.UTF_8) =
-    args.map { arg => CBToString(arg, charset) }
-
-  def fromTuples(
-    args: Seq[(ChannelBuffer, ChannelBuffer)], charset: Charset = StandardCharsets.UTF_8
-  ) = args map { arg => (CBToString(arg._1), CBToString(arg._2)) }
-
-  def fromTuplesWithDoubles(
-    args: Seq[(ChannelBuffer, Double)],
-    charset: Charset = StandardCharsets.UTF_8
-  ) = args map { arg => (CBToString(arg._1, charset), arg._2) }
 }
 
 object ReplyFormat {
