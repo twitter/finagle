@@ -1,7 +1,8 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{Message, Rst, Ping}
+import com.twitter.finagle.http2.transport.Http2ClientDowngrader.{GoAway, Message, Rst, Ping}
 import com.twitter.logging.Logger
+import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.Http2Exception.HeaderListSizeException
@@ -94,7 +95,9 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
         encoder.writeRstStream(ctx, streamId, errorCode, promise)
       case Ping =>
         encoder.writePing(ctx, false /* ack */, Http2CodecUtil.emptyPingBuf, promise)
-      // TODO we need to add support for writing GOAWAYs
+      case GoAway(_, streamId, errorCode) =>
+        encoder.writeGoAway(ctx, streamId, errorCode, /* debugData */ Unpooled.EMPTY_BUFFER, promise)
+
       case _ =>
         val wrongType = new IllegalArgumentException(
           s"Expected a Message, got ${msg.getClass.getName} instead.")

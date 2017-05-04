@@ -91,10 +91,30 @@ private[http2] class MultiplexedTransporter(
     case Message(msg, streamId) =>
       val c = parent.synchronized { children.get(streamId) }
       if (c != null) c.offer(msg)
-      else log.debug(s"Got message for nonexistent stream $streamId, msg: $msg")
-      // TODO: Handle messages for invalid streams according to http2 spec
+      else {
+        val lastId = id.get()
+        if (log.isLoggable(Level.DEBUG))
+          log.debug(s"Got message for nonexistent stream $streamId. Next client " +
+            s"stream id=${lastId}. msg=$msg"
+          )
 
-    case GoAway(msg, lastStreamId) =>
+        if (streamId < id.get()) {
+          underlying.write(Rst(streamId, Http2Error.STREAM_CLOSED.code))
+        } else {
+          parent.synchronized {
+            dead = true
+            children.values.asScala.foreach(_.close())
+          }
+          underlying.write(GoAway(
+            LastHttpContent.EMPTY_LAST_CONTENT, // TODO: Properly (and carefully) utilize the
+            lastId,                             //       debugData section of GoAway
+            Http2Error.PROTOCOL_ERROR.code)
+          )
+          close()
+        }
+      }
+
+    case GoAway(msg, lastStreamId, _) =>
       handleGoaway(msg, lastStreamId)
 
     case Rst(streamId, errorCode) =>
@@ -104,16 +124,22 @@ private[http2] class MultiplexedTransporter(
 
       val c = parent.synchronized { children.get(streamId) }
       if (c != null) c.closeWith(error)
-      else log.debug(s"Got RST for nonexistent stream: $streamId, code: $errorCode")
-      // TODO: Handle RSTs for invalid streams according to http2 sepc
+      else {
+        if (log.isLoggable(Level.DEBUG))
+          log.debug(s"Got RST for nonexistent stream: $streamId, code: $errorCode")
+      }
+      // According to spec, an endpoint should not send another RST upon receipt
+      // of an RST for an absent stream ID as this could cause a loop.
 
     case Ping =>
       pingPromise.get.setDone()
 
     case rep =>
-      val name = rep.getClass.getName
-      log.error(s"we only support Message, GoAway, Rst right now but got $name. "
-        + s"$name#toString returns: $rep")
+      if (log.isLoggable(Level.DEBUG)) {
+        val name = rep.getClass.getName
+        log.debug(s"we only support Message, GoAway, Rst right now but got $name. "
+          + s"$name#toString returns: $rep")
+      }
   }
 
   private[this] val handleRead: Try[StreamMessage] => Future[Unit] = {

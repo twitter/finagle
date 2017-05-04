@@ -7,9 +7,10 @@ import com.twitter.finagle.http2.transport.MultiplexedTransporter._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{FailureFlags, Status, StreamClosedException, Stack}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Future, TimeoutException}
 import io.netty.buffer._
 import io.netty.handler.codec.http._
+import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
@@ -94,7 +95,7 @@ class MultiplexedTransporterTest extends FunSuite {
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
     val child = multi().get
-    readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1))
+    readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1, Http2Error.PROTOCOL_ERROR.code))
 
     intercept[DeadConnectionException] {
       multi().get
@@ -117,7 +118,7 @@ class MultiplexedTransporterTest extends FunSuite {
 
     // Serve one response and GOAWAY
     readq.offer(Message(res, 1))
-    readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1))
+    readq.offer(GoAway(LastHttpContent.EMPTY_LAST_CONTENT, 1, Http2Error.PROTOCOL_ERROR.code))
 
     // Despite the GOAWAY, this child should be busy until it has been read
     assert(c1.status == Status.Open)
@@ -205,6 +206,54 @@ class MultiplexedTransporterTest extends FunSuite {
     }
 
     assert(thrown.getMessage.equals("derp"))
+  }
 
+  test("RST is sent when a message is received for a closed stream") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val multi = new MultiplexedTransporter(transport, addr, params)
+
+    multi.setStreamId(5)
+
+    readq.offer(Message(LastHttpContent.EMPTY_LAST_CONTENT, 3))
+
+    val result = Await.result(writeq.poll(), 5.seconds)
+    assert(result == Rst(3, Http2Error.STREAM_CLOSED.code))
+  }
+
+  test("GOAWAY w/ PROTOCOL_ERROR is sent when a message is received for an idle stream") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val multi = new MultiplexedTransporter(transport, addr, params)
+
+    multi.setStreamId(5)
+
+    readq.offer(Message(LastHttpContent.EMPTY_LAST_CONTENT, 11))
+
+    val result = Await.result(writeq.poll(), 5.seconds)
+    val GoAway(_, lastId, errorCode) = result
+    assert(lastId == 5)
+    assert(errorCode == Http2Error.PROTOCOL_ERROR.code)
+  }
+
+  test("RST is not sent when RST is received for a nonexistent stream") {
+    val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
+    val transport = new SlowClosingQueue(writeq, readq)
+    val addr = new SocketAddress {}
+    var cur: Status = Status.Open
+    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val multi = new MultiplexedTransporter(transport, addr, params)
+
+    readq.offer(Rst(11, Http2Error.INTERNAL_ERROR.code))
+
+    intercept[TimeoutException] {
+      Await.result(writeq.poll(), 100.milliseconds)
+    }
   }
 }
