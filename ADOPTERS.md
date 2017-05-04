@@ -67,6 +67,7 @@ URLs if possible) and [submit a pull request][1]!
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](https://teads.tv/)
 * [Tendril](http://www.tendrilinc.com/)
+* [Threat Stack](https://www.threatstack.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
