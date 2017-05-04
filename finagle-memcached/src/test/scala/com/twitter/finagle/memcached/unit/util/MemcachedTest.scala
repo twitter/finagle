@@ -10,7 +10,6 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -71,15 +70,5 @@ class MemcachedTest extends FunSuite
       // number of requeues = maxRetriesPerReq * numRequests
       assert(st.counters(Seq("memcache", "retries", "requeues")) > numberRequests)
     }
-  }
-
-  test("GlobalRegistry pipelined partitioned client") {
-    val name = "pipelined"
-    val expectedKey = Seq("client", "memcached", name, "is_pipelining")
-    Memcached.client.withLabel(name).newTwemcacheClient("127.0.0.1:12345")
-    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
-      e.key == expectedKey && e.value == "true"
-    }
-    assert(isPipelining)
   }
 }

@@ -8,7 +8,6 @@ import com.twitter.finagle.memcached.{Client, PartitionedClient}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
-import com.twitter.util.registry.GlobalRegistry
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
@@ -225,14 +224,6 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       if (Await.result(client.get(s"foo$i"), TimeOut) == None) cacheMisses = cacheMisses + 1
     }
     assert(cacheMisses > 0)
-  }
-
-  test("GlobalRegistry pipelined client") {
-    val expectedKey = Seq("client", "memcached", clientName, "is_pipelining")
-    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
-      e.key == expectedKey && e.value == "true"
-    }
-    assert(isPipelining)
   }
 
   test("host comes back into ring after being ejected") {

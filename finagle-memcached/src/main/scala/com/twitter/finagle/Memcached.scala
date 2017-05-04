@@ -227,12 +227,8 @@ object Memcached extends finagle.Client[Command, Response]
 
   private[finagle] def registerClient(
     label: String,
-    hasher: String,
-    isPipelining: Boolean
+    hasher: String
   ): Unit = {
-    GlobalRegistry.get.put(
-      Seq(ClientRegistry.registryName, Client.ProtocolLibraryName, label, "is_pipelining"),
-      isPipelining.toString)
     GlobalRegistry.get.put(
       Seq(ClientRegistry.registryName, Client.ProtocolLibraryName, label, "key_hasher"),
       hasher)
@@ -290,7 +286,7 @@ object Memcached extends finagle.Client[Command, Response]
 
       val label0 = if (label == "") params[Label].label else label
 
-      registerClient(label0, hasher.toString, isPipelining = true)
+      registerClient(label0, hasher.toString)
 
       val healthBroker = new Broker[NodeHealth]
 
