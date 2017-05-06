@@ -21,7 +21,7 @@ object ZipkinTracer {
     scribePort: Int = Host().getPort,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sampleRate: Float = core.Sampler.DefaultSampleRate
-  ): Tracer.Factory = () => mk(scribeHost, scribePort, statsReceiver, sampleRate)
+  ): Tracer = mk(scribeHost, scribePort, statsReceiver, sampleRate)
 
   /**
    * @param host Host to send trace data to
@@ -44,7 +44,7 @@ object ZipkinTracer {
    * @param sr stats receiver to send successes/failures to
    */
   @deprecated("Use mk() instead", "6.1.0")
-  def apply(sr: StatsReceiver): Tracer.Factory = () =>
+  def apply(sr: StatsReceiver): Tracer =
     mk(Host().getHostName, Host().getPort, sr, core.Sampler.DefaultSampleRate)
 
   /**

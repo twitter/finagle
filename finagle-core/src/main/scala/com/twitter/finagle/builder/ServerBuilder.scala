@@ -616,15 +616,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
     _configured(MonitorFactory(mFactory))
 
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
-    tracer(factory())
-
-  // API compatibility method
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(t: com.twitter.finagle.tracing.Tracer): This =
-    tracer(t)
-
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withTracer`.
    * For example:

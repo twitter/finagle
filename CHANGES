@@ -27,6 +27,11 @@ Breaking API Changes
     use similar methods on instances instead: `$protocol.client.params/stack` and
     `$protocol.server.params/stack` instead. ``RB_ID=915703``
 
+  * finagle-core: Remove deprecated `c.t.f.builder.ClientBuilder.tracerFactory`.
+    Use `c.t.f.builder.ClientBuilder.tracer` instead. Remove deprecated
+    `c.t.f.tracing.Tracer.Factory`. Use `c.t.f.tracing.Tracer` instead.
+    ``RB_ID=915481``
+
   * finagle-core: Remove deprecated `c.t.f.Deadline`. Use `c.t.f.context.Deadline` instead.
     ``RB_ID=915550``
 

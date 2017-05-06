@@ -62,9 +62,6 @@ object Annotation {
 }
 
 object Tracer {
-  // Deprecated.
-  type Factory = () => Tracer
-
   /**
    * Useful constant for the return value of [[Tracer.sampleTrace]]
    */
@@ -124,7 +121,6 @@ trait Tracer {
  * A no-op [[Tracer]].
  */
 class NullTracer extends Tracer {
-  val factory: Tracer.Factory = () => this
   def record(record: Record): Unit = ()
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
   override def isNull: Boolean = true
@@ -294,8 +290,6 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
-  val factory: Tracer.Factory = () => this
-
   def record(record: Record): Unit = {
     println(record)
   }

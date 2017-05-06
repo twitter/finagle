@@ -1014,14 +1014,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
-   */
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
-    tracer(factory())
-
-  /**
-   * Specifies a tracer that receives trace events.
-   * See [[com.twitter.finagle.tracing]] for details.
    *
    * To migrate to the Stack-based APIs, use `CommonParams.withTracer`.
    * For example:
