@@ -274,7 +274,9 @@ File-based configurations are defined in JSON files with the format specified in
 :util-tunable-src:`JsonTunableMapper <com/twitter/util/tunable/JsonTunableMapper.scala>`.
 
 Per-environment and per-instance configurations are supported. Configurations for a given id are
-composed from files located at `resources/com/twitter/tunables/`, in the following order:
+composed from files located at `resources/com/twitter/tunables/`
+(ensure that the `resources` directory is properly packaged with your application) in the following
+order:
 
 1. $id/$env/instance-$instance.json
 2. $id/$env/instances.json
