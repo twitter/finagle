@@ -10,6 +10,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle: Changed dependencies of Netty from 4.1.9 to 4.1.10 and tcnative
+    from 2.0.0 to 2.0.1.
+
   * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
 
@@ -225,7 +228,7 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated methods on `c.t.f.memcached.Client`:
     - `apply(name: Name)`
     - `apply(host: String)`
-    
+
     Use `c.t.f.Memcached.client` to create a Memcached client. ``RB_ID=908442``
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.protocol.text.Memcached` object.
