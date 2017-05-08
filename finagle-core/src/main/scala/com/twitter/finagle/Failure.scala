@@ -315,9 +315,7 @@ object Failure {
   private[finagle] class ProcessFailures[Req, Rep] extends SimpleFilter[Req, Rep] {
     private[this] val Process: PartialFunction[Throwable, Future[Rep]] = {
       case f: Failure => Future.exception(f.show)
-      case f: FailureFlags[_] => {
-        Future.exception(f.masked(FailureFlags.ShowMask))
-      }
+      case f: FailureFlags[_] => Future.exception(f.masked(FailureFlags.ShowMask))
     }
 
     def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
