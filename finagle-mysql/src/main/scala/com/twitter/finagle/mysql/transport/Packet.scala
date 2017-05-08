@@ -12,15 +12,17 @@ object Packet {
 
   def fromBuf(buf: Buf): Packet = {
     val br = MysqlBuf.reader(buf)
-
-    val size = br.readUnsignedMediumLE()
-    val seq = br.readUnsignedByte()
-    val body = br.readAll()
-    if (size != body.length) {
-      throw new IllegalStateException(
-        s"Bad Packet size. Expected: $size, actual ${body.length}")
+    try {
+      val size = br.readUnsignedMediumLE()
+      val seq = br.readUnsignedByte()
+      val body = br.readAll()
+      if (size != body.length) {
+        throw new IllegalStateException(
+          s"Bad Packet size. Expected: $size, actual ${body.length}")
+      }
+      Packet(seq, body)
     }
-    Packet(seq, body)
+    finally br.close()
   }
 }
 

@@ -48,9 +48,13 @@ private[finagle] object MuxFramer {
      * Extracts frame size from the `buf`.
      */
     def decodeFrameSize(buf: Buf): Int = {
-      val size = ByteReader(buf).readIntBE()
-      require(size > 0)
-      size
+      val br = ByteReader(buf)
+      try {
+        val size = ByteReader(buf).readIntBE()
+        require(size > 0)
+        size
+      }
+      finally br.close()
     }
   }
 

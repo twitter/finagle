@@ -32,7 +32,9 @@ private[mux] object MuxFailure {
   private val Extractor: PartialFunction[(Buf, Buf), MuxFailure] = {
     // Ignore anything after the first 8 bytes for future use
     case (k, vBuf) if k.equals(ContextId) && vBuf.length >= 8 =>
-      MuxFailure(ByteReader(vBuf).readLongBE())
+      val br = ByteReader(vBuf)
+      try MuxFailure(br.readLongBE())
+      finally br.close()
   }
 
   /**

@@ -131,22 +131,25 @@ private[finagle] class LengthFieldFramer(
     // channel should be closed and this decoder should be discarded.
     accum = accum.concat(buf)
     val br = ByteReader(accum)
-    var frameLength = readNextFrameLength(br)
+    try {
+      var frameLength = readNextFrameLength(br)
 
-    if (frameLength > 0) {
-      var frameCursor = 0
-      val frames = new ArrayBuffer[Buf]
+      if (frameLength > 0) {
+        var frameCursor = 0
+        val frames = new ArrayBuffer[Buf]
 
-      while (frameLength >= 0) {
-        frames += accum.slice(frameCursor, frameCursor + frameLength)
-        frameCursor += frameLength
-        frameLength = readNextFrameLength(br)
+        while (frameLength >= 0) {
+          frames += accum.slice(frameCursor, frameCursor + frameLength)
+          frameCursor += frameLength
+          frameLength = readNextFrameLength(br)
+        }
+
+        accum = accum.slice(frameCursor, accum.length)
+        frames.toIndexedSeq
+      } else {
+        NoFrames
       }
-
-      accum = accum.slice(frameCursor, accum.length)
-      frames.toIndexedSeq
-    } else {
-      NoFrames
     }
+    finally br.close()
   }
 }

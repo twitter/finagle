@@ -263,4 +263,16 @@ abstract class AbstractByteBufByteReaderTest extends FunSuite with GeneratorDriv
     assert(0 == reader.remaining)
     assert(-1 == reader.remainingUntil(0x3))
   }
+
+  test("close() releases the underlying ByteBuf and is idempotent") {
+    val byteBuf = UnpooledByteBufAllocator.DEFAULT.buffer(10, Int.MaxValue)
+    val br = wrapByteBufInReader(byteBuf)
+    assert(byteBuf.refCnt() == 1)
+    br.close()
+    assert(byteBuf.refCnt() == 0)
+
+    // idempotency
+    br.close() // would throw if not guarded by the ByteReader implementation
+    assert(byteBuf.refCnt() == 0)
+  }
 }

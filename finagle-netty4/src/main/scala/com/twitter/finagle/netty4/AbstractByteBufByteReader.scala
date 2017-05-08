@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.io.ByteReader.UnderflowException
-import java.lang.{Float => JFloat, Double => JDouble}
+import java.lang.{Double => JDouble, Float => JFloat}
 import io.netty.buffer.ByteBuf
 
 /**
@@ -10,6 +10,8 @@ import io.netty.buffer.ByteBuf
  *
  * Operations on this `ByteReader` may mutate the reader index of the underlying `ByteBuf`, but
  * will not mutate the data or writer index.
+ *
+ * @note This `ByteReader` and its concrete implementations are not thread safe.
  *
  * @note This type doesn't assume an ownership interest in the passed `ByteBuf`, but concrete
  *       implementations may. Eg, this construct does not manipulate the reference count of the
@@ -20,6 +22,8 @@ import io.netty.buffer.ByteBuf
  *      via an explicit copy to the heap.
  */
 private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends ByteReader {
+
+  private[this] var closed: Boolean = false
 
   final def remaining: Int = bb.readableBytes()
 
@@ -130,6 +134,14 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
   }
 
   final def readAll(): Buf = readBytes(remaining)
+
+
+  final def close(): Unit = {
+    if (!closed) {
+      closed = true
+      bb.release()
+    }
+  }
 
   final protected def checkRemaining(needed: Int): Unit =
     if (remaining < needed) {

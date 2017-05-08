@@ -618,13 +618,19 @@ private[twitter] object Message {
    * @note may throw a [[Failure]] wrapped [[BadMessageException]]
    */
   def decode(buf: Buf): Message = {
-    try decode(ByteReader(buf))
-    finally Bufs.releaseDirect(buf)
+    val br = ByteReader(buf)
+    try decode(br)
+    finally {
+      br.close()
+      Bufs.releaseDirect(buf)
+    }
   }
 
   /**
    * Try to decode the contents of a `ByteReader` to [[Message]]. This function
-   * assumes the content of the `ByteReader` represents exactly one message.
+   * assumes the content of the `ByteReader` represents exactly one message. This
+   * function _does not_ assume ownership of the passed `ByteReader` and it is up
+   * to the caller to release the underlying resources.
    *
    * @note may throw a [[Failure]] wrapped [[BadMessageException]]
    */

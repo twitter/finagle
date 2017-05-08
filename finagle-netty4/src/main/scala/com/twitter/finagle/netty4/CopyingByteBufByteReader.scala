@@ -6,6 +6,8 @@ import io.netty.buffer.ByteBuf
 /**
  * An implementation of `ByteReader` that wraps a Netty 4 `ByteBuf`.
  *
+ * @note This `ByteReader` implementation is not thread safe.
+ *
  * @note This implementation does not retain an ownership interest in the passed `ByteBuf`,
  *       either directly or via generated values. It is up to the user to manage the
  *       resources of the underlying `ByteBuf`.

@@ -16,7 +16,7 @@ private[redis] final class StageDecoder(init: Stage) {
 
   import Stage._
 
-  private[this] var reader = ByteReader(Buf.Empty)
+  private[this] var remaining = Buf.Empty
   private[this] var stack = List.empty[Acc]
   private[this] var current = init
 
@@ -29,22 +29,27 @@ private[redis] final class StageDecoder(init: Stage) {
    */
   def absorb(buf: Buf): Reply = synchronized {
     // Absorb the new buffer.
-    reader = ByteReader(reader.readAll().concat(buf))
-
-    // Decode the next reply if possible.
-    decodeNext(current)
+    val reader = ByteReader(remaining.concat(buf))
+    try {
+      // Decode the next reply if possible.
+      val result = decodeNext(current, reader)
+      // preserve any unconsumed data
+      remaining = reader.readAll()
+      result
+    }
+    finally reader.close()
   }
 
   // Tries its best to decode the next _full_ reply or returns `null` if
   // there is not enough data in the input buffer.
   @tailrec
-  private[this] def decodeNext(stage: Stage): Reply = stage(reader) match {
+  private[this] def decodeNext(stage: Stage, reader: ByteReader): Reply = stage(reader) match {
     case NextStep.Incomplete =>
       // The decoder is starving so we capture the current state
       // and fail-fast with `null`.
       current = stage
       null
-    case NextStep.Goto(nextStage) => decodeNext(nextStage)
+    case NextStep.Goto(nextStage) => decodeNext(nextStage, reader)
     case NextStep.Emit(reply) =>
       stack match {
         case Nil =>
@@ -54,14 +59,14 @@ private[redis] final class StageDecoder(init: Stage) {
         case acc :: rest if acc.n == 1 =>
           stack = rest
           acc.replies += reply
-          decodeNext(Stage.const(NextStep.Emit(acc.finish(acc.replies.toList))))
+          decodeNext(Stage.const(NextStep.Emit(acc.finish(acc.replies.toList))), reader)
         case acc :: _ =>
           acc.n -= 1
           acc.replies += reply
-          decodeNext(init)
+          decodeNext(init, reader)
       }
     case NextStep.Accumulate(n, finish) =>
       stack = new Acc(n, ListBuffer.empty[Reply], finish) :: stack
-      decodeNext(init)
+      decodeNext(init, reader)
   }
 }
