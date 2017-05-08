@@ -8,6 +8,7 @@ import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
+import com.twitter.finagle.ssl.client.{ SslClientConfiguration, SslClientEngineFactory }
 import com.twitter.logging.Logger
 import com.twitter.util.Future
 import javax.net.ssl.{SSLContext, SSLEngine, TrustManagerFactory}
@@ -21,7 +22,7 @@ import scala.collection.mutable
 
 import com.sun.corba.se.impl.protocol.RequestCanceledException
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.transport.Transport
 
 /*
  * Filter that converts exceptions into ServerErrors.
@@ -182,7 +183,8 @@ class PacketDecoder(@volatile var inSslNegotation: Boolean) extends FrameDecoder
  * Map PgRequest to PgResponse.
  */
 class PgClientChannelHandler(
-  sslEngineFactory: Option[SocketAddress => ssl.Engine],
+  sslEngineFactory: SslClientEngineFactory,
+  sslConfig: Option[SslClientConfiguration],
   val useSsl: Boolean
 ) extends SimpleChannelHandler {
   private[this] val logger = Logger(getClass.getName)
@@ -215,8 +217,9 @@ class PgClientChannelHandler(
           case _ => None
         }
 
-        val engine = sslEngineFactory.map(_.apply(addr))
-          .orElse(inetAddr.map(inet => Ssl.client(inet.getHostString, inet.getPort)))
+        val engine = inetAddr.map(inet =>
+          sslConfig.map(sslEngineFactory(Address(inet), _)).getOrElse(Ssl.client(inet.getHostString, inet.getPort))
+        )
           .getOrElse(Ssl.client())
           .self
 

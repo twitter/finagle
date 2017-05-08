@@ -11,10 +11,12 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.ValueDecoder
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
+import com.twitter.finagle.ssl.client.SslClientEngineFactory
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Monitor => _, _}
 import com.twitter.logging.Logger
+import java.net.SocketAddress
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels}
 
 import scala.language.existentials
@@ -71,7 +73,8 @@ object Postgres {
     .replace(Retries.Role, Retries.moduleWithRetryPolicy[PgRequest, PgResponse])
 
   private def pipelineFactory(params: Stack.Params) = {
-    val Transport.TLSClientEngine(ssl) = params[Transport.TLSClientEngine]
+    val SslClientEngineFactory.Param(sslFactory) = params[SslClientEngineFactory.Param]
+    val Transport.ClientSsl(ssl) = params[Transport.ClientSsl]
 
     new ChannelPipelineFactory {
       def getPipeline = {
@@ -79,17 +82,18 @@ object Postgres {
 
         pipeline.addLast("binary_to_packet", new PacketDecoder(ssl.nonEmpty))
         pipeline.addLast("packet_to_backend_messages", new BackendMessageDecoder(new BackendMessageParser))
-        pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(ssl, ssl.nonEmpty))
+        pipeline.addLast("backend_messages_to_postgres_response", new PgClientChannelHandler(sslFactory, ssl, ssl.nonEmpty))
         pipeline
       }
     }
   }
 
-  private def mkTransport(params: Stack.Params) =
+  private def mkTransport(params: Stack.Params, addr: SocketAddress) =
     Netty3Transporter.apply[PgRequest, PgResponse](
       pipelineFactory(params),
-      params + Transport.TLSClientEngine(None)  // we want to give this param to Postgres but not directly to transport
-                                                // because postgres doesn't start out in TLS
+      addr,
+      params + Transport.ClientSsl(None)  // we want to give this param to Postgres but not directly to transport
+                                          // because postgres doesn't start out in TLS
     )
 
   case class Client(
@@ -150,7 +154,7 @@ object Postgres {
 
     def conditionally(bool: Boolean, conf: Client => Client) = if(bool) conf(this) else this
 
-    protected def newTransporter(): Transporter[In, Out] = mkTransport(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] = mkTransport(params, addr)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[PgRequest, PgResponse] = {
       new Dispatcher(
@@ -185,7 +189,7 @@ object Postgres {
       val User(user) = params[User]
       val Password(password) = params[Password]
       val Database(db) = params[Database]
-      val Transport.TLSClientEngine(ssl) = params[Transport.TLSClientEngine]
+      val Transport.ClientSsl(ssl) = params[Transport.ClientSsl]
       new AuthenticationProxy(new HandleErrorsProxy(next), user, password, db, ssl.nonEmpty)
     }
   }
