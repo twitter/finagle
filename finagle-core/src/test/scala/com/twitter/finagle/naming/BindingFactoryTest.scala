@@ -1,21 +1,16 @@
-package com.twitter.finagle.factory
+package com.twitter.finagle.naming
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
-import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
-import com.twitter.finagle.util.Rng
+import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
 import com.twitter.util._
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{atLeastOnce, spy, verify, when}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
-import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 object BindingFactoryTest {
@@ -27,7 +22,6 @@ object BindingFactoryTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter {
   import BindingFactoryTest._
 
@@ -132,7 +126,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       val f =
         Dtab.unwind {
           Dtab.local =
-            Dtab.read(s"/foo/bar=>/$$/com.twitter.finagle.factory.BindingFactoryTest$$TestNamer")
+            Dtab.read(s"/foo/bar=>/$$/com.twitter.finagle.naming.BindingFactoryTest$$TestNamer")
           factory()
         }
       tc.advance(5678.microseconds)
@@ -409,189 +403,5 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     val service = Await.result(factory())
     Await.result(service("foo"))
-  }
-}
-
-@RunWith(classOf[JUnitRunner])
-class DynNameFactoryTest extends FunSuite with MockitoSugar {
-  private trait Ctx {
-    val cache = mock[ServiceFactoryCache[NameTree[Name.Bound], String,String]]
-    val svc = mock[Service[String, String]]
-    val (name, namew) = Activity[NameTree[Name.Bound]]()
-    val dyn = new DynNameFactory[String, String](name, cache)
-  }
-
-  test("DynNameFactory is Busy when name is unresolved")(new Ctx {
-    intercept[IllegalStateException] { name.sample() }
-    assert(dyn.status == Status.Busy)
-  })
-
-  test("DynNameFactory is Closed when name resolution fails")(new Ctx {
-    assert(dyn.status == Status.Busy)
-    namew.notify(Throw(new Exception("boom")))
-    assert(dyn.status == Status.Closed)
-  })
-
-  test("DynNameFactory is Closed after closing")(new Ctx {
-    assert(dyn.status == Status.Busy)
-    Await.ready(dyn.close())
-    assert(dyn.status == Status.Closed)
-  })
-
-  test("DynNameFactory reflects status of underlying cached service factory")(
-    for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) { new Ctx {
-      when(cache.status(any[NameTree[Name.Bound]])).thenReturn(status)
-      namew.notify(Return(NameTree.Leaf(Name.empty)))
-      assert(dyn.status == status)
-    }}
-  )
-
-  test("queue requests until name is nonpending (ok)")(new Ctx {
-    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.value(svc))
-
-    val f1, f2 = dyn()
-    assert(!f1.isDefined)
-    assert(!f2.isDefined)
-
-    namew.notify(Return(NameTree.Leaf(Name.empty)))
-
-    assert(f1.poll == Some(Return(svc)))
-    assert(f2.poll == Some(Return(svc)))
-
-    Await.result(f1)("foo")
-    Await.result(f1)("bar")
-    Await.result(f2)("baz")
-  })
-
-  test("queue requests until name is nonpending (fail)")(new Ctx {
-    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
-
-    val f1, f2 = dyn()
-    assert(!f1.isDefined)
-    assert(!f2.isDefined)
-
-    val exc = new Exception
-    namew.notify(Throw(exc))
-
-    assert(f1.poll == Some(Throw(Failure(exc, Failure.Naming))))
-    assert(f2.poll == Some(Throw(Failure(exc, Failure.Naming))))
-  })
-
-  test("dequeue interrupted requests")(new Ctx {
-    when(cache(any[NameTree[Name.Bound]], any[ClientConnection])).thenReturn(Future.never)
-
-    val f1, f2 = dyn()
-    assert(!f1.isDefined)
-    assert(!f2.isDefined)
-
-    val exc = new Exception
-    f1.raise(exc)
-
-    f1.poll match {
-      case Some(Throw(cce: CancelledConnectionException)) =>
-        assert(cce.getCause == exc)
-      case _ => fail()
-    }
-    assert(f2.poll == None)
-
-    namew.notify(Return(NameTree.Leaf(Name.empty)))
-    assert(f2.poll == None)
-  })
-}
-
-@RunWith(classOf[JUnitRunner])
-class NameTreeFactoryTest extends FunSuite {
-
-  test("distributes requests according to weight") {
-    val tree =
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf("foo")),
-          NameTree.Weighted(1D, NameTree.Leaf("bar")))),
-        NameTree.Weighted(1D, NameTree.Leaf("baz")))
-
-    val counts = mutable.HashMap[String, Int]()
-
-    val factoryCache = new ServiceFactoryCache[String, Unit, Unit](
-      key => new ServiceFactory[Unit, Unit] {
-        def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = {
-          val count = counts.getOrElse(key, 0)
-          counts.put(key, count + 1)
-          Future.value(null)
-        }
-        def close(deadline: Time) = Future.Done
-      },
-      Timer.Nil)
-
-    // not the world's greatest test since it depends on the
-    // implementation of Drv
-    val rng = {
-      val ints = Array(0, 0, 0, 1, 1)
-      var intIdx = 0
-
-      new Rng {
-        def nextDouble() =
-          throw new UnsupportedOperationException
-
-        def nextInt(n: Int) = {
-          val i = ints(intIdx)
-          intIdx += 1
-          i
-        }
-
-        def nextInt() = ???
-        def nextLong(n: Long) = ???
-      }
-    }
-
-    val factory = NameTreeFactory(
-      Path.empty,
-      tree,
-      factoryCache,
-      rng)
-
-    factory.apply(ClientConnection.nil)
-    factory.apply(ClientConnection.nil)
-    factory.apply(ClientConnection.nil)
-
-    assert(counts("foo") == 1)
-    assert(counts("bar") == 1)
-    assert(counts("baz") == 1)
-  }
-
-  test("is available iff all leaves are available") {
-    def isAvailable(tree: NameTree[Status]): Boolean =
-      NameTreeFactory(
-        Path.empty,
-        tree,
-        new ServiceFactoryCache[Status, Unit, Unit](
-          key => new ServiceFactory[Unit, Unit] {
-            def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
-            def close(deadline: Time) = Future.Done
-            override def status = key
-          },
-          Timer.Nil)
-        ).isAvailable
-
-    assert(isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
-        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
-
-    assert(!isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Closed)))),
-        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
-
-    assert(!isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
-        NameTree.Weighted(1D, NameTree.Empty))))
   }
 }

@@ -1,198 +1,14 @@
-package com.twitter.finagle.factory
+package com.twitter.finagle.naming
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.factory.ServiceFactoryCache
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.util.{Drv, Rng, Showable}
+import com.twitter.finagle.util.Showable
 import com.twitter.util._
-import scala.collection.immutable
-
-/**
- * Proxies requests to the current definiton of 'name', queueing
- * requests while it is pending.
- */
-private class DynNameFactory[Req, Rep](
-    name: Activity[NameTree[Name.Bound]],
-    cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep],
-    statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends ServiceFactory[Req, Rep] {
-
-  val latencyStat = statsReceiver.stat("bind_latency_us")
-
-  private sealed trait State
-  private case class Pending(
-    q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]], Stopwatch.Elapsed)]
-  ) extends State
-  private case class Named(name: NameTree[Name.Bound]) extends State
-  private case class Failed(exc: Throwable) extends State
-  private case class Closed() extends State
-
-  override def status = state match {
-    case Pending(_) => Status.Busy
-    case Named(name) => cache.status(name)
-    case Failed(_) | Closed() => Status.Closed
-  }
-
-  @volatile private[this] var state: State = Pending(immutable.Queue.empty)
-
-  private[this] val sub = name.run.changes respond {
-    case Activity.Ok(name) => synchronized {
-      state match {
-        case Pending(q) =>
-          state = Named(name)
-          for ((conn, p, elapsed) <- q) {
-            latencyStat.add(elapsed().inMicroseconds)
-            p.become(apply(conn))
-          }
-        case Failed(_) | Named(_) =>
-          state = Named(name)
-        case Closed() =>
-      }
-    }
-
-    case Activity.Failed(exc) => synchronized {
-      state match {
-        case Pending(q) =>
-          for ((_, p, elapsed) <- q) {
-            latencyStat.add(elapsed().inMicroseconds)
-            p.setException(Failure.adapt(exc, Failure.Naming))
-          }
-          state = Failed(exc)
-        case Failed(_) =>
-          // if already failed, just update the exception; the promises
-          // must already be satisfied.
-          state = Failed(exc)
-        case Named(_) | Closed() =>
-      }
-    }
-
-    case Activity.Pending =>
-  }
-
-  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    state match {
-      case Named(name) =>
-        Trace.record("namer.success")
-        cache(name, conn)
-
-      case Failed(exc) =>
-        Trace.recordBinary("namer.failure", exc.getClass.getName)
-        Future.exception(Failure.adapt(exc, Failure.Naming))
-
-      case Closed() =>
-        Trace.record("namer.closed")
-        // don't trace these, since they're not a namer failure
-        Future.exception(new ServiceClosedException)
-
-      case Pending(_) =>
-        applySync(conn)
-    }
-  }
-
-  private[this] def applySync(conn: ClientConnection): Future[Service[Req, Rep]] = synchronized {
-    state match {
-      case Pending(q) =>
-        val p = new Promise[Service[Req, Rep]]
-        val elapsed = Stopwatch.start()
-        val el = (conn, p, elapsed)
-        p setInterruptHandler { case exc =>
-          synchronized {
-            state match {
-              case Pending(q) if q contains el =>
-                state = Pending(q filter (_ != el))
-                latencyStat.add(elapsed().inMicroseconds)
-                p.setException(new CancelledConnectionException(exc))
-              case _ =>
-            }
-          }
-        }
-        state = Pending(q enqueue el)
-        p
-
-      case other => apply(conn)
-    }
-  }
-
-  def close(deadline: Time) = {
-    val prev = synchronized {
-      val prev = state
-      state = Closed()
-      prev
-    }
-    prev match {
-      case Pending(q) =>
-        val exc = new ServiceClosedException
-        for ((_, p, elapsed) <- q) {
-          latencyStat.add(elapsed().inMicroseconds)
-          p.setException(exc)
-        }
-      case _ =>
-    }
-    sub.close(deadline)
-  }
-}
-
-/**
- * Builds a factory from a [[com.twitter.finagle.NameTree]]. Leaves
- * are taken from the given
- * [[com.twitter.finagle.factory.ServiceFactoryCache]]; Unions become
- * random weighted distributors.
- */
-private[finagle] object NameTreeFactory {
-
-  def apply[Key, Req, Rep](
-    path: Path,
-    tree: NameTree[Key],
-    factoryCache: ServiceFactoryCache[Key, Req, Rep],
-    rng: Rng = Rng.threadLocal
-  ): ServiceFactory[Req, Rep] = {
-
-    lazy val noBrokersAvailableFactory = Failed(new NoBrokersAvailableException(path.show))
-
-    case class Failed(exn: Throwable) extends ServiceFactory[Req, Rep] {
-      val service: Future[Service[Req, Rep]] = Future.exception(exn)
-
-      def apply(conn: ClientConnection) = service
-      override def status = Status.Closed
-      def close(deadline: Time) = Future.Done
-    }
-
-    case class Leaf(key: Key) extends ServiceFactory[Req, Rep] {
-      def apply(conn: ClientConnection) = factoryCache.apply(key, conn)
-      override def status = factoryCache.status(key)
-      def close(deadline: Time) = Future.Done
-    }
-
-    case class Weighted(
-      drv: Drv,
-      factories: Seq[ServiceFactory[Req, Rep]]
-    ) extends ServiceFactory[Req, Rep] {
-      def apply(conn: ClientConnection) = factories(drv(rng)).apply(conn)
-
-      override def status = Status.worstOf[ServiceFactory[Req, Rep]](factories, _.status)
-      def close(deadline: Time) = Future.Done
-    }
-
-    def factoryOfTree(tree: NameTree[Key]): ServiceFactory[Req, Rep] =
-      tree match {
-        case NameTree.Neg | NameTree.Fail | NameTree.Empty => noBrokersAvailableFactory
-        case NameTree.Leaf(key) => Leaf(key)
-
-        // it's an invariant of Namer.bind that it returns no Alts
-        case NameTree.Alt(_*) => Failed(new IllegalArgumentException("NameTreeFactory"))
-
-        case NameTree.Union(weightedTrees@_*) =>
-          val (weights, trees) = weightedTrees.unzip { case NameTree.Weighted(w, t) => (w, t) }
-          Weighted(Drv.fromWeights(weights), trees.map(factoryOfTree))
-      }
-
-    factoryOfTree(tree)
-  }
-}
 
 /**
  * A factory that routes to the local binding of the passed-in
@@ -314,7 +130,7 @@ object BindingFactory {
   /**
    * A class eligible for configuring a
    * [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.factory.BindingFactory]] with a destination
+   * [[com.twitter.finagle.naming.BindingFactory]] with a destination
    * [[com.twitter.finagle.Name]] to bind.
    */
   case class Dest(dest: Name) {
@@ -332,7 +148,7 @@ object BindingFactory {
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.factory.BindingFactory]] with a
+   * [[com.twitter.finagle.naming.BindingFactory]] with a
    * [[com.twitter.finagle.Dtab]].
    */
   case class BaseDtab(baseDtab: () => Dtab) {
@@ -402,7 +218,7 @@ object BindingFactory {
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.factory.BindingFactory]].
+   * [[com.twitter.finagle.naming.BindingFactory]].
    *
    * Ignores bound residual paths.
    */

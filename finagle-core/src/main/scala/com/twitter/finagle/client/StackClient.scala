@@ -3,11 +3,11 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.context
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.factory.{
-  BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
+import com.twitter.finagle.factory.{RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter._
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.service._
 import com.twitter.finagle.stack.nilStack
@@ -202,7 +202,7 @@ object StackClient {
    * @see [[com.twitter.finagle.factory.StatsFactoryWrapper]]
    * @see [[com.twitter.finagle.client.StatsScoping]]
    * @see [[com.twitter.finagle.client.AddrMetadataExtraction]]
-   * @see [[com.twitter.finagle.factory.BindingFactory]]
+   * @see [[com.twitter.finagle.naming.BindingFactory]]
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.FactoryToService]]
