@@ -210,6 +210,12 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         // 2. close the factory (not sure if ordering matters for this step)
         // 3. drain pending requests for existing sessions
         // 4. close those connections when their requests complete
+        //
+        // Because we care about the order here, it's important that the closes
+        // are done synchronously.  This means that we must be careful not to
+        // schedule work for the future, as might happen if we transform or
+        // respond to a future.
+
         // closing `underlying` eventually calls Netty3Listener.close which has an
         // interesting side-effect of synchronously closing #1
         val ulClosed = underlying.close(deadline)

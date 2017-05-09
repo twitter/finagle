@@ -525,6 +525,7 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
       class ResponseProxyFilter extends SimpleFilter[Request, Response] {
         override def apply(
