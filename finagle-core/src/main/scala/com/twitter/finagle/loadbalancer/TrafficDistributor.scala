@@ -1,4 +1,4 @@
-package com.twitter.finagle.factory
+package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
-private[finagle] object TrafficDistributor {
+private object TrafficDistributor {
 
   /**
    * A [[ServiceFactory]] which admits that a concrete address flows through
@@ -129,7 +129,7 @@ private[finagle] object TrafficDistributor {
  * for stale cache entries across updates that are only evicted when a [[ServiceFactory]]
  * is no longer eligible to receive traffic (as indicated by its `status` field).
  */
-private[finagle] class TrafficDistributor[Req, Rep](
+private class TrafficDistributor[Req, Rep](
     dest: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
     newBalancer: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],

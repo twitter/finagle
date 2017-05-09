@@ -2,7 +2,6 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Future, Time, Var}
