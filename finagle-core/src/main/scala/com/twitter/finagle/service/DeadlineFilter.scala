@@ -88,7 +88,7 @@ object DeadlineFilter {
       }
     }
 
-  class DeadlineExceededException(
+  class DeadlineExceededException private[DeadlineFilter](
       timestamp: Time,
       deadline: Time,
       elapsed: Duration,
@@ -98,9 +98,9 @@ object DeadlineFilter {
       + s"by $elapsed. Deadline expired at $deadline and now it is $now.")
     with FailureFlags[DeadlineExceededException]
     with HasLogLevel {
-      def logLevel: Level = Level.DEBUG
-      protected def copyWithFlags(flags: Long): DeadlineExceededException =
-        new DeadlineExceededException(timestamp, deadline, elapsed, now, flags)
+    def logLevel: Level = Level.DEBUG
+    protected def copyWithFlags(flags: Long): DeadlineExceededException =
+      new DeadlineExceededException(timestamp, deadline, elapsed, now, flags)
   }
 }
 
