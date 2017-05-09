@@ -1,28 +1,31 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.Rng
 import com.twitter.util.{Duration, Future, Return, Time, Throw}
 
 /**
- * Implements a [[NodeT]] that is hyper-sensitive to latent endpoints.
+ * Provides a Node that is hyper-sensitive to latent endpoints.
  *
  * Peak EWMA is designed to converge quickly when encountering slow endpoints. It
  * is quick to react to latency spikes, recovering only cautiously. Peak EWMA takes
  * history into account, so that slow behavior is penalized relative to the
  * supplied `decayTime`.
  */
-private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
+private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
 
-  protected def rng: Rng
+  protected type Node <: PeakEwmaNode
 
+  /**
+   * The moving window over which latency is observed.
+   */
   protected def decayTime: Duration
 
-  protected def nanoTime(): Long = System.nanoTime()
+  /**
+   * Returns the current time in nanos.
+   */
+  protected val nanoTime: () => Long
 
-  protected class Metric {
+  private class Metric {
     private[this] val epoch = nanoTime()
     private[this] val Penalty: Double = Long.MaxValue >> 16
     // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
@@ -75,17 +78,13 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected case class Node(
-      factory: ServiceFactory[Req, Rep],
-      metric: Metric,
-      token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT[Req, Rep] {
+  protected trait PeakEwmaNode extends NodeT[Req, Rep] {
+    private[this] val metric: Metric = new Metric
 
     def load: Double = metric.get()
     def pending: Int = metric.rate()
 
-    override def apply(conn: ClientConnection) = {
+    abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
       val ts = metric.start()
       super.apply(conn).transform {
         case Return(svc) =>
@@ -102,12 +101,4 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
       }
     }
   }
-
-  protected def newNode(
-      factory: ServiceFactory[Req, Rep],
-      statsReceiver: StatsReceiver): Node =
-    Node(factory, new Metric, rng.nextInt())
-
-  protected def failingNode(cause: Throwable): Node =
-    Node(new FailingFactory(cause), new Metric, 0)
 }

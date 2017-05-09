@@ -8,6 +8,14 @@ import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 
 /**
+ * A [[BalancerNode]] allows implementors to refine the node type-alias
+ * without eagerly mixing in all of [[Balancer]].
+ */
+private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
+  protected type Node <: NodeT[Req, Rep]
+}
+
+/**
  * Basic functionality for a load balancer. Balancer takes care of
  * maintaining and updating a distributor, which is responsible for
  * distributing load across a number of nodes.
@@ -16,7 +24,7 @@ import scala.collection.{immutable, mutable}
  * example, we can specify and mix in a load metric (via a Node) and
  * a balancer (a Distributor) separately.
  */
-private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
+private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
   /**
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
@@ -35,26 +43,9 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   protected def statsReceiver: StatsReceiver
 
   /**
-   * The type of Node. Mixed in.
-   */
-  protected type Node <: AnyRef with NodeT[Req, Rep]
-
-  /**
    * Create a new node representing the given factory.
-   * Report node-related stats to the given StatsReceiver.
    */
-  protected def newNode(
-    factory: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver
-  ): Node
-
-  /**
-   * Allows implementations to transform the underlying [[ServiceFactory]]
-   * without having to implement a [[Node]].
-   */
-  protected def newFactory(
-    factory: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] = factory
+  protected def newNode(factory: ServiceFactory[Req, Rep]): Node
 
   /**
    * Create a node whose sole purpose it is to endlessly fail
@@ -184,8 +175,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
             transferred += oldFactories(factory)
             oldFactories.remove(factory)
           } else {
-            val fact = newFactory(factory)
-            transferred += newNode(fact, statsReceiver.scope(fact.toString))
+            transferred += newNode(factory)
             numAdded += 1
           }
         }

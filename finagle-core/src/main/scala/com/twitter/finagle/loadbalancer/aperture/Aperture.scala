@@ -2,16 +2,11 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
-import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT}
+import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
-
-private object Aperture {
-  val nodeToken: NodeT[_, _] => Int = { node => node.token }
-  val openNode: NodeT[_, _] => Boolean = { node => node.status == Status.Open }
-}
 
 /**
  * The aperture distributor balances load onto a window, the aperture, of
@@ -29,8 +24,21 @@ private object Aperture {
  * are typically backed by pools, and will be warm on average.
  */
 private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self =>
-  import Aperture._
   import DeterministicOrdering._
+
+  protected type Node <: ApertureNode
+
+  protected trait ApertureNode extends NodeT[Req, Rep] {
+    /**
+     * A token is a random integer associated with an Aperture node.
+     * It persists through node updates, but is not necessarily
+     * unique. Aperture uses this token to order the nodes when
+     * deterministic ordering is not enabled or available. Since
+     * the token is assigned at Node creation, this guarantees
+     * a stable order across distributor rebuilds.
+     */
+    val token: Int = rng.nextInt()
+  }
 
   /**
    * The random number generator used to pick two nodes for
@@ -93,6 +101,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     coordinateUpdates.incr()
     self.rebuild()
   }
+
+  private[this] val nodeToken: ApertureNode => Int = _.token
+  private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
 
   /**
    * A distributor that uses P2C to select nodes from within a window ("aperture").
@@ -261,7 +272,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // unavailable node to the layer above and trigger a rebuild. We do however
     // want to return to our "stable" ordering as soon as we notice that a
     // previously busy node is now available.
-    def needsRebuild: Boolean = busy.exists(openNode)
+    def needsRebuild: Boolean = busy.exists(nodeOpen)
   }
 
   protected def initDistributor(): Distributor =

@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -55,7 +55,6 @@ class BalancerTest extends FunSuite
     class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
       def load: Double = ???
       def pending: Int = ???
-      def token: Int = ???
       def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
         factory.close()
         Future.Done
@@ -63,11 +62,7 @@ class BalancerTest extends FunSuite
       def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = Future.never
     }
 
-    protected def newNode(
-      factory: ServiceFactory[Unit, Unit],
-      statsReceiver: StatsReceiver
-    ): Node = new Node(factory)
-
+    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node = new Node(factory)
     protected def failingNode(cause: Throwable): Node = ???
 
     protected def initDistributor(): Distributor = Distributor(Vector.empty)

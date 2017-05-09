@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.Balancer
+import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Duration, Future, Return, Time, Throw}
 import java.util.concurrent.atomic.AtomicInteger
@@ -17,8 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * The upshot is that `lowLoad` and `highLoad` define an acceptable
  * band of load for each serving unit.
  */
-private[loadbalancer] trait LoadBand[Req, Rep] {
-  self: Balancer[Req, Rep] with Aperture[Req, Rep] =>
+private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { self: Aperture[Req, Rep] =>
+
+  protected type Node <: LoadBandNode
 
   /**
    * The time-smoothing factor used to compute the capacity-adjusted
@@ -78,25 +79,22 @@ private[loadbalancer] trait LoadBand[Req, Rep] {
       narrow()
   }
 
-  override protected def newFactory(
-    sf: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] =
-    new ServiceFactoryProxy(sf) {
-      override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-        adjustTotalLoad(1)
-        super.apply(conn).transform {
-          case Return(svc) =>
-            Future.value(new ServiceProxy(svc) {
-              override def close(deadline: Time) =
-                super.close(deadline).ensure {
-                  adjustTotalLoad(-1)
-                }
-            })
+  protected trait LoadBandNode extends NodeT[Req, Rep] {
+    abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+      adjustTotalLoad(1)
+      super.apply(conn).transform {
+        case Return(svc) =>
+          Future.value(new ServiceProxy(svc) {
+            override def close(deadline: Time) =
+              super.close(deadline).ensure {
+                adjustTotalLoad(-1)
+              }
+          })
 
-          case t@Throw(_) =>
-            adjustTotalLoad(-1)
-            Future.const(t)
-        }
+        case t@Throw(_) =>
+          adjustTotalLoad(-1)
+          Future.const(t)
       }
     }
+  }
 }

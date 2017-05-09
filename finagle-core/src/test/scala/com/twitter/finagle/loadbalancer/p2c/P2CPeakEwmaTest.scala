@@ -20,12 +20,11 @@ class P2CBalancerEwmaTest extends FunSuite with P2CSuite {
     Activity(fs.map(Activity.Ok(_))),
     maxEffort = 5,
     decayTime = 150.nanoseconds,
+    nanoTime = clock,
     rng = Rng(12345L),
     statsReceiver = sr,
     emptyException = noBrokers
-  ) {
-    override def nanoTime(): Long = clock()
-  }
+  )
 
   def run(fs: Vector[P2CServiceFactory], n: Int): Unit = {
     val clock = new Clock

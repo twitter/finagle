@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.loadbalancer.NodeT
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
 import com.twitter.finagle.{NoBrokersAvailableException, Status}
@@ -21,18 +21,17 @@ class ApertureTest extends FunSuite with ApertureSuite {
   private class Bal extends TestBal {
     protected class Node(val factory: ServiceFactory[Unit, Unit])
       extends ServiceFactoryProxy[Unit, Unit](factory)
-      with NodeT[Unit, Unit] {
+      with NodeT[Unit, Unit]
+      with ApertureNode {
       // We don't need a load metric since this test only focuses on
       // the internal behavior of aperture.
       def load: Double = 0
       def pending: Int = 0
-      def token: Int = 0
+      override val token: Int = 0
     }
 
-    protected def newNode(
-      factory: ServiceFactory[Unit, Unit],
-      statsReceiver: StatsReceiver
-    ): Node = new Node(factory)
+    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node =
+      new Node(factory)
 
     protected def failingNode(cause: Throwable): Node =
       new Node(new FailingFactory[Unit, Unit](cause))

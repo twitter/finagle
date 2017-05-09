@@ -13,7 +13,7 @@ import com.twitter.finagle.loadbalancer.{Balancer, DistributorT, NodeT, Updating
  * the list for each request. This balancer doesn't take a node's
  * load into account and as such doesn't mix-in a load metric.
  */
-private[loadbalancer] class RoundRobinBalancer[Req, Rep](
+private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
     protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     protected val statsReceiver: StatsReceiver,
     protected val emptyException: NoBrokersAvailableException,
@@ -103,10 +103,6 @@ private[loadbalancer] class RoundRobinBalancer[Req, Rep](
 
   protected def initDistributor(): Distributor = new Distributor(Vector.empty)
 
-  protected def newNode(
-    factory: ServiceFactory[Req,Rep],
-    statsReceiver: StatsReceiver
-  ): Node = new Node(factory)
-
+  protected def newNode(factory: ServiceFactory[Req,Rep]): Node = new Node(factory)
   protected def failingNode(cause: Throwable): Node = new Node(new FailingFactory(cause))
 }
