@@ -39,9 +39,9 @@ class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("FailureFlags.flagsOf") {
     val failures = Seq(
-      Interrupted|Retryable|Naming|Rejected|Wrapped,
-      NonRetryable,
-      Empty
+      FlagCheck(Interrupted|Retryable|Naming|Rejected|Wrapped),
+      FlagCheck(NonRetryable),
+      FlagCheck(Empty)
     )
     val names = Seq(
       Set("interrupted", "restartable", "wrapped", "rejected", "naming"),

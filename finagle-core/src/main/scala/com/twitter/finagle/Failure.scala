@@ -237,11 +237,8 @@ object Failure {
   /**
    * Expose flags as strings, used for stats reporting
    */
-  def flagsOf(exc: Throwable): Set[String] =
-    exc match {
-      case f: Failure => FailureFlags.flagsOf(f.flags)
-      case _ => Set.empty
-    }
+  @deprecated("Use `FailureFlags.flagsOf` instead", "2017-05-08")
+  def flagsOf(exc: Throwable): Set[String] = FailureFlags.flagsOf(exc)
 
   /**
    * Adapt an exception. If the passed-in exception is already a failure,

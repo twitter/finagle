@@ -55,7 +55,7 @@ object StatsFilter {
 
   /** Basic categorizer with all exceptions under 'failures'. */
   val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
-    mkFlags = Failure.flagsOf,
+    mkFlags = FailureFlags.flagsOf,
     mkSource = SourcedException.unapply) {
 
     override def toString: String = "DefaultCategorizer"

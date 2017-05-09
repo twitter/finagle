@@ -75,6 +75,15 @@ object FailureFlags {
   }
 
   /**
+   * Expose flags of a given throwable as strings. Here, Retryable is named
+   * "restartable" for now to maintain compatibility with existing stats.
+   */
+  def flagsOf(e: Throwable): Set[String] = e match {
+    case f: FailureFlags[_] => flagsOf(f.flags)
+    case _ => Set.empty
+  }
+
+  /**
    * A function for transforming unsuccessful responses into ones that are
    * flagged as NonRetryable
    */
