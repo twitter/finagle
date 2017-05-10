@@ -2,9 +2,9 @@ package com.twitter.finagle.loadbalancer.p2c
 
 import com.twitter.finagle.loadbalancer.{Balancer, PeakEwma, Updating}
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
+import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Duration}
 
 /**
@@ -19,10 +19,10 @@ import com.twitter.util.{Activity, Duration}
  * @param endpoints An activity that updates with the set of node pairs
  * over which we distribute load.
  *
- * @param decayTime The window of latency observations.
- *
  * @param maxEffort the maximum amount of "effort" we're willing to
  * expend on a load balancing decision without reweighing.
+ *
+ * @param decayTime The window of latency observations.
  *
  * @param rng The PRNG used for flipping coins. Override for
  * deterministic tests.
@@ -46,7 +46,7 @@ private[loadbalancer] final class P2CPeakEwma[Req, Rep](
   with PeakEwma[Req, Rep]
   with P2C[Req, Rep]
   with Updating[Req, Rep] {
-  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+  protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 
   case class Node(factory: ServiceFactory[Req, Rep])
     extends ServiceFactoryProxy[Req, Rep](factory)

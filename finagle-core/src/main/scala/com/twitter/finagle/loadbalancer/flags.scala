@@ -28,7 +28,7 @@ object defaultBalancer extends GlobalFlag("choice", "Default load balancer")
  * to be expensive, especially when the size of the destination cluster
  * is large. However, they can be quite useful for debugging.
  */
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
+object perHostStats extends GlobalFlag[Boolean](false, "enable/default per-host stats.\n" +
   "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
   "\tWhen disabled, the configured stats receiver will be used,\n" +

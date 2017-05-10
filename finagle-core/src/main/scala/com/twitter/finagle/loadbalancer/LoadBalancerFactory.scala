@@ -9,12 +9,12 @@ import java.util.logging.{Level, Logger}
 
 /**
  * Exposes a [[Stack.Module]] which composes load balancing into the respective
- * [[Stack]]. This is mixed in by default into Finagle's [[StackClient]]. The only
- * necessary configuration is a [[Dest]] which represents a changing collection of
- * addresses that is load balanced over.
+ * [[Stack]]. This is mixed in by default into Finagle's [[com.twitter.finagle.client.StackClient]].
+ * The only necessary configuration is a [[LoadBalancerFactory.Dest]] which
+ * represents a changing collection of addresses that is load balanced over.
  */
 object LoadBalancerFactory {
-  val role = Stack.Role("LoadBalancer")
+  val role: Stack.Role = Stack.Role("LoadBalancer")
 
   /**
    * A class eligible for configuring a client's load balancer probation setting.
@@ -111,7 +111,26 @@ object LoadBalancerFactory {
 
   object AddressOrdering {
     implicit val param = new Stack.Param[AddressOrdering] {
-      def default = AddressOrdering(defaultAddressOrdering)
+      def default: AddressOrdering = AddressOrdering(defaultAddressOrdering)
+    }
+  }
+
+  /**
+   * A class eligible for configuring the [[LoadBalancerFactory]] behavior
+   * when the balancer does not find a node with `Status.Open`.
+   *
+   * The default is to "fail open" and pick a node at random.
+   *
+   * @see [[WhenNoNodesOpen]]
+   */
+  case class WhenNoNodesOpenParam(whenNoNodesOpen: WhenNoNodesOpen) {
+    def mk(): (WhenNoNodesOpenParam, Stack.Param[WhenNoNodesOpenParam]) =
+      (this, WhenNoNodesOpenParam.param)
+  }
+
+  object WhenNoNodesOpenParam {
+    implicit val param = new Stack.Param[WhenNoNodesOpenParam] {
+      def default: WhenNoNodesOpenParam = WhenNoNodesOpenParam(WhenNoNodesOpen.PickOne)
     }
   }
 
@@ -122,9 +141,10 @@ object LoadBalancerFactory {
    * defined by the `LoadBalancerFactory.Param` parameter.
    */
   private[finagle] trait StackModule[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
-    val role = LoadBalancerFactory.role
+    val role: Stack.Role = LoadBalancerFactory.role
     val parameters = Seq(
       implicitly[Stack.Param[ErrorLabel]],
+      implicitly[Stack.Param[WhenNoNodesOpenParam]],
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[Param]],
       implicitly[Stack.Param[HostStats]],
@@ -134,8 +154,10 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[param.Monitor]],
       implicitly[Stack.Param[param.Reporter]])
 
-    def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-      val ErrorLabel(errorLabel) = params[ErrorLabel]
+    def make(
+      params: Stack.Params,
+      next: Stack[ServiceFactory[Req, Rep]]
+    ): Stack[ServiceFactory[Req, Rep]] = {
       val Dest(dest) = params[Dest]
       val Param(loadBalancerFactory) = params[Param]
       val EnableProbation(probationEnabled) = params[EnableProbation]
@@ -194,8 +216,9 @@ object LoadBalancerFactory {
         // cost across requests by moving endpoint stack creation into
         // service acquisition (apply method below).
         new ServiceFactory[Req, Rep] {
-          var underlying: ServiceFactory[Req, Rep] = null
-          var isClosed = false
+          // thread-safety of these are provided by synchronization on `this`
+          private[this] var underlying: ServiceFactory[Req, Rep] = null
+          private[this] var isClosed = false
           def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
             synchronized {
               if (isClosed) return Future.exception(new ServiceClosedException)
@@ -222,7 +245,7 @@ object LoadBalancerFactory {
       }
 
       val balancerStats = rawStatsReceiver.scope("loadbalancer")
-      val balancerExc = new NoBrokersAvailableException(errorLabel)
+      val balancerExc = new NoBrokersAvailableException(params[ErrorLabel].label)
 
       def newBalancer(
         endpoints: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]]
@@ -233,7 +256,12 @@ object LoadBalancerFactory {
         val orderedEndpoints = endpoints.map { set =>
           set.toVector.sortBy(_.address)(addressOrdering)
         }
-        loadBalancerFactory.newBalancer(orderedEndpoints, balancerStats, balancerExc)
+        val underlying = loadBalancerFactory.newBalancer(orderedEndpoints, balancerStats, balancerExc)
+
+        params[WhenNoNodesOpenParam].whenNoNodesOpen match {
+          case WhenNoNodesOpen.PickOne => underlying
+          case WhenNoNodesOpen.FailFast => new NoNodesOpenServiceFactory(underlying)
+        }
       }
 
       val destActivity: Activity[Set[Address]] = Activity(dest.map {
@@ -293,7 +321,7 @@ abstract class LoadBalancerFactory {
    *
    * @param emptyException The exception returned when a balancer's collection is empty.
    *
-   * @note `endpoints` are ordered by the [[LoadBalancerFactory.Ordering]] param.
+   * @note `endpoints` are ordered by the [[LoadBalancerFactory.AddressOrdering]] param.
    */
   def newBalancer[Req, Rep](
     endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],

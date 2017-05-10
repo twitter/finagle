@@ -8,7 +8,7 @@ import scala.util.control.NonFatal
 
 /**
  * A Balancer mix-in which provides the collection over which to load balance
- * by observing `activity`.
+ * by observing `endpoints`.
  */
 private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
@@ -18,7 +18,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
 
   /*
    * Subscribe to the Activity and dynamically update the load
-   * balancer as it (succesfully) changes.
+   * balancer as it (successfully) changes.
    *
    * The observation is terminated when the Balancer is closed.
    */

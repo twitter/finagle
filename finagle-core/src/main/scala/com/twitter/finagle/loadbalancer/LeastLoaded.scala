@@ -27,7 +27,7 @@ private trait LeastLoaded[Req, Rep] extends BalancerNode[Req, Rep] { self: Balan
       super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) =
+            override def close(deadline: Time): Future[Unit] =
               super.close(deadline).ensure {
                 counter.decrementAndGet()
               }

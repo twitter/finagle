@@ -1,6 +1,6 @@
 package com.twitter.finagle.loadbalancer.p2c
 
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory}
 import com.twitter.util.{Activity, Var}

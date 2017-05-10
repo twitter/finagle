@@ -9,8 +9,8 @@ import scala.annotation.tailrec
 import scala.util.Random
 
 private object HeapBalancer {
-  val Penalty = Int.MaxValue
-  val Zero = Int.MinValue + 1
+  val Penalty: Int = Int.MaxValue
+  val Zero: Int = Int.MinValue + 1
 }
 
 /**
@@ -81,7 +81,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
 
   private[this] val loadGauge = statsReceiver.addGauge("load") {
     val loads = synchronized {
-      heap drop(1) map { n =>
+      heap.drop(1).map { n =>
         if (n.load < 0) n.load+Penalty
         else n.load
       }
@@ -173,7 +173,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   private[this] class Wrapped(n: Node, underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def close(deadline: Time) =
+    override def close(deadline: Time): Future[Unit] =
       super.close(deadline) ensure {
         put(n)
       }
@@ -203,7 +203,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     Closable.all(synchronized(heap).map(_.factory):_*).close(deadline)
   }
 
-  def close(deadline: Time) = {
+  def close(deadline: Time): Future[Unit] = {
     Closable.sequence(observation, nodesClosable).close(deadline)
   }
 
@@ -215,5 +215,5 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
 
   private[this] val nodeStatus: Node => Status = _.factory.status
 
-  override val toString = synchronized("HeapBalancer(%d)".format(size))
+  override val toString: String = synchronized("HeapBalancer(%d)".format(size))
 }

@@ -3,11 +3,11 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.conversions.time._
 import com.twitter.finagle.loadbalancer.aperture.{ApertureLeastLoaded, AperturePeakEwma}
 import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
-import com.twitter.finagle.loadbalancer.p2c.{P2CPeakEwma, P2CLeastLoaded}
+import com.twitter.finagle.loadbalancer.p2c.{P2CLeastLoaded, P2CPeakEwma}
 import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, NoBrokersAvailableException}
+import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy}
 import com.twitter.util.{Activity, Duration, Future, Time, Stopwatch}
 import scala.util.Random
 
@@ -206,10 +206,10 @@ object Balancers {
    * deterministic tests.
    *
    * @param useDeterministicOrdering Enables the aperture instance to make use of
-   * the coordinate in [[DeterministicOrdering]] to calculate an order for the
+   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] to calculate an order for the
    * endpoints. In short, this allows coordination for apertures across process
    * boundaries to avoid load concentration when deployed in a distributed system.
-   * See [[DeterministicOrdering]] for more details.
+   * See [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] for more details.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
    * for more details.
@@ -278,10 +278,10 @@ object Balancers {
    * deterministic tests.
    *
    * @param useDeterministicOrdering Enables the aperture instance to make use of
-   * the coordinate in [[DeterministicOrdering]] to calculate an order for the
+   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] to calculate an order for the
    * endpoints. In short, this allows coordination for apertures across process
    * boundaries to avoid load concentration when deployed in a distributed system.
-   * See [[DeterministicOrdering]] for more details.
+   * See [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] for more details.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
    * for more details.
@@ -329,7 +329,8 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
-      newScopedBal(sr, "round_robin", new RoundRobinBalancer(endpoints, sr, exc))
+      newScopedBal(sr, "round_robin",
+        new RoundRobinBalancer(endpoints, sr, exc, maxEffort))
     }
   }
 }

@@ -20,6 +20,7 @@ import com.twitter.finagle.liveness.FailureAccrualFactory;
 import com.twitter.finagle.liveness.FailureAccrualPolicy;
 import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
+import com.twitter.finagle.loadbalancer.WhenNoNodesOpens;
 import com.twitter.finagle.naming.BindingFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
 import com.twitter.finagle.param.ExceptionStatsHandler;
@@ -86,9 +87,11 @@ public class StackParamCompilationTest {
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())
         .configured(new RequestSemaphoreFilter.Param(
-          new Some<AsyncSemaphore>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
+          new Some<>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
+        .configured(new LoadBalancerFactory.WhenNoNodesOpenParam(
+            WhenNoNodesOpens.FAIL_FAST).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
@@ -109,11 +112,11 @@ public class StackParamCompilationTest {
           }
         }).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
-        .configured(new TimeoutFilter.Param(new Tunable.Const<Duration>("id", Duration.Top())).mk())
+        .configured(new TimeoutFilter.Param(new Tunable.Const<>("id", Duration.Top())).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
         .configured(new Transport.Verbose(false).mk())
-        .configured(new Transporter.TrafficClass(new Some<Object>(1)).mk())
+        .configured(new Transporter.TrafficClass(new Some<>(1)).mk())
         .configured(new Listener.TrafficClass(Option.empty()).mk())
         .configured(new Transport.ClientSsl(
           Option.<SslClientConfiguration>empty()).mk())

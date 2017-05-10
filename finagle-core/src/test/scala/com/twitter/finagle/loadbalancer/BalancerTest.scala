@@ -4,28 +4,25 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.{Conductors, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.concurrent.Conductors
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class BalancerTest extends FunSuite
   with Conductors
-  with IntegrationPatience
   with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer(
       protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
     extends Balancer[Unit, Unit] {
+
     def maxEffort: Int = 5
     def emptyException: Throwable = ???
 
     def stats: InMemoryStatsReceiver = statsReceiver
-    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+    protected[this] val maxEffortExhausted = stats.counter("max_effort_exhausted")
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
@@ -69,13 +66,13 @@ class BalancerTest extends FunSuite
   }
 
   def newFac(_status: Status = Status.Open) = new ServiceFactory[Unit, Unit] {
-    def apply(conn: ClientConnection) = Future.never
+    def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
 
-    override def status = _status
+    override def status: Status = _status
 
     @volatile var ncloses = 0
 
-    def close(deadline: Time) = {
+    def close(deadline: Time): Future[Unit] = {
       synchronized { ncloses += 1 }
       Future.Done
     }
@@ -120,20 +117,19 @@ class BalancerTest extends FunSuite
   }
 
   test("max_effort_exhausted counter updated properly") {
-    val stats = new InMemoryStatsReceiver()
-    val bal = new TestBalancer(stats)
+    val bal = new TestBalancer()
     val closed = newFac(Status.Closed)
     val open = newFac(Status.Open)
 
     // start out all closed
     bal.update(Vector(closed))
     bal(ClientConnection.nil)
-    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
 
     // now have it be open and a pick must succeed
     bal.update(Vector(open))
     bal(ClientConnection.nil)
-    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
   }
 
   test("updater: keeps nodes up to date") {

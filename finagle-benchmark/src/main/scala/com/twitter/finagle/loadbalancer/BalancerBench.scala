@@ -41,6 +41,7 @@ object BalancerBench {
 
   private class NullBalancer extends Balancer[Unit, Unit] {
     override protected def maxEffort: Int = 0
+
     override protected def emptyException: Throwable = new Exception()
     override protected def statsReceiver: StatsReceiver = NullStatsReceiver
     override protected[this] def maxEffortExhausted: Counter =

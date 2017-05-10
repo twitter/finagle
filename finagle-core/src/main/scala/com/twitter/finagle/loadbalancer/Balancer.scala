@@ -21,8 +21,8 @@ private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
  * distributing load across a number of nodes.
  *
  * This arrangement allows separate functionality to be mixed in. For
- * example, we can specify and mix in a load metric (via a Node) and
- * a balancer (a Distributor) separately.
+ * example, we can specify and mix in a load metric (via a `Node`) and
+ * a balancer (a `Distributor`) separately.
  */
 private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
   /**
@@ -35,7 +35,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * The throwable to use when the load balancer is empty.
    */
   protected def emptyException: Throwable
-  protected lazy val empty = Future.exception(emptyException)
 
   /**
    * Balancer reports stats here.
@@ -217,6 +216,12 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   protected def invoke(fn: Distributor => Unit): Unit =
     updater(Invoke(fn))
 
+  /**
+   * Returns `null` when `count` reaches 0.
+   *
+   * This indicates that we were unsuccessful in finding a Node
+   * with a `Status.Open`.
+   */
   @tailrec
   private[this] def pick(count: Int): Node = {
     if (count == 0)
@@ -236,7 +241,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       rebuild()
       node = dist.pick()
     }
-
     if (snap.eq(dist) && snap.needsRebuild)
       rebuild()
 

@@ -85,7 +85,7 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { 
       super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) =
+            override def close(deadline: Time): Future[Unit] =
               super.close(deadline).ensure {
                 adjustTotalLoad(-1)
               }

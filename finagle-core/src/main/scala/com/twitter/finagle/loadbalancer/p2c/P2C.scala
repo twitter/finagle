@@ -18,8 +18,8 @@ private[loadbalancer] trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     type This = Distributor
 
     protected def bound: Int = vector.size
-    protected def emptyNode = failingNode(emptyException)
-    protected def rng = self.rng
+    protected def emptyNode: Node = failingNode(emptyException)
+    protected def rng: Rng = self.rng
 
     // There is nothing to rebuild (we don't partition in P2C) so we just return
     // `this` instance.

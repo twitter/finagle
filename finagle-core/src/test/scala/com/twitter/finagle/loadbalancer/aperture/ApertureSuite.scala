@@ -10,7 +10,7 @@ import scala.collection.mutable
 trait ApertureSuite {
   class Empty extends Exception
 
-  private[loadbalancer] trait TestBal
+  private[loadbalancer] abstract class TestBal
     extends Balancer[Unit, Unit]
     with Aperture[Unit, Unit] {
 

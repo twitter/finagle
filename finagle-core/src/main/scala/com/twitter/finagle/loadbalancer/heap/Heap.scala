@@ -13,7 +13,7 @@ private object Heap {
     }
   }
 
-  def apply[T](ord: Ordering[T], indexer: Indexer[T] = Indexer.nil) =
+  def apply[T](ord: Ordering[T], indexer: Indexer[T] = Indexer.nil): Heap[T] =
     new Heap(ord, indexer)
 }
 

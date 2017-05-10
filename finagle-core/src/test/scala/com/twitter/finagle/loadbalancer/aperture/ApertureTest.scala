@@ -4,8 +4,7 @@ import com.twitter.finagle.loadbalancer.NodeT
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
-import com.twitter.finagle.{NoBrokersAvailableException, Status}
+import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, Status}
 import com.twitter.util.{Activity, Await, Duration}
 import org.scalatest.FunSuite
 
@@ -13,7 +12,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
   /**
    * @note We don't mix in a controller for the aperture. This means that the aperture
    * will not expand or contract automatically. Thus, each test in this suite must
-   * manually adjust it or rely on the "rebuild" functionality provided by [[Balancer]]
+   * manually adjust it or rely on the "rebuild" functionality provided by [[com.twitter.finagle.loadbalancer.Balancer]]
    * which kicks in when we select a down node. Since aperture uses P2C to select
    * nodes, we inherit the same probabilistic properties that help us avoid down
    * nodes with the important caveat that we only select over a subset.
@@ -209,7 +208,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     DeterministicOrdering.unsetCoordinate()
 
-    val servers = Vector.tabulate(10) { i => new Factory(i) }
+    val servers = Vector.tabulate(10) { i => Factory(i) }
 
     val distSnap = bal.distx
     bal.update(servers)
@@ -228,7 +227,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     DeterministicOrdering.setCoordinate(0, 5, 10)
 
-    val servers = Vector.tabulate(10) { i => new Factory(i) }
+    val servers = Vector.tabulate(10) { i => Factory(i) }
     bal.update(servers)
 
     val order = bal.distx.vector
@@ -252,7 +251,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     val numClients = 6
     val offset = 0
 
-    bal.update(Vector.tabulate(numServers) { i => new Factory(i) })
+    bal.update(Vector.tabulate(numServers) { i => Factory(i) })
 
     for (i <- 0 until numClients) {
       DeterministicOrdering.setCoordinate(offset, i, numClients)

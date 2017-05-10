@@ -16,6 +16,11 @@ New Features
   * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
 
+  * finagle-core: Allow customization of load balancer behavior when no nodes
+    are `Status.Open`. See the user guide for details:
+    https://twitter.github.io/finagle/guide/Clients.html#behavior-when-no-nodes-are-available
+    ``RB_ID=916145``
+
 Bug Fixes
 ~~~~~~~~~
 
