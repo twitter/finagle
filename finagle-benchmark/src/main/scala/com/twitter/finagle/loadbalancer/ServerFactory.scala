@@ -50,7 +50,7 @@ private object ServerFactory {
         }
         numRequests.incr()
         _numRequests.incrementAndGet()
-        Future.sleep(nextLatency())(DefaultTimer.twitter).ensure {
+        Future.sleep(nextLatency())(DefaultTimer).ensure {
           _load.decrementAndGet()
         }
       }

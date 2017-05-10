@@ -1,6 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, stats, tracing, util}
 import com.twitter.util.{JavaTimer, NullMonitor}
 
@@ -47,7 +48,7 @@ case class Timer(timer: com.twitter.util.Timer) {
     (this, Timer.param)
 }
 object Timer {
-  implicit val param: Stack.Param[Timer] = Stack.Param(Timer(util.DefaultTimer.twitter))
+  implicit val param: Stack.Param[Timer] = Stack.Param(Timer(DefaultTimer))
 }
 
 /**
@@ -78,7 +79,8 @@ object HighResTimer {
       override def stop(): Unit = ()
     }
 
-  implicit val param: Stack.Param[HighResTimer] = Stack.Param(HighResTimer(Default))
+  implicit val param: Stack.Param[HighResTimer] =
+    Stack.Param(HighResTimer(Default))
 }
 
 /**

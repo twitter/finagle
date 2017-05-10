@@ -59,7 +59,7 @@ class ApacheWatcherTest extends FlatSpec
   }
 
   "StatsWatcher" should "count session events" in {
-    val statsWatcher = SessionStats.watcher(watcher.state, statsReceiver, 5.seconds, DefaultTimer.twitter)
+    val statsWatcher = SessionStats.watcher(watcher.state, statsReceiver, 5.seconds, DefaultTimer)
     // Set a constant witness so the Var doesn't reset state
     statsWatcher.changes.respond(_ => ())
     for (ks <- KeeperState.values) {

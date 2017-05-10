@@ -57,7 +57,7 @@ object ThriftServiceIfaceExample {
 
     def timeoutFilter[Req, Rep](duration: Duration) = {
       val exc = new IndividualRequestTimeoutException(duration)
-      val timer = DefaultTimer.twitter
+      val timer = DefaultTimer
       new TimeoutFilter[Req, Rep](duration, exc, timer)
     }
     val filteredLog = timeoutFilter(2.seconds)
@@ -75,7 +75,7 @@ object ThriftServiceIfaceExample {
     })
 
     val retriedGetLogSize =
-      new RetryExceptionsFilter(retryPolicy, DefaultTimer.twitter)
+      new RetryExceptionsFilter(retryPolicy, DefaultTimer)
         .andThen(clientServiceIface.getLogSize)
 
     retriedGetLogSize(GetLogSize.Args())

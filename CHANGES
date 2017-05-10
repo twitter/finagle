@@ -23,6 +23,15 @@ Bug Fixes
     Java users now get the correct types for calls such as `c.t.f.Http.client().withStack`
     and `c.t.f.Http.server().withStack`. ``RB_ID=915440``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.util.DefaultTimer` is decoupled from Netty 3 and is loaded via the
+    `LoadService` machinery. If no timers are available on the class path, the `JavaTimer`
+    instead is used instead. This ony affects direct usages of `DefaultTimer` as all Finagle
+    protocols are using Netty 4 `HashedWheelTimer` at this point. ``RB_ID=915924``
+
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

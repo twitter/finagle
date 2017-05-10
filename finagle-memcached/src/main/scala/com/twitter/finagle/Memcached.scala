@@ -264,7 +264,7 @@ object Memcached extends finagle.Client[Command, Response]
           new DecodingToResponse,
           transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
-        DefaultTimer.twitter
+        DefaultTimer
       )
 
     def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {

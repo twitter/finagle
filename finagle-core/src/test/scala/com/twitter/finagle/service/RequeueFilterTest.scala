@@ -24,7 +24,7 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -53,7 +53,7 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -81,7 +81,7 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     var numNos = 0
     val svc = filter.andThen(Service.mk { s: String =>
@@ -163,7 +163,7 @@ class RequeueFilterTest extends FunSuite {
       NullStatsReceiver,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val stats = new InMemoryStatsReceiver()
 

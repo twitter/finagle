@@ -63,7 +63,7 @@ class JsonExporter(
 
   import JsonExporter._
 
-  def this(registry: Metrics) = this(registry, DefaultTimer.twitter)
+  def this(registry: Metrics) = this(registry, DefaultTimer)
 
   private[this] val mapper = new ObjectMapper
   mapper.registerModule(DefaultScalaModule)

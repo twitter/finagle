@@ -20,7 +20,7 @@ private[lease] class RequestSnooper(
   counter: ByteCounter,
   quantile: Double,
   lr: LogsReceiver = NullLogsReceiver,
-  timer: Timer = DefaultTimer.twitter
+  timer: Timer = DefaultTimer
 ) {
   private[this] val histo = {
     val clk = new ClockFromTimer(timer)

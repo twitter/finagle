@@ -27,7 +27,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   class ServiceDiscovererWithExposedCache(
     varZkSession: Var[ZkSession],
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ) extends ServiceDiscoverer(varZkSession, statsReceiver, ForeverEpoch, timer) {
     val cache = new ZkEntryCache("/foo/bar", NullStatsReceiver)
     cache.setSession(varZkSession.sample)
@@ -327,7 +327,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   test("ServiceDiscoverer rawHealth is reported correctly") {
       val zkSession = Event[ZkSession]()
       val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
-      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer.twitter)
+      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer)
 
       val health = new AtomicReference[ClientHealth](ClientHealth.Healthy)
       sd.rawHealth.changes.register(Witness {

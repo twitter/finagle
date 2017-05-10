@@ -25,7 +25,7 @@ object Client {
 
 class Client(
     override val factory: ServiceFactory[Command, Reply],
-    private[redis] val timer: Timer = DefaultTimer.twitter)
+    private[redis] val timer: Timer = DefaultTimer)
   extends BaseClient(factory)
   with NormalCommands
   with SubscribeCommands

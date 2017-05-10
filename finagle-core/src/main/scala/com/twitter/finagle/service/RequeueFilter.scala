@@ -31,7 +31,7 @@ import com.twitter.util._
  * @param timer Timer used to schedule retries
  *
  * @note consider using a [[Timer]] with high resolution so there is
- * less correlation between retries. For example [[param.HighResTimer.Default]]
+ * less correlation between retries. For example [[com.twitter.finagle.util.DefaultTimer]]
  *
  * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
  *      for more details.

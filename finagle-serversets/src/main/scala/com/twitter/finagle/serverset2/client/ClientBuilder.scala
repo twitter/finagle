@@ -75,7 +75,7 @@ private[serverset2] object ClientBuilder {
     readOnlyOK = false,
     sessionId = None,
     password = None,
-    timer = DefaultTimer.twitter
+    timer = DefaultTimer
   )
 
   def apply() = new ClientBuilder(DefaultConfig)

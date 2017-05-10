@@ -394,7 +394,7 @@ private[http2] class MultiplexedTransporter(
         state match {
           case a: Active if !a.finished =>
             underlying.write(Rst(_curId, Http2Error.CANCEL.code))
-              .by(deadline)(DefaultTimer.twitter) // TODO: Get Timer from stack params
+              .by(deadline)(DefaultTimer) // TODO: Get Timer from stack params
           case _ =>
         }
 

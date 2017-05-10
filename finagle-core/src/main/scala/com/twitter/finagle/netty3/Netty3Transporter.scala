@@ -13,7 +13,7 @@ import com.twitter.finagle.ssl.SessionVerifier
 import com.twitter.finagle.ssl.client.SslClientEngineFactory
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, Stack}
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
@@ -98,7 +98,7 @@ object Netty3Transporter {
   )
 
   val channelFactory: NettyChannelFactory = new NioClientSocketChannelFactory(
-    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer.netty) {
+    Executor, 1 /*# boss threads*/, WorkerPool, HashedWheelTimer.nettyHwt) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
 
@@ -291,7 +291,7 @@ private[netty3] class Netty3Transporter[In, Out](
 
       pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
       pipeline.addFirst("idleDetector",
-        new IdleStateHandler(DefaultTimer.netty, rms, wms, 0, TimeUnit.MILLISECONDS))
+        new IdleStateHandler(HashedWheelTimer.nettyHwt, rms, wms, 0, TimeUnit.MILLISECONDS))
     }
   }
 

@@ -121,7 +121,7 @@ object ScribeRawZipkinTracer {
     scribeHost: String = "localhost",
     scribePort: Int = 1463,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ): ScribeRawZipkinTracer =
     apply(scribeHost, scribePort, "zipkin", statsReceiver, timer, "zipkin-tracer")
 
@@ -156,7 +156,7 @@ private[thrift] class ScribeRawZipkinTracer(
   client: Scribe.FutureIface,
   statsReceiver: StatsReceiver,
   scribeCategory: String = "zipkin",
-  timer: Timer = DefaultTimer.twitter,
+  timer: Timer = DefaultTimer,
   poolSize: Int = 10,
   initialBufferSize: StorageUnit = 512.bytes,
   maxBufferSize: StorageUnit = 1.megabyte

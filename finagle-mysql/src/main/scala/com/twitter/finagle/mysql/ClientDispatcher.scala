@@ -129,7 +129,7 @@ class ClientDispatcher(
 
   override def close(deadline: Time): Future[Unit] =
     trans.write(QuitRequest.toPacket)
-      .by(DefaultTimer.twitter, deadline).ensure(super.close(deadline))
+      .by(DefaultTimer, deadline).ensure(super.close(deadline))
 
   /**
    * Performs the connection phase. The phase should only be performed

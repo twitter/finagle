@@ -23,7 +23,7 @@ private object RawZipkinTracer {
 // See https://github.com/openzipkin/zipkin-finagle
 abstract class RawZipkinTracer(
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer.twitter)
+    timer: Timer = DefaultTimer)
   extends Tracer
 {
   import RawZipkinTracer._

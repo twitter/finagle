@@ -193,7 +193,7 @@ private[twitter] class ServerDispatcher(
 ) extends Closable with Lessee {
   import ServerDispatcher.State
 
-  private[this] implicit val injectTimer = DefaultTimer.twitter
+  private[this] implicit val injectTimer = DefaultTimer
   private[this] val tracker = new Tracker[Message]
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val duplicateTagCounter = statsReceiver.counter("duplicate_tag")
