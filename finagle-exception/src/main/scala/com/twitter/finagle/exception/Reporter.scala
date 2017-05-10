@@ -2,10 +2,11 @@ package com.twitter.finagle.exception
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle.Thrift
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.exception.thriftscala.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{Protocols, ThriftClientFramedCodec}
+import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ReporterFactory
 import com.twitter.util.{Future, GZIPStringEncoder, Monitor, NullMonitor, Time}
@@ -46,35 +47,7 @@ object Reporter {
   def defaultReporter(scribeHost: String, scribePort: Int, serviceName: String): Reporter = {
     new Reporter(makeClient(scribeHost, scribePort), serviceName)
   }
-
-  /**
-   * Create a default client reporter.
-   *
-   * Default means the Reporter instance created by defaultReporter with the addition of
-   * reporting the client based on the localhost address as the client endpoint.
-   *
-   * It returns a String => Reporter, which conforms to ClientBuilder's monitor option.
-   */
-  @deprecated("Use reporterFactory instead")
-  def clientReporter(scribeHost: String, scribePort: Int): String => Monitor = {
-    monitorFactory(scribeHost, scribePort).clientMonitor
-  }
-
-  /**
-   * Create a default source (i.e. server) reporter.
-   *
-   * Default means the Reporter instance created by defaultReporter with the addition of
-   * reporting the source based on the SocketAddress argument.
-   *
-   * It returns a (String, SocketAddress) => Reporter, which conforms to ServerBuilder's
-   * monitor option.
-   */
-  @deprecated("Use reporterFactory instead")
-  def sourceReporter(scribeHost: String, scribePort: Int): (String, SocketAddress) => Monitor = {
-    monitorFactory(scribeHost, scribePort).serverMonitor
-  }
-
-
+  
   /**
    * Create a reporter factory that can produce either a client or server reporter based
    * on the signature.
@@ -93,12 +66,11 @@ object Reporter {
     val service = ClientBuilder() // these are from the zipkin tracer
       .name("exception_reporter")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .codec(ThriftClientFramedCodec())
+      .stack(Thrift.client
+        // somewhat arbitrary, but bounded timeouts
+        .withSessionPool.maxWaiters(250))
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
-      // using an arbitrary, but bounded number of waiters to avoid memory leaks
-      .hostConnectionMaxWaiters(250)
-      // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
       .daemon(true)
       .build()

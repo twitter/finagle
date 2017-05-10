@@ -39,8 +39,8 @@ class CorsTest extends FlatSpec with MustMatchers {
   "Cors.HttpFilter" should "handle preflight requests" in {
     val request = Request()
     request.method = Method.Options
-    request.headers.set("Origin", "thestreet")
-    request.headers.set("Access-Control-Request-Method", "BRR")
+    request.headerMap.set("Origin", "thestreet")
+    request.headerMap.set("Access-Control-Request-Method", "BRR")
 
     val response = Await result service(request)
     response.headerMap.get("Access-Control-Allow-Origin") must be(Some("thestreet"))
@@ -68,7 +68,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   it should "respond to unacceptable cross-origin requests without CORS headers" in {
     val request = Request()
     request.method = Method.Options
-    request.headers.set("Origin", "theclub")
+    request.headerMap.set("Origin", "theclub")
 
     val response = Await result service(request)
     response.status must be(Status.Ok)
@@ -82,7 +82,7 @@ class CorsTest extends FlatSpec with MustMatchers {
   it should "handle simple requests" in {
     val request = Request()
     request.method = TRAP
-    request.headers.set("Origin", "juughaus")
+    request.headerMap.set("Origin", "juughaus")
 
     val response = Await result service(request)
     response.headerMap.get("Access-Control-Allow-Origin") must be(Some("juughaus"))

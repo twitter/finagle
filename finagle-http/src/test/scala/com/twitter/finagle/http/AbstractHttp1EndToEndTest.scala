@@ -83,7 +83,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
 
       val client = connect(service)
       val request = Request("/")
-      request.headers().add("header", "a" * 8192)
+      request.headerMap.add("header", "a" * 8192)
       val response = await(client(request))
 
       assert(response.status == Status.RequestHeaderFieldsTooLarge)

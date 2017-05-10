@@ -1,8 +1,8 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     'finagle/finagle-mux',
     'util/util-core',
-    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core',
   ],
   fatal_warnings=True,
   sources=rglobs('*.java')

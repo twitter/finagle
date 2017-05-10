@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle._
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.Reader
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,7 +39,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
     }
 
     Response(
-      in.httpResponse,
+      Bijections.responseToNetty(in),
       new Reader {
         def read(n: Int) = in.reader.read(n) respond {
           case Return(None) => done()

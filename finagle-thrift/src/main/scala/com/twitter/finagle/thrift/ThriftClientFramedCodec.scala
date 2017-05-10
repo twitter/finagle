@@ -14,18 +14,22 @@ import org.jboss.netty.channel._
  * supports upgrading in order to provide TraceContexts across
  * requests.
  */
+@deprecated("Use the com.twitter.finagle.Thrift object to build a client", "2016-12-01")
 object ThriftClientFramedCodec {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodecFactory]].
    * Passing a ClientId will propagate that information to the server iff the server is a finagle
    * server.
    */
+  @deprecated("Use the com.twitter.finagle.Thrift object to build a client", "2016-12-01")
   def apply(clientId: Option[ClientId] = None): ThriftClientFramedCodecFactory =
     new ThriftClientFramedCodecFactory(clientId)
 
+  @deprecated("Use Thrift.client to configure the thrift framed protocol", "2016-12-01")
   def get(): ThriftClientFramedCodecFactory = apply()
 }
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a client", "2016-12-01")
 class ThriftClientFramedCodec(
     protocolFactory: TProtocolFactory,
     config: ClientCodecConfig,

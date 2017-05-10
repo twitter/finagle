@@ -1,7 +1,6 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.Metrics
-import com.twitter.finagle.toggle.flag
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -83,29 +82,6 @@ class StatsFormatterTest extends FunSuite {
     includeEmptyHistograms.let(false) {
       val formatted = formatter(values)
       assert(Map("empty_histo.count" -> 0) == formatted)
-    }
-  }
-
-  test("shouldIncludeEmptyHistograms uses flag when set") {
-    flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 1.0) {
-      includeEmptyHistograms.let(false) {
-        assert(!StatsFormatter.shouldIncludeEmptyHistograms)
-      }
-      includeEmptyHistograms.let(true) {
-        assert(StatsFormatter.shouldIncludeEmptyHistograms)
-      }
-    }
-  }
-
-  test("shouldIncludeEmptyHistograms uses toggle when flag not set") {
-    includeEmptyHistograms.letClear {
-      flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 0.0) {
-        assert(!StatsFormatter.shouldIncludeEmptyHistograms)
-      }
-
-      flag.overrides.let(StatsFormatter.ExportEmptyHistogramToggleId, 1.0) {
-        assert(StatsFormatter.shouldIncludeEmptyHistograms)
-      }
     }
   }
 

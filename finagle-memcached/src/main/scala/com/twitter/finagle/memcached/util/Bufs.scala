@@ -2,11 +2,10 @@ package com.twitter.finagle.memcached.util
 
 import com.google.common.base.Strings
 import com.twitter.io.Buf
+import scala.collection.breakOut
 import scala.language.implicitConversions
 
 private[finagle] object Bufs {
-
-  final val INVALID_KEY_CHARACTERS = Set('\n'.toByte, '\u0000'.toByte, '\r'.toByte, ' '.toByte)
 
   /**
    * @return the Buf representation of non-empty and non-null Strings, else null
@@ -27,7 +26,7 @@ private[finagle] object Bufs {
       null
     }
     else {
-      strings.map(nonEmptyStringToBuf).toSeq
+      strings.map(nonEmptyStringToBuf)(breakOut)
     }
   }
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.exp
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.logging.Logger
+import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util.Future
 
 /**
@@ -22,15 +22,15 @@ class DarkTrafficFilter[Req, Rep](
   extends SimpleFilter[Req, Rep]
   with AbstractDarkTrafficFilter {
 
+  import DarkTrafficFilter.log
+
   def this(
     darkService: Service[Req, Rep],
     enableSampling: Req => Boolean,
     statsReceiver: StatsReceiver
   ) = this(darkService, enableSampling, statsReceiver, false)
 
-  private[this] val log = Logger.get("DarkTrafficFilter")
-
-  override def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     if (forwardAfterService) {
       service(request).ensure {
         sendDarkRequest(request)(enableSampling, darkService)
@@ -40,7 +40,15 @@ class DarkTrafficFilter[Req, Rep](
     }
   }
 
-  override protected def handleFailedInvocation(t: Throwable): Unit = {
-    log.error(t, t.getMessage)
+  protected def handleFailedInvocation(t: Throwable): Unit = {
+    val level = t match {
+      case hll: HasLogLevel => hll.logLevel
+      case _ => Level.WARNING
+    }
+    log.log(level, t, s"DarkTrafficFilter Failed invocation: ${t.getMessage}")
   }
+}
+
+private object DarkTrafficFilter {
+  val log: Logger = Logger.get("DarkTrafficFilter")
 }

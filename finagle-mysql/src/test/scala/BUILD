@@ -1,4 +1,4 @@
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
@@ -7,13 +7,11 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-mysql',
+    'finagle/finagle-mysql/src/test/resources',
     '3rdparty/jvm/com/github/ben-manes/caffeine:caffeine',
     'finagle/finagle-core/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-mysql/src/test/resources'
-  ]
 )

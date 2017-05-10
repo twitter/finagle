@@ -10,6 +10,10 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 
+private object RawZipkinTracer {
+  val ErrorAnnotation = "%s: %s" // annotation: errorMessage
+}
+
 /**
  * Receives the Finagle generated traces and sends them off to Zipkin
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
@@ -19,10 +23,10 @@ import java.nio.ByteBuffer
 // See https://github.com/openzipkin/zipkin-finagle
 abstract class RawZipkinTracer(
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer.twitter)
+    timer: Timer = DefaultTimer)
   extends Tracer
 {
-  private[this] val ErrorAnnotation = "%s: %s" // annotation: errorMessage
+  import RawZipkinTracer._
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap: DeadlineSpanMap =
@@ -33,7 +37,7 @@ abstract class RawZipkinTracer(
   /**
    * Always sample the request.
    */
-  def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
+  def sampleTrace(traceId: TraceId): Option[Boolean] = Tracer.SomeTrue
 
   override def isActivelyTracing(traceId: TraceId): Boolean = true
 

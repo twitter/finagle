@@ -4,18 +4,19 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Mux.param.MuxImpl
 import com.twitter.finagle._
 import com.twitter.finagle.context.RemoteInfo
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
+import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
@@ -44,9 +45,9 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
     super.test(testName, testTags:_*) {
-      mux.sessionFailureDetector.let("none") { f }
+      liveness.sessionFailureDetector.let("none") { f }
     }
   }
 
@@ -60,8 +61,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       Future.value(Response(Buf.Utf8(stringer.toString)))
     })
 
-
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     Dtab.unwind {
       Dtab.local ++= Dtab.read("/foo=>/bar; /web=>/$/inet/twitter.com/80")
@@ -77,15 +78,16 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   test(s"$implName: (no) Dtab propagation") {
     val server = Mux.server.configured(serverImpl).serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val bw = BufWriter.fixed(4)
+      val bw = ByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
       Future.value(Response(bw.owned()))
     })
 
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
-    val br = BufReader(payload)
+    val br = ByteReader(payload)
 
     assert(br.remaining == 4)
     assert(br.readIntBE() == 0)
@@ -117,9 +119,9 @@ abstract class AbstractEndToEndTest extends FunSuite
 
     client = Mux.client
       .configured(param.Tracer(tracer))
-      .configured(param.Label("theClient"))
       .configured(clientImpl)
-      .newService(server)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "theClient")
 
     Await.result(client(Request.empty), 30.seconds)
 
@@ -168,6 +170,40 @@ abstract class AbstractEndToEndTest extends FunSuite
     Await.result(client.close(), 30.seconds)
   }
 
+  test(s"$implName: propagate c.t.f.Failures") {
+    var respondWith: Failure = null
+    val service = new Service[Request, Response] {
+      def apply(req: Request): Future[Response] = {
+        Future.exception(respondWith)
+      }
+    }
+
+    val server = Mux.serve("localhost:*", service)
+    val address = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
+    // Don't mask failures so we can examine which flags were propagated
+    // Remove the retries module because otherwise requests will be retried until the default budget
+    // is exceeded and then flagged as NonRetryable.
+    val client = Mux.client.transformed(_.remove(Failure.role).remove(Retries.Role))
+        .newService(address, "client")
+
+    def check(f: Failure): Unit = {
+      respondWith = f
+      Await.result(client(Request.empty).liftToTry, 5.seconds) match {
+        case Throw(rep: Failure) =>
+          assert(rep.isFlagged(f.flags))
+        case x =>
+          fail(s"Expected Failure, got $x")
+      }
+    }
+
+    check(Failure("Nah", Failure.Rejected))
+    check(Failure("Nope", Failure.NonRetryable))
+    check(Failure("", Failure.Restartable))
+
+    Await.result(server.close(), 30.seconds)
+    Await.result(client.close(), 30.seconds)
+  }
+
   test(s"$implName: gracefully reject sessions") {
     val factory = new ServiceFactory[Request, Response] {
       def apply(conn: ClientConnection): Future[Service[Request, Response]] =
@@ -177,10 +213,11 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     val server = Mux.server.configured(serverImpl).serve("localhost:*", factory)
-    val client = Mux.client.configured(clientImpl).newService(server)
+    val client = Mux.client.configured(clientImpl).newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     // This will try until it exhausts its budget. That's o.k.
-    val failure = intercept[Failure] { Await.result(client(Request.empty)) }
+    val failure = intercept[Failure] { Await.result(client(Request.empty), 30.seconds) }
 
     // Failure.Restartable is stripped.
     assert(!failure.isFlagged(Failure.Restartable))
@@ -290,7 +327,9 @@ EOF
 
       val sr = new InMemoryStatsReceiver
 
-      val factory = Mux.client.configured(clientImpl).configured(param.Stats(sr)).newClient(server)
+      val factory = Mux.client.configured(clientImpl).configured(param.Stats(sr)).newClient(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
       val fclient = factory()
       eventually { assert(fclient.isDefined) }
 
@@ -342,9 +381,9 @@ EOF
 
     val client = Mux.client
       .configured(clientImpl)
-      .withLabel("client")
       .withStatsReceiver(sr)
-      .newService(server)
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))), 5.seconds)
 

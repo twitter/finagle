@@ -3,10 +3,10 @@ package com.twitter.finagle.zookeeper
 import com.twitter.common.quantity.{Amount, Time => CommonTime}
 import com.twitter.common.zookeeper.{ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
-import com.twitter.conversions.common.quantity._
 import com.twitter.finagle.addr.StabilizingAddr.State._
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.util.Duration
+import java.lang.{Long => JLong}
 import java.net.InetSocketAddress
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{Watcher, WatchedEvent}
@@ -26,10 +26,15 @@ private[finagle] class ZooKeeperHealthHandler extends Watcher {
   } permit.release()
 }
 
+private[zookeeper] object DurationHelper {
+  private[finagle] def convertToDuration(amt: Amount[JLong, CommonTime]): Duration =
+    Duration(amt.getValue.longValue, amt.getUnit.getTimeUnit)
+}
+
 private[finagle] object DefaultZkClientFactory
-  extends ZkClientFactory(Amount.of(
+  extends ZkClientFactory(DurationHelper.convertToDuration(Amount.of(
     ZooKeeperUtils.DEFAULT_ZK_SESSION_TIMEOUT.getValue.toLong,
-    ZooKeeperUtils.DEFAULT_ZK_SESSION_TIMEOUT.getUnit).toDuration)
+    ZooKeeperUtils.DEFAULT_ZK_SESSION_TIMEOUT.getUnit)))
 
 private[finagle] class ZkClientFactory(val sessionTimeout: Duration) {
   private[this] val zkClients: mutable.Map[Set[InetSocketAddress], ZooKeeperClient] = mutable.Map()

@@ -10,18 +10,17 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, BufReader}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMessage}
 
 
 private[finagle] class Netty3StreamTransport[
-  In <: Message,
-  Out <: Message,
-  NettyIn <: HttpMessage,
-  NettyOut <: HttpMessage](
+    In <: Message,
+    Out <: Message,
+    NettyIn <: HttpMessage,
+    NettyOut <: HttpMessage: Manifest](
     rawTransport: Transport[Any, Any],
-    mkMessage: (NettyOut, Reader) => Out
-  )(implicit injection: Injection[In, NettyIn])
+    mkMessage: (NettyOut, Reader) => Out)
+    (implicit injection: Injection[In, NettyIn])
   extends StreamTransportProxy[In, Out](rawTransport) {
 
   private[this] val transport = Transport.cast[NettyIn, NettyOut](rawTransport)
@@ -30,7 +29,7 @@ private[finagle] class Netty3StreamTransport[
       val reader = BufReader(ChannelBufferBuf.Owned(res.getContent))
       Future.value(Multi(mkMessage(res, reader), Future.Done))
     case res =>
-      val coll: Reader with Future[Unit] = Transport.collate(transport, readChunk)
+      val coll: Reader with Future[Unit] = Transport.collate(rawTransport, readChunk)
       Future.value(Multi(mkMessage(res, coll), coll))
   }
 
@@ -55,21 +54,7 @@ private[finagle] class Netty3ClientStreamTransport(transport: Transport[Any, Any
 private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any])
   extends Netty3StreamTransport[Response, Request, HttpResponse, HttpRequest](
     transport,
-    {
-      case (badReq: BadHttpRequest, _) =>
-        badReq.exception match {
-          case ex: TooLongFrameException =>
-            if (ex.getMessage().startsWith("An HTTP line is larger than "))
-              BadRequest.uriTooLong(badReq)
-            else if (ex.getMessage().startsWith("HTTP content length exceeded "))
-              BadRequest.contentTooLong(badReq)
-            else
-              BadRequest.headerTooLong(badReq)
-          case _ =>
-            BadRequest(badReq)
-        }
-
-      case (req: HttpRequest, reader: Reader) =>
+    { case (req: HttpRequest, reader: Reader) =>
         Request(
           req,
           reader,

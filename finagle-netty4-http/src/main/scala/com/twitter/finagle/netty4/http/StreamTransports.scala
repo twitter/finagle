@@ -7,7 +7,7 @@ import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Writer, Buf, Reader}
 import com.twitter.util._
-import io.netty.handler.codec.{http => NettyHttp, TooLongFrameException}
+import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
 
@@ -75,11 +75,11 @@ private[http] object StreamTransports {
     case chunk: NettyHttp.HttpContent if chunk.content.readableBytes == 0 =>
       Buf.Empty
     case chunk: NettyHttp.HttpContent =>
-      ByteBufAsBuf.Owned(chunk.content)
+      ByteBufAsBuf(chunk.content)
   }
 
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
-    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Owned(buf))
+    new NettyHttp.DefaultHttpContent(BufAsByteBuf(buf))
 
   /**
    * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.
@@ -101,7 +101,7 @@ private[http] object StreamTransports {
     }
   }
 
-  val isLast: NettyHttp.HttpObject => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
+  val isLast: Any => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
 }
 
 private[finagle] class Netty4ServerStreamTransport(
@@ -127,19 +127,6 @@ private[finagle] class Netty4ServerStreamTransport(
 
   def read(): Future[Multi[Request]] = {
     transport.read().flatMap {
-      case req: NettyHttp.HttpRequest if req.decoderResult.isFailure =>
-        val exn = req.decoderResult.cause
-        val bad = exn match {
-          case ex: TooLongFrameException =>
-            if (ex.getMessage.startsWith("An HTTP line is larger than "))
-              BadRequest.uriTooLong(exn)
-            else
-              BadRequest.headerTooLong(exn)
-          case _ =>
-            BadRequest(exn)
-        }
-        Future.value(Multi(bad, Future.Done))
-
       case req: NettyHttp.FullHttpRequest =>
         val finagleReq = Bijections.netty.fullRequestToFinagle(req,
           transport.remoteAddress match {
@@ -151,9 +138,8 @@ private[finagle] class Netty4ServerStreamTransport(
 
       case req: NettyHttp.HttpRequest =>
         assert(!req.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
-        assert(NettyHttp.HttpUtil.isTransferEncodingChunked(req))
 
-        val coll = collate(transport, readChunk)(isLast)
+        val coll = collate(rawTransport, readChunk)(isLast)
         val finagleReq = Bijections.netty.chunkedRequestToFinagle(
           req,
           coll,
@@ -197,8 +183,7 @@ private[finagle] class Netty4ClientStreamTransport(
       // chunked message, collate the transport
       case rep: NettyHttp.HttpResponse =>
         assert(!rep.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
-        assert(NettyHttp.HttpUtil.isTransferEncodingChunked(rep))
-        val coll = collate(transport, readChunk)(isLast)
+        val coll = collate(rawTransport, readChunk)(isLast)
         val finagleRep: Response = Bijections.netty.chunkedResponseToFinagle(rep, coll)
         Future.value(Multi(finagleRep, coll))
 

@@ -5,6 +5,7 @@ import com.twitter.logging.HasLogLevel
 import com.twitter.util.Monitor
 import java.io.IOException
 import java.util.logging.{Level, Logger}
+import scala.annotation.tailrec
 
 /**
  * A monitor that unrolls the exception causes to report source information if any
@@ -29,6 +30,7 @@ class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
     false
   }
 
+  @tailrec
   private[this] def unrollCauses(exc: Throwable, res: Seq[String] = Nil): Seq[String] = exc match {
     case null => res.reverse
     case se: SourcedException => unrollCauses(se.getCause, se.serviceName +: res)

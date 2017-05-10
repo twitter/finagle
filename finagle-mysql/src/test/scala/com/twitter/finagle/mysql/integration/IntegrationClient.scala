@@ -2,11 +2,11 @@ package com.twitter.finagle.mysql.integration
 
 import com.twitter.finagle.Mysql
 import com.twitter.finagle.mysql._
-import com.twitter.util.NonFatal
 import java.io.{File, FileInputStream}
 import java.net.{ServerSocket, BindException}
 import java.util.logging.{Level, Logger}
 import java.util.Properties
+import scala.util.control.NonFatal
 
 trait IntegrationClient {
   private val logger = Logger.getLogger("integration-client")
@@ -45,7 +45,7 @@ trait IntegrationClient {
     .withCredentials(username, password)
     .withDatabase(db)
 
-  val client: Option[Client] = if (isAvailable) {
+  val client: Option[Client with Cursors] = if (isAvailable) {
     logger.log(Level.INFO, "Attempting to connect to mysqld @ localhost:3306")
     val username = p.getProperty("username", "<user>")
     val password = p.getProperty("password", null)

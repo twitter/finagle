@@ -2,15 +2,19 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
 import com.twitter.util.{Await, Future, Time}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
+import java.security.{Principal, PrivilegedAction}
 import java.util.Arrays.{equals => arrayEquals}
+import javax.security.auth.Subject
+import javax.security.auth.kerberos.{KerberosPrincipal, KerberosTicket}
+import javax.security.auth.login.LoginContext
 import org.ietf.jgss.GSSContext
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{stub, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
@@ -62,6 +66,70 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     } finally {
       server.close(Time.Bottom)
     }
+  }
+
+  test("isLoginValid returns correct result") {
+    /** Temp class so we can expose isLoginValid which is protected by the JAAS trait */
+    class JaasLoginTest extends Credentials.ClientSource with Credentials.JAAS {
+      override def init(context: GSSContext, challengeToken: Option[Token]): Future[Token] = ???
+
+      override val loginContext: String = ""
+
+      override protected def createGSSContext(): GSSContext = ???
+
+      def testIsLoginValid(portal: Option[LoginContext]) = super.isLoginValid(portal)
+
+    }
+
+    /** Subject credentials are secured so we need a privileged action to modify them */
+    def addCreds(subject: Subject, ticket: KerberosTicket) =
+      new PrivilegedAction[Boolean] {
+        def run(): Boolean = subject.getPrivateCredentials(classOf[KerberosTicket]).add(ticket)
+      }
+
+    def createTicketWithEndTime(end: Time, principal: KerberosPrincipal): KerberosTicket =
+      new KerberosTicket(
+        new Array[Byte](10),
+        principal,
+        principal,
+        new Array[Byte](10),
+        0,
+        new Array[Boolean](10),
+        Time.now.toDate,
+        Time.now.toDate,
+        end.toDate,
+        Time.Top.toDate,
+        new Array[InetAddress](10)
+      )
+
+    def createSubjectWithTicket(ticket: KerberosTicket): Subject = {
+      val creds = new java.util.HashSet[KerberosTicket]()
+      creds.add(ticket)
+      new Subject(
+        false,
+        new java.util.HashSet[Principal](),
+        new java.util.HashSet(),
+        creds
+      )
+    }
+
+    val jaas = new JaasLoginTest
+    // Needs to start with 'krbtgt/' and have a realm (@REALM.NAME).
+    val principal = new KerberosPrincipal("krbtgt/random@TEST.REALM")
+
+    // End date for TGT has not passed yet, ticket is valid
+    val goodTicket = createTicketWithEndTime(Time.Top, principal)
+    val goodSubject = createSubjectWithTicket(goodTicket)
+    val goodLoginContext = mock[LoginContext]
+    stub(goodLoginContext.getSubject).toReturn(goodSubject)
+    assert(jaas.testIsLoginValid(Some(goodLoginContext)))
+
+    // End date for TGT has already passed, ticket is invalid
+    val badTicket = createTicketWithEndTime(Time.Bottom, principal)
+    val badSubject = createSubjectWithTicket(badTicket)
+    val badLoginContext = mock[LoginContext]
+    stub(badLoginContext.getSubject).toReturn(badSubject)
+    assert(!jaas.testIsLoginValid(Some(badLoginContext)))
   }
 
   /**

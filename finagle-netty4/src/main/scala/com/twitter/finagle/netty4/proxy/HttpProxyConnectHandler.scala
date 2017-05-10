@@ -1,13 +1,14 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{ChannelClosedException, Failure, ConnectionFailedException}
+import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, Failure}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
+import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
-import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
+import io.netty.util.ReferenceCountUtil
+import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.net.SocketAddress
 
@@ -44,15 +45,17 @@ private[netty4] class HttpProxyConnectHandler(
   with BufferingChannelOutboundHandler
   with ConnectPromiseDelayListeners { self =>
 
-  private[this] val httpCodecKey: String = "http proxy client codec"
-  private[this] var connectPromise: ChannelPromise = _
+  private[this] final def httpCodecKey = "httpProxyClientCodec"
 
-  private[this] def proxyAuthorizationHeader(c: Credentials): String = {
+  private[this] var connectPromise: ChannelPromise = _
+  private[this] var proxyResponseStatus: HttpResponseStatus = _
+
+  private[this] final def proxyAuthorizationHeader(c: Credentials): String = {
     val bytes = "%s:%s".format(c.username, c.password).getBytes(UTF_8)
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 
-  private[this] def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
+  private[this] final def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
     // We "try" because it might be already cancelled and we don't need to handle
     // cancellations here - it's already done by `proxyCancellationsTo`.
     connectPromise.tryFailure(t)
@@ -68,6 +71,8 @@ private[netty4] class HttpProxyConnectHandler(
     val proxyConnectPromise = ctx.newPromise()
 
     // Cancel new promise if an original one is canceled.
+    // NOTE: We don't worry about cancelling/failing pending writes here since it will happen
+    // automatically on channel closure.
     promise.addListener(proxyCancellationsTo(proxyConnectPromise, ctx))
 
     // Fail old promise if a new one is failed.
@@ -85,11 +90,7 @@ private[netty4] class HttpProxyConnectHandler(
           )
 
           ctx.writeAndFlush(req)
-
-          // We issue a read request if auto-read is disabled.
-          if (!ctx.channel().config().isAutoRead) {
-            ctx.read()
-          }
+          readIfNeeded(ctx)
         } else {
           // The connect request was cancelled or failed so the channel was never active. Since no
           // writes are expected from the previous handler, no need to fail the pending writes.
@@ -105,27 +106,27 @@ private[netty4] class HttpProxyConnectHandler(
     ctx.connect(remote, local, proxyConnectPromise)
   }
 
-  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
-    case rep: FullHttpResponse =>
-      // A remote HTTP proxy is ready to proxy traffic to an ultimate destination. We no longer
-      // need HTTP proxy pieces in the pipeline.
-      if (rep.status() == HttpResponseStatus.OK) {
-        ctx.pipeline().remove(httpCodecKey)
-        ctx.pipeline().remove(self) // drains pending writes when removed
+  override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
+    def finishOrRead(o: HttpObject): Unit = {
+      ReferenceCountUtil.release(o)
 
-        connectPromise.trySuccess()
-        // We don't release `req` since by specs, we don't expect any payload sent back from a
-        // a web proxy server.
-      } else {
-        val failure = new ConnectionFailedException(
-          Failure(s"Unexpected status returned from an HTTP proxy server: ${rep.status()}."),
-          ctx.channel().remoteAddress()
-        )
+      if (o.isInstanceOf[LastHttpContent]) finishProxyHandshake(ctx)
+      else readIfNeeded(ctx)
+    }
 
-        fail(ctx, failure)
-        ctx.close()
-      }
-    case other => ctx.fireChannelRead(other)
+    msg match {
+      case rep: HttpResponse =>
+        // The first portion of a response has arrived so we capture the status.
+        proxyResponseStatus = rep.status()
+        finishOrRead(rep)
+
+      case chunk: HttpContent =>
+        // Some proxy servers send their error messages as HTML formatted documents so
+        // we need to swallow them.
+        finishOrRead(chunk)
+
+      case other => ctx.fireChannelRead(other)
+    }
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
@@ -138,5 +139,33 @@ private[netty4] class HttpProxyConnectHandler(
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     fail(ctx, new ChannelClosedException(ctx.channel().remoteAddress()))
     ctx.fireChannelInactive()
+  }
+
+  private[this] final def finishProxyHandshake(ctx: ChannelHandlerContext): Unit = {
+    // A remote HTTP proxy is ready to proxy traffic to an ultimate destination. We no longer
+    // need HTTP proxy pieces in the pipeline.
+    if (proxyResponseStatus == HttpResponseStatus.OK) {
+      ctx.pipeline().remove(httpCodecKey)
+      ctx.pipeline().remove(self) // drains pending writes when removed
+
+      connectPromise.trySuccess()
+      // We don't release `req` since by specs, we don't expect any payload sent back from a
+      // a web proxy server in a successful case.
+    } else {
+      val failure = new ConnectionFailedException(
+        Failure(s"Unexpected status returned from an HTTP proxy server: $proxyResponseStatus."),
+        ctx.channel().remoteAddress()
+      )
+
+      fail(ctx, failure)
+      ctx.close()
+    }
+  }
+
+  private[this] final def readIfNeeded(ctx: ChannelHandlerContext): Unit = {
+    // We issue a read request if auto-read is disabled.
+    if (!ctx.channel().config().isAutoRead) {
+      ctx.read()
+    }
   }
 }

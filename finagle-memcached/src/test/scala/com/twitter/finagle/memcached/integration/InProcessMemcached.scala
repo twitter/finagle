@@ -1,8 +1,8 @@
 package com.twitter.finagle.memcached.integration
 
 import _root_.java.net.SocketAddress
-import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.ListeningServer
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle.memcached.{Entry, Interpreter, InterpreterService}
 import com.twitter.io.Buf
@@ -21,16 +21,12 @@ class InProcessMemcached(address: SocketAddress) {
     new InterpreterService(interpreter)
   }
 
-  private[this] val serverSpec =
-    ServerBuilder()
-      .name("finagle")
-      .codec(Memcached())
-      .bindTo(address)
+  private[this] val serverSpec = Memcached.server.withLabel("finagle")
 
-  private[this] var server: Option[BuiltServer] = None
+  private[this] var server: Option[ListeningServer] = None
 
-  def start(): BuiltServer = {
-    server = Some(serverSpec.build(service))
+  def start(): ListeningServer = {
+    server = Some(serverSpec.serve(address, service))
     server.get
   }
 

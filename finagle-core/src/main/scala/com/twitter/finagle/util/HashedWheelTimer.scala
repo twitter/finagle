@@ -162,20 +162,3 @@ object HashedWheelTimer {
     () => 10.seconds,
     FinagleStatsReceiver.scope("timer"))
 }
-
-/**
- * Retained for compatibility. Prefer [[HashedWheelTimer]].
- */
-object DefaultTimer {
-  private[finagle] val netty = HashedWheelTimer.nettyHwt
-
-  /**
-   * An alias for [[HashedWheelTimer.Default]].
-   */
-  val twitter: Timer = HashedWheelTimer.Default
-
-  val get: DefaultTimer.type = this
-
-  override def toString: String = "DefaultTimer"
-
-}

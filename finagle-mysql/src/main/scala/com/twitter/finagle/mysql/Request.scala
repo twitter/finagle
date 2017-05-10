@@ -158,6 +158,19 @@ case class HandshakeResponse(
   }
 }
 
+class FetchRequest(val prepareOK: PrepareOK, val numRows: Int) extends CommandRequest(Command.COM_STMT_FETCH) {
+  val stmtId = prepareOK.id
+
+  override def toPacket: Packet = {
+    val bw = MysqlBuf.writer(new Array[Byte](9))
+    bw.writeByte(cmd)
+    bw.writeIntLE(stmtId)
+    bw.writeIntLE(numRows)
+
+    Packet(seq, bw.owned())
+  }
+}
+
 /**
  * Uses the binary protocol to build an execute request for
  * a prepared statement.
@@ -236,22 +249,24 @@ class ExecuteRequest(
       val composite = if (hasNewParams) {
         val types = MysqlBuf.writer(new Array[Byte](params.size * 2))
         params foreach { writeTypeCode(_, types) }
-        bw.owned()
-          .concat(nullBitmap)
-          .concat(newParamsBoundBuf)
-          .concat(types.owned())
-          .concat(values.owned())
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          types.owned(),
+          values.owned()))
       } else {
-        bw.owned()
-          .concat(nullBitmap)
-          .concat(newParamsBoundBuf)
-          .concat(values.owned())
+        Buf(Seq(bw.owned(),
+          nullBitmap,
+          newParamsBoundBuf,
+          values.owned()))
       }
       Packet(seq, composite)
     }
 }
 
 object ExecuteRequest {
+  val FLAG_CURSOR_READ_ONLY = 0x01.toByte // CURSOR_TYPE_READ_ONLY
+
   def apply(
     stmtId: Int,
     params: IndexedSeq[Parameter] = IndexedSeq.empty,

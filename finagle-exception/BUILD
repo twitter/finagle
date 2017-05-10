@@ -1,4 +1,4 @@
-target(name='finagle-exception',
+target(
   dependencies=[
     'finagle/finagle-exception/src/main/scala'
   ]

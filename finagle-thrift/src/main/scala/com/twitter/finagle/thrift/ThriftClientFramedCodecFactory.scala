@@ -3,6 +3,7 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle.{ClientCodecConfig, CodecFactory}
 import org.apache.thrift.protocol.TProtocolFactory
 
+@deprecated("Use the com.twitter.finagle.Thrift object to build a client", "2016-12-01")
 class ThriftClientFramedCodecFactory(
     clientId: Option[ClientId],
     _useCallerSeqIds: Boolean,

@@ -13,7 +13,6 @@ import java.net.{InetSocketAddress, SocketAddress}
 trait ListeningServer
   extends Closable
   with Awaitable[Unit]
-  with Group[SocketAddress]
 {
   /**
    * The address to which this server is bound.
@@ -44,9 +43,14 @@ trait ListeningServer
   final def close(deadline: Time): Future[Unit] = synchronized {
     isClosed = true
     val collected = Future.collect(announcements)
-    collected flatMap { list =>
-      Closable.all(list:_*).close(deadline) before closeServer(deadline)
-    }
+    Future.join(Seq(
+      collected.flatMap { list =>
+        Closable.all(list:_*).close(deadline)
+      },
+      // StackServer assumes that closeServer is called synchronously, so we must be
+      // careful that it doesn't get scheduled for later.
+      closeServer(deadline)
+    ))
   }
 }
 

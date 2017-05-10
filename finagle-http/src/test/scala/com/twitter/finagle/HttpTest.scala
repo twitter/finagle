@@ -6,11 +6,8 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.toggle.flag
 import com.twitter.util.{Await, Duration, Future, Return}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class HttpTest extends FunSuite {
 
   private def classifier(params: Stack.Params): ResponseClassifier =
@@ -123,4 +120,13 @@ class HttpTest extends FunSuite {
     }
   }
 
+  test("Netty 3 is a default implementation") {
+    val transporter = Http.client.params[Http.HttpImpl].transporter
+    val listener = Http.server.params[Http.HttpImpl].listener
+
+    val addr = InetSocketAddress.createUnresolved("supdog", 0)
+
+    assert(transporter(Stack.Params.empty)(addr).toString == "Netty3Transporter")
+    assert(listener(Stack.Params.empty).toString == "Netty3Listener")
+  }
 }

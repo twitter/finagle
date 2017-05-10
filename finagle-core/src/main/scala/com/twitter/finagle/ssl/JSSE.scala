@@ -78,8 +78,8 @@ object JSSE {
    * Get a client from the given Context
    */
   def client(ctx: SSLContext): Engine = {
-    val sslEngine = ctx.createSSLEngine();
-    sslEngine.setUseClientMode(true);
+    val sslEngine = ctx.createSSLEngine()
+    sslEngine.setUseClientMode(true)
     new Engine(sslEngine)
   }
 
@@ -87,8 +87,8 @@ object JSSE {
    * Get a client from the given Context
    */
   def client(ctx: SSLContext, host: String, port: Int): Engine = {
-    val sslEngine = ctx.createSSLEngine(host, port);
-    sslEngine.setUseClientMode(true);
+    val sslEngine = ctx.createSSLEngine(host, port)
+    sslEngine.setUseClientMode(true)
     new Engine(sslEngine)
   }
 

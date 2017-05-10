@@ -14,23 +14,41 @@ curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash 
 ```
 
 If you have any questions or run into any problems, please create
-an issue here, tweet at us at [@finagle](https://twitter.com/finagle), or email
-the Finaglers mailing list.
+an issue here, chat with us in [gitter](https://gitter.im/twitter/finagle), or email
+the Finaglers [mailing list](https://groups.google.com/forum/#!forum/finaglers).
 
 ## Workflow
 
 The workflow that we support:
 
-1.  Fork finagle
-2.  Check out the `develop` branch
-3.  Make a feature branch (use `git checkout -b "cool-new-feature"`)
-4.  Make your cool new feature or bugfix on your branch
-5.  Write a test for your change
-6.  From your branch, make a pull request against `twitter/finagle/develop`
-7.  Work with repo maintainers to get your change reviewed
-8.  Wait for your change to be pulled into `twitter/finagle/develop`
-9.  Merge `twitter/finagle/develop` into your origin `develop`
-10.  Delete your feature branch
+1. Fork finagle
+1. Check out the `develop` branch
+1. Make a feature branch (use `git checkout -b "cool-new-feature"`)
+1. Make your cool new feature or bugfix on your branch
+1. Write a test for your change
+1. From your branch, make a pull request against `twitter/finagle/develop`
+1. Work with repo maintainers to get your change reviewed
+1. Wait for your change to be pulled into `twitter/finagle/develop`
+1. Merge `twitter/finagle/develop` into your origin `develop`
+1. Delete your feature branch
+
+## Checklist
+
+There are a number of things we like to see in pull requests. Depending
+on the scope of your change, there may not be many to take care of, but
+please scan this list and see which apply. It's okay if something is missed;
+the maintainers will help out during code review.
+
+1. Include [tests](CONTRIBUTING.md#testing).
+1. Update the [changelog][changes] for new features, API breakages, runtime behavior changes,
+   deprecations, and bug fixes.
+1. New metrics should be documented in the [user guide][metrics].
+1. All public APIs should have [Scaladoc][8].
+1. When adding a constructor to an existing class or arguments to an existing
+   method, in order to preserve backwards compatibility for Java users, avoid
+   Scala's default arguments. Instead use explicit forwarding methods.
+1. The second argument of an `@deprecated` annotation should be the current
+   date, in `YYYY-MM-DD` form.
 
 ## Testing
 
@@ -54,6 +72,14 @@ Travis CI more useful for development, but for now you don't need to worry if
 it's failing (assuming that you are able to build and test your changes
 locally).
 
+### Property-based testing
+
+When appropriate, use [ScalaCheck][scalacheck] to write property-based
+tests for your code. This will often produce more thorough and effective
+inputs for your tests. We use ScalaTest's
+[GeneratorDrivenPropertyChecks][gendrivenprop] as the entry point for
+writing these tests.
+
 ## Compatibility
 
 We try to keep public APIs stable for the obvious reasons. Often,
@@ -74,9 +100,9 @@ We take a variety of approaches to minimize this.
 
 1. Add a "compilation" unit test, written in Java, that verifies the APIs are
    usable from Java.
-2. If there is anything gnarly, we add Java adapters either by adding
+1. If there is anything gnarly, we add Java adapters either by adding
    a non-symbolic method name or by adding a class that does forwarding.
-3. Prefer `abstract` classes over `traits` as they are easier for Java
+1. Prefer `abstract` classes over `traits` as they are easier for Java
    developers to extend.
 
 ## Style
@@ -88,7 +114,7 @@ in doubt, look around the codebase and see how it's done elsewhere.
 
 When creating an issue please try to ahere to the following format:
 
-    One line summary of the issue (less than 72 characters)
+    module-name: One line summary of the issue (less than 72 characters)
 
     ### Expected behavior
 
@@ -112,7 +138,7 @@ We adhere to a specific format for commit messages. Please write your commit
 messages along these guidelines. Please keep the line width no greater than
 80 columns (You can use `fmt -n -p -w 80` to accomplish this).
 
-    One line description of your change (less than 72 characters)
+    module-name: One line description of your change (less than 72 characters)
 
     Problem
 
@@ -203,8 +229,10 @@ requests that improve the existing Scaladocs!
 [9]: https://github.com/twitter/finagle/blob/master/finagle-core/src/test/java/com/twitter/finagle/AddrCompilationTest.java
 [es]: https://twitter.github.io/effectivescala/
 [funsuite]: http://www.scalatest.org/getting_started_with_fun_suite
-[ostrich]: https://github.com/twitter/ostrich
 [scalatest]: http://www.scalatest.org/
+[scalacheck]: https://www.scalacheck.org/
 [ssg]: http://docs.scala-lang.org/style/scaladoc.html
 [travis-ci]: https://travis-ci.org/twitter/finagle
-[util]: https://github.com/twitter/util
+[metrics]: https://twitter.github.io/finagle/guide/Metrics.html
+[changes]: https://github.com/twitter/finagle/blob/develop/CHANGES
+[gendrivenprop]: http://www.scalatest.org/user_guide/generator_driven_property_checks

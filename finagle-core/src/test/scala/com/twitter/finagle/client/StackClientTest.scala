@@ -5,7 +5,7 @@ import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty3.Netty3Transporter
@@ -15,10 +15,10 @@ import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
-import com.twitter.finagle.{param, Name}
+import com.twitter.finagle.{Name, param}
 import com.twitter.util._
-import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
-import java.net.{InetAddress, InetSocketAddress}
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -41,8 +41,8 @@ private object StackClientTest {
     protected type In = String
     protected type Out = String
 
-    protected def newTransporter(): Transporter[String, String] =
-      Netty3Transporter(StringClientPipeline, params)
+    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+      Netty3Transporter(StringClientPipeline, addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
@@ -415,7 +415,7 @@ class StackClientTest extends FunSuite
         param.Stats(sr) +
         BindingFactory.BaseDtab(() => baseDtab)))
 
-    intercept[ChannelWriteException] {
+    intercept[Failure] {
       Await.result(service(()), 5.seconds)
     }
 
@@ -470,7 +470,6 @@ class StackClientTest extends FunSuite
     val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
     assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
   }
-
 
   test("endpointer clears Contexts") {
     import StackClientTest._

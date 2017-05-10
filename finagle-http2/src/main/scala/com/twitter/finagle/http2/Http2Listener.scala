@@ -1,52 +1,50 @@
 package com.twitter.finagle.http2
 
-import com.twitter.finagle.Http.{param => httpparam}
-import com.twitter.finagle.Stack
-import com.twitter.finagle.http2.param.PriorKnowledge
+import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.transport.{TlsConfig, Transport}
-import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelDuplexHandler}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.Awaitable.CanAwait
+import com.twitter.util.{Future, Time, Duration}
+import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelHandler}
 import io.netty.handler.codec.http.HttpServerCodec
-import io.netty.handler.codec.http2.{Http2Codec, Http2ServerDowngrader}
+import io.netty.handler.codec.http2.Http2ConnectionHandler
+import io.netty.channel.group.DefaultChannelGroup
+import io.netty.util.concurrent.GlobalEventExecutor
+import java.net.SocketAddress
+import scala.collection.JavaConverters._
 
 /**
  * Please note that the listener cannot be used for TLS yet.
  */
-private[http2] object Http2Listener {
-  val PlaceholderName = "placeholder"
+private[finagle] object Http2Listener {
+  def apply[In, Out](params: Stack.Params)
+    (implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
+    val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]
 
-  private[this] def priorKnowledgeListener[In, Out](params: Stack.Params): Listener[In, Out] =
-    Netty4Listener(
-      pipelineInit = { pipeline: ChannelPipeline =>
-        // we inject a dummy handler so we can replace it with the real stuff
-        // after we get `init` in the setupMarshalling phase.
-        pipeline.addLast(PlaceholderName, new ChannelDuplexHandler(){})
-      },
-      params = params + Netty4Listener.BackPressure(false),
-      setupMarshalling = { init: ChannelInitializer[Channel] =>
-        val initializer = new ChannelInitializer[Channel] {
-          def initChannel(ch: Channel): Unit = {
-            // downgrade from http/2 to http/1.1 types
-            ch.pipeline.addLast(new Http2ServerDowngrader(false /* validateHeaders */))
-            initServer(params)(ch.pipeline)
-            ch.pipeline.addLast(init)
-          }
-        }
-        new ChannelInitializer[Channel] {
-          def initChannel(ch: Channel): Unit = {
-            ch.pipeline.replace(PlaceholderName, "http2Codec", new Http2Codec(true, initializer))
-          }
-        }
-      }
-    )
+    val initializer = if (configuration.isDefined) new Http2TlsServerInitializer(
+      _: ChannelInitializer[Channel],
+      params
+    ) else new Http2CleartextServerInitializer(_: ChannelInitializer[Channel], params)
 
+    new Http2Listener(params, initializer, mIn, mOut)
+  }
+}
+
+private[http2] class Http2Listener[In, Out](
+    params: Stack.Params,
+    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
+    implicit val mIn: Manifest[In],
+    implicit val mOut: Manifest[Out])
+  extends Listener[In, Out] {
+
+  private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
   private[this] def sourceCodec(params: Stack.Params) = {
-    val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
-    val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-    val maxRequestSize = params[httpparam.MaxRequestSize].size
+    val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
+    val maxHeaderSize = params[http.param.MaxHeaderSize].size
+    val maxRequestSize = params[http.param.MaxRequestSize].size
 
     new HttpServerCodec(
       maxInitialLineSize.inBytes.toInt,
@@ -55,41 +53,59 @@ private[http2] object Http2Listener {
     )
   }
 
-  private[this] def cleartextListener[In, Out](params: Stack.Params): Listener[In, Out] = {
-    Netty4Listener(
-      pipelineInit = { pipeline: ChannelPipeline =>
-        val source = sourceCodec(params)
-        pipeline.addLast(HttpCodecName, source)
-        initServer(params)(pipeline)
-      },
-      params = params,
-      setupMarshalling = {
-        init: ChannelInitializer[Channel] =>
-          new Http2CleartextServerInitializer(init, params)
+  private[this] val underlyingListener = Netty4Listener[In, Out](
+    pipelineInit = { pipeline: ChannelPipeline =>
+      channels.add(pipeline.channel)
+      pipeline.addLast(HttpCodecName, sourceCodec(params))
+      initServer(params)(pipeline)
+    },
+    params = params,
+    setupMarshalling = setupMarshalling
+  )
+
+  // we need to find the underlying handler and tell it how long to wait to drain
+  // before we actually send the `close` signal.
+  private[this] def propagateDeadline(deadline: Time): Unit = {
+    val duration = (deadline - Time.now).inMillis
+    if (duration > 0) {
+      channels.asScala.foreach { channel =>
+        val pipeline = channel.pipeline
+        val handler = Option(pipeline.get(classOf[Http2ConnectionHandler]))
+        handler.foreach { handler =>
+          handler.gracefulShutdownTimeoutMillis(duration)
+        }
       }
-    )
+    }
   }
 
-  private[this] def tlsListener[In, Out](params: Stack.Params): Listener[In, Out] = {
-    Netty4Listener(
-      pipelineInit = { pipeline: ChannelPipeline =>
-        pipeline.addLast(HttpCodecName, sourceCodec(params))
-        initServer(params)(pipeline)
-      },
-      params = params,
-      setupMarshalling = {
-        init: ChannelInitializer[Channel] => new Http2TlsServerInitializer(init, params)
-      }
-    )
+  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer = {
+    val underlying = underlyingListener.listen(addr)(serveTransport)
+    new Http2ListeningServer(underlying, propagateDeadline)
+  }
+}
+
+private[http2] class Http2ListeningServer(
+    underlying: ListeningServer,
+    propagateDeadline: Time => Unit)
+  extends ListeningServer {
+
+  // we override announcement so that we delegate the announcement to the underlying listening
+  // server and don't double announce.
+  override def announce(addr: String): Future[Announcement] = underlying.announce(addr)
+
+  def closeServer(deadline: Time): Future[Unit] = {
+    propagateDeadline(deadline)
+    underlying.close(deadline)
   }
 
-  def apply[In, Out](params: Stack.Params): Listener[In, Out] = {
-    val PriorKnowledge(priorKnowledge) = params[PriorKnowledge]
-    val Transport.Tls(tlsConfig) = params[Transport.Tls]
+  override def isReady(implicit permit: CanAwait): Boolean = underlying.isReady(permit)
 
-
-    if (tlsConfig != TlsConfig.Disabled) tlsListener(params)
-    else if (priorKnowledge) priorKnowledgeListener(params)
-    else cleartextListener(params)
+  def ready(timeout: Duration)(implicit permit: CanAwait): this.type = {
+    underlying.ready(timeout)(permit)
+    this
   }
+
+  def result(timeout: Duration)(implicit permit: CanAwait): Unit = underlying.result(timeout)(permit)
+
+  def boundAddress: SocketAddress = underlying.boundAddress
 }

@@ -1,18 +1,13 @@
 package com.twitter.finagle.memcached.protocol.text.server
 
-import scala.Function.tupled
-
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
-import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
-
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.{Decoding, TokensWithData, Tokens}
 import com.twitter.finagle.memcached.util.Bufs.RichBuf
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import com.twitter.util.Time
-
-import text.{TokensWithData, Tokens}
+import scala.Function.tupled
 
 object DecodingToCommand {
   private val NOREPLY = Buf.Utf8("noreply")
@@ -31,15 +26,17 @@ object DecodingToCommand {
   private val CAS     = Buf.Utf8("cas")
 }
 
-abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
+abstract class AbstractDecodingToCommand[C] {
   import ParserUtils._
 
   // Taken from memcached.c
   private val RealtimeMaxdelta = 60*60*24*30
 
-  def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef): C = m match {
+  def decode(decoding: Decoding): C = decoding match {
     case Tokens(tokens) => parseNonStorageCommand(tokens)
     case TokensWithData(tokens, data, casUnique) => parseStorageCommand(tokens, data, casUnique)
+    case other => throw new IllegalArgumentException(
+      s"Expecting `Tokens` or `TokensWithData`, got $other")
   }
 
   protected def parseNonStorageCommand(tokens: Seq[Buf]): C

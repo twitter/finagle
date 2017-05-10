@@ -20,7 +20,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
  * Provides tests for server side content decoding.
  *
  * If and when client side compression is implemented, this test should probably
- * be removed in favour of a complete entry in [[EndToEndTest]]. Client side
+ * be removed in favour of a complete entry in [[Netty3EndToEndTest]]. Client side
  * compression is currently made problematic by netty
  * (see https://github.com/netty/netty/issues/4970).
  */
@@ -73,7 +73,7 @@ class ServerSideDecodingTest extends FunSuite
 
     // Standard client
     val client = ClientBuilder()
-      .codec(Http())
+      .stack(finagle.Http.client)
       .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()

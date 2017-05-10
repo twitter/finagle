@@ -18,35 +18,29 @@ scala_library(name='external',
   sources=EXTERNAL_SOURCES
 )
 
-junit_tests(name='scala',
+junit_tests(
   dependencies=[
     ':external',
-    '3rdparty/jvm/junit',
-    '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/io/netty',
-    '3rdparty/jvm/org/scalacheck',
-    '3rdparty/jvm/org/scalatest',
-    'science/src/java/com/twitter/common/application:action',
-    'science/src/java/com/twitter/common/zookeeper:testing',
-    'science/src/java/com/twitter/common/zookeeper:client',
-    'science/src/java/com/twitter/common/zookeeper:server-set',
-    'finagle/finagle-serversets',
-    'util/util-hashing',
-    'util/util-zk-test',
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
+    '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/junit',
     '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/org/scalacheck',
+    '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-core/src/test/scala:scala',
     'finagle/finagle-memcached/src/main/scala:scala',
-    'science/src/java/com/twitter/common/io:io',
-    'science/src/java/com/twitter/common/quantity:quantity',
+    'finagle/finagle-memcached/src/test/resources',
+    'finagle/finagle-serversets',
     'util/util-collection/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
+    'util/util-hashing',
     'util/util-registry/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
+    'util/util-zk-test',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala', exclude=[EXTERNAL_SOURCES]),
-  resources=[
-    'finagle/finagle-memcached/src/test/resources'
-  ]
 )

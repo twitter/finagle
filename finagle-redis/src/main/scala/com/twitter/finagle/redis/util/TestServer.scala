@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis.util
 
-import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
 import com.twitter.finagle.Redis
@@ -19,7 +18,7 @@ object RedisCluster { self =>
   def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i => i.address }
 
   def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
-    require(instanceStack.length > 0)
+    require(instanceStack.nonEmpty)
     addresses.slice(from, until).map { address =>
       val addy = address.get
       "%s:%d".format("127.0.0.1", addy.getPort())
@@ -54,7 +53,7 @@ object RedisCluster { self =>
     override def run() {
       self.instanceStack.foreach { instance => instance.stop() }
     }
-  });
+  })
 }
 
 sealed trait RedisMode
@@ -78,7 +77,7 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
 
   private[this] def findAddress() {
     var tries = 100
-    while (address == None && tries >= 0) {
+    while (address.isEmpty && tries >= 0) {
       address = Some(RandomSocket.nextAddress())
       if (forbiddenPorts.contains(address.get.getPort)) {
         address = None

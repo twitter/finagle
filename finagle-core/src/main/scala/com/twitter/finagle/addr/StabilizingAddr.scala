@@ -38,7 +38,7 @@ private[finagle] object StabilizingAddr {
     pulse: Offer[State.Health],
     grace: Duration,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ): Offer[Addr] = new Offer[Addr] {
     import State._
 

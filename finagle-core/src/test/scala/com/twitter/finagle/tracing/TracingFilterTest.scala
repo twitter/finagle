@@ -6,6 +6,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
 import org.mockito.Matchers.any
+import org.scalactic.source.Position
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
@@ -22,7 +23,7 @@ class TracingFilterTest
   var tracer: Tracer = _
   var captor: ArgumentCaptor[Record] = _
 
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
     super.test(testName, testTags:_*) {
       tracer = spy(new NullTracer)
       when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)

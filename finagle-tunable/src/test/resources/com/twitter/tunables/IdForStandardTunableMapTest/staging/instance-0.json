@@ -1,0 +1,9 @@
+{
+  "tunables": [
+    {
+      "id": "com.twitter.util.tunable.FileBasedPerEnvPerInstance",
+      "value": "file based per env per instance",
+      "type": "java.lang.String"
+    }
+  ]
+}

@@ -1,12 +1,9 @@
 package com.twitter.finagle.example.thrift
 
-import java.net.{InetAddress, InetSocketAddress}
-
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.example.thriftscala._
 import com.twitter.finagle.service.{RetryExceptionsFilter, RetryPolicy, TimeoutFilter}
-import com.twitter.finagle.thrift.ThriftServiceIface
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Duration, Future, Throw, Try}
 
@@ -41,18 +38,18 @@ object ThriftServiceIfaceExample {
 
     //#thriftclientapi
     val clientServiceIface: LoggerService.ServiceIface =
-      Thrift.client.newServiceIface[LoggerService.ServiceIface]("localhost:1234")
+      Thrift.client.newServiceIface[LoggerService.ServiceIface]("localhost:1234", "thrift_client")
     //#thriftclientapi
 
     //#thriftclientapi-call
-    val result: Future[Log.Result] = clientServiceIface.log(Log.Args("hello", 1))
+    val result: Future[Log.SuccessType] = clientServiceIface.log(Log.Args("hello", 1))
     //#thriftclientapi-call
 
     Await.result(result)
 
     //#thriftclientapi-filters
-    val uppercaseFilter = new SimpleFilter[Log.Args, Log.Result] {
-      def apply(req: Log.Args, service: Service[Log.Args, Log.Result]): Future[Log.Result] = {
+    val uppercaseFilter = new SimpleFilter[Log.Args, Log.SuccessType] {
+      def apply(req: Log.Args, service: Service[Log.Args, Log.SuccessType]): Future[Log.SuccessType] = {
         val uppercaseRequest = req.copy(message = req.message.toUpperCase)
         service(uppercaseRequest)
       }
@@ -60,10 +57,12 @@ object ThriftServiceIfaceExample {
 
     def timeoutFilter[Req, Rep](duration: Duration) = {
       val exc = new IndividualRequestTimeoutException(duration)
-      val timer = DefaultTimer.twitter
+      val timer = DefaultTimer
       new TimeoutFilter[Req, Rep](duration, exc, timer)
     }
-    val filteredLog = timeoutFilter(2.seconds) andThen uppercaseFilter andThen clientServiceIface.log
+    val filteredLog = timeoutFilter(2.seconds)
+      .andThen(uppercaseFilter)
+      .andThen(clientServiceIface.log)
 
     filteredLog(Log.Args("hello", 2))
     // [2] Server received: 'HELLO'
@@ -76,9 +75,8 @@ object ThriftServiceIfaceExample {
     })
 
     val retriedGetLogSize =
-      new RetryExceptionsFilter(retryPolicy, DefaultTimer.twitter) andThen
-        ThriftServiceIface.resultFilter(GetLogSize) andThen
-        clientServiceIface.getLogSize
+      new RetryExceptionsFilter(retryPolicy, DefaultTimer)
+        .andThen(clientServiceIface.getLogSize)
 
     retriedGetLogSize(GetLogSize.Args())
     //#thriftclientapi-retries

@@ -7,9 +7,12 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.CRC32
+import java.util.{function => juf}
+import java.{lang => jl}
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.{breakOut, immutable, mutable}
+import scala.util.hashing.MurmurHash3
 
 /**
  * A collection of Int-typed [[Toggle toggles]] which can be
@@ -90,6 +93,30 @@ abstract class ToggleMap { self =>
 
 object ToggleMap {
 
+  // more or less picked out of thin air as the initial hashing value
+  private[this] val HashSeed = 1300476044
+
+  /**
+   * Used to create a `Toggle[Int]` that hashes its inputs to
+   * `apply` and `isDefinedAt` in order to promote a relatively even
+   * distribution even when the inputs do not have a good distribution.
+   *
+   * This allows users to get away with using a poor hashing function,
+   * such as `String.hashCode`.
+   */
+  private def hashedToggle(
+    id: String,
+    pf: PartialFunction[Int, Boolean]
+  ): Toggle[Int] = new Toggle[Int](id) {
+    override def toString: String = s"Toggle($id)"
+    private[this] def hash(i: Int): Int = {
+      val h = MurmurHash3.mix(HashSeed, i)
+      MurmurHash3.finalizeHash(h, 1)
+    }
+    def isDefinedAt(x: Int): Boolean = pf.isDefinedAt(hash(x))
+    def apply(x: Int): Boolean = pf(hash(x))
+  }
+
   private[this] val MetadataOrdering: Ordering[Toggle.Metadata] =
     new Ordering[Toggle.Metadata] {
       def compare(x: Metadata, y: Metadata): Int = {
@@ -109,6 +136,9 @@ object ToggleMap {
    */
   def observed(toggleMap: ToggleMap, statsReceiver: StatsReceiver): ToggleMap = {
     new Proxy with Composite {
+      private[this] val lastApplied =
+        new ConcurrentHashMap[String, AtomicReference[jl.Boolean]]()
+
       private[this] val checksum = statsReceiver.addGauge("checksum") {
         // crc32 is not a cryptographic hash, but good enough for our purposes
         // of summarizing the current state of the ToggleMap. we only need it
@@ -141,6 +171,36 @@ object ToggleMap {
 
       def components: Seq[ToggleMap] =
         Seq(underlying)
+
+      // mixes in `Toggle.Captured` to provide visibility into how
+      // toggles are in use at rutime.
+      override def apply(id: String): Toggle[Int] = {
+        val delegate = super.apply(id)
+        new Toggle[Int](delegate.id) with Toggle.Captured {
+          private[this] val last = lastApplied.computeIfAbsent(id,
+            new juf.Function[String, AtomicReference[jl.Boolean]] {
+              def apply(t: String): AtomicReference[jl.Boolean] =
+                new AtomicReference[jl.Boolean](null)
+            }
+          )
+
+          override def toString: String = delegate.toString
+
+          def isDefinedAt(x: Int): Boolean =
+            delegate.isDefinedAt(x)
+
+          def apply(v1: Int): Boolean = {
+            val value = delegate(v1)
+            last.set(jl.Boolean.valueOf(value))
+            value
+          }
+
+          def lastApply: Option[Boolean] = last.get match {
+            case null => None
+            case v => Some(v)
+          }
+        }
+      }
     }
   }
 
@@ -207,6 +267,9 @@ object ToggleMap {
   /**
    * Create a [[Toggle]] where `fraction` of the inputs will return `true.`
    *
+   * @note that inputs to [[Toggle.apply]] will be modified to promote
+   *       better distributions in the face of low entropy inputs.
+   *
    * @param id the name of the Toggle which is used to mix
    *           where along the universe of Ints does the range fall.
    * @param fraction the fraction, from 0.0 - 1.0 (inclusive), of Ints
@@ -242,10 +305,10 @@ object ToggleMap {
       Toggle.on(id) // 100%
     } else if (start <= end) {
       // the range is contiguous without overflows.
-      Toggle(id, { case i => i >= start && i <= end })
+      hashedToggle(id, { case i => i >= start && i <= end })
     } else {
       // the range overflows around Int.MaxValue
-      Toggle(id, { case i  => i >= start || i <= end })
+      hashedToggle(id, { case i  => i >= start || i <= end })
     }
   }
 
@@ -319,12 +382,18 @@ object ToggleMap {
   /**
    * Create an empty [[Mutable]] instance with a default [[Metadata.source]]
    * specified.
+   *
+   * @note that inputs to [[Toggle.apply]] will be modified to promote
+   *       better distributions in the face of low entropy inputs.
    */
   def newMutable(): Mutable =
     newMutable(None)
 
   /**
    * Create an empty [[Mutable]] instance with the given [[Metadata.source]].
+   *
+   * @note that inputs to [[Toggle.apply]] will be modified to promote
+   *       better distributions in the face of low entropy inputs.
    */
   def newMutable(source: String): Mutable =
     newMutable(Some(source))
@@ -390,6 +459,9 @@ object ToggleMap {
    *
    * Fractions that are out of range (outside of `[0.0-1.0]`) will be
    * ignored.
+   *
+   * @note that inputs to [[Toggle.apply]] will be modified to promote
+   *       better distributions in the face of low entropy inputs.
    */
   val flags: ToggleMap = new ToggleMap {
 

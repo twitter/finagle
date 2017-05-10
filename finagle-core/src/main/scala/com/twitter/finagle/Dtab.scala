@@ -16,7 +16,7 @@ import scala.collection.mutable.Builder
  * [[com.twitter.finagle.Addr]]. [[com.twitter.finagle.naming.DefaultInterpreter]]
  * implements the default binding stategy.
  *
- * @see The [[http://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
  *      for further details.
  */
 case class Dtab(dentries0: IndexedSeq[Dentry])

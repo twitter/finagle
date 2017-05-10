@@ -114,7 +114,9 @@ trait ThriftTest { self: FunSuite =>
 
       thrift
         .configured(impl)
-        .newIface[Iface](Group(addr).named("thriftclient"))
+        .newIface[Iface](
+          Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
+          "thriftclient")
     }
 
     def close() = ()

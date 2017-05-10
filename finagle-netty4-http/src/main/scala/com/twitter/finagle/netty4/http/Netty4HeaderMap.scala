@@ -9,10 +9,14 @@ import scala.collection.JavaConverters._
  * [[HeaderMap]] implementation which proxies all calls to a
  * mutable netty `HttpHeaders` instance.
  */
-private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) extends HeaderMap {
+private class Netty4HeaderMap(private[http] val underlying: HttpHeaders) extends HeaderMap {
   import Netty4HeaderMap._
 
-  def getAll(key: String): Iterable[String] = underlying.getAll(key).asScala
+  def getAll(key: String): Seq[String] = underlying.getAll(key).asScala
+
+  def get(key: String): Option[String] = Option(underlying.get(key))
+
+  override def getOrNull(key: String): String = underlying.get(key)
 
   def set(k: String, v: String): HeaderMap = {
     underlying.set(k, v)
@@ -25,7 +29,7 @@ private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) e
   }
 
   def +=(kv: (String, String)): Netty4HeaderMap.this.type = {
-    underlying.add(kv._1, kv._2)
+    set(kv._1, kv._2)
     this
   }
 
@@ -34,14 +38,21 @@ private[http] class Netty4HeaderMap(private[http] val underlying: HttpHeaders) e
     this
   }
 
-  def get(key: String): Option[String] = Option(underlying.get(key))
-
   def iterator: Iterator[(String, String)] =
     underlying.iteratorAsString().asScala.map(entryToTuple)
 
+  override def keysIterator: Iterator[String] =
+    keys.iterator
+
+  override def keySet: Set[String] =
+    keys.toSet
+
+  override def keys: Iterable[String] =
+    underlying.names.asScala
+
 }
 
-private[http] object Netty4HeaderMap {
+private object Netty4HeaderMap {
   val entryToTuple: (Entry[String, String]) => (String, String) =
     { entry: Entry[String, String] => entry.getKey -> entry.getValue }
 }

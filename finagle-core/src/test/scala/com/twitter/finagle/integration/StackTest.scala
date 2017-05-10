@@ -1,8 +1,10 @@
 package com.twitter.finagle.integration
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.{StackClient, StringClient}
+import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.server.StringServer
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
@@ -27,6 +29,7 @@ class StackTest extends FunSuite {
       val server = stringServer.serve(new InetSocketAddress(0), failService)
       val client =
         stringClient.withStack(newClientStack)
+          .configured(FailureAccrualFactory.Param(5, 1.minute))
           .newService(Name.bound(Address(
             server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
@@ -49,6 +52,7 @@ class StackTest extends FunSuite {
 
       val client = ClientBuilder()
         .codec(StringCodec)
+        .failureAccrualParams((5, 1.minute))
         .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .build()

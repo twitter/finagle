@@ -1,4 +1,4 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/scala-lang:scala-library',
@@ -8,6 +8,6 @@ junit_tests(name='java',
     'util/util-core/src/main/scala:scala',
     'util/util-hashing/src/main/scala:scala',
   ],
-  fatal_warnings=False,
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

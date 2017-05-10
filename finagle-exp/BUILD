@@ -4,7 +4,7 @@ target(name='benchmark',
   ]
 )
 
-target(name='finagle-exp',
+target(
   dependencies=[
     'finagle/finagle-exp/src/main/scala'
   ]

@@ -1,13 +1,14 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ResolutionRaceTest extends FunSuite with AssertionsForJUnit {
+class ResolutionRaceTest extends FunSuite {
 
   private[this] val Echoer = Service.mk[String, String](Future.value)
 
@@ -18,26 +19,20 @@ class ResolutionRaceTest extends FunSuite with AssertionsForJUnit {
    * If this test fails intermittently, IT IS NOT FLAKY, it's broken.
    * Or maybe its flakey in terms of port allocations.
    */
-   // Fails in CI, see CSL-1307 and CSL-1358
-   if (!sys.props.contains("SKIP_FLAKY")) test("resolution raciness") {
+  test("resolution raciness") {
     val socketAddr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = Echo.serve(socketAddr, Echoer)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val dest = "asyncinet!localhost:%d".format(addr.getPort)
+    val dest = s"asyncinet!localhost:${addr.getPort}"
     try {
-      1 to 1000 foreach { i =>
-        val phrase = "%03d [%s]".format(i, dest)
-        val echo = Echo.newService(dest)
-        try {
-          val echoed = Await.result(echo(phrase))
-          assert(echoed == phrase)
-        } finally Await.ready(echo.close())
-      }
-    } catch {
-      case _: NoBrokersAvailableException =>
-        fail("resolution is racy")
+      val phrase = s"[$dest]"
+      val echo = Echo.newService(dest)
+      try {
+        val echoed = Await.result(echo(phrase), 5.seconds)
+        assert(echoed == phrase)
+      } finally Await.ready(echo.close(), 5.seconds)
     } finally {
-      Await.result(server.close())
+      Await.result(server.close(), 5.seconds)
     }
   }
 }

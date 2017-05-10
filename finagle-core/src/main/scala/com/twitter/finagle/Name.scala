@@ -28,7 +28,7 @@ import com.twitter.finagle.util.Showable
  * to bind only a [[com.twitter.finagle.Name Name]] prefix, leaving an
  * unbound residual name to be processed by a downstream Namer.
  *
- * @see The [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Names.html user guide]]
  *      for further details.
  */
 sealed trait Name

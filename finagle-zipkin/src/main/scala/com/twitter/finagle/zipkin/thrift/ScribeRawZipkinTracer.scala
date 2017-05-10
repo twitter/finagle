@@ -18,6 +18,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.ArrayBlockingQueue
 import org.apache.thrift.TByteArrayOutputStream
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
 object ScribeRawZipkinTracer {
   val tracerCache = new TracerCache[ScribeRawZipkinTracer]
@@ -28,13 +29,13 @@ object ScribeRawZipkinTracer {
     name: String
   ): Scribe.FutureIface = {
     val transport = ClientBuilder()
-      .stack(Thrift.client)
+      .stack(Thrift.client
+        // using an arbitrary, but bounded number of waiters to avoid memory leaks
+        .withSessionPool.maxWaiters(250))
       .name(name)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
-      // using an arbitrary, but bounded number of waiters to avoid memory leaks
-      .hostConnectionMaxWaiters(250)
       // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
       .daemon(true)
@@ -120,7 +121,7 @@ object ScribeRawZipkinTracer {
     scribeHost: String = "localhost",
     scribePort: Int = 1463,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ): ScribeRawZipkinTracer =
     apply(scribeHost, scribePort, "zipkin", statsReceiver, timer, "zipkin-tracer")
 
@@ -155,7 +156,7 @@ private[thrift] class ScribeRawZipkinTracer(
   client: Scribe.FutureIface,
   statsReceiver: StatsReceiver,
   scribeCategory: String = "zipkin",
-  timer: Timer = DefaultTimer.twitter,
+  timer: Timer = DefaultTimer,
   poolSize: Int = 10,
   initialBufferSize: StorageUnit = 512.bytes,
   maxBufferSize: StorageUnit = 1.megabyte

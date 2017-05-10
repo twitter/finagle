@@ -1,20 +1,18 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Future, Time, Var}
 import java.util.logging.{Level, Logger}
 
-object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
-  "\tWhen enabled,the configured stats receiver will be used,\n" +
-  "\tor the loaded stats receiver if none given.\n" +
-  "\tWhen disabled, the configured stats receiver will be used,\n" +
-  "\tor the NullStatsReceiver if none given.")
-
+/**
+ * Exposes a [[Stack.Module]] which composes load balancing into the respective
+ * [[Stack]]. This is mixed in by default into Finagle's [[StackClient]]. The only
+ * necessary configuration is a [[Dest]] which represents a changing collection of
+ * addresses that is load balanced over.
+ */
 object LoadBalancerFactory {
   val role = Stack.Role("LoadBalancer")
 
@@ -91,6 +89,33 @@ object LoadBalancerFactory {
   }
 
   /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]] with a
+   * finagle [[Address]] ordering. The collection of endpoints in a load
+   * balancer are sorted by this ordering. Although it's generally not a
+   * good idea to have the same ordering across process boundaries, the
+   * final ordering decision is left to the load balancer implementations.
+   * This only provides a stable ordering before we hand off the collection
+   * of endpoints to the balancer.
+   *
+   * The default reads the process global ordering from [[defaultAddressOrdering]].
+   *
+   * @note This is configurable to allow for environment specific orderings.
+   * See [[defaultAddressOrdering]] for a way to set the ordering for the
+   * entire process.
+   */
+  case class AddressOrdering(ordering: Ordering[Address]) {
+    def mk(): (AddressOrdering, Stack.Param[AddressOrdering]) =
+      (this, AddressOrdering.param)
+  }
+
+  object AddressOrdering {
+    implicit val param = new Stack.Param[AddressOrdering] {
+      def default = AddressOrdering(defaultAddressOrdering)
+    }
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.loadbalancer.LoadBalancerFactory]].
    * The module creates a new `ServiceFactory` based on the module above it for each `Addr`
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
@@ -103,6 +128,7 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[Param]],
       implicitly[Stack.Param[HostStats]],
+      implicitly[Stack.Param[AddressOrdering]],
       implicitly[Stack.Param[param.Stats]],
       implicitly[Stack.Param[param.Logger]],
       implicitly[Stack.Param[param.Monitor]],
@@ -197,8 +223,18 @@ object LoadBalancerFactory {
 
       val balancerStats = rawStatsReceiver.scope("loadbalancer")
       val balancerExc = new NoBrokersAvailableException(errorLabel)
-      def newBalancer(endpoints: Activity[Set[ServiceFactory[Req, Rep]]]) =
-        loadBalancerFactory.newBalancer(endpoints, balancerStats, balancerExc)
+
+      def newBalancer(
+        endpoints: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]]
+      ): ServiceFactory[Req, Rep] = {
+        // note, we late bind these so that we can read the latest value of
+        // `addressOrdering` if it's set to `defaultAddressOrdering`.
+        val AddressOrdering(addressOrdering) = params[AddressOrdering]
+        val orderedEndpoints = endpoints.map { set =>
+          set.toVector.sortBy(_.address)(addressOrdering)
+        }
+        loadBalancerFactory.newBalancer(orderedEndpoints, balancerStats, balancerExc)
+      }
 
       val destActivity: Activity[Set[Address]] = Activity(dest.map {
         case Addr.Bound(set, _) =>
@@ -235,63 +271,13 @@ object LoadBalancerFactory {
 }
 
 /**
- * A load balancer that balances among multiple connections,
- * useful for managing concurrency in pipelining protocols.
- *
- * Each endpoint can open multiple connections. For N endpoints,
- * each opens M connections, load balancer balances among N*M
- * options. Thus, it increases concurrency of each endpoint.
- */
-object ConcurrentLoadBalancerFactory {
-  import LoadBalancerFactory._
-
-  private val ReplicaKey = "concurrent_lb_replica"
-
-  // package private for testing
-  private[finagle] def replicate(num: Int): Address => Set[Address] = {
-    case Address.Inet(ia, metadata) =>
-      for (i: Int <- (0 until num).toSet) yield
-        Address.Inet(ia, metadata + (ReplicaKey -> i))
-    case addr => Set(addr)
-  }
-
-  /**
-   * A class eligible for configuring the number of connections
-   * a single endpoint has.
-   */
-  case class Param(numConnections: Int) {
-    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
-  }
-  object Param {
-    implicit val param = Stack.Param(Param(4))
-  }
-
-  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new StackModule[Req, Rep] {
-      val description = "Balance requests across multiple connections on a single " +
-        "endpoint, used for pipelining protocols"
-
-      override def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
-        val Param(numConnections) = params[Param]
-        val Dest(dest) = params[Dest]
-        val newDest = dest.map {
-          case bound@Addr.Bound(set, _) =>
-            bound.copy(addrs = set.flatMap(replicate(numConnections)))
-          case addr => addr
-        }
-        super.make(params + Dest(newDest), next)
-      }
-    }
-}
-
-/**
  * A thin interface around a Balancer's constructor that allows Finagle to pass in
  * context from the stack to the balancers at construction time.
  *
  * @see [[Balancers]] for a collection of available balancers.
  *
  * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
- *      for more details.
+ * for more details.
  */
 abstract class LoadBalancerFactory {
   /**
@@ -306,30 +292,14 @@ abstract class LoadBalancerFactory {
    * across implementations.
    *
    * @param emptyException The exception returned when a balancer's collection is empty.
+   *
+   * @note `endpoints` are ordered by the [[LoadBalancerFactory.Ordering]] param.
    */
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep]
-}
-
-/**
- * We expose the ability to configure balancers per-process via flags. 'heap',
- * 'choice', and 'aperture' are valid choices for defaultBalancer. However, using
- * this is generally not a good idea, as Finagle processes usually contain many clients.
- * To configure the load balancer method on a client, use the `configured` method like so:
- *
- * {{
- *    val balancer = Balancers.aperture(...)
- *    Protocol.configured(LoadBalancerFactory.Param(balancer))
- * }}
- */
-object defaultBalancer extends GlobalFlag("choice", "Default load balancer")
-
-package exp {
-  object loadMetric extends GlobalFlag("leastReq",
-    "Metric used to measure load across endpoints (leastReq | ewma)")
 }
 
 object DefaultBalancerFactory extends LoadBalancerFactory {
@@ -352,7 +322,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     }
 
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] = {

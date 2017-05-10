@@ -37,7 +37,7 @@ class MockClientTest extends FunSuite {
     assert(!Await.result(memcache.add("key", "new value")))
     assert(Await.result(memcache.get("key")) == Some("value"))
 
-    assert(Await.result(memcache.add("key2", "value2")))
+    assert(Await.result(memcache.add("key2", "value2")).booleanValue)
     assert(Await.result(memcache.get("key2")) == Some("value2"))
 
     assert(!Await.result(memcache.add("key2", "value3")))
@@ -47,7 +47,7 @@ class MockClientTest extends FunSuite {
   test("correctly perform the APPEND command") {
     val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    assert(Await.result(memcache.append("key", "More")))
+    assert(Await.result(memcache.append("key", "More")).booleanValue)
     assert(Await.result(memcache.get("key")) == Some("valueMore"))
 
     assert(!Await.result(memcache.append("unknown", "value")))
@@ -57,7 +57,7 @@ class MockClientTest extends FunSuite {
   test("correctly perform the PREPEND command") {
     val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    assert(Await.result(memcache.prepend("key", "More")))
+    assert(Await.result(memcache.prepend("key", "More")).booleanValue)
     assert(Await.result(memcache.get("key")) == Some("Morevalue"))
 
     assert(!Await.result(memcache.prepend("unknown", "value")))
@@ -67,7 +67,7 @@ class MockClientTest extends FunSuite {
   test("correctly perform the REPLACE command") {
     val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    assert(Await.result(memcache.replace("key", "new value")))
+    assert(Await.result(memcache.replace("key", "new value")).booleanValue)
     assert(Await.result(memcache.get("key")) == Some("new value"))
 
     assert(!Await.result(memcache.replace("unknown", "value")))
@@ -77,7 +77,7 @@ class MockClientTest extends FunSuite {
   test("correctly perform the DELETE command") {
     val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    assert(Await.result(memcache.delete("key")))
+    assert(Await.result(memcache.delete("key")).booleanValue)
     assert(Await.result(memcache.get("key")) == None)
 
     assert(!Await.result(memcache.delete("unknown")))

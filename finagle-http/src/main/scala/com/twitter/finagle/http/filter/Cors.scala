@@ -63,7 +63,7 @@ object Cors {
        * If the Origin header is not present terminate this set of steps. The request is outside
        * the scope of this specification.
        */
-      Option(request.headers.get("Origin")) flatMap { origin =>
+      request.headerMap.get("Origin").flatMap { origin =>
         /*
          * If the value of the Origin header is not a case-sensitive match for any of the values
          * in list of origins, do not set any additional headers and terminate this set of steps.
@@ -84,9 +84,9 @@ object Cors {
      * n.b. The string "*" cannot be used for a resource that supports credentials.
      */
     protected[this] def setOriginAndCredentials(response: Response, origin: String): Response = {
-      response.headers.add("Access-Control-Allow-Origin", origin)
+      response.headerMap.add("Access-Control-Allow-Origin", origin)
       if (policy.supportsCredentials && origin != "*") {
-        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headerMap.add("Access-Control-Allow-Credentials", "true")
       }
       response
     }
@@ -100,7 +100,7 @@ object Cors {
      * origins.
      */
     def setVary(response: Response): Response = {
-      response.headers.set("Vary", "Origin")
+      response.headerMap.set("Vary", "Origin")
       response
     }
 
@@ -115,7 +115,7 @@ object Cors {
      */
     protected[this] def addExposedHeaders(response: Response): Response = {
       if (policy.exposedHeaders.nonEmpty) {
-        response.headers.add(
+        response.headerMap.add(
           "Access-Control-Expose-Headers", policy.exposedHeaders.mkString(", "))
       }
       response
@@ -140,7 +140,7 @@ object Cors {
 
     /** Let method be the value as result of parsing the Access-Control-Request-Method header. */
     protected[this] def getMethod(request: Request): Option[String] =
-      Option(request.headers.get("Access-Control-Request-Method"))
+      request.headerMap.get("Access-Control-Request-Method")
 
     /**
      * If method is a simple method this step may be skipped.
@@ -149,7 +149,7 @@ object Cors {
      * methods.
      */
     protected[this] def setMethod(response: Response, methods: Seq[String]): Response = {
-      response.headers.set("Access-Control-Allow-Methods", methods.mkString(", "))
+      response.headerMap.set("Access-Control-Allow-Methods", methods.mkString(", "))
       response
     }
 
@@ -159,7 +159,7 @@ object Cors {
      */
     protected[this] def setMaxAge(response: Response): Response = {
       policy.maxAge foreach { maxAge =>
-        response.headers.add("Access-Control-Max-Age", maxAge.inSeconds.toString)
+        response.headerMap.set("Access-Control-Max-Age", maxAge.inSeconds.toString)
       }
       response
     }
@@ -172,9 +172,10 @@ object Cors {
      * headers let header field-names be the empty list.
      */
     protected[this] def getHeaders(request: Request): Seq[String] =
-      Option(request.headers.get("Access-Control-Request-Headers")) map {
-        commaSpace.split(_).toSeq
-      } getOrElse List.empty[String]
+      request.headerMap.get("Access-Control-Request-Headers") match {
+        case Some(value) => commaSpace.split(value).toSeq
+        case None => Seq.empty
+      }
 
     /**
      * If each of the header field-names is a simple header and none is Content-Type, than this step
@@ -185,7 +186,7 @@ object Cors {
      */
     protected[this] def setHeaders(response: Response, headers: Seq[String]): Response = {
       if (headers.nonEmpty) {
-        response.headers.set("Access-Control-Allow-Headers", headers.mkString(", "))
+        response.headerMap.set("Access-Control-Allow-Headers", headers.mkString(", "))
       }
       response
     }

@@ -1,35 +1,25 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{ChannelHandlerContext, Channel}
+import com.twitter.io.Buf
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
-
-import com.twitter.finagle.memcached.util.ChannelBufferUtils.channelBufferToString
-import com.twitter.io.Buf
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class EncoderTest extends FunSuite with MockitoSugar {
 
   test("not alter the tokens it is serializing") {
-    val channel = mock[Channel]
-    val context = mock[ChannelHandlerContext]
-    val addr = mock[java.net.SocketAddress]
-    when(context.getChannel) thenReturn channel
-    when(channel.getLocalAddress) thenReturn addr
     val encoder = new Encoder
 
-    def encode(x: AnyRef) = {
-      val encoded = encoder.encode(context, channel, x)
+    def encode(decoding: Decoding) = {
+      val encoded = encoder.encode(decoding)
       Buf.Utf8.unapply(encoded).get
     }
 
-    def encodeIsPure(x: AnyRef) = {
-      val buf1 = encode(x)
-      val buf2 = encode(x)
+    def encodeIsPure(decoding: Decoding) = {
+      val buf1 = encode(decoding)
+      val buf2 = encode(decoding)
       assert(buf1 == buf2)
     }
 

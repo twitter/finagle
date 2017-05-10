@@ -41,8 +41,9 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
     assert(bodyObserved.content == content)
   }
 
-  test("fixed length messages which are chunked are aggregated") {
-    val agg = new FixedLengthMessageAggregator(10.megabytes)
+  test("fixed length messages which are chunked and smaller than " +
+       "the specified length are aggregated") {
+    val agg = new FixedLengthMessageAggregator(12.bytes)
     val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
     val content = Unpooled.wrappedBuffer(new Array[Byte](11))
     val head = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
@@ -56,5 +57,42 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
     val reqObserved = channel.readInbound[FullHttpRequest]()
     assert(reqObserved.method == HttpMethod.POST)
     assert(reqObserved.content == content)
+  }
+
+  test("fixed length messages which are chunked and equal to the specified length are aggregated") {
+    val agg = new FixedLengthMessageAggregator(11.bytes)
+    val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
+    val content = Unpooled.wrappedBuffer(new Array[Byte](11))
+    val head = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    HttpUtil.setContentLength(head, content.readableBytes)
+
+    val body = new DefaultLastHttpContent(content)
+
+    assert(!channel.writeInbound(head))
+    assert(channel.writeInbound(body))
+
+    val reqObserved = channel.readInbound[FullHttpRequest]()
+    assert(reqObserved.method == HttpMethod.POST)
+    assert(reqObserved.content == content)
+  }
+
+  test("fixed length messages which are chunked and larger than than the " +
+       "specified size remain chunked") {
+    val agg = new FixedLengthMessageAggregator(11.byte)
+    val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
+    val content = Unpooled.wrappedBuffer(new Array[Byte](12))
+    val head = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/")
+    HttpUtil.setContentLength(head, content.readableBytes)
+
+    val body = new DefaultLastHttpContent(content)
+
+    assert(channel.writeInbound(head))
+    assert(channel.writeInbound(body))
+
+    val reqObserved = channel.readInbound[HttpRequest]()
+    assert(reqObserved.method == HttpMethod.POST)
+
+    val bodyObserved = channel.readInbound[HttpContent]()
+    assert(bodyObserved.content == content)
   }
 }

@@ -20,7 +20,9 @@ StatsFilter
   If you are using a ``ResponseClassifier`` that classifies non-Exceptions
   as failures, it will use a synthetic Exception,
   ``com.twitter.finagle.service.ResponseClassificationSyntheticException``,
-  to account for these.
+  to account for these. See the
+  `FAQ <https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception>`_
+  for more details.
 
 **failures**
   A counter of the number of times any failure has been observed.
@@ -72,12 +74,8 @@ ServerStatsFilter
 
 **transit_latency_ms**
   A stat that attempts to measure (wall time) transit times between hops, e.g.,
-  from client to server. Be aware that clock drift between hosts and other factors
-  can contribute here. Not supported by all protocols.
-
-**deadline_budget_ms**
-  A stat accounting for the (implied) amount of time remaining for this request,
-  for example from a deadline or timeout. Not supported by all protocols.
+  from client to server. Be aware that clock drift between hosts, stop the world
+  pauses, and queue backups can contribute here. Not supported by all protocols.
 
 RequestSemaphoreFilter
 <<<<<<<<<<<<<<<<<<<<<<
@@ -99,10 +97,3 @@ PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
 
 **response_payload_bytes**
   A histogram of the number of bytes per response's payload.
-
-TimeoutFilter
-<<<<<<<<<<<<<
-
-**timeout/expired_deadline_ms**
-  A stat of the elapsed time since expiry if a deadline has expired, in
-  milliseconds. Temporary stat to aid in debugging.

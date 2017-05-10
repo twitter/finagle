@@ -11,7 +11,7 @@ import java.security.cert.Certificate
 /**
  * A Transport that handles encoding Commands to Bufs and decoding framed Bufs to Responses.
  */
-private[finagle] class ClientTransport[Command <: AnyRef, Response <: AnyRef](
+private[finagle] class ClientTransport[Command, Response](
     commandToEncoding: AbstractCommandToEncoding[Command],
     decodingToResponse: AbstractDecodingToResponse[Response],
     underlying: Transport[Buf, Buf])
@@ -38,7 +38,7 @@ private[finagle] class ClientTransport[Command <: AnyRef, Response <: AnyRef](
 
   def write(command: Command): Future[Unit] = {
     val decoding: Decoding = commandToEncoding.encode(command)
-    val buf: Buf = encoder.encode(null, null, decoding)
+    val buf: Buf = encoder.encode(decoding)
     underlying.write(buf)
   }
 

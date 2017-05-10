@@ -31,9 +31,9 @@ class ChanTest extends FunSuite {
       }
     }
 
-    t0.start();
+    t0.start()
     t1.start()
-    t0.join();
+    t0.join()
     t1.join()
 
     assert(threads.toSeq == Seq(t0, t1))

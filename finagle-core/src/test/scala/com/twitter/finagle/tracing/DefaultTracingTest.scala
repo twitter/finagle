@@ -76,8 +76,8 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
       val client = stringClient
         .configured(fparam.Tracer(clientTracer))
-        .configured(fparam.Label("theClient"))
-        .newService(svc)
+        .newService(
+          Name.bound(Address(svc.boundAddress.asInstanceOf[InetSocketAddress])), "theClient")
 
       val finalizer = new Closable {
         override def close(deadline: Time): Future[Unit] =

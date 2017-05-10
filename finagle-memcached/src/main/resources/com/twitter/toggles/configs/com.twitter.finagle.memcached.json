@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.memcached.UseNetty4",
-      "description": "Use Netty4 for the Finagle Memcached stack client",
-      "fraction": 0.0
-    }
-  ]
-}

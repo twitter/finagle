@@ -6,6 +6,7 @@ import com.twitter.util.{Await, Duration, Var}
 import java.io.{InputStreamReader, BufferedReader}
 import java.net.{InetSocketAddress, URL}
 import org.junit.runner.RunWith
+import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.exceptions.TestFailedDueToTimeoutException
 import org.scalatest.junit.JUnitRunner
@@ -37,7 +38,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   def hostPath = "localhost:%d!/foo/bar/baz".format(inst.zookeeperAddress.getPort)
 
   // TODO: remove when no longer flaky.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (!sys.props.contains("SKIP_FLAKY"))
       super.test(testName, testTags:_*)(f)
   }

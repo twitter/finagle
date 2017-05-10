@@ -23,7 +23,7 @@ import com.twitter.util.{Future, Time}
  * In other words, it converts a `Service[ReqOut, RepIn]` to a
  * `Service[ReqIn, RepOut]`.
  *
- * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters user guide]]
  *      for details and examples.
  */
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
@@ -59,7 +59,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     else AndThen(service => andThen(next.andThen(service)))
 
   /**
-   * Convert the [[TypeAgnostic]] filter to a Filter and chain it with
+   * Convert the [[Filter.TypeAgnostic]] filter to a Filter and chain it with
    * `andThen`.
    */
   def agnosticAndThen(next: Filter.TypeAgnostic): Filter[ReqIn, RepOut, ReqOut, RepIn] =
@@ -76,15 +76,10 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
     val svc = Service.rescue(service)
     new Service[ReqIn, RepOut] {
-      def apply(request: ReqIn) = Filter.this.apply(request, svc)
-      override def close(deadline: Time) = service.close(deadline)
-      override def status = service.status
+      def apply(request: ReqIn): Future[RepOut] = Filter.this.apply(request, svc)
+      override def close(deadline: Time): Future[Unit] = service.close(deadline)
+      override def status: Status = service.status
     }
-  }
-
-  def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
-    val service = Service.mk(f)
-    req => Filter.this.apply(req, service)
   }
 
   /**
@@ -102,9 +97,9 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
         svc => Filter.this.andThen(svc)
       def apply(conn: ClientConnection): Future[Service[ReqIn, RepOut]] =
         factory(conn).map(fn)
-      def close(deadline: Time) = factory.close(deadline)
-      override def status = factory.status
-      override def toString() = factory.toString()
+      def close(deadline: Time): Future[Unit] = factory.close(deadline)
+      override def status: Status = factory.status
+      override def toString: String = factory.toString()
     }
 
   /**
@@ -152,9 +147,9 @@ object Filter {
           svc => AndThen.this.andThen(svc)
         def apply(conn: ClientConnection): Future[Service[ReqIn, RepOut]] =
           factory(conn).map(fn)
-        def close(deadline: Time) = factory.close(deadline)
-        override def status = factory.status
-        override def toString() = factory.toString()
+        def close(deadline: Time): Future[Unit] = factory.close(deadline)
+        override def status: Status = factory.status
+        override def toString: String = factory.toString()
       }
 
     def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] =
@@ -175,22 +170,30 @@ object Filter {
   implicit def canStackFromSvc[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
-      def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+      def toStackable(
+        _role: Stack.Role,
+        filter: Filter[Req, Rep, Req, Rep]
+      ): Stack.Module0[Service[Req, Rep]] =
         new Stack.Module0[Service[Req, Rep]] {
-          val role = _role
-          val description = role.name
-          def make(next: Service[Req, Rep]) = filter andThen next
+          val role: Stack.Role = _role
+          val description: String = role.name
+          def make(next: Service[Req, Rep]): Service[Req, Rep] =
+            filter.andThen(next)
         }
     }
 
   implicit def canStackFromFac[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], ServiceFactory[Req, Rep]] {
-      def toStackable(_role: Stack.Role, filter: Filter[Req, Rep, Req, Rep]) =
+      def toStackable(
+        _role: Stack.Role,
+        filter: Filter[Req, Rep, Req, Rep]
+      ): Stack.Module0[ServiceFactory[Req, Rep]] =
         new Stack.Module0[ServiceFactory[Req, Rep]] {
-          val role = _role
-          val description = role.name
-          def make(next: ServiceFactory[Req, Rep]) = filter andThen next
+          val role: Stack.Role = _role
+          val description: String = role.name
+          def make(next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+            filter.andThen(next)
         }
     }
 
@@ -203,7 +206,7 @@ object Filter {
 
     def andThen(next: TypeAgnostic): TypeAgnostic =
       new TypeAgnostic {
-        def toFilter[Req, Rep] =
+        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
           self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
       }
 
@@ -215,13 +218,6 @@ object Filter {
       next: Filter[ReqIn, RepOut, ReqOut, RepIn]
     ): Filter[ReqIn, RepOut, ReqOut, RepIn] =
       toFilter[ReqIn, RepOut].andThen(next)
-
-    /**
-     * Convert this to an appropriately-typed [[Filter]] and compose
-     * with `andThen`.
-     */
-    def andThen[Req, Rep](f: Req => Future[Rep]): Req => Future[Rep] =
-      toFilter[Req, Rep].andThen(f)
 
     /**
      * Convert this to an appropriately-typed [[Filter]] and compose
@@ -241,7 +237,7 @@ object Filter {
   object TypeAgnostic {
     val Identity: TypeAgnostic =
       new TypeAgnostic {
-        override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = identity[Req, Rep]
+        def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = identity[Req, Rep]
       }
   }
 
@@ -251,7 +247,8 @@ object Filter {
   def mk[ReqIn, RepOut, ReqOut, RepIn](
     f: (ReqIn, ReqOut => Future[RepIn]) => Future[RepOut]
   ): Filter[ReqIn, RepOut, ReqOut, RepIn] = new Filter[ReqIn, RepOut, ReqOut, RepIn] {
-    def apply(request: ReqIn, service: Service[ReqOut, RepIn]) = f(request, service)
+    def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] =
+      f(request, service)
   }
 
   /**

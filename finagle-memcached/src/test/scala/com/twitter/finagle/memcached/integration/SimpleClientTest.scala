@@ -1,18 +1,17 @@
 package com.twitter.finagle.memcached.integration
 
-import _root_.java.lang.{Boolean => JBoolean}
-
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
-
-import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.Address
+import com.twitter.finagle.Memcached
+import com.twitter.finagle.Name
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.Await
+import java.net.InetSocketAddress
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class SimpleClientTest extends FunSuite with BeforeAndAfter {
@@ -27,12 +26,11 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
   before {
     testServer = TestMemcachedServer.start()
     if (testServer.isDefined) {
-      val service = ClientBuilder()
-        .hosts(Seq(testServer.get.address))
-        .reportTo(stats)
-        .codec(new Memcached())
-        .hostConnectionLimit(1)
-        .build()
+      val address = Address(testServer.get.address.asInstanceOf[InetSocketAddress])
+      val service = Memcached.client
+        .withStatsReceiver(stats)
+        .connectionsPerEndpoint(1)
+        .newService(Name.bound(address), "memcache")
       client = Client(service)
     }
   }
@@ -92,8 +90,9 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       assert(value == Buf.Utf8("y"))
       assert(casUnique == Buf.Utf8("1"))
 
-      assert(!Await.result(client.cas("x", Buf.Utf8("z"), Buf.Utf8("2"))))
-      assert(Await.result(client.cas("x", Buf.Utf8("z"), casUnique)))
+      assert(!Await.result(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
+      assert(Await.result(
+        client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue)
       val res = Await.result(client.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))
@@ -170,7 +169,7 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
    intercept[ClientError] { Await.result(client.prepend("bad key", Buf.Utf8("rab"))) }
    intercept[ClientError] { Await.result(client.replace("bad key", Buf.Utf8("bar"))) }
    intercept[ClientError] { Await.result(client.add("bad key", Buf.Utf8("2"))) }
-   intercept[ClientError] { Await.result(client.cas("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
+   intercept[ClientError] { Await.result(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
    intercept[ClientError] { Await.result(client.incr("bad key")) }
    intercept[ClientError] { Await.result(client.decr("bad key")) }
    intercept[ClientError] { Await.result(client.delete("bad key")) }

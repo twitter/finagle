@@ -2,20 +2,20 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
-import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer, Netty4Framer}
-import com.twitter.finagle.mux.{Handshake, FailureDetector, Toggles}
-import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
+import com.twitter.finagle.mux.transport._
+import com.twitter.finagle.mux.{Handshake, Toggles}
+import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.param.{ProtocolLibrary, Timer, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.{Transport, StatsTransport}
+import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, StorageUnit}
@@ -62,23 +62,17 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * servers and clients can use the same parameter).
      */
     case class MuxImpl(
-        transporter: Stack.Params => Transporter[Buf, Buf],
+        transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
         listener: Stack.Params => Listener[Buf, Buf]) {
       def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
         (this, MuxImpl.param)
     }
 
-    object MuxImpl {
-      private val UseNetty4ToggleId: String = "com.twitter.finagle.mux.UseNetty4"
-      private val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-      private def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
 
-      /**
-       * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.
-       */
-      val Netty3 = MuxImpl(
-        params => Netty3Transporter(Netty3Framer, params),
-        params => Netty3Listener(Netty3Framer, params))
+    object MuxImpl {
+      private val RefCountToggleId: String = "com.twitter.finagle.mux.RefCountControlMessages"
+      private val refCountControlToggle: Toggle[Int] = Toggles(RefCountToggleId)
+      private def refCountControl: Boolean = refCountControlToggle(ServerInfo().id.hashCode)
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
@@ -86,20 +80,31 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4 = MuxImpl(
-        params => Netty4Transporter(Netty4Framer, params),
-        params => Netty4Listener(Netty4Framer, params))
+        params => Netty4Transporter.raw(CopyingFramer, _, params),
+        params => Netty4Listener(CopyingFramer, params))
 
-      private val defaultTransporter: Stack.Params => Transporter[Buf, Buf] = params => {
-        if (useNetty4) Netty4.transporter(params)
-        else Netty3.transporter(params)
-      }
+      /**
+       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
+       * ref-counts inbound mux control messages. No application changes are
+       * required to use this implementation.
+       *
+       * @note this is experimental and not yet tested in production.
+       */
+      val Netty4RefCountingControl = MuxImpl(
+        params => Netty4Transporter.raw(
+          RefCountingFramer,
+          _,
+          params,
+          transportFactory = new RefCountingTransport(_)
+        ),
+        params => Netty4Listener(CopyingFramer, params)
+      )
 
-      private val defaultListener: Stack.Params => Listener[Buf, Buf] = params => {
-        if (useNetty4) Netty4.listener(params)
-        else Netty3.listener(params)
-      }
-
-      implicit val param = Stack.Param(MuxImpl(defaultTransporter, defaultListener))
+      implicit val param = Stack.Param(
+        // note that ref-counting toggle is dependent on n4 toggle.
+        if (refCountControl) Netty4RefCountingControl
+        else Netty4
+      )
     }
   }
 
@@ -164,7 +169,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         }
     }
 
-    val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
+    private val params: Stack.Params = StackClient.defaultParams +
+      ProtocolLibrary("mux") +
+      Timer(Netty4HashedWheelTimer)
+
+    private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
@@ -184,7 +193,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   case class Client(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
-      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("mux"))
+      params: Stack.Params = Client.params)
     extends StdStackClient[mux.Request, mux.Response, Client]
     with WithDefaultLoadBalancer[Client] {
 
@@ -198,8 +207,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newTransporter(): Transporter[In, Out] =
-      params[param.MuxImpl].transporter(params)
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+      params[param.MuxImpl].transporter(params)(addr)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
@@ -241,10 +250,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   private[finagle] class ServerProtoTracing extends ProtoTracing("srv", StackServer.Role.protoTracing)
 
   object Server {
-    val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
+    private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
       .remove(TraceInitializerFilter.role)
       .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+
+    private val params: Stack.Params = StackServer.defaultParams +
+      ProtocolLibrary("mux") +
+      Timer(Netty4HashedWheelTimer)
 
     /**
      * Returns the headers that a server sends to a client.
@@ -266,7 +279,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   case class Server(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
-      params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("mux"))
+      params: Stack.Params = Server.params)
     extends StdStackServer[mux.Request, mux.Response, Server] {
 
     protected def copy1(

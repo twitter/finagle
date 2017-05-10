@@ -1,5 +1,5 @@
-ChannelConnector
-<<<<<<<<<<<<<<<<
+Netty Transporter
+<<<<<<<<<<<<<<<<<
 
 **connect_latency_ms**
   A histogram of the length of time it takes for a connection to succeed,

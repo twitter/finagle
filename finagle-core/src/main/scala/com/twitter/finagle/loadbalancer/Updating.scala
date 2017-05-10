@@ -1,23 +1,20 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.util.OnReady
-import com.twitter.util.{Time, Activity, Future, Promise}
+import com.twitter.finagle.util.DefaultLogger
+import com.twitter.util.{Time, Activity, Future}
+import java.util.logging.Level
+import scala.util.control.NonFatal
 
 /**
  * A Balancer mix-in which provides the collection over which to load balance
  * by observing `activity`.
  */
-private[loadbalancer] trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
-  private[this] val ready = new Promise[Unit]
-  def onReady: Future[Unit] = ready
-
+private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
    * An activity representing the active set of ServiceFactories.
    */
-  // Note: this is not a terribly good method name and should be
-  // improved in a future commit.
-  protected def activity: Activity[Traversable[ServiceFactory[Req, Rep]]]
+  protected def endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]]
 
   /*
    * Subscribe to the Activity and dynamically update the load
@@ -25,24 +22,22 @@ private[loadbalancer] trait Updating[Req, Rep] extends Balancer[Req, Rep] with O
    *
    * The observation is terminated when the Balancer is closed.
    */
-  private[this] val observation = activity.states.respond {
-    case Activity.Pending =>
-
+  private[this] val observation = endpoints.states.respond {
     case Activity.Ok(newList) =>
-      update(newList)
-      ready.setDone()
+      // We log here for completeness. Since this happens out-of-band
+      // of requests, the failures are not easily exposed.
+      try update(newList) catch {
+        case NonFatal(exc) =>
+          DefaultLogger.log(Level.WARNING, "Failed to update balancer", exc)
+      }
 
-    case Activity.Failed(_) =>
-      // On resolution failure, consider the
-      // load balancer ready (to serve errors).
-      ready.setDone()
+    case Activity.Failed(exc) =>
+      DefaultLogger.log(Level.WARNING, "Activity Failed", exc)
+
+    case Activity.Pending => // nop
   }
 
   override def close(deadline: Time): Future[Unit] = {
-    observation.close(deadline).transform { _ =>
-      super.close(deadline)
-    }.ensure {
-      ready.setDone()
-    }
+    observation.close(deadline).before { super.close(deadline) }
   }
 }

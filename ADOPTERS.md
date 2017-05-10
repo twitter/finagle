@@ -16,6 +16,8 @@ URLs if possible) and [submit a pull request][1]!
 * [Despegar](http://www.despegar.com/)
 * [DICE](http://dice.se/)
 * [Dwango](http://dwango.co.jp/)
+* [EnerNOC](https://www.enernoc.com/)
+* [Fitbit](https://www.fitbit.com/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
 * [Globo.com](http://globo.com/)
@@ -39,11 +41,12 @@ URLs if possible) and [submit a pull request][1]!
   * ["How we make pins more useful"][3]
 * [Quanttus](http://www.Quanttus.com/)
 * [Qubit](http://www.qubitproducts.com/)
-* [QuizUp] (https://www.quizup.com/)
+* [QuizUp](https://www.quizup.com/)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
 * [Sabre Labs](http://sabrelabs.com/)
+* [Salesforce](https://www.salesforce.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SmartNews](https://www.smartnews.com/en/)
@@ -64,6 +67,7 @@ URLs if possible) and [submit a pull request][1]!
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](https://teads.tv/)
 * [Tendril](http://www.tendrilinc.com/)
+* [Threat Stack](https://www.threatstack.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]

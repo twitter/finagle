@@ -159,6 +159,8 @@ output. To override this, use the following sample.
 
 Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
 
+.. _client_retries:
+
 Retries
 ~~~~~~~
 
@@ -171,6 +173,14 @@ bytes were written to the wire and protocol level NACKs) will be automatically r
 These retries come out of a ``RetryBudget`` that allows for approximately 20% of the total requests
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.
+
+Some failures may also be known as unsafe to retry. If a :src:`Failure <com/twitter/finagle/Failure.scala>`
+is flagged ``NonRetryable``, the `Retries` module will not make any attempts to retry the request and
+pass along the failure as is. A `NonRetryable` failure may be used in situations where a client
+determines that a service is unhealthy and wishes to signal that the normal pattern of retries should
+be skipped. Additionally, a service may reject a request that is malformed and thus pointless to retry.
+While Finagle respects the `NonRetryable` flag internally, users should also take care to respect it
+when creating retry filters of their own.
 
 The `Retries` module is configured with two parameters:
 
@@ -557,6 +567,8 @@ and picks a node it hopes has become available.
 
 :ref:`Related stats <loadbalancer_stats>`
 
+.. _client_circuit_breaking:
+
 Circuit Breaking
 ~~~~~~~~~~~~~~~~
 
@@ -619,7 +631,7 @@ The `Failure Accrual` module marks itself as unavailable based on the number of 
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
-The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`.
+The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`.
 
 See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
 ``Failure Accrual`` module.
@@ -644,8 +656,8 @@ success rate [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.successRate(
@@ -669,9 +681,8 @@ following snippet [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
-
+  import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+  import com.twitter.finagle.service.Backoff
 
   val twitter = Http.client
     .configured(FailureAccrual.Param(() => FailureAccrualPolicy.consecutiveFailures(
@@ -780,7 +791,47 @@ and then slowly decays, based on the TTL.
 
 :ref:`Related stats <pool_stats>`
 
+Admission Control
+-----------------
+
+Clients are configured with the :src:`NackAdmissionFilter <com/twitter/finagle/filter/NackAdmissionFilter.scala>`
+which will probabilistically drop some requests to unhealthy clusters. This aims
+to decrease the request volume to those clusters with little to no effect on a
+client's already unhealthy success rate. The filter works by keeping a moving
+average of the fraction of requests that are :ref:`nacked <glossary_nack>`. When
+this fraction hits a given threshold, the filter will probabilistically drop
+requests in proportion to that fraction.
+The filter can be configured with the following parameters:
+
+1. ``window`` The duration over which the average is calculated. Default is 2
+   minutes.
+2. ``nackRateThreshold`` The rate of rejected requests at which the filter kicks
+   in. Default is 0.5.
+
+:ref:`Related stats <admission_control_stats>`
+
+.. _response_classification:
+
 .. include:: shared-modules/ResponseClassification.rst
+
+MethodBuilder
+-------------
+
+.. warning:: These APIs are experimental and subject to change.
+
+.. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
+          We are waiting on user interest before expanding to more protocols.
+
+``MethodBuilder`` is a collection of APIs for client configuration at a higher
+level than the  :ref:`Finagle 6 APIs <finagle6apis>` while improving upon the deprecated
+``ClientBuilder``. ``MethodBuilder`` provides:
+
+- :ref:`Logical <mb_logical_req>` success rate metrics.
+- Retries based on application-level requests and responses (e.g. an HTTP
+  503 response code or a Thrift exception).
+- Configuration of per-attempt and total timeouts.
+
+:doc:`Learn more <MethodBuilder>` about ``MethodBuilder``.
 
 .. rubric:: Footnotes
 

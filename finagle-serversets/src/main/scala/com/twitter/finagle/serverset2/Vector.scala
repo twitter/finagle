@@ -1,7 +1,7 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.util.InetSocketAddressUtil.parseHostPorts
-import com.twitter.util.NonFatal
+import scala.util.control.NonFatal
 
 private[serverset2] sealed trait Selector {
   def matches(e: Entry): Boolean

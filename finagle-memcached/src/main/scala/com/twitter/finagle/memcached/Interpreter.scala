@@ -12,7 +12,6 @@ import com.twitter.util.{Future, Time}
  */
 class Interpreter(map: AtomicMap[Buf, Entry]) {
 
-  import ParserUtils._
   import Interpreter._
 
   def apply(command: Command): Response = {
@@ -120,7 +119,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               val Buf.Utf8(existingString) = entry.value
-              if (!existingString.isEmpty && !DigitsPattern.matcher(existingString).matches())
+              if (!existingString.isEmpty && !ParserUtils.isDigits(entry.value))
                 throw new ClientError("cannot increment or decrement non-numeric value")
 
               val existingValue: Long =
@@ -142,7 +141,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
         map.lock(key) { data =>
           apply(Incr(key, -value))
         }
-      case Quit() =>
+      case _ =>
         NoOp()
     }
   }

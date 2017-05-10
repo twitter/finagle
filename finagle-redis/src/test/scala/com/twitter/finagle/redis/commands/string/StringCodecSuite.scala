@@ -16,13 +16,13 @@ final class StringCodecSuite extends RedisRequestTest {
   test("MGET", CodecTest) { checkMultiKey("MGET", MGet.apply) }
 
   test("BITCOUNT", CodecTest) {
-    assert(encode(BitCount(Buf.Utf8("foo"), None, None)) == Seq("BITCOUNT", "foo"))
-    assert(encode(BitCount(Buf.Utf8("foo"), Some(1), Some(2))) == Seq("BITCOUNT", "foo", "1", "2"))
+    assert(encodeCommand(BitCount(Buf.Utf8("foo"), None, None)) == Seq("BITCOUNT", "foo"))
+    assert(encodeCommand(BitCount(Buf.Utf8("foo"), Some(1), Some(2))) == Seq("BITCOUNT", "foo", "1", "2"))
   }
 
   test("BITOP", CodecTest) {
     forAll(Gen.oneOf("AND", "OR", "XOR", "NOT")) { op =>
-      assert(encode(BitOp(Buf.Utf8(op), Buf.Utf8("foo"), Seq(Buf.Utf8("bar")))) ==
+      assert(encodeCommand(BitOp(Buf.Utf8(op), Buf.Utf8("foo"), Seq(Buf.Utf8("bar")))) ==
         Seq("BITOP", op, "foo", "bar")
       )
     }
@@ -39,7 +39,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("GETRANGE", CodecTest) {
-    assert(encode(GetRange(Buf.Utf8("foo"), 0, 42)) == Seq("GETRANGE", "foo", "0", "42"))
+    assert(encodeCommand(GetRange(Buf.Utf8("foo"), 0, 42)) == Seq("GETRANGE", "foo", "0", "42"))
   }
 
   test("INCR", CodecTest) { checkSingleKey("INCR", Incr.apply) }

@@ -3,21 +3,19 @@ package com.twitter.finagle.memcached.unit.util
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
+import com.twitter.finagle.Failure
+import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.toggle.flag
-import com.twitter.finagle.WriteException
-import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class MemcachedTest extends FunSuite
@@ -52,6 +50,8 @@ class MemcachedTest extends FunSuite
   test("Memcache.newPartitionedClient enables FactoryToService") {
     val st = new InMemoryStatsReceiver
     val client = Memcached.client
+      .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.consecutiveFailures(
+        100, Backoff.const(1.seconds))))
       .configured(Stats(st))
       .newRichClient("memcache=127.0.0.1:12345")
 
@@ -63,36 +63,12 @@ class MemcachedTest extends FunSuite
     val numberRequests = 10
     Time.withCurrentTimeFrozen { _ =>
       for (i <- 0 until numberRequests)
-        intercept[WriteException](Await.result(client.get("foo"), 3.seconds))
+        intercept[Failure](Await.result(client.get("foo"), 3.seconds))
       // Since FactoryToService is enabled, number of requeues should be
       // limited by leaky bucket until it exhausts retries, instead of
       // retrying 25 times on service acquisition.
       // number of requeues = maxRetriesPerReq * numRequests
       assert(st.counters(Seq("memcache", "retries", "requeues")) > numberRequests)
-    }
-  }
-
-  test("GlobalRegistry pipelined partitioned client") {
-    val name = "pipelined"
-    val expectedKey = Seq("client", "memcached", name, "is_pipelining")
-    Memcached.client.withLabel(name).newTwemcacheClient("127.0.0.1:12345")
-    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
-      e.key == expectedKey && e.value == "true"
-    }
-    assert(isPipelining)
-  }
-
-  test("Memcached is configured to use Netty3 by default") {
-    val client = Memcached.client
-    val params = client.params
-
-    assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty3Transporter")
-  }
-
-  test("Memcached can be toggled to Netty4") {
-    flag.overrides.let("com.twitter.finagle.memcached.UseNetty4", 1.0) {
-      val params = Memcached.client.params
-      assert(params[Memcached.param.MemcachedImpl].transporter(params).toString == "Netty4Transporter")
     }
   }
 }

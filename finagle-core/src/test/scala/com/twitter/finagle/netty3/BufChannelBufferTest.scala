@@ -441,6 +441,23 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     }
   }
 
+  test("test random long access (specified LITTLE_ENDIAN)") {
+    val endianness = ByteOrder.LITTLE_ENDIAN
+    val bytes = new Array[Byte](CAPACITY)
+    val wrapped = ChannelBuffers.wrappedBuffer(endianness, bytes)
+    0.until(CAPACITY - 7, 8) foreach { i =>
+      val value = random.nextLong()
+      wrapped.setLong(i, value)
+    }
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(bytes), endianness)
+
+    random.setSeed(seed)
+    0.until(CAPACITY - 7, 8) foreach { i =>
+      val value = random.nextLong()
+      assert(value == bcb.getLong(i))
+    }
+  }
+
   test("setZero") {
     intercept[ReadOnlyBufferException] {
       buffer.setZero(0, 1)

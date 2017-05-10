@@ -26,8 +26,8 @@ object Echo extends Client[String, String] with Server[String, String] {
       copy(stack, params)
 
     //#transporter
-    protected def newTransporter(): Transporter[String, String] =
-      Netty4Transporter(StringClientPipeline, params)
+    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+      Netty4Transporter.rawTransporter(StringClientPipeline, addr, params)
     //#transporter
 
     protected def newDispatcher(
@@ -112,7 +112,7 @@ object BasicClient {
   //#explicitbridge
   val addr = new java.net.InetSocketAddress("localhost", 8080)
   val transporter = Netty4Transporter[String, String](
-    StringClientPipeline, StackClient.defaultParams)
+    StringClientPipeline, addr, StackClient.defaultParams)
 
   val bridge: Future[Service[String, String]] =
     transporter(addr) map { transport =>

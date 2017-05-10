@@ -5,11 +5,8 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class RetriesTest extends FunSuite {
 
   private[this] class MyRetryEx extends Exception
@@ -43,6 +40,59 @@ class RetriesTest extends FunSuite {
       minRetriesPerSec = minBudget,
       percentCanRetry = 0.0, // this shouldn't be a factor because we are relying on the reserve
       nowMillis = Stopwatch.timeMillis)
+
+  test("moduleRequeable retries service acquisition `Retries.Effort` times on retryable failure") {
+    val stats = new InMemoryStatsReceiver()
+
+    val params = Stack.Params.empty +
+      param.Stats(stats) +
+      Retries.Budget(RetryBudget.Empty)
+
+    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
+      Stack.Role("FailingFactory"),
+      new FailingFactory[String, String](new Failure("boom", flags = Failure.Restartable))
+    )
+
+    val svcFactory: ServiceFactory[String, String] =
+      Retries.moduleRequeueable.toStack(failingFactory).make(params)
+
+    intercept[Exception] {
+      Await.result(svcFactory(), 5.seconds)
+    }
+
+    assert(stats.counter("retries", "requeues")() == Retries.Effort)
+  }
+
+  test("moduleRequeable retries service acquisition `Retries.Effort` times on retryable failure " +
+    "for each service application when using FactoryToService") {
+    val stats = new InMemoryStatsReceiver()
+
+    val params = Stack.Params.empty +
+      param.Stats(stats) +
+      Retries.Budget(RetryBudget.Empty)
+
+    val failingFactory: Stack[ServiceFactory[String, String]] = Stack.Leaf(
+      Stack.Role("test"),
+      new FailingFactory[String, String](new Failure("boom", flags = Failure.Restartable))
+    )
+
+    val svcFactory: ServiceFactory[String, String] =
+      Retries.moduleRequeueable.toStack(failingFactory).make(params)
+
+    val svc = new FactoryToService(svcFactory)
+
+    intercept[Exception] {
+      Await.result(svc("hello"), 5.seconds)
+    }
+
+    assert(stats.counter("retries", "requeues")() == Retries.Effort)
+
+    intercept[Exception] {
+      Await.result(svc("hello"), 5.seconds)
+    }
+
+    assert(stats.counter("retries", "requeues")() == Retries.Effort * 2)
+  }
 
   test("moduleRetryableWrites only does requeues") {
     val stats = new InMemoryStatsReceiver()
@@ -155,7 +205,7 @@ class RetriesTest extends FunSuite {
     val svc: Service[Exception, Int] =
       Await.result(svcFactory(), 5.seconds)
 
-    intercept[MyRetryEx] {
+    intercept[Failure] {
       Await.result(svc(new MyRetryEx()), 5.seconds)
     }
 
@@ -249,19 +299,16 @@ class RetriesTest extends FunSuite {
     val numReqs = 100
     Time.withCurrentTimeFrozen { _ =>
       0.until(numReqs).foreach { _ =>
-        intercept[MyRetryEx] {
+        intercept[Failure] {
           Await.result(svc(new MyRetryEx()), 5.seconds)
         }
       }
 
-      // verify each layer only sees 20% more
-      assert((numReqs * 0.2).toInt ==
-        nRetries(stats.stats(Seq("front", "retries"))))
-      assert((numReqs * (0.2 * 1.2)).toInt ==
-        nRetries(stats.stats(Seq("mid", "retries"))))
-      // numReqs + front's retries + mid's retries
-      // which is a 1.44x multiplier
-      assert((numReqs * 1.44).toInt == backReqs.get)
+      // Verify that the NonRetryable flag is respected and only one layer here
+      // retries requests. Behavior should be the same as only having one filter.
+      assert(0 == nRetries(stats.stats(Seq("front", "retries"))))
+      assert((numReqs * 0.2).toInt == nRetries(stats.stats(Seq("mid", "retries"))))
+      assert((numReqs * 1.2).toInt == backReqs.get)
     }
   }
 
@@ -317,5 +364,4 @@ class RetriesTest extends FunSuite {
     svcFactory.close(Duration.Zero)
     assert(budgetGauge.isEmpty)
   }
-
 }

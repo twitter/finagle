@@ -26,7 +26,7 @@ private[serverset2] object LocalServerSetService extends App {
   private val numberOfServersets = flag("serversets.count", 25, "Number of serversets to churn")
   private val zkListenPort = flag("zk.listenport", 2181, "port that the localhost zookeeper will listen on")
 
-  private val timer = DefaultTimer.twitter
+  private val timer = DefaultTimer
   private val logger = Logger(getClass)
   private var zkClient: CuratorFramework = null
   private val serversets = createServerSetPaths(numberOfServersets())

@@ -48,6 +48,28 @@ class ToggleMapTest extends FunSuite
     assert(state2 == gauge())
   }
 
+  test("ToggleMap.observed produces Toggle.Captured") {
+    val inMem = ToggleMap.newMutable()
+    val tm = ToggleMap.observed(inMem, NullStatsReceiver)
+
+    val name = "com.id"
+    val toggle = tm(name)
+    val capture = toggle.asInstanceOf[Toggle.Captured]
+
+    // starts empty
+    assert(capture.lastApply.isEmpty)
+
+    // observe a false
+    inMem.put(name, 0.0)
+    toggle(55)
+    assert(capture.lastApply.contains(false))
+
+    // observe a true
+    inMem.put(name, 1.0)
+    toggle(55)
+    assert(capture.lastApply.contains(true))
+  }
+
   test("ToggleMap.newMutable toString") {
     val src = "um well excuse me um"
     val m = ToggleMap.newMutable(src)
@@ -250,12 +272,12 @@ class ToggleMapTest extends FunSuite
       // to change if the underlying algorithm changes. we want
       // some mechanism for seeing that the values can be variable.
       val someToggle = ToggleMap.flags("com.toggle.some")
-      assert(someToggle.isDefinedAt(123))
-      assert(!someToggle(123))
+      assert(someToggle.isDefinedAt(999))
+      assert(someToggle(999))
       assert(someToggle.isDefinedAt(Int.MinValue))
-      assert(someToggle(Int.MinValue))
+      assert(!someToggle(Int.MinValue))
       assert(someToggle.isDefinedAt(Int.MaxValue))
-      assert(someToggle(Int.MaxValue))
+      assert(!someToggle(Int.MaxValue))
     }
   }
 

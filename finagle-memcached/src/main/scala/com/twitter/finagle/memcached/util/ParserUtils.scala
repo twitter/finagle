@@ -1,41 +1,15 @@
 package com.twitter.finagle.memcached.util
 
 import com.twitter.io.Buf
-import java.util.regex.Pattern
-import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.mutable.ArrayBuffer
 
 object ParserUtils {
 
-  /**
-   * Prefer using `isDigits(ChannelBuffer)` or `DigitsPattern.matcher(input).matches()`
-   */
-  val DIGITS = "^\\d+$"
-
-  val DigitsPattern = Pattern.compile(DIGITS)
-
   // Used by byteArrayStringToInt. The maximum length of a non-negative Int in chars
   private[this] val MaxLengthOfIntString = Int.MaxValue.toString.length
 
-  /**
-   * Returns true if every readable byte in the ChannelBuffer is a digit,
-   * false otherwise.
-   */
-  def isDigits(cb: ChannelBuffer): Boolean = {
-    val len = cb.readableBytes()
-    if (len == 0)
-      return false
-
-    val start = cb.readerIndex()
-    val end = start + len
-    var i = start
-    while (i < end) {
-      val b = cb.getByte(i)
-      if (b < '0' || b > '9')
-        return false
-      i += 1
-    }
-    true
+  private[this] val isDigitProcessor = new Buf.Processor {
+    def apply(byte: Byte): Boolean = byte >= '0' && byte <= '9'
   }
 
   /**
@@ -43,16 +17,7 @@ object ParserUtils {
    */
   def isDigits(buf: Buf): Boolean =
     if (buf.isEmpty) false
-    else {
-      val Buf.ByteArray.Owned(bytes, begin, end) = Buf.ByteArray.coerce(buf)
-      var i = begin
-      while (i < end) {
-        if (bytes(i) < '0' || bytes(i) > '9')
-          return false
-        i += 1
-      }
-      true
-    }
+    else -1 == buf.process(isDigitProcessor)
 
   private[memcached] def split(bytes: Array[Byte], delimiter: Byte): IndexedSeq[Buf] = {
     val split = new ArrayBuffer[Buf](6)

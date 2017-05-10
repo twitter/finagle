@@ -1,8 +1,8 @@
 {
   "toggles": [
     {
-      "id": "com.twitter.finagle.mux.UseNetty4",
-      "description": "Use netty4 as the transport implementation",
+      "id": "com.twitter.finagle.mux.RefCountControlMessages",
+      "description": "Use netty4 with a ref-counting control plane as the transport implementation. This feature is dependent on com.twitter.finagle.mux.UseNetty4 evaluating as true.",
       "fraction": 0.0
     }
   ]

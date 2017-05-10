@@ -54,21 +54,15 @@ class ClientRegistryTest extends FunSuite
     ClientRegistry.clear()
   }
 
-  test("ClientRegistry.expAllRegisteredClientsResolved zero clients")(new Ctx {
-    val allResolved0 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved0.poll == Some(Return(Set())))
-  })
-
   test("ClientRegistry.expAllRegisteredClientsResolved handles Addr.Bound")(new Ctx {
     val va = Var[Addr](Addr.Pending)
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll == None)
 
     va() = Addr.Bound(Set.empty[Address])
     eventually {
-      assert(allResolved.poll == Some(Return(Set("foo"))))
+      assert(allResolved.poll.get.get().contains("foo"))
     }
   })
 
@@ -77,11 +71,10 @@ class ClientRegistryTest extends FunSuite
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll == None)
 
     va() = Addr.Failed(new Exception("foo"))
     eventually {
-      assert(allResolved.poll == Some(Return(Set("foo"))))
+      assert(allResolved.poll.get.get().contains("foo"))
     }
   })
 
@@ -90,11 +83,10 @@ class ClientRegistryTest extends FunSuite
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll == None)
 
     va() = Addr.Neg
     eventually {
-      assert(allResolved.poll == Some(Return(Set("foo"))))
+      assert(allResolved.poll.get.get().contains("foo"))
     }
   })
 
@@ -104,19 +96,18 @@ class ClientRegistryTest extends FunSuite
 
     val c0 = stackClient.newClient(Name.Bound(va0, new Object()), "foo")
     val allResolved0 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved0.poll == None)
     va0() = Addr.Bound(Set.empty[Address])
     eventually {
-      assert(allResolved0.poll == Some(Return(Set("foo"))))
+      assert(allResolved0.poll.get.get.contains("foo"))
     }
 
     val c1 = stackClient.newClient(Name.Bound(va1, new Object()), "bar")
     val allResolved1 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved1.poll == None)
     va1() = Addr.Bound(Set.empty[Address])
 
     eventually {
-      assert(allResolved1.poll == Some(Return(Set("foo", "bar"))))
+      val res = allResolved1.poll.get.get
+      assert(res.contains("foo") && res.contains("bar"))
     }
   })
 
@@ -124,10 +115,9 @@ class ClientRegistryTest extends FunSuite
     val path = Path.read("/$/com.twitter.finagle.client.crtnamer/foo")
     val c = stackClient.newClient(Name.Path(path), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll == None)
     crtnamer.e.notify(Addr.Bound(Set.empty[Address]))
     eventually {
-      assert(allResolved.poll == Some(Return(Set("foo"))))
+      assert(allResolved.poll.get.get().contains("foo"))
     }
     c.close()
   })

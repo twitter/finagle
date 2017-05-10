@@ -49,13 +49,13 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
       val client = ThriftMux.client.newIface[TestService.FutureIface](
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-      assert(Await.result(client.query("ok"), 1.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.second) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok"), 1.second) == "hello context world")
+        assert(Await.result(client.query("ok"), 5.second) == "hello context world")
       }
 
-      Await.result(server.close(), 1.second)
+      Await.result(server.close(), 5.second)
     }
   }
 
@@ -65,13 +65,13 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
         Thrift.client.newIface[TestService.FutureIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-      assert(Await.result(client.query("ok"), 1.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.second) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok"), 1.second) == "hello context world")
+        assert(Await.result(client.query("ok"), 5.second) == "hello context world")
       }
 
-      Await.result(server.close(), 1.second)
+      Await.result(server.close(), 5.second)
     }
   }
 
@@ -81,14 +81,14 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
       val client =
         Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-      assert(Await.result(client.query("ok"), 1.second) == "okok")
+      assert(Await.result(client.query("ok"), 5.second) == "okok")
 
       Dtab.unwind {
         Dtab.local = Dtab.read("/foo=>/bar")
-        assert(Await.result(client.query("ok"), 1.second) == "/foo=>/bar")
+        assert(Await.result(client.query("ok"), 5.second) == "/foo=>/bar")
       }
 
-      Await.result(server.close(), 1.second)
+      Await.result(server.close(), 5.second)
     }
   }
 
@@ -116,7 +116,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
       .newIface[TestService.FutureIface](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-    assert(Await.result(client.query("ok"), 2.seconds) == "ok")
+    assert(Await.result(client.query("ok"), 5.seconds) == "ok")
   }
 
   test("thriftmux server + thriftmux client: server does not see Retries " +

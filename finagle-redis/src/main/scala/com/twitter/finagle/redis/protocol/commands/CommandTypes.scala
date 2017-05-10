@@ -7,6 +7,8 @@ trait KeyCommand extends Command {
   protected def validate() {
     RequireClientProtocol(key != null && key.length > 0, "Empty Key found")
   }
+
+  override def body: Seq[Buf] = Seq(key)
 }
 trait StrictKeyCommand extends KeyCommand {
   validate()
@@ -20,6 +22,8 @@ trait KeysCommand extends Command {
       RequireClientProtocol(key != null && key.length > 0, "Empty key found")
     }
   }
+
+  override def body: Seq[Buf] = keys
 }
 trait StrictKeysCommand extends KeysCommand {
   validate()

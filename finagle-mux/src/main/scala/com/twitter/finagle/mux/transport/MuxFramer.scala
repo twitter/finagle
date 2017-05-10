@@ -3,13 +3,13 @@ package com.twitter.finagle.mux.transport
 import com.twitter.concurrent.{AsyncQueue, Broker, Offer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Status}
-import com.twitter.io.Buf
-import com.twitter.util.{Future, NonFatal, Promise,Time, Throw, Return}
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.util.{Future, Promise,Time, Throw, Return}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicInteger
+import scala.util.control.NonFatal
 
 /**
  * Defines a [[com.twitter.finagle.transport.Transport]] which allows a
@@ -39,7 +39,7 @@ private[finagle] object MuxFramer {
      */
     def encodeFrameSize(size: Int): Buf = {
       require(size > 0)
-      val bw = BufWriter.fixed(4)
+      val bw = ByteWriter.fixed(4)
       bw.writeIntBE(size)
       bw.owned()
     }
@@ -48,9 +48,13 @@ private[finagle] object MuxFramer {
      * Extracts frame size from the `buf`.
      */
     def decodeFrameSize(buf: Buf): Int = {
-      val size = BufReader(buf).readIntBE()
-      require(size > 0)
-      size
+      val br = ByteReader(buf)
+      try {
+        val size = ByteReader(buf).readIntBE()
+        require(size > 0)
+        size
+      }
+      finally br.close()
     }
   }
 
@@ -282,7 +286,7 @@ private[finagle] object MuxFramer {
     private[this] def readLoop(tags: Map[Int, Buf]): Future[Unit] =
       trans.read().flatMap { buf =>
         readStreamBytes.add(buf.length)
-        val br = BufReader(buf)
+        val br = ByteReader(buf)
         val header = br.readIntBE()
         val typ = Message.Tags.extractType(header)
         val tag = Message.Tags.extractTag(header)
@@ -317,7 +321,7 @@ private[finagle] object MuxFramer {
             val head = buf.slice(0, 4)
             val rest = tags(t)
             val last = buf.slice(4, buf.length)
-            head.concat(rest).concat(last)
+            Buf(Seq(head, rest, last))
           }
           readq.offer(Message.decode(resBuf))
           tags - t

@@ -123,9 +123,10 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
   }
 
   test("not decode invalid messages") {
-    assert(intercept[Failure] {
-      decode(Buf.Empty)
-    } == Failure.wrap(BadMessageException("short message")))
+    val short = intercept[Failure] { decode(Buf.Empty) }
+    assert(short.why.startsWith("short message"))
+    assert(short.cause.get.isInstanceOf[BadMessageException])
+
     assert(intercept[Failure] {
       decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1)))
     } == Failure.wrap(BadMessageException("unknown message type: 0 [tag=1]. Payload bytes: 0. First 0 bytes of the payload: ''")))
@@ -168,5 +169,43 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
     assert(ControlMessage.unapply(Rping(tag)) == Some(tag))
     assert(ControlMessage.unapply(Tdiscarded(tag, "")) == Some(tag))
     assert(ControlMessage.unapply(Tlease(0, 0L)) == Some(tag))
+  }
+
+  test("context entries are backed by Buf.Empty or an exact sized ByteArray") {
+    def checkBuf(buf: Buf): Unit = buf match {
+      case Buf.Empty => assert(true) // ok
+      case Buf.ByteArray.Owned(array, 0, end) => assert(end == array.length)
+      case msg => fail(s"Unexpected Buf: $msg")
+    }
+
+    val msg = RdispatchOk(0, goodContexts.flatten, Buf.Empty)
+    val RdispatchOk(0, ctxs, Buf.Empty) = decode(Buf.ByteArray.coerce(encode(msg)))
+    ctxs.foreach { case (k, v) =>
+      checkBuf(k)
+      checkBuf(v)
+    }
+  }
+
+  test("Message.coerceTrimmed(Buf.Empty)") {
+    val coerced = Message.coerceTrimmed(Buf.Empty)
+    assert(coerced eq Buf.Empty)
+  }
+
+  test("Message.coerceTrimmed(correctly sized ByteArray)") {
+    val exact = Buf.ByteArray(1, 2, 3)
+    val coerced = Message.coerceTrimmed(exact)
+    assert(coerced eq exact)
+  }
+
+  test("Message.coerceTrimmed(sliced Buf)") {
+    val slice = Buf.ByteArray(1, 2, 3).slice(0, 2)
+    val coerced = Message.coerceTrimmed(slice)
+    coerced match {
+      case Buf.ByteArray.Owned(data, 0, 2) =>
+        assert(data.length == 2)
+        assert(data(0) == 1 && data(1) == 2)
+
+      case other => fail(s"Unexpected representation: $other")
+    }
   }
 }

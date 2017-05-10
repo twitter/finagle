@@ -7,12 +7,15 @@ import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, Ser
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
-import com.twitter.finagle.ssl.{Engine, Ssl}
+import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
+import com.twitter.finagle.ssl.server.{
+  ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
+import java.io.File
 import java.net.SocketAddress
 import javax.net.ssl.SSLEngine
 import org.jboss.netty.channel.ServerChannelFactory
@@ -117,7 +120,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * to do your own dirty work.
  *
  * Please see the
- * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * [[https://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
  * for information on the preferred `with`-style client-construction APIs.
  *
  * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
@@ -169,7 +172,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * - `maxConcurrentRequests`: Int.MaxValue
  * - `backlog`: OS-defined default value
  *
- * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
  *      for information on the preferred `with`-style APIs insead.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
@@ -439,6 +442,37 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     _configured(Transport.Verbose(v))
 
   /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration): This =
+    configured(Transport.ServerSsl(Some(config)))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, engineFactory)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
    * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
    * For example:
    * {{{
@@ -447,9 +481,30 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * Http.server.withTransport.tls(...)
    * }}}
    */
-  def tls(certificatePath: String, keyPath: String,
-          caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
-    newFinagleSslEngine(() => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
+  def tls(
+    certificatePath: String,
+    keyPath: String,
+    caCertificatePath: String = null,
+    ciphers: String = null,
+    nextProtos: String = null
+  ): This = {
+    val keyCredentials = if (caCertificatePath == null) {
+      KeyCredentials.CertAndKey(new File(certificatePath), new File(keyPath))
+    } else {
+      KeyCredentials.CertKeyAndChain(
+        new File(certificatePath), new File(keyPath), new File(caCertificatePath))
+    }
+    val cipherSuites = if (ciphers == null) CipherSuites.Unspecified
+      else CipherSuites.fromString(ciphers)
+    val applicationProtocols = if (nextProtos == null) ApplicationProtocols.Unspecified
+      else ApplicationProtocols.fromString(nextProtos)
+
+    configured(Transport.ServerSsl(
+      Some(SslServerConfiguration(
+        keyCredentials = keyCredentials,
+        cipherSuites = cipherSuites,
+        applicationProtocols = applicationProtocols))))
+  }
 
   /**
    * Provide a raw SSL engine that is used to establish SSL sessions.
@@ -458,7 +513,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     newFinagleSslEngine(() => new Engine(newSsl()))
 
   def newFinagleSslEngine(v: () => Engine): This =
-    _configured(Transport.TLSServerEngine(Some(v)))
+    _configured(SslServerEngineFactory.Param(
+      new ConstServerEngineFactory(v)))
+    .configured(Transport.ServerSsl(
+      Some(SslServerConfiguration())))
 
   /**
    * Configures the maximum concurrent requests that are admitted
@@ -557,15 +615,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
     _configured(MonitorFactory(mFactory))
-
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
-    tracer(factory())
-
-  // API compatibility method
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(t: com.twitter.finagle.tracing.Tracer): This =
-    tracer(t)
 
   /**
    * To migrate to the Stack-based APIs, use `CommonParams.withTracer`.

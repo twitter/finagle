@@ -61,10 +61,10 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
 
   import LoadDistributionTest._
 
-  private[this] val serverset = Var(Set.empty[ServiceFactory[Unit, Unit]])
+  private[this] val serverset = Var(Vector.empty[ServiceFactory[Unit, Unit]])
 
-  private[this] def newClients(n: Int): Seq[ServiceFactory[Unit, Unit]] =
-    List.tabulate(n)(i =>
+  private[this] def newClients(n: Int): Vector[ServiceFactory[Unit, Unit]] =
+    Vector.tabulate(n)(i =>
       newBalancerFactory(Rng(i)).newBalancer(
         Activity(serverset.map(Activity.Ok(_))),
         NullStatsReceiver,
@@ -72,8 +72,8 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
       )
     )
 
-  private[this] def newServers(n: Int): Seq[Server] =
-    List.fill(n)(new Server)
+  private[this] def newServers(n: Int): Vector[Server] =
+    Vector.fill(n)(new Server)
 
   private[this] def sendAndWait(load: Int)(sf: ServiceFactory[Unit, Unit]): Unit =
     Await.ready(Future.collect(Seq.fill(load)(sf())), 15.seconds)
@@ -82,7 +82,7 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     val clients = newClients(5)
     val servers = newServers(10)
 
-    serverset.update(servers.toSet)
+    serverset.update(servers)
 
     // Each client sends 150 requests (750 in total).
     clients.foreach(sendAndWait(150))
@@ -96,15 +96,15 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     val servers = newServers(20)
 
     // Initial state.
-    serverset.update(servers.take(10).toSet)
+    serverset.update(servers.take(10))
     clients.foreach(sendAndWait(150))
 
     // Deploy the first batch.
-    serverset.update(servers.slice(5, 15).toSet)
+    serverset.update(servers.slice(5, 15))
     clients.foreach(sendAndWait(150))
 
     // Deploy the second batch.
-    serverset.update(servers.slice(10, 20).toSet)
+    serverset.update(servers.slice(10, 20))
     clients.foreach(sendAndWait(150))
 
     // Optimal load is 750 * 3 / 10 = 225.
@@ -116,10 +116,10 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     val servers = newServers(10)
 
     // Initial state.
-    serverset.update(servers.toSet)
+    serverset.update(servers)
     clients.foreach(sendAndWait(150))
 
-    serverset.update(servers.take(5).toSet)
+    serverset.update(servers.take(5))
     clients.foreach(sendAndWait(150))
 
     // Optimal load is 750 * 2 / 10 = 150.
@@ -131,10 +131,10 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     val servers = newServers(15)
 
     // Initial state.
-    serverset.update(servers.take(10).toSet)
+    serverset.update(servers.take(10))
     clients.foreach(sendAndWait(150))
 
-    serverset.update(servers.toSet)
+    serverset.update(servers)
     clients.foreach(sendAndWait(150))
 
     // Ideal load is 750 * 2 / 10 = 150.

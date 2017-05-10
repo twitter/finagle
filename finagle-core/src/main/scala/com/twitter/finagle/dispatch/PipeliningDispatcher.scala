@@ -1,12 +1,12 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.concurrent.{AsyncQueue, AsyncMutex}
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.Failure
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Timer}
+import com.twitter.util.{Future, Promise, Timer, Time}
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -45,28 +45,19 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
   private[this] val transRead: Promise[Rep] => Unit =
     p =>
       trans.read().respond { res =>
-        try p.update(res)
+        try p.updateIfEmpty(res)
         finally loop()
       }
-
-  // this is unbounded because we assume a higher layer bounds how many
-  // concurrent requests we can have
-  private[this] val mutex = new AsyncMutex()
 
   private[this] def loop(): Unit =
     q.poll().onSuccess(transRead)
 
   loop()
 
+  // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
+  // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    mutex.acquire().flatMap { permit =>
-      // we must map on offering so that we don't relinquish the mutex until we
-      // have enqueued the promise, so we don't have to worry about out of order
-      // Promises
-      trans.write(req).before { q.offer(p); Future.Done }.ensure {
-        permit.release()
-      }
-    }
+    trans.write(req).before { q.offer(p); Future.Done }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)
@@ -75,14 +66,18 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
 
     p.setInterruptHandler {
       case t: Throwable =>
-        f.raiseWithin(TimeToWaitForStalledPipeline, StalledPipelineException)(timer)
-        self.synchronized {
-          // we check stalled so that we log exactly once per failed pipeline
-          if (!stalled) {
-            stalled = true
-            val addr = trans.remoteAddress
-            PipeliningDispatcher.log.warning(
-              s"pipelined connection stalled with ${q.size} items, talking to $addr")
+        timer.schedule(Time.now + TimeToWaitForStalledPipeline) {
+          if (!f.isDefined) {
+            f.raise(StalledPipelineException)
+            self.synchronized {
+              // we check stalled so that we log exactly once per failed pipeline
+              if (!stalled) {
+                stalled = true
+                val addr = trans.remoteAddress
+                PipeliningDispatcher.log.warning(
+                  s"pipelined connection stalled with ${q.size} items, talking to $addr")
+              }
+            }
           }
         }
     }

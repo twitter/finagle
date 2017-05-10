@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.Label
 import com.twitter.util._
 

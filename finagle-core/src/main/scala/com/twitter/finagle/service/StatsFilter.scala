@@ -3,12 +3,13 @@ package com.twitter.finagle.service
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Future, Stopwatch, Throw, Try}
-import java.util.concurrent.TimeUnit
+import com.twitter.util._
 import java.util.concurrent.atomic.LongAdder
+import java.util.concurrent.TimeUnit
+import scala.util.control.NonFatal
 
 object StatsFilter {
-  val role = Stack.Role("RequestStats")
+  val role: Stack.Role = Stack.Role("RequestStats")
 
   /**
    * Configures a [[StatsFilter.module]] to track latency using the
@@ -33,8 +34,8 @@ object StatsFilter {
       Param,
       ServiceFactory[Req, Rep]
     ] {
-      val role = StatsFilter.role
-      val description = "Report request statistics"
+      val role: Stack.Role = StatsFilter.role
+      val description: String = "Report request statistics"
       def make(
         _stats: param.Stats,
         _exceptions: param.ExceptionStatsHandler,
@@ -54,7 +55,7 @@ object StatsFilter {
 
   /** Basic categorizer with all exceptions under 'failures'. */
   val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
-    mkFlags = Failure.flagsOf,
+    mkFlags = FailureFlags.flagsOf,
     mkSource = SourcedException.unapply) {
 
     override def toString: String = "DefaultCategorizer"
@@ -66,10 +67,20 @@ object StatsFilter {
   def typeAgnostic(
     statsReceiver: StatsReceiver,
     exceptionStatsHandler: ExceptionStatsHandler
+  ): TypeAgnostic = typeAgnostic(
+    statsReceiver, ResponseClassifier.Default, exceptionStatsHandler, TimeUnit.MILLISECONDS)
+
+  def typeAgnostic(
+    statsReceiver: StatsReceiver,
+    responseClassifier: ResponseClassifier,
+    exceptionStatsHandler: ExceptionStatsHandler,
+    timeUnit: TimeUnit
   ): TypeAgnostic = new TypeAgnostic {
-    override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-      new StatsFilter[Req, Rep](statsReceiver, exceptionStatsHandler)
+    def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+      new StatsFilter[Req, Rep](
+        statsReceiver, responseClassifier, exceptionStatsHandler, timeUnit)
   }
+
 }
 
 /**
@@ -148,7 +159,14 @@ class StatsFilter[Req, Rep](
     val elapsed = Stopwatch.start()
 
     outstandingRequestCount.increment()
-    service(request).respond { response =>
+
+    val result = try {
+      service(request)
+    } catch { case NonFatal(e) =>
+      Future.exception(e)
+    }
+
+    result.respond { response =>
       outstandingRequestCount.decrement()
       if (!isBlackholeResponse(response)) {
         dispatchCount.incr()
@@ -174,15 +192,15 @@ class StatsFilter[Req, Rep](
 }
 
 private[finagle] object StatsServiceFactory {
-  val role = Stack.Role("FactoryStats")
+  val role: Stack.Role = Stack.Role("FactoryStats")
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsServiceFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
-      val role = StatsServiceFactory.role
-      val description = "Report connection statistics"
+      val role: Stack.Role = StatsServiceFactory.role
+      val description: String = "Report connection statistics"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next

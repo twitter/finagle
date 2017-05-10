@@ -349,10 +349,10 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
         (bytes(0) & 0xff).toLong |
         ((bytes(1) & 0xff).toLong << 8) |
         ((bytes(2) & 0xff).toLong << 16) |
-        ((bytes(3) & 0xff).toLong << 24)
-        ((bytes(4) & 0xff).toLong << 32)
-        ((bytes(5) & 0xff).toLong << 40)
-        ((bytes(6) & 0xff).toLong << 48)
+        ((bytes(3) & 0xff).toLong << 24) |
+        ((bytes(4) & 0xff).toLong << 32) |
+        ((bytes(5) & 0xff).toLong << 40) |
+        ((bytes(6) & 0xff).toLong << 48) |
         ((bytes(7) & 0xff).toLong << 56)
     }
   }

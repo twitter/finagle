@@ -222,8 +222,8 @@ object Retries {
        * some exceptions to acquire a service are considered fatal.
        */
       private[this] def applySelf(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] =
-        self(conn).rescue {
-          case e@RetryPolicy.RetryableWriteException(_) if n > 0 =>
+        self(conn).transform {
+          case Throw(e@RetryPolicy.RetryableWriteException(_)) if n > 0 =>
             if (status == Status.Open) {
               requeuesCounter.incr()
               applySelf(conn, n-1)
@@ -231,16 +231,24 @@ object Retries {
               notOpenCounter.incr()
               Future.exception(e)
             }
+
+          // this indicates that there isn't a problem with the remote peer but
+          // the returned service is unusable, which allows a protocol
+          // to point out when a connection is dead for a reason that shouldn't
+          // trigger circuit breaking
+          case Return(deadSvc) if deadSvc.status == Status.Closed && n > 0 =>
+            requeuesCounter.incr()
+            applySelf(conn, n-1)
+          case t => Future.const(t)
         }
 
       /**
-       * Note: This may seem like we are always attempting service acquisition
-       * with a fixed budget (i.e. `Effort`). However, this is not always the case
-       * and is dependent on how the client is built (i.e. `newService`/`newClient`).
+       * Note: We attempt service acquisition with a fixed budget (i.e. `Effort`).
        *
-       * Clients built with `newService` compose FactoryToService as part of their stack
-       * which effectively moves service acquisition as part of service application,
-       * so all requeues are gated by [[RequeueFilter]].
+       * Clients built with `newService` compose `FactoryToService` as part of their stack,
+       * making service acquisition part of *each* service application,
+       * so we requeue service acquisition up to `Effort` times for each service application,
+       * followed by request requeues as per [[RequeueFilter]].
        *
        * Clients built with `newClient` separate requeues into two distinct phases for
        * service acquisition and service application. First, we try up to `Effort` to acquire

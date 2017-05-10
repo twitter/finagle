@@ -53,7 +53,7 @@ class HttpTransportTest extends FunSuite {
 
     val Multi(req, _) = {
       val req = Request()
-      req.headers.set("Connection", "close")
+      req.headerMap.set("Connection", "close")
       reqq.offer(req)
       Await.result(trans.read(), 10.seconds)
     }

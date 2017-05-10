@@ -3,8 +3,9 @@ package com.twitter.finagle.redis.exp
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, NonFatal, Promise}
+import com.twitter.util.{Future, Promise}
 import java.util.concurrent.atomic.AtomicReference
+import scala.util.control.NonFatal
 
 class SubscribeDispatcher(trans: Transport[Command, Reply])
     extends GenSerialClientDispatcher[Command, Reply, Command, Reply](trans) {

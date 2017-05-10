@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.finagle.redis.util.StringToBuf
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -45,7 +45,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly index elements of an actively changing list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("lindex")
+      val key = Buf.Utf8("lindex")
 
       assert(Await.result(client.lIndex(key, 0L)) == None)
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
@@ -60,7 +60,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly insert before & after a pushed element", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("linsert")
+      val key = Buf.Utf8("linsert")
       val PivotFailureMessage = "Pivot not found"
 
       assert(Await.result(client.lPush(key, List(bufMoo))) == 1)
@@ -77,7 +77,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly Push -->> Remove -->> Pop elements in order", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("lremove")
+      val key = Buf.Utf8("lremove")
 
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
       assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
@@ -88,7 +88,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push members, set one, then pop them off in order", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("lset")
+      val key = Buf.Utf8("lset")
 
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
       assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
@@ -106,7 +106,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push members, examine the range, then pop them off", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("lrange")
+      val key = Buf.Utf8("lrange")
 
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
       assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
@@ -118,7 +118,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push members, the poll members queue style (RPOP)", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("rpop")
+      val key = Buf.Utf8("rpop")
 
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
       assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
@@ -129,7 +129,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push then pop members from the HEAD (RPUSH RPOP)", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("rpush")
+      val key = Buf.Utf8("rpush")
 
       assert(Await.result(client.rPush(key, List(bufBar))) == 1)
       assert(Await.result(client.rPush(key, List(bufBaz))) == 2)
@@ -140,7 +140,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push and trim members, then pop the two remaining", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = StringToBuf("ltrim")
+      val key = Buf.Utf8("ltrim")
 
       assert(Await.result(client.lPush(key, List(bufBar))) == 1)
       assert(Await.result(client.lPush(key, List(bufBaz))) == 2)

@@ -4,12 +4,11 @@ import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.thrift.Status._
-import com.twitter.util.{Await, Duration, RandomSocket, Var}
+import com.twitter.util.{Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
 import scala.collection.JavaConverters._

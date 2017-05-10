@@ -1,5 +1,8 @@
 package com.twitter
 
+import com.twitter.finagle.stats.DefaultStatsReceiver
+import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
+
 /**
 
 Finagle is an extensible RPC system.
@@ -60,7 +63,7 @@ connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to UR
 returns a [[com.twitter.util.Future]] representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.
 
-The [[http://twitter.github.io/finagle/ Finagle homepage]] contains useful documentation and
+The [[https://twitter.github.io/finagle/ Finagle homepage]] contains useful documentation and
 resources for using Finagle.
  */
 package object finagle {
@@ -73,4 +76,12 @@ package object finagle {
       new com.twitter.finagle.service.FailingFactory[Req, Rep](
         new IllegalArgumentException("Unterminated stack")))
   }
+
+  private[this] val LibraryName: String = "com.twitter.finagle.core"
+
+  /**
+   * The [[ToggleMap]] used for finagle-core
+   */
+  private[finagle] val CoreToggles: ToggleMap =
+    StandardToggleMap(LibraryName, DefaultStatsReceiver)
 }

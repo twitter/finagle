@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Await, Future}
 import scala.math.Ordering
+import scala.util.control.NoStackTrace
 
 /**
  * Status tells the condition of a networked endpoint. They are used
@@ -25,9 +26,11 @@ sealed trait Status
  * (An [[scala.math.Ordering]] is defined in these terms.)
  */
 object Status {
-  private implicit val timer = DefaultTimer.twitter
+  private implicit val timer = DefaultTimer
 
-  class ClosedException extends Exception("Status was Closed; expected Open")
+  class ClosedException
+    extends Exception("Status was Closed; expected Open")
+    with NoStackTrace
 
   implicit val StatusOrdering: Ordering[Status] = Ordering.by({
     case Open => 3

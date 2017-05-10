@@ -1,7 +1,7 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import org.openjdk.jmh.annotations.{Benchmark, OperationsPerInvocation, Scope, Setup, State}
+import org.openjdk.jmh.annotations.{Benchmark, OperationsPerInvocation, Scope, State}
 import org.openjdk.jmh.infra.Blackhole
 
 @OperationsPerInvocation(50)

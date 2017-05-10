@@ -55,7 +55,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
 
     @volatile var states = Seq.empty[SessionState]
     val state = session1 flatMap { session1 => session1.state }
-    state.changes.register(Witness({ ws => ws match {
+    state.changes.register(Witness({ ws: WatchState => ws match {
       case WatchState.SessionState(s) => states = s +: states
       case _ =>
     }}))
@@ -95,14 +95,14 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     val varZkState = varZkSession flatMap { _.state }
 
     @volatile var zkStates = Seq[(SessionState, Duration)]()
-    varZkState.changes.register(Witness({ ws => ws match {
+    varZkState.changes.register(Witness({ ws: WatchState => ws match {
       case WatchState.SessionState(state) =>
         zkStates = (state, watch()) +: zkStates
       case _ =>
     }}))
 
     @volatile var sessions = Seq[ZkSession]()
-    varZkSession.changes.register(Witness({ s =>
+    varZkSession.changes.register(Witness({ s: ZkSession =>
       sessions = s +: sessions
     }))
 
@@ -130,12 +130,12 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
 
     val connected = new Promise[Unit]
     val closed = new Promise[Unit]
-    session2.state.changes.register(Witness({ ws => ws match {
+    session2.state.changes.register(Witness({ ws: WatchState => ws match {
       case WatchState.SessionState(SessionState.SyncConnected) =>
-        connected.setDone()
+        connected.setDone(); ()
       case WatchState.SessionState(SessionState.Disconnected) =>
-        closed.setDone()
-      case _ =>
+        closed.setDone(); ()
+      case _ => ()
     }}))
 
     Await.ready(connected)

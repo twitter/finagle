@@ -27,7 +27,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   class ServiceDiscovererWithExposedCache(
     varZkSession: Var[ZkSession],
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ) extends ServiceDiscoverer(varZkSession, statsReceiver, ForeverEpoch, timer) {
     val cache = new ZkEntryCache("/foo/bar", NullStatsReceiver)
     cache.setSession(varZkSession.sample)
@@ -175,7 +175,10 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
         watchedZk, NullStatsReceiver)), NullStatsReceiver, timer)
 
       val currentValue = new AtomicReference[Activity.State[Seq[(Entry, Double)]]]
-      sd("/foo/bar").states.filter(_ != Activity.Pending).register(Witness(currentValue))
+
+      // Test will become flaky if we don't capture this as the Closeable will be occasionally
+      // closed by the CollectCloseables thread
+      val holdRef = sd("/foo/bar").states.filter(_ != Activity.Pending).register(Witness(currentValue))
       val cache = sd.cache
 
       val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
@@ -324,7 +327,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   test("ServiceDiscoverer rawHealth is reported correctly") {
       val zkSession = Event[ZkSession]()
       val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
-      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer.twitter)
+      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer)
 
       val health = new AtomicReference[ClientHealth](ClientHealth.Healthy)
       sd.rawHealth.changes.register(Witness {

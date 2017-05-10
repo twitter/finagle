@@ -22,7 +22,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   def makeRequest(version: Version, headers: (String, String)*) = {
     val request = Request(version, Method.Get, "/")
     headers.foreach { case (k, v) =>
-      request.headers.set(k, v)
+      request.headerMap.set(k, v)
     }
     request
   }
@@ -30,9 +30,14 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   def makeResponse(version: Version, headers: (String, String)*) = {
     val response = Response(version, Status.Ok)
     headers.foreach { case (k, v) =>
-      response.headers.set(k, v)
+      response.headerMap.set(k, v)
     }
     response
+  }
+
+  test("shouldClose returns false when initialized") {
+    val manager = new ConnectionManager()
+    assert(!manager.shouldClose())
   }
 
   test("not terminate when response is standard") {
@@ -123,6 +128,30 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     assert(rep.headerMap.get(Fields.Connection) == Some("close"))
   }
 
+  test("not terminate on a response with a status code that must not have a body") {
+    val reps = Seq(                        // Status code
+      Response(Status.Continue),           // 100
+      Response(Status.SwitchingProtocols), // 101
+      Response(Status.Processing),         // 102
+      Response(Status.NoContent),          // 204
+      Response(Status.NotModified)         // 304
+    )
+
+    reps.foreach { rep =>
+      assert(rep.contentLength == None) // sanity checks
+      assert(!rep.isChunked)
+
+      val manager = new ConnectionManager()
+
+      manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+      assert(!manager.shouldClose())
+
+      manager.observeResponse(rep, Future.Done)
+      assert(!manager.shouldClose())
+      assert(rep.headerMap.get(Fields.Connection) == None)
+    }
+  }
+
   // these tests are sophisticated, and use things that ConnectionManager
   // isn't aware of.  we should be careful in the way we use it.
   def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
@@ -190,5 +219,4 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
       true
     )
   }
-
 }

@@ -1,4 +1,4 @@
-target(name='finagle-core',
+target(
   dependencies=[
     'finagle/finagle-core/src/main/java',
     'finagle/finagle-core/src/main/scala'

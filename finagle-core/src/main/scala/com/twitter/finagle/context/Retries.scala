@@ -1,7 +1,6 @@
 package com.twitter.finagle.context
 
-import com.twitter.finagle.util.{BufReader, BufWriter}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util.{Return, Throw, Try}
 
 /**
@@ -19,7 +18,7 @@ private[finagle] object Retries
     Contexts.broadcast.get(Retries)
 
   override def marshal(retries: Retries): Buf = {
-    val bw: BufWriter = BufWriter.fixed(4)
+    val bw: ByteWriter = ByteWriter.fixed(4)
     bw.writeIntBE(retries.retries)
     bw.owned()
   }
@@ -29,7 +28,7 @@ private[finagle] object Retries
       Throw(new IllegalArgumentException(
         s"Could not extract Retries from Buf. Length ${buf.length} but required 4"))
     } else {
-      val retries: Int = BufReader(buf).readIntBE()
+      val retries: Int = ByteReader(buf).readIntBE()
       Return(Retries(retries))
     }
   }

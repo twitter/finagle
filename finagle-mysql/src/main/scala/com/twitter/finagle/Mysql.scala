@@ -1,34 +1,41 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
+import com.twitter.finagle.framer.LengthFieldFramer
 import com.twitter.finagle.mysql._
-import com.twitter.finagle.mysql.transport.{Packet, TransportImpl}
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
+import com.twitter.finagle.mysql.transport.Packet
+import com.twitter.finagle.netty4.{Netty4Transporter, Netty4HashedWheelTimer}
+import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
-import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
+import java.net.SocketAddress
 
 /**
  * Supplements a [[com.twitter.finagle.Client]] with convenient
  * builder methods for constructing a mysql client.
  */
 trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
+
+  def richClientStatsReceiver: StatsReceiver = NullStatsReceiver
+
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest` with the assigned
    * `label`. The `label` is used to scope client stats.
    */
-  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions =
-    mysql.Client(newClient(dest, label))
+  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+    mysql.Client(newClient(dest, label), richClientStatsReceiver)
 
   /**
    * Creates a new `RichClient` connected to the logical
    * destination described by `dest`.
    */
-  def newRichClient(dest: String): mysql.Client with mysql.Transactions =
-    mysql.Client(newClient(dest))
+  def newRichClient(dest: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+    mysql.Client(newClient(dest), richClientStatsReceiver)
 }
 
 object MySqlClientTracingFilter {
@@ -90,6 +97,20 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     }
   }
 
+  object Client {
+    private val params: Stack.Params = StackClient.defaultParams +
+      ProtocolLibrary("mysql") +
+      Timer(Netty4HashedWheelTimer) +
+      DefaultPool.Param(
+        low = 0, high = 1, bufferSize = 0,
+        idleTime = Duration.Top,
+        maxWaiters = Int.MaxValue
+      )
+
+    private val stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
+      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)
+  }
+
   /**
    * Implements a mysql client in terms of a
    * [[com.twitter.finagle.client.StackClient]]. The client inherits a wealth
@@ -100,13 +121,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * client which exposes a rich mysql api.
    */
   case class Client(
-      stack: Stack[ServiceFactory[Request, Result]] = StackClient.newStack
-        .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable),
-      params: Stack.Params = StackClient.defaultParams + DefaultPool.Param(
-          low = 0, high = 1, bufferSize = 0,
-          idleTime = Duration.Top,
-          maxWaiters = Int.MaxValue) +
-        ProtocolLibrary("mysql"))
+      stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
+      params: Stack.Params = Client.params)
     extends StdStackClient[Request, Result, Client]
     with WithSessionPool[Client]
     with WithDefaultLoadBalancer[Client]
@@ -117,12 +133,29 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Packet
-    protected type Out = Packet
-    protected def newTransporter() = params[TransportImpl].transporter(params)
-    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
+    protected type In = Buf
+    protected type Out = Buf
+
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] = {
+      val framerFactory = () => {
+        new LengthFieldFramer(
+          lengthFieldBegin = 0,
+          lengthFieldLength = 3,
+          lengthAdjust = Packet.HeaderSize, // Packet size field doesn't include the header size.
+          maxFrameLength = Packet.HeaderSize + Packet.MaxBodySize,
+          bigEndian = false
+        )
+      }
+      Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
+    }
+
+    protected def newDispatcher(transport: Transport[Buf, Buf]):  Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
-      mysql.ClientDispatcher(transport, Handshake(params), num)
+      mysql.ClientDispatcher(
+        transport.map(_.toBuf, Packet.fromBuf),
+        Handshake(params),
+        num
+      )
     }
 
     /**
@@ -178,9 +211,13 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
     override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
 
+    override def withStack(stack: Stack[ServiceFactory[Request, Result]]): Client =
+      super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
     override def filtered(filter: Filter[Request, Result, Request, Result]): Client =
       super.filtered(filter)
+
+    override def richClientStatsReceiver: StatsReceiver = params[Stats].statsReceiver
   }
 
   val client = Client()

@@ -3,7 +3,8 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, NonFatal}
+import com.twitter.util.Future
+import scala.util.control.NonFatal
 
 /**
  * General purpose exception filter.

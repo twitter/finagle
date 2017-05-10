@@ -1,14 +1,14 @@
 package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
-import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
-import com.twitter.finagle.http.HttpMuxHandler
+import com.twitter.common.metrics.{AbstractGauge, HistogramInterface, Metrics}
+import com.twitter.finagle.http.{HttpMuxHandler, Route, RouteIndex}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.events.{Event, Sink}
-import com.twitter.util.lint.{Issue, Category, Rule, GlobalRules}
-import com.twitter.util.{Time, Throw, Try}
+import com.twitter.util.lint.{Category, GlobalRules, Issue, Rule}
+import com.twitter.util.{Throw, Time, Try}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
@@ -337,4 +337,11 @@ class MetricsExporter(val registry: Metrics)
 {
   def this() = this(MetricsStatsReceiver.defaultRegistry)
   val pattern = "/admin/metrics.json"
+  def route: Route = Route(
+    pattern = pattern,
+    handler = this,
+    index = Some(RouteIndex(
+      alias = "Metrics",
+      group = "Metrics",
+      path = Some("/admin/metrics.json?pretty=true"))))
 }

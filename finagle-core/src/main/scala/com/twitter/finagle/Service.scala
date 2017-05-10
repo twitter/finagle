@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
-import com.twitter.util.{Closable, Future, NonFatal, Time}
+import com.twitter.util.{Closable, Future, Time}
 import java.net.SocketAddress
+import scala.util.control.NonFatal
 
 object Service {
 
@@ -10,15 +11,16 @@ object Service {
    * Wrap the given service such that any synchronously thrown `NonFatal`
    * exceptions are lifted into `Future.exceptions`.
    */
-  def rescue[Req, Rep](service: Service[Req, Rep]) = new ServiceProxy[Req, Rep](service) {
-    override def apply(request: Req): Future[Rep] = {
-      try {
-        service(request)
-      } catch {
-        case NonFatal(e) => Future.exception(e)
+  def rescue[Req, Rep](service: Service[Req, Rep]): ServiceProxy[Req, Rep] =
+    new ServiceProxy[Req, Rep](service) {
+      override def apply(request: Req): Future[Rep] = {
+        try {
+          service(request)
+        } catch {
+          case NonFatal(e) => Future.exception(e)
+        }
       }
     }
-  }
 
   /**
    * A convenience method for creating `Services` from a `Function1` of
@@ -46,14 +48,14 @@ object Service {
  *
  * It is the basic unit of an RPC interface.
  *
- * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
  *      for details and examples.
  *
  * @see [[com.twitter.finagle.Service.mk Service.mk]] for a convenient
  *     way to create new instances.
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
-  def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
+  def map[Req1](f: Req1 => Req): Service[Req1, Rep] = new Service[Req1, Rep] {
     def apply(req1: Req1): Future[Rep] = Service.this.apply(f(req1))
     override def close(deadline: Time): Future[Unit] = Service.this.close(deadline)
   }
@@ -134,9 +136,16 @@ abstract class ServiceFactory[-Req, +Rep]
    * Reserve the use of a given service instance. This pins the
    * underlying channel and the returned service has exclusive use of
    * its underlying connection. To relinquish the use of the reserved
-   * Service, the user must call Service.close().
+   * [[Service]], the user must call [[Service.close()]].
    */
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
+
+  /**
+   * Reserve the use of a given service instance using [[ClientConnection.nil]].
+   * This pins the underlying resources and the returned service has exclusive use
+   * of its underlying connection. To relinquish the use of the reserved
+   * [[Service]], the user must call [[Service.close()]].
+   */
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
 
   /**
@@ -150,7 +159,7 @@ abstract class ServiceFactory[-Req, +Rep]
         self(conn) flatMap { service =>
           f(service) onFailure { _ => service.close() }
         }
-      def close(deadline: Time) = self.close(deadline)
+      def close(deadline: Time): Future[Unit] = self.close(deadline)
       override def status: Status = self.status
       override def toString(): String = self.toString()
     }
@@ -173,20 +182,30 @@ abstract class ServiceFactory[-Req, +Rep]
    */
   def status: Status = Status.Open
 
+  /**
+   * Return `true` if and only if [[status]] is currently [[Status.Open]].
+   */
   final def isAvailable: Boolean = status == Status.Open
 }
 
 object ServiceFactory {
+  /**
+   * @see [[constant]] for a Java compatible API.
+   */
   def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
       private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
         // close() is meaningless on connectionless services.
-        override def close(deadline: Time) = Future.Done
+        override def close(deadline: Time): Future[Unit] = Future.Done
       })
 
       def apply(conn: ClientConnection): Future[Service[Req, Rep]] = noRelease
       def close(deadline: Time): Future[Unit] = Future.Done
     }
+
+  /** Java compatible API for [[const]] as `const` is a reserved word in Java */
+  def constant[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
+    ServiceFactory.const(service)
 
   def apply[Req, Rep](f: () => Future[Service[Req, Rep]]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
@@ -198,7 +217,7 @@ object ServiceFactory {
 /**
  * A [[ServiceFactory]] that proxies all calls to another
  * ServiceFactory.  This can be useful if you want to modify
- * and existing `ServiceFactory`.
+ * an existing `ServiceFactory`.
  */
 abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
   extends ServiceFactory[Req, Rep]
@@ -231,9 +250,9 @@ object FactoryToService {
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[Enabled, ServiceFactory[Req, Rep]] {
-      val role = FactoryToService.role
+      val role: Stack.Role = FactoryToService.role
       val description = "Apply service factory on each service request"
-      def make(_enabled: Enabled, next: ServiceFactory[Req, Rep]) = {
+      def make(_enabled: Enabled, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         if (_enabled.enabled) {
           /*
            * The idea here is to push FactoryToService down the stack

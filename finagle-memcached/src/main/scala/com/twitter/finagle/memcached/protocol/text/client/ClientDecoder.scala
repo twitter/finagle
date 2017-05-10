@@ -91,6 +91,8 @@ private[finagle] class ClientDecoder extends Decoder {
         awaitData(Nil, tokens, bytesNeeded)
       case AwaitingResponseOrEnd(valuesSoFar) =>
         awaitData(valuesSoFar, tokens, bytesNeeded)
+      case otherState => throw new IllegalStateException(
+        s"Received data while in invalid state: $otherState")
     }
   }
 

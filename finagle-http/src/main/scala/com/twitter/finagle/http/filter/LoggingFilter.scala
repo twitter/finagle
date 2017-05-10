@@ -123,8 +123,6 @@ class CommonLogFormatter extends LogFormatter {
  *  Logging filter.
  *
  * Logs all requests according to formatter.
- * Note this may be used upstream of a ValidateRequestFilter, so the URL and
- * parameters may be invalid.
  */
 class LoggingFilter[REQUEST <: Request](
   val log: Logger,

@@ -12,8 +12,8 @@ case class PSubscribe(
     handler: SubscribeHandler)
   extends SubscribeCommand {
 
-  def command: String = Commands.PSUBSCRIBE
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.PSUBSCRIBE +: patterns)
+  def name: Buf = Command.PSUBSCRIBE
+  override def body: Seq[Buf] = patterns
 }
 
 case class PUnsubscribe(
@@ -21,8 +21,8 @@ case class PUnsubscribe(
     handler: SubscribeHandler)
   extends SubscribeCommand {
 
-  def command: String = Commands.PUNSUBSCRIBE
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.PUNSUBSCRIBE +: patterns)
+  def name: Buf = Command.PUNSUBSCRIBE
+  override def body: Seq[Buf] = patterns
 }
 
 case class Subscribe(
@@ -30,8 +30,8 @@ case class Subscribe(
     handler: SubscribeHandler)
   extends SubscribeCommand {
 
-  def command: String = Commands.SUBSCRIBE
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.SUBSCRIBE +: channels)
+  def name: Buf = Command.SUBSCRIBE
+  override def body: Seq[Buf] = channels
 }
 
 case class Unsubscribe(
@@ -39,13 +39,13 @@ case class Unsubscribe(
     handler: SubscribeHandler)
   extends SubscribeCommand {
 
-  def command: String = Commands.UNSUBSCRIBE
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(CommandBytes.UNSUBSCRIBE +: channels)
+  def name: Buf = Command.UNSUBSCRIBE
+  override def body: Seq[Buf] = channels
 }
 
 case class Publish(key: Buf, message: Buf) extends StrictKeyCommand {
-  def command: String = Commands.PUBLISH
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PUBLISH, key, message))
+  def name: Buf = Command.PUBLISH
+  override def body: Seq[Buf] = Seq(key, message)
 }
 
 case class PubSubChannels(pattern: Option[Buf]) extends PubSub(Buf.Utf8("CHANNELS"), pattern.toSeq)
@@ -55,6 +55,6 @@ case class PubSubNumSub(channels: Seq[Buf]) extends PubSub(Buf.Utf8("NUMSUB"), c
 case object PubSubNumPat extends PubSub(Buf.Utf8("NUMPAT"), Seq.empty)
 
 abstract class PubSub(sub: Buf, args: Seq[Buf]) extends Command {
-  def command: String = Commands.PUBSUB
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(Seq(CommandBytes.PUBSUB, sub) ++ args)
+  def name: Buf = Command.PUBSUB
+  override def body: Seq[Buf] = sub +: args
 }

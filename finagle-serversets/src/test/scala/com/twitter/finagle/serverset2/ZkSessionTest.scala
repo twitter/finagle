@@ -2,7 +2,6 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
-import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._

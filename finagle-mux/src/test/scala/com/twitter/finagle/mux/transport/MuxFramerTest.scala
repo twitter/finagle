@@ -2,12 +2,11 @@ package com.twitter.finagle.mux.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.Latch
+import com.twitter.finagle.liveness.Latch
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.util.BufReader
 import com.twitter.finagle.{Dtab, Dentry, Failure, Path}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Future, Promise, Return}
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
@@ -47,12 +46,12 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
         assert(sr.stats(Seq("write_stream_bytes")).forall { _ == window + 4 })
 
         q.init.foreach { buf =>
-          val br = BufReader(buf)
+          val br = ByteReader(buf)
           br.readByte() // typ
           assert((br.readByte() >> 7 & 1) == 1) // tag MSB
         }
 
-        val last = BufReader(q.last)
+        val last = ByteReader(q.last)
         last.readByte() // typ
         assert((last.readByte() >> 7 & 1) == 0) // tag MSB
       }
@@ -144,7 +143,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     val transport = new QueueTransport(transq, transq) {
       override def write(buf: Buf): Future[Unit] = {
-        val br = BufReader(buf)
+        val br = ByteReader(buf)
         val tag = Message.Tags.extractTag(br.readIntBE())
         // clear fragment bit and store tag
         writtenTags += tag  & ~Message.Tags.TagMSB
@@ -199,7 +198,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     val Return(writes) = writeq.drain()
     assert(writes.exists { buf =>
-      val br = BufReader(buf)
+      val br = ByteReader(buf)
       val typ = Message.Tags.extractType(br.readIntBE())
       typ == Message.Types.BAD_Tdiscarded
     })

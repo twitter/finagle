@@ -21,7 +21,7 @@ class ZkInstance {
   }
 
   lazy val zookeeperConnectString =
-    zookeeperAddress.getHostName() + ":" + zookeeperAddress.getPort();
+    zookeeperAddress.getHostName() + ":" + zookeeperAddress.getPort()
 
   def start() {
     started = true

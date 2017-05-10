@@ -110,6 +110,7 @@ class StandardToggleMapTest extends FunSuite {
     val serverInfo: ServerInfo = new ServerInfo {
       def environment: Option[String] = Some("staging")
       def id: String = "testing"
+      def instanceId: Option[Long] = None
     }
     val togMap = StandardToggleMap(
       // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/

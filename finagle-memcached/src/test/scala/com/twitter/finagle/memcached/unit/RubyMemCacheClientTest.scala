@@ -5,7 +5,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class RubyMemCacheClientTest extends FunSuite with MockitoSugar {

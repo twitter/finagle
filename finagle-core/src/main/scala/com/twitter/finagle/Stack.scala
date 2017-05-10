@@ -43,7 +43,7 @@ sealed trait Stack[T] {
    * the map traverses on the element produced by `fn`, not the
    * original stack.
    */
-  def transform(fn: Stack[T] => Stack[T]): Stack[T] =
+  protected def transform(fn: Stack[T] => Stack[T]): Stack[T] =
     fn(this) match {
       case Node(hd, mk, next) => Node(hd, mk, next.transform(fn))
       case leaf@Leaf(_, _) => leaf
@@ -305,6 +305,16 @@ object Stack {
    */
   trait Param[P] {
     def default: P
+
+    /**
+     * Method invoked to generate a way to display a P-typed param, which takes the form
+     * Seq[(key, () => value)], where `key` and `value` are the variable names and values for
+     * public member variables in the class. The function `() => value` is invoked to display the
+     * current value of a member variable.
+     *
+     * This should be overriden by param classes that do not implement [[scala.Product]]
+     */
+    def show(p: P): Seq[(String, () => String)] = Seq.empty
   }
   object Param {
     def apply[T](t: => T): Param[T] = new Param[T] {
@@ -406,6 +416,13 @@ object Stack {
     def configured[P](psp: (P, Stack.Param[P])): T = {
       val (p, sp) = psp
       configured(p)(sp)
+    }
+
+    /**
+     * Adds all parameters, `newParams`, to the current [[Params]].
+     */
+    def configuredParams(newParams: Stack.Params): T = {
+      withParams(params ++ newParams)
     }
 
     def withParams(ps: Stack.Params): T
