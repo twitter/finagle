@@ -145,17 +145,22 @@ object EOF extends Decoder[EOF] {
 
 case class EOF(warnings: Short, serverStatus: ServerStatus) extends Result
 
-object FieldAttributes {
-  val NotNullBitMask = 1
-  val PrimaryKeyBitMask = 2
-  val UniqueKeyBitMask = 4
-  val MultipleKeyBitMask = 8
-  val BlobBitMask = 16
-  val UnsignedBitMask = 32
-  val ZeroFillBitMask = 64
-  val BinaryBitMask = 128
-}
+/**
+* These bit masks are to understand whether corresponding attribute
+* is set for the field. Link to source code from mysql is below.
+* [[https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h]]
+* */
 
+object FieldAttributes {
+  val NotNullBitMask: Short = 1
+  val PrimaryKeyBitMask: Short = 2
+  val UniqueKeyBitMask: Short = 4
+  val MultipleKeyBitMask: Short = 8
+  val BlobBitMask: Short = 16
+  val UnsignedBitMask: Short = 32
+  val ZeroFillBitMask: Short = 64
+  val BinaryBitMask: Short = 128
+}
 
 /**
  * Represents the column meta-data associated with a query.
