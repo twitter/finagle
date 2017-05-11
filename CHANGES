@@ -31,11 +31,13 @@ Bug Fixes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle: Add a floor of 8 to the default values of the flags `c.t.f.netty3.numWorkers`
+    and `c.t.f.netty4.numWorkers`. ``RB_ID=916465``
+
   * finagle-core: `c.t.f.util.DefaultTimer` is decoupled from Netty 3 and is loaded via the
     `LoadService` machinery. If no timers are available on the class path, the `JavaTimer`
     instead is used instead. This ony affects direct usages of `DefaultTimer` as all Finagle
     protocols are using Netty 4 `HashedWheelTimer` at this point. ``RB_ID=915924``
-
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
