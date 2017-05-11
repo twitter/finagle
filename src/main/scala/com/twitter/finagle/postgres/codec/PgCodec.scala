@@ -8,6 +8,7 @@ import com.twitter.finagle.postgres.ResultSet
 import com.twitter.finagle.postgres.connection.{AuthenticationRequired, Connection, RequestingSsl, WrongStateForEvent}
 import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values.Md5Encryptor
+import com.twitter.finagle.ssl.SessionVerifier
 import com.twitter.finagle.ssl.client.{ SslClientConfiguration, SslClientEngineFactory }
 import com.twitter.logging.Logger
 import com.twitter.util.Future
@@ -225,7 +226,19 @@ class PgClientChannelHandler(
 
         engine.setUseClientMode(true)
 
-        pipeline.addFirst("ssl", new SslHandler(engine))
+        val sslHandler = new SslHandler(engine)
+        pipeline.addFirst("ssl", sslHandler)
+
+        val verifier = inetAddr.fold(SessionVerifier.AlwaysValid)(inet => SessionVerifier.hostname(inet.getHostString))
+
+        sslHandler.handshake().addListener(new ChannelFutureListener {
+          override def operationComplete(f: ChannelFuture) = {
+            verifier(engine.getSession).foreach { err =>
+              logger.error(err, "SSL host verification failed")
+              Channels.close(ctx.getChannel)
+            }
+          }
+        })
 
         connection.receive(SwitchToSsl).foreach {
           Channels.fireMessageReceived(ctx, _)
