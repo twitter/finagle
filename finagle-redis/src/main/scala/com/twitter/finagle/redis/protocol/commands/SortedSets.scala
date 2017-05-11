@@ -3,6 +3,7 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
+import java.lang.{Long => JLong}
 
 case class ZAdd(key: Buf, members: Seq[ZMember]) extends StrictKeyCommand {
   RequireClientProtocol(members.nonEmpty, "Members set must not be empty")
@@ -333,4 +334,24 @@ abstract class ZRangeCmd extends StrictKeyCommand {
 
 abstract class ZRankCmd extends StrictKeyCommand with StrictMemberCommand {
   override def body: Seq[Buf] = Seq(key, member)
+}
+
+case class ZScan(
+  key: Buf,
+  cursor: Long,
+  count: Option[JLong] = None,
+  pattern: Option[Buf] = None
+  ) extends Command {
+  def name: Buf  = Command.ZSCAN
+  override def body: Seq[Buf] = {
+    val bufs = Seq(key, Buf.Utf8(cursor.toString))
+    val withCount = count match {
+      case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
+      case None        => bufs
+    }
+    pattern match {
+      case Some(pattern) => withCount ++ Seq(Command.PATTERN, pattern)
+      case None          => withCount
+    }
+  }
 }
