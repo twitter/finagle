@@ -22,14 +22,15 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
         `double` double(4,3) NOT NULL,
         `decimal` decimal(30,11) NOT NULL,
         `bit` bit(1) NOT NULL,
+        `unsigned` int(11) UNSIGNED NOT NULL,
         PRIMARY KEY (`smallint`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
 
     Await.ready(c.query(
       """INSERT INTO `numeric` (`smallint`,
         `tinyint`, `mediumint`, `int`,
-        `bigint`, `float`, `double`, `decimal`, `bit`)
-        VALUES (1, 2, 3, 4, 5, 1.61, 1.618, 1.61803398875, 1);"""))
+        `bigint`, `float`, `double`, `decimal`, `bit`, `unsigned`)
+        VALUES (1, 2, 3, 4, 5, 1.61, 1.618, 1.61803398875, 1, 4294967295);"""))
 
     val textEncoded = Await.result(c.query("SELECT * FROM `numeric`") map {
       case rs: ResultSet if rs.rows.size > 0 => rs.rows(0)
@@ -109,6 +110,13 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
       row("bit") match {
         case Some(v: RawValue) => // pass
         case v => fail("expected a RawValue but got %s".format(v))
+      }
+    }
+
+    test("extract %s from %s".format("unsigned", rowType)) {
+      row("unsigned") match {
+        case Some(LongValue(l)) => assert(l == 4294967295l)
+        case v => fail("expected a LongValue but got %s".format(v))
       }
     }
   }

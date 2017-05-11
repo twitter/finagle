@@ -71,14 +71,15 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
       else {
         val str = new String(bytes, Charset(charset))
         field.fieldType match {
-          case Type.Tiny       => ByteValue(str.toByte)
-          case Type.Short      => ShortValue(str.toShort)
-          case Type.Int24      => IntValue(str.toInt)
-          case Type.Long       => IntValue(str.toInt)
-          case Type.LongLong   => LongValue(str.toLong)
-          case Type.Float      => FloatValue(str.toFloat)
-          case Type.Double     => DoubleValue(str.toDouble)
-          case Type.Year       => ShortValue(str.toShort)
+          case Type.Tiny                        => ByteValue(str.toByte)
+          case Type.Short                       => ShortValue(str.toShort)
+          case Type.Int24                       => IntValue(str.toInt)
+          case Type.Long if field.isUnsigned()  => LongValue(str.toLong)
+          case Type.Long                        => IntValue(str.toInt)
+          case Type.LongLong                    => LongValue(str.toLong)
+          case Type.Float                       => FloatValue(str.toFloat)
+          case Type.Double                      => DoubleValue(str.toDouble)
+          case Type.Year                        => ShortValue(str.toShort)
           // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
           case Type.VarChar | Type.String | Type.VarString |
                Type.TinyBlob | Type.Blob | Type.MediumBlob
@@ -130,14 +131,15 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
     for ((field, idx) <- fields.zipWithIndex) yield {
       if (isNull(idx)) NullValue
       else field.fieldType match {
-        case Type.Tiny        => ByteValue(reader.readByte())
-        case Type.Short       => ShortValue(reader.readShortLE())
-        case Type.Int24       => IntValue(reader.readIntLE())
-        case Type.Long        => IntValue(reader.readIntLE())
-        case Type.LongLong    => LongValue(reader.readLongLE())
-        case Type.Float       => FloatValue(reader.readFloatLE())
-        case Type.Double      => DoubleValue(reader.readDoubleLE())
-        case Type.Year        => ShortValue(reader.readShortLE())
+        case Type.Tiny                        => ByteValue(reader.readByte())
+        case Type.Short                       => ShortValue(reader.readShortLE())
+        case Type.Int24                       => IntValue(reader.readIntLE())
+        case Type.Long if field.isUnsigned()  => LongValue(reader.readUnsignedIntLE())
+        case Type.Long                        => IntValue(reader.readIntLE())
+        case Type.LongLong                    => LongValue(reader.readLongLE())
+        case Type.Float                       => FloatValue(reader.readFloatLE())
+        case Type.Double                      => DoubleValue(reader.readDoubleLE())
+        case Type.Year                        => ShortValue(reader.readShortLE())
         // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
         case Type.VarChar | Type.String | Type.VarString |
              Type.TinyBlob | Type.Blob | Type.MediumBlob

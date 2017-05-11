@@ -145,6 +145,18 @@ object EOF extends Decoder[EOF] {
 
 case class EOF(warnings: Short, serverStatus: ServerStatus) extends Result
 
+object FieldAttributes {
+  val NotNullBitMask = 1
+  val PrimaryKeyBitMask = 2
+  val UniqueKeyBitMask = 4
+  val MultipleKeyBitMask = 8
+  val BlobBitMask = 16
+  val UnsignedBitMask = 32
+  val ZeroFillBitMask = 64
+  val BinaryBitMask = 128
+}
+
+
 /**
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
@@ -207,6 +219,8 @@ case class Field(
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
   override val toString = "Field(%s)".format(id)
+
+  def isUnsigned(): Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
 }
 
 /**
