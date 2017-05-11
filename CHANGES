@@ -11,7 +11,7 @@ New Features
 ~~~~~~~~~~~~
 
   * finagle: Changed dependencies of Netty from 4.1.9 to 4.1.10 and tcnative
-    from 2.0.0 to 2.0.1.
+    from 2.0.0 to 2.0.1. ``RB_ID=916056``
 
   * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
@@ -20,6 +20,9 @@ New Features
     are `Status.Open`. See the user guide for details:
     https://twitter.github.io/finagle/guide/Clients.html#behavior-when-no-nodes-are-available
     ``RB_ID=916145``
+
+  * finagle-redis: Support scanning over sets and sorted sets with SSCAN and ZSCAN.
+    ``RB_ID=916484``
 
 Bug Fixes
 ~~~~~~~~~
