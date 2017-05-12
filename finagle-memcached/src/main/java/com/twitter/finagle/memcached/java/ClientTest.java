@@ -2,16 +2,11 @@ package com.twitter.finagle.memcached.java;
 
 import scala.Option;
 
-import com.google.common.collect.ImmutableSet;
-
+import com.twitter.finagle.Memcached;
 import com.twitter.finagle.Service;
-import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.memcached.CacheNode;
-import com.twitter.finagle.memcached.CachePoolCluster;
-import com.twitter.finagle.memcached.KetamaClientBuilder;
+import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
-import com.twitter.finagle.memcached.protocol.text.Memcached;
 import com.twitter.io.Buf;
 import com.twitter.util.Await;
 
@@ -24,30 +19,12 @@ public final class ClientTest {
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
-    Service<Command, Response> service =
-      ClientBuilder.safeBuild(
-        ClientBuilder
-          .get()
-          .hosts("localhost:11211")
-          .hostConnectionLimit(1)
-          .codec(new Memcached()));
+    Service<Command, Response> service = Memcached.client()
+          .configured(new ConcurrentLoadBalancerFactory.Param(1).mk())
+          .newService("localhost:11211");
 
     Client client = Client.newInstance(service);
     testClient(client);
-
-    // cache client with cluster
-    CachePoolCluster cluster = CachePoolClusterUtil.newStaticCluster(
-        ImmutableSet.of(new CacheNode("localhost", 11211, 1)));
-
-    ClientBuilder builder = ClientBuilder.get().codec(new Memcached());
-    com.twitter.finagle.memcached.Client memcachedClient = KetamaClientBuilder.get()
-        .cachePoolCluster(cluster)
-        .clientBuilder(builder)
-        .build();
-
-    client = new ClientBase(memcachedClient);
-    testClient(client);
-
   }
 
   public static void testClient(Client client) throws Exception {

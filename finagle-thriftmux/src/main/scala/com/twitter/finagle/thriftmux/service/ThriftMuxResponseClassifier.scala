@@ -6,7 +6,8 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.DeserializeCtx
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.io.Buf
-import com.twitter.util.{NonFatal, Return, Try}
+import com.twitter.util.{Return, Try}
+import scala.util.control.NonFatal
 
 /**
  * `ResponseClassifiers` for use with `finagle-thriftmux`

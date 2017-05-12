@@ -5,7 +5,7 @@ import java.util.Random
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 
-// ./sbt 'project finagle-benchmark' 'run .*BucketedHistogramBenchmark.*'
+// ./sbt 'project finagle-benchmark' 'jmh:run BucketedHistogramBenchmark'
 class BucketedHistogramBenchmark extends StdBenchAnnotations {
   import BucketedHistogramBenchmark._
 

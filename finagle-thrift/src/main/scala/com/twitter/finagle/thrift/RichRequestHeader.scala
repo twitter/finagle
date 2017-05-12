@@ -1,4 +1,4 @@
-package com.twitter.finagle.thrift;
+package com.twitter.finagle.thrift
 
 import com.twitter.finagle.{Dentry, Dtab, Path, NameTree}
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}

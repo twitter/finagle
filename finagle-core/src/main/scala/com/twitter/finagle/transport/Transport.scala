@@ -3,13 +3,14 @@ package com.twitter.finagle.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.finagle.ssl
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Closable, Future, Promise, Time, Throw, Return, Duration}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
-
-// Mapped: ideally via a util-codec?
+import scala.runtime.NonLocalReturnControl
+import scala.util.control.NonFatal
 
 /**
  * A transport is a representation of a stream of objects that may be
@@ -19,7 +20,7 @@ import java.security.cert.Certificate
  */
 trait Transport[In, Out] extends Closable { self =>
   /**
-   * Write {{req}} to this transport; the returned future
+   * Write `req` to this transport; the returned future
    * acknowledges write completion.
    */
   def write(req: In): Future[Unit]
@@ -67,7 +68,13 @@ trait Transport[In, Out] extends Closable { self =>
    */
   def map[In1, Out1](f: In1 => In, g: Out => Out1): Transport[In1, Out1] =
     new Transport[In1, Out1] {
-      def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
+      def write(in1: In1): Future[Unit] =
+        try self.write(f(in1))
+        catch {
+          case NonFatal(t) => Future.exception(t)
+          case nlrc: NonLocalReturnControl[_] => Future.exception(new FutureNonLocalReturnControl(nlrc))
+        }
+
       def read(): Future[Out1] = self.read().map(g)
       def status: Status = self.status
       def onClose: Future[Throwable] = self.onClose
@@ -150,33 +157,25 @@ object Transport {
   }
 
   /**
-   * $param the TLS engine for a `Transport`.
+   * $param the SSL/TLS client configuration for a `Transport`.
    */
-  case class TLSClientEngine(e: Option[SocketAddress => ssl.Engine]) {
-    def mk(): (TLSClientEngine, Stack.Param[TLSClientEngine]) =
-      (this, TLSClientEngine.param)
+  case class ClientSsl(e: Option[SslClientConfiguration]) {
+    def mk(): (ClientSsl, Stack.Param[ClientSsl]) =
+      (this, ClientSsl.param)
   }
-  object TLSClientEngine {
-    implicit val param = Stack.Param(TLSClientEngine(None))
+  object ClientSsl {
+    implicit val param = Stack.Param(ClientSsl(None))
   }
 
   /**
-   * $param the TLS engine for a `Transport`.
+   * $param the SSL/TLS server configuration for a `Transport`.
    */
-  case class TLSServerEngine(e: Option[() => ssl.Engine]) {
-    def mk(): (TLSServerEngine, Stack.Param[TLSServerEngine]) =
-      (this, TLSServerEngine.param)
+  case class ServerSsl(e: Option[SslServerConfiguration]) {
+    def mk(): (ServerSsl, Stack.Param[ServerSsl]) =
+      (this, ServerSsl.param)
   }
-  object TLSServerEngine {
-    implicit val param = Stack.Param(TLSServerEngine(None))
-  }
-
-  /**
-   * $param the TLS config for a `Transport` (default: disabled).
-   */
-  case class Tls(config: TlsConfig)
-  object Tls {
-    implicit val param: Stack.Param[Tls] = Stack.Param(Tls(TlsConfig.Disabled))
+  object ServerSsl {
+    implicit val param = Stack.Param(ServerSsl(None))
   }
 
   /**
@@ -210,7 +209,7 @@ object Transport {
    * done using them.
    *
    * {{{
-   * copyToWriter(trans, w)(f) ensure {
+   * copyToWriter(trans, w)(f).ensure {
    *   trans.close()
    *   w.close()
    * }
@@ -222,11 +221,15 @@ object Transport {
    *
    * @param f A mapping from `A` to `Future[Option[Buf]]`.
    */
-  private[finagle] def copyToWriter[A](trans: Transport[_, A], w: Writer)
-                     (f: A => Future[Option[Buf]]): Future[Unit] = {
+  private[finagle] def copyToWriter[A](
+    trans: Transport[_, A],
+    w: Writer
+  )(
+    f: A => Future[Option[Buf]]
+  ): Future[Unit] = {
     trans.read().flatMap(f).flatMap {
       case None => Future.Done
-      case Some(buf) => w.write(buf) before copyToWriter(trans, w)(f)
+      case Some(buf) => w.write(buf).before(copyToWriter(trans, w)(f))
     }
   }
 
@@ -244,8 +247,10 @@ object Transport {
    * the path of interrupts are a little convoluted; they would be
    * clarified by an independent implementation.
    */
-  private[finagle] def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
-  : Reader with Future[Unit] = new Promise[Unit] with Reader {
+  private[finagle] def collate[A](
+    trans: Transport[_, A],
+    chunkOfA: A => Future[Option[Buf]]
+  ): Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
 
     // Ensure that collate's future is satisfied _before_ its reader
@@ -262,7 +267,7 @@ object Transport {
         rw.close()
     }
 
-    def read(n: Int) = rw.read(n)
+    def read(n: Int): Future[Option[Buf]] = rw.read(n)
 
     def discard(): Unit = {
       rw.discard()
@@ -275,9 +280,50 @@ object Transport {
    * generally unsafe: only do this when you know the cast is guaranteed safe.
    * This is useful when coercing a netty object pipeline into a typed transport,
    * for example.
+   *
+   * @see [[Transport.cast(Class[Out], transport)]] for Java users.
    */
-  def cast[In1, Out1](trans: Transport[Any, Any]): Transport[In1, Out1] =
-    trans.map(_.asInstanceOf[Any], _.asInstanceOf[Out1])
+  def cast[In1, Out1](trans: Transport[Any, Any])(implicit m: Manifest[Out1]): Transport[In1, Out1] = {
+    val cls = m.runtimeClass.asInstanceOf[Class[Out1]]
+    cast[In1, Out1](cls, trans)
+  }
+
+
+  /**
+   * Casts an object transport to `Transport[In1, Out1]`. Note that this is
+   * generally unsafe: only do this when you know the cast is guaranteed safe.
+   * This is useful when coercing a netty object pipeline into a typed transport,
+   * for example.
+   *
+   * @see [[Transport.cast(trans)]] for Scala users.
+   */
+  def cast[In1, Out1](cls: Class[Out1], trans: Transport[Any, Any]): Transport[In1, Out1] = {
+
+    if (cls.isAssignableFrom(classOf[Any])) {
+      // No need to do any dynamic type checks on Any!
+      trans.asInstanceOf[Transport[In1, Out1]]
+    } else new Transport[In1, Out1] {
+      def write(req: In1): Future[Unit] = trans.write(req)
+      def read(): Future[Out1] = trans.read().flatMap(readFn)
+      def status: Status = trans.status
+      def onClose: Future[Throwable] = trans.onClose
+      def localAddress: SocketAddress = trans.localAddress
+      def remoteAddress: SocketAddress = trans.remoteAddress
+      def peerCertificate: Option[Certificate] = trans.peerCertificate
+      def close(deadline: Time): Future[Unit] = trans.close(deadline)
+      override def toString: String = trans.toString
+
+      private val readFn: Any => Future[Out1] = {
+        case out1 if cls.isAssignableFrom(out1.getClass) => Future.value(out1.asInstanceOf[Out1])
+        case other =>
+          val msg = s"Transport.cast failed. Expected type ${cls.getName} " +
+            s"but found ${other.getClass.getName}"
+          val ex = new ClassCastException(msg)
+          Future.exception(ex)
+      }
+    }
+  }
+
 }
 
 /**
@@ -307,12 +353,13 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
  * A `Transport` interface to a pair of queues (one for reading, one
  * for writing); useful for testing.
  */
-class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
-  extends Transport[In, Out]
-{
+class QueueTransport[In, Out](
+    writeq: AsyncQueue[In],
+    readq: AsyncQueue[Out])
+  extends Transport[In, Out] {
   private[this] val closep = new Promise[Throwable]
 
-  def write(input: In) = {
+  def write(input: In): Future[Unit] = {
     writeq.offer(input)
     Future.Done
   }
@@ -322,15 +369,16 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
       closep.updateIfEmpty(Throw(exc))
     }
 
-  def status = if (closep.isDefined) Status.Closed else Status.Open
-  def close(deadline: Time) = {
-    val ex = new IllegalStateException("close() is undefined on QueueTransport")
+  def status: Status = if (closep.isDefined) Status.Closed else Status.Open
+
+  def close(deadline: Time): Future[Unit] = {
+    val ex = new Exception("QueueTransport is now closed")
     closep.updateIfEmpty(Return(ex))
-    Future.exception(ex)
+    Future.Done
   }
 
-  val onClose = closep
-  val localAddress = new SocketAddress{}
-  val remoteAddress = new SocketAddress{}
+  val onClose: Future[Throwable] = closep
+  val localAddress: SocketAddress = new SocketAddress{}
+  val remoteAddress: SocketAddress = new SocketAddress{}
   def peerCertificate: Option[Certificate] = None
 }

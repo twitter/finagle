@@ -10,7 +10,7 @@ import java.util.BitSet
  * A Path comprises a sequence of byte buffers naming a
  * hierarchically-addressed object.
  *
- * @see The [[http://twitter.github.io/finagle/guide/Names.html#paths user guide]]
+ * @see The [[https://twitter.github.io/finagle/guide/Names.html#paths user guide]]
  *      for further details.
  */
 case class Path(elems: Buf*) {

@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.List;
 
 import com.twitter.finagle.Client;
+import com.twitter.finagle.Http;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.http.Http;
+import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.http.Request;
 import com.twitter.finagle.http.Response;
 import com.twitter.finagle.param.Label;
@@ -24,7 +25,7 @@ public final class HttpClientTest {
   public static void main(String[] args) {
     Service<Request, Response> client =
       ClientBuilder.safeBuild(ClientBuilder.get()
-        .codec(Http.get())
+        .stack(Http.client())
         .hosts("localhost:10000")
         .hostConnectionLimit(1));
 
@@ -73,6 +74,7 @@ public final class HttpClientTest {
           .withSessionQualifier().noFailFast()
           .withTls("foo.com")
           .configured(new Label("test").mk())
-          .withDecompression(true);
+          .withDecompression(true)
+          .configuredParams(StackClient$.MODULE$.defaultParams());
   }
 }

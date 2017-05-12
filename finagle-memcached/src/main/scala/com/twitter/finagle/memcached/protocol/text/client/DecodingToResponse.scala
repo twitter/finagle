@@ -1,10 +1,8 @@
 package com.twitter.finagle.memcached.protocol.text.client
 
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.{StatLines, TokensWithData, ValueLines, Tokens}
+import com.twitter.finagle.memcached.protocol.text.{Decoding, StatLines, TokensWithData, ValueLines, Tokens}
 import com.twitter.io.Buf
-import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
-import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 
 private[finagle] object AbstractDecodingToResponse {
   private[finagle] val STORED        = Buf.Utf8("STORED")
@@ -17,8 +15,8 @@ private[finagle] object AbstractDecodingToResponse {
   private[finagle] val SERVER_ERROR  = Buf.Utf8("SERVER_ERROR")
 }
 
-private[finagle] abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
-  def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef): R = m match {
+private[finagle] abstract class AbstractDecodingToResponse[R] {
+  def decode(decoding: Decoding): R = decoding match {
     case Tokens(tokens) =>
       parseResponse(tokens)
     case ValueLines(lines) =>
@@ -27,9 +25,6 @@ private[finagle] abstract class AbstractDecodingToResponse[R <: AnyRef] extends 
       parseStatLines(lines)
     case _ => throw new IllegalArgumentException("Expecting a Decoding")
   }
-
-  def decode(m: AnyRef): R =
-    decode(null, null, m)
 
   protected def parseResponse(tokens: Seq[Buf]): R
   protected def parseValues(valueLines: Seq[TokensWithData]): R

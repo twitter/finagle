@@ -1,7 +1,5 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
-
 /**
  * RPC clients with `Req`-typed requests and `Rep` typed replies.
  * RPC destinations are represented by names. Names are bound
@@ -20,10 +18,14 @@ import java.net.SocketAddress
  * @define newService
  *
  * Create a new service which dispatches requests to `dest`.
+ * See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
+ * for details on destination names.
  *
  * @define newClient
  *
  * Create a new client connected to `dest`.
+ * See the [[https://twitter.github.io/finagle/guide/Names.html user guide]]
+ * for details on destination names.
  *
  * @define label
  *
@@ -34,14 +36,6 @@ trait Client[Req, Rep] {
 
   /** $newService $label */
   def newService(dest: Name, label: String): Service[Req, Rep]
-
-  @deprecated("Use destination names", "6.7.x")
-  /** $newService */
-  final def newService(dest: Group[SocketAddress]): Service[Req, Rep] =
-    dest match {
-      case LabelledGroup(g, label) => newService(Name.fromGroup(g), label)
-      case _ => newService(Name.fromGroup(dest), "")
-     }
 
   /** $newService */
   final def newService(dest: String): Service[Req, Rep] = {
@@ -66,11 +60,4 @@ trait Client[Req, Rep] {
   /** $newClient $label */
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
 
-  @deprecated("Use destination names", "6.7.x")
-  /** $newClient */
-  final def newClient(dest: Group[SocketAddress]): ServiceFactory[Req, Rep] =
-    dest match {
-      case LabelledGroup(g, label) => newClient(Name.fromGroup(g), label)
-      case _ => newClient(Name.fromGroup(dest), "")
-    }
 }

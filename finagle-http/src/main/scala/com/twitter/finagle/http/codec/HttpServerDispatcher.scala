@@ -34,32 +34,7 @@ private[finagle] class HttpServerDispatcher(
     service.close()
   }
 
-  protected def dispatch(m: Request): Future[Response] = m match {
-    case badReq: BadReq =>
-      val resp = badReq match {
-        case _: ContentTooLong =>
-          Response(badReq.version, Status.RequestEntityTooLarge)
-        case _: UriTooLong =>
-          Response(badReq.version, Status.RequestURITooLong)
-        case _: HeaderFieldsTooLarge =>
-          Response(badReq.version, Status.RequestHeaderFieldsTooLarge)
-        case _ =>
-          Response(badReq.version, Status.BadRequest)
-      }
-
-      // We need to set the content-length here because we
-      // won't be going through the service which in typically
-      // responsible for this aspect.
-      resp.contentLength = 0
-
-      // A bad request will most likely result in a corrupt connection, so signal
-      // close with a 'Connection: close' header. Closing the transport will then
-      // be performed by the ConnectionManager
-      resp.headerMap.set(Fields.Connection, "close")
-
-      Future.value(resp)
-
-    case req =>
+  protected def dispatch(req: Request): Future[Response] = {
       val handleFn = req.version match {
         case Version.Http10 => handleHttp10
         case _ => handleHttp11
@@ -97,21 +72,19 @@ private[finagle] class HttpServerDispatcher(
    * allowing services to gracefully close the connection through the Connection header mechanism.
    */
   private def setKeepAlive(rep: Response, keepAlive: Boolean): Unit = {
-    val connectionHeader = rep.headerMap.get(Fields.Connection)
-    if (connectionHeader.isEmpty || !"close".equalsIgnoreCase(connectionHeader.get)) {
+    val connectionHeaders = rep.headerMap.getAll(Fields.Connection)
+    if (connectionHeaders.isEmpty || !connectionHeaders.exists("close".equalsIgnoreCase(_))) {
       rep.version match {
-        case Version.Http10 =>
-          if (keepAlive) {
+        case Version.Http10 if keepAlive =>
             rep.headerMap.set(Fields.Connection, "keep-alive")
-          } else {
-            rep.headerMap.remove(Fields.Connection)
-          }
-        case Version.Http11 =>
-          if (keepAlive) {
-            rep.headerMap.remove(Fields.Connection)
-          } else {
-            rep.headerMap.set(Fields.Connection, "close")
-          }
+
+        case Version.Http11 if (!keepAlive) =>
+            // The connection header may contain additional information, so add
+            // rather than set.
+            rep.headerMap.add(Fields.Connection, "close")
+
+        case _ =>
+
       }
     }
   }

@@ -13,40 +13,60 @@ class ChannelBufferBufBenchmark extends StdBenchAnnotations {
   @Param(Array("1000"))
   var size: Int = 1000
 
+  private[this] var bytes: Array[Byte] = _
   private[this] var channelBufferBuf: Buf = _
-
-  private[this] var all: Array[Buf] = _
+  private[this] var byteArrayBuf: Buf = _
+  private[this] var concatBuf: Buf = _
 
   @Setup(Level.Iteration)
   def setup(): Unit = {
     val cap = size * 2
     val start = cap / 4
     val end = start + size
-    val raw = 0.until(cap).map(_.toByte).toArray
+    bytes = 0.until(cap).map(_.toByte).toArray
 
-    val bb = java.nio.ByteBuffer.wrap(raw, start, size)
-    val cb = ChannelBuffers.wrappedBuffer(raw, start, size)
+    val bb = java.nio.ByteBuffer.wrap(bytes, start, size)
+    val cb = ChannelBuffers.wrappedBuffer(bytes, start, size)
     channelBufferBuf = ChannelBufferBuf.Owned(cb)
-
-    val byteArrayBuf = Buf.ByteArray.Owned(raw, start, end)
-    val byteBufferBuf = Buf.ByteBuffer.Owned(bb)
-    val concatBuf = byteArrayBuf.slice(0, size / 2).concat(byteArrayBuf.slice(size / 2, size))
-    all = Array(byteArrayBuf, byteBufferBuf, concatBuf, channelBufferBuf)
+    byteArrayBuf = Buf.ByteArray.Owned(bytes, start, end)
+    concatBuf = byteArrayBuf.slice(0, size / 2).concat(byteArrayBuf.slice(size / 2, size))
   }
 
   @Benchmark
-  def equality(hole: Blackhole): Unit = {
-    var i = 0
-    while (i < all.length) {
-      hole.consume(channelBufferBuf == all(i))
-      hole.consume(all(i) == channelBufferBuf)
-      i += 1
-    }
-  }
+  def equalityChannelBufferBufChannelBufferBuf(): Boolean =
+    channelBufferBuf == channelBufferBuf
 
   @Benchmark
-  def hash(): Int =
-    channelBufferBuf.hashCode
+  def equalityChannelBufferBufByteArray(): Boolean =
+    channelBufferBuf == byteArrayBuf
+
+  @Benchmark
+  def equalityChannelBufferBufConcat(): Boolean =
+    channelBufferBuf == concatBuf
+
+  @Benchmark
+  def equalityByteArrayChannelBufferBuf(): Boolean =
+    byteArrayBuf == channelBufferBuf
+
+  @Benchmark
+  def equalityConcatChannelBufferBuf(): Boolean =
+    concatBuf == channelBufferBuf
+
+  @Benchmark
+  @Warmup(iterations = 5)
+  @Measurement(iterations = 5)
+  def hashCodeBaseline(): Buf =
+    ChannelBufferBuf.Owned(ChannelBuffers.wrappedBuffer(bytes, 1, size + 1))
+
+  // subtract the results of the Baseline run to get the results
+  @Benchmark
+  @Warmup(iterations = 5)
+  @Measurement(iterations = 5)
+  def hashCode(hole: Blackhole): Int = {
+    val buf = hashCodeBaseline()
+    hole.consume(buf)
+    buf.hashCode
+  }
 
   @Benchmark
   def slice(): Buf =

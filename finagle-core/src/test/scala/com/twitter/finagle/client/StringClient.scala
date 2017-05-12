@@ -6,6 +6,7 @@ import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
 import com.twitter.util.Future
+import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.channel.{ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, SimpleChannelHandler}
 import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
@@ -44,7 +45,7 @@ private[finagle] object StringClient {
   val protocolLibrary = "string"
 }
 
-private[finagle] trait StringClient {
+trait StringClient {
   import StringClient._
 
   case class RichClient(underlying: Service[String, String]) {
@@ -70,9 +71,9 @@ private[finagle] trait StringClient {
     protected type In = String
     protected type Out = String
 
-    protected def newTransporter(): Transporter[String, String] =
-      if (appendDelimeter) Netty3Transporter(StringClientPipeline, params)
-      else Netty3Transporter(NoDelimStringPipeline, params)
+    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+      if (appendDelimeter) Netty3Transporter(StringClientPipeline, addr, params)
+      else Netty3Transporter(NoDelimStringPipeline, addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]

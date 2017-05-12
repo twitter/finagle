@@ -1,4 +1,4 @@
-target(name='finagle-netty4-http',
+target(
   dependencies=[
     'finagle/finagle-netty4-http/src/main/scala'
   ]

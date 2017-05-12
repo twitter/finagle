@@ -1,67 +1,54 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
 import java.lang.{Long => JLong}
 
 case class HDel(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
-  def command: String = Commands.HDEL
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HDEL, key) ++ fields)
+  def name: Buf = Command.HDEL
+  override def body: Seq[Buf] = key +: fields
 }
 
-case class HExists(key: Buf , field: Buf) extends StrictKeyCommand {
-
-  def command: String = Commands.HEXISTS
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HEXISTS, key, field))
+case class HExists(key: Buf, field: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HEXISTS
+  override def body: Seq[Buf] = Seq(key, field)
 }
 
 case class HGet(key: Buf, field: Buf) extends StrictKeyCommand {
-  def command: String = Commands.HGET
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HGET, key, field))
+  def name: Buf = Command.HGET
+  override def body: Seq[Buf] = Seq(key, field)
 }
 
 case class HGetAll(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.HGETALL
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HGETALL, key))
+  def name: Buf = Command.HGETALL
 }
 
 case class HIncrBy(key: Buf, field: Buf, amount: Long) extends StrictKeyCommand {
-  def command: String = Commands.HINCRBY
-  def toBuf: Buf = RedisCodec.toUnifiedBuf(
-    Seq(CommandBytes.HINCRBY, key, field, StringToBuf(amount.toString))
-  )
+  def name: Buf  = Command.HINCRBY
+  override def body: Seq[Buf] = Seq(key, field, Buf.Utf8(amount.toString))
 }
 
 case class HKeys(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.HKEYS
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HKEYS, key))
+  def name: Buf = Command.HKEYS
 }
 
 case class HLen(key: Buf) extends StrictKeyCommand {
-  def command: String = Commands.HLEN
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HLEN, key))
+  def name: Buf = Command.HLEN
 }
 
 case class HMGet(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
-  def command: String = Commands.HMGET
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HMGET, key) ++ fields)
+  def name: Buf = Command.HMGET
+  override def body: Seq[Buf] = key +: fields
 }
 
 case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
-  def command: String  = Commands.HMSET
-  val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
-    f :: v :: Nil
-  }(collection.breakOut)
+  def name: Buf = Command.HMSET
+  override def body: Seq[Buf] = {
+    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
+      f :: v :: Nil
+    }(collection.breakOut)
 
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HMSET, key) ++ fvList)
+    key +: fvList
+  }
 }
 
 case class HScan(
@@ -70,35 +57,31 @@ case class HScan(
   count: Option[JLong] = None,
   pattern: Option[Buf] = None
 ) extends Command {
-  def command: String  = Commands.HSCAN
-  def toBuf: Buf = {
-    val bufs = Seq(CommandBytes.HSCAN, key, StringToBuf(cursor.toString))
+  def name: Buf = Command.HSCAN
+  override def body: Seq[Buf] = {
+    val bufs = Seq(key, Buf.Utf8(cursor.toString))
+
     val withCount = count match {
-      case Some(count) => bufs ++ Seq(CommandBytes.COUNT, StringToBuf(count.toString))
+      case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
       case None        => bufs
     }
-    val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+
+    pattern match {
+      case Some(pattern) => withCount ++ Seq(Command.MATCH, pattern)
       case None          => withCount
     }
-    RedisCodec.toUnifiedBuf(withPattern)
   }
 }
 
 case class HSet(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
-  def command: String  = Commands.HSET
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HSET, key, field, value))
+  def name: Buf = Command.HSET
+  override def body: Seq[Buf] = Seq(key, field, value)
 }
 
 case class HSetNx(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
-  def command: String  = Commands.HSETNX
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HSETNX, key, field, value))
-}
+  def name: Buf = Command.HSETNX
+  override def body: Seq[Buf] = Seq(key, field, value)}
 
 case class HVals(key: Buf) extends StrictKeyCommand {
-  def command: String  = Commands.HVALS
-  def toBuf: Buf =
-    RedisCodec.toUnifiedBuf(Seq(CommandBytes.HVALS, key))
+  def name: Buf = Command.HVALS
 }

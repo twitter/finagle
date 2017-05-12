@@ -1,17 +1,15 @@
 package com.twitter.finagle.mysql.transport
 
-import com.twitter.io.{Buf, Charsets}
-import com.twitter.finagle.util.{ProxyBufWriter, ProxyBufReader, BufReader, BufWriter}
-import java.nio.charset.{Charset => JCharset}
+import com.twitter.io.{Buf, ByteReader, ByteWriter, ProxyByteReader, ProxyByteWriter}
+import java.nio.charset.{Charset => JCharset, StandardCharsets}
 import scala.collection.mutable.{Buffer => MutableBuffer}
-
 
 /**
  * MysqlBuf provides convenience methods for reading/writing a logical packet
  * exchanged between a mysql client and server. All data is little endian ordered.
  */
 object MysqlBuf {
-  val NullLength = -1 // denotes a SQL NULL value when reading a length coded binary.
+  val NullLength: Int = -1 // denotes a SQL NULL value when reading a length coded binary.
 
   def reader(buf: Buf): MysqlBufReader = new MysqlBufReader(buf)
 
@@ -41,10 +39,10 @@ object MysqlBuf {
   }
 }
 
-class MysqlBufReader(buf: Buf) extends ProxyBufReader {
+class MysqlBufReader(buf: Buf) extends ProxyByteReader {
   import MysqlBuf._
 
-  protected val reader: BufReader = BufReader(buf)
+  protected val reader: ByteReader = ByteReader(buf)
 
   /**
    * Take `n` bytes as a byte array
@@ -62,7 +60,7 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
     do {
       val b = readByte()
       if (b == 0x00) {
-        eof = true;
+        eof = true
       } else {
         bytes += b
       }
@@ -73,7 +71,8 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
   /**
    * Reads a null-terminated UTF-8 encoded string
    */
-  def readNullTerminatedString(): String = new String(readNullTerminatedBytes(), Charsets.Utf8)
+  def readNullTerminatedString(): String =
+    new String(readNullTerminatedBytes(), StandardCharsets.UTF_8)
 
   /**
    * Reads a length encoded set of bytes according to the MySQL
@@ -130,15 +129,15 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
           throw new IllegalStateException(s"Negative length-encoded value: $longValue")
         longValue
 
-      case _ => throw new IllegalStateException("Invalid length byte")
+      case len => throw new IllegalStateException(s"Invalid length byte: $len")
     }
   }
 }
 
 
-class MysqlBufWriter(bytes: Array[Byte]) extends ProxyBufWriter {
+class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter {
 
-  protected val writer: BufWriter = BufWriter(bytes)
+  protected val writer: ByteWriter = ByteWriter(bytes)
 
   /**
    * Writes `b` to the buffer `num` times
@@ -180,7 +179,7 @@ class MysqlBufWriter(bytes: Array[Byte]) extends ProxyBufWriter {
    * @param s String to write.
    */
   def writeNullTerminatedString(s: String): MysqlBufWriter = {
-    writeBytes(s.getBytes(Charsets.Utf8))
+    writeBytes(s.getBytes(StandardCharsets.UTF_8))
     writeByte(0x00)
     this
   }

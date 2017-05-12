@@ -101,7 +101,7 @@ class EofTest extends FunSuite with HexDump {
     assert(packets.size > 0)
     val eof = EOF.decode(packets(0))
     assert(eof.warnings == 0x00)
-    assert(eof.serverStatus == 0x02)
+    assert(eof.serverStatus.mask == 0x02)
   }
 }
 

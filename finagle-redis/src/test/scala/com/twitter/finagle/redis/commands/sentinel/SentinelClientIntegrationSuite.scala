@@ -3,25 +3,20 @@ package com.twitter.finagle.redis.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.SentinelClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.finagle.redis.util.{BufToString, CBToString, StringToBuf, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.BufToString
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Await, Awaitable, Future, Time}
-import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import scala.language.implicitConversions
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
 final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   val log = Logger(getClass)
-
-  implicit def s2cb(s: String) = StringToChannelBuffer(s)
-  implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
   val sentinelCount = 3
   val masterCount = 2
@@ -59,7 +54,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     val until = startTime + 20.seconds
     def checkLater(): Future[Boolean] = {
       if (Time.now > until) Future.value(false)
-      else DefaultTimer.twitter.doLater(1.second) {
+      else DefaultTimer.doLater(1.second) {
         log.info("%s", Time.now - startTime)
         if (check) Future.value(true)
         else checkLater()
@@ -219,7 +214,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   test("Correctly perform the FLUSHCONFIG command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
-      val configFile = result(client.info(StringToBuf("server")))
+      val configFile = result(client.info(Buf.Utf8("server")))
         .flatMap { buf =>
           val prefix = "config_file:"
           BufToString(buf).trim

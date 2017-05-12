@@ -1,95 +1,22 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
+import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, ServerStatsReceiver}
-import com.twitter.finagle.tracing._
+import com.twitter.finagle.http.netty.{BadMessageConverter, ClientExceptionMapper, Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.netty4.http.exp.HttpCodecName
+import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
+import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{NonFatal, Closable, StorageUnit, Try}
-import java.net.InetSocketAddress
-import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
+import com.twitter.util.{Closable, StorageUnit}
+import java.lang.{Long => JLong}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http._
-
-private[finagle] case class BadHttpRequest(
-  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Throwable)
-    extends DefaultHttpRequest(httpVersion, method, uri)
-
-object BadHttpRequest {
-  def apply(exception: Throwable): BadHttpRequest =
-    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
-}
-
-private[finagle] sealed trait BadReq
-private[finagle] trait ContentTooLong extends BadReq
-private[finagle] trait UriTooLong extends BadReq
-private[finagle] trait HeaderFieldsTooLarge extends BadReq
-
-private[http] case class BadRequest(httpRequest: HttpRequest, exception: Throwable)
-  extends Request with BadReq {
-  lazy val remoteSocketAddress = new InetSocketAddress(0)
-}
-
-private[finagle] object BadRequest {
-
-  def apply(msg: BadHttpRequest): BadRequest =
-    new BadRequest(msg, msg.exception)
-
-  def apply(exn: Throwable): BadRequest = {
-    val msg = new BadHttpRequest(
-      HttpVersion.HTTP_1_0,
-      HttpMethod.GET,
-      "/bad-http-request",
-      exn
-    )
-
-    apply(msg)
-  }
-
-  def contentTooLong(msg: BadHttpRequest): BadRequest with ContentTooLong =
-    new BadRequest(msg, msg.exception) with ContentTooLong
-
-  def contentTooLong(exn: Throwable): BadRequest with ContentTooLong = {
-    val msg = new BadHttpRequest(
-      HttpVersion.HTTP_1_0,
-      HttpMethod.GET,
-      "/bad-http-request",
-      exn
-    )
-    contentTooLong(msg)
-  }
-
-  def uriTooLong(msg: BadHttpRequest): BadRequest with UriTooLong =
-    new BadRequest(msg, msg.exception) with UriTooLong
-
-  def uriTooLong(exn: Throwable): BadRequest with UriTooLong = {
-    val msg = new BadHttpRequest(
-      HttpVersion.HTTP_1_0,
-      HttpMethod.GET,
-      "/bad-http-request",
-      exn
-    )
-    uriTooLong(msg)
-  }
-
-  def headerTooLong(msg: BadHttpRequest): BadRequest with HeaderFieldsTooLarge  =
-    new BadRequest(msg, msg.exception) with HeaderFieldsTooLarge
-
-  def headerTooLong(exn: Throwable): BadRequest with HeaderFieldsTooLarge = {
-    val msg = new BadHttpRequest(
-      HttpVersion.HTTP_1_0,
-      HttpMethod.GET,
-      "/bad-http-request",
-      exn
-    )
-    headerTooLong(msg)
-  }
-}
-
 
 /**
  * a HttpChunkAggregator which recovers decode failures into 4xx http responses
@@ -97,19 +24,16 @@ private[finagle] object BadRequest {
 private[http] class SafeServerHttpChunkAggregator(maxContentSizeBytes: Int) extends HttpChunkAggregator(maxContentSizeBytes) {
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
-    try {
-      super.handleUpstream(ctx, e)
-    } catch {
-      case NonFatal(ex) =>
-        val channel = ctx.getChannel()
-        ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    try super.handleUpstream(ctx, e)
+    catch { case ex: TooLongFrameException =>
+      val event = BadMessageConverter.errorToDownstreamEvent(ctx.getChannel, ex)
+      ctx.sendDownstream(event)
     }
   }
 }
 
 /** Convert exceptions to BadHttpRequests */
-class SafeHttpServerCodec(
+private[http] class SafeHttpServerCodec(
     maxInitialLineLength: Int,
     maxHeaderSize: Int,
     maxChunkSize: Int)
@@ -119,13 +43,13 @@ class SafeHttpServerCodec(
     // this only catches Codec exceptions -- when a handler calls sendUpStream(), it
     // rescues exceptions from the upstream handlers and calls notifyHandlerException(),
     // which doesn't throw exceptions.
-    try {
-     super.handleUpstream(ctx, e)
-    } catch {
-      case ex: Exception =>
-        val channel = ctx.getChannel()
-        ctx.sendUpstream(new UpstreamMessageEvent(
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    try super.handleUpstream(ctx, e)
+    catch { case ex: Exception =>
+      val event = BadMessageConverter.errorToDownstreamEvent(ctx.getChannel, ex)
+      
+      // The event must be handled by `this` because we are the codec
+      // responsible for handling http messages
+      this.handleDownstream(ctx, event)
     }
   }
 }
@@ -151,13 +75,12 @@ class SafeHttpServerCodec(
  * which gives the application a handle to the byte stream. If `false`, the
  * entire message content is buffered into a [[com.twitter.io.Buf]].
  */
-case class Http(
+private case class Http(
     _compressionLevel: Int = -1,
     _maxRequestSize: StorageUnit = 5.megabytes,
     _maxResponseSize: StorageUnit = 5.megabytes,
     _decompressionEnabled: Boolean = true,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
-    _annotateCipherHeader: Option[String] = None,
     _enableTracing: Boolean = false,
     _maxInitialLineLength: StorageUnit = 4096.bytes,
     _maxHeaderSize: StorageUnit = 8192.bytes,
@@ -171,7 +94,6 @@ case class Http(
     _maxResponseSize: StorageUnit,
     _decompressionEnabled: Boolean,
     _channelBufferUsageTracker: Option[ChannelBufferUsageTracker],
-    _annotateCipherHeader: Option[String],
     _enableTracing: Boolean,
     _maxInitialLineLength: StorageUnit,
     _maxHeaderSize: StorageUnit,
@@ -183,7 +105,6 @@ case class Http(
       _maxResponseSize,
       _decompressionEnabled,
       _channelBufferUsageTracker,
-      _annotateCipherHeader,
       _enableTracing,
       _maxInitialLineLength,
       _maxHeaderSize,
@@ -203,7 +124,6 @@ case class Http(
   @deprecated("Use maxRequestSize to enforce buffer footprint limits", "2016-05-10")
   def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
     copy(_channelBufferUsageTracker = Some(usageTracker))
-  def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
   def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
   def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
   def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
@@ -218,13 +138,15 @@ case class Http(
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
           val maxChunkSize = 8192
           pipeline.addLast(
-            "httpCodec", new HttpClientCodec(
+            HttpCodecName, new HttpClientCodec(
               maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
 
-          if (!_streaming)
+          if (!_streaming) {
             pipeline.addLast(
               "httpDechunker",
               new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
+            pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
+          }
 
           if (_decompressionEnabled)
             pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
@@ -251,7 +173,7 @@ case class Http(
               .andThen(new DtabFilter.Injector)
               .andThenIf(!_streaming ->
                 new PayloadSizeFilter[Request, Response](
-                  params[param.Stats].statsReceiver, _.content.length, _.content.length
+                  params[finagle.param.Stats].statsReceiver, _.content.length, _.content.length
                 )
               )
 
@@ -264,7 +186,7 @@ case class Http(
       override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
         new HttpClientDispatcher(
           new HttpTransport(new Netty3ClientStreamTransport(transport)),
-          params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+          params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
         )
 
       override def newTraceInitializer =
@@ -288,7 +210,12 @@ case class Http(
           val maxRequestSizeInBytes = _maxRequestSize.inBytes.toInt
           val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
           val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
-          pipeline.addLast("httpCodec", new SafeHttpServerCodec(maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxRequestSizeInBytes))
+          val safeCodec = new SafeHttpServerCodec(
+            maxInitialLineLengthInBytes,
+            maxHeaderSizeInBytes,
+            maxRequestSizeInBytes /* maxChunkSize */
+          )
+          pipeline.addLast(HttpCodecName, safeCodec)
 
           if (_compressionLevel > 0) {
             pipeline.addLast("httpCompressor", new HttpContentCompressor(_compressionLevel))
@@ -310,10 +237,6 @@ case class Http(
               "httpDechunker",
               new SafeServerHttpChunkAggregator(maxRequestSizeInBytes))
 
-          _annotateCipherHeader foreach { headerName: String =>
-            pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))
-          }
-
           pipeline
         }
       }
@@ -330,8 +253,8 @@ case class Http(
         underlying: ServiceFactory[Request, Response],
         params: Stack.Params
       ): ServiceFactory[Request, Response] = {
-        val param.Stats(stats) = params[param.Stats]
-        new HttpNackFilter(stats)
+        val finagle.param.Stats(stats) = params[finagle.param.Stats]
+        HttpNackFilter.newFilter(stats)
           .andThen(new DtabFilter.Extractor)
           .andThen(new ServerContextFilter[Request, Response])
           .andThenIf(!_streaming -> new PayloadSizeFilter[Request, Response](
@@ -349,7 +272,7 @@ case class Http(
   override val protocolLibraryName: String = "http"
 }
 
-object Http {
+private object Http {
   def get() = new Http()
 }
 
@@ -369,6 +292,10 @@ object HttpTracing {
 
     val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
+
+    /** exposed for testing */
+    private[http] def hasAllRequired(headers: HeaderMap): Boolean =
+      headers.contains(Header.TraceId) && headers.contains(Header.SpanId)
   }
 
   /** Java compatibility API for [[Header]]. */
@@ -388,39 +315,57 @@ object HttpTracing {
 private object TraceInfo {
   import HttpTracing._
 
+  private[this] def removeAllHeaders(headers: HeaderMap): Unit = {
+    val iter = Header.All.iterator
+    while (iter.hasNext)
+      headers -= iter.next()
+  }
+
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
-    val id = if (Header.Required.forall { request.headers.contains(_) }) {
-      val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
+    val id =
+      if (Header.hasAllRequired(request.headerMap)) {
+        val spanId = SpanId.fromString(request.headerMap(Header.SpanId))
 
-      spanId map { sid =>
-        val traceId = SpanId.fromString(request.headers.get(Header.TraceId))
-        val parentSpanId = SpanId.fromString(request.headers.get(Header.ParentSpanId))
+        spanId match {
+          case None => None
+          case Some(sid) =>
+            val traceId = SpanId.fromString(request.headerMap(Header.TraceId))
+            val parentSpanId =
+              if (request.headerMap.contains(Header.ParentSpanId))
+                SpanId.fromString(request.headerMap(Header.ParentSpanId))
+              else
+                None
 
-        val sampled = Option(request.headers.get(Header.Sampled)) flatMap { sampled =>
-          Try(sampled.toBoolean).toOption
+            val sampled = if (!request.headerMap.contains(Header.Sampled)) {
+              None
+            } else {
+              try Some(request.headerMap(Header.Sampled).toBoolean)
+              catch { case _: IllegalArgumentException =>
+                None
+              }
+            }
+
+            val flags = getFlags(request)
+            Some(TraceId(traceId, parentSpanId, sid, sampled, flags))
         }
-
-        val flags = getFlags(request)
-        TraceId(traceId, parentSpanId, sid, sampled, flags)
+      } else if (request.headerMap.contains(Header.Flags)) {
+        // even if there are no id headers we want to get the debug flag
+        // this is to allow developers to just set the debug flag to ensure their
+        // trace is collected
+        Some(Trace.nextId.copy(flags = getFlags(request)))
+      } else {
+        Some(Trace.nextId)
       }
-    } else if (request.headers.contains(Header.Flags)) {
-      // even if there are no id headers we want to get the debug flag
-      // this is to allow developers to just set the debug flag to ensure their
-      // trace is collected
-      Some(Trace.nextId.copy(flags = getFlags(request)))
-    } else {
-      Some(Trace.nextId)
-    }
 
     // remove so the header is not visible to users
-    Header.All foreach { request.headers.remove(_) }
+    removeAllHeaders(request.headerMap)
 
     id match {
-      case Some(id) =>
-        Trace.letId(id) {
-    traceRpc(request)
+      case Some(tid) =>
+        Trace.letId(tid) {
+          traceRpc(request)
           f
-  }
+        }
       case None =>
         traceRpc(request)
         f
@@ -428,27 +373,31 @@ private object TraceInfo {
   }
 
   def setClientRequestHeaders(request: Request): Unit = {
-    Header.All.foreach { request.headers.remove(_) }
+    removeAllHeaders(request.headerMap)
 
     val traceId = Trace.id
-    request.headers.add(Header.TraceId, traceId.traceId.toString)
-    request.headers.add(Header.SpanId, traceId.spanId.toString)
+    request.headerMap.add(Header.TraceId, traceId.traceId.toString)
+    request.headerMap.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
-    traceId._parentId.foreach { id =>
-      request.headers.add(Header.ParentSpanId, id.toString)
+    traceId._parentId match {
+      case Some(id) =>
+        request.headerMap.add(Header.ParentSpanId, id.toString)
+      case None => ()
     }
     // three states of sampled, yes, no or none (let the server decide)
-    traceId.sampled.foreach { sampled =>
-      request.headers.add(Header.Sampled, sampled.toString)
+    traceId.sampled match {
+      case Some(sampled) =>
+        request.headerMap.add(Header.Sampled, sampled.toString)
+      case None => ()
     }
-    request.headers.add(Header.Flags, traceId.flags.toLong)
+    request.headerMap.add(Header.Flags, JLong.toString(traceId.flags.toLong))
     traceRpc(request)
   }
 
   def traceRpc(request: Request): Unit = {
     if (Trace.isActivelyTracing) {
-      Trace.recordRpc(request.getMethod.getName)
-      Trace.recordBinary("http.uri", stripParameters(request.getUri))
+      Trace.recordRpc(request.method.toString)
+      Trace.recordBinary("http.uri", stripParameters(request.uri))
     }
   }
 
@@ -456,68 +405,53 @@ private object TraceInfo {
    * Safely extract the flags from the header, if they exist. Otherwise return empty flag.
    */
   def getFlags(request: Request): Flags = {
-    try {
-      Flags(Option(request.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
-    } catch {
-      case _: Throwable => Flags()
+    if (!request.headerMap.contains(Header.Flags)) {
+      Flags()
+    } else {
+      try Flags(JLong.parseLong(request.headerMap(Header.Flags)))
+      catch {
+        case _: NumberFormatException => Flags()
+      }
     }
   }
 }
 
 private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]
-  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
-  val role = TraceInitializerFilter.role
-  val description = "Initialize the tracing system with trace info from the incoming request"
+  extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
+  val role: Stack.Role = TraceInitializerFilter.role
+  val description: String =
+    "Initialize the tracing system with trace info from the incoming request"
 
-  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
-    val param.Tracer(tracer) = _tracer
+  def make(
+    _tracer: finagle.param.Tracer,
+    next: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = {
+    val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracer(tracer) {
         TraceInfo.letTraceIdFromRequestHeaders(req) { svc(req) }
       }
     }
-    traceInitializer andThen next
+    traceInitializer.andThen(next)
   }
 }
 
 private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
-  extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
-  val role = TraceInitializerFilter.role
-  val description = "Sets the next TraceId and attaches trace information to the outgoing request"
-  def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
-    val param.Tracer(tracer) = _tracer
+  extends Stack.Module1[finagle.param.Tracer, ServiceFactory[Req, Rep]] {
+  val role: Stack.Role = TraceInitializerFilter.role
+  val description: String =
+    "Sets the next TraceId and attaches trace information to the outgoing request"
+  def make(
+    _tracer: finagle.param.Tracer,
+    next: ServiceFactory[Req, Rep]
+  ): ServiceFactory[Req, Rep] = {
+    val finagle.param.Tracer(tracer) = _tracer
     val traceInitializer = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
       Trace.letTracerAndNextId(tracer) {
         TraceInfo.setClientRequestHeaders(req)
         svc(req)
       }
     }
-    traceInitializer andThen next
-  }
-}
-
-/**
- * Pass along headers with the required tracing information.
- */
-private[finagle] class HttpClientTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
-
-  def apply(request: Req, service: Service[Req, Res]) = {
-    TraceInfo.setClientRequestHeaders(request)
-    service(request)
-  }
-}
-
-/**
- * Adds tracing annotations for each http request we receive.
- * Including uri, when request was sent and when it was received.
- */
-private[finagle] class HttpServerTracingFilter[Req <: Request, Res](serviceName: String)
-  extends SimpleFilter[Req, Res]
-{
-  def apply(request: Req, service: Service[Req, Res]) =
-    TraceInfo.letTraceIdFromRequestHeaders(request) {
-    service(request)
+    traceInitializer.andThen(next)
   }
 }

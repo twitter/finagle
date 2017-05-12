@@ -8,9 +8,8 @@ import com.twitter.scrooge._
 import com.twitter.util._
 import java.util.Arrays
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TMessageType, TMessage, TProtocolFactory}
+import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
-
 
 object maxReusableBufferSize extends GlobalFlag[StorageUnit](
   16.kilobytes,
@@ -21,7 +20,7 @@ object maxReusableBufferSize extends GlobalFlag[StorageUnit](
  * Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
  * Scrooge generates implementations of this builder.
  */
-trait ServiceIfaceBuilder[ServiceIface] {
+trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]] {
   /**
    * Build a client ServiceIface wrapping a binary thrift service.
    *
@@ -65,15 +64,15 @@ case class ThriftMethodStats(
   failuresScope: StatsReceiver)
 
 /**
- * Construct Service interface for a thrift method.
+ * Construct Service interface for a Thrift method.
  *
- * There are two ways to use a Scrooge-generated thrift service with Finagle:
+ * There are two ways to use a Scrooge-generated Thrift `Service` with Finagle:
  *
- * 1. Using a Service interface, i.e. a collection of finagle `Services`.
+ * 1. Using a Service interface, i.e. a collection of Finagle `Services`.
  *
  * 2. Using a method interface, i.e. a collection of methods returning `Futures`.
  *
- * Example: for a thrift service
+ * Example: for a Thrift service IDL:
  * {{{
  * service Logger {
  *   string log(1: string message, 2: i32 logLevel);
@@ -81,15 +80,15 @@ case class ThriftMethodStats(
  * }
  * }}}
  *
- * the Service interface is
+ * the `Service` interface, or `ServiceIface`, is
  * {{{
  * trait LoggerServiceIface {
- *   val log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.Result]
- *   val getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.Result]
- *  }
+ *   val log: com.twitter.finagle.Service[Logger.Log.Args, Logger.Log.SuccessType]
+ *   val getLogSize: com.twitter.finagle.Service[Logger.GetLogSize.Args, Logger.GetLogSize.SuccessType]
+ * }
  * }}}
  *
- * and the method interface is
+ * and the method interface, or `MethodIface`, is
  * {{{
  * trait Logger[Future] {
  *   def log(message: String, logLevel: Int): Future[String]
@@ -111,10 +110,21 @@ object ThriftServiceIface {
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
     stats: StatsReceiver
-  ): Service[method.Args, method.Result] = {
+  ): Service[method.Args, method.SuccessType] = {
     statsFilter(method, stats)
       .andThen(thriftCodecFilter(method, pf))
       .andThen(thriftService)
+  }
+
+  /**
+   * Used in conjunction with [[ServiceIfaceBuilder]] to allow for filtering
+   * of a `ServiceIface`.
+   */
+  trait Filterable[T] {
+    /**
+     * Prepend the given type-agnostic [[Filter]].
+     */
+    def filtered(filter: Filter.TypeAgnostic): T
   }
 
   /**
@@ -124,33 +134,21 @@ object ThriftServiceIface {
   private def statsFilter(
     method: ThriftMethod,
     stats: StatsReceiver
-  ): SimpleFilter[method.Args, method.Result] = {
+  ): SimpleFilter[method.Args, method.SuccessType] = {
     val methodStats = ThriftMethodStats(stats.scope(method.serviceName).scope(method.name))
-    new SimpleFilter[method.Args, method.Result] {
-      private[this] val respondFn: Try[method.Result] => Unit = {
-        case Return(result) =>
-          if (result.successField.isDefined) {
-            methodStats.successCounter.incr()
-          } else {
-            result.firstException() match {
-              case Some(ex) =>
-                onFailureFn(ex)
-              case None =>
-            }
-          }
-        case Throw(throwable) =>
-          onFailureFn(throwable)
-      }
-
-      private[this] val onFailureFn: Throwable => Unit = { throwable =>
-        methodStats.failuresCounter.incr()
-        methodStats.failuresScope.counter(Throwables.mkString(throwable): _*).incr()
+    new SimpleFilter[method.Args, method.SuccessType] {
+      private[this] val respondFn: Try[method.SuccessType] => Unit = {
+        case Return(_) =>
+          methodStats.successCounter.incr()
+        case Throw(ex) =>
+          methodStats.failuresCounter.incr()
+          methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
       }
 
       def apply(
         args: method.Args,
-        service: Service[method.Args, method.Result]
-      ): Future[method.Result] = {
+        service: Service[method.Args, method.SuccessType]
+      ): Future[method.SuccessType] = {
         methodStats.requestsCounter.incr()
         service(args).respond(respondFn)
       }
@@ -164,17 +162,28 @@ object ThriftServiceIface {
   private def thriftCodecFilter(
     method: ThriftMethod,
     pf: TProtocolFactory
-  ): Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] =
-    new Filter[method.Args, method.Result, ThriftClientRequest, Array[Byte]] {
-      private[this] val decodeRepFn: Array[Byte] => method.Result =
-        bytes => decodeResponse(bytes, method.responseCodec, pf)
+  ): Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] =
+    new Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] {
+      private[this] val decodeRepFn: Array[Byte] => Future[method.SuccessType] = { bytes =>
+        val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
+        result.successField match {
+          case Some(v) => Future.value(v)
+          case None => result.firstException() match {
+            case Some(ex) => Future.exception(ex)
+            case None =>
+              Future.exception(new TApplicationException(
+                TApplicationException.MISSING_RESULT,
+                s"Thrift method '${method.name}' failed: missing result"))
+          }
+        }
+      }
 
       def apply(
         args: method.Args,
         service: Service[ThriftClientRequest, Array[Byte]]
-      ): Future[method.Result] = {
+      ): Future[method.SuccessType] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
-        service(request).map(decodeRepFn)
+        service(request).flatMap(decodeRepFn)
       }
     }
 

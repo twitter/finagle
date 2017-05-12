@@ -13,7 +13,7 @@ class NameTest extends FunSuite {
     val n = Name.fromGroup(g)
 
     var addr: Addr = Addr.Pending
-    n.addr.changes.register(Witness({ addr = _ }))
+    n.addr.changes.register(Witness({ addr = _: Addr }))
     assert(addr == Addr.Pending)
     val set = Set[SocketAddress](new InetSocketAddress(0), new InetSocketAddress(1))
     g() = set

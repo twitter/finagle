@@ -71,13 +71,13 @@ class Zk2Resolver(
     timer: Timer) =
     this(statsReceiver, removalWindow, batchWindow, unhealthyWindow,
       FixedInetResolver(statsReceiver, dnsCacheSize(), Backoff.exponentialJittered(1.second, 5.minutes),
-        DefaultTimer.twitter), timer)
+        DefaultTimer), timer)
 
   def this(statsReceiver: StatsReceiver,
     removalWindow: Duration,
     batchWindow: Duration,
     unhealthyWindow: Duration) =
-    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer.twitter)
+    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer)
 
   def this(statsReceiver: StatsReceiver) =
     this(statsReceiver, 40.seconds, 5.seconds, 5.minutes)
@@ -193,7 +193,8 @@ class Zk2Resolver(
         // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
-        val reg = (discoverer.health.changes joinLast states).register(Witness { tuple =>
+        val reg = (discoverer.health.changes joinLast states)
+            .register(Witness { tuple: (ServiceDiscoverer.ClientHealth, Zk2Resolver.State) =>
           val (clientHealth, state) = tuple
 
           if (chatty()) {

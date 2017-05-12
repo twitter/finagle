@@ -5,14 +5,15 @@ package com.twitter.finagle.loadbalancer
  * updated nondestructively, but, as with nodes, may share some
  * data across updates.
  *
- * @param vector the nodes over which we are currently balancing.
+ * @param vector the vector of nodes over which the balancer is balancing.
  */
-protected[loadbalancer] abstract class DistributorT[Node](val vector: Vector[Node]) {
+private abstract class DistributorT[Node](val vector: Vector[Node]) {
 
   type This <: DistributorT[Node]
 
   /**
    * Pick the next node.
+   *
    * This is the main entry point for a load balancer implementation.
    */
   def pick(): Node

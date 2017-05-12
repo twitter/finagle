@@ -73,10 +73,10 @@ private[redis] trait SentinelCommands { self: BaseClient =>
     doRequest(SentinelGetMasterAddrByName(name)) {
       case NilMBulkReply => Future.None
       case MBulkReply(messages) => Future.value(
-        ReplyFormat.toChannelBuffers(messages) match {
+        ReplyFormat.toBuf(messages) match {
           case host :: port :: Nil =>
             Some(InetSocketAddress.createUnresolved(
-              CBToString(host), NumberFormat.toInt(CBToString(port))))
+              BufToString(host), BufToString(port).toInt))
         })
     }
 

@@ -30,7 +30,7 @@ object Stress {
     val statsReceiver = new SummarizingStatsReceiver
 
     val client: Service[Request, Response] = ClientBuilder()
-      .codec(Http())
+      .stack(com.twitter.finagle.Http.client)
       .hosts(new InetSocketAddress(uri.getHost, uri.getPort))
       .hostConnectionCoresize(concurrency)
       .reportTo(statsReceiver)

@@ -1,7 +1,6 @@
-target(name='finagle-http',
+target(
   dependencies=[
-    'finagle/finagle-http/src/main/scala',
-    'finagle/finagle-http/src/main/java'
+    'finagle/finagle-http/src/main/scala'
   ]
 )
 

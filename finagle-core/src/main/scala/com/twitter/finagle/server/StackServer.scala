@@ -2,9 +2,10 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{ExpiringService, DeadlineStatsFilter, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{ExpiringService, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle.stats.ServerStatsReceiver
@@ -14,9 +15,6 @@ import com.twitter.jvm.Jvm
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
-import java.util.Collections
-import java.util.concurrent.ConcurrentHashMap
-import scala.collection.JavaConverters._
 
 object StackServer {
 
@@ -50,7 +48,6 @@ object StackServer {
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
-   * @see [[com.twitter.finagle.service.DeadlineStatsFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
@@ -62,8 +59,7 @@ object StackServer {
    * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
-    val stk = new StackBuilder[ServiceFactory[Req, Rep]](
-      stack.nilStack[Req, Rep])
+    val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
     // We want to start expiring services as close to their instantiation
     // as possible. By installing `ExpiringService` here, we are guaranteed
@@ -72,7 +68,6 @@ object StackServer {
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
-    stk.push(DeadlineStatsFilter.module)
     stk.push(DtabStatsFilter.module)
     // Admission Control filters are inserted after `StatsFilter` so that rejected
     // requests are counted. We may need to adjust how latency are recorded
@@ -113,6 +108,8 @@ trait StackBasedServer[Req, Rep]
 /**
  * A [[com.twitter.finagle.Server]] that composes a
  * [[com.twitter.finagle.Stack]].
+ *
+ * @see [[ListeningServer]] for a template implementation that tracks session resources.
  */
 trait StackServer[Req, Rep]
   extends StackBasedServer[Req, Rep]
@@ -120,8 +117,10 @@ trait StackServer[Req, Rep]
 
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]
-  /** The current parameter map used in this StackServer */
+
+  /** The current parameter map used in this StackServer. */
   def params: Stack.Params
+
   /** A new StackServer with the provided Stack. */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep]
 
@@ -130,25 +129,164 @@ trait StackServer[Req, Rep]
   override def configured[P: Param](p: P): StackServer[Req, Rep]
 
   override def configured[P](psp: (P, Param[P])): StackServer[Req, Rep]
+
+  override def configuredParams(params: Stack.Params): StackServer[Req, Rep]
 }
 
 /**
- * A standard template implementation for
- * [[com.twitter.finagle.server.StackServer]].
+ * The standard template for creating a concrete representation of a [[StackServer]].
  *
- * @see The [[http://twitter.github.io/finagle/guide/Servers.html user guide]]
- *      for further details on Finagle servers and their configuration.
- *
- * @see [[StackServer.newStack]] for the default modules used by Finagle
- *      servers.
+ * @see [[StdStackServer]] for a further refined `StackServer` template which uses the
+ *      transport + dispatcher pattern.
  */
-trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
+trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This]]
   extends StackServer[Req, Rep]
   with Stack.Parameterized[This]
   with CommonParams[This]
   with WithServerTransport[This]
   with WithServerSession[This]
-  with WithServerAdmissionControl[This] { self =>
+  with WithServerAdmissionControl[This] { self: This =>
+
+  /**
+   * Constructs a new `ListeningServer` from the `ServiceFactory`.
+   * Each new session is passed to the `trackSession` function exactly once
+   * to facilitate connection resource management.
+   */
+  protected def newListeningServer(serviceFactory: ServiceFactory[Req, Rep], addr: SocketAddress)(trackSession: ClientConnection => Unit): ListeningServer
+
+  final def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
+    new ListeningServer with CloseAwaitably {
+      // Ensure that we have performed global initialization.
+      com.twitter.finagle.Init()
+
+      val Monitor(monitor) = params[Monitor]
+      val Reporter(reporter) = params[Reporter]
+      val Stats(stats) = params[Stats]
+      val Label(label) = params[Label]
+      val registry = ServerRegistry.connectionRegistry(addr)
+      // For historical reasons, we have to respect the ServerRegistry
+      // for naming addresses (i.e. label=addr). Until we deprecate
+      // its usage, it takes precedence for identifying a server as
+      // it is the most recently set label.
+      val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
+
+      val statsReceiver =
+        if (serverLabel.isEmpty) stats
+        else stats.scope(serverLabel)
+
+      val serverParams = params +
+        Label(serverLabel) +
+        Stats(statsReceiver) +
+        Monitor(reporter(label, None) andThen monitor)
+
+      val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
+        .make(serverParams)
+
+      // We re-parameterize in case `newListeningServer` needs to access the
+      // finalized parameters.
+      val server = withParams(serverParams)
+
+      // Session bookkeeping used to explicitly manage
+      // session resources per ListeningServer. Note, draining
+      // in-flight requests is expected to be managed by the session,
+      // so we can simply `close` all sessions here.
+      val sessions = new Closables
+
+      val underlying = server.newListeningServer(serviceFactory, addr) { session =>
+        registry.register(session.remoteAddress)
+        sessions.register(session)
+        session.onClose.ensure {
+          sessions.unregister(session)
+          registry.unregister(session.remoteAddress)
+        }
+      }
+
+      ServerRegistry.register(underlying.boundAddress.toString, server.stack, server.params)
+
+      protected def closeServer(deadline: Time) = closeAwaitably {
+        // Here be dragons
+        // We want to do four things here in this order:
+        // 1. close the listening socket
+        // 2. close the factory (not sure if ordering matters for this step)
+        // 3. drain pending requests for existing sessions
+        // 4. close those connections when their requests complete
+        //
+        // Because we care about the order here, it's important that the closes
+        // are done synchronously.  This means that we must be careful not to
+        // schedule work for the future, as might happen if we transform or
+        // respond to a future.
+
+        // closing `underlying` eventually calls Netty3Listener.close which has an
+        // interesting side-effect of synchronously closing #1
+        val ulClosed = underlying.close(deadline)
+
+        // However we don't want to wait on the above because it will only complete
+        // when #4 is finished.  So we ignore it and close everything else.  Note that
+        // closing the connections here will do #2 and drain them via the Dispatcher.
+        val closingSessions = sessions.close(deadline)
+        val closingFactory = factory.close(deadline)
+
+        // and once they're drained we can then wait on the listener physically closing them
+        Future.join(Seq(closingSessions, closingFactory)).before(ulClosed)
+      }
+
+      def boundAddress = underlying.boundAddress
+    }
+
+  /**
+   * Creates a new StackServer with parameter `p`.
+   */
+  override def configured[P: Param](p: P): This =
+    withParams(params + p)
+
+  /**
+   * Creates a new StackServer with parameter `psp._1` and Stack Param type `psp._2`.
+   */
+  override def configured[P](psp: (P, Stack.Param[P])): This = {
+    val (p, sp) = psp
+    configured(p)(sp)
+  }
+
+  /**
+   * Creates a new StackServer with `params` used to configure this StackServer's `stack`.
+   */
+  def withParams(params: Stack.Params): This =
+    copy1(params = params)
+
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
+    copy1(stack = stack)
+
+  /**
+   * A copy constructor in lieu of defining StackServer as a
+   * case class.
+   */
+  protected def copy1(
+    stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
+    params: Stack.Params = this.params
+  ): This
+
+  /**
+   * Creates a new StackServer with additional parameters `newParams`.
+   */
+  override def configuredParams(newParams: Stack.Params): This = {
+    withParams(params ++ newParams)
+  }
+}
+
+/**
+ * A standard template implementation for [[com.twitter.finagle.server.StackServer]]
+ * that uses the transport + dispatcher pattern.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html user guide]]
+ *      for further details on Finagle servers and their configuration.
+ *
+ * @see [[StackServer]] for a generic representation of a stack server.
+ *
+ * @see [[StackServer.newStack]] for the default modules used by Finagle
+ *      servers.
+ */
+trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
+  extends ListeningStackServer[Req, Rep, This] { self: This =>
 
   /**
    * The type we write into the transport.
@@ -176,144 +314,77 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    */
   protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
 
-  /**
-   * Creates a new StackServer with parameter `p`.
-   */
-  override def configured[P: Stack.Param](p: P): This =
-    withParams(params + p)
+  final protected def newListeningServer(
+    serviceFactory: ServiceFactory[Req, Rep],
+    addr: SocketAddress
+  )(trackSession: ClientConnection => Unit): ListeningServer = {
 
-  /**
-   * Creates a new StackServer with parameter `psp._1` and Stack Param type `psp._2`.
-   */
-  override def configured[P](psp: (P, Stack.Param[P])): This = {
-    val (p, sp) = psp
-    configured(p)(sp)
-  }
+    // Listen over `addr` and serve traffic from incoming transports to
+    // `serviceFactory` via `newDispatcher`.
+    val listener = newListener()
 
-  /**
-   * Creates a new StackServer with `params` used to configure this StackServer's `stack`.
-   */
-  def withParams(params: Stack.Params): This =
-    copy1(params = params)
+    // Export info about the listener type so that we can query info
+    // about its implementation at runtime. This assumes that the `toString`
+    // of the implementation is sufficiently descriptive.
+    val listenerImplKey = Seq(
+      ServerRegistry.registryName,
+      params[ProtocolLibrary].name,
+      params[Label].label,
+      "Listener")
+    GlobalRegistry.get.put(listenerImplKey, listener.toString)
 
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
-    copy1(stack = stack)
-
-  /**
-   * A copy constructor in lieu of defining StackServer as a
-   * case class.
-   */
-  protected def copy1(
-    stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
-    params: Stack.Params = this.params
-  ): This { type In = self.In; type Out = self.Out }
-
-  def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
-    new ListeningServer with CloseAwaitably {
-      // Ensure that we have performed global initialization.
-      com.twitter.finagle.Init()
-
-      val Monitor(monitor) = params[Monitor]
-      val Reporter(reporter) = params[Reporter]
-      val Stats(stats) = params[Stats]
-      val Label(label) = params[Label]
-      // For historical reasons, we have to respect the ServerRegistry
-      // for naming addresses (i.e. label=addr). Until we deprecate
-      // its usage, it takes precedence for identifying a server as
-      // it is the most recently set label.
-      val serverLabel = ServerRegistry.nameOf(addr) getOrElse label
-
-      // Connection bookkeeping used to explicitly manage
-      // connection resources per ListeningServer. Note, draining
-      // in-flight requests is expected to be managed by `newDispatcher`,
-      // so we can simply `close` all connections here.
-      val connections = Collections.newSetFromMap(
-        new ConcurrentHashMap[Closable, java.lang.Boolean])
-
-      // Hydrates a new ClientConnection with connection information from the
-      // given `transport`. ClientConnection instances are used to
-      // thread this through a finagle server stack.
-      def newConn(transport: Transport[In, Out]) = new ClientConnection {
-        val remoteAddress = transport.remoteAddress
-        val localAddress = transport.localAddress
-        def close(deadline: Time) = transport.close(deadline)
-        val onClose = transport.onClose.map(_ => ())
-      }
-
-      val statsReceiver =
-        if (serverLabel.isEmpty) stats
-        else stats.scope(serverLabel)
-
-      val serverParams = params +
-        Label(serverLabel) +
-        Stats(statsReceiver) +
-        Monitor(reporter(label, None) andThen monitor)
-
-      val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
-        .make(serverParams)
-
-      val server = copy1(params=serverParams)
-
-      // Listen over `addr` and serve traffic from incoming transports to
-      // `serviceFactory` via `newDispatcher`.
-      val listener = server.newListener()
-
-      // Export info about the listener type so that we can query info
-      // about its implementation at runtime. This assumes that the `toString`
-      // of the implementation is sufficiently descriptive.
-      val listenerImplKey = Seq(
-        ServerRegistry.registryName,
-        params[ProtocolLibrary].name,
-        params[Label].label,
-        "Listener")
-      GlobalRegistry.get.put(listenerImplKey, listener.toString)
-
-      val underlying = listener.listen(addr) { transport =>
-        serviceFactory(newConn(transport)).respond {
-          case Return(service) =>
-            val d = server.newDispatcher(transport, service)
-            connections.add(d)
-            transport.onClose ensure connections.remove(d)
-          case Throw(exc) =>
-            // If we fail to create a new session locally, we continue establishing
-            // the session but (1) reject any incoming requests; (2) close it right
-            // away. This allows protocols that support graceful shutdown to
-            // also gracefully deny new sessions.
-            val d = server.newDispatcher(
-              transport,
-              Service.const(Future.exception(
-                Failure.rejected("Terminating session and ignoring request", exc)))
-            )
-            connections.add(d)
-            transport.onClose ensure connections.remove(d)
-            // We give it a generous amount of time to shut down the session to
-            // improve our chances of being able to do so gracefully.
-            d.close(10.seconds)
+    listener.listen(addr) { transport =>
+      val clientConnection = new ClientConnectionImpl(transport)
+      val futureService = transport.peerCertificate match {
+        case None => serviceFactory(clientConnection)
+        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+          serviceFactory(clientConnection)
         }
       }
+      futureService.respond {
+        case Return(service) =>
+          val d = newDispatcher(transport, service)
+          // Now that we have a dispatcher, we have a higher notion of what `close(..)` does, so use it
+          clientConnection.setClosable(d)
+          trackSession(clientConnection)
 
-      ServerRegistry.register(underlying.boundAddress.toString, server.stack, server.params)
+        case Throw(exc) =>
+          // If we fail to create a new session locally, we continue establishing
+          // the session but (1) reject any incoming requests; (2) close it right
+          // away. This allows protocols that support graceful shutdown to
+          // also gracefully deny new sessions.
+          val d = newDispatcher(
+            transport,
+            Service.const(Future.exception(
+              Failure.rejected("Terminating session and ignoring request", exc)))
+          )
 
-      protected def closeServer(deadline: Time) = closeAwaitably {
-        // Here be dragons
-        // We want to do four things here in this order:
-        // 1. close the listening socket
-        // 2. close the factory (not sure if ordering matters for this step)
-        // 3. drain pending requests for existing connections
-        // 4. close those connections when their requests complete
-        // closing `underlying` eventually calls Netty3Listener.close which has an
-        // interesting side-effect of synchronously closing #1
-        val ulClosed = underlying.close(deadline)
-
-        // However we don't want to wait on the above because it will only complete
-        // when #4 is finished.  So we ignore it and close everything else.  Note that
-        // closing the connections here will do #2 and drain them via the Dispatcher.
-        val everythingElse = Seq[Closable](factory) ++ connections.asScala.toSeq
-
-        // and once they're drained we can then wait on the listener physically closing them
-        Closable.all(everythingElse:_*).close(deadline) before ulClosed
+          // Now that we have a dispatcher, we have a higher notion of what `close(..)` does, so use it
+          clientConnection.setClosable(d)
+          trackSession(clientConnection)
+          // We give it a generous amount of time to shut down the session to
+          // improve our chances of being able to do so gracefully.
+          d.close(10.seconds)
       }
-
-      def boundAddress = underlying.boundAddress
     }
+  }
+
+  private class ClientConnectionImpl(t: Transport[In, Out]) extends ClientConnection {
+    @volatile
+    private var closable: Closable = t
+
+    def setClosable(closable: Closable): Unit = {
+      this.closable = closable
+    }
+
+    override def remoteAddress: SocketAddress = t.remoteAddress
+    override def localAddress: SocketAddress = t.localAddress
+    // In the Transport + Dispatcher model, the Transport is a source of truth for
+    // the `onClose` future: closing the dispatcher will result in closing the
+    // Transport and closing the Transport will trigger shutdown of the dispatcher.
+    // Therefore, even when we swap the closable that is the target of `this.close(..)`,
+    // they both will complete the transports `onClose` future.
+    override val onClose: Future[Unit] = t.onClose.unit
+    override def close(deadline: Time): Future[Unit] = closable.close(deadline)
+  }
 }

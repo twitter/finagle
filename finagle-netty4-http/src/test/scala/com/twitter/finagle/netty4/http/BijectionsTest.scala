@@ -58,10 +58,10 @@ object BijectionsTest {
   } yield {
 
     val req = Request.apply(version, method, uri, BufReader(Buf.Utf8(body)))
-    headers.foreach { case (k, v) => req.headers.add(k, v) }
+    headers.foreach { case (k, v) => req.headerMap.add(k, v) }
     req.setChunked(false)
     req.contentString = body
-    req.headers.set(Fields.ContentLength, body.length.toString)
+    req.headerMap.set(Fields.ContentLength, body.length.toString)
     (req, body)
   }
 
@@ -134,7 +134,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("netty http request -> finagle") {
     forAll(arbNettyRequest) { case (in: FullHttpRequest, body: String) =>
       val out = Bijections.netty.fullRequestToFinagle(in, new InetSocketAddress(0))
-      assert(out.getUri == in.uri)
+      assert(out.uri == in.uri)
       assert(out.isChunked == false)
       assert(out.contentString == body)
       assert(out.version == Bijections.netty.versionToFinagle(in.protocolVersion))
@@ -185,7 +185,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       assert(HttpUtil.isTransferEncodingChunked(out) == false)
       assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
       assert(out.method == Bijections.finagle.methodToNetty(in.method))
-      assert(out.uri == in.getUri)
+      assert(out.uri == in.uri)
       if (!in.isChunked) {
         assert(out.isInstanceOf[FullHttpRequest])
         val full = out.asInstanceOf[FullHttpRequest]
@@ -196,5 +196,24 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
         assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
       }
     }
+  }
+
+  test("finagle http request with chunked and content-length set -> netty") {
+    val in = Request()
+    in.setChunked(true)
+    in.contentLength = 10
+
+    val out = Bijections.finagle.requestToNetty(in)
+    assert(!HttpUtil.isTransferEncodingChunked(out))
+    assert(out.headers.get(Fields.ContentLength) == "10")
+  }
+
+  test("finagle http request with chunked and no content-length set -> netty") {
+    val in = Request()
+    in.setChunked(true)
+
+    val out = Bijections.finagle.requestToNetty(in)
+    assert(HttpUtil.isTransferEncodingChunked(out))
+    assert(!out.headers.contains(Fields.ContentLength))
   }
 }

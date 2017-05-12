@@ -3,14 +3,14 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.liveness.{FailureDetector, Latch}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -18,6 +18,7 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
 import org.mockito.stubbing.Answer
+import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
@@ -30,13 +31,16 @@ private object TestContext {
   }
 }
 
-private[mux] class ClientServerTest(canDispatch: Boolean)
+private[mux] abstract class ClientServerTest
   extends FunSuite
   with OneInstancePerTest
   with MockitoSugar
   with AssertionsForJUnit
   with Eventually
   with IntegrationPatience {
+
+  def canDispatch: Boolean
+
   val tracer = new BufferingTracer
 
   class Ctx(config: FailureDetector.Config = FailureDetector.NullConfig) {
@@ -86,7 +90,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   // Push a tracer for the client.
-  override def test(testName: String, testTags: Tag*)(f: => Unit): Unit =
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit =
     super.test(testName, testTags:_*) {
       Trace.letTracer(tracer)(f)
     }
@@ -226,7 +230,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       client(Request(Path.empty, buf(1)))
     }
     assert(resp.poll.isDefined)
-    val Buf.Utf8(respStr) = Await.result(resp).body
+    val Buf.Utf8(respStr) = Await.result(resp, 5.seconds).body
     assert(respStr == id.toString)
   }
 
@@ -237,7 +241,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
-          val bw = BufWriter.fixed(8)
+          val bw = ByteWriter.fixed(8)
           bw.writeLongBE(Trace.id.flags.toLong)
           Future.value(Response(bw.owned()))
         }
@@ -251,7 +255,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       p
     }
     assert(resp.poll.isDefined)
-    val respBr = BufReader(Await.result(resp).body)
+    val respBr = ByteReader(Await.result(resp, 5.seconds).body)
     assert(respBr.remaining == 8)
     val respFlags = Flags(respBr.readLongBE())
     assert(respFlags == flags)
@@ -266,9 +270,8 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     import ctx._
 
     assert(nping.get == 1)
-    assert(client.status == Status.Busy)
+    assert(client.status == Status.Open)
     pingRep.flip()
-    Status.awaitOpen(client.status)
 
     // This is technically racy, but would require a pretty
     // pathological test environment.
@@ -287,7 +290,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientServerTestNoDispatch extends ClientServerTest(false) {
+class ClientServerTestNoDispatch extends ClientServerTest {
+  val canDispatch = false
+
   test("does not dispatch destinations") {
     val ctx = new Ctx
     import ctx._
@@ -296,13 +301,15 @@ class ClientServerTestNoDispatch extends ClientServerTest(false) {
     val withoutDst = Request(Path.empty, buf(123))
     val rep = Response(buf(23))
     when(service(withoutDst)).thenReturn(Future.value(rep))
-    assert(Await.result(client(withDst)) == rep)
+    assert(Await.result(client(withDst), 5.seconds) == rep)
     verify(service)(withoutDst)
   }
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientServerTestDispatch extends ClientServerTest(true) {
+class ClientServerTestDispatch extends ClientServerTest {
+  val canDispatch = true
+
   import TestContext._
 
   // Note: We test trace propagation here, too,
@@ -321,13 +328,13 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
     )
 
     // No context set
-    assert(Await.result(client(Request(Path.empty, Buf.Empty))).body.isEmpty)
+    assert(Await.result(client(Request(Path.empty, Buf.Empty)), 5.seconds).body.isEmpty)
 
     val f = Contexts.broadcast.let(testContext, Buf.Utf8("My context!")) {
       client(Request.empty)
     }
 
-    assert(Await.result(f).body == Buf.Utf8("My context!"))
+    assert(Await.result(f, 5.seconds).body == Buf.Utf8("My context!"))
   }
 
   test("dispatches destinations") {
@@ -337,7 +344,7 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
     val req = Request(Path.read("/dst/name"), buf(123))
     val rep = Response(buf(23))
     when(service(req)).thenReturn(Future.value(rep))
-    assert(Await.result(client(req)) == rep)
+    assert(Await.result(client(req), 5.seconds) == rep)
     verify(service)(req)
   }
 }

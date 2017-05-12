@@ -35,26 +35,26 @@ class RetryPolicyTest extends FunSpec {
     it("should WriteExceptionsOnly") {
       val weo = WriteExceptionsOnly orElse NoExceptions
 
-      assert(weo(Throw(new Exception)) == false)
-      assert(weo(Throw(WriteException(new Exception))) == true)
-      assert(weo(Throw(Failure(new Exception, Failure.Interrupted))) == false)
+      assert(!weo(Throw(new Exception)))
+      assert(weo(Throw(WriteException(new Exception))))
+      assert(!weo(Throw(Failure(new Exception, Failure.Interrupted))))
       // it's important that this failure isn't retried, despite being "restartable".
       // interrupted futures should never be retried.
-      assert(weo(Throw(Failure(new Exception, Failure.Interrupted|Failure.Restartable))) == false)
-      assert(weo(Throw(Failure(new Exception, Failure.Restartable))) == true)
-      assert(weo(Throw(Failure(new Exception, Failure.Rejected|Failure.NonRetryable))) == false)
-      assert(weo(Throw(timeoutExc)) == false)
+      assert(!weo(Throw(Failure(new Exception, Failure.Interrupted|Failure.Restartable))))
+      assert(weo(Throw(Failure(new Exception, Failure.Restartable))))
+      assert(!weo(Throw(Failure(new Exception, Failure.Rejected|Failure.NonRetryable))))
+      assert(!weo(Throw(timeoutExc)))
     }
 
     it("should TimeoutAndWriteExceptionsOnly") {
       val taweo = TimeoutAndWriteExceptionsOnly orElse NoExceptions
 
-      assert(taweo(Throw(new Exception)) == false)
-      assert(taweo(Throw(WriteException(new Exception))) == true)
-      assert(taweo(Throw(Failure(new Exception, Failure.Interrupted))) == false)
-      assert(taweo(Throw(Failure(timeoutExc, Failure.Interrupted))) == true)
-      assert(taweo(Throw(timeoutExc)) == true)
-      assert(taweo(Throw(new com.twitter.util.TimeoutException(""))) == true)
+      assert(!taweo(Throw(new Exception)))
+      assert(taweo(Throw(WriteException(new Exception))))
+      assert(!taweo(Throw(Failure(new Exception, Failure.Interrupted))))
+      assert(taweo(Throw(Failure(timeoutExc, Failure.Interrupted))))
+      assert(taweo(Throw(timeoutExc)))
+      assert(taweo(Throw(new com.twitter.util.TimeoutException(""))))
     }
 
     it("RetryableWriteException matches retryable exception") {
@@ -175,6 +175,22 @@ class RetryPolicyTest extends FunSpec {
         channelClosedBackoff
       )
       assert(backoffs == expectedBackoffs)
+    }
+  }
+
+  describe("RetryPolicy.Never") {
+    val never = RetryPolicy.Never.asInstanceOf[RetryPolicy[Try[Int]]]
+    it("should not retry") {
+      assert(None == never(Return(1)))
+      assert(None == never(Throw(new RuntimeException)))
+    }
+  }
+
+  describe("RetryPolicy.none") {
+    val nah = RetryPolicy.none
+    it("should not retry") {
+      assert(None == nah((1, Return(1))))
+      assert(None == nah((1, Throw(new RuntimeException))))
     }
   }
 }

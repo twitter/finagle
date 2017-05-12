@@ -3,18 +3,23 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Duration
-import com.twitter.util.Future
+import com.twitter.util.{Duration, Future}
 import java.net.SocketAddress
 
 /**
- * Transporters are simple functions from a `SocketAddress` to a
- * `Future[Transport[In, Out]]`. They represent a transport layer session from a
- * client to a server. Transporters are symmetric to the server-side
- * [[com.twitter.finagle.server.Listener]].
+ * Transporters construct a `Future[Transport[In, Out]]`.
+ *
+ * There is one Transporter assigned per remote peer.  Transporters are
+ * symmetric to the server-side [[com.twitter.finagle.server.Listener]], except
+ * that it isn't shared across remote peers..
  */
 trait Transporter[In, Out] {
-  def apply(addr: SocketAddress): Future[Transport[In, Out]]
+  def apply(): Future[Transport[In, Out]]
+
+  /**
+   * The address of the remote peer that this `Transporter` connects to.
+   */
+  def remoteAddress: SocketAddress
 }
 
 /**
@@ -53,18 +58,6 @@ object Transporter {
   }
   object ConnectTimeout {
     implicit val param = Stack.Param(ConnectTimeout(1.second))
-  }
-
-  /**
-   * $param hostname verification, if TLS is enabled.
-   * @see [[com.twitter.finagle.transport.Transport#TLSEngine]]
-   */
-  case class TLSHostname(hostname: Option[String]) {
-    def mk(): (TLSHostname, Stack.Param[TLSHostname]) =
-      (this, TLSHostname.param)
-  }
-  object TLSHostname {
-    implicit val param = Stack.Param(TLSHostname(None))
   }
 
   /**

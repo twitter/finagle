@@ -40,8 +40,8 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
 
     val req = Request()
     // not base64 encoded
-    req.headers().add("X-Dtab-01-A", "/foo")
-    req.headers().add("X-Dtab-01-B", "/bar")
+    req.headerMap.add("X-Dtab-01-A", "/foo")
+    req.headerMap.add("X-Dtab-01-B", "/bar")
     Dtab.unwind {
       Dtab.local = Dtab.empty
       val rsp = Await.result(service(req), timeout)
@@ -61,7 +61,7 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
 
     // prepare a request and add a correct looking new-style dtab header
     val req = Request()
-    req.headers().add("dtab-local", "/srv=>/srv#/staging")
+    req.headerMap.add("dtab-local", "/srv=>/srv#/staging")
     Await.result(svc(req), timeout)
 
     assert(receivedDtab == Some(Dtab.empty))
@@ -76,8 +76,8 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
 
     // prepare a request and add a correct looking new-style dtab header
     val req = Request()
-    req.headers().add("x-dtab-00-a", "/s/foo")
-    req.headers().add("x-dtab-00-b", "/s/bar")
+    req.headerMap.add("x-dtab-00-a", "/s/foo")
+    req.headerMap.add("x-dtab-00-b", "/s/bar")
     Await.result(svc(req), timeout)
 
     assert(receivedDtab == Some(Dtab.empty))

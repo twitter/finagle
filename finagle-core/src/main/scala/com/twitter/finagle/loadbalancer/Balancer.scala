@@ -8,6 +8,14 @@ import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 
 /**
+ * A [[BalancerNode]] allows implementors to refine the node type-alias
+ * without eagerly mixing in all of [[Balancer]].
+ */
+private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
+  protected type Node <: NodeT[Req, Rep]
+}
+
+/**
  * Basic functionality for a load balancer. Balancer takes care of
  * maintaining and updating a distributor, which is responsible for
  * distributing load across a number of nodes.
@@ -16,7 +24,7 @@ import scala.collection.{immutable, mutable}
  * example, we can specify and mix in a load metric (via a Node) and
  * a balancer (a Distributor) separately.
  */
-private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
+private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
   /**
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
@@ -35,18 +43,9 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   protected def statsReceiver: StatsReceiver
 
   /**
-   * The type of Node. Mixed in.
+   * Create a new node representing the given factory.
    */
-  protected type Node <: AnyRef with NodeT[Req, Rep] { type This = Node }
-
-  /**
-   * Create a new node representing the given factory, with the given
-   * weight. Report node-related stats to the given StatsReceiver.
-   */
-  protected def newNode(
-    factory: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver
-  ): Node
+  protected def newNode(factory: ServiceFactory[Req, Rep]): Node
 
   /**
    * Create a node whose sole purpose it is to endlessly fail
@@ -104,7 +103,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
 
   protected sealed trait Update
   protected case class NewList(
-    svcFactories: Traversable[ServiceFactory[Req, Rep]]) extends Update
+    svcFactories: IndexedSeq[ServiceFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -160,7 +159,9 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
         // factories - old factories, and rebuild the distributor with new
         // factories, preserving the nodes of the factories in the intersection.
 
-        // We will rebuild `Distributor` with these nodes.
+        // We will rebuild `Distributor` with these nodes. Note, it's important
+        // that we maintain the order of the `newFactories` collection as some
+        // `Distributor` implementations rely on its ordering.
         val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
 
         // These nodes are currently maintained by `Distributor`.
@@ -169,12 +170,12 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
 
         var numAdded: Int = 0
 
-        for (newFactory <- newFactories) {
-          if (oldFactories.contains(newFactory)) {
-            transferred += oldFactories(newFactory)
-            oldFactories.remove(newFactory)
+        for (factory <- newFactories) {
+          if (oldFactories.contains(factory)) {
+            transferred += oldFactories(factory)
+            oldFactories.remove(factory)
           } else {
-            transferred += newNode(newFactory, statsReceiver.scope(newFactory.toString))
+            transferred += newNode(factory)
             numAdded += 1
           }
         }
@@ -204,7 +205,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(factories: Traversable[ServiceFactory[Req, Rep]]): Unit = {
+  def update(factories: IndexedSeq[ServiceFactory[Req, Rep]]): Unit = {
     updates.incr()
     updater(NewList(factories))
   }
@@ -217,29 +218,29 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
     updater(Invoke(fn))
 
   @tailrec
-  private[this] def pick(nodes: Distributor, count: Int): Node = {
+  private[this] def pick(count: Int): Node = {
     if (count == 0)
       return null.asInstanceOf[Node]
 
     val n = dist.pick()
     if (n.factory.status == Status.Open) n
-    else pick(nodes, count-1)
+    else pick(count-1)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-    val d = dist
+    val snap = dist
 
-    var n = pick(d, maxEffort)
-    if (n == null) {
+    var node = pick(maxEffort)
+    if (node == null) {
       maxEffortExhausted.incr()
       rebuild()
-      n = dist.pick()
+      node = dist.pick()
     }
 
-    val f = n(conn)
-    if (d.needsRebuild && d == dist)
+    if (snap.eq(dist) && snap.needsRebuild)
       rebuild()
-    f
+
+    node(conn)
   }
 
   def close(deadline: Time): Future[Unit] = {

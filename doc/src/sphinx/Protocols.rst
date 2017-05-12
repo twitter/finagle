@@ -45,7 +45,7 @@ Using finagle-thrift
 ~~~~~~~~~~~~~~~~~~~~
 
 At Twitter, we use our open-source Thrift code-generator called
-`Scrooge <http://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
+`Scrooge <https://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:
 
 .. literalinclude:: ../../../finagle-example/src/main/thrift/logger.thrift
@@ -71,7 +71,7 @@ A ServiceIface is a collection of Services, one for each Thrift method. Call the
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-call
 
-Thrift services can be combined with :api:`Filters <com.twitter.finagle.Filter$>`.
+Thrift services can be combined with :api:`Filters <com/twitter/finagle/Filter$>`.
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-filters
    :language: scala
@@ -86,13 +86,13 @@ Another way to construct Thrift clients is using the method interface:
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-methodiface
    :language: scala
 
-To convert the Service interface to the method interface use :api:`Thrift.newMethodIface <com.twitter.finagle.Thrift$>`:
+To convert the Service interface to the method interface use :api:`Thrift.newMethodIface <com/twitter/finagle/Thrift$>`:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-method-adapter
    :language: scala
 
 The complete example is at `ThriftServiceIfaceExample.scala <https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala>`_.
-Check out the `finagle-thrift` :api:`API <com.twitter.finagle.Thrift$>`
+Check out the `finagle-thrift` :api:`API <com/twitter/finagle/Thrift$>`
 for more info.
 
 .. _mux:
@@ -164,21 +164,21 @@ transactions while taking advantage of Finagle's :ref:`client stack <client_modu
 connection pooling. The implementation supports both the MySQL binary and string protocols.
 
 A client can be constructed using the
-:api:`Mysql <com.twitter.finagle.Mysql$>` protocol object:
+:api:`Mysql <com/twitter/finagle/Mysql$>` protocol object:
 
 .. includecode:: code/protocols/mysql.scala#client
    :language: scala
 
-We configure the :api:`client's connection pool <com.twitter.finagle.client.DefaultPool>` to be
+We configure the :api:`client's connection pool <com/twitter/finagle/client/DefaultPool>` to be
 compatible with our MySQL server. The constructor returns a Finagle :ref:`ServiceFactory <service_factory>`
-from :api:`mysql.Request <com.twitter.finagle.mysql.Request>` to :api:`mysql.Result <com.twitter.finagle.mysql.Result>`
+from :api:`mysql.Request <com/twitter/finagle/mysql/Request>` to :api:`mysql.Result <com/twitter/finagle/mysql/Result>`
 which we can use to query the db:
 
 .. includecode:: code/protocols/mysql.scala#query0
    :language: scala
 
-A :api:`ResultSet <com.twitter.finagle.mysql.ResultSet>` makes it easy to extract
-:api:`Values <com.twitter.finagle.mysql.Value>` based on column names. For example, we can
+A :api:`ResultSet <com/twitter/finagle/mysql/ResultSet>` makes it easy to extract
+:api:`Values <com/twitter/finagle/mysql/Value>` based on column names. For example, we can
 implement the above `processRow` as a pattern match on expected values:
 
 .. includecode:: code/protocols/mysql.scala#processRow
@@ -196,7 +196,30 @@ and we can select:
    :language: scala
 
 Note that `select` takes care of checking out the service and returning it to the pool. `select` and
-other useful methods are available on :api:`mysql.Client <com.twitter.finagle.mysql.Client>` which is returned
+other useful methods are available on :api:`mysql.Client <com/twitter/finagle/mysql/Client>` which is returned
 from the call to `newRichClient`.
 
 For a more involved example see the Finagle `example project <https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala>`_.
+
+HTTP
+----
+Finagle supports both HTTP/1 and HTTP/2. Details can be found in *finagle-http* and *finagle-http2*.
+
+**Headers**
+
+Finagle sets certain request/response headers to transmit additional metadata.
+
+`Finagle-Ctx-com.twitter.finagle.Retries`
+  The number of times this request has been retried. See :finagle-http-src:`HttpContext.scala <com/twitter/finagle/http/codec/HttpContext.scala>`
+
+`Finagle-Ctx-com.twitter.finagle.Deadline`
+  The time by which this request must be satisfied. See :finagle-http-src:`HttpContext.scala <com/twitter/finagle/http/codec/HttpContext.scala>`
+
+`dtab-local`
+  A list of dtab overrides for this request. See :finagle-http-src:`HttpDtab.scala <com/twitter/finagle/http/codec/HttpDtab.scala>` and :ref:`dtabs <dtabs>`.
+
+`finagle-http-nack`
+  Makes finagle treat this reply as a retryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_
+
+`finagle-http-nonretryable-nack`
+  Makes finagle treat this reply as a nonretryable nack. See `HttpNackFilter.scala <https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala>`_

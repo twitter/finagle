@@ -7,7 +7,6 @@ import com.twitter.finagle.http.Status._
 import com.twitter.io.Buf
 import com.twitter.io.Reader.ReaderDiscarded
 import com.twitter.util.{Await, Future}
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -38,18 +37,18 @@ class ResponseConformanceFilterTest extends FunSuite {
     res.contentLength = 1
 
     val resp = fetchHeadResponse(res)
-    assert(resp.getStatus == HttpResponseStatus.OK)
-    assert(resp.getContent.readableBytes() == 0)
+    assert(resp.status == Status.Ok)
+    assert(resp.content.length == 0)
     assert(!resp.isChunked)
-    assert(resp.headers().get(Fields.ContentLength) == "1")
+    assert(resp.headerMap.get(Fields.ContentLength) == Some("1"))
   }
 
   test("response to HEAD request without content-length") {
     val response = fetchHeadResponse(Response())
-    assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.status == Status.Ok)
+    assert(response.content.length == 0)
     assert(!response.isChunked)
-    assert(response.headers().get(Fields.ContentLength) == null)
+    assert(response.headerMap.get(Fields.ContentLength) == None)
   }
 
   test("response to HEAD request that contains a body") {
@@ -58,10 +57,10 @@ class ResponseConformanceFilterTest extends FunSuite {
     res.content = body
 
     val response = fetchHeadResponse(res)
-    assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.status == Status.Ok)
+    assert(response.content.length == 0)
     assert(!response.isChunked)
-    assert(response.headers().get(Fields.ContentLength) == body.length.toString)
+    assert(response.headerMap.get(Fields.ContentLength) == Some(body.length.toString))
   }
 
   test("response to HEAD request with chunked response lacking a body") {
@@ -70,10 +69,10 @@ class ResponseConformanceFilterTest extends FunSuite {
 
     val response = fetchHeadResponse(res)
 
-    assert(response.getStatus == HttpResponseStatus.OK)
-    assert(response.getContent.readableBytes() == 0)
+    assert(response.status == Status.Ok)
+    assert(response.content.length == 0)
     assert(!response.isChunked) // the pipeline will clear the chunked flag
-    assert(response.headers().get(Fields.ContentLength) == null)
+    assert(response.headerMap.get(Fields.ContentLength) == None)
 
     // Make sure to close the Reader/Writer pair, just in case someone is listening
     intercept[ReaderDiscarded] { Await.result(res.writer.write(Buf.Empty), 5.seconds) }

@@ -3,5 +3,5 @@ Finagle Toggle
 
 This is a module designed to give Finagle, and other libraries,
 ["Feature Toggles"](http://martinfowler.com/articles/feature-toggles.html).
-See the [user guide](http://twitter.github.io/finagle/guide/Configuration.html#feature-toggles)
+See the [user guide](https://twitter.github.io/finagle/guide/Configuration.html#feature-toggles)
 for more details.

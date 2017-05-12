@@ -184,35 +184,38 @@ class TimestampValue(
     var year, month, day, hour, min, sec, micro = 0
     val br = MysqlBuf.reader(bytes)
 
-    // If the len was not zero, we can strictly
-    // expect year, month, and day to be included.
-    if (br.remaining >= 4) {
-      year = br.readUnsignedShortLE()
-      month = br.readUnsignedByte()
-      day = br.readUnsignedByte()
-    } else {
-      return Zero
+    try {
+      // If the len was not zero, we can strictly
+      // expect year, month, and day to be included.
+      if (br.remaining >= 4) {
+        year = br.readUnsignedShortLE()
+        month = br.readUnsignedByte()
+        day = br.readUnsignedByte()
+      } else {
+        return Zero
+      }
+
+      // if the time-part is 00:00:00, it isn't included.
+      if (br.remaining >= 3) {
+        hour = br.readUnsignedByte()
+        min = br.readUnsignedByte()
+        sec = br.readUnsignedByte()
+      }
+
+      // if the sub-seconds are 0, they aren't included.
+      if (br.remaining >= 4) {
+        micro = br.readIntLE()
+      }
+
+      val cal = Calendar.getInstance(timeZone)
+      cal.set(year, month-1, day, hour, min, sec)
+
+      val ts = new Timestamp(0)
+      ts.setTime(cal.getTimeInMillis)
+      ts.setNanos(micro * 1000)
+      ts
     }
-
-    // if the time-part is 00:00:00, it isn't included.
-    if (br.remaining >= 3) {
-      hour = br.readUnsignedByte()
-      min = br.readUnsignedByte()
-      sec = br.readUnsignedByte()
-    }
-
-    // if the sub-seconds are 0, they aren't included.
-    if (br.remaining >= 4) {
-      micro = br.readIntLE()
-    }
-
-    val cal = Calendar.getInstance(timeZone)
-    cal.set(year, month-1, day, hour, min, sec)
-
-    val ts = new Timestamp(0)
-    ts.setTime(cal.getTimeInMillis)
-    ts.setNanos(micro * 1000)
-    ts
+    finally br.close()
   }
 }
 
@@ -300,19 +303,21 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
 
     var year, month, day = 0
     val br = MysqlBuf.reader(bytes)
+    try {
+      if (br.remaining >= 4) {
+        year = br.readUnsignedShortLE()
+        month = br.readUnsignedByte()
+        day = br.readUnsignedByte()
+      } else {
+        return Zero
+      }
 
-    if (br.remaining >= 4) {
-      year = br.readUnsignedShortLE()
-      month = br.readUnsignedByte()
-      day = br.readUnsignedByte()
-    } else {
-      return Zero
+      val cal = Calendar.getInstance
+      cal.set(year, month-1, day)
+
+      new Date(cal.getTimeInMillis)
     }
-
-    val cal = Calendar.getInstance
-    cal.set(year, month-1, day)
-
-    new Date(cal.getTimeInMillis)
+    finally br.close()
   }
 }
 

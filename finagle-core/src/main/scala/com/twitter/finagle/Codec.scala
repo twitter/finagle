@@ -59,17 +59,25 @@ trait Codec[Req, Rep] {
   def newClientDispatcher(
     transport: Transport[Any, Any],
     params: Stack.Params
-  ): Service[Req, Rep] =
+  ): Service[Req, Rep] = {
+    // In order to not break the Netty 3 API, we provide some 'alternative facts'
+    // and continue without our dynamic check
+    val clazz = classOf[Any].asInstanceOf[Class[Rep]]
     new SerialClientDispatcher(
-      Transport.cast[Req, Rep](transport),
+      Transport.cast[Req, Rep](clazz, transport),
       params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
     )
+  }
 
   def newServerDispatcher(
     transport: Transport[Any, Any],
     service: Service[Req, Rep]
-  ): Closable =
-    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](transport), service)
+  ): Closable = {
+    // In order to not break the Netty 3 API, we provide some 'alternative facts'
+    // and continue without our dynamic check
+    val clazz = classOf[Any].asInstanceOf[Class[Req]]
+    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](clazz, transport), service)
+  }
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

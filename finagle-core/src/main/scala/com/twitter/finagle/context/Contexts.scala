@@ -32,9 +32,9 @@ object Contexts {
    * request may create a "background Future-loop" which should
    * not capture these request scoped values.
    */
-  def letClear[R](fn: => R): R =
-    local.letClear() {
-      broadcast.letClear() {
+  def letClearAll[R](fn: => R): R =
+    local.letClearAll {
+      broadcast.letClearAll {
         fn
       }
     }

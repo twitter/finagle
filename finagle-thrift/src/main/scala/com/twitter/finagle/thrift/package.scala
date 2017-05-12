@@ -12,10 +12,10 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  * ==Thrift codecs==
  *
  * We provide client and server protocol support for the framed protocol.
- * The public implementations are:
+ * The public implementations are defined on the Thrift object:
  *
- *  - [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
- *  - [[com.twitter.finagle.thrift.ThriftServerFramedCodec]]
+ *  - [[com.twitter.finagle.Thrift.client]]
+ *  - [[com.twitter.finagle.Thrift.server]]
  *
  * The type of the server codec is `Service[Array[Byte], Array[Byte]]`
  * and the client codecs are `Service[ThriftClientRequest,
@@ -30,7 +30,7 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  * {{{
  * val service: Service[ThriftClientRequest, Array[Byte]] = ClientBuilder()
  *   .hosts("foobar.com:123")
- *   .codec(ThriftClientFramedCodec())
+ *   .stack(Thrift.client)
  *   .build()
  *
  * // Wrap the raw Thrift transport in a Client decorator. The client

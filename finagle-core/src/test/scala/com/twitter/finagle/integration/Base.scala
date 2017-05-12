@@ -9,7 +9,7 @@ import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
 ChannelPipelineFactory, Channels, DefaultChannelConfig}
 import org.mockito.Matchers._
@@ -97,7 +97,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     val clientBuilder = ClientBuilder()
       .name(name)
       .codec(codecFactory)
-      .channelFactory(channelFactory)
+      .configured(Netty3Transporter.ChannelFactory(channelFactory))
       .daemon(true) // don't create an exit guard
       .hosts(Seq(clientAddress))
       .reportTo(statsReceiver)
@@ -117,8 +117,8 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       type In = String
       type Out = String
 
-      def newTransporter(): Transporter[String, String] = {
-        Netty3Transporter[String, String](clientPipelineFactory, params)
+      def newTransporter(addr: SocketAddress): Transporter[String, String] = {
+        Netty3Transporter[String, String](clientPipelineFactory, addr, params)
       }
 
       def newDispatcher(transport: Transport[In, Out]): Service[String, String] =

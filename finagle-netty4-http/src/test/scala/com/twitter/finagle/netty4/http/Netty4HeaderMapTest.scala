@@ -1,14 +1,16 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.http.{HeaderMap => FinagleHeaders}
+import com.twitter.finagle.http.{AbstractHeaderMapTest, HeaderMap => FinagleHeaders}
 import io.netty.handler.codec.http.{DefaultHttpHeaders => NettyHeaders}
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
-class Netty4HeaderMapTest extends FunSuite {
+class Netty4HeaderMapTest extends AbstractHeaderMapTest {
+
+  override def newHeaderMap(headers: (String, String)*): FinagleHeaders = {
+    val netty = new NettyHeaders()
+    headers.foreach { case (k, v) => netty.add(k, v) }
+    new Netty4HeaderMap(netty)
+  }
 
   test("Netty4HeaderMap proxies updates and reads to netty headers") {
     val netty = new NettyHeaders()
@@ -24,6 +26,8 @@ class Netty4HeaderMapTest extends FunSuite {
     assert(wrapper.values.toSet == Set("bar", "val", "something"))
     assert(wrapper.getAll("key") == Seq("val"))
     assert(wrapper.getAll("qux") == Seq("something"))
+    assert(wrapper.getOrNull("qux") == "something")
+    assert(wrapper.getOrNull("missing") == null)
     assert(netty.get("qux") == "something")
 
     assert(wrapper.remove("foo") == Some("bar"))

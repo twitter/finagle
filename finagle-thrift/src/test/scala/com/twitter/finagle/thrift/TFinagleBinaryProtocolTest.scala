@@ -7,13 +7,12 @@ import java.nio.ByteBuffer
 import org.apache.thrift.transport.TMemoryBuffer
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with ShouldMatchers {
+class TFinagleBinaryProtocolTest extends FunSuite with BeforeAndAfter with Matchers {
 
   private val NullCounter = NullStatsReceiver.counter("")
 

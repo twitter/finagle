@@ -1,13 +1,13 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.{Filter, Service, SimpleFilter, ThriftMux}
+import com.twitter.finagle.ThriftMux
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.benchmark.thriftscala._
 import com.twitter.util.{Await, Future}
 import com.twitter.finagle.param
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.NullTracer
-import org.openjdk.jmh.annotations.{Benchmark, Setup, Scope, State}
+import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
 
 /**
  * Thrift client allocations benchmark.

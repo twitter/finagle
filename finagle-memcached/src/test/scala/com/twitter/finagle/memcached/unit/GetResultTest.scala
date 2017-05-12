@@ -2,11 +2,11 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import scala.collection.immutable
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
+import scala.collection.immutable
 
 @RunWith(classOf[JUnitRunner])
 class GetResultTest extends FunSuite with MockitoSugar {
@@ -50,14 +50,12 @@ class GetResultTest extends FunSuite with MockitoSugar {
 
   test("merged of empty seq produces empty GetResult") {
     val context = new Context
-    import context._
 
     assert(GetResult.merged(Seq[GetResult]()) == GetResult())
   }
 
   test("merged of single item produces that item") {
     val context = new Context
-    import context._
 
     val getResult = GetResult()
     assert(GetResult.merged(Seq(getResult)) == getResult)
@@ -65,7 +63,6 @@ class GetResultTest extends FunSuite with MockitoSugar {
 
   test("merge is the same as ++") {
     val context = new Context
-    import context._
 
     val subResults = (1 to 10) map { i =>
       GetResult(

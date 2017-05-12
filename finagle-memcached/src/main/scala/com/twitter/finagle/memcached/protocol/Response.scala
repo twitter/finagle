@@ -11,7 +11,7 @@ case class Deleted()                      extends Response
 case class Error(cause: Exception)        extends Response
 case class NoOp()                         extends Response
 
-case class Info(key: Buf, values: Seq[Buf]) extends Response
+case class Info(key: Buf, values: Seq[Buf])
 case class InfoLines(lines: Seq[Info]) extends Response
 
 case class Values(values: Seq[Value])     extends Response

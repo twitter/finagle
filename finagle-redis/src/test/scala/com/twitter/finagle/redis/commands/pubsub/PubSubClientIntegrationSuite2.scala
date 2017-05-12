@@ -122,7 +122,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       val masterAddr = master.address.get
       result(client.slaveOf(Buf.Utf8(masterAddr.getHostString), Buf.Utf8(masterAddr.getPort.toString)))
       waitUntil("master-slave replication") {
-        val status = b2s(result(client.info(StringToBuf("replication"))).get)
+        val status = b2s(result(client.info(Buf.Utf8("replication"))).get)
           .split("\n")
           .map(_.trim)
           .find(_.startsWith("master_link_status:"))

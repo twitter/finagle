@@ -5,7 +5,7 @@ import com.twitter.finagle.netty3.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
 import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
 import com.twitter.finagle.param.Label
-import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
@@ -160,17 +160,17 @@ class Netty3ListenerTest extends FunSuite with MockitoSugar {
     assert(sslHandler.isEmpty)
   }
 
-  test("SslHandler is not added if the TLSServerEngine param is None") {
-    val params = Stack.Params.empty + Label("name") + Transport.TLSServerEngine(None)
+  test("SslHandler is not added if the SSL/TLS server configuration param is None") {
+    val params = Stack.Params.empty + Label("name") + Transport.ServerSsl(None)
     val pipeline = makeListenerPipeline(params)
     val sslHandler = findHandlerInPipeline[SslHandler](pipeline)
     assert(sslHandler.isEmpty)
   }
 
-  test("SslHandler is added if the TLSServerEngine param is configured") {
+  test("SslHandler is added if the SSL/TLS server configuration param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
-      Transport.TLSServerEngine(Some(() => new Engine(engine)))
+      Transport.ServerSsl(Some(SslServerConfiguration()))
     val pipeline = makeListenerPipeline(params)
     val sslHandler = findHandlerInPipeline[SslHandler](pipeline)
     assert(sslHandler.nonEmpty)
@@ -183,17 +183,17 @@ class Netty3ListenerTest extends FunSuite with MockitoSugar {
     assert(sslConnectionHandler.isEmpty)
   }
 
-  test("SslListenerConnectionHandler is not added if the TLSServerEngine param is None") {
-    val params = Stack.Params.empty + Label("name") + Transport.TLSServerEngine(None)
+  test("SslListenerConnectionHandler is not added if the SSL/TLS server config param is None") {
+    val params = Stack.Params.empty + Label("name") + Transport.ServerSsl(None)
     val pipeline = makeListenerPipeline(params)
     val sslConnectionHandler = findHandlerInPipeline[SslListenerConnectionHandler](pipeline)
     assert(sslConnectionHandler.isEmpty)
   }
 
-  test("SslListenerConnectionHandler is added if the TLSServerEngine param is configured") {
+  test("SslListenerConnectionHandler is added if the SSL/TLS server config param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
-      Transport.TLSServerEngine(Some(() => new Engine(engine)))
+      Transport.ServerSsl(Some(SslServerConfiguration()))
     val pipeline = makeListenerPipeline(params)
     val sslConnectionHandler = findHandlerInPipeline[SslListenerConnectionHandler](pipeline)
     assert(sslConnectionHandler.nonEmpty)

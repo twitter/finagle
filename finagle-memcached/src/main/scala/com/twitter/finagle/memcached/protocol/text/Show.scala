@@ -1,26 +1,20 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.{Command => _, _}
 import com.twitter.io.Buf
-import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel._
 
 /**
  * Class that can encode `Command`-type objects into `Decoding`s. Used on the client side.
  */
-private[finagle] abstract class AbstractCommandToEncoding[Command <: AnyRef] extends OneToOneEncoder {
+private[finagle] abstract class AbstractCommandToEncoding[Command] {
 
-  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding
-
-  def encode(message: Command): Decoding =
-    encode(null, null, message)
+  def encode(message: Command): Decoding
 }
 
 /**
  * Used by the server.
  */
-private[finagle] class ResponseToEncoding extends OneToOneEncoder {
+private[finagle] class ResponseToEncoding {
   private[this] val ZERO          = Buf.Utf8("0")
   private[this] val VALUE         = Buf.Utf8("VALUE")
 
@@ -30,7 +24,7 @@ private[finagle] class ResponseToEncoding extends OneToOneEncoder {
   private[this] val NOT_FOUND     = Buf.Utf8("NOT_FOUND")
   private[this] val DELETED       = Buf.Utf8("DELETED")
 
-  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
+  def encode(message: Response): Decoding = message match {
     case Stored()       => Tokens(Seq(STORED))
     case NotStored()    => Tokens(Seq(NOT_STORED))
     case Exists()       => Tokens(Seq(EXISTS))
@@ -62,7 +56,7 @@ private[finagle] class ResponseToEncoding extends OneToOneEncoder {
 /**
  * Used by the client.
  */
-private[finagle] class CommandToEncoding[Command <: AnyRef] extends AbstractCommandToEncoding[Command] {
+private[finagle] class CommandToEncoding[Command] extends AbstractCommandToEncoding[Command] {
   private[this] val GET = Buf.Utf8("get")
   private[this] val GETS = Buf.Utf8("gets")
   private[this] val DELETE = Buf.Utf8("delete")
@@ -87,7 +81,7 @@ private[finagle] class CommandToEncoding[Command <: AnyRef] extends AbstractComm
   private[this] def intToUtf8(i: Int): Buf =
     if (i == 0) ZeroBuf else Buf.Utf8(i.toString)
 
-  def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
+  def encode(message: Command): Decoding = message match {
     case Add(key, flags, expiry, value) =>
       TokensWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Set(key, flags, expiry, value) =>
@@ -117,13 +111,6 @@ private[finagle] class CommandToEncoding[Command <: AnyRef] extends AbstractComm
     case Stats(args) => Tokens(STATS +: args)
     case Quit() =>
       Tokens(Seq(QUIT))
-  }
-}
-
-class ExceptionHandler extends SimpleChannelUpstreamHandler {
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) = {
-    val formatted = ExceptionHandler.formatWithEol(e.getCause)
-    Channels.write(ctx.getChannel, ChannelBuffers.copiedBuffer(formatted:_*))
   }
 }
 

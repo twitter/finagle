@@ -32,14 +32,14 @@ class PoolBench extends StdBenchAnnotations {
   @Setup
   def loadPools() {
     watermark = new WatermarkPool(underlying, lowWatermark = 1, highWatermark = poolSize)
-    cache = new CachingPool(underlying, poolSize, Duration.Top, DefaultTimer.twitter)
+    cache = new CachingPool(underlying, poolSize, Duration.Top, DefaultTimer)
     buffer = new BufferingPool(underlying, poolSize)
     composed = new WatermarkPool(
       new CachingPool(
         new BufferingPool(underlying, poolSize),
         poolSize,
         Duration.Top,
-        DefaultTimer.twitter
+        DefaultTimer
       ),
       lowWatermark = 1,
       highWatermark = poolSize

@@ -3,14 +3,11 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle.ServiceFactory
 
 /**
- * The base type of nodes over which load is balanced.
- * Nodes define the load metric that is used; distributors
- * like P2C will use these to decide where to balance
- * the next request.
+ * The base type of nodes over which load is balanced. [[NodeT]]s define the
+ * load metric that is used. [[DistributorT]]'s will use these to decide
+ * where to balance the next request.
  */
-protected[loadbalancer] trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
-  type This
-
+private trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
   /**
    * The current load, in units of the active metric.
    */
@@ -22,13 +19,7 @@ protected[loadbalancer] trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
   def pending: Int
 
   /**
-   * A token is a random integer identifying the node.
-   * It persists through node updates.
-   */
-  def token: Int
-
-  /**
-   * The underlying service factory.
+   * The underlying service factory which this node proxies to.
    */
   def factory: ServiceFactory[Req, Rep]
 }

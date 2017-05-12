@@ -1,8 +1,9 @@
 package com.twitter.finagle.http
 
-import com.twitter.util.{Await, Promise, Future}
-import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.ssl.client.SslClientConfiguration
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
+import com.twitter.util.{Await, Promise, Future}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -31,7 +32,8 @@ class TlsFilterTest extends FunSuite {
     val p = new Promise[Request]
     val stk = TlsFilter.module.toStack(
       Stack.Leaf(TlsFilter.role, ServiceFactory.const(svc(p))))
-    val fac = stk.make(Stack.Params.empty + Transporter.TLSHostname(Some(host)))
+    val fac = stk.make(Stack.Params.empty + Transport.ClientSsl(
+      Some(SslClientConfiguration(hostname = Some(host)))))
     Await.result(fac())(Request(Http11, Get, "/"))
     assert(Await.result(p).headerMap.get("Host") == Some(host))
   }

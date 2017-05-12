@@ -1,11 +1,13 @@
-junit_tests(name='java',
+junit_tests(
   dependencies=[
-    '3rdparty/jvm/junit',
+    '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/junit',
     'finagle/finagle-core',
     'util/util-core',
-    '3rdparty/jvm/com/google/guava:guava',
+    'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
+    'util/util-tunable/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
   fatal_warnings=True,

@@ -148,21 +148,23 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  ignore("Correctly perform an hscan operation", RedisTest, ClientTest) {
+  test("Correctly perform an hscan operation", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.hSet(bufFoo, bufBar, bufBaz))
-      Await.result(client.hSet(bufFoo, bufBoo, bufMoo))
+      Await.result(client.hSet(bufFoo, bufBar, bufBaz), TIMEOUT)
+      Await.result(client.hSet(bufFoo, bufBoo, bufMoo), TIMEOUT)
+
       val res = Await.result(client.hScan(bufFoo, 0L, None, None), TIMEOUT)
-      assert(BufToString(res(1)) == "bar")
+      val resList = res.flatMap(Buf.Utf8.unapply)
+      assert(resList == Seq("0", "bar", "baz", "boo", "moo"))
+
       val withCount = Await.result(client.hScan(bufFoo, 0L, Some(2L), None), TIMEOUT)
-      assert(BufToString(withCount(0)) == "0")
-      assert(BufToString(withCount(1)) == "bar")
-      assert(BufToString(withCount(2)) == "boo")
-      val pattern = Buf.Utf8("b*")
+      val withCountList = withCount.flatMap(Buf.Utf8.unapply)
+      assert(withCountList == Seq("0", "bar", "baz", "boo", "moo"))
+
+      val pattern = Buf.Utf8("bo*")
       val withPattern = Await.result(client.hScan(bufFoo, 0L, None, Some(pattern)), TIMEOUT)
-      assert(BufToString(withCount(0)) == "0")
-      assert(BufToString(withCount(1)) == "bar")
-      assert(BufToString(withCount(2)) == "boo")
+      val withMatchList = withPattern.flatMap(Buf.Utf8.unapply)
+      assert(withMatchList == Seq("0", "boo", "moo"))
     }
   }
 }

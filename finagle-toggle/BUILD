@@ -1,4 +1,4 @@
-target(name='finagle-toggle',
+target(
   dependencies=[
     'finagle/finagle-toggle/src/main/scala'
   ]

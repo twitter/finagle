@@ -1,9 +1,10 @@
 package com.twitter.finagle.mysql
 
 import com.twitter.finagle.mysql.transport.MysqlBuf
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import java.sql.Timestamp
 import java.util.TimeZone
+import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -53,14 +54,14 @@ class TimestampValueTest extends FunSuite {
   test("decode text timestamp with binary character set") {
     val str = "2015-01-02 03:04:05.67890"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(Charsets.UsAscii))
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(US_ASCII))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 
   test("decode text timestamp with utf8_general_ci character set") {
     val str = "2015-01-02 03:04:05.67890"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(Charsets.Utf8))
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(UTF_8))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 

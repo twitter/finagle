@@ -2,12 +2,12 @@ package com.twitter.finagle.thrift.transport.netty4
 
 import com.twitter.finagle.{Stack, Thrift}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.{DirectToHeapInboundHandlerName, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.logging.Logger
 import io.netty.channel.ChannelPipeline
+import java.net.SocketAddress
 
 
 /**
@@ -20,28 +20,30 @@ import io.netty.channel.ChannelPipeline
 
 private[finagle] object Netty4Transport {
 
-  private[this] val logger = Logger.get(this.getClass)
-
-  val Client: Stack.Params => Transporter[ThriftClientRequest, Array[Byte]] = { params =>
-    val pipeline = { pipeline: ChannelPipeline =>
-      addFramerAtLast(pipeline, params)
-      pipeline.addLast("clientByteCodec", ClientByteBufCodec())
-      ()
+  val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit =
+    { params: Stack.Params =>
+      { pipeline: ChannelPipeline =>
+        addFramerAtLast(pipeline, params)
+        pipeline.addLast("clientByteCodec", ClientByteBufCodec())
+        ()
+      }
     }
 
-    Netty4Transporter(pipeline, params)
+  val Client: Stack.Params => SocketAddress => Transporter[ThriftClientRequest, Array[Byte]] = { params =>
+    Netty4Transporter.raw(ClientPipelineInit(params), _, params)
   }
 
-  val Server: Stack.Params => Listener[Array[Byte], Array[Byte]] = { params =>
-    val Thrift.param.Framed(framed) = params[Thrift.param.Framed]
-
-    val pipeline ={ pipeline: ChannelPipeline =>
-      addFramerAtLast(pipeline, params)
-      pipeline.addLast("serverByteCodec", ServerByteBufCodec())
-      ()
+  val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit =
+    { params =>
+      { pipeline: ChannelPipeline =>
+        addFramerAtLast(pipeline, params)
+        pipeline.addLast("serverByteCodec", ServerByteBufCodec())
+        ()
+      }
     }
 
-    Netty4Listener[Array[Byte], Array[Byte]](pipeline,
+  val Server: Stack.Params => Listener[Array[Byte], Array[Byte]] = { params =>
+    Netty4Listener[Array[Byte], Array[Byte]](ServerPipelineInit(params),
       if (params.contains[Label]) params else params + Label("thrift"))
   }
 
@@ -54,14 +56,6 @@ private[finagle] object Netty4Transport {
       // use the buffered transport framer
       val Thrift.param.ProtocolFactory(protocolFactory) = params[Thrift.param.ProtocolFactory]
       pipeline.addLast("thriftBufferDecoder", new ThriftBufferedTransportDecoder(protocolFactory))
-    }
-
-    // We don't need it because all the netty `ByteBuf` types will be released by
-    // the `Array[Byte]` codecs
-    try pipeline.remove(DirectToHeapInboundHandlerName)
-    catch { case _: NoSuchElementException =>
-      logger.info("Expected DirectToHeapInboundHandler in the netty4 channel pipeline, " +
-        "but it didn't exist.")
     }
   }
 }

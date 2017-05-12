@@ -15,7 +15,12 @@ import org.scalatest.FunSuite
 class AdapterProxyChannelHandlerTest extends FunSuite {
   val moon = Unpooled.copiedBuffer("goodnight moon", StandardCharsets.UTF_8)
   val stars = Unpooled.copiedBuffer("goodnight stars", StandardCharsets.UTF_8)
-  val fullRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com", moon)
+  val fullRequest = new DefaultFullHttpRequest(
+    HttpVersion.HTTP_1_1,
+    HttpMethod.GET,
+    "twitter.com",
+    moon
+  )
   val fullResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, moon)
   val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
   val dataReq = new DefaultHttpContent(moon)
@@ -191,7 +196,11 @@ class Disaggregator extends ChannelDuplexHandler {
   override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
     msg match {
       case fullReq: FullHttpRequest =>
-        val req = new DefaultHttpRequest(fullReq.getProtocolVersion, fullReq.getMethod, fullReq.getUri)
+        val req = new DefaultHttpRequest(
+          fullReq.getProtocolVersion,
+          fullReq.getMethod,
+          fullReq.getUri
+        )
         val data = new DefaultHttpContent(fullReq.content)
         val combiner = new PromiseCombiner()
         val reqP = ctx.newPromise()
@@ -207,7 +216,11 @@ class Disaggregator extends ChannelDuplexHandler {
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
     msg match {
       case fullReq: FullHttpRequest =>
-        val req = new DefaultHttpRequest(fullReq.getProtocolVersion, fullReq.getMethod, fullReq.getUri)
+        val req = new DefaultHttpRequest(
+          fullReq.getProtocolVersion,
+          fullReq.getMethod,
+          fullReq.getUri
+        )
         val data = new DefaultHttpContent(fullReq.content)
         ctx.fireChannelRead(req)
         ctx.fireChannelRead(data)

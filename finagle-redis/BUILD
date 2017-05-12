@@ -1,4 +1,4 @@
-target(name='finagle-redis',
+target(
   dependencies=[
     'finagle/finagle-redis/src/main/scala'
   ]

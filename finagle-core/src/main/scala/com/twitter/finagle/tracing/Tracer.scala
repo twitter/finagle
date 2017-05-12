@@ -62,8 +62,15 @@ object Annotation {
 }
 
 object Tracer {
-  // Deprecated.
-  type Factory = () => Tracer
+  /**
+   * Useful constant for the return value of [[Tracer.sampleTrace]]
+   */
+  val SomeTrue: Option[Boolean] = Some(true)
+
+  /**
+   * Useful constant for the return value of [[Tracer.sampleTrace]]
+   */
+  val SomeFalse: Option[Boolean] = Some(false)
 }
 
 /**
@@ -83,6 +90,8 @@ trait Tracer {
    * True: keep it
    * False: false throw the data away
    * None: i'm going to defer making a decision on this to the child service
+   *
+   * @see [[Tracer.SomeTrue]] and [[Tracer.SomeFalse]] as constant return values.
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
 
@@ -108,8 +117,10 @@ trait Tracer {
     }
 }
 
+/**
+ * A no-op [[Tracer]].
+ */
 class NullTracer extends Tracer {
-  val factory: Tracer.Factory = () => this
   def record(record: Record): Unit = ()
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
   override def isNull: Boolean = true
@@ -117,14 +128,27 @@ class NullTracer extends Tracer {
   override def toString: String = "NullTracer"
 }
 
+/**
+ * A singleton instance of a no-op [[NullTracer]].
+ */
 object NullTracer extends NullTracer
 
 object BroadcastTracer {
-  def apply(tracers: Seq[Tracer]): Tracer = tracers.filterNot(_ == NullTracer) match {
+
+  def apply(tracers: Seq[Tracer]): Tracer = tracers.filterNot(_.isNull) match {
     case Seq() => NullTracer
     case Seq(tracer) => tracer
     case Seq(first, second) => new Two(first, second)
+    case Seq(first, second, third) => new Three(first, second, third)
     case _ => new N(tracers)
+  }
+
+  // cheaper than calling `o.contains(b)` as it avoids the allocations from boxing
+  private def containsBool(b: Boolean, o: Option[Boolean]): Boolean = {
+    o match {
+      case Some(v) => b == v
+      case None => false
+    }
   }
 
   private class Two(first: Tracer, second: Tracer) extends Tracer {
@@ -137,18 +161,63 @@ object BroadcastTracer {
     }
 
     def sampleTrace(traceId: TraceId): Option[Boolean] = {
-      val sampledByFirst = first.sampleTrace(traceId)
-      val sampledBySecond = second.sampleTrace(traceId)
-      if (sampledByFirst == Some(true) || sampledBySecond == Some(true))
-        Some(true)
-      else if (sampledByFirst == Some(false) && sampledBySecond == Some(false))
-        Some(false)
-      else
-        None
+      val firstSample = first.sampleTrace(traceId)
+      if (containsBool(true, firstSample)) {
+        Tracer.SomeTrue
+      } else {
+        val secondSample = second.sampleTrace(traceId)
+        if (containsBool(true, secondSample)) {
+          Tracer.SomeTrue
+        } else if (containsBool(false, firstSample) && containsBool(false, secondSample)) {
+          Tracer.SomeFalse
+        } else {
+          None
+        }
+      }
     }
 
     override def isActivelyTracing(traceId: TraceId): Boolean =
       first.isActivelyTracing(traceId) || second.isActivelyTracing(traceId)
+  }
+
+  private class Three(
+      first: Tracer,
+      second: Tracer,
+      third: Tracer)
+    extends Tracer {
+    override def toString: String =
+      s"BroadcastTracer($first, $second, $third)"
+
+    def record(record: Record): Unit = {
+      first.record(record)
+      second.record(record)
+      third.record(record)
+    }
+
+    def sampleTrace(traceId: TraceId): Option[Boolean] = {
+      val s1 = first.sampleTrace(traceId)
+      if (containsBool(true, s1))
+        return Tracer.SomeTrue
+      val s2 = second.sampleTrace(traceId)
+      if (containsBool(true, s2))
+        return Tracer.SomeTrue
+      val s3 = third.sampleTrace(traceId)
+      if (containsBool(true, s3))
+        return Tracer.SomeTrue
+
+      if (containsBool(false, s1) &&
+          containsBool(false, s2) &&
+          containsBool(false, s3)) {
+        Tracer.SomeFalse
+      } else {
+        None
+      }
+    }
+
+    override def isActivelyTracing(traceId: TraceId): Boolean =
+      first.isActivelyTracing(traceId) ||
+        second.isActivelyTracing(traceId) ||
+        third.isActivelyTracing(traceId)
   }
 
   private class N(tracers: Seq[Tracer]) extends Tracer {
@@ -157,14 +226,14 @@ object BroadcastTracer {
       s"BroadcastTracer(${tracers.mkString(", ")})"
 
     def record(record: Record): Unit = {
-      tracers foreach { _.record(record) }
+      tracers.foreach { _.record(record) }
     }
 
     def sampleTrace(traceId: TraceId): Option[Boolean] = {
-      if (tracers exists { _.sampleTrace(traceId) == Some(true) })
-        Some(true)
-      else if (tracers forall { _.sampleTrace(traceId) == Some(false) })
-        Some(false)
+      if (tracers.exists { t => containsBool(true, t.sampleTrace(traceId)) })
+        Tracer.SomeTrue
+      else if (tracers.forall { t => containsBool(false, t.sampleTrace(traceId)) })
+        Tracer.SomeFalse
       else
         None
     }
@@ -185,12 +254,14 @@ object DefaultTracer extends Tracer with Proxy {
   @volatile var self: Tracer = BroadcastTracer(tracers)
 
   def record(record: Record): Unit =
-    if (self == null) () else self.record(record)
+    if (self != null)
+      self.record(record)
 
   def sampleTrace(traceId: TraceId): Option[Boolean] =
-    if (self == null) None else self.sampleTrace(traceId)
+    if (self == null) None
+    else self.sampleTrace(traceId)
 
-  val get = this
+  val get: DefaultTracer.type = this
 
   override def isActivelyTracing(traceId: TraceId): Boolean =
     self != null && self.isActivelyTracing(traceId)
@@ -219,8 +290,6 @@ class BufferingTracer extends Tracer
 }
 
 object ConsoleTracer extends Tracer {
-  val factory: Tracer.Factory = () => this
-
   def record(record: Record): Unit = {
     println(record)
   }

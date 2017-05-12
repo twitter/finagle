@@ -12,7 +12,7 @@ private[finagle] object Netty4ServerFramer extends (ChannelPipeline => Unit) {
   import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 
   def apply(pipeline: ChannelPipeline): Unit = {
-    pipeline.addLast("endec", new BufCodec)
+    pipeline.addLast("endec", BufCodec)
     pipeline.addLast("framer", new FrameHandler(new ServerFramer(StorageCommands)))
   }
 }
@@ -24,7 +24,7 @@ private[finagle] object Netty4ClientFramer extends (ChannelPipeline => Unit) {
   import com.twitter.finagle.memcached.protocol.text.client.ClientFramer
 
   def apply(pipeline: ChannelPipeline): Unit = {
-    pipeline.addLast("endec", new BufCodec)
+    pipeline.addLast("endec", BufCodec)
     pipeline.addLast("framer", new FrameHandler(new ClientFramer))
   }
 }

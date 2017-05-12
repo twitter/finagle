@@ -44,8 +44,8 @@ private[netty4] class Netty4FramedServerChannelInitializer(
       pipeline.addLast(ReadTimeoutHandlerKey, new ReadTimeoutHandler(timeoutValue, timeoutUnit))
     }
 
-    channelRequestStatsHandler.foreach(pipeline.addLast("channel request stats handler", _))
+    channelRequestStatsHandler.foreach(pipeline.addLast("channelRequestStatsHandler", _))
 
-    pipeline.addLast("exception handler", exceptionHandler)
+    pipeline.addLast("exceptionHandler", exceptionHandler)
   }
 }

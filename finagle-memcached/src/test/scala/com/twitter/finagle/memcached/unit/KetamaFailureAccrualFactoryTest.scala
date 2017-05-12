@@ -3,9 +3,9 @@ package com.twitter.finagle.memcached.unit
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.liveness.FailureAccrualPolicy
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.service.{Backoff, ResponseClassifier}
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Future, MockTimer, Time}
 import org.junit.runner.RunWith
@@ -14,7 +14,7 @@ import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {

@@ -1,7 +1,6 @@
-target(name='finagle-mux',
+target(
   dependencies=[
     'finagle/finagle-mux/src/main/scala',
-    'finagle/finagle-mux/src/main/java'
   ]
 )
 

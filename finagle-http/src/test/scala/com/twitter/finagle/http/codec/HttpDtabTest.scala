@@ -38,8 +38,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("Dtab-Local: read multiple, with commas") {
     val m = newMsg()
-    m.headers.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
-    m.headers.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
+    m.headerMap.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
+    m.headerMap.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
     val expected = Dtab.read(
       "/srv#/prod/local/role => /$/fail;"+
       "/srv => /srv#/staging;"+
@@ -51,10 +51,10 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("Dtab-Local takes precedence over X-Dtab") {
     val m = newMsg()
-    m.headers.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
-    m.headers.add("X-Dtab-01-A", b64Encode("/srv"))
-    m.headers.add("X-Dtab-01-B", b64Encode("/$/nil"))
-    m.headers.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
+    m.headerMap.add("Dtab-Local", "/srv#/prod/local/role=>/$/fail;/srv=>/srv#/staging")
+    m.headerMap.add("X-Dtab-01-A", b64Encode("/srv"))
+    m.headerMap.add("X-Dtab-01-B", b64Encode("/$/nil"))
+    m.headerMap.add("Dtab-Local", "/srv/local=>/srv/other,/srv=>/srv#/devel")
     val expected = Dtab.read(
       "/srv => /$/nil;"+
       "/srv#/prod/local/role => /$/fail;"+
@@ -81,8 +81,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid: no shared prefix") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "a")
-    m.headers.set("X-Dtab-02-B", "a")
+    m.headerMap.set("X-Dtab-01-A", "a")
+    m.headerMap.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Unmatched X-Dtab headers")
@@ -90,8 +90,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid prefix") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "L2ZvbyA9PiAvZmFy") // /foo => /far
-    m.headers.set("X-Dtab-01-B", "L2Zhcg==") // /far
+    m.headerMap.set("X-Dtab-01-A", "L2ZvbyA9PiAvZmFy") // /foo => /far
+    m.headerMap.set("X-Dtab-01-B", "L2Zhcg==") // /far
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Invalid prefix: /foo => /far")
@@ -99,8 +99,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid name") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "L2Zvbw==") // foo
-    m.headers.set("X-Dtab-01-B", "L2ZvbyA9PiAvZmFy") // /foo => /far
+    m.headerMap.set("X-Dtab-01-A", "L2Zvbw==") // foo
+    m.headerMap.set("X-Dtab-01-B", "L2ZvbyA9PiAvZmFy") // /foo => /far
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Invalid name: /foo => /far")
@@ -108,9 +108,9 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid: missing entry") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "a")
-    m.headers.set("X-Dtab-01-B", "a")
-    m.headers.set("X-Dtab-02-B", "a")
+    m.headerMap.set("X-Dtab-01-A", "a")
+    m.headerMap.set("X-Dtab-01-B", "a")
+    m.headerMap.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Unmatched X-Dtab headers")
@@ -118,8 +118,8 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
   test("X-Dtab: Invalid: non-ASCII encoding") {
     val m = newMsg()
-    m.headers.set("X-Dtab-01-A", "☺")
-    m.headers.set("X-Dtab-01-B", "☹")
+    m.headerMap.set("X-Dtab-01-A", "☺")
+    m.headerMap.set("X-Dtab-01-B", "☹")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
     assert(failure.why == "Value not b64-encoded: ☺")
@@ -128,11 +128,11 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
   test("clear()") {
     val m = newMsg()
     HttpDtab.write(Dtab.read("/srv=>/srv#/staging"), m)
-    m.headers.set("X-Dtab-00-A", b64Encode("/a"))
-    m.headers.set("X-Dtab-00-B", b64Encode("/b"))
-    m.headers.set("X-Dtab-01-A", b64Encode("/a"))
-    m.headers.set("X-Dtab-01-B", b64Encode("/c"))
-    m.headers.set("onetwothree", "123")
+    m.headerMap.set("X-Dtab-00-A", b64Encode("/a"))
+    m.headerMap.set("X-Dtab-00-B", b64Encode("/b"))
+    m.headerMap.set("X-Dtab-01-A", b64Encode("/a"))
+    m.headerMap.set("X-Dtab-01-B", b64Encode("/c"))
+    m.headerMap.set("onetwothree", "123")
 
     val headers = Seq(
       "X-Dtab-00-A", "X-Dtab-00-B",
@@ -140,15 +140,15 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
       "Dtab-Local")
 
     for (h <- headers)
-      assert(m.headers.contains(h), h+" not in headers")
+      assert(m.headerMap.contains(h), h+" not in headers")
 
-    assert(m.headers.contains("onetwothree"), "onetwothree not in headers")
+    assert(m.headerMap.contains("onetwothree"), "onetwothree not in headers")
 
     HttpDtab.clear(m)
 
-    assert(m.headers.contains("onetwothree"), "onetwothree was removed from headers")
+    assert(m.headerMap.contains("onetwothree"), "onetwothree was removed from headers")
     for (h <- headers)
-      assert(!m.headers.contains(h), h+" was not removed from headers")
+      assert(!m.headerMap.contains(h), h+" was not removed from headers")
   }
 
   test("strip(msg)") {
@@ -163,7 +163,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
 
     val message = allHeaders.foldLeft(newMsg()) {
       (m, h) =>
-        m.headers.set(h._1, h._2)
+        m.headerMap.set(h._1, h._2)
         m
     }
 

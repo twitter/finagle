@@ -1,4 +1,4 @@
-scala_library(name='scala',
+scala_library(
   provides = scala_artifact(
     org = 'com.twitter',
     name = 'finagle-redis',
@@ -7,9 +7,10 @@ scala_library(name='scala',
   dependencies=[
     'util/util-logging',
     '3rdparty/jvm/io/netty:netty',
-    'finagle/finagle-core/src/main/scala:scala',
-    'util/util-core/src/main/scala:scala',
-    'util/util-stats/src/main/scala:scala',
+    'finagle/finagle-core',
+    'finagle/finagle-netty4',
+    'util/util-core',
+    'util/util-stats',
   ],
   sources=rglobs('*.scala'),
 )

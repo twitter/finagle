@@ -3,12 +3,12 @@ package com.twitter.finagle.thrift
 import com.google.common.base.Charsets
 import com.twitter.finagle.stats.{Counter, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.logging.Logger
-import com.twitter.util.NonFatal
 import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.charset.{CharsetEncoder, CoderResult, CodingErrorAction}
 import java.security.{PrivilegedExceptionAction, AccessController}
 import org.apache.thrift.protocol.{TProtocol, TProtocolFactory, TBinaryProtocol}
 import org.apache.thrift.transport.TTransport
+import scala.util.control.NonFatal
 
 object Protocols {
 

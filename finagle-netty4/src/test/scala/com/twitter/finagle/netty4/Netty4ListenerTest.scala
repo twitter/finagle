@@ -20,6 +20,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatience {
@@ -138,6 +139,15 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val bb = Await.result(requestBB, 2.seconds)
     assert(bb.refCnt == 1)
     Await.ready(server.close(), 2.seconds)
+  }
+
+  test("bind failures are rethrown synchronously") {
+    val ss = new java.net.ServerSocket(0, 10, InetAddress.getLoopbackAddress)
+    val listener = Netty4Listener[String, String](StringServerInit, Params.empty)
+    intercept[java.net.BindException] {
+      listener.listen(ss.getLocalSocketAddress)(_ => ())
+    }
+    ss.close()
   }
 
   test("Netty4Listener records basic channel stats") {

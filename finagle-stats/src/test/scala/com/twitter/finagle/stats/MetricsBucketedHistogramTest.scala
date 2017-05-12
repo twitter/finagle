@@ -9,6 +9,10 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MetricsBucketedHistogramTest extends FunSuite {
 
+  // use an arbitrary time that will not fall into
+  // the next snap window while the test does `roll()`s.
+  val BeginningOfMinute = Time.fromSeconds(1490332920)
+
   test("basics") {
     // use an arbitrary time that will not fall into
     // the next snap window while the test does `roll()`s.
@@ -118,9 +122,8 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot respects refresh window") {
-    Time.withCurrentTimeFrozen { tc =>
+    Time.withTimeAt(BeginningOfMinute) { tc =>
       val ctx = new Ctx(tc)
       import ctx._
 
@@ -142,9 +145,8 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot stays up-to-date when snapshots are missed") {
-    Time.withCurrentTimeFrozen { tc =>
+    Time.withTimeAt(BeginningOfMinute) { tc =>
       val ctx = new Ctx(tc)
       import ctx._
 
@@ -205,9 +207,8 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
-  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot erases old data on refresh") {
-    Time.withCurrentTimeFrozen { tc =>
+    Time.withTimeAt(BeginningOfMinute) { tc =>
       val ctx = new Ctx(tc)
       import ctx._
 

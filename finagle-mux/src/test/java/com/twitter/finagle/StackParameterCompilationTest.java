@@ -2,8 +2,8 @@ package com.twitter.finagle;
 
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.StackClient;
-import com.twitter.finagle.mux.FailureDetector;
-import com.twitter.finagle.mux.FailureDetectors;
+import com.twitter.finagle.liveness.FailureDetector;
+import com.twitter.finagle.liveness.FailureDetectors;
 import com.twitter.util.Duration;
 
 public class StackParameterCompilationTest {

@@ -43,7 +43,7 @@ class DecodingToCommandTest extends FunSuite {
           Buf.Utf8(data),
           None
         )
-        val command = decodingToCommand.decode(null, null, buffer)
+        val command = decodingToCommand.decode(buffer)
         assert(command.getClass == classOf[Set])
         val set = command.asInstanceOf[Set]
         assert(set.key == Buf.Utf8(key))
@@ -63,7 +63,7 @@ class DecodingToCommandTest extends FunSuite {
         case Some(s) => Seq("stats", s) map { Buf.Utf8(_) }
       }
       val buffer = Tokens(cmd)
-      val command = decodingToCommand.decode(null, null, buffer)
+      val command = decodingToCommand.decode(buffer)
       assert(command.getClass == classOf[Stats])
       val stats = command.asInstanceOf[Stats]
       stats.args.headOption match {

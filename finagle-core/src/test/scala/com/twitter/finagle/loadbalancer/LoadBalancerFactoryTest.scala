@@ -1,11 +1,12 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.{StackClient, StringClient}
+import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.StringServer
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.util.{Await, Future, Var}
+import com.twitter.util.{Activity, Await, Future, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -84,7 +85,7 @@ class LoadBalancerFactoryTest extends FunSuite
   test("throws NoBrokersAvailableException with negative addresses") {
     val next: Stack[ServiceFactory[String, String]] =
       Stack.Leaf(Stack.Role("mock"), ServiceFactory.const[String, String](
-        Service.mk[String, String](req => Future.value(s"$req"))))
+        Service.mk[String, String](req => Future.value(req))))
 
     val stack = new LoadBalancerFactory.StackModule[String, String] {
       val description = "mock"
@@ -97,44 +98,50 @@ class LoadBalancerFactoryTest extends FunSuite
       intercept[NoBrokersAvailableException](Await.result(factory()))
     }
   }
-}
 
-@RunWith(classOf[JUnitRunner])
-class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with StringServer {
-  val echoService = Service.mk[String, String](Future.value(_))
+  test("Respects the AddressOrdering") {
+    val endpoint: Stack[ServiceFactory[String, String]] =
+      Stack.Leaf(Stack.Role("endpoint"), ServiceFactory.const[String, String](
+        Service.mk[String, String](req => ???)))
 
-  test("makes service factory stack") {
-    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = stringServer.serve(address, echoService)
+    val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
 
-    val sr = new InMemoryStatsReceiver
-    val clientStack =
-      StackClient.newStack.replace(
-        LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
-    val client = stringClient.withStack(clientStack)
-      .configured(Stats(sr))
-      .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    var eps: Vector[String] = Vector.empty
+    val mockBalancer = new LoadBalancerFactory {
+      def newBalancer[Req, Rep](
+        endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+        statsReceiver: StatsReceiver,
+        emptyException: NoBrokersAvailableException
+      ): ServiceFactory[Req, Rep] = {
+        // this relies on the toString of the ServiceFactory
+        // inside the LoadBalancerFactory, not the best way
+        // to get at the underlying addr, but not sure there
+        // is another way since we can't change the type of
+        // Stack modules and Stack is invariant.
+        eps = endpoints.sample().toVector.map(_.toString)
+        ServiceFactory.const(Service.mk(_ => ???))
+      }
+    }
 
-    assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 4)
-    assert(Await.result(client("hello\n")) == "hello")
-  }
+    val addresses = (10 to 0 by -1).map { i =>
+      Address(InetSocketAddress.createUnresolved(s"inet-address-$i", 0))
+    }
 
-  test("creates fixed number of service factories based on params") {
-    val addr1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server1 = stringServer.serve(addr1, echoService)
+    var orderCalled = false
+    val order: Ordering[Address] = new Ordering[Address] {
+      def compare(a0: Address, a1: Address): Int = {
+        orderCalled = true
+        a0.toString.compare(a1.toString)
+      }
+    }
 
-    val addr2 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server2 = stringServer.serve(addr2, echoService)
+    stack.make(Stack.Params.empty +
+      LoadBalancerFactory.Param(mockBalancer) +
+      LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet))) +
+      LoadBalancerFactory.AddressOrdering(order))
 
-    val sr = new InMemoryStatsReceiver
-    val clientStack =
-      StackClient.newStack.replace(
-        LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
-    val client = stringClient.withStack(clientStack)
-      .configured(Stats(sr))
-      .configured(ConcurrentLoadBalancerFactory.Param(3))
-      .newService(Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress]), Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-    assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 6)
+    assert(orderCalled)
+    val sortedAddresses: Seq[String] = addresses.sortBy(_.toString).map(_.toString)
+    eps.indices.foreach { i => assert(eps(i) == sortedAddresses(i)) }
   }
 }

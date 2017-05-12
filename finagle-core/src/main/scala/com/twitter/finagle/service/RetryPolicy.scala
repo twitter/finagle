@@ -1,9 +1,8 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException, WriteException}
-import com.twitter.util.{
-  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Return, Throw, Try}
+import com.twitter.finagle.{ChannelClosedException, Failure, FailureFlags, TimeoutException, WriteException}
+import com.twitter.util.{Duration, JavaSingleton, Return, Throw, Try, TimeoutException => UtilTimeoutException}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
@@ -139,13 +138,20 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
 }
 
 object RetryPolicy extends JavaSingleton {
+
+  /**
+   * An extractor for exceptions which are known to be safe to retry.
+   *
+   * @see [[RequeueFilter.Requeueable]]
+   */
   object RetryableWriteException {
     def unapply(thr: Throwable): Option[Throwable] = thr match {
       // We don't retry interruptions by default since they indicate that the
       // request was discarded.
-      case f: Failure if f.isFlagged(Failure.Interrupted) => None
-      case f: Failure if f.isFlagged(Failure.NonRetryable) => None
+      case f: FailureFlags[_] if f.isFlagged(Failure.Interrupted) => None
+      case f: FailureFlags[_] if f.isFlagged(Failure.NonRetryable) => None
       case f: Failure if f.isFlagged(Failure.Restartable) => Some(f.show)
+      case f: FailureFlags[_] if f.isFlagged(Failure.Restartable) => Some(f)
       case WriteException(exc) => Some(exc)
       case _ => None
     }
@@ -172,9 +178,21 @@ object RetryPolicy extends JavaSingleton {
     case Throw(_: ChannelClosedException) => true
   }
 
-  val Never: RetryPolicy[Try[Nothing]] = new RetryPolicy[Try[Nothing]] {
-    def apply(t: Try[Nothing]): Option[(Duration, Nothing)] = None
+  /**
+   * A [[RetryPolicy]] that never retries.
+   */
+  val none: RetryPolicy[Any] = new RetryPolicy[Any] {
+    def apply(t: Any): Option[(Duration, RetryPolicy[Any])] = None
+
+    override def toString: String = "RetryPolicy.none"
   }
+
+  /**
+   * A [[RetryPolicy]] that never retries.
+   *
+   * @see [[none]] for a more generally applicable version.
+   */
+  val Never: RetryPolicy[Try[Nothing]] = none
 
   /**
    * Converts a `RetryPolicy[Try[Nothing]]` to a `RetryPolicy[(Req, Try[Rep])]`
@@ -186,7 +204,7 @@ object RetryPolicy extends JavaSingleton {
     new RetryPolicy[(Req, Try[Rep])] {
       def apply(input: (Req, Try[Rep])): Option[(Duration, RetryPolicy[(Req, Try[Rep])])] = input match {
         case (_, t@Throw(_)) =>
-          policy(t.asInstanceOf[Throw[Nothing]]) match {
+          policy(t.cast[Nothing]) match {
             case Some((howlong, nextPolicy)) => Some((howlong, convertExceptionPolicy(nextPolicy)))
             case None => None
           }

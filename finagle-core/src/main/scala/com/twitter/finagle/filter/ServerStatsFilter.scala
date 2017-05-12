@@ -1,8 +1,9 @@
 package com.twitter.finagle.filter
 
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{param, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{Future, Stopwatch}
+import com.twitter.util.{Time, Duration, Future, Stopwatch}
 import java.util.concurrent.TimeUnit
 
 private[finagle] object ServerStatsFilter {
@@ -37,9 +38,18 @@ private[finagle] class ServerStatsFilter[Req, Rep](statsReceiver: StatsReceiver,
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, Stopwatch.systemNanos)
 
   private[this] val handletime = statsReceiver.stat("handletime_us")
+  private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val startAt = nowNanos()
+
+    Deadline.current match {
+      case Some(deadline) =>
+        val now = Time.now
+        transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMillis)
+      case None =>
+    }
+
     try service(request)
     finally {
       val elapsedNs = nowNanos() - startAt

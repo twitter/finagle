@@ -71,7 +71,7 @@ Failure Accrual
 .. _failure_accrual_stats:
 
 The client stats under the `failure_accrual` scope track how
-:src:`FailureAccrualFactory <com/twitter/finagle/service/FailureAccrualFactory.scala>`
+:src:`FailureAccrualFactory <com/twitter/finagle/liveness/FailureAccrualFactory.scala>`
 manages failures.
 
 .. include:: metrics/FailureAccrual.rst
@@ -103,6 +103,16 @@ Pooling
 These client stats help you keep track of connection churn.
 
 .. include:: metrics/Pooling.rst
+
+PendingRequestFilter
+--------------------
+
+.. _pending_request_filter:
+
+These stats represent information about the behavior of PendingRequestFilter.
+
+**pending_requests/rejected**
+  a counter of the number of requests that have been rejected by this filter.
 
 Retries
 -------
@@ -196,7 +206,7 @@ These stats pertain to the HTTP protocol.
   responses are not automatically retried.
 
 These metrics are added by
-:src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
+:finagle-http-src:`StatsFilter <com/twitter/finagle/http/filter/StatsFilter.scala>` and can be enabled by
 using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
 **status/<statusCode>**
@@ -212,6 +222,21 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 
 **time/<statusCategory>**
   A histogram on duration in milliseconds per HTTP status code category.
+
+HTTP2
+-----
+These stats pertain to HTTP2 only.
+
+.. include:: metrics/Http2.rst
+
+Memcached
+---------
+
+.. _memcached_stats:
+
+These stats pertain to the Memcached protocol.
+
+.. include:: metrics/Memcached.rst
 
 Mux
 ---

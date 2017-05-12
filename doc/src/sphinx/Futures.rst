@@ -146,6 +146,8 @@ Futures. This is quite useful, and gives rise to a great amount of
 modularity in distributed systems as common patterns can be cleanly
 abstracted.
 
+.. _future_failure:
+
 Recovering from failure
 -----------------------
 

@@ -17,6 +17,10 @@ visibility into this caching.
 **evicts**
   A counter of the number of cache evictions.
 
+**expires**
+  A counter of the number of idle ``ServiceFactory``\s
+  that were actively evicted.
+
 **idle**
   A gauge of the number of cached idle ``ServiceFactory``\s.
 

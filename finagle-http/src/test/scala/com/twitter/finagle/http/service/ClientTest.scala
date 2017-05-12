@@ -1,11 +1,11 @@
 package com.twitter.finagle.http.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http.{Http => HttpCodec, Request, Response, Version, Method}
+import com.twitter.finagle.http.{Method, Request, Response, Version}
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.util.{Await, Throw, Try}
+import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
+import com.twitter.util.Await
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -23,14 +23,14 @@ class ClientTest extends FunSuite {
       ClientBuilder()
         .hosts(serverAddress)
         .hostConnectionLimit(1)
-        .codec(HttpCodec())
+        .stack(Http.client)
 
     try spec(builder) finally {
       Await.result(server.close())
     }
   }
 
-  var counter = 0
+  @volatile private[this] var counter = 0
 
   def failingFactory: ServiceFactory[Request, Response] =
     new FailingFactory[Request, Response](new Exception("bye")) {
@@ -46,12 +46,11 @@ class ClientTest extends FunSuite {
       val client = clientBuilder.build()
       try {
         // No failures have happened yet.
-        assert(client.isAvailable == true)
+        assert(client.isAvailable)
         val future = client(Request(Version.Http11, Method.Get, "/"))
-        val resolved = Try(Await.result(future, 1.second))
-        assert(resolved.isThrow == true)
-        val Throw(cause) = resolved
-        intercept[ChannelClosedException] { throw cause }
+        intercept[ChannelClosedException] {
+          Await.result(future, 1.second)
+        }
       } finally client.close()
     }
   }
@@ -64,10 +63,9 @@ class ClientTest extends FunSuite {
         .build()
       try {
         val future = client(Request(Version.Http11, Method.Get, "/"))
-        val resolved = Try(Await.result(future, 1.second))
-        assert(resolved.isThrow == true)
-        val Throw(cause) = resolved
-        intercept[ChannelClosedException] { throw cause }
+        intercept[ChannelClosedException] {
+          Await.result(future, 1.second)
+        }
         assert(counter == 1)
       } finally client.close()
     }

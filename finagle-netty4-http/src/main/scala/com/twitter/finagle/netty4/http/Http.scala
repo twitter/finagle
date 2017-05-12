@@ -1,15 +1,16 @@
 package com.twitter.finagle.netty4.http
 
-import com.twitter.finagle.Http.param.HttpImpl
-import com.twitter.finagle.Http.{param => httpparam}
-import com.twitter.finagle.param.Logger
-import com.twitter.finagle.{Status => _, _}
+import com.twitter.conversions.storage._
+import com.twitter.finagle.http
+import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.netty4.http.handler.{FixedLengthMessageAggregator, PayloadSizeHandler, RespondToExpectContinue}
+import com.twitter.finagle.netty4.http.handler._
+import com.twitter.finagle.param.Logger
 import com.twitter.finagle.server.Listener
 import io.netty.channel._
 import io.netty.handler.codec.{http => NettyHttp}
+import java.net.SocketAddress
 
 /**
  * The `exp` package contains params to configure the underlying netty version
@@ -24,33 +25,49 @@ object exp {
   private[finagle] val HttpCodecName = "httpCodec"
 
   private[finagle] def initClient(params: Stack.Params): ChannelPipeline => Unit = {
-    val maxChunkSize = params[httpparam.MaxChunkSize].size
-    val maxResponseSize = params[httpparam.MaxResponseSize].size
-    val decompressionEnabled = params[httpparam.Decompression].enabled
-    val streaming = params[httpparam.Streaming].enabled
+    val maxResponseSize = params[http.param.MaxResponseSize].size
+    val decompressionEnabled = params[http.param.Decompression].enabled
+    val streaming = params[http.param.Streaming].enabled
 
     { pipeline: ChannelPipeline =>
       if (decompressionEnabled)
         pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
 
-      if (streaming)
-        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxChunkSize))
-      else {
+      if (streaming) {
+        // 8 KB is the size of the maxChunkSize parameter used in netty3,
+        // which is where it stops attempting to aggregate messages that lack
+        // a 'Transfer-Encoding: chunked' header.
+        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(8.kilobytes))
+      } else {
         pipeline.addLast(
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxResponseSize.inBytes.toInt)
         )
       }
+      // Map some client related channel exceptions to something meaningful to finagle
+      pipeline.addLast("clientExceptionMapper", ClientExceptionMapper)
 
+      // Given that Finagle's channel transports aren't doing anything special (yet)
+      // about resource management, we have to turn pooled resources into unpooled ones as
+      // the very last step of the pipeline.
+      pipeline.addLast("unpoolHttp", UnpoolHttpHandler)
     }
   }
 
-  private[finagle] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
-    (params: Stack.Params) => {
-      Netty4Transporter({ pipeline: ChannelPipeline =>
-        val maxChunkSize = params[httpparam.MaxChunkSize].size
-        val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-        val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
+  private[finagle] val Netty4HttpTransporter: Stack.Params => SocketAddress => Transporter[Any, Any] =
+    (params: Stack.Params) =>
+      (addr: SocketAddress) => Netty4Transporter.raw(
+        pipelineInit = ClientPipelineInit(params),
+        addr = addr,
+        params = params
+      )
+
+  private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
+    params: Stack.Params =>
+      pipeline: ChannelPipeline => {
+        val maxChunkSize = params[http.param.MaxChunkSize].size
+        val maxHeaderSize = params[http.param.MaxHeaderSize].size
+        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
 
         val codec = new NettyHttp.HttpClientCodec(
           maxInitialLineSize.inBytes.toInt,
@@ -61,14 +78,14 @@ object exp {
         pipeline.addLast(HttpCodecName, codec)
 
         initClient(params)(pipeline)
-      }, params)
-    }
+      }
+  }
 
   private[finagle] def initServer(params: Stack.Params): ChannelPipeline => Unit = {
-    val maxRequestSize = params[httpparam.MaxRequestSize].size
-    val decompressionEnabled = params[httpparam.Decompression].enabled
-    val compressionLevel = params[httpparam.CompressionLevel].level
-    val streaming = params[httpparam.Streaming].enabled
+    val maxRequestSize = params[http.param.MaxRequestSize].size
+    val decompressionEnabled = params[http.param.Decompression].enabled
+    val compressionLevel = params[http.param.CompressionLevel].level
+    val streaming = params[http.param.Streaming].enabled
     val log = params[Logger].log
 
     { pipeline: ChannelPipeline =>
@@ -100,35 +117,39 @@ object exp {
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxRequestSize.inBytes.toInt)
         )
+
+      // We need to handle bad requests as the dispatcher doesn't know how to handle them.
+      pipeline.addLast("badRequestHandler", BadRequestHandler)
+
+      // Given that Finagle's channel transports aren't doing anything special (yet)
+      // about resource management, we have to turn pooled resources into unpooled ones as
+      // the very last step of the pipeline.
+      pipeline.addLast("unpoolHttp", UnpoolHttpHandler)
     }
   }
 
+  private[finagle] val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit = {
+    params: Stack.Params =>
+      pipeline: ChannelPipeline => {
+        val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
+        val maxHeaderSize = params[http.param.MaxHeaderSize].size
+        val maxRequestSize = params[http.param.MaxRequestSize].size
 
-  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any] = (params: Stack.Params) => {
-      Netty4Listener[Any, Any](
-        params = params,
-        pipelineInit = { pipeline: ChannelPipeline =>
-          val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
-          val maxHeaderSize = params[httpparam.MaxHeaderSize].size
-          val maxRequestSize = params[httpparam.MaxRequestSize].size
+        val codec = new NettyHttp.HttpServerCodec(
+          maxInitialLineSize.inBytes.toInt,
+          maxHeaderSize.inBytes.toInt,
+          maxRequestSize.inBytes.toInt
+        )
 
-          val codec = new NettyHttp.HttpServerCodec(
-            maxInitialLineSize.inBytes.toInt,
-            maxHeaderSize.inBytes.toInt,
-            maxRequestSize.inBytes.toInt
-          )
+        pipeline.addLast(HttpCodecName, codec)
 
-          pipeline.addLast(HttpCodecName, codec)
+        initServer(params)(pipeline)
+      }
+  }
 
-          initServer(params)(pipeline)
-        }
-      )
-    }
-
-  val Netty4Impl: HttpImpl =
-    HttpImpl(
-      new Netty4ClientStreamTransport(_),
-      new Netty4ServerStreamTransport(_),
-      Netty4HttpTransporter,
-      Netty4HttpListener)
+  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any] = (params: Stack.Params) =>
+    Netty4Listener[Any, Any](
+      params = params,
+      pipelineInit = ServerPipelineInit(params)
+    )
 }

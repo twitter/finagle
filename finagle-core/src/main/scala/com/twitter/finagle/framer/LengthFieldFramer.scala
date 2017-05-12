@@ -1,7 +1,6 @@
 package com.twitter.finagle.framer
 
-import com.twitter.finagle.util.BufReader
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import scala.collection.mutable.ArrayBuffer
 
 private[finagle] object LengthFieldFramer {
@@ -83,7 +82,7 @@ private[finagle] class LengthFieldFramer(
    * is present.
    * @return The length of the frame if it is complete, -1 otherwise.
    */
-  private[this] def readNextFrameLength(br: BufReader): Int = {
+  private[this] def readNextFrameLength(br: ByteReader): Int = {
     if (br.remaining < lengthFieldEnd)
       return -1
 
@@ -131,23 +130,26 @@ private[finagle] class LengthFieldFramer(
     // thrown on EVERY subsequent call. Once an exception is encountered, the
     // channel should be closed and this decoder should be discarded.
     accum = accum.concat(buf)
-    val br = BufReader(accum)
-    var frameLength = readNextFrameLength(br)
+    val br = ByteReader(accum)
+    try {
+      var frameLength = readNextFrameLength(br)
 
-    if (frameLength > 0) {
-      var frameCursor = 0
-      val frames = new ArrayBuffer[Buf]
+      if (frameLength > 0) {
+        var frameCursor = 0
+        val frames = new ArrayBuffer[Buf]
 
-      while (frameLength >= 0) {
-        frames += accum.slice(frameCursor, frameCursor + frameLength)
-        frameCursor += frameLength
-        frameLength = readNextFrameLength(br)
+        while (frameLength >= 0) {
+          frames += accum.slice(frameCursor, frameCursor + frameLength)
+          frameCursor += frameLength
+          frameLength = readNextFrameLength(br)
+        }
+
+        accum = accum.slice(frameCursor, accum.length)
+        frames.toIndexedSeq
+      } else {
+        NoFrames
       }
-
-      accum = accum.slice(frameCursor, accum.length)
-      frames.toIndexedSeq
-    } else {
-      NoFrames
     }
+    finally br.close()
   }
 }

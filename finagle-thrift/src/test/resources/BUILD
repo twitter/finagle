@@ -1,3 +1,3 @@
-resources(name='resources',
-  sources=globs('*', exclude=[globs('BUILD')])
+resources(
+  sources=rglobs('*', exclude=[rglobs('BUILD')])
 )

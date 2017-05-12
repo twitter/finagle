@@ -17,31 +17,29 @@ object BalancerBench {
       def apply(req: Unit): Future[Unit] = Future.Done
     })
 
-  def newActivity(num: Int): Activity[Set[ServiceFactory[Unit, Unit]]] = {
-    val underlying = Var((0 until num).map(_ => newFactory()).toSet)
+  def newActivity(num: Int): Activity[Vector[ServiceFactory[Unit, Unit]]] = {
+    val underlying = Var((0 until num).map(_ => newFactory()).toVector)
     Activity(underlying.map { facs => Activity.Ok(facs) })
   }
 
-  case class NullNode(factory: ServiceFactory[Unit, Unit])
+  private case class NullNode(factory: ServiceFactory[Unit, Unit])
     extends ServiceFactoryProxy[Unit, Unit](factory) with NodeT[Unit, Unit] {
 
-    override type This = NullNode
     override def load: Double = 0.0
     override def pending: Int = 0
-    override def token: Int = 0
     override def close(deadline: Time): Future[Unit] = Future.Done
   }
 
-  case class NullDistibutor(vec: Vector[NullNode])
+  private case class NullDistributor(vec: Vector[NullNode])
     extends DistributorT[NullNode](vec) {
-    override type This = NullDistibutor
+    override type This = NullDistributor
     override def pick(): NullNode = vector.head
     override def needsRebuild: Boolean = false
-    override def rebuild(): NullDistibutor = this
-    override def rebuild(vector: Vector[NullNode]): NullDistibutor = NullDistibutor(vector)
+    override def rebuild(): NullDistributor = this
+    override def rebuild(vector: Vector[NullNode]): NullDistributor = NullDistributor(vector)
   }
 
-  class NullBalancer extends Balancer[Unit, Unit] {
+  private class NullBalancer extends Balancer[Unit, Unit] {
     override protected def maxEffort: Int = 0
     override protected def emptyException: Throwable = new Exception()
     override protected def statsReceiver: StatsReceiver = NullStatsReceiver
@@ -49,18 +47,16 @@ object BalancerBench {
       NullStatsReceiver.counter0("")
 
     override protected type Node = NullNode
-    override protected type Distributor = NullDistibutor
+    override protected type Distributor = NullDistributor
 
-    override protected def newNode(
-      factory: ServiceFactory[Unit, Unit],
-      statsReceiver: StatsReceiver
-    ): Node = NullNode(factory)
+    override protected def newNode(factory: ServiceFactory[Unit, Unit]): Node =
+      NullNode(factory)
 
     override protected def failingNode(cause: Throwable): Node =
       NullNode(ServiceFactory.const(Service.const(Future.exception(cause))))
 
     override protected def initDistributor(): Distributor =
-      NullDistibutor(Vector.empty)
+      NullDistributor(Vector.empty)
   }
 
   @State(Scope.Benchmark)
@@ -96,7 +92,7 @@ object BalancerBench {
 class BalancerBench extends StdBenchAnnotations {
   import BalancerBench._
 
-  val noBalancer: NullBalancer = new NullBalancer
+  private[this] val noBalancer: NullBalancer = new NullBalancer
 
   @Benchmark
   def update5000x500(state: UpdateState): Unit = {

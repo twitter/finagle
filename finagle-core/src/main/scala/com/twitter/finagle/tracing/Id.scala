@@ -3,8 +3,8 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.RichU64String
 import com.twitter.util.{Try, Return, Throw}
-import com.twitter.util.NonFatal
 import java.lang.{Boolean => JBool}
+import scala.util.control.NonFatal
 
 /**
  * Defines trace identifiers.  Span IDs name a particular (unique)

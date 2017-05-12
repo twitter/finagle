@@ -1,32 +1,28 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceFactoryProxy, ServiceProxy}
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.Rng
+import com.twitter.finagle._
 import com.twitter.util.{Throw, Time, Future, Return}
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Provide Nodes whose 'load' is the current number of pending
+ * Provides a Node whose 'load' is the current number of pending
  * requests and thus will result in least-loaded load balancer.
+ * Pending requests are only decremented when a response is
+ * satisfied, and thus, this load metric implicitly takes latency
+ * into account.
  */
-private[loadbalancer] trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
-  protected def rng: Rng
+private trait LeastLoaded[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
 
-  protected case class Node(
-      factory: ServiceFactory[Req, Rep],
-      counter: AtomicInteger,
-      token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT[Req, Rep] {
+  protected type Node <: LeastLoadedNode
 
-    type This = Node
+  protected trait LeastLoadedNode extends NodeT[Req, Rep] {
+
+    private[this] val counter = new AtomicInteger(0)
 
     def load: Double = counter.get
     def pending: Int = counter.get
 
-    override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+    abstract override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
       counter.incrementAndGet()
       super.apply(conn).transform {
         case Return(svc) =>
@@ -43,10 +39,4 @@ private[loadbalancer] trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
       }
     }
   }
-
-  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
-    Node(factory, new AtomicInteger(0), rng.nextInt())
-
-  private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), failingLoad, 0)
 }

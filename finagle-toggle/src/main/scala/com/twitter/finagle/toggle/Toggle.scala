@@ -66,6 +66,21 @@ object Toggle {
   }
 
   /**
+   * A mixin to get access to the last result of [[Toggle.apply]].
+   *
+   * Useful for providing visibility to how a toggle is
+   * being used at runtime.
+   *
+   * @see [[ToggleMap.observed]]
+   */
+  trait Captured {
+    /**
+     * `None` if no calls to [[Toggle.apply]] have been made.
+     */
+    def lastApply: Option[Boolean]
+  }
+
+  /**
    * Whether or not the given `fraction` is valid.
    *
    * @param fraction must be between `0.0 and 1.0`, inclusive.
@@ -139,7 +154,7 @@ object Toggle {
     }
   }
 
-  private[toggle] def apply[T](
+  private def apply[T](
     id: String,
     pf: PartialFunction[T, Boolean]
   ): Toggle[T] = new Toggle[T](id) {

@@ -1,3 +1,3 @@
-resources(name='resources',
+resources(
   sources=globs('*.sql')
 )

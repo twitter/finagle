@@ -2,10 +2,11 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.ssl.{Ssl, Engine}
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.ssl.TrustCredentials
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
-import java.net.{InetSocketAddress, SocketAddress}
 import javax.net.ssl.SSLContext
 
 /**
@@ -28,71 +29,61 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     self.configured(Transporter.ConnectTimeout(timeout))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) on this client.
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(config: SslClientConfiguration): A =
+    self.configured(Transport.ClientSsl(Some(config)))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(config: SslClientConfiguration, engineFactory: SslClientEngineFactory): A =
+    self
+      .configured(Transport.ClientSsl(Some(config)))
+      .configured(SslClientEngineFactory.Param(engineFactory))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
    *
    * @note Given that this uses default [[SSLContext]], all configuration params (trust/key stores)
    *       should be passed as Java system properties.
    */
-  def tls: A = {
-    val socketAddressToEngine: SocketAddress => Engine = {
-      case sa: InetSocketAddress => Ssl.client(sa.getHostName, sa.getPort)
-      case _ => Ssl.client()
-    }
-
+  def tls: A =
     self
-      .configured(Transport.TLSClientEngine(Some(socketAddressToEngine)))
-      .configured(Transport.Tls(TlsConfig.Client))
-  }
+      .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) on this client.
+   * Enables SSL/TLS support (connection encrypting) on this client.
    * Hostname verification will be provided against the given `hostname`.
    */
-  def tls(hostname: String): A = {
-    val socketAddressToEngine: SocketAddress => Engine = {
-      case sa: InetSocketAddress => Ssl.client(hostname, sa.getPort)
-      case _ => Ssl.client()
-    }
-
+  def tls(hostname: String): A =
     self
-      .configured(Transport.TLSClientEngine(Some(socketAddressToEngine)))
-      .configured(Transporter.TLSHostname(Some(hostname)))
-      .configured(Transport.Tls(TlsConfig.ClientHostname(hostname)))
-  }
+      .configured(Transport.ClientSsl(
+        Some(SslClientConfiguration(hostname = Some(hostname)))))
 
   /**
-   * Enables the TLS/SSL support (connection encrypting) with no hostname validation
-   * on this client. The TLS/SSL sessions are configured using the given `context`.
+   * Enables SSL/TLS support (connection encrypting) with no hostname validation
+   * on this client. The SSL/TLS are configured using the given `context`.
    *
    * @note It's recommended to not use [[SSLContext]] directly, but rely on Finagle to pick
-   *       the most efficient TLS/SSL implementation available on your platform.
+   *       the most efficient SSL/TLS available on your platform.
    */
-  def tls(context: SSLContext): A = {
-    val socketAddressToEngine: SocketAddress => Engine = {
-      case sa: InetSocketAddress => Ssl.client(context, sa.getHostName, sa.getPort)
-      case _ => Ssl.client(context)
-    }
-
+  def tls(context: SSLContext): A =
     self
-      .configured(Transport.TLSClientEngine(Some(socketAddressToEngine)))
-      .configured(Transport.Tls(TlsConfig.ClientSslContext(context)))
-  }
+      .configured(SslClientEngineFactory.Param(
+        new SslContextClientEngineFactory(context)))
+      .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with hostname validation
    * on this client. The TLS/SSL sessions are configured using the given `context`.
    */
-  def tls(context: SSLContext, hostname: String): A = {
-    val socketAddressToEngine: SocketAddress => Engine = {
-      case sa: InetSocketAddress => Ssl.client(context, hostname, sa.getPort)
-      case _ => Ssl.client(context)
-    }
-
+  def tls(context: SSLContext, hostname: String): A =
     self
-      .configured(Transport.TLSClientEngine(Some(socketAddressToEngine)))
-      .configured(Transporter.TLSHostname(Some(hostname)))
-      .configured(Transport.Tls(TlsConfig.ClientSslContextAndHostname(context, hostname)))
-  }
+      .configured(SslClientEngineFactory.Param(
+        new SslContextClientEngineFactory(context)))
+      .configured(Transport.ClientSsl(
+        Some(SslClientConfiguration(hostname = Some(hostname)))))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with no certificate validation
@@ -102,16 +93,9 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    *       idea of TLS/SSL. Use this carefully.
    */
   def tlsWithoutValidation: A = {
-    val socketAddressToEngine: SocketAddress => Engine = {
-      case sa: InetSocketAddress =>
-        Ssl.clientWithoutCertificateValidation(sa.getHostName, sa.getPort)
-      case _ =>
-        Ssl.clientWithoutCertificateValidation()
-    }
-
     self
-      .configured(Transport.TLSClientEngine(Some(socketAddressToEngine)))
-      .configured(Transport.Tls(TlsConfig.ClientNoValidation))
+      .configured(Transport.ClientSsl(
+        Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
   }
 
   /**

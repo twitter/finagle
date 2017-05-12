@@ -8,7 +8,7 @@ import com.twitter.util.Try
  * the Finagle stack access to the deserialized forms of
  * Thrift requests and responses.
  *
- * When using [[http://twitter.github.io/scrooge/ Scrooge]] for code
+ * When using [[https://twitter.github.io/scrooge/ Scrooge]] for code
  * generation, a proper `DeserializationCtx` will be available
  * to code via `Contexts.local(DeserializeCtx.Key)`.
  *

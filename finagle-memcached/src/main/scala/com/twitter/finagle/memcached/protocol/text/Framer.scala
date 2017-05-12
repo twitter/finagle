@@ -42,15 +42,20 @@ private[memcached] trait Framer extends FinagleFramer {
   /**
    * Return the number of bytes before `\r\n` (newline), or -1 if no newlines found
    */
-  private[this] def bytesBeforeLineEnd(bytes: Array[Byte]): Int = {
-    var i = 0
-    while (i < bytes.length - 1) {
-      if (bytes(i) == '\r' && bytes(i + 1) == '\n') {
-        return i
+  private[this] def bytesBeforeLineEnd(buf: Buf): Int = {
+    val finder = new Buf.Processor {
+      private[this] var prevCh: Byte = _
+      def apply(byte: Byte): Boolean = {
+        if (byte == '\n' && prevCh == '\r') {
+          false
+        } else {
+          prevCh = byte
+          true
+        }
       }
-      i += 1
     }
-    -1
+    val pos = buf.process(finder)
+    if (pos == -1) -1 else pos - 1
   }
 
   /**
@@ -60,7 +65,7 @@ private[memcached] trait Framer extends FinagleFramer {
   private def extractFrame(): Buf =
     state match {
       case AwaitingTextFrame =>
-        val frameLength = bytesBeforeLineEnd(Buf.ByteArray.Owned.extract(accum))
+        val frameLength = bytesBeforeLineEnd(accum)
         if (frameLength < 0) {
           null
         } else {

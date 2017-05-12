@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.DelayedFactory
 import com.twitter.finagle.{Addr, Name, Stack, Stackable, ServiceFactory}
 import com.twitter.util.Future

@@ -1,11 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.context
+import com.twitter.finagle._
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{ServiceFactory, FailedFastException, Service}
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
+import java.io.IOException
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -24,14 +24,15 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
-    intercept[FailedFastException] {
+    val exn = intercept[FailedFastException] {
       Await.result(svc(new FailedFastException("lolll")), 5.seconds)
     }
 
+    assert(exn.isFlagged(FailureFlags.NonRetryable))
     assert(minRetries * percentRequeues == stats.counter("requeues")())
     assert(Seq(minRetries * percentRequeues) == stats.stat("requeues_per_request")())
     // the budget is not considered exhausted if we only used
@@ -52,14 +53,15 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
-    intercept[FailedFastException] {
+    val exn = intercept[FailedFastException] {
       Await.result(svc(new FailedFastException("lolll")), 5.seconds)
     }
 
+    assert(exn.isFlagged(FailureFlags.NonRetryable))
     assert(minRetries == stats.counter("requeues")())
     assert(Seq(minRetries) == stats.stat("requeues_per_request")())
     assert(1 == stats.counter("budget_exhausted")())
@@ -79,7 +81,7 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     var numNos = 0
     val svc = filter.andThen(Service.mk { s: String =>
@@ -161,7 +163,7 @@ class RequeueFilterTest extends FunSuite {
       NullStatsReceiver,
       () => true,
       percentRequeues,
-      DefaultTimer.twitter)
+      DefaultTimer)
 
     val stats = new InMemoryStatsReceiver()
 
@@ -187,4 +189,26 @@ class RequeueFilterTest extends FunSuite {
       assert(stats.stat("retry_context_retries")().map(_.toInt) == retriesInContext)
     }
   }
+
+  test("Requeueable.unapply for retryable exceptions") {
+    Seq(
+      Failure.rejected("rejected"),
+      WriteException(new RuntimeException())
+    ).foreach {
+      case RequeueFilter.Requeueable(_) =>
+      case x => fail(s"should be Requeueable: $x")
+    }
+  }
+
+  test("Requeueable.unapply for non-retryable exceptions") {
+    Seq(
+      Failure("not retryable", Failure.NonRetryable),
+      Failure("interrupted", Failure.Interrupted),
+      new IOException("an io exception")
+    ).foreach {
+      case RequeueFilter.Requeueable(x) => fail(s"should not be Requeueable: $x")
+      case _ =>
+    }
+  }
+
 }

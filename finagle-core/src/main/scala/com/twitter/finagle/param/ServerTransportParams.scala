@@ -1,8 +1,11 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.transport.{TlsConfig, Transport}
+import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
+import com.twitter.finagle.ssl.server.{
+  SslContextServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.transport.Transport
+import java.io.File
 import javax.net.ssl.SSLContext
 
 /**
@@ -14,6 +17,20 @@ import javax.net.ssl.SSLContext
  */
 class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
   extends TransportParams(self) {
+
+  /*
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(config: SslServerConfiguration): A =
+    self.configured(Transport.ServerSsl(Some(config)))
+
+  /*
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): A =
+    self
+      .configured(Transport.ServerSsl(Some(config)))
+      .configured(SslServerEngineFactory.Param(engineFactory))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) on this server. Only `certificatePath` and
@@ -37,20 +54,30 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     caCertificatePath: Option[String],
     ciphers: Option[String],
     nextProtocols: Option[String]
-  ): A = self
-    .configured(Transport.TLSServerEngine(Some(() =>
-      Ssl.server(
-        certificatePath, keyPath, caCertificatePath.orNull, ciphers.orNull, nextProtocols.orNull
-      )
-    )))
-    .configured(Transport.Tls(TlsConfig.ServerCertAndKey(
-      certificatePath, keyPath, caCertificatePath, ciphers, nextProtocols
-    )))
+  ): A = {
+    val keyCredentials = caCertificatePath match {
+      case Some(caPath) => KeyCredentials.CertKeyAndChain(
+        new File(certificatePath), new File(keyPath), new File(caPath))
+      case None => KeyCredentials.CertAndKey(
+        new File(certificatePath), new File(keyPath))
+    }
+    val cipherSuites = ciphers match {
+      case Some(suites) => CipherSuites.fromString(suites)
+      case None => CipherSuites.Unspecified
+    }
+    val applicationProtocols = nextProtocols match {
+      case Some(protos) => ApplicationProtocols.fromString(protos)
+      case None => ApplicationProtocols.Unspecified
+    }
+    val configuration = SslServerConfiguration(
+      keyCredentials = keyCredentials,
+      cipherSuites = cipherSuites,
+      applicationProtocols = applicationProtocols)
+    tls(configuration)
+  }
 
   /**
    * Enables TLS/SSL support (connection encrypting) on this server.
-   *
-   * @note This configuration method is only used to configure Netty 4 transports.
    *
    * @note It's recommended to not use [[SSLContext]] directly, but rely on Finagle to pick
    *       the most efficient TLS/SSL implementation available on your platform.
@@ -58,5 +85,7 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * @param context the SSL context to use
    */
   def tls(context: SSLContext): A =
-    self.configured(Transport.Tls(TlsConfig.ServerSslContext(context)))
+    tls(SslServerConfiguration(),
+      new SslContextServerEngineFactory(context))
+
 }

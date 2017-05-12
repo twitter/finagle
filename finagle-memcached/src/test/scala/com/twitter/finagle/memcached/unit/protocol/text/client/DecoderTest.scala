@@ -1,14 +1,12 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
+import com.twitter.finagle.memcached.protocol.text.client.ClientDecoder
+import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens, StatLines}
+import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
-
-import com.twitter.finagle.memcached.protocol.text.client.ClientDecoder
-import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens, StatLines}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.io.Buf
+import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class DecoderTest extends FunSuite with MockitoSugar {

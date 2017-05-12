@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.QueueTransport

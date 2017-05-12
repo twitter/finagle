@@ -134,6 +134,7 @@ class ServerBuilderTest extends FunSuite
       .build(svc)
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   verifyServerBoundAddress("#codec(CodecFactory#Server)FancyCodec", expected = "fancy") {
     class FancyCodec extends CodecFactory[String, String] {
       def client = { config =>

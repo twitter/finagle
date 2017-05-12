@@ -1,13 +1,15 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.Status
+import com.twitter.finagle.http.filter.HttpNackFilter
+import com.twitter.finagle.{Address, Http, Name, Service, Status, http}
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.netty.Netty3ClientStreamTransport
-import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{Transport, QueueTransport}
+import com.twitter.finagle.http.netty.{Bijections, Netty3ClientStreamTransport}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Await, Duration, Time, Promise, Future, Return, Throw}
+import com.twitter.util.{Await, Closable, Duration, Future, Promise, Return, Throw, Time}
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
@@ -28,11 +30,9 @@ object OpTransport {
 
 }
 
-class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
+class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
   import org.scalatest.Assertions._
   import OpTransport._
-
-  var ops = _ops
 
   def read() = ops match {
     case Read(res) :: rest =>
@@ -43,7 +43,6 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
   }
 
   def write(in: In) = ops match {
-
     case Write(accept, res) :: rest =>
       if (!accept(in))
         fail(s"Did not accept write $in")
@@ -88,7 +87,7 @@ class HttpClientDispatcherTest extends FunSuite {
     new DefaultHttpChunk(
       ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
 
-  private val timeout = Duration.fromSeconds(2)
+  private val timeout = Duration.fromSeconds(15)
 
   test("streaming request body") {
     val (in, out) = mkPair()
@@ -101,7 +100,7 @@ class HttpClientDispatcherTest extends FunSuite {
     // discard the request immediately
     out.read()
 
-    val r = Response().httpResponse
+    val r = Bijections.responseToNetty(Response())
     r.setChunked(true)
     out.write(r)
     val res = Await.result(f, timeout)
@@ -141,7 +140,7 @@ class HttpClientDispatcherTest extends FunSuite {
     Await.result(out.read(), timeout)
     out.write(httpRes)
     val res = Await.result(f, timeout)
-    assert(res.httpResponse === httpRes)
+    assert(Bijections.responseToNetty(res) == httpRes)
   }
 
   test("chunked") {
@@ -156,11 +155,11 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write(chunk("world"))
-    assert(Await.result(cc, timeout) === Some(Buf.Utf8("world")))
+    assert(Await.result(cc, timeout) == Some(Buf.Utf8("world")))
 
     out.write(HttpChunk.LAST_CHUNK)
     assert(Await.result(reader.read(Int.MaxValue), timeout).isEmpty)
@@ -179,7 +178,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c, timeout) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c, timeout) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write("something else")
@@ -193,8 +192,8 @@ class HttpClientDispatcherTest extends FunSuite {
     val writep = new Promise[Unit]
     val readp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
-      Read(readp),
       Write(Function.const(true), writep),
+      Read(readp),
       Close(Future.Done))
 
     val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
@@ -222,10 +221,10 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val readp = new Promise[Nothing]
     val transport = OpTransport[Any, Any](
-      // Read the response
-      Read(readp),
       // Write the initial request.
       Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(readp),
       Close(Future.Done))
 
     val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
@@ -253,10 +252,10 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val chunkp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
-      // Read the response
-      Read(Future.never),
       // Write the initial request.
       Write(_.isInstanceOf[HttpRequest], Future.Done),
+      // Read the response
+      Read(Future.never),
       // Then we try to write the chunk
       Write(_.isInstanceOf[HttpChunk], chunkp),
       Close(Future.Done))
@@ -284,5 +283,77 @@ class HttpClientDispatcherTest extends FunSuite {
     }
   }
 
+  test("swallows the body of a HttpNack if it happens to come as a chunked response") {
+    new NackCtx {
+      def nackBody: Buf = Buf.Utf8("Chunked nack body")
+
+      assert(Await.result(client(request), timeout).status == http.Status.Ok)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
+      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
+
+      // reuse connections
+      assert(Await.result(client(request), timeout).status == http.Status.Ok)
+      assert(clientSr.counters(Seq("http", "connects")) == 1)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
+
+      Closable.all(client, server).close()
+    }
+  }
+
+  test("fails on excessively large nack response") {
+    new NackCtx {
+      def nackBody: Buf = Buf.Utf8("Very large" * 1024)
+
+      assert(Await.result(client(request), timeout).status == http.Status.Ok)
+
+      // Should have closed the connection on the first nack
+      assert(clientSr.counters(Seq("http", "connects")) == 2)
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
+
+      Closable.all(client, server).close()
+    }
+  }
+
+  // Scaffold for checking nack behavior
+  private abstract class NackCtx {
+    def nackBody: Buf
+    val serverSr = new InMemoryStatsReceiver
+    val clientSr = new InMemoryStatsReceiver
+    @volatile var needsNack = true
+    val service = Service.mk{ _: Request =>
+      val resp =
+        if (needsNack) {
+          needsNack = false
+          // simulate a nack response with a chunked body by just sending a chunked body
+          serverSr.scope("myservice").counter("nacks").incr()
+          val resp = Response(status = HttpNackFilter.ResponseStatus)
+          resp.headerMap.set(HttpNackFilter.RetryableNackHeader, "true")
+          resp.setChunked(true)
+          resp.writer.write(nackBody)
+            .before(resp.writer.close())
+          resp
+        } else {
+          val resp = Response()
+          resp.contentString = "the body"
+          resp
+        }
+
+      Future.value(resp)
+    }
+
+    val server =
+      Http.server
+        .withStatsReceiver(serverSr)
+        .withLabel("myservice")
+        .withStreaming(true)
+        .serve(new InetSocketAddress(0), service)
+    val client =
+      Http.client
+        .withStatsReceiver(clientSr)
+        .withStreaming(true)
+        .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
+
+    val request = Request("/")
+  }
 }
 

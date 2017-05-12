@@ -8,16 +8,16 @@ import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
 import scala.annotation.tailrec
 
 private[finagle] object SingletonPool {
-  val role = StackClient.Role.pool
+  val role: Stack.Role = StackClient.Role.pool
 
   /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.pool.SingletonPool]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
-      val role = SingletonPool.role
+      val role: Stack.Role = SingletonPool.role
       val description = "Maintain at most one connection"
-      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val param.Stats(sr) = _stats
         new SingletonPool(next, sr.scope("singletonpool"))
       }
@@ -34,7 +34,7 @@ private[finagle] object SingletonPool {
    * 'close' on the underlying service multiple times.
    */
   class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
-      extends ServiceProxy[Req, Rep](underlying) {
+    extends ServiceProxy[Req, Rep](underlying) {
     private[this] val count = new AtomicInteger(1)
     private[this] val future = Future.value(this)
 
@@ -69,9 +69,9 @@ private[finagle] object SingletonPool {
  * fails or the current service has become unavailable.
  */
 class SingletonPool[Req, Rep](
-  underlying: ServiceFactory[Req, Rep],
-  statsReceiver: StatsReceiver)
-extends ServiceFactory[Req, Rep] {
+    underlying: ServiceFactory[Req, Rep],
+    statsReceiver: StatsReceiver)
+  extends ServiceFactory[Req, Rep] {
   import SingletonPool._
 
   private[this] val scoped = statsReceiver.scope("connects")

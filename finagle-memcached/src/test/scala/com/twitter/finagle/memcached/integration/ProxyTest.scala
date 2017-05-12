@@ -1,11 +1,9 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.builder.{ClientBuilder, Server => MServer, ServerBuilder}
+import com.twitter.finagle._
 import com.twitter.finagle.memcached.Client
-import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
-import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.io.Buf
 import com.twitter.util.Await
 import java.net.{InetAddress, InetSocketAddress}
@@ -21,7 +19,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
    * Note: This integration test requires a real Memcached server to run.
    */
   var externalClient: Client = null
-  var server: MServer = null
+  var server: ListeningServer = null
   var serverAddress: InetSocketAddress = null
   var proxyService: MemcacheService = null
   var proxyClient: MemcacheService = null
@@ -31,23 +29,22 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     testServer = TestMemcachedServer.start()
     if (testServer.isDefined) {
       Thread.sleep(150) // On my box the 100ms sleep wasn't long enough
-      proxyClient = ClientBuilder()
-        .hosts(Seq(testServer.get.address))
-        .codec(Memcached())
-        .hostConnectionLimit(1)
-        .build()
+      proxyClient = Memcached.client
+        .connectionsPerEndpoint(1)
+        .newService(
+          Name.bound(Address(testServer.get.address.asInstanceOf[InetSocketAddress])), "memcached")
+
       proxyService = new MemcacheService {
         def apply(request: Command) = proxyClient(request)
       }
 
-      server = ServerBuilder()
-        .codec(Memcached())
-        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .name("memcached")
-        .build(proxyService)
+      server = Memcached.server
+        .withLabel("memcached")
+        .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), proxyService)
 
       serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
-      externalClient = Client("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
+      externalClient = Client(Memcached.client.newService(
+        "%s:%d".format(serverAddress.getHostName, serverAddress.getPort)))
     }
   }
 

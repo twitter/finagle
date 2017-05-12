@@ -7,13 +7,16 @@ package com.twitter.finagle.util
  * Ema requires monotonic timestamps. A monotonic
  * time source is available at [[Ema.Monotime]].
  *
+ * This class is NOT threadsafe and requires synchronization around both
+ * the timestamp generation and calls to update.
+ *
  * @param window The mean lifetime of observations.
  */
 private[finagle] class Ema(window: Long) {
   private[this] var time = Long.MinValue
   private[this] var ema = 0D
 
-  def isEmpty: Boolean = synchronized { time < 0 }
+  def isEmpty: Boolean = time < 0
 
   /**
    * Update the average with observed value `x`, and return the new average.
@@ -21,7 +24,7 @@ private[finagle] class Ema(window: Long) {
    * Since `update` requires monotonic timestamps, it is up to the caller to
    * ensure that calls to update do not race.
    */
-  def update(stamp: Long, x: Long): Double = synchronized {
+  def update(stamp: Long, x: Long): Double = {
     if (time == Long.MinValue) {
       time = stamp
       ema = x
@@ -39,12 +42,12 @@ private[finagle] class Ema(window: Long) {
    * Return the last observation. This is generally only safe to use if you
    * control your own clock, since the current value depends on it.
    */
-  def last: Double = synchronized { ema }
+  def last: Double = ema
 
   /**
    * Reset the average to 0 and erase all observations.
    */
-  def reset(): Unit = synchronized {
+  def reset(): Unit = {
     time = Long.MinValue
     ema = 0
   }
@@ -58,19 +61,29 @@ private[finagle] object Ema {
    * any specific wall clock time, and it should only be used for checking
    * elapsed time.
    *
-   * Call `nanos` to sample.
+   * Call `nanos` to sample. This class is not threadsafe. Also, when used to
+   * generate a timestamp for Ema#update, both the timestamp generation and
+   * update must occur atomically:
+   *
+   * {{{
+   * val ema = Ema()
+   * val monotime = Ema.Monotime()
+   * ...
+   * def update(x: Long): Unit = synchronized {
+   *   ema.update(monotime.nanos(), x)
+   * }
+   * }}}
    *
    * TODO: stops increasing if it overflows.
    */
   class Monotime {
      private[this] var last = System.nanoTime()
 
-    def nanos(): Long = synchronized {
+    def nanos(): Long = {
       val sample = System.nanoTime()
       if (sample - last > 0)
         last = sample
       last
     }
-
   }
 }

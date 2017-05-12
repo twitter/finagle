@@ -13,7 +13,7 @@ final class HyperLogLogClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the PFADD command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.pfAdd(bufFoo, List(bufBar))))
+      assert(Await.result(client.pfAdd(bufFoo, List(bufBar))).booleanValue)
     }
   }
 

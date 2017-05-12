@@ -110,13 +110,13 @@ class StreamTransportsTest extends FunSuite {
       Future.None
 
     case chunk: HttpContent =>
-      Future.value(Some(ByteBufAsBuf.Owned(chunk.content.duplicate)))
+      Future.value(Some(ByteBufAsBuf(chunk.content.duplicate)))
   }
 
 
   test("eof satisfies collated reader") {
     val channel: EmbeddedChannel = new EmbeddedChannel()
-    val chanTran = new ChannelTransport[Any, HttpContent](channel)
+    val chanTran = Transport.cast[Any, HttpContent](new ChannelTransport(channel))
     val coll: Reader with Future[Unit] = collate(chanTran, readChunk)(_.isInstanceOf[LastHttpContent])
     val read = coll.read(10)
 

@@ -1,4 +1,4 @@
-scala_library(name='scala',
+scala_library(
   provides = scala_artifact(
     org = 'com.twitter',
     name = 'finagle-example',
@@ -7,7 +7,6 @@ scala_library(name='scala',
   dependencies=[
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-mysql',
-    'finagle/finagle-ostrich4',
     'finagle/finagle-redis',
     'finagle/finagle-stats',
     'finagle/finagle-thrift',
@@ -17,9 +16,7 @@ scala_library(name='scala',
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
-    'finagle/finagle-kestrel/src/main/scala:scala',
     'finagle/finagle-memcached/src/main/scala:scala',
-    'ostrich/src/main/scala:scala',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],

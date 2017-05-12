@@ -1,9 +1,0 @@
-{
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.stats.exportEmptyHistograms",
-      "description": "Export the full histogram details when no data points have been collected.",
-      "fraction": 0.0
-    }
-  ]
-}

@@ -22,7 +22,7 @@ All Balancers
 **meanweight**
   A gauge tracking the arithmetic mean of the weights of the endpoints
   being load-balanced across. Does not apply to
-  :src:`HeapBalancer <com/twitter/finagle/loadbalancer/HeapBalancer.scala>`.
+  :src:`HeapLeastLoaded <com/twitter/finagle/loadbalancer/heap/HeapLeastLoaded.scala>`.
 
 **adds**
   A counter of the number of hosts added to the loadbalancer.
@@ -47,9 +47,24 @@ All Balancers
   attempts. When this occurs, a non-open node may be selected for that
   request.
 
+**algorithm/{type}**
+  A gauge exported with the name of the algorithm used for load balancing.
+
 ApertureLoadBandBalancer
 <<<<<<<<<<<<<<<<<<<<<<<<
 
 **aperture**
   A gauge of the width of the window over which endpoints are
   load-balanced.
+
+**coordinate**
+  The process global coordinate for the process as sampled by
+  the Aperture implementation.
+
+**use_deterministic_ordering**
+  1 if the Apeture implementation uses deterministic ordering
+  0, otherwise.
+
+**coordinate_updates**
+  A counter of the number of times the Aperture implementation receives
+  updates from the `DeterministicOrdering` process global.

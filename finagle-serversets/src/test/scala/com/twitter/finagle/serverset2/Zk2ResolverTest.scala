@@ -8,13 +8,13 @@ import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
+import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.{Span, SpanSugar}
 import org.scalatest.{FunSuite, BeforeAndAfter, Tag}
 import scala.collection.JavaConverters.mapAsJavaMapConverter
-import scala.language.implicitConversions
 
 @RunWith(classOf[JUnitRunner])
 class Zk2ResolverTest
@@ -49,7 +49,7 @@ class Zk2ResolverTest
     inst.stop()
   }
 
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+  override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     // Since this test currently relies on timing, it's currently best to treat it as flaky for CI.
     // It should be runnable, if a little slow, however.
     if (!sys.props.contains("SKIP_FLAKY"))
@@ -114,7 +114,7 @@ class Zk2ResolverTest
         "resolution is not negative after the serverset disappears")
     }
   }
-  
+
   test("end-to-end: no shard ID") {
     val Name.Bound(va) = zk2resolve("/foo/bar")
     eventually {

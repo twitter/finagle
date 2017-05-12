@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux.lease.exp
 
 import com.twitter.util.Local
+import org.scalatest.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, Conductors}
 
 trait LocalConductors extends Conductors with IntegrationPatience {
@@ -18,7 +19,7 @@ trait LocalConductors extends Conductors with IntegrationPatience {
     }
   }
 
-  def localWhenFinished(conductor: Conductor)(fn: => Unit): Unit = {
+  def localWhenFinished(conductor: Conductor)(fn: => Assertion): Unit = {
     val outer = Local.save()
     conductor.whenFinished {
       val saved = Local.save()
