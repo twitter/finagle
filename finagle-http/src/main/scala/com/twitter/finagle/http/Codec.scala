@@ -13,7 +13,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsR
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit}
-import java.lang.{Long => JLong}
+import java.lang.{Long => JLong, Boolean => JBoolean}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http._
@@ -336,13 +336,11 @@ private object TraceInfo {
               else
                 None
 
-            val sampled = if (!request.headerMap.contains(Header.Sampled)) {
+            val maybeSampled = request.headerMap.getOrNull(Header.Sampled)
+            val sampled = if (maybeSampled == null) {
               None
             } else {
-              try Some(request.headerMap(Header.Sampled).toBoolean)
-              catch { case _: IllegalArgumentException =>
-                None
-              }
+              Some("1".equals(maybeSampled) || JBoolean.valueOf(maybeSampled))
             }
 
             val flags = getFlags(request)
