@@ -61,6 +61,9 @@ Breaking API Changes
     `c.t.f.builder.ClientBuilder.group`. Use `c.t.f.builder.ClientBuilder.dest` instead.
     ``RB_ID=915098``
 
+  * finagle-core: Remove deprecated `c.t.f.builder.Cluster`. Use `com.twitter.finagle.Name` to
+    represent clusters instead. ``RB_ID=916162``
+
   * finagle-base-http: Remove deprecated `c.t.f.http.Message.ContentTypeWwwFrom`.
     Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=915543`
 

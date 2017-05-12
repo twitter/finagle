@@ -63,30 +63,6 @@ class GroupTest extends FunSuite {
     assert(group2() eq group2())
   }
 
-  test("convert from builder group") {
-    val bc = builder.StaticCluster(Seq(1, 2, 3, 4))
-    val group = Group.fromCluster(bc)
-    assert(group() == Set(1, 2, 3, 4))
-    assert(group() eq group())
-  }
-
-  test("convert from dynamic builder group") {
-    val bc = new builder.ClusterInt
-    val group = Group.fromCluster(bc)
-
-    assert(group().isEmpty)
-    bc.add(1)
-    assert(group() == Set(1))
-    bc.del(1)
-    assert(group().isEmpty)
-    bc.add(1)
-    assert(group() == Set(1))
-    bc.add(1)
-    assert(group() == Set(1))
-    bc.add(2)
-    assert(group() == Set(1, 2))
-  }
-
   test("combined groups") {
     val combined = Group[Int](1, 2) + Group[Int](3, 4) + Group[Int](5, 6)
     assert(combined.members == Set(1, 2, 3, 4, 5, 6))

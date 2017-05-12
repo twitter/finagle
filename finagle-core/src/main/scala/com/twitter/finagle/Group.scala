@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.builder.Cluster
 import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
@@ -163,26 +162,5 @@ object Group {
   def mutable[T](initial: T*): MutableGroup[T] = new MutableGroup[T] {
     protected[finagle] val set = Var(Set(initial:_*))
     def update(newMembers: Set[T]) { set() = newMembers }
-  }
-
-  /**
-   * Construct a (dynamic) `Group` from the given
-   * [[com.twitter.finagle.builder.Cluster]]. Note that clusters
-   * are deprecated, so this constructor acts as a temporary
-   * bridge.
-   */
-  @deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "2014-11-21")
-  def fromCluster[T](underlying: Cluster[T]): Group[T] = {
-    val (snap, edits) = underlying.snap
-    new Group[T] {
-      protected[finagle] val set = Var(snap.toSet)
-
-      edits foreach { spool =>
-        spool foreach {
-          case Cluster.Add(t) => set() += t
-          case Cluster.Rem(t) => set() -= t
-        }
-      }
-    }
   }
 }
