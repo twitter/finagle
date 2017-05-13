@@ -1,6 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.mysql.transport.MysqlBuf
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufReader}
 import com.twitter.io.Buf
 
 /**
@@ -71,15 +71,19 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
       else {
         val str = new String(bytes, Charset(charset))
         field.fieldType match {
-          case Type.Tiny                        => ByteValue(str.toByte)
-          case Type.Short                       => ShortValue(str.toShort)
-          case Type.Int24                       => IntValue(str.toInt)
-          case Type.Long if field.isUnsigned()  => LongValue(str.toLong)
-          case Type.Long                        => IntValue(str.toInt)
-          case Type.LongLong                    => LongValue(str.toLong)
-          case Type.Float                       => FloatValue(str.toFloat)
-          case Type.Double                      => DoubleValue(str.toDouble)
-          case Type.Year                        => ShortValue(str.toShort)
+          case Type.Tiny if field.isSigned()      => ByteValue(str.toByte)
+          case Type.Tiny                          => ShortValue(str.toShort)
+          case Type.Short if field.isSigned()     => ShortValue(str.toShort)
+          case Type.Short                         => IntValue(str.toInt)
+          case Type.Int24 if field.isSigned()     => IntValue(str.toInt)
+          case Type.Int24                         => IntValue(str.toInt)
+          case Type.Long if field.isSigned()      => IntValue(str.toInt)
+          case Type.Long                          => LongValue(str.toLong)
+          case Type.LongLong if field.isSigned()  => LongValue(str.toLong)
+          case Type.LongLong                      => BigIntValue(BigInt(str))
+          case Type.Float                         => FloatValue(str.toFloat)
+          case Type.Double                        => DoubleValue(str.toDouble)
+          case Type.Year                          => ShortValue(str.toShort)
           // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
           case Type.VarChar | Type.String | Type.VarString |
                Type.TinyBlob | Type.Blob | Type.MediumBlob
@@ -102,7 +106,7 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
  * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
  */
 class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map[String, Int]) extends Row {
-  private val reader = MysqlBuf.reader(rawRow)
+  private val reader: MysqlBufReader = MysqlBuf.reader(rawRow)
   reader.skip(1)
 
   /**
@@ -131,15 +135,19 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
     for ((field, idx) <- fields.zipWithIndex) yield {
       if (isNull(idx)) NullValue
       else field.fieldType match {
-        case Type.Tiny                        => ByteValue(reader.readByte())
-        case Type.Short                       => ShortValue(reader.readShortLE())
-        case Type.Int24                       => IntValue(reader.readIntLE())
-        case Type.Long if field.isUnsigned()  => LongValue(reader.readUnsignedIntLE())
-        case Type.Long                        => IntValue(reader.readIntLE())
-        case Type.LongLong                    => LongValue(reader.readLongLE())
-        case Type.Float                       => FloatValue(reader.readFloatLE())
-        case Type.Double                      => DoubleValue(reader.readDoubleLE())
-        case Type.Year                        => ShortValue(reader.readShortLE())
+        case Type.Tiny if field.isSigned()      => ByteValue(reader.readByte())
+        case Type.Tiny                          => ShortValue(reader.readUnsignedByte())
+        case Type.Short if field.isSigned()     => ShortValue(reader.readShortLE())
+        case Type.Short                         => IntValue(reader.readUnsignedShortLE())
+        case Type.Int24 if field.isSigned()     => IntValue(reader.readIntLE())
+        case Type.Int24                         => IntValue(reader.readIntLE())
+        case Type.Long if field.isSigned()      => IntValue(reader.readIntLE())
+        case Type.Long                          => LongValue(reader.readUnsignedIntLE())
+        case Type.LongLong if field.isSigned()  => LongValue(reader.readLongLE())
+        case Type.LongLong                      => BigIntValue(reader.readUnsignedLongLE())
+        case Type.Float                         => FloatValue(reader.readFloatLE())
+        case Type.Double                        => DoubleValue(reader.readDoubleLE())
+        case Type.Year                          => ShortValue(reader.readShortLE())
         // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
         case Type.VarChar | Type.String | Type.VarString |
              Type.TinyBlob | Type.Blob | Type.MediumBlob

@@ -16,6 +16,7 @@ case class ByteValue(b: Byte) extends Value
 case class ShortValue(s: Short) extends Value
 case class IntValue(i: Int) extends Value
 case class LongValue(l: Long) extends Value
+case class BigIntValue(bi: BigInt) extends Value
 case class FloatValue(f: Float) extends Value
 case class DoubleValue(d: Double) extends Value
 case class StringValue(s: String) extends Value

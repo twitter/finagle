@@ -132,6 +132,30 @@ class MysqlBufReader(buf: Buf) extends ProxyByteReader {
       case len => throw new IllegalStateException(s"Invalid length byte: $len")
     }
   }
+
+  private val unsignedLongMaxValue: BigInt = BigInt("18446744073709551615")
+
+  def readUnsignedLongLE(): BigInt = {
+    val arr = Array.ofDim[Byte](8)
+
+    for (i <- 0 until 8) {
+      val b = readByte()
+      arr(7 - i) = b
+    }
+
+    BigInt(arr) & unsignedLongMaxValue
+  }
+
+  def readUnsignedLongBE(): BigInt = {
+    val arr = Array.ofDim[Byte](8)
+
+    for (i <- 0 until 8) {
+      val b = readByte()
+      arr(i) = b
+    }
+
+    BigInt(arr) & unsignedLongMaxValue
+  }
 }
 
 
