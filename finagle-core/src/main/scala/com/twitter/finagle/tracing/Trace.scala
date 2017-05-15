@@ -332,11 +332,6 @@ object Trace {
     record(Annotation.Message(message), duration)
   }
 
-  @deprecated("Use recordRpc and recordServiceName", "6.13.x")
-  def recordRpcname(service: String, rpc: String): Unit = {
-    record(Annotation.Rpcname(service, rpc))
-  }
-
   def recordServiceName(serviceName: String): Unit = {
     record(Annotation.ServiceName(serviceName))
   }

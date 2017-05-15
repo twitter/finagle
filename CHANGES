@@ -61,6 +61,10 @@ Breaking API Changes
     `c.t.f.builder.ClientBuilder.group`. Use `c.t.f.builder.ClientBuilder.dest` instead.
     ``RB_ID=915098``
 
+  * finagle-core: Remove deprecated `c.t.f.tracing.Trace.recordRpcName`. Use
+    `c.t.f.tracing.Trace.recordRpc` and `c.t.f.tracing.Trace.recordServiceName` instead.
+    ``RB_ID=916426``
+
   * finagle-core: Remove deprecated `c.t.f.builder.Cluster`. Use `com.twitter.finagle.Name` to
     represent clusters instead. ``RB_ID=916162``
 
