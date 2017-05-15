@@ -216,22 +216,7 @@ object ThriftServiceIface {
         service(args).flatMap(responseFn)
     }
 
-  private[this] val tlReusableBuffer = new ThreadLocal[TReusableMemoryTransport] {
-    override def initialValue(): TReusableMemoryTransport = TReusableMemoryTransport(512)
-  }
-
-  private[this] def getReusableBuffer(): TReusableMemoryTransport = {
-    val buf = tlReusableBuffer.get()
-    buf.reset()
-    buf
-  }
-
-  private[this] def resetBuffer(trans: TReusableMemoryTransport): Unit = {
-    if (trans.currentCapacity > maxReusableBufferSize().inBytes) {
-      resetCounter.incr()
-      tlReusableBuffer.remove()
-    }
-  }
+  private[this] val tlReusableBuffer = TReusableBuffer()
 
   private def encodeRequest(
     methodName: String,
@@ -239,15 +224,15 @@ object ThriftServiceIface {
     pf: TProtocolFactory,
     oneway: Boolean
   ): ThriftClientRequest = {
-    val buf = getReusableBuffer()
+    val buf = tlReusableBuffer.get()
     val oprot = pf.getProtocol(buf)
 
     oprot.writeMessageBegin(new TMessage(methodName, TMessageType.CALL, 0))
     args.write(oprot)
     oprot.writeMessageEnd()
 
-    val bytes = Arrays.copyOfRange(buf.getArray, 0, buf.length)
-    resetBuffer(buf)
+    val bytes = Arrays.copyOfRange(buf.getArray(), 0, buf.length())
+    tlReusableBuffer.reset()
 
     new ThriftClientRequest(bytes, oneway)
   }
