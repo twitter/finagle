@@ -199,12 +199,12 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
   }
 
-  private[this] val nodesClosable: Closable = Closable.make { deadline =>
-    Closable.all(synchronized(heap).map(_.factory):_*).close(deadline)
-  }
-
   def close(deadline: Time): Future[Unit] = {
-    Closable.sequence(observation, nodesClosable).close(deadline)
+    // Note, we don't treat the endpoints as a
+    // resource that the load balancer owns, and as
+    // such we don't close it here. We expect the
+    // layers above to manage them accordingly.
+    observation.close(deadline)
   }
 
   /**

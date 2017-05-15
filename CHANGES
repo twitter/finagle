@@ -42,6 +42,13 @@ Runtime Behavior Changes
     instead is used instead. This ony affects direct usages of `DefaultTimer` as all Finagle
     protocols are using Netty 4 `HashedWheelTimer` at this point. ``RB_ID=915924``
 
+  * finagle-core: The load balancer implementations no longer close the endpoint
+    resources when they are closed. Instead, they treat them as externally
+    managed resources and expect the layers above to manage them. No change
+    is required if using the Balancers in the context of a Finagle client.
+    If that's not the case, however, managing the life cycle of the passed
+    in endpoints is necessary. ``RB_ID=916415``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -131,6 +138,7 @@ Breaking API Changes
   * finagle-thriftmux: Remove deprecated `c.t.f.ThrifMux.withClientId`. Use
     `c.t.f.ThriftMux.client.withClientId`. Remove deprecated `c.t.f.ThrifMux.withProtocolFactory`.
     Use `c.t.f.ThriftMux.client.withProtocolFactory`. ``RB_ID=915655``
+
 
 6.44.0
 ------

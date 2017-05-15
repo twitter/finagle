@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Updater
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Future, Time}
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 
@@ -250,6 +250,10 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   def close(deadline: Time): Future[Unit] = {
     for (gauge <- gauges) gauge.remove()
     removes.incr(dist.vector.size)
-    Closable.all(dist.vector:_*).close(deadline)
+    // Note, we don't treat the `dist.vector` as a
+    // resource that the load balancer owns, and as
+    // such we don't close it here. We expect the
+    // layers above to manage them accordingly.
+    Future.Done
   }
 }
