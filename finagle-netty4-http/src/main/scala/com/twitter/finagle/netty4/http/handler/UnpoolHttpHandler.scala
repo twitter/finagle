@@ -25,12 +25,9 @@ private[http] object UnpoolHttpHandler extends ChannelInboundHandlerAdapter {
       ctx.fireChannelRead(hc)
 
     case hc: HttpContent =>
-      val onHeapContent = try {
-        if (hc.content.readableBytes > 0)
-          Unpooled.buffer(hc.content.readableBytes, hc.content.capacity).writeBytes(hc.content)
-        else
-          Unpooled.EMPTY_BUFFER
-      } finally hc.content.release()
+      val onHeapContent =
+        try Unpooled.buffer(hc.content.readableBytes, hc.content.capacity).writeBytes(hc.content)
+        finally hc.content.release()
 
       ctx.fireChannelRead(hc.replace(onHeapContent))
 
