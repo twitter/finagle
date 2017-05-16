@@ -68,6 +68,26 @@ class TracingTest extends FunSuite
     assert(Status.Ok == Await.result(res, 5.seconds).status)
   }
 
+  test("parse header with sampled as 1") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request): Future[Response] = {
+        assert(Trace.id == traceId)
+        assert(Trace.id.flags == flags)
+        Future.value(Response())
+      }
+    }
+
+    val req = Request("/test.json")
+    req.headerMap.add(Header.TraceId, "0000000000000001")
+    req.headerMap.add(Header.SpanId, "0000000000000002")
+    req.headerMap.add(Header.Sampled, "1")
+    req.headerMap.add(Header.Flags, "1")
+    val res = TraceInfo.letTraceIdFromRequestHeaders(req) {
+      svc(req)
+    }
+    assert(Status.Ok == Await.result(res, 5.seconds).status)
+  }
+
   test("not parse header if no trace id") {
     val svc = new Service[Request, Response] {
       def apply(request: Request): Future[Response] = {
