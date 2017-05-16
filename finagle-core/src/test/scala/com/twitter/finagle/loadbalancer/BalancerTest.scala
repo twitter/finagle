@@ -158,7 +158,7 @@ class BalancerTest extends FunSuite
     assert(rems() == 1)
     assert(bal.factories == Set(f1, f3))
     assert(f1.ncloses == 0)
-    assert(f2.ncloses == 1)
+    assert(f2.ncloses == 0)
     assert(f3.ncloses == 0)
 
     bal.update(Vector(f1, f2, f3))

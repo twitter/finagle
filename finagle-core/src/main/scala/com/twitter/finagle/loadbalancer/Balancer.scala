@@ -148,8 +148,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     private[this] val factoryToNode: Node => (ServiceFactory[Req, Rep], Node) =
       n => n.factory -> n
 
-    private[this] val closeNode: Node => Unit = n => n.close()
-
     def handle(u: Update): Unit = u match {
       case NewList(newFactories) =>
         // We get a new list of service factories, and compare against the
@@ -178,9 +176,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
             numAdded += 1
           }
         }
-
-        // Close nodes that weren't transferred.
-        oldFactories.values.foreach(closeNode)
 
         removes.incr(oldFactories.size)
         adds.incr(numAdded)
@@ -250,9 +245,9 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   def close(deadline: Time): Future[Unit] = {
     for (gauge <- gauges) gauge.remove()
     removes.incr(dist.vector.size)
-    // Note, we don't treat the `dist.vector` as a
+    // Note, we don't treat the endpoints as a
     // resource that the load balancer owns, and as
-    // such we don't close it here. We expect the
+    // such we don't close them here. We expect the
     // layers above to manage them accordingly.
     Future.Done
   }

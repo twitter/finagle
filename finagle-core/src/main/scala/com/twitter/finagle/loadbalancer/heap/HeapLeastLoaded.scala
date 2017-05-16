@@ -106,7 +106,6 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     heap = heap.dropRight(1)
     size -= 1
     node.index = -1 // sentinel value indicating node is no longer in the heap.
-    serviceFactory.close()
     removes.incr()
   }
 
