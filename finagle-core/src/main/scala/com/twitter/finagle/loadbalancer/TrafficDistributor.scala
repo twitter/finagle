@@ -8,21 +8,11 @@ import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
 private object TrafficDistributor {
-
-  /**
-   * A [[ServiceFactory]] which admits that a concrete address flows through
-   * the [[TrafficDistributor]].
-   */
-  case class EndpointServiceFactory[Req, Rep](
-      underlying: ServiceFactory[Req, Rep],
-      address: Address)
-    extends ServiceFactoryProxy[Req, Rep](underlying)
-
   /**
    * A [[ServiceFactory]] and its associated weight.
    */
   case class WeightedFactory[Req, Rep](
-      factory: EndpointServiceFactory[Req, Rep],
+      factory: EndpointFactory[Req, Rep],
       weight: Double)
 
   /**
@@ -30,8 +20,8 @@ private object TrafficDistributor {
    * operates over, capable of being updated.
    */
   type BalancerEndpoints[Req, Rep] =
-    Var[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
-      with Updatable[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
+    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]]
+      with Updatable[Activity.State[Set[EndpointFactory[Req, Rep]]]]
 
   /**
    * Represents cache entries for load balancer instances. Stores both
@@ -141,7 +131,7 @@ private object TrafficDistributor {
 private class TrafficDistributor[Req, Rep](
     dest: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
-    newBalancer: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
+    newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
     eagerEviction: Boolean,
     rng: Rng = Rng.threadLocal,
     statsReceiver: StatsReceiver = NullStatsReceiver)
@@ -173,7 +163,7 @@ private class TrafficDistributor[Req, Rep](
             case Some(wf@WeightedFactory(_, w)) if w != weight =>
               cache.updated(addr, wf.copy(weight = weight))
             case None =>
-              val endpoint = new EndpointServiceFactory(newEndpoint(addr), addr)
+              val endpoint = new EndpointFactory(() => newEndpoint(addr), addr)
               cache.updated(addr, WeightedFactory(endpoint, weight))
             case _ => cache
           }
@@ -273,7 +263,7 @@ private class TrafficDistributor[Req, Rep](
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
         val emptyBal = newBalancer(
-          Activity(Var(Activity.Ok(Set.empty[EndpointServiceFactory[Req, Rep]]))))
+          Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
         updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal

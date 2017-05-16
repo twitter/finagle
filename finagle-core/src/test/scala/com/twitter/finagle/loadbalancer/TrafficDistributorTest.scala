@@ -9,13 +9,9 @@ import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
 private object TrafficDistributorTest {
-  import TrafficDistributor.EndpointServiceFactory
-
   // The distributor is not privy to this wrapped socket address and
   // it allows us to retrieve the weight class.
   object WeightedTestAddr {
@@ -48,7 +44,7 @@ private object TrafficDistributorTest {
       }
   }
 
-  case class Balancer(endpoints: Activity[Traversable[ServiceFactory[Int, Int]]])
+  private case class Balancer(endpoints: Activity[Traversable[AddressFactory]])
     extends ServiceFactory[Int, Int] {
       var offeredLoad = 0
       def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
@@ -68,15 +64,13 @@ private object TrafficDistributorTest {
       balancers.flatMap { b =>
         val endpoints = b.endpoints.sample()
         endpoints.map {
-          case s: ServiceFactoryProxy[_, _] => s.self match {
-            case AddressFactory(WeightedTestAddr(_, w)) =>
-              (w*endpoints.size, endpoints.size, b.offeredLoad)
-          }
+          case AddressFactory(WeightedTestAddr(_, w)) =>
+            (w*endpoints.size, endpoints.size, b.offeredLoad)
         }
       }
     }
 
-  class Ctx {
+  private class Ctx {
     var newEndpointCalls = 0
     def newEndpoint(addr: Address): ServiceFactory[Int, Int] = {
       newEndpointCalls += 1
@@ -85,9 +79,19 @@ private object TrafficDistributorTest {
 
     var newBalancerCalls = 0
     var balancers: Set[Balancer] = Set.empty
-    def newBalancer(eps: Activity[Set[EndpointServiceFactory[Int, Int]]]): ServiceFactory[Int, Int] = {
+    def newBalancer(
+      eps: Activity[Set[EndpointFactory[Int, Int]]]
+    ): ServiceFactory[Int, Int] = {
       newBalancerCalls += 1
-      val b = Balancer(eps)
+      // eagerly establish the lazy endpoints and extract the
+      // underlying `AddressFactory`
+      val addressFactories = eps.map { set =>
+        set.map { epsf =>
+          Await.result(epsf())
+          epsf.self.get.asInstanceOf[AddressFactory]
+        }
+      }
+      val b = Balancer(addressFactories)
       balancers += b
       b
     }
@@ -95,9 +99,10 @@ private object TrafficDistributorTest {
     def newDist(
       dest: Var[Activity.State[Set[Address]]],
       eagerEviction: Boolean = true,
-      statsReceiver: StatsReceiver = NullStatsReceiver
-    ): ServiceFactory[Int, Int] = {
-      new TrafficDistributor[Int, Int](
+      statsReceiver: StatsReceiver = NullStatsReceiver,
+      autoPrime: Boolean = false
+    ): TrafficDistributor[Int, Int] = {
+      val dist = new TrafficDistributor[Int, Int](
         dest = Activity(dest),
         newEndpoint = newEndpoint,
         newBalancer = newBalancer,
@@ -105,6 +110,17 @@ private object TrafficDistributorTest {
         statsReceiver = statsReceiver,
         rng = Rng("seed".hashCode)
       )
+
+      if (autoPrime) {
+        // Primes the distributor such that it creates its underlying
+        // resources (i.e. endpoint stacks). Note, do NOT block here
+        // since this is a circular dependency. Instead, we can rely
+        // on the fact that we are serialized since the same thread
+        // that updates `dest` will call this closure as well.
+        dest.changes.respond { _ => for (_ <- 0 to 100) { dist() } }
+      }
+
+      dist
     }
 
     def resetCounters(): Unit = {
@@ -112,9 +128,30 @@ private object TrafficDistributorTest {
       newBalancerCalls = 0
     }
   }
+
+  private class CumulativeGaugeInMemoryStatsReceiver
+    extends StatsReceiverWithCumulativeGauges
+  {
+    private[this] val underlying = new InMemoryStatsReceiver()
+    override val repr: AnyRef = this
+    override def counter(name: String*): ReadableCounter = underlying.counter(name: _*)
+    override def stat(name: String*): ReadableStat = underlying.stat(name: _*)
+
+    protected[this] def registerGauge(name: Seq[String], f: => Float): Unit =
+      underlying.addGauge(name: _*)(f)
+
+    protected[this] def deregisterGauge(name: Seq[String]): Unit =
+      underlying.gauges -= name
+
+    def counters: Map[Seq[String], Int] = underlying.counters.toMap
+    def stats: Map[Seq[String], Seq[Float]] = underlying.stats.toMap
+    def gauges: Map[Seq[String], () => Float] = underlying.gauges.toMap
+
+    def numGauges(name: Seq[String]): Int =
+      numUnderlying(name: _*)
+  }
 }
 
-@RunWith(classOf[JUnitRunner])
 class TrafficDistributorTest extends FunSuite {
   import TrafficDistributorTest._
 
@@ -184,7 +221,7 @@ class TrafficDistributorTest extends FunSuite {
     val init: Set[Address] = (1 to 5).map(Address(_)).toSet
     val dest = Var(Activity.Ok(init))
 
-    newDist(dest)
+    newDist(dest, autoPrime = true)
 
     assert(newEndpointCalls == init.size)
     assert(newBalancerCalls == 1)
@@ -205,7 +242,7 @@ class TrafficDistributorTest extends FunSuite {
     }.toSet
     val dest = Var(Activity.Ok(init))
 
-    newDist(dest)
+    newDist(dest, autoPrime = true)
 
     assert(newBalancerCalls == init.size)
     assert(balancers.size == init.size)
@@ -253,7 +290,7 @@ class TrafficDistributorTest extends FunSuite {
       }
     }
 
-    newDist(dest, eagerEviction = false)
+    newDist(dest, eagerEviction = false, autoPrime = true)
 
     assert(newEndpointCalls == init.size)
     assert(newBalancerCalls == 1)
@@ -342,7 +379,7 @@ class TrafficDistributorTest extends FunSuite {
     val dest = Var(Activity.Ok(classes))
 
     def mkBalancer(
-      set: Activity[Set[TrafficDistributor.EndpointServiceFactory[Int, Int]]]
+      set: Activity[Set[EndpointFactory[Int, Int]]]
     ): ServiceFactory[Int, Int] = {
       DefaultBalancerFactory.newBalancer(
         set.map(_.toVector),
@@ -362,31 +399,6 @@ class TrafficDistributorTest extends FunSuite {
     assert(dist.status == Status.Open)
   })
 
-  // todo: move this to util-stats?
-  private class CumulativeGaugeInMemoryStatsReceiver
-    extends StatsReceiverWithCumulativeGauges
-  {
-    private[this] val underlying = new InMemoryStatsReceiver()
-    override val repr: AnyRef = this
-    override def counter(name: String*): ReadableCounter = underlying.counter(name: _*)
-    override def stat(name: String*): ReadableStat = underlying.stat(name: _*)
-
-    protected[this] def registerGauge(name: Seq[String], f: => Float): Unit =
-      underlying.addGauge(name: _*)(f)
-
-    protected[this] def deregisterGauge(name: Seq[String]): Unit =
-      underlying.gauges -= name
-
-    def counters: Map[Seq[String], Int] = underlying.counters.toMap
-
-    def stats: Map[Seq[String], Seq[Float]] = underlying.stats.toMap
-
-    def gauges: Map[Seq[String], () => Float] = underlying.gauges.toMap
-
-    def numGauges(name: Seq[String]): Int =
-      numUnderlying(name: _*)
-  }
-
   test("increment weights on a shard") (new StringClient with StringServer {
     val server = stringServer.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
@@ -404,7 +416,8 @@ class TrafficDistributorTest extends FunSuite {
     // redline a shard.
     val N = 5
     for (i <- 1 to N) withClue(s"for i=$i:") {
-      val addr = WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
+      val addr = WeightedAddress(
+        Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
       va() = Addr.Bound(addr)
       assert(Await.result(client("hello")) == "hello".reverse)
       assert(sr.counters(Seq("test", "requests")) == i)
