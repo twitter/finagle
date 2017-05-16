@@ -252,9 +252,9 @@ object ThriftMux
     }
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -262,9 +262,9 @@ object ThriftMux
       thriftmux.MethodBuilder.from(dest, this)
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */

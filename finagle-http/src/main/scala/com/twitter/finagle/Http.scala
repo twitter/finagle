@@ -308,9 +308,9 @@ object Http extends Client[Request, Response] with HttpRichClient
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[http.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -318,9 +318,9 @@ object Http extends Client[Request, Response] with HttpRichClient
       http.MethodBuilder.from(dest, this)
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[http.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
