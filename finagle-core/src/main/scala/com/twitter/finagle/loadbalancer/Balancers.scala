@@ -333,4 +333,25 @@ object Balancers {
         new RoundRobinBalancer(endpoints, sr, exc, maxEffort))
     }
   }
+
+  /**
+   * A simple sticky load balancer which selects the first backend it
+   * can connect to and sticks to it unless that backend is not functioning
+   * properly, in which case it will change to another functioning backend.
+   *
+   * WARNING: This load balancer does not take load or latency into account
+   * when selecting backends.
+   */
+  def sticky(): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "StickyLoadBalancerFactory"
+    def newBalancer[Req, Rep](
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      sr: StatsReceiver,
+      exc: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
+      new StickyBalancer(endpoints, sr, exc) {
+        private[this] val gauge = sr.addGauge("sticky")(1)
+      }
+    }
+  }
 }
