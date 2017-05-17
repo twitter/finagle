@@ -13,6 +13,10 @@ New Features
   * finagle: Changed dependencies of Netty from 4.1.9 to 4.1.10 and tcnative
     from 2.0.0 to 2.0.1. ``RB_ID=916056``
 
+  * finagle-core: `c.t.f.n.ssl.SslConnectHandler` is no longer exported publicly.
+    It has also been renamed to `c.t.f.n.ssl.client.SslClientConnectHandler`.
+    ``RB_ID=916932``
+
   * finagle-core: c.t.f.factory.ServiceFactoryCache is now exported publicly.
     ``RB_ID=915064``
 

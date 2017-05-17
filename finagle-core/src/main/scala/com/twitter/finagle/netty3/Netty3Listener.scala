@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.IOExceptionStrings.FinestIOExceptionMessages
 import com.twitter.finagle.netty3.channel._
 import com.twitter.finagle.netty3.param.Netty3Timer
-import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
+import com.twitter.finagle.netty3.ssl.server.SslServerConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.{Label, Logger, Stats, Timer}
 import com.twitter.finagle.server.{Listener, ServerRegistry}
@@ -110,7 +110,7 @@ object Netty3Listener {
     // are no longer needed (namely, upon disconnection.) Since some engine implementations
     // make use of objects that are not managed by the JVM's memory manager, we need to
     // know when memory can be released. This will invoke the shutdown method  on implementations
-    // that define shutdown(): Unit. The SslListenerConnectionHandler also ensures that the SSL
+    // that define shutdown(): Unit. The SslServerConnectHandler also ensures that the SSL
     // handshake is complete before continuing.
     def onShutdown(): Unit =
       try {
@@ -122,8 +122,7 @@ object Netty3Listener {
 
     pipeline.addFirst(
       "sslConnect",
-      new SslListenerConnectionHandler(handler, onShutdown)
-    )
+      new SslServerConnectHandler(handler, onShutdown))
   }
 
   val channelFactory: ServerChannelFactory =

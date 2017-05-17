@@ -4,7 +4,7 @@ import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.netty3.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
-import com.twitter.finagle.netty3.ssl.SslConnectHandler
+import com.twitter.finagle.netty3.ssl.client.SslClientConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.netty3.Netty3Transporter.{ChannelFactory, TransportFactory}
 import com.twitter.finagle.param.{Label, Logger}
@@ -311,7 +311,7 @@ private[netty3] class Netty3Transporter[In, Out](
         .getOrElse(SessionVerifier.AlwaysValid)
 
       val sslHandler = new SslHandler(engine.self)
-      val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
+      val sslConnectHandler = new SslClientConnectHandler(sslHandler, verifier)
 
       pipeline.addFirst("sslConnect", sslConnectHandler)
       pipeline.addFirst("ssl", sslHandler)

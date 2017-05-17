@@ -3,7 +3,7 @@ package com.twitter.finagle.netty3
 import com.twitter.conversions.time._
 import com.twitter.finagle.netty3.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
-import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
+import com.twitter.finagle.netty3.ssl.server.SslServerConnectHandler
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
@@ -176,27 +176,27 @@ class Netty3ListenerTest extends FunSuite with MockitoSugar {
     assert(sslHandler.nonEmpty)
   }
 
-  test("SslListenerConnectionHandler is not added by default") {
+  test("SslServerConnectHandler is not added by default") {
     val params = Stack.Params.empty + Label("name")
     val pipeline = makeListenerPipeline(params)
-    val sslConnectionHandler = findHandlerInPipeline[SslListenerConnectionHandler](pipeline)
-    assert(sslConnectionHandler.isEmpty)
+    val sslConnectHandler = findHandlerInPipeline[SslServerConnectHandler](pipeline)
+    assert(sslConnectHandler.isEmpty)
   }
 
-  test("SslListenerConnectionHandler is not added if the SSL/TLS server config param is None") {
+  test("SslServerConnectHandler is not added if the SSL/TLS server config param is None") {
     val params = Stack.Params.empty + Label("name") + Transport.ServerSsl(None)
     val pipeline = makeListenerPipeline(params)
-    val sslConnectionHandler = findHandlerInPipeline[SslListenerConnectionHandler](pipeline)
-    assert(sslConnectionHandler.isEmpty)
+    val sslConnectHandler = findHandlerInPipeline[SslServerConnectHandler](pipeline)
+    assert(sslConnectHandler.isEmpty)
   }
 
-  test("SslListenerConnectionHandler is added if the SSL/TLS server config param is configured") {
+  test("SslServerConnectHandler is added if the SSL/TLS server config param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
       Transport.ServerSsl(Some(SslServerConfiguration()))
     val pipeline = makeListenerPipeline(params)
-    val sslConnectionHandler = findHandlerInPipeline[SslListenerConnectionHandler](pipeline)
-    assert(sslConnectionHandler.nonEmpty)
+    val sslConnectHandler = findHandlerInPipeline[SslServerConnectHandler](pipeline)
+    assert(sslConnectHandler.nonEmpty)
   }
 
   test("FinagleBridge is added by default") {

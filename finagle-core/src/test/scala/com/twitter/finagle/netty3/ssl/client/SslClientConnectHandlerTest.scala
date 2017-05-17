@@ -1,23 +1,20 @@
-package com.twitter.finagle.netty3.ssl
+package com.twitter.finagle.netty3.ssl.client
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.ArgumentCaptor
-import org.mockito.Matchers._
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.ssl.SslHandler
-import javax.net.ssl.{SSLEngine, SSLSession}
+import com.twitter.finagle.SslHandshakeException
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import com.twitter.finagle.SslHandshakeException
+import javax.net.ssl.{SSLEngine, SSLSession}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.ssl.SslHandler
+import org.mockito.ArgumentCaptor
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatest.FunSuite
+import org.scalatest.mock.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
-class SslConnectHandlerTest extends FunSuite with MockitoSugar {
+class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
 
-  class SslHandlerHelper {
+  class SslConnectHandlerHelper {
     val ctx = mock[ChannelHandlerContext]
     val sslHandler = mock[SslHandler]
     val session = mock[SSLSession]
@@ -38,37 +35,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     when(sslHandler.handshake()) thenReturn handshakeFuture
   }
 
-  class SslListenerConnectionHandlerHelper extends SslHandlerHelper {
-    var shutdownCount = 0
-    def onShutdown() = shutdownCount += 1
-
-    val listenerHandler = new SslListenerConnectionHandler(sslHandler, onShutdown)
-    val event = new UpstreamChannelStateEvent(
-      channel, ChannelState.CONNECTED, remoteAddress)
-
-    listenerHandler.handleUpstream(ctx, event)
-  }
-
-  test("SslListenerConnectionHandler should call the shutdown callback on channel shutdown") {
-    val h = new SslListenerConnectionHandlerHelper
-    import h._
-
-    val event = new UpstreamChannelStateEvent(channel, ChannelState.OPEN, null)
-    listenerHandler.channelClosed(mock[ChannelHandlerContext], event)
-    assert(shutdownCount == 1)
-  }
-
-  test("SslListenerConnectionHandler should delay connection until the handshake is complete") {
-    val h = new SslListenerConnectionHandlerHelper
-    import h._
-
-    verify(sslHandler, times(1)).handshake()
-    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
-    handshakeFuture.setSuccess()
-    verify(ctx, times(1)).sendUpstream(any[ChannelEvent])
-  }
-
-  class SslConnectHandlerHelper extends SslHandlerHelper {
+  class SslClientConnectHandlerHelper extends SslConnectHandlerHelper {
     val verifier = mock[SSLSession => Option[Throwable]]
     when(verifier(any[SSLSession])) thenReturn None
 
@@ -76,7 +43,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     val connectRequested = new DownstreamChannelStateEvent(
       channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
 
-    val ch = new SslConnectHandler(sslHandler, verifier)
+    val ch = new SslClientConnectHandler(sslHandler, verifier)
     ch.handleDownstream(ctx, connectRequested)
 
     def checkDidClose() {
@@ -90,8 +57,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("SslConnectHandler should upon connect wrap the downstream connect request") {
-    val h = new SslConnectHandlerHelper
+  test("SslClientConnectHandler should upon connect wrap the downstream connect request") {
+    val h = new SslClientConnectHandlerHelper
     import h._
 
     val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
@@ -104,8 +71,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(e.getValue == remoteAddress)
   }
 
-  test("SslConnectHandler should upon connect propagate cancellation") {
-    val h = new SslConnectHandlerHelper
+  test("SslClientConnectHandler should upon connect propagate cancellation") {
+    val h = new SslClientConnectHandlerHelper
     import h._
 
     val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
@@ -117,7 +84,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(e.getFuture.isCancelled)
   }
 
-  class helper2 extends SslConnectHandlerHelper {
+  class helper2 extends SslClientConnectHandlerHelper {
     verify(sslHandler, times(0)).handshake()
     ch.handleUpstream(ctx, new UpstreamChannelStateEvent(
       channel, ChannelState.CONNECTED, remoteAddress))
@@ -125,21 +92,21 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("SslConnectHandler should when connect is successful initiate a handshake") {
+  test("SslClientConnectHandler should when connect is successful initiate a handshake") {
     val h = new helper2
     import h._
 
     verify(sslHandler).handshake()
   }
 
-  test("SslConnectHandler should when connect is successful not propagate success") {
+  test("SslClientConnectHandler should when connect is successful not propagate success") {
     val h = new helper2
     import h._
 
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("SslConnectHandler should when connect is successful propagate handshake failures as SslHandshakeException") {
+  test("SslClientConnectHandler should when connect is successful propagate handshake failures as SslHandshakeException") {
     val h = new helper2
     import h._
 
@@ -150,7 +117,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
       new SslHandshakeException(exc, remoteAddress))
   }
 
-  test("SslConnectHandler should when connect is successful propagate connection cancellation") {
+  test("SslClientConnectHandler should when connect is successful propagate connection cancellation") {
     val h = new helper2
     import h._
 
@@ -158,7 +125,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     checkDidClose()
   }
 
-  test("SslConnectHandler should when connect is successful when handshake is successful propagate success") {
+  test("SslClientConnectHandler should when connect is successful when handshake is successful propagate success") {
     val h = new helper2
     import h._
 
@@ -175,7 +142,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(e.getValue == remoteAddress)
   }
 
-  test("SslConnectHandler should when connect is successful when handshake is successful verify") {
+  test("SslClientConnectHandler should when connect is successful when handshake is successful verify") {
     val h = new helper2
     import h._
 
@@ -184,7 +151,7 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(verifier).apply(any[SSLSession])
   }
 
-  test("SslConnectHandler should when connect is successful when handshake is successful propagate verification failure") {
+  test("SslClientConnectHandler should when connect is successful when handshake is successful propagate verification failure") {
     val h = new helper2
     import h._
 
@@ -196,8 +163,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     checkDidClose()
   }
 
-  test("SslConnectHandler should propagate connection failure") {
-    val h = new SslConnectHandlerHelper
+  test("SslClientConnectHandler should propagate connection failure") {
+    val h = new SslClientConnectHandlerHelper
     import h._
 
     val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
