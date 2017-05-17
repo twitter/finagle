@@ -35,6 +35,12 @@ Bug Fixes
     Java users now get the correct types for calls such as `c.t.f.Http.client().withStack`
     and `c.t.f.Http.server().withStack`. ``RB_ID=915440``
 
+  * finagle-http: To conform to the RFC, a message body is NO LONGER sent when 1xx, 204
+    and 304 responses are returned. Additionally, a Content-Length header field is NOT
+    sent for 1xx and 204 responses. Both rules are enforced even if users intentionally
+    add body data or the header field for these responses. If violation of these rules is
+    detected then a error message is logged.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
