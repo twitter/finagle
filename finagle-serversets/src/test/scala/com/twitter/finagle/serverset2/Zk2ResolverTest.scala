@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.finagle.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.{Addr, Address, Resolver, Name}
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.serverset2.addr.ZkMetadata

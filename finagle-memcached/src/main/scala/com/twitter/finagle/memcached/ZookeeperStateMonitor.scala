@@ -1,9 +1,8 @@
 package com.twitter.finagle.memcached
 
-import com.twitter.common.quantity.{Time, Amount}
-import com.twitter.common.zookeeper.ZooKeeperClient
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
+import com.twitter.finagle.common.zookeeper.ZooKeeperClient
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, JavaTimer, FuturePool}
@@ -124,7 +123,7 @@ trait ZookeeperStateMonitor {
 
     // read cache pool config data and leave a node data watch
     val data = zkClient
-        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .get(DefaultZKWaitTimeout)
         .getData(zkPath, true, null)
 
     applyZKData(data)
@@ -140,7 +139,7 @@ trait ZookeeperStateMonitor {
 
     // get children list and leave a node children watch
     val children = zkClient
-        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .get(DefaultZKWaitTimeout)
         .getChildren(zkPath, true, null)
 
     applyZKChildren(children.toList)
@@ -155,10 +154,10 @@ trait ZookeeperStateMonitor {
 
     // reset watch for node data and children
     val data = zkClient
-        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .get(DefaultZKWaitTimeout)
         .getData(zkPath, true, null)
     val children = zkClient
-        .get(Amount.of(DefaultZKWaitTimeout.inMilliseconds, Time.MILLISECONDS))
+        .get(DefaultZKWaitTimeout)
         .getChildren(zkPath, true, null)
   }
 
