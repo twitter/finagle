@@ -35,6 +35,11 @@ Bug Fixes
     Java users now get the correct types for calls such as `c.t.f.Http.client().withStack`
     and `c.t.f.Http.server().withStack`. ``RB_ID=915440``
 
+  * finagle-thrift, finagle-thriftmux: Clients created using `newServiceIface` now use the
+    configured `c.t.f.service.ResponseClassifier` (or `c.t.f.service.ResponseClassifier.Default` if
+    not configured) for per-method stats and usage in `c.t.f.liveness.FailureAccrualFactory` and
+    `c.t.f.stats.StatsFilter`. ``RB_ID=917010``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

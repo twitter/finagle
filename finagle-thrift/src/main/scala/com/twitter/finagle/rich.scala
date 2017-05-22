@@ -310,7 +310,9 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   ): ServiceIface = {
     val statsLabel = if (label.isEmpty) defaultClientName else label
     val scopedStats = stats.scope(statsLabel)
-    builder.newServiceIface(service, protocolFactory, scopedStats)
+    val responseClassifier =
+      params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+    builder.newServiceIface(service, protocolFactory, scopedStats, responseClassifier)
   }
 
   /**
