@@ -44,7 +44,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   /**
    * Create a new node representing the given factory.
    */
-  protected def newNode(factory: ServiceFactory[Req, Rep]): Node
+  protected def newNode(factory: EndpointFactory[Req, Rep]): Node
 
   /**
    * Create a node whose sole purpose it is to endlessly fail
@@ -102,7 +102,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
   protected sealed trait Update
   protected case class NewList(
-    svcFactories: IndexedSeq[ServiceFactory[Req, Rep]]) extends Update
+    svcFactories: IndexedSeq[EndpointFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -145,7 +145,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       else listOrRebuild +=: result
     }
 
-    private[this] val factoryToNode: Node => (ServiceFactory[Req, Rep], Node) =
+    private[this] val factoryToNode: Node => (EndpointFactory[Req, Rep], Node) =
       n => n.factory -> n
 
     def handle(u: Update): Unit = u match {
@@ -162,7 +162,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
         val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
 
         // These nodes are currently maintained by `Distributor`.
-        val oldFactories: mutable.HashMap[ServiceFactory[Req, Rep], Node] =
+        val oldFactories: mutable.HashMap[EndpointFactory[Req, Rep], Node] =
           dist.vector.map(factoryToNode)(collection.breakOut)
 
         var numAdded: Int = 0
@@ -199,7 +199,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(factories: IndexedSeq[ServiceFactory[Req, Rep]]): Unit = {
+  def update(factories: IndexedSeq[EndpointFactory[Req, Rep]]): Unit = {
     updates.incr()
     updater(NewList(factories))
   }

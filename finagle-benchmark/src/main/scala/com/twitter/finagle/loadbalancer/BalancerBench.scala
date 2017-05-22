@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
+import com.twitter.finagle._
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.{NoBrokersAvailableException, Service, ServiceFactory, ServiceFactoryProxy}
 import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.util.concurrent.TimeUnit
@@ -12,17 +12,23 @@ object BalancerBench {
 
   val NoBrokersExc = new NoBrokersAvailableException
 
-  def newFactory(): ServiceFactory[Unit, Unit] =
-    ServiceFactory.const(new Service[Unit, Unit] {
-      def apply(req: Unit): Future[Unit] = Future.Done
-    })
+  def newFactory(): EndpointFactory[Unit, Unit] =
+    new EndpointFactory[Unit, Unit] {
+      val address = Address.Failed(new Exception)
+      def remake() = {}
+      def apply(conn: ClientConnection) =
+        Future.value(new Service[Unit, Unit] {
+          def apply(req: Unit): Future[Unit] = Future.Done
+        })
+      def close(when: Time) = Future.Done
+    }
 
-  def newActivity(num: Int): Activity[Vector[ServiceFactory[Unit, Unit]]] = {
+  def newActivity(num: Int): Activity[Vector[EndpointFactory[Unit, Unit]]] = {
     val underlying = Var((0 until num).map(_ => newFactory()).toVector)
     Activity(underlying.map { facs => Activity.Ok(facs) })
   }
 
-  private case class NullNode(factory: ServiceFactory[Unit, Unit])
+  private case class NullNode(factory: EndpointFactory[Unit, Unit])
     extends ServiceFactoryProxy[Unit, Unit](factory) with NodeT[Unit, Unit] {
 
     override def load: Double = 0.0
@@ -50,11 +56,10 @@ object BalancerBench {
     override protected type Node = NullNode
     override protected type Distributor = NullDistributor
 
-    override protected def newNode(factory: ServiceFactory[Unit, Unit]): Node =
+    override protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       NullNode(factory)
 
-    override protected def failingNode(cause: Throwable): Node =
-      NullNode(ServiceFactory.const(Service.const(Future.exception(cause))))
+    override protected def failingNode(cause: Throwable): Node = ???
 
     override protected def initDistributor(): Distributor =
       NullDistributor(Vector.empty)
@@ -63,7 +68,7 @@ object BalancerBench {
   @State(Scope.Benchmark)
   class UpdateState {
 
-    private val input: Vector[Vector[ServiceFactory[Unit, Unit]]] = {
+    private val input: Vector[Vector[EndpointFactory[Unit, Unit]]] = {
       val prev = Vector.fill(5000)(BalancerBench.newFactory())
       val result = ArrayBuffer.apply(prev)
 
@@ -78,7 +83,7 @@ object BalancerBench {
 
     private var index: Int = 0
 
-    def next(): Vector[ServiceFactory[Unit, Unit]] = {
+    def next(): Vector[EndpointFactory[Unit, Unit]] = {
       val n = input(index)
       index = (index + 1) % input.length
       n

@@ -1,6 +1,5 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.ServiceFactory
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util.{Time, Activity, Future}
 import java.util.logging.Level
@@ -14,7 +13,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
    * An activity representing the active set of ServiceFactories.
    */
-  protected def endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]]
+  protected def endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]]
 
   /*
    * Subscribe to the Activity and dynamically update the load

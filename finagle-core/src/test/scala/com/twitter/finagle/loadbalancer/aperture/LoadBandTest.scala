@@ -1,8 +1,8 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.LeastLoaded
+import com.twitter.finagle.loadbalancer.{EndpointFactory, LeastLoaded}
+import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
 import com.twitter.util.{Await, Closable, Duration}
 import org.scalatest.FunSuite
 
@@ -14,13 +14,13 @@ class LoadBandTest extends FunSuite with ApertureSuite {
     def this() = this(0.5, 2.0)
     protected def smoothWin: Duration = Duration.Zero
 
-    case class Node(factory: ServiceFactory[Unit, Unit])
+    case class Node(factory: EndpointFactory[Unit, Unit])
       extends ServiceFactoryProxy[Unit, Unit](factory)
       with LeastLoadedNode
       with LoadBandNode
       with ApertureNode
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit]) = Node(factory)
+    protected def newNode(factory: EndpointFactory[Unit, Unit]) = Node(factory)
     protected def failingNode(cause: Throwable) = ???
   }
 

@@ -71,9 +71,13 @@ class LoadBalancerFactoryTest extends FunSuite
     val server2 = stringServer.serve(addr2, echoService)
 
     val sr = new InMemoryStatsReceiver
+    val dest = Seq(
+      Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
+      Address(server2.boundAddress.asInstanceOf[InetSocketAddress]))
+
     val client = stringClient
       .configured(Stats(sr))
-      .newService(Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress]), Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+      .newService(Name.bound(dest:_*), "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 2)
     assert(Await.result(client("hello\n")) == "hello")
@@ -160,16 +164,11 @@ class LoadBalancerFactoryTest extends FunSuite
     var eps: Vector[String] = Vector.empty
     val mockBalancer = new LoadBalancerFactory {
       def newBalancer[Req, Rep](
-        endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
         statsReceiver: StatsReceiver,
         emptyException: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
-        // this relies on the toString of the ServiceFactory
-        // inside the LoadBalancerFactory, not the best way
-        // to get at the underlying addr, but not sure there
-        // is another way since we can't change the type of
-        // Stack modules and Stack is invariant.
-        eps = endpoints.sample().toVector.map(_.toString)
+        eps = endpoints.sample().toVector.map(_.address.toString)
         ServiceFactory.const(Service.mk(_ => ???))
       }
     }

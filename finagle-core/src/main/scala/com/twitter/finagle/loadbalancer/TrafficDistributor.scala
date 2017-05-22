@@ -12,8 +12,8 @@ private object TrafficDistributor {
    * A [[ServiceFactory]] and its associated weight.
    */
   case class WeightedFactory[Req, Rep](
-      factory: EndpointFactory[Req, Rep],
-      weight: Double)
+    factory: EndpointFactory[Req, Rep],
+    weight: Double)
 
   /**
    * An intermediate representation of the endpoints that a load balancer
@@ -163,7 +163,7 @@ private class TrafficDistributor[Req, Rep](
             case Some(wf@WeightedFactory(_, w)) if w != weight =>
               cache.updated(addr, wf.copy(weight = weight))
             case None =>
-              val endpoint = new EndpointFactory(() => newEndpoint(addr), addr)
+              val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
               cache.updated(addr, WeightedFactory(endpoint, weight))
             case _ => cache
           }

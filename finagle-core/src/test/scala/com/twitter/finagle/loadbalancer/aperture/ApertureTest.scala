@@ -1,10 +1,9 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.NodeT
-import com.twitter.finagle.service.FailingFactory
+import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy, Status}
 import com.twitter.util.{Activity, Await, Duration}
 import org.scalatest.FunSuite
 
@@ -18,7 +17,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
    * nodes with the important caveat that we only select over a subset.
    */
   private class Bal extends TestBal {
-    protected class Node(val factory: ServiceFactory[Unit, Unit])
+    protected class Node(val factory: EndpointFactory[Unit, Unit])
       extends ServiceFactoryProxy[Unit, Unit](factory)
       with NodeT[Unit, Unit]
       with ApertureNode {
@@ -29,11 +28,11 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override val token: Int = 0
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node =
+    protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       new Node(factory)
 
     protected def failingNode(cause: Throwable): Node =
-      new Node(new FailingFactory[Unit, Unit](cause))
+      new Node(new FailingEndpointFactory[Unit, Unit](cause))
   }
 
   test("requires minAperture > 0") {

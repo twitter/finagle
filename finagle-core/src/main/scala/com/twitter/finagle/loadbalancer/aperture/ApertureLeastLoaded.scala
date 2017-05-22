@@ -1,8 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.{LeastLoaded, Updating}
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, LeastLoaded, Updating}
+import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactoryProxy}
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Duration}
@@ -12,7 +11,7 @@ import com.twitter.util.{Activity, Duration}
  * load metric.
  */
 private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
-    protected val endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+    protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
     protected val smoothWin: Duration,
     protected val lowLoad: Double,
     protected val highLoad: Double,
@@ -29,12 +28,12 @@ private[loadbalancer] final class ApertureLeastLoaded[Req, Rep](
   require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
   protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 
-  case class Node(factory: ServiceFactory[Req, Rep])
+  case class Node(factory: EndpointFactory[Req, Rep])
     extends ServiceFactoryProxy[Req, Rep](factory)
     with LeastLoadedNode
     with LoadBandNode
     with ApertureNode
 
-  protected def newNode(factory: ServiceFactory[Req, Rep]): Node = Node(factory)
-  protected def failingNode(cause: Throwable): Node = Node(new FailingFactory(cause))
+  protected def newNode(factory: EndpointFactory[Req, Rep]): Node = Node(factory)
+  protected def failingNode(cause: Throwable): Node = Node(new FailingEndpointFactory(cause))
 }

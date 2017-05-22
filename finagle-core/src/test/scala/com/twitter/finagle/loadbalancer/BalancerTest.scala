@@ -49,7 +49,7 @@ class BalancerTest extends FunSuite
       def needsRebuild: Boolean = false
     }
 
-    class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
+    class Node(val factory: EndpointFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
       def load: Double = ???
       def pending: Int = ???
       def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
@@ -59,15 +59,17 @@ class BalancerTest extends FunSuite
       def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = Future.never
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node = new Node(factory)
+    protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)
     protected def failingNode(cause: Throwable): Node = ???
 
     protected def initDistributor(): Distributor = Distributor(Vector.empty)
   }
 
-  def newFac(_status: Status = Status.Open) = new ServiceFactory[Unit, Unit] {
-    def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
+  def newFac(_status: Status = Status.Open) = new EndpointFactory[Unit, Unit] {
+    def address = Address.Failed(new Exception)
+    def remake() = {}
 
+    def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
     override def status: Status = _status
 
     @volatile var ncloses = 0
@@ -81,7 +83,7 @@ class BalancerTest extends FunSuite
   val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val genSvcFac = genStatus.map(newFac)
   val genLoadedNode = for(fac  <- genSvcFac) yield fac
-  val genNodes = Gen.containerOf[Vector, ServiceFactory[Unit,Unit]](genLoadedNode)
+  val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit,Unit]](genLoadedNode)
 
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer

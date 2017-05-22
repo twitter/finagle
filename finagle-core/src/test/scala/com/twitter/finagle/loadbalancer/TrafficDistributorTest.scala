@@ -88,7 +88,8 @@ private object TrafficDistributorTest {
       val addressFactories = eps.map { set =>
         set.map { epsf =>
           Await.result(epsf())
-          epsf.self.get.asInstanceOf[AddressFactory]
+          epsf.asInstanceOf[LazyEndpointFactory[Int, Int]]
+            .self.get.asInstanceOf[AddressFactory]
         }
       }
       val b = Balancer(addressFactories)

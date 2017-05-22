@@ -85,7 +85,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "P2CLeastLoaded"
     def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -126,7 +126,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "P2CPeakEwma"
     def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -145,7 +145,7 @@ object Balancers {
     new LoadBalancerFactory {
       override def toString: String = "HeapLeastLoaded"
       def newBalancer[Req, Rep](
-        endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+        endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
@@ -225,7 +225,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "ApertureLeastLoaded"
     def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
@@ -297,7 +297,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "AperturePeakEwma"
     def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
@@ -325,7 +325,7 @@ object Balancers {
   ): LoadBalancerFactory = new LoadBalancerFactory {
     override def toString: String = "RoundRobin"
     def newBalancer[Req, Rep](
-      endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+      endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {

@@ -1,54 +1,142 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
+import com.twitter.finagle.service.FailingFactory
 import com.twitter.util.{Future, Time}
+import java.util.concurrent.atomic.AtomicReference
+import scala.annotation.tailrec
+import scala.util.control.NonFatal
 
 /**
- * A [[ServiceFactory]] which admits that it backs an endpoint by carrying around
- * the address used to create the endpoint.
- *
- * The factory also delays the creation of its implementation until it receives
- * the first request. That is, it is lazy. This is designed to allow the load
- * balancer to construct the stacks for a large collection of endpoints and
- * amortize the cost across requests. Note, this isn't related to session
- * establishment. Session establishment is lazy and on the request path already,
- * but rather creating a large number of objects per namer updates can be expensive.
+ * A specialized [[ServiceFactory]] which admits that it backs a
+ * concrete endpoint. The extra information and functionality provided
+ * here is used by Finagle's load balancers.
  */
-private class EndpointFactory[Req, Rep](
+trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
+  /**
+   * Returns the address which this endpoint connects to.
+   */
+  def address: Address
+
+  /**
+   * Signals to the endpoint that it should close and rebuild
+   * its underlying resources. That is, `close` is terminal
+   * but `remake` is not.
+   */
+  def remake(): Unit
+}
+
+/**
+ * An [[EndpointFactory]] that fails to construct services.
+ */
+private final class FailingEndpointFactory[Req, Rep](cause: Throwable)
+  extends EndpointFactory[Req, Rep] {
+  val address: Address = Address.Failed(cause)
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = Future.exception(cause)
+  def close(deadline: Time): Future[Unit] = Future.Done
+  def remake(): Unit = {}
+  override def status: Status = Status.Open
+}
+
+private object LazyEndpointFactory {
+  sealed trait State[-Req, +Rep]
+
+  /**
+   * Indicates that the underlying resource needs to be materialized.
+   */
+  case object Init extends State[Any, Nothing]
+
+  /**
+   * Indicates that the EndpointFactory is closed and will no longer
+   * admit any service acquisition requests.
+   */
+  case object Closed extends State[Any, Nothing]
+
+  /**
+   * Indicates that the process of building the underlying resources
+   * is in progress.
+   */
+  case object Making extends State[Any, Nothing]
+
+  /**
+   * Indicates that the EndpointFactory has a materialized backing
+   * resource which it will proxy service acquisition requests to.
+   */
+  case class Made[Req, Rep](underlying: ServiceFactory[Req, Rep]) extends State[Req, Rep]
+}
+
+/**
+ * An implementation of [[EndpointFactory]] which is lazy. That is, it delays
+ * the creation of its implementation until it receives the first service acquisition
+ * request. This is designed to allow the load balancer to construct the stacks
+ * for a large collection of endpoints and amortize the cost across requests.
+ * Note, this isn't related to session establishment. Session establishment is
+ * lazy and on the request path already, but rather creating a large number of
+ * objects per namer updates can be expensive.
+ */
+private final class LazyEndpointFactory[Req, Rep](
     mk: () => ServiceFactory[Req, Rep],
     val address: Address)
-  extends ServiceFactory[Req, Rep] {
+  extends EndpointFactory[Req, Rep] {
+  import LazyEndpointFactory._
 
-    // access to this state is mediated by the lock on `this`.
-    private[this] var underlying: ServiceFactory[Req, Rep] = null
-    private[this] var isClosed = false
+  private[this] val state = new AtomicReference[State[Req, Rep]](Init)
 
-    def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-      synchronized {
-        if (isClosed) return Future.exception(new ServiceClosedException)
-        if (underlying == null) underlying = mk()
-      }
-      underlying(conn)
+  @tailrec def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+    state.get match {
+      case Init =>
+        if (state.compareAndSet(Init, Making)) {
+          val underlying = try mk() catch { case NonFatal(exc) =>
+            new FailingFactory[Req, Rep](exc)
+          }
+          // This is the only place where we can transition from `Making`
+          // to any other state so this is safe. All other spin loops wait
+          // for the thread that has entered here to exit the `Making`
+          // state.
+          state.set(Made(underlying))
+        }
+        apply(conn)
+
+      case Making => apply(conn)
+      case Made(underlying) => underlying(conn)
+      case Closed => Future.exception(new ServiceClosedException)
     }
 
-    def close(deadline: Time): Future[Unit] = synchronized {
-      isClosed = true
-      if (underlying == null) Future.Done
-      else underlying.close(deadline)
-    }
-
-    override def status: Status = synchronized {
-      if (underlying != null) underlying.status else {
-        if (!isClosed) Status.Open
-        else Status.Closed
-      }
-    }
-
-    /**
-     * Returns the underlying [[ServiceFactory]] if it is materialized
-     * otherwise None.
-     */
-    def self: Option[ServiceFactory[Req, Rep]] = synchronized { Option(underlying) }
-
-    override def toString: String = address.toString
+  /**
+   * Returns the underlying [[ServiceFactory]] if it is
+   * materialized otherwise None. This is useful for testing.
+   */
+  def self: Option[ServiceFactory[Req, Rep]] = state.get match {
+    case Made(underlying) => Some(underlying)
+    case _ => None
   }
+
+  @tailrec def remake(): Unit = state.get match {
+    case Init | Closed => // nop
+    case Making => remake()
+    case s@Made(underlying) =>
+      // Note, underlying is responsible for draining any outstanding
+      // service acquistion requests gracefully.
+      if (!state.compareAndSet(s, Init)) remake()
+      else underlying.close()
+  }
+
+  @tailrec def close(when: Time): Future[Unit] = state.get match {
+    case Closed => Future.Done
+    case Making => close(when)
+    case Init =>
+      if (!state.compareAndSet(Init, Closed)) close(when)
+      else Future.Done
+    case s@Made(underlying) =>
+      if (!state.compareAndSet(s, Closed)) close(when)
+      else underlying.close(when)
+  }
+
+  override def status: Status = state.get match {
+    case Init | Making => Status.Open
+    case Closed => Status.Closed
+    case Made(underlying) => underlying.status
+  }
+
+  override def toString: String = s"EndpointFactory($address)"
+}

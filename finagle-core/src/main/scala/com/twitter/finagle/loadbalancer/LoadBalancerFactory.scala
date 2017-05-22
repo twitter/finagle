@@ -291,7 +291,7 @@ abstract class LoadBalancerFactory {
    * @note `endpoints` are ordered by the [[LoadBalancerFactory.AddressOrdering]] param.
    */
   def newBalancer[Req, Rep](
-    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep]
@@ -317,7 +317,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     }
 
   def newBalancer[Req, Rep](
-    endpoints: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+    endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] = {

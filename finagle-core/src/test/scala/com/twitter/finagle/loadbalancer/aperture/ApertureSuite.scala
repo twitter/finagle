@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.Balancer
+import com.twitter.finagle.loadbalancer.{Balancer, EndpointFactory}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
@@ -36,7 +36,10 @@ trait ApertureSuite {
     def rebuildx(): Unit = rebuild()
   }
 
-  case class Factory(i: Int) extends ServiceFactory[Unit, Unit] {
+  case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {
+    def remake() = {}
+    def address = Address.Failed(new Exception)
+
     var n = 0
     var p = 0
 
@@ -86,7 +89,7 @@ trait ApertureSuite {
 
     def apply(i: Int) = factories.getOrElseUpdate(i, Factory(i))
 
-    def range(n: Int): IndexedSeq[ServiceFactory[Unit, Unit]] =
+    def range(n: Int): IndexedSeq[EndpointFactory[Unit, Unit]] =
       Vector.tabulate(n) { i => apply(i) }
   }
 
