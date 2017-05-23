@@ -9,20 +9,15 @@ private object KeyValidation {
 
   private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
 
-  private[this] def invalidChar(b: Byte): Boolean =
-    b <= ' ' && (b == '\n' || b == '\u0000' || b == '\r' || b == ' ')
+  private[this] object processor extends Buf.Processor {
+    def apply(byte: Byte): Boolean = !invalidChar(byte)
+
+    private def invalidChar(b: Byte): Boolean =
+      b <= ' ' && (b == '\n' || b == '\u0000' || b == '\r' || b == ' ')
+  }
 
   /** Return -1 if no invalid bytes */
-  private def invalidByteIndex(key: Buf): Int = {
-    val bs = Buf.ByteArray.Owned.extract(key)
-    var i = 0
-    while (i < bs.length) {
-      if (invalidChar(bs(i)))
-        return i
-      i += 1
-    }
-    -1
-  }
+  private def invalidByteIndex(key: Buf): Int = key.process(processor)
 
   private val KeyCheck: Buf => Unit =
     key => {
@@ -35,7 +30,7 @@ private object KeyValidation {
 
       val index = invalidByteIndex(key)
       if (index != -1) {
-        val ch = Buf.ByteArray.Owned.extract(key)(index)
+        val ch = key.get(index)
         throw new IllegalArgumentException(
           "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(ch))
       }
