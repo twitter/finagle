@@ -79,7 +79,7 @@ private[memcached] object StorageCommand {
     Buf.Utf8("cas"))
 }
 
-abstract class StorageCommand(
+sealed abstract class StorageCommand(
     key: Buf,
     flags: Int,
     expiry: Time,
@@ -90,9 +90,9 @@ abstract class StorageCommand(
   def keys: Seq[Buf] = Seq(key)
 }
 
-abstract class NonStorageCommand(name: String) extends Command(name)
+sealed abstract class NonStorageCommand(name: String) extends Command(name)
 
-abstract class ArithmeticCommand(
+sealed abstract class ArithmeticCommand(
     key: Buf,
     delta: Long,
     name: String)
@@ -101,7 +101,7 @@ abstract class ArithmeticCommand(
   def keys: Seq[Buf] = Seq(key)
 }
 
-abstract class RetrievalCommand(name: String) extends NonStorageCommand(name) with KeyValidation {
+sealed abstract class RetrievalCommand(name: String) extends NonStorageCommand(name) with KeyValidation {
   def keys: Seq[Buf]
 }
 

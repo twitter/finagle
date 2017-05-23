@@ -58,7 +58,7 @@ class DirectBufferLifecycleTest extends FunSuite {
   testDirect[Buf](
     protocol = "memcached server",
     msg = {
-      val cte: memcached.text.AbstractCommandToEncoding[AnyRef] = new memcached.text.CommandToEncoding
+      val cte = new memcached.text.CommandToEncoding
       val enc = new memcached.text.Encoder
       val command = memcached.Get(Seq(Buf.Utf8("1")))
       enc.encode(cte.encode(command))
@@ -69,7 +69,7 @@ class DirectBufferLifecycleTest extends FunSuite {
   testDirect[Buf](
     protocol = "memcached client",
     msg = {
-      val cte = new memcached.text.CommandToEncoding[AnyRef]
+      val cte = new memcached.text.CommandToEncoding
       val enc = new memcached.text.Encoder
       val command = memcached.Get(Seq(Buf.Utf8("1")))
       enc.encode(cte.encode(command))

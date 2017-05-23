@@ -1,14 +1,14 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol.{Command => _, _}
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
 
 /**
  * Class that can encode `Command`-type objects into `Decoding`s. Used on the client side.
  */
-private[finagle] abstract class AbstractCommandToEncoding[Command] {
+private[finagle] abstract class AbstractCommandToEncoding[Cmd] {
 
-  def encode(message: Command): Decoding
+  def encode(message: Cmd): Decoding
 }
 
 /**
@@ -56,7 +56,7 @@ private[finagle] class ResponseToEncoding {
 /**
  * Used by the client.
  */
-private[finagle] class CommandToEncoding[Command] extends AbstractCommandToEncoding[Command] {
+private[finagle] class CommandToEncoding extends AbstractCommandToEncoding[Command] {
   private[this] val GET = Buf.Utf8("get")
   private[this] val GETS = Buf.Utf8("gets")
   private[this] val DELETE = Buf.Utf8("delete")
