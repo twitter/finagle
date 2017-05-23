@@ -25,7 +25,7 @@ New Features
     https://twitter.github.io/finagle/guide/Clients.html#behavior-when-no-nodes-are-available
     ``RB_ID=916145``
 
-  * finagle-redis: Support scanning over sets and sorted sets with SSCAN and ZSCAN.
+    * finagle-redis: Support scanning over sets and sorted sets with SSCAN and ZSCAN.
     ``RB_ID=916484``
 
 Bug Fixes
@@ -117,6 +117,9 @@ Breaking API Changes
 
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
+
+  * finagle-memcached: Make memcached Response subtypes with no fields case objects.
+    ``RB_ID=917137``
 
   * finagle-mysql: Remove deprecated methods on `c.t.f.Mysql`:
       - `withCredentials`; use `c.t.f.Mysql.client.withCredentials` instead

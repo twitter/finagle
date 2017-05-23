@@ -578,7 +578,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def set(key: String, flags: Int, expiry: Time, value: Buf): Future[Unit] = {
     try {
       service(Set(key, flags, expiry, value)).map {
-        case Stored() => ()
+        case Stored => ()
         case Error(e) => throw e
         case response => throw new IllegalStateException(s"Invalid response: $response")
       }
@@ -590,11 +590,11 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[CasResult] = {
     try {
       service(Cas(key, flags, expiry, value, casUnique)).flatMap {
-        case Stored()   => FutureStored
-        case Exists()   => FutureExists
-        case NotFound() => FutureNotFound
-        case Error(e)   => Future.exception(e)
-        case _          => Future.exception(new IllegalStateException)
+        case Stored => FutureStored
+        case Exists => FutureExists
+        case NotFound  => FutureNotFound
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -604,10 +604,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Add(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -617,10 +617,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Append(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -630,10 +630,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Prepend(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -643,10 +643,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Replace(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -656,10 +656,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def delete(key: String): Future[JBoolean] = {
     try {
       service(Delete(key)).flatMap {
-        case Deleted()    => JavaTrue
-        case NotFound()   => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Deleted => JavaTrue
+        case NotFound => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -670,9 +670,9 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     try {
       service(Incr(key, delta)).flatMap {
         case Number(value) => Future.value(Some(value))
-        case NotFound()    => Future.None
-        case Error(e)      => Future.exception(e)
-        case _             => Future.exception(new IllegalStateException)
+        case NotFound => Future.None
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -683,9 +683,9 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     try {
       service(Decr(key, delta)).flatMap {
         case Number(value) => Future.value(Some(value))
-        case NotFound()    => Future.None
-        case Error(e)      => Future.exception(e)
-        case _             => Future.exception(new IllegalStateException)
+        case NotFound => Future.None
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))

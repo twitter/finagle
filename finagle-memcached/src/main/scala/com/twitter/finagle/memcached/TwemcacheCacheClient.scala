@@ -68,8 +68,8 @@ trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =
   def upsert(key: String, flags: Int, expiry: Time, value: Buf, version: Buf): Future[JBoolean] = {
     try {
       service(Upsert(Buf.Utf8(key), flags, expiry, value, version)).map {
-        case Stored() => true
-        case Exists() => false
+        case Stored   => true
+        case Exists   => false
         case Error(e) => throw e
         case _        => throw new IllegalStateException
       }

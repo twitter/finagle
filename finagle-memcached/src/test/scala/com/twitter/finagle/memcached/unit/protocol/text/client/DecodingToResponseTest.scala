@@ -22,7 +22,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("NOT_FOUND")))
-    assert(decodingToResponse.decode(buffer) == NotFound())
+    assert(decodingToResponse.decode(buffer) == NotFound)
   }
 
   test("parseResponse STORED") {
@@ -30,7 +30,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("STORED")))
-    assert(decodingToResponse.decode(buffer) == Stored())
+    assert(decodingToResponse.decode(buffer) == Stored)
   }
 
   test("parseResponse EXISTS") {
@@ -38,7 +38,7 @@ class DecodingToResponseTest extends FunSuite {
     import context._
 
     val buffer = Tokens(Seq(Buf.Utf8("EXISTS")))
-    assert(decodingToResponse.decode(buffer) == Exists())
+    assert(decodingToResponse.decode(buffer) == Exists)
   }
 
   test("parseResponse ERROR") {

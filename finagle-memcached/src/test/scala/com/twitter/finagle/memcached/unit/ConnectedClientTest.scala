@@ -22,24 +22,24 @@ class ConnectedClientTest extends FunSuite with MockitoSugar {
   val value = Buf.Utf8("value")
 
   test("cas correctly responds to return states of the service") {
-    when(service.apply(any[Command])).thenReturn(Future.value(Stored()))
+    when(service.apply(any[Command])).thenReturn(Future.value(Stored))
     assert(Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
-    when(service.apply(any[Command])).thenReturn(Future.value(Exists()))
+    when(service.apply(any[Command])).thenReturn(Future.value(Exists))
     assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
 
-    when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
+    when(service.apply(any[Command])).thenReturn(Future.value(NotFound))
     assert(!Await.result(client.checkAndSet(key, value, casUnique).map(_.replaced)))
  }
 
  test("checkAndSet correctly responds to return states of the service") {
-    when(service.apply(any[Command])).thenReturn(Future.value(Stored()))
+    when(service.apply(any[Command])).thenReturn(Future.value(Stored))
     assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.Stored)
 
-    when(service.apply(any[Command])).thenReturn(Future.value(Exists()))
+    when(service.apply(any[Command])).thenReturn(Future.value(Exists))
     assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.Exists)
 
-    when(service.apply(any[Command])).thenReturn(Future.value(NotFound()))
+    when(service.apply(any[Command])).thenReturn(Future.value(NotFound))
     assert(Await.result(client.checkAndSet(key, value, casUnique)) == CasResult.NotFound)
  }
 
@@ -47,7 +47,7 @@ class ConnectedClientTest extends FunSuite with MockitoSugar {
     when(service.apply(any[Command])).thenReturn(Future.value(Error(new IllegalAccessException("exception"))))
     intercept[IllegalAccessException] { Await.result(client.checkAndSet(key, value, casUnique)) }
 
-    when(service.apply(any[Command])).thenReturn(Future.value(Deleted()))
+    when(service.apply(any[Command])).thenReturn(Future.value(Deleted))
     intercept[IllegalStateException] { Await.result(client.checkAndSet(key, value, casUnique)) }
   }
 }

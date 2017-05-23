@@ -15,24 +15,24 @@ private[finagle] abstract class AbstractCommandToEncoding[Command] {
  * Used by the server.
  */
 private[finagle] class ResponseToEncoding {
-  private[this] val ZERO          = Buf.Utf8("0")
-  private[this] val VALUE         = Buf.Utf8("VALUE")
+  private[this] val ZERO = Buf.Utf8("0")
+  private[this] val VALUE = Buf.Utf8("VALUE")
 
-  private[this] val STORED        = Buf.Utf8("STORED")
-  private[this] val NOT_STORED    = Buf.Utf8("NOT_STORED")
-  private[this] val EXISTS        = Buf.Utf8("EXISTS")
-  private[this] val NOT_FOUND     = Buf.Utf8("NOT_FOUND")
-  private[this] val DELETED       = Buf.Utf8("DELETED")
+  private[this] val STORED = Buf.Utf8("STORED")
+  private[this] val NOT_STORED = Buf.Utf8("NOT_STORED")
+  private[this] val EXISTS = Buf.Utf8("EXISTS")
+  private[this] val NOT_FOUND = Buf.Utf8("NOT_FOUND")
+  private[this] val DELETED = Buf.Utf8("DELETED")
 
   def encode(message: Response): Decoding = message match {
-    case Stored()       => Tokens(Seq(STORED))
-    case NotStored()    => Tokens(Seq(NOT_STORED))
-    case Exists()       => Tokens(Seq(EXISTS))
-    case Deleted()      => Tokens(Seq(DELETED))
-    case NotFound()     => Tokens(Seq(NOT_FOUND))
-    case NoOp()         => Tokens(Nil)
-    case Number(value)  => Tokens(Seq(Buf.Utf8(value.toString)))
-    case Error(cause)   =>
+    case Stored => Tokens(Seq(STORED))
+    case NotStored => Tokens(Seq(NOT_STORED))
+    case Exists => Tokens(Seq(EXISTS))
+    case Deleted => Tokens(Seq(DELETED))
+    case NotFound => Tokens(Seq(NOT_FOUND))
+    case NoOp => Tokens(Nil)
+    case Number(value) => Tokens(Seq(Buf.Utf8(value.toString)))
+    case Error(cause) =>
       val formatted: Seq[Array[Byte]] = ExceptionHandler.format(cause)
       Tokens(formatted.map { Buf.ByteArray.Owned(_) })
     case InfoLines(lines) =>

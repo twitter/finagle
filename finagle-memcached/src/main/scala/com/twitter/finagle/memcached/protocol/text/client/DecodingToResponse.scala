@@ -5,14 +5,14 @@ import com.twitter.finagle.memcached.protocol.text.{Decoding, StatLines, TokensW
 import com.twitter.io.Buf
 
 private[finagle] object AbstractDecodingToResponse {
-  private[finagle] val STORED        = Buf.Utf8("STORED")
-  private[finagle] val NOT_FOUND     = Buf.Utf8("NOT_FOUND")
-  private[finagle] val NOT_STORED    = Buf.Utf8("NOT_STORED")
-  private[finagle] val EXISTS        = Buf.Utf8("EXISTS")
-  private[finagle] val DELETED       = Buf.Utf8("DELETED")
-  private[finagle] val ERROR         = Buf.Utf8("ERROR")
-  private[finagle] val CLIENT_ERROR  = Buf.Utf8("CLIENT_ERROR")
-  private[finagle] val SERVER_ERROR  = Buf.Utf8("SERVER_ERROR")
+  private[finagle] val STORED = Buf.Utf8("STORED")
+  private[finagle] val NOT_FOUND = Buf.Utf8("NOT_FOUND")
+  private[finagle] val NOT_STORED = Buf.Utf8("NOT_STORED")
+  private[finagle] val EXISTS = Buf.Utf8("EXISTS")
+  private[finagle] val DELETED = Buf.Utf8("DELETED")
+  private[finagle] val ERROR = Buf.Utf8("ERROR")
+  private[finagle] val CLIENT_ERROR = Buf.Utf8("CLIENT_ERROR")
+  private[finagle] val SERVER_ERROR = Buf.Utf8("SERVER_ERROR")
 }
 
 private[finagle] abstract class AbstractDecodingToResponse[R] {
@@ -37,16 +37,16 @@ private[finagle] class DecodingToResponse extends AbstractDecodingToResponse[Res
 
   protected def parseResponse(tokens: Seq[Buf]) = {
     tokens.headOption match {
-      case None               => Response.NoOp
-      case Some(NOT_FOUND)    => Response.NotFound
-      case Some(STORED)       => Response.Stored
-      case Some(NOT_STORED)   => Response.NotStored
-      case Some(EXISTS)       => Response.Exists
-      case Some(DELETED)      => Response.Deleted
-      case Some(ERROR)        => Error(new NonexistentCommand(parseErrorMessage(tokens)))
+      case None => NoOp
+      case Some(NOT_FOUND) => NotFound
+      case Some(STORED) => Stored
+      case Some(NOT_STORED) => NotStored
+      case Some(EXISTS) => Exists
+      case Some(DELETED) => Deleted
+      case Some(ERROR) => Error(new NonexistentCommand(parseErrorMessage(tokens)))
       case Some(CLIENT_ERROR) => Error(new ClientError(parseErrorMessage(tokens)))
       case Some(SERVER_ERROR) => Error(new ServerError(parseErrorMessage(tokens)))
-      case Some(ds)           => Number(ds.toLong)
+      case Some(ds) => Number(ds.toLong)
     }
   }
 
