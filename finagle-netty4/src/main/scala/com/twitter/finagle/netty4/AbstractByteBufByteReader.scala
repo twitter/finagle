@@ -109,6 +109,42 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
     bb.readLongLE()
   }
 
+  final def readUnsignedLongBE(): BigInt = {
+    checkRemaining(8)
+
+    // 9 (8+1) so sign bit is always positive
+    val bytes: Array[Byte] = new Array[Byte](9)
+    bytes(0) = 0
+    bytes(1) = bb.readByte()
+    bytes(2) = bb.readByte()
+    bytes(3) = bb.readByte()
+    bytes(4) = bb.readByte()
+    bytes(5) = bb.readByte()
+    bytes(6) = bb.readByte()
+    bytes(7) = bb.readByte()
+    bytes(8) = bb.readByte()
+
+    BigInt(bytes)
+  }
+
+  final def readUnsignedLongLE(): BigInt = {
+    checkRemaining(8)
+
+    // 9 (8+1) so sign bit is always positive
+    val bytes: Array[Byte] = new Array[Byte](9)
+    bytes(8) = bb.readByte()
+    bytes(7) = bb.readByte()
+    bytes(6) = bb.readByte()
+    bytes(5) = bb.readByte()
+    bytes(4) = bb.readByte()
+    bytes(3) = bb.readByte()
+    bytes(2) = bb.readByte()
+    bytes(1) = bb.readByte()
+    bytes(0) = 0
+
+    BigInt(bytes)
+  }
+
   final def readFloatBE(): Float = {
     JFloat.intBitsToFloat(readIntBE())
   }
