@@ -25,7 +25,10 @@ New Features
     https://twitter.github.io/finagle/guide/Clients.html#behavior-when-no-nodes-are-available
     ``RB_ID=916145``
 
-    * finagle-redis: Support scanning over sets and sorted sets with SSCAN and ZSCAN.
+  * finagle-core: The global `c.t.f.naming.NameInterpreter` can be optionally set using
+    service loader. ``RB_ID=917082``
+
+  * finagle-redis: Support scanning over sets and sorted sets with SSCAN and ZSCAN.
     ``RB_ID=916484``
 
 Bug Fixes

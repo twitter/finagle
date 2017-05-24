@@ -16,18 +16,17 @@ trait NameInterpreter {
 }
 
 object NameInterpreter extends NameInterpreter {
-
   /**
    * The global interpreter that resolves all names in Finagle.
    *
    * Can be modified to provide a different mechanism for name resolution.
    */
-  @volatile var global: NameInterpreter = DefaultInterpreter
+  @volatile var global: NameInterpreter = LoadedNameInterpreter
 
   /** Java API for setting the interpreter */
   def setGlobal(nameInterpreter: NameInterpreter): Unit =
     global = nameInterpreter
 
-  override def bind(dtab: Dtab, tree: Path): Activity[NameTree[Name.Bound]] =
-    global.bind(dtab, tree)
+  def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] =
+    global.bind(dtab, path)
 }
