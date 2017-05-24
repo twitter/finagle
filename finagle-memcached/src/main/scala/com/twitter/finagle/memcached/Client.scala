@@ -37,6 +37,13 @@ case class GetResult private[memcached](
 ) {
   lazy val values: Map[String, Buf] = hits.mapValues { _.value }
 
+  lazy val valuesWithFlags: Map[String, (Buf, Buf)] = hits.mapValues { v =>
+    v.flags match {
+      case Some(x) => (v.value, x)
+      case None => (v.value, Buf.Empty)
+    }
+  }
+
   def ++(o: GetResult): GetResult =
     GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
 }
@@ -47,6 +54,12 @@ case class GetsResult(getResult: GetResult) {
   def failures: Map[String, Throwable] = getResult.failures
   def values: Map[String, Buf] = getResult.values
   lazy val valuesWithTokens: Map[String, (Buf, Buf)] = hits.mapValues { v => (v.value, v.casUnique.get) }
+  lazy val valuesWithFlagsAndTokens: Map[String, (Buf, Buf, Buf)] = hits.mapValues { v =>
+    v.flags match {
+      case Some(x) => (v.value, x, v.casUnique.get)
+      case None => (v.value, Buf.Empty, v.casUnique.get)
+    }
+  }
   def ++(o: GetsResult): GetsResult = GetsResult(getResult ++ o.getResult)
 }
 
@@ -121,6 +134,12 @@ private object BaseClient {
 
   def getsFn[T]: Map[String, (T, Buf)] => Option[(T, Buf)] =
     GetFn.asInstanceOf[Map[String, (T, Buf)] => Option[(T, Buf)]]
+
+  def getWithFlagFn[T]: Map[String, (T, Buf)] => Option[(T, Buf)] =
+    GetFn.asInstanceOf[Map[String, (T, Buf)] => Option[(T, Buf)]]
+
+  def getsWithFlagFn[T]: Map[String, (T, Buf, Buf)] => Option[(T, Buf, Buf)] =
+    GetFn.asInstanceOf[Map[String, (T, Buf, Buf)] => Option[(T, Buf, Buf)]]
 }
 
 /**
@@ -264,6 +283,26 @@ trait BaseClient[T] {
     gets(Seq(key)).map(getsFn)
 
   /**
+   * Get a key from the server along with its flags
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[get]] if you do not need the flags.
+   */
+  def getWithFlag(key: String): Future[Option[(T, Buf)]] =
+    getWithFlag(Seq(key)).map(getWithFlagFn)
+
+  /**
+   * Get a key from the server along with its flags and a "cas unique" token.
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[get]] if you do not need the flags or the token.
+   * @see [[gets]] if you do not need the flags.
+   * @see [[getWithFlag]] if you do not need the token.
+   */
+  def getsWithFlag(key: String): Future[Option[(T, Buf, Buf)]] =
+    getsWithFlag(Seq(key)).map(getsWithFlagFn)
+
+  /**
    * Get a set of keys from the server.
    *
    * @return a Map[String, T] of all of the keys that the server had.
@@ -296,6 +335,49 @@ trait BaseClient[T] {
       } else {
         Future.value(result.valuesWithTokens.mapValues {
           case (v, u) => (bufferToType(v), u)
+        })
+      }
+    }
+  }
+
+  /**
+   * Get a set of keys from the server, together with their flags
+   *
+   * @return a Map[String, (T, Buf)] of all the
+   * keys the server had, together with their flags
+   * @see [[get]] if you do not need the flags
+   */
+  def getWithFlag(keys: Iterable[String]): Future[Map[String, (T, Buf)]] = {
+    getResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithFlags.mapValues {
+          case (v, u) => (bufferToType(v), u)
+        })
+      }
+    }
+  }
+
+  /**
+   * Get a set of keys from the server, together with a "cas unique"
+   * token and flags. The token is treated opaquely by the memcache
+   * client but is in reality a string-encoded u64.
+   *
+   * @return a Map[String, (T, Buf, Buf)] of all the keys
+   * the server had, together with ther "cas unique" token and flags
+   * @see [[get]] if you do not need the token or the flags.
+   * @see [[gets]] if you do not need the flag.
+   * @see [[getWithFlag]] if you do not need the token.
+   * @see [[checkAndSet]] for using the token.
+   */
+  def getsWithFlag(keys: Iterable[String]): Future[Map[String, (T, Buf, Buf)]] = {
+    getsResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithFlagsAndTokens.mapValues {
+          case (v, u, t) => (bufferToType(v), u, t)
         })
       }
     }

@@ -70,6 +70,17 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     assert(result == Map("foo" -> "bar", "baz" -> "boing"))
   }
 
+  test("getWithFlag") {
+    Await.result(client.set("foo", Buf.Utf8("bar")), TimeOut)
+    Await.result(client.set("baz", Buf.Utf8("boing")), TimeOut)
+    val result = Await.result(client.getWithFlag(Seq("foo", "baz", "notthere")), TimeOut)
+      .map { case (key, ((Buf.Utf8(value), Buf.Utf8(flag)))) => (key, (value, flag)) }
+    assert(result == Map(
+      "foo" -> (("bar", "0")),
+      "baz" -> (("boing", "0"))
+    ))
+  }
+
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("gets") {
       // create a client that connects to only one server so we can predict CAS tokens
@@ -95,6 +106,23 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
           "bars" -> (("yxz", "6"))
         )
       assert(result == expected)
+    }
+  }
+
+  if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
+    test("getsWithFlag") {
+      Await.result(client.set("foos1", Buf.Utf8("xyz")), TimeOut)
+      Await.result(client.set("bazs1", Buf.Utf8("xyz")), TimeOut)
+      Await.result(client.set("bazs1", Buf.Utf8("zyx")), TimeOut)
+      val result = Await.result(client.getsWithFlag(Seq("foos1", "bazs1", "somethingelse")), TimeOut)
+        .map { case (key, (Buf.Utf8(value), Buf.Utf8(flag), Buf.Utf8(casUnique))) =>
+          (key, (value, flag, casUnique))
+        }
+
+      assert(result == Map(
+        "foos1" -> (("xyz", "0", "1")),  // the "cas unique" values are predictable from a fresh memcached
+        "bazs1" -> (("zyx", "0", "2"))
+      ))
     }
   }
 
