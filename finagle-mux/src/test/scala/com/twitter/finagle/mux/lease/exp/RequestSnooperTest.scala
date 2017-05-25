@@ -1,6 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.{Time, MockTimer}
+import com.twitter.util.{Time, Stopwatch}
 import com.twitter.conversions.time.intToTimeableNumber
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import org.junit.runner.RunWith
@@ -13,15 +13,15 @@ import org.scalatest.mock.MockitoSugar
 class RequestSnooperTest extends FunSuite with MockitoSugar {
   test("RequestSnooper should compute handleBytes reasonably") {
     val ctr = mock[ByteCounter]
-    val quantile = 0.50
+    val percentile = 50
 
     when(ctr.rate()).thenReturn(1)
 
     Time.withCurrentTimeFrozen { ctl =>
       when(ctr.lastGc).thenReturn(Time.now - 5.seconds)
 
-      val tmr = new MockTimer()
-      val snooper = new RequestSnooper(ctr, quantile, timer = tmr)
+      val now = Stopwatch.timeMillis
+      val snooper = new RequestSnooper(ctr, percentile, now = now)
       for (_ <- 0 until 50)
         snooper.observe(1.second)
       for (_ <- 0 until 50)
@@ -29,22 +29,21 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
       for (_ <- 0 until 50)
         snooper.observe(3.seconds)
       ctl.advance(12.seconds)
-      tmr.tick()
       assert(snooper.handleBytes() == 2000.bytes)
     }
   }
 
   test("RequestSnooper should discard results that overlap with a gc") {
     val ctr = mock[ByteCounter]
-    val quantile = 0.50
+    val percentile = 50
 
     when(ctr.rate()).thenReturn(1)
 
     Time.withCurrentTimeFrozen { ctl =>
       when(ctr.lastGc).thenReturn(Time.now - 5.seconds)
 
-      val tmr = new MockTimer()
-      val snooper = new RequestSnooper(ctr, quantile, timer = tmr)
+      val now = Stopwatch.timeMillis
+      val snooper = new RequestSnooper(ctr, percentile, now = now)
       for (_ <- 0 until 50)
         snooper.observe(1.second)
       for (_ <- 0 until 50)
@@ -54,7 +53,6 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
       for (_ <- 0 until 1000)
         snooper.observe(8.seconds)
       ctl.advance(12.seconds)
-      tmr.tick()
       assert(snooper.handleBytes() == 2000.bytes)
     }
   }

@@ -289,7 +289,7 @@ private[finagle] object ClockedDrainer {
       case Some(coord) =>
         val rSnooper = new RequestSnooper(
           coord.counter,
-          drainerPercentile().toDouble / 100.0,
+          drainerPercentile(),
           lr
         )
 

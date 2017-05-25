@@ -512,10 +512,10 @@ object Finagle extends Build {
       util("app"),
       util("core"),
       util("logging"),
-      util("stats"),
-      "com.twitter.common" % "stats-util" % "0.0.60")
+      util("stats"))
   ).dependsOn(
     finagleCore,
+    finagleExp,
     finagleNetty4,
     finagleToggle)
 
@@ -527,6 +527,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-thriftmux",
     libraryDependencies ++= Seq(
+      "commons-lang" % "commons-lang" % "2.6",
       util("core"),
       util("logging"),
       util("stats")) ++ scroogeLibs
