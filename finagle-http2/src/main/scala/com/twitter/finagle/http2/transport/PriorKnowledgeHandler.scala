@@ -10,7 +10,7 @@ import io.netty.channel.{
   Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, ChannelOption
 }
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
-import io.netty.handler.codec.http2.{Http2Codec, Http2CodecBuilder, Http2FrameLogger, Http2StreamChannelBootstrap}
+import io.netty.handler.codec.http2.{Http2Codec, Http2FrameLogger, Http2StreamChannelBootstrap}
 import io.netty.handler.logging.LogLevel
 
 /**
@@ -78,10 +78,7 @@ private[http2] class PriorKnowledgeHandler(
             .option(ChannelOption.ALLOCATOR, ctx.alloc())
             .handler(initializer)
 
-          val codec = new Http2CodecBuilder(true /* server */ , bootstrap)
-            .frameLogger(logger)
-            .initialSettings(initialSettings)
-            .build()
+          val codec = new Http2Codec(true /* server */ , bootstrap, logger, initialSettings)
           p.replace(HttpCodecName, "http2Codec", codec)
           p.remove("upgradeHandler")
 

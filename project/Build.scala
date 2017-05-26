@@ -19,7 +19,7 @@ object Finagle extends Build {
 
   val libthriftVersion = "0.5.0-7"
 
-  val netty4Version = "4.1.11.Final"
+  val netty4Version = "4.1.10.Final"
 
   // zkVersion should be kept in sync with the 'util-zk' dependency version
   val zkVersion = "3.5.0-alpha"
