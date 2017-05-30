@@ -121,6 +121,9 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated `c.t.f.memcached.BaseClient.cas` methods.
     Use `c.t.f.memcached.BaseClient.checkAndSet` instead. ``RB_ID=914678``
 
+  * finagle-memcached: `c.t.f.memcached.protocol.text.Encoder` object is now private.
+    ``RB_ID=917214``
+
   * finagle-memcached: Make memcached Response subtypes with no fields case objects.
     ``RB_ID=917137``
 

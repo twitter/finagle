@@ -1,14 +1,51 @@
 package com.twitter.finagle.memcached.protocol.text
 
+import com.twitter.finagle.memcached.protocol.text.Encoder._
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteWriter}
+import java.nio.charset.StandardCharsets
 
 /**
- * Class that can encode `Command`-type objects into `Decoding`s. Used on the client side.
+ * Class that can encode `Command`-type objects into `Buf`s. Used on the client side.
  */
-private[finagle] abstract class AbstractCommandToEncoding[Cmd] {
+private[finagle] abstract class AbstractCommandToBuf[Cmd] {
 
-  def encode(message: Cmd): Decoding
+  protected final def encodeCommandWithData(command: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): Buf = {
+    // estimated size + 50 for casUnique, data length, DELIMITERS
+    val bw = ByteWriter.dynamic(50 + data.length + 10 * command.length)
+    command.foreach { token =>
+      bw.writeBytes(token)
+      bw.writeBytes(SPACE)
+    }
+
+    bw.writeBytes(data.length.toString.getBytes(StandardCharsets.UTF_8))
+
+    casUnique match {
+      case Some(token) =>
+        bw.writeBytes(SPACE)
+        bw.writeBytes(token)
+      case None => ()
+    }
+
+    bw.writeBytes(DELIMITER)
+    bw.writeBytes(data)
+    bw.writeBytes(DELIMITER)
+
+    bw.owned()
+  }
+
+  protected final def encodeCommand(command: Seq[Buf]): Buf = {
+    // estimated size + 2 for DELIMITER
+    val bw = ByteWriter.dynamic(10 * command.size + 2)
+    command.foreach { token =>
+      bw.writeBytes(token)
+      bw.writeBytes(SPACE)
+    }
+    bw.writeBytes(DELIMITER)
+    bw.owned()
+  }
+
+  def encode(message: Cmd): Buf
 }
 
 /**
@@ -56,7 +93,8 @@ private[finagle] class ResponseToEncoding {
 /**
  * Used by the client.
  */
-private[finagle] class CommandToEncoding extends AbstractCommandToEncoding[Command] {
+private[finagle] class CommandToBuf extends AbstractCommandToBuf[Command] {
+
   private[this] val GET = Buf.Utf8("get")
   private[this] val GETS = Buf.Utf8("gets")
   private[this] val DELETE = Buf.Utf8("delete")
@@ -81,36 +119,37 @@ private[finagle] class CommandToEncoding extends AbstractCommandToEncoding[Comma
   private[this] def intToUtf8(i: Int): Buf =
     if (i == 0) ZeroBuf else Buf.Utf8(i.toString)
 
-  def encode(message: Command): Decoding = message match {
+  def encode(message: Command): Buf = message match {
     case Add(key, flags, expiry, value) =>
-      TokensWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Set(key, flags, expiry, value) =>
-      TokensWithData(Seq(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(Seq(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Replace(key, flags, expiry, value) =>
-      TokensWithData(Seq(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(Seq(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Append(key, flags, expiry, value) =>
-      TokensWithData(Seq(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(Seq(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Prepend(key, flags, expiry, value) =>
-      TokensWithData(Seq(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(Seq(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Cas(key, flags, expiry, value, casUnique) =>
-      TokensWithData(Seq(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(casUnique))
-    case Get(keys) =>
-      Tokens(GET +: keys)
-    case Gets(keys) =>
-      Tokens(GETS +: keys)
-    case Getv(keys) =>
-      Tokens(GETV +: keys)
+      encodeCommandWithData(Seq(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(casUnique))
     case Upsert(key, flags, expiry, value, version) =>
-      TokensWithData(Seq(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(version))
+      encodeCommandWithData(Seq(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(version))
+    case Get(keys) =>
+      encodeCommand(GET +: keys)
+    case Gets(keys) =>
+      encodeCommand(GETS +: keys)
+    case Getv(keys) =>
+      encodeCommand(GETV +: keys)
     case Incr(key, amount) =>
-      Tokens(Seq(INCR, key, Buf.Utf8(amount.toString)))
+      encodeCommand(Seq(INCR, key, Buf.Utf8(amount.toString)))
     case Decr(key, amount) =>
-      Tokens(Seq(DECR, key, Buf.Utf8(amount.toString)))
+      encodeCommand(Seq(DECR, key, Buf.Utf8(amount.toString)))
     case Delete(key) =>
-      Tokens(Seq(DELETE, key))
-    case Stats(args) => Tokens(STATS +: args)
+      encodeCommand(Seq(DELETE, key))
+    case Stats(args) =>
+      encodeCommand(STATS +: args)
     case Quit() =>
-      Tokens(Seq(QUIT))
+      encodeCommand(Seq(QUIT))
   }
 }
 

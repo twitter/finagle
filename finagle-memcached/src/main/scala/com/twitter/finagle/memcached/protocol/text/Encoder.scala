@@ -3,10 +3,10 @@ package com.twitter.finagle.memcached.protocol.text
 import com.twitter.io.{Buf, ByteWriter}
 import java.nio.charset.StandardCharsets
 
-object Encoder {
-  private val SPACE         = " ".getBytes
-  private val DELIMITER     = "\r\n".getBytes
-  private val END           = "END".getBytes
+private object Encoder {
+  val SPACE = " ".getBytes(StandardCharsets.UTF_8)
+  val DELIMITER = "\r\n".getBytes(StandardCharsets.UTF_8)
+  val END = "END".getBytes(StandardCharsets.UTF_8)
 }
 
 class Encoder {
