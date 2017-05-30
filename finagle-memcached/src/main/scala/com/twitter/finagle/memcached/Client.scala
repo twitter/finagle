@@ -607,6 +607,11 @@ private[memcached] object ClientConstants {
     case CasResult.Exists   => JavaFalse
     case CasResult.NotFound => JavaFalse
   }
+
+  def hitsFromValues(values: Seq[Value]): Map[String, Value] = values.map { value =>
+    val Buf.Utf8(keyStr) = value.key
+    (keyStr, value)
+  }(breakOut)
 }
 
 /**
@@ -620,23 +625,23 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
     val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
 
-    service(command).map {
-      case Values(values) =>
-        val hits: Map[String, Value] = values.map { value =>
-          val Buf.Utf8(keyStr) = value.key
-          (keyStr, value)
-        }(breakOut)
+    service(command).transform {
+      case Return(Values(values)) =>
+        val hits: Map[String, Value] = hitsFromValues(values)
         val misses = util.NotFound(keys, hits.keySet)
-        GetResult(hits, misses)
-      case Error(e) => throw e
-      case other    =>
+        Future.value(GetResult(hits, misses))
+      case Return(Error(e)) => throw e
+      case Return(other) =>
         throw new IllegalStateException(
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
-    } handle {
-      case t: RequestException => GetResult(failures = keys.map { (_, t) }(breakOut))
-      case t: ChannelException => GetResult(failures = keys.map { (_, t) }(breakOut))
-      case t: ServiceException => GetResult(failures = keys.map { (_, t) }(breakOut))
+      case Throw(t: RequestException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case Throw(t: ChannelException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case Throw(t: ServiceException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case t => Future.const(t.asInstanceOf[Try[GetResult]])
     }
   }
 
