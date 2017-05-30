@@ -8,35 +8,43 @@ object ParserUtils {
   // Used by byteArrayStringToInt. The maximum length of a non-negative Int in chars
   private[this] val MaxLengthOfIntString = Int.MaxValue.toString.length
 
-  private[this] val isDigitProcessor = new Buf.Processor {
+  private[this] object isWhitespaceProcessor extends Buf.Processor {
+    private[this] val TokenDelimiter: Byte = ' '
+    def apply(byte: Byte): Boolean = byte != TokenDelimiter
+  }
+
+  private[this] object isDigitProcessor extends Buf.Processor {
     def apply(byte: Byte): Boolean = byte >= '0' && byte <= '9'
   }
 
   /**
-   * @return true iff the Buf is non empty and every byte in the Buf is a digit.
+   * @return true if the Buf is non empty and every byte in the Buf is a digit.
    */
   def isDigits(buf: Buf): Boolean =
     if (buf.isEmpty) false
     else -1 == buf.process(isDigitProcessor)
 
-  private[memcached] def split(bytes: Array[Byte], delimiter: Byte): IndexedSeq[Buf] = {
+  private[memcached] def splitOnWhitespace(bytes: Buf): IndexedSeq[Buf] = {
+    val len = bytes.length
     val split = new ArrayBuffer[Buf](6)
     var segmentStart = 0
-    var segmentEnd = 0
-    while (segmentEnd < bytes.length) {
-      if (bytes(segmentEnd) == delimiter) {
-        if (segmentEnd != 0)
-          split += Buf.ByteArray.Owned(bytes, segmentStart, segmentEnd)
-        segmentStart = segmentEnd + 1
-        segmentEnd = segmentStart
+
+    while (segmentStart < len) {
+      val segmentEnd = bytes.process(segmentStart, len, isWhitespaceProcessor)
+      if (segmentEnd == -1) {
+        // At the end
+        split += bytes.slice(segmentStart, len)
+        segmentStart = len // terminate loop
       } else {
-        segmentEnd += 1
+        // We don't add an empty Buf instance at the front
+        if (segmentEnd != 0) {
+          split += bytes.slice(segmentStart, segmentEnd)
+        }
+
+        segmentStart = segmentEnd + 1
       }
     }
-    if (segmentStart != segmentEnd) {
-      split += Buf.ByteArray.Owned(bytes, segmentStart, segmentEnd)
-    }
-    split.toIndexedSeq
+    split
   }
 
   private[memcached] def newByteArrayForBuf2Int() = new Array[Byte](MaxLengthOfIntString)
