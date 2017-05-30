@@ -598,6 +598,8 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
           endpointClient.params[Label].label,
           "Transporter")
         GlobalRegistry.get.put(transporterImplKey, transporter.toString)
+        // Note, this ensures that session establishment is lazy (i.e.,
+        // on the service acquisition path).
         ServiceFactory.apply[Req, Rep] { () =>
           // we do not want to capture and request specific Locals
           // that would live for the life of the session.

@@ -21,7 +21,7 @@ private object TrafficDistributorTest {
       Address.Inet(new InetSocketAddress(port), Addr.Metadata(key -> weight))
 
     def unapply(addr: Address): Option[(Int, Double)] = addr match {
-      case Address.Inet(ia, metadata) =>
+      case Address.Inet(ia, metadata) if metadata.nonEmpty =>
         Some((ia.getPort, metadata(key).asInstanceOf[Double]))
       case _ => None
     }

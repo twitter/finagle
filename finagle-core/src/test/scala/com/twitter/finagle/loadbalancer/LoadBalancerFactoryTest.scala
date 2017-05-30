@@ -8,8 +8,8 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
-import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.FunSuite
 
 class LoadBalancerFactoryTest extends FunSuite
   with StringClient
@@ -70,14 +70,15 @@ class LoadBalancerFactoryTest extends FunSuite
     val addr2 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server2 = stringServer.serve(addr2, echoService)
 
-    val sr = new InMemoryStatsReceiver
-    val dest = Seq(
+    val dest = Name.bound(
       Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server2.boundAddress.asInstanceOf[InetSocketAddress]))
+      Address(server2.boundAddress.asInstanceOf[InetSocketAddress])
+    )
 
+    val sr = new InMemoryStatsReceiver
     val client = stringClient
       .configured(Stats(sr))
-      .newService(Name.bound(dest:_*), "client")
+      .newService(dest, "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 2)
     assert(Await.result(client("hello\n")) == "hello")
@@ -101,15 +102,15 @@ class LoadBalancerFactoryTest extends FunSuite
   }
 
   test("when no nodes are Open and configured to fail fast") {
-    val closedSvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
-      override def status: Status = Status.Closed
+    val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
+      override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
         val svc = Service.mk { _: String => Future.value("closed after this") }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
     }
-    val endpoint = Stack.Leaf(Stack.Role("endpoint"), closedSvcFac)
+    val endpoint = Stack.Leaf(Stack.Role("endpoint"), busySvcFac)
     val stack = LoadBalancerFactory.module.toStack(endpoint)
 
     val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
@@ -118,27 +119,27 @@ class LoadBalancerFactoryTest extends FunSuite
         LoadBalancerFactory.Dest(Var(Addr.Bound(address))) +
         LoadBalancerFactory.WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast))
 
-    // as `factory.status == Open` until we have "primed" the pump.
-    // services are lazily established and are considered "Open" until that point.
+    // Services are lazily established and are considered "Open"
+    // until we have "primed" the pump.
     Await.ready(factory(ClientConnection.nil), 5.seconds)
 
     // now that the service is primed, we should fail fast.
-    assert(factory.status == Status.Closed)
+    assert(factory.status == Status.Busy)
     intercept[NoNodesOpenException] {
       Await.result(factory(ClientConnection.nil), 5.seconds)
     }
   }
 
   test("when no nodes are Open and not configured to fail fast") {
-    val closedSvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
-      override def status: Status = Status.Closed
+    val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
+      override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
         val svc = Service.mk { _: String => Future.value("closed after this") }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
     }
-    val endpoint = Stack.Leaf(Stack.Role("endpoint"), closedSvcFac)
+    val endpoint = Stack.Leaf(Stack.Role("endpoint"), busySvcFac)
     val stack = LoadBalancerFactory.module.toStack(endpoint)
     val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
     val factory = stack.make(
@@ -150,7 +151,7 @@ class LoadBalancerFactoryTest extends FunSuite
     Await.ready(factory(ClientConnection.nil), 5.seconds)
 
     // we will not see a failure, even though there are no nodes open
-    assert(factory.status == Status.Closed)
+    assert(factory.status == Status.Busy)
     Await.result(factory(ClientConnection.nil), 5.seconds)
   }
 

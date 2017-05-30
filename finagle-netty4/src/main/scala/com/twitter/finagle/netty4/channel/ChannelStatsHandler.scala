@@ -107,10 +107,11 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     // `channelActive`, not `handlerAdded`.
     ctx.channel.attr(ConnectionDurationKey).get match {
       case null => // the connection didn't initialize
-      case elapsed => connectionDuration.add(elapsed().inMilliseconds)
+      case elapsed =>
+        connectionDuration.add(elapsed().inMilliseconds)
+        connectionCount.decrement()
     }
 
-    connectionCount.decrement()
     super.channelInactive(ctx)
   }
 

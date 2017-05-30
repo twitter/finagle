@@ -1,11 +1,10 @@
 package com.twitter.finagle.loadbalancer.roundrobin
 
+import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.finagle.{ClientConnection, NoBrokersAvailableException, Service,
-  ServiceFactory, ServiceFactoryProxy, Status}
 import com.twitter.util.{Activity, Future, Time}
 import java.util.concurrent.atomic.AtomicLong
-import com.twitter.finagle.loadbalancer._
 
 /**
  * A simple round robin balancer that chooses the next backend in

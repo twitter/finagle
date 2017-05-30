@@ -6,8 +6,8 @@ import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
 import com.twitter.finagle.loadbalancer.p2c.{P2CLeastLoaded, P2CPeakEwma}
 import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy}
+import com.twitter.finagle.util.{DefaultTimer, Rng}
+import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, NoBrokersAvailableException}
 import com.twitter.util.{Activity, Duration, Future, Time, Stopwatch}
 import scala.util.Random
 
@@ -231,7 +231,7 @@ object Balancers {
     ): ServiceFactory[Req, Rep] = {
       newScopedBal(sr, "aperture_least_loaded",
         new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, exc, useDeterministicOrdering))
+          highLoad, minAperture, maxEffort, rng, sr, DefaultTimer, exc, useDeterministicOrdering))
     }
   }
 
@@ -303,7 +303,7 @@ object Balancers {
     ): ServiceFactory[Req, Rep] = {
       newScopedBal(sr, "aperture_peak_ewma",
         new AperturePeakEwma(endpoints, smoothWin, smoothWin, Stopwatch.systemNanos, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, exc, useDeterministicOrdering))
+          highLoad, minAperture, maxEffort, rng, sr, DefaultTimer, exc, useDeterministicOrdering))
     }
   }
 

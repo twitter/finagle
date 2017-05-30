@@ -61,6 +61,9 @@ Runtime Behavior Changes
     If that's not the case, however, managing the life cycle of the passed
     in endpoints is necessary. ``RB_ID=916415``
 
+  * finagle-core: Aperture load balancers now expire idle sessions which fall
+    out of the aperture window. ``RB_ID=916508``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

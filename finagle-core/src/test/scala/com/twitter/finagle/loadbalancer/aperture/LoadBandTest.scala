@@ -2,16 +2,22 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle.loadbalancer.{EndpointFactory, LeastLoaded}
 import com.twitter.finagle.ServiceFactoryProxy
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Await, Closable, Duration}
 import org.scalatest.FunSuite
 
 class LoadBandTest extends FunSuite with ApertureSuite {
-  val rng = Rng()
+  private val rng = Rng()
 
-  private class Bal(protected val lowLoad: Double, protected val highLoad: Double)
-      extends TestBal with LeastLoaded[Unit, Unit] with LoadBand[Unit, Unit] {
-    def this() = this(0.5, 2.0)
+  private class Bal(
+      protected val lowLoad: Double = 0.5,
+      protected val highLoad: Double = 2.0)
+    extends TestBal
+    with LeastLoaded[Unit, Unit]
+    with LoadBand[Unit, Unit] {
+
+    protected def statsReceiver = NullStatsReceiver
     protected def smoothWin: Duration = Duration.Zero
 
     case class Node(factory: EndpointFactory[Unit, Unit])
@@ -24,7 +30,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
     protected def failingNode(cause: Throwable) = ???
   }
 
-  class Avg {
+  private class Avg {
     var n = 0
     var sum = 0
 
@@ -60,7 +66,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
       for (i <- 0 to 100) {
         counts.clear()
         val factories = Seq.fill(c) { Await.result(bal.apply()) }
-        for (f <- counts if f.n > 0) { avgLoad.update(f.p) }
+        for (f <- counts if f.total > 0) { avgLoad.update(f.outstanding) }
         // no need to avg ap, it's independent of the load distribution
         ap = bal.aperturex
         Await.result(Closable.all(factories:_*).close())
@@ -78,7 +84,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
       // and controller work independently.
       assert(math.abs(avgLoad() - high) <= 1)
 
-      assert(counts.forall(_.p == 0))
+      assert(counts.forall(_.outstanding == 0))
     }
   }
 }

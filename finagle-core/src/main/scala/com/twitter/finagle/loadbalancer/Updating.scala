@@ -11,7 +11,7 @@ import scala.util.control.NonFatal
  */
 private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
   /**
-   * An activity representing the active set of ServiceFactories.
+   * An activity representing the active set of EndpointFactories.
    */
   protected def endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]]
 
