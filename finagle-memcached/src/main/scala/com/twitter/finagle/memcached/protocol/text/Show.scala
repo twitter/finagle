@@ -10,13 +10,28 @@ import java.nio.charset.StandardCharsets
  */
 private[finagle] abstract class AbstractCommandToBuf[Cmd] {
 
-  protected final def encodeCommandWithData(command: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): Buf = {
+  protected final def encodeCommandWithData(
+    command: Buf,
+    key: Buf,
+    flags: Buf,
+    expiry: Buf,
+    data: Buf,
+    casUnique: Option[Buf] = None
+  ): Buf = {
     // estimated size + 50 for casUnique, data length, DELIMITERS
     val bw = ByteWriter.dynamic(50 + data.length + 10 * command.length)
-    command.foreach { token =>
-      bw.writeBytes(token)
-      bw.writeBytes(SPACE)
-    }
+
+    bw.writeBytes(command)
+    bw.writeBytes(SPACE)
+
+    bw.writeBytes(key)
+    bw.writeBytes(SPACE)
+
+    bw.writeBytes(flags)
+    bw.writeBytes(SPACE)
+
+    bw.writeBytes(expiry)
+    bw.writeBytes(SPACE)
 
     bw.writeBytes(data.length.toString.getBytes(StandardCharsets.UTF_8))
 
@@ -121,19 +136,19 @@ private[finagle] class CommandToBuf extends AbstractCommandToBuf[Command] {
 
   def encode(message: Command): Buf = message match {
     case Add(key, flags, expiry, value) =>
-      encodeCommandWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value)
     case Set(key, flags, expiry, value) =>
-      encodeCommandWithData(Seq(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value)
     case Replace(key, flags, expiry, value) =>
-      encodeCommandWithData(Seq(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value)
     case Append(key, flags, expiry, value) =>
-      encodeCommandWithData(Seq(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value)
     case Prepend(key, flags, expiry, value) =>
-      encodeCommandWithData(Seq(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
+      encodeCommandWithData(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value)
     case Cas(key, flags, expiry, value, casUnique) =>
-      encodeCommandWithData(Seq(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(casUnique))
+      encodeCommandWithData(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value, Some(casUnique))
     case Upsert(key, flags, expiry, value, version) =>
-      encodeCommandWithData(Seq(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(version))
+      encodeCommandWithData(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds), value, Some(version))
     case Get(keys) =>
       encodeCommand(GET +: keys)
     case Gets(keys) =>
