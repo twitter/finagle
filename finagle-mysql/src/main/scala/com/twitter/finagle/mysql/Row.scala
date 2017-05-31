@@ -72,18 +72,18 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
         val str = new String(bytes, Charset(charset))
         field.fieldType match {
           case Type.Tiny if field.isSigned      => ByteValue(str.toByte)
-          case Type.Tiny                          => ShortValue(str.toShort)
+          case Type.Tiny                        => ShortValue(str.toShort)
           case Type.Short if field.isSigned     => ShortValue(str.toShort)
-          case Type.Short                         => IntValue(str.toInt)
+          case Type.Short                       => IntValue(str.toInt)
           case Type.Int24 if field.isSigned     => IntValue(str.toInt)
-          case Type.Int24                         => IntValue(str.toInt)
+          case Type.Int24                       => IntValue(str.toInt)
           case Type.Long if field.isSigned      => IntValue(str.toInt)
-          case Type.Long                          => LongValue(str.toLong)
+          case Type.Long                        => LongValue(str.toLong)
           case Type.LongLong if field.isSigned  => LongValue(str.toLong)
-          case Type.LongLong                      => BigIntValue(BigInt(str))
-          case Type.Float                         => FloatValue(str.toFloat)
-          case Type.Double                        => DoubleValue(str.toDouble)
-          case Type.Year                          => ShortValue(str.toShort)
+          case Type.LongLong                    => BigIntValue(BigInt(str))
+          case Type.Float                       => FloatValue(str.toFloat)
+          case Type.Double                      => DoubleValue(str.toDouble)
+          case Type.Year                        => ShortValue(str.toShort)
           // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
           case Type.VarChar | Type.String | Type.VarString |
                Type.TinyBlob | Type.Blob | Type.MediumBlob
@@ -136,18 +136,18 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
       if (isNull(idx)) NullValue
       else field.fieldType match {
         case Type.Tiny if field.isSigned      => ByteValue(reader.readByte())
-        case Type.Tiny                          => ShortValue(reader.readUnsignedByte())
+        case Type.Tiny                        => ShortValue(reader.readUnsignedByte())
         case Type.Short if field.isSigned     => ShortValue(reader.readShortLE())
-        case Type.Short                         => IntValue(reader.readUnsignedShortLE())
+        case Type.Short                       => IntValue(reader.readUnsignedShortLE())
         case Type.Int24 if field.isSigned     => IntValue(reader.readIntLE())
-        case Type.Int24                         => IntValue(reader.readIntLE())
+        case Type.Int24                       => IntValue(reader.readIntLE())
         case Type.Long if field.isSigned      => IntValue(reader.readIntLE())
-        case Type.Long                          => LongValue(reader.readUnsignedIntLE())
+        case Type.Long                        => LongValue(reader.readUnsignedIntLE())
         case Type.LongLong if field.isSigned  => LongValue(reader.readLongLE())
-        case Type.LongLong                      => BigIntValue(reader.readUnsignedLongLE())
-        case Type.Float                         => FloatValue(reader.readFloatLE())
-        case Type.Double                        => DoubleValue(reader.readDoubleLE())
-        case Type.Year                          => ShortValue(reader.readShortLE())
+        case Type.LongLong                    => BigIntValue(reader.readUnsignedLongLE())
+        case Type.Float                       => FloatValue(reader.readFloatLE())
+        case Type.Double                      => DoubleValue(reader.readDoubleLE())
+        case Type.Year                        => ShortValue(reader.readShortLE())
         // Nonbinary strings as stored in the CHAR, VARCHAR, and TEXT data types
         case Type.VarChar | Type.String | Type.VarString |
              Type.TinyBlob | Type.Blob | Type.MediumBlob
