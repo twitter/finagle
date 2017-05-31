@@ -60,10 +60,7 @@ private[netty4] class Netty4ProxyConnectHandler(
           ctx.pipeline().remove(proxyCodecKey)
           ctx.pipeline().remove(self)
 
-          // We have to run the connect `promise` satisfaction later so we give `ProxyHandler`
-          // a chance to clean up the pipeline (remove its proxy codecs) before we start
-          // sending traffic.
-          ctx.executor().submit(new Runnable { def run(): Unit = promise.trySuccess() })
+          promise.trySuccess()
         } else {
           // SOCKS/HTTP proxy handshake promise is failed so given `ProxyHandler` is going to
           // close the channel and fail pending writes, we only need to fail the connect promise.

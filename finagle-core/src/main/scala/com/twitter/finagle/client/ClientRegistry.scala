@@ -1,8 +1,8 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.param.{Label, ProtocolLibrary}
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.StackRegistry.Entry

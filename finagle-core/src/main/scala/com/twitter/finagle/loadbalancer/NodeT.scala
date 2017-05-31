@@ -21,5 +21,5 @@ private trait NodeT[Req, Rep] extends ServiceFactory[Req, Rep] {
   /**
    * The underlying service factory which this node proxies to.
    */
-  def factory: ServiceFactory[Req, Rep]
+  def factory: EndpointFactory[Req, Rep]
 }

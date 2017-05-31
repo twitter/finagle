@@ -75,7 +75,8 @@ class ScribeRawZipkinTracerTest extends FunSuite {
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))))
-      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServiceName("service")))
+      tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpc("method")))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i16", 16.toShort)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i32", 32)))
       tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i64", 64L)))
@@ -92,8 +93,9 @@ class ScribeRawZipkinTracerTest extends FunSuite {
 
     test("logSpan if a timeout occurs") {
       val ann1 = Annotation.Message("some_message")
-      val ann2 = Annotation.Rpcname("some_service", "rpc_name")
-      val ann3 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
+      val ann2 = Annotation.ServiceName("some_service")
+      val ann3 = Annotation.Rpc("rpc_name")
+      val ann4 = Annotation.Message(TimeoutFilter.TimeoutAnnotation)
 
       val scribe = new ScribeClient
       val tracer = new ScribeRawZipkinTracer(scribe, NullStatsReceiver)
@@ -101,6 +103,7 @@ class ScribeRawZipkinTracerTest extends FunSuite {
       tracer.record(Record(traceId, Time.fromSeconds(1), ann1))
       tracer.record(Record(traceId, Time.fromSeconds(2), ann2))
       tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
+      tracer.record(Record(traceId, Time.fromSeconds(3), ann4))
 
       // scribe Log method is in java
       assert(scribe.messages.size == 1)

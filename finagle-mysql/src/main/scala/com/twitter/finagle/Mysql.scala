@@ -227,33 +227,4 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
   def newService(dest: Name, label: String): Service[Request, Result] =
     client.newService(dest, label)
-
-  /**
-   * The credentials to use when authenticating a new session.
-   */
-  @deprecated("Use client.withCredentials", "6.22.0")
-  def withCredentials(u: String, p: String): Client =
-    client.configured(Handshake.Credentials(Option(u), Option(p)))
-
-  /**
-   * Database to use when this client establishes a new session.
-   */
-  @deprecated("Use client.withDatabase", "6.22.0")
-  def withDatabase(db: String): Client =
-    client.configured(Handshake.Database(Option(db)))
-
-  /**
-   * The default character set used when establishing
-   * a new session.
-   */
-  @deprecated("Use client.withCharset", "6.22.0")
-  def withCharset(charset: Short): Client =
-    client.configured(Handshake.Charset(charset))
-
-  /**
-   * A client configured with parameter p.
-   */
-  @deprecated("Use client.configured", "6.22.0")
-  def configured[P: Stack.Param](p: P): Client =
-    client.configured(p)
 }

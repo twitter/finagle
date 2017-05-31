@@ -89,7 +89,7 @@ class DynamicTimeoutTest extends FunSuite {
     Memcached.server,
     Memcached.client,
     Quit(),
-    NoOp()
+    NoOp
   )
 
   testDynamicTimeouts(

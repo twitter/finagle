@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
-import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor

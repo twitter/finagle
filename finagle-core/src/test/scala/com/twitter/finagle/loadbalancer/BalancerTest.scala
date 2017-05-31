@@ -4,28 +4,25 @@ import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.{Conductors, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.concurrent.Conductors
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class BalancerTest extends FunSuite
   with Conductors
-  with IntegrationPatience
   with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer(
       protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
     extends Balancer[Unit, Unit] {
+
     def maxEffort: Int = 5
     def emptyException: Throwable = ???
 
     def stats: InMemoryStatsReceiver = statsReceiver
-    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+    protected[this] val maxEffortExhausted = stats.counter("max_effort_exhausted")
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
@@ -52,7 +49,7 @@ class BalancerTest extends FunSuite
       def needsRebuild: Boolean = false
     }
 
-    class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
+    class Node(val factory: EndpointFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
       def load: Double = ???
       def pending: Int = ???
       def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
@@ -62,20 +59,22 @@ class BalancerTest extends FunSuite
       def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = Future.never
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node = new Node(factory)
+    protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)
     protected def failingNode(cause: Throwable): Node = ???
 
     protected def initDistributor(): Distributor = Distributor(Vector.empty)
   }
 
-  def newFac(_status: Status = Status.Open) = new ServiceFactory[Unit, Unit] {
-    def apply(conn: ClientConnection) = Future.never
+  def newFac(_status: Status = Status.Open) = new EndpointFactory[Unit, Unit] {
+    def address = Address.Failed(new Exception)
+    def remake() = {}
 
-    override def status = _status
+    def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
+    override def status: Status = _status
 
     @volatile var ncloses = 0
 
-    def close(deadline: Time) = {
+    def close(deadline: Time): Future[Unit] = {
       synchronized { ncloses += 1 }
       Future.Done
     }
@@ -84,7 +83,7 @@ class BalancerTest extends FunSuite
   val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val genSvcFac = genStatus.map(newFac)
   val genLoadedNode = for(fac  <- genSvcFac) yield fac
-  val genNodes = Gen.containerOf[Vector, ServiceFactory[Unit,Unit]](genLoadedNode)
+  val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit,Unit]](genLoadedNode)
 
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer
@@ -120,20 +119,19 @@ class BalancerTest extends FunSuite
   }
 
   test("max_effort_exhausted counter updated properly") {
-    val stats = new InMemoryStatsReceiver()
-    val bal = new TestBalancer(stats)
+    val bal = new TestBalancer()
     val closed = newFac(Status.Closed)
     val open = newFac(Status.Open)
 
     // start out all closed
     bal.update(Vector(closed))
     bal(ClientConnection.nil)
-    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
 
     // now have it be open and a pick must succeed
     bal.update(Vector(open))
     bal(ClientConnection.nil)
-    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+    assert(1 == bal.stats.counters(Seq("max_effort_exhausted")))
   }
 
   test("updater: keeps nodes up to date") {
@@ -162,7 +160,7 @@ class BalancerTest extends FunSuite
     assert(rems() == 1)
     assert(bal.factories == Set(f1, f3))
     assert(f1.ncloses == 0)
-    assert(f2.ncloses == 1)
+    assert(f2.ncloses == 0)
     assert(f3.ncloses == 0)
 
     bal.update(Vector(f1, f2, f3))

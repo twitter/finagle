@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
  * @param latchPeriod how often calls to [[snapshot()]]
  *   should trigger a rolling of the collection bucket.
  */
-private[stats] class MetricsBucketedHistogram(
+class MetricsBucketedHistogram(
     name: String,
     percentiles: Array[Double] = Histogram.DEFAULT_QUANTILES,
     latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod)

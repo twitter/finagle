@@ -54,7 +54,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     val until = startTime + 20.seconds
     def checkLater(): Future[Boolean] = {
       if (Time.now > until) Future.value(false)
-      else DefaultTimer.twitter.doLater(1.second) {
+      else DefaultTimer.doLater(1.second) {
         log.info("%s", Time.now - startTime)
         if (check) Future.value(true)
         else checkLater()

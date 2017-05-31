@@ -121,9 +121,9 @@ object ThriftMux
         request: mux.Request,
         svc: Service[mux.Request, mux.Response]
       ): Future[mux.Response] = {
-        // we're reasonably sure that this filter sits just after the ThriftClientRequest's
-        // message array is wrapped by a ChannelBuffer
-        recordRpc(Buf.ByteArray.Owned.extract(request.body))
+        if (Trace.isActivelyTracing) {
+          recordRpc(Buf.ByteArray.Owned.extract(request.body))
+        }
         svc(request)
       }
     }
@@ -252,9 +252,9 @@ object ThriftMux
     }
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -262,9 +262,9 @@ object ThriftMux
       thriftmux.MethodBuilder.from(dest, this)
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -508,8 +508,13 @@ object ThriftMux
       copy(muxer = muxer.withParams(ps))
 
     private[this] val tracingFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
-      def apply(request: Array[Byte], svc: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] = {
-        recordRpc(request)
+      def apply(
+        request: Array[Byte],
+        svc: Service[Array[Byte], Array[Byte]]
+      ): Future[Array[Byte]] = {
+        if (Trace.isActivelyTracing) {
+          recordRpc(request)
+        }
         svc(request)
       }
     }

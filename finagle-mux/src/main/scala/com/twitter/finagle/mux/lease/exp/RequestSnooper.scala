@@ -1,12 +1,9 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.common.quantity.{Amount, Data, Time => CommonTime}
-import com.twitter.common.stats.WindowedApproxHistogram
-import com.twitter.common.util.Clock
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Await, Promise, Duration, Timer, Time, StorageUnit}
+import com.twitter.finagle.exp.LatencyHistogram
+import com.twitter.util.{Duration, Time, StorageUnit, Stopwatch}
 
 /**
  * RequestSnooper maintains a histogram of handle time unaffected by garbage
@@ -17,23 +14,18 @@ import com.twitter.util.{Await, Promise, Duration, Timer, Time, StorageUnit}
  * at minimum "handle bytes" for the outstanding requests to finish up.
  */
 private[lease] class RequestSnooper(
-  counter: ByteCounter,
-  quantile: Double,
-  lr: LogsReceiver = NullLogsReceiver,
-  timer: Timer = DefaultTimer.twitter
-) {
-  private[this] val histo = {
-    val clk = new ClockFromTimer(timer)
-    val granularity = CommonTime.MILLISECONDS
+    counter: ByteCounter,
+    percentile: Int,
+    lr: LogsReceiver = NullLogsReceiver,
+    now: () => Long = Stopwatch.systemMillis) {
 
-    new WindowedApproxHistogram(
-      Amount.of(1.minute.inMilliseconds, granularity),
-      5,
-      // TODO: switch to precision
-      Amount.of(100.kilobytes.inBytes, Data.BYTES),
-      clk
-    )
-  }
+  private[this] val histo = new LatencyHistogram(
+    clipDuration = 10.seconds.inMilliseconds,
+    error = 0,
+    history = 1.minute.inMilliseconds,
+    slices = LatencyHistogram.DefaultSlices,
+    now
+  )
 
   /**
    * Stores the [[com.twitter.util.Duration]] in a histogram unless the
@@ -49,36 +41,14 @@ private[lease] class RequestSnooper(
   }
 
   /**
-   * Grabs the `quantile` from the handle time histogram and multiplies it
+   * Grabs the `percentile` from the handle time histogram and multiplies it
    * against `ByteCounter#rate()`, resulting in the estimated number of
    * bytes that will pass in the time it takes to handle a request.
    */
   def handleBytes(): StorageUnit = {
-    lr.record("discountHistoMs", histo.getQuantile(quantile).toString)
+    lr.record("discountHistoMs", histo.quantile(percentile).toString)
     lr.record("discountRate", counter.rate().toString)
 
-    (histo.getQuantile(quantile) * counter.rate()).toLong.bytes
-  }
-}
-
-/**
- * Makes a [[com.twitter.common.util.Clock]] from a [[com.twitter.util.Timer]] and
- * [[com.twitter.util.Time]]
- */
-private[lease] class ClockFromTimer(timer: Timer) extends Clock {
-  def nowMillis(): Long = {
-    Time.now.inMilliseconds
-  }
-
-  def nowNanos(): Long = {
-    Time.now.inNanoseconds
-  }
-
-  def waitFor(millis: Long) {
-    val p = Promise[Unit]
-    timer.schedule(millis.milliseconds) {
-      p.setValue(())
-    }
-    Await.result(p)
+    (histo.quantile(percentile) * counter.rate()).toLong.bytes
   }
 }

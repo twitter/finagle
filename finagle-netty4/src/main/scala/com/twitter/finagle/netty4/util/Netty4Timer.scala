@@ -1,12 +1,13 @@
 package com.twitter.finagle.netty4.util
 
-import com.twitter.util.{Duration, Time, Timer, TimerTask}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.{Duration, Time, TimerTask}
 import java.util.concurrent.TimeUnit
 
 /**
- * An implementation of [[Timer]] based on Netty 4 [[io.netty.util.Timer]].
+ * An implementation of Finagle's [[DefaultTimer]] based on Netty 4 [[io.netty.util.Timer]].
  */
-private[netty4] class Netty4Timer(protected val underlying: io.netty.util.Timer) extends Timer {
+private[netty4] class Netty4Timer(underlying: io.netty.util.Timer) extends DefaultTimer {
 
   protected def scheduleOnce(when: Time)(f: => Unit): TimerTask =
     new TimerTask {

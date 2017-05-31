@@ -1,8 +1,8 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.net.{SocketAddress, InetSocketAddress}
-import com.twitter.common.zookeeper._
 import com.twitter.finagle.{Addr, Address, Group, Resolver}
+import com.twitter.finagle.common.zookeeper._
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory}
 import com.twitter.thrift.Status.ALIVE

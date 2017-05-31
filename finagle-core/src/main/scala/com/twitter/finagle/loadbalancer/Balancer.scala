@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Updater
-import com.twitter.util.{Closable, Future, Time}
+import com.twitter.util.{Future, Time}
 import scala.annotation.tailrec
 import scala.collection.{immutable, mutable}
 
@@ -21,8 +21,8 @@ private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
  * distributing load across a number of nodes.
  *
  * This arrangement allows separate functionality to be mixed in. For
- * example, we can specify and mix in a load metric (via a Node) and
- * a balancer (a Distributor) separately.
+ * example, we can specify and mix in a load metric (via a `Node`) and
+ * a balancer (a `Distributor`) separately.
  */
 private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
   /**
@@ -35,7 +35,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * The throwable to use when the load balancer is empty.
    */
   protected def emptyException: Throwable
-  protected lazy val empty = Future.exception(emptyException)
 
   /**
    * Balancer reports stats here.
@@ -45,7 +44,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   /**
    * Create a new node representing the given factory.
    */
-  protected def newNode(factory: ServiceFactory[Req, Rep]): Node
+  protected def newNode(factory: EndpointFactory[Req, Rep]): Node
 
   /**
    * Create a node whose sole purpose it is to endlessly fail
@@ -103,7 +102,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
   protected sealed trait Update
   protected case class NewList(
-    svcFactories: IndexedSeq[ServiceFactory[Req, Rep]]) extends Update
+    svcFactories: IndexedSeq[EndpointFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -146,10 +145,8 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       else listOrRebuild +=: result
     }
 
-    private[this] val factoryToNode: Node => (ServiceFactory[Req, Rep], Node) =
+    private[this] val factoryToNode: Node => (EndpointFactory[Req, Rep], Node) =
       n => n.factory -> n
-
-    private[this] val closeNode: Node => Unit = n => n.close()
 
     def handle(u: Update): Unit = u match {
       case NewList(newFactories) =>
@@ -165,7 +162,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
         val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
 
         // These nodes are currently maintained by `Distributor`.
-        val oldFactories: mutable.HashMap[ServiceFactory[Req, Rep], Node] =
+        val oldFactories: mutable.HashMap[EndpointFactory[Req, Rep], Node] =
           dist.vector.map(factoryToNode)(collection.breakOut)
 
         var numAdded: Int = 0
@@ -179,9 +176,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
             numAdded += 1
           }
         }
-
-        // Close nodes that weren't transferred.
-        oldFactories.values.foreach(closeNode)
 
         removes.incr(oldFactories.size)
         adds.incr(numAdded)
@@ -205,7 +199,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(factories: IndexedSeq[ServiceFactory[Req, Rep]]): Unit = {
+  def update(factories: IndexedSeq[EndpointFactory[Req, Rep]]): Unit = {
     updates.incr()
     updater(NewList(factories))
   }
@@ -217,6 +211,12 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   protected def invoke(fn: Distributor => Unit): Unit =
     updater(Invoke(fn))
 
+  /**
+   * Returns `null` when `count` reaches 0.
+   *
+   * This indicates that we were unsuccessful in finding a Node
+   * with a `Status.Open`.
+   */
   @tailrec
   private[this] def pick(count: Int): Node = {
     if (count == 0)
@@ -236,7 +236,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       rebuild()
       node = dist.pick()
     }
-
     if (snap.eq(dist) && snap.needsRebuild)
       rebuild()
 
@@ -246,6 +245,10 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   def close(deadline: Time): Future[Unit] = {
     for (gauge <- gauges) gauge.remove()
     removes.incr(dist.vector.size)
-    Closable.all(dist.vector:_*).close(deadline)
+    // Note, we don't treat the endpoints as a
+    // resource that the load balancer owns, and as
+    // such we don't close them here. We expect the
+    // layers above to manage them accordingly.
+    Future.Done
   }
 }

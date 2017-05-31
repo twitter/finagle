@@ -1,6 +1,6 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.finagle.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.thrift.Status._

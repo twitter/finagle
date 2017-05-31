@@ -6,58 +6,6 @@ import com.twitter.util.Duration
 /**
  * '''Experimental:''' This API is under construction.
  *
- * = Timeouts =
- *
- * Defaults to using the StackClient's configuration.
- *
- * An example of setting a per-request timeout of 50 milliseconds and a total
- * timeout of 100 milliseconds:
- * {{{
- * import com.twitter.conversions.time._
- * import com.twitter.finagle.client.MethodBuilderScaladoc
- *
- * val builder: MethodBuilderScaladoc[_] = ???
- * builder
- *   .withTimeoutPerRequest(50.milliseconds)
- *   .withTimeoutTotal(100.milliseconds)
- * }}}
- *
- * = Retries =
- *
- * Retries are intended to help clients improve success rate by trying
- * failed requests additional times. Care must be taken by developers
- * to only retry when they are known to be safe to issue the request multiple
- * times. This is because the client cannot always be sure what the
- * backend service has done. An example of a request that is safe to
- * retry would be a read-only request.
- *
- * Defaults to using the client's [[ResponseClassifier]] to retry failures
- * [[com.twitter.finagle.service.ResponseClass.RetryableFailure marked as retryable]].
- * See [[MethodBuilderScaladoc.withRetryForClassifier]] for details.
- *
- * A [[com.twitter.finagle.service.RetryBudget]] is used to prevent retries from overwhelming
- * the backend service. The budget is shared across clients created from
- * an initial [[MethodBuilder]]. As such, even if the retry rules
- * deem the request retryable, it may not be retried if there is insufficient
- * budget.
- *
- * Finagle will automatically retry failures that are known to be safe
- * to retry via [[com.twitter.finagle.service.RequeueFilter]]. This includes
- * [[com.twitter.finagle.WriteException WriteExceptions]] and
- * [[com.twitter.finagle.Failure.Restartable retryable nacks]]. As these should have
- * already been retried, we avoid retrying them again by ignoring them at this layer.
- *
- * Additional information regarding retries can be found in the
- * [[https://twitter.github.io/finagle/guide/Clients.html#retries user guide]].
- *
- * The classifier is also used to determine the logical success metrics of
- * the client. Logical here means after any retries are run. For example
- * should a request result in retryable failure on the first attempt, but
- * succeed upon retry, this is exposed through metrics as a success.
- * Logical success rate metrics are scoped to
- * "clnt/your_client_label/method_name/logical" and get "success" and
- * "requests" counters along with a "request_latency_ms" stat.
- *
  * @note This interface primarily exists to share Scaladocs across
  *       protocol-specific `MethodBuilder` implementations.
  */

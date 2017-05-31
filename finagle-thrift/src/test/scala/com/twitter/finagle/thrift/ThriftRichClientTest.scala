@@ -43,7 +43,7 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
   test("ThriftRichClientTest newServiceIface takes dest String and stats scoping label arguments") {
     val captor = ArgumentCaptor.forClass(classOf[StatsReceiver])
     val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture())
+    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture(), any())
 
     val client = spy(ThriftRichClientMock)
     client.newServiceIface("/s/tweetypie/tweetypie", "tweetypie_client")(builder = mockBuilder)
@@ -55,7 +55,7 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
   test("ThriftRichClientTest newServiceIface takes dest Name and stats scoping label arguments") {
     val captor = ArgumentCaptor.forClass(classOf[StatsReceiver])
     val mockBuilder = mock[ServiceIfaceBuilder[SvcIface]]
-    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture())
+    doReturn(svcIface).when(mockBuilder).newServiceIface(any(), any(), captor.capture(), any())
 
     val name = Name.empty
     val client = spy(ThriftRichClientMock)

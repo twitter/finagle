@@ -8,7 +8,7 @@ import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.netty3.channel.{
   ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
-import com.twitter.finagle.netty3.ssl.SslConnectHandler
+import com.twitter.finagle.netty3.ssl.client.SslClientConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.Engine
@@ -298,20 +298,20 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     assert(httpConnectHandler.nonEmpty)
   }
 
-  test("SslConnectHandler is not added by default") {
+  test("SslClientConnectHandler is not added by default") {
     val params = Stack.Params.empty + Label("name")
     val pipeline = makeTransporterPipeline(params, unresolvedAddr)
-    val sslHandler = findHandlerInPipeline[SslConnectHandler](pipeline)
-    assert(sslHandler.isEmpty)
+    val sslConnectHandler = findHandlerInPipeline[SslClientConnectHandler](pipeline)
+    assert(sslConnectHandler.isEmpty)
   }
 
-  test("SslConnectHandler is added when the SSL/TLS client configuration param is configured") {
+  test("SslClientConnectHandler is added when the SSL/TLS client configuration param is configured") {
     val engine = mock[SSLEngine]
     val params = Stack.Params.empty + Label("name") +
       Transport.ClientSsl(Some(SslClientConfiguration()))
     val pipeline = makeTransporterPipeline(params, unresolvedAddr)
-    val sslHandler = findHandlerInPipeline[SslConnectHandler](pipeline)
-    assert(sslHandler.nonEmpty)
+    val sslConnectHandler = findHandlerInPipeline[SslClientConnectHandler](pipeline)
+    assert(sslConnectHandler.nonEmpty)
   }
 
   test("SslHandler is not added by default") {

@@ -1,7 +1,7 @@
 package com.twitter.finagle.zookeeper
 
-import com.twitter.common.zookeeper.ServerSet.EndpointStatus
-import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl, ZooKeeperClient}
+import com.twitter.finagle.common.zookeeper.ServerSet.EndpointStatus
+import com.twitter.finagle.common.zookeeper.{ServerSet, ServerSetImpl, ZooKeeperClient}
 import com.twitter.finagle.{Announcer, Announcement}
 import com.twitter.util.{Future, Promise}
 import java.net.InetSocketAddress

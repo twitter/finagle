@@ -14,7 +14,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
 
   // Timer here will never be released. This is ok since this class
   // is used for debugging only.
-  def this(logger: Logger) = this(logger, DefaultTimer.twitter)
+  def this(logger: Logger) = this(logger, DefaultTimer)
 
   def stat(name: String*): Stat = new Stat {
     def add(value: Float) {

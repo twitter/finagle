@@ -1,23 +1,26 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
+import com.twitter.finagle._
 import com.twitter.finagle.service.ConstantService
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ClientConnection, NoBrokersAvailableException, Service, ServiceFactory, Status}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import org.junit.runner.RunWith
-import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import scala.util.Random
 
 object LoadDistributionTest {
 
-  type ServerSet = Activity[Set[ServiceFactory[Unit, Unit]]]
+  type ServerSet = Activity[Set[EndpointFactory[Unit, Unit]]]
 
-  def emptyServerSet: ServerSet = Activity(Var(Activity.Ok(Set.empty[ServiceFactory[Unit, Unit]])))
+  def emptyServerSet: ServerSet = Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Unit, Unit]])))
 
-  class Server extends ServiceFactory[Unit, Unit] {
+  class Server extends EndpointFactory[Unit, Unit] {
+    def remake() = {}
+    def address = Address.Failed(new Exception)
+
     var load: Int = 0
     var closed: Boolean = false
 
@@ -61,7 +64,7 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
 
   import LoadDistributionTest._
 
-  private[this] val serverset = Var(Vector.empty[ServiceFactory[Unit, Unit]])
+  private[this] val serverset = Var(Vector.empty[EndpointFactory[Unit, Unit]])
 
   private[this] def newClients(n: Int): Vector[ServiceFactory[Unit, Unit]] =
     Vector.tabulate(n)(i =>

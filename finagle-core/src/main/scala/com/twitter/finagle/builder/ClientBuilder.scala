@@ -5,15 +5,16 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient}
 import com.twitter.finagle.client.{StackBasedClient, Transporter}
-import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
+import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.ExceptionSourceFilter
-import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.liveness.FailureAccrualFactory
+import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
-import com.twitter.finagle.ssl.TrustCredentials
+import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
@@ -440,7 +441,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * For example:
    * {{{
    * import com.twitter.finagle.Http
-   * import com.twitter.finagle.factory.BindingFactory
+   * import com.twitter.finagle.naming.BindingFactory
    *
    * Http.client.configured(BindingFactory.BaseDtab(baseDtab))
    * }}}

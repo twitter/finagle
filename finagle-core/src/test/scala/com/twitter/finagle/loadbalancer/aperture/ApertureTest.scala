@@ -1,40 +1,43 @@
 package com.twitter.finagle.loadbalancer.aperture
 
-import com.twitter.finagle.loadbalancer.NodeT
-import com.twitter.finagle.service.FailingFactory
+import com.twitter.finagle._
+import com.twitter.finagle.loadbalancer.{EndpointFactory, FailingEndpointFactory, NodeT}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy}
-import com.twitter.finagle.{NoBrokersAvailableException, Status}
-import com.twitter.util.{Activity, Await, Duration}
+import com.twitter.util.{Activity, Await, Duration, NullTimer}
 import org.scalatest.FunSuite
 
 class ApertureTest extends FunSuite with ApertureSuite {
   /**
-   * @note We don't mix in a controller for the aperture. This means that the aperture
-   * will not expand or contract automatically. Thus, each test in this suite must
-   * manually adjust it or rely on the "rebuild" functionality provided by [[Balancer]]
-   * which kicks in when we select a down node. Since aperture uses P2C to select
-   * nodes, we inherit the same probabilistic properties that help us avoid down
-   * nodes with the important caveat that we only select over a subset.
+   * A simple aperture balancer which doesn't have a controller or load metric
+   * mixed in since we only want to test the aperture behavior exclusive of
+   * these.
+   *
+   * This means that the aperture will not expand or contract automatically. Thus, each
+   * test in this suite must manually adjust it or rely on the "rebuild" functionality
+   * provided by [[Balancer]] which kicks in when we select a down node. Since aperture
+   * uses P2C to select nodes, we inherit the same probabilistic properties that help
+   * us avoid down nodes with the important caveat that we only select over a subset.
    */
   private class Bal extends TestBal {
-    protected class Node(val factory: ServiceFactory[Unit, Unit])
+    protected def statsReceiver = NullStatsReceiver
+    protected class Node(val factory: EndpointFactory[Unit, Unit])
       extends ServiceFactoryProxy[Unit, Unit](factory)
       with NodeT[Unit, Unit]
       with ApertureNode {
       // We don't need a load metric since this test only focuses on
       // the internal behavior of aperture.
+      def id: Int = 0
       def load: Double = 0
       def pending: Int = 0
       override val token: Int = 0
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit]): Node =
+    protected def newNode(factory: EndpointFactory[Unit, Unit]): Node =
       new Node(factory)
 
     protected def failingNode(cause: Throwable): Node =
-      new Node(new FailingFactory[Unit, Unit](cause))
+      new Node(new FailingEndpointFactory[Unit, Unit](cause))
   }
 
   test("requires minAperture > 0") {
@@ -48,6 +51,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
         maxEffort = 0,
         rng = Rng.threadLocal,
         statsReceiver = NullStatsReceiver,
+        timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = false
       )
@@ -167,16 +171,16 @@ class ApertureTest extends FunSuite with ApertureSuite {
       closed0.status = unavailableStatus
       closed1.status = unavailableStatus
 
-      val closed0Req = closed0.n
-      val closed1Req = closed1.n
+      val closed0Req = closed0.total
+      val closed1Req = closed1.total
 
       bal.applyn(100)
 
       // We want to make sure that we haven't sent requests to the
       // `Closed` nodes since our aperture is wide enough to avoid
       // them.
-      assert(closed0Req == closed0.n)
-      assert(closed1Req == closed1.n)
+      assert(closed0Req == closed0.total)
+      assert(closed1Req == closed1.total)
     }
   }
 
@@ -209,7 +213,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     DeterministicOrdering.unsetCoordinate()
 
-    val servers = Vector.tabulate(10) { i => new Factory(i) }
+    val servers = Vector.tabulate(10) { i => Factory(i) }
 
     val distSnap = bal.distx
     bal.update(servers)
@@ -228,7 +232,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
 
     DeterministicOrdering.setCoordinate(0, 5, 10)
 
-    val servers = Vector.tabulate(10) { i => new Factory(i) }
+    val servers = Vector.tabulate(10) { i => Factory(i) }
     bal.update(servers)
 
     val order = bal.distx.vector
@@ -252,7 +256,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     val numClients = 6
     val offset = 0
 
-    bal.update(Vector.tabulate(numServers) { i => new Factory(i) })
+    bal.update(Vector.tabulate(numServers) { i => Factory(i) })
 
     for (i <- 0 until numClients) {
       DeterministicOrdering.setCoordinate(offset, i, numClients)

@@ -55,7 +55,7 @@ class ServerSetResolver {
   def resolveChurningServerSets(): Int = {
 
     val shutdown = new Promise[Int]
-    implicit val timer = DefaultTimer.twitter
+    implicit val timer = DefaultTimer
 
     val stabilizationWindow = Duration.fromSeconds(stabilizationSec)
     val resolver = new Zk2Resolver(NullStatsReceiver, stabilizationWindow, stabilizationWindow, stabilizationWindow)

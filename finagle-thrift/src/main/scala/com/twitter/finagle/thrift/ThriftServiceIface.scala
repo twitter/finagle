@@ -4,6 +4,8 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage._
 import com.twitter.finagle.stats.{ClientStatsReceiver, Counter, StatsReceiver}
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.scrooge._
 import com.twitter.util._
 import java.util.Arrays
@@ -30,8 +32,16 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
-    stats: StatsReceiver
+    stats: StatsReceiver,
+    responseClassifier: ResponseClassifier
   ): ServiceIface
+
+  def newServiceIface(
+    thriftService: Service[ThriftClientRequest, Array[Byte]],
+    pf: TProtocolFactory,
+    stats: StatsReceiver
+  ): ServiceIface =
+    newServiceIface(thriftService, pf, stats, ResponseClassifier.Default)
 }
 
 /**
@@ -109,12 +119,20 @@ object ThriftServiceIface {
     method: ThriftMethod,
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
-    stats: StatsReceiver
-  ): Service[method.Args, method.SuccessType] = {
-    statsFilter(method, stats)
+    stats: StatsReceiver,
+    responseClassifier: ResponseClassifier
+  ): Service[method.Args, method.SuccessType] =
+    statsFilter(method, stats, responseClassifier)
       .andThen(thriftCodecFilter(method, pf))
       .andThen(thriftService)
-  }
+
+  def apply(
+    method: ThriftMethod,
+    thriftService: Service[ThriftClientRequest, Array[Byte]],
+    pf: TProtocolFactory,
+    stats: StatsReceiver
+  ): Service[method.Args, method.SuccessType] =
+    apply(method, thriftService, pf, stats, ResponseClassifier.Default)
 
   /**
    * Used in conjunction with [[ServiceIfaceBuilder]] to allow for filtering
@@ -129,28 +147,36 @@ object ThriftServiceIface {
 
   /**
    * A [[Filter]] that updates success and failure stats for a thrift method.
-   * Failed responses and thrift exceptions are counted as failures here.
+   * Responses are classified according to `responseClassifier`.
    */
   private def statsFilter(
     method: ThriftMethod,
-    stats: StatsReceiver
+    stats: StatsReceiver,
+    responseClassifier: ResponseClassifier
   ): SimpleFilter[method.Args, method.SuccessType] = {
     val methodStats = ThriftMethodStats(stats.scope(method.serviceName).scope(method.name))
     new SimpleFilter[method.Args, method.SuccessType] {
-      private[this] val respondFn: Try[method.SuccessType] => Unit = {
-        case Return(_) =>
-          methodStats.successCounter.incr()
-        case Throw(ex) =>
-          methodStats.failuresCounter.incr()
-          methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
-      }
-
       def apply(
         args: method.Args,
         service: Service[method.Args, method.SuccessType]
       ): Future[method.SuccessType] = {
         methodStats.requestsCounter.incr()
-        service(args).respond(respondFn)
+        service(args).respond { response =>
+          val responseClass = responseClassifier.applyOrElse(
+            ReqRep(args, response),
+            ResponseClassifier.Default)
+          responseClass match {
+            case ResponseClass.Successful(_) =>
+              methodStats.successCounter.incr()
+            case ResponseClass.Failed(_) =>
+              methodStats.failuresCounter.incr()
+              response match {
+                case Throw(ex) =>
+                  methodStats.failuresScope.counter(Throwables.mkString(ex): _*).incr()
+                case _ =>
+              }
+          }
+        }
       }
     }
   }
@@ -164,14 +190,14 @@ object ThriftServiceIface {
     pf: TProtocolFactory
   ): Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] =
     new Filter[method.Args, method.SuccessType, ThriftClientRequest, Array[Byte]] {
-      private[this] val decodeRepFn: Array[Byte] => Future[method.SuccessType] = { bytes =>
+      private[this] val decodeRepFn: Array[Byte] => Try[method.SuccessType] = { bytes =>
         val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
         result.successField match {
-          case Some(v) => Future.value(v)
+          case Some(v) => Return(v)
           case None => result.firstException() match {
-            case Some(ex) => Future.exception(ex)
+            case Some(ex) => Throw(ex)
             case None =>
-              Future.exception(new TApplicationException(
+              Throw(new TApplicationException(
                 TApplicationException.MISSING_RESULT,
                 s"Thrift method '${method.name}' failed: missing result"))
           }
@@ -183,7 +209,12 @@ object ThriftServiceIface {
         service: Service[ThriftClientRequest, Array[Byte]]
       ): Future[method.SuccessType] = {
         val request = encodeRequest(method.name, args, pf, method.oneway)
-        service(request).flatMap(decodeRepFn)
+        val serdeCtx = new DeserializeCtx[method.SuccessType](args, decodeRepFn)
+        Contexts.local.let(DeserializeCtx.Key, serdeCtx) {
+          service(request).flatMap { response =>
+            Future.const(serdeCtx.deserialize(response))
+          }
+        }
       }
     }
 
@@ -216,22 +247,7 @@ object ThriftServiceIface {
         service(args).flatMap(responseFn)
     }
 
-  private[this] val tlReusableBuffer = new ThreadLocal[TReusableMemoryTransport] {
-    override def initialValue(): TReusableMemoryTransport = TReusableMemoryTransport(512)
-  }
-
-  private[this] def getReusableBuffer(): TReusableMemoryTransport = {
-    val buf = tlReusableBuffer.get()
-    buf.reset()
-    buf
-  }
-
-  private[this] def resetBuffer(trans: TReusableMemoryTransport): Unit = {
-    if (trans.currentCapacity > maxReusableBufferSize().inBytes) {
-      resetCounter.incr()
-      tlReusableBuffer.remove()
-    }
-  }
+  private[this] val tlReusableBuffer = TReusableBuffer()
 
   private def encodeRequest(
     methodName: String,
@@ -239,15 +255,15 @@ object ThriftServiceIface {
     pf: TProtocolFactory,
     oneway: Boolean
   ): ThriftClientRequest = {
-    val buf = getReusableBuffer()
+    val buf = tlReusableBuffer.get()
     val oprot = pf.getProtocol(buf)
 
     oprot.writeMessageBegin(new TMessage(methodName, TMessageType.CALL, 0))
     args.write(oprot)
     oprot.writeMessageEnd()
 
-    val bytes = Arrays.copyOfRange(buf.getArray, 0, buf.length)
-    resetBuffer(buf)
+    val bytes = Arrays.copyOfRange(buf.getArray(), 0, buf.length())
+    tlReusableBuffer.reset()
 
     new ThriftClientRequest(bytes, oneway)
   }

@@ -42,7 +42,7 @@ private class ThresholdFailureDetector(
     closeTimeout: Duration = 4.seconds,
     nanoTime: () => Long = System.nanoTime,
     statsReceiver: StatsReceiver = NullStatsReceiver,
-    implicit val timer: Timer = DefaultTimer.twitter)
+    implicit val timer: Timer = DefaultTimer)
   extends FailureDetector {
   require(windowSize > 0)
   private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()

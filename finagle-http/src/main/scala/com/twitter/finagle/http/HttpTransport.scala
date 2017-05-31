@@ -2,8 +2,8 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.{Status => CoreStatus}
 import com.twitter.finagle.http.codec.ConnectionManager
-import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy, StreamTransport}
-import com.twitter.util.{Future, Promise}
+import com.twitter.finagle.http.exp.{Multi, StreamTransport, StreamTransportProxy}
+import com.twitter.util.{Future, Promise, Return, Try}
 import scala.util.control.NonFatal
 
 /**
@@ -15,7 +15,8 @@ import scala.util.control.NonFatal
 private[finagle] class HttpTransport[A <: Message, B <: Message](
     self: StreamTransport[A, B],
     manager: ConnectionManager)
-  extends StreamTransportProxy[A, B](self) {
+  extends StreamTransportProxy[A, B](self)
+  with (Try[Multi[B]] => Unit)  {
 
   def this(self: StreamTransport[A, B]) =
     this(self, new ConnectionManager)
@@ -25,18 +26,17 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
   // is ready to be closed.
   manager.onClose.before(self.close())
 
-
-  def read(): Future[Multi[B]] =
-    self.read().onSuccess(readFn)
-
-  private[this] val readFn: Multi[B] => Unit = { case Multi(m, onFinish) =>
-    manager.observeMessage(m, onFinish)
+  // A respond handler for `read`.
+  def apply(mb: Try[Multi[B]]): Unit = mb match {
+    case Return(Multi(m, onFinish)) => manager.observeMessage(m, onFinish)
+    case _ => // do nothing
   }
 
+  def read(): Future[Multi[B]] = self.read().respond(this)
 
   def write(m: A): Future[Unit] =
     try {
-      val p = Promise[Unit]
+      val p = new Promise[Unit]
       manager.observeMessage(m, p)
       val f = self.write(m)
       p.become(f)
@@ -46,5 +46,5 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
     }
 
 
-  override def status: CoreStatus = if (manager.shouldClose) CoreStatus.Closed else self.status
+  override def status: CoreStatus = if (manager.shouldClose()) CoreStatus.Closed else self.status
 }

@@ -13,7 +13,6 @@ import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
 import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.client.Transporter;
-import com.twitter.finagle.factory.BindingFactory;
 import com.twitter.finagle.factory.TimeoutFactory;
 import com.twitter.finagle.filter.MaskCancelFilter;
 import com.twitter.finagle.filter.RequestSemaphoreFilter;
@@ -21,8 +20,9 @@ import com.twitter.finagle.liveness.FailureAccrualFactory;
 import com.twitter.finagle.liveness.FailureAccrualPolicy;
 import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
+import com.twitter.finagle.loadbalancer.WhenNoNodesOpens;
+import com.twitter.finagle.naming.BindingFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
-import com.twitter.finagle.netty3.param.Netty3Timer;
 import com.twitter.finagle.param.ExceptionStatsHandler;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
@@ -44,6 +44,7 @@ import com.twitter.finagle.ssl.client.SslClientConfiguration;
 import com.twitter.finagle.ssl.server.SslServerConfiguration;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.transport.Transport;
+import com.twitter.finagle.util.DefaultTimer;
 import com.twitter.finagle.util.Rngs;
 import com.twitter.util.Duration;
 import com.twitter.util.Function0;
@@ -58,7 +59,7 @@ public class StackParamCompilationTest {
     StackClient<String, String> client =
       ClientBuilder.<String, String>stackClientOfCodec(null)
         .configured(new Label("").mk())
-        .configured(new Timer(com.twitter.finagle.util.DefaultTimer.twitter()).mk())
+        .configured(new Timer(DefaultTimer.getInstance()).mk())
         .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
         .configured(new Stats(com.twitter.finagle.stats.DefaultStatsReceiver.get()).mk())
         .configured(new Monitor(RootMonitor.getInstance()).mk())
@@ -86,11 +87,12 @@ public class StackParamCompilationTest {
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())
         .configured(new RequestSemaphoreFilter.Param(
-          new Some<AsyncSemaphore>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
+          new Some<>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
+        .configured(new LoadBalancerFactory.WhenNoNodesOpenParam(
+            WhenNoNodesOpens.FAIL_FAST).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
-        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get().netty()).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
           .configured(new FailFastFactory.FailFast(true).mk())
@@ -110,11 +112,11 @@ public class StackParamCompilationTest {
           }
         }).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
-        .configured(new TimeoutFilter.Param(new Tunable.Const<Duration>("id", Duration.Top())).mk())
+        .configured(new TimeoutFilter.Param(new Tunable.Const<>("id", Duration.Top())).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
         .configured(new Transport.Verbose(false).mk())
-        .configured(new Transporter.TrafficClass(new Some<Object>(1)).mk())
+        .configured(new Transporter.TrafficClass(new Some<>(1)).mk())
         .configured(new Listener.TrafficClass(Option.empty()).mk())
         .configured(new Transport.ClientSsl(
           Option.<SslClientConfiguration>empty()).mk())

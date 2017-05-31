@@ -124,9 +124,9 @@ private[twitter] object Message {
       while (iter.hasNext) {
         iter.next() match { case (k, v) =>
           bw.writeIntBE(k.length)
-          bw.writeBytes(Buf.ByteArray.Owned.extract(k))
+          bw.writeBytes(k)
           bw.writeIntBE(v.length)
-          bw.writeBytes(Buf.ByteArray.Owned.extract(v))
+          bw.writeBytes(v)
         }
       }
       bw.owned()
@@ -271,9 +271,9 @@ private[twitter] object Message {
         // to do zero-copy here.
         iter.next() match { case (k, v) =>
           hd.writeShortBE(k.length)
-          hd.writeBytes(Buf.ByteArray.Owned.extract(k))
+          hd.writeBytes(k)
           hd.writeShortBE(v.length)
-          hd.writeBytes(Buf.ByteArray.Owned.extract(v))
+          hd.writeBytes(v)
         }
       }
 
@@ -319,9 +319,9 @@ private[twitter] object Message {
       while (iter.hasNext) {
         iter.next() match { case (k, v) =>
           hd.writeShortBE(k.length)
-          hd.writeBytes(Buf.ByteArray.Owned.extract(k))
+          hd.writeBytes(k)
           hd.writeShortBE(v.length)
-          hd.writeBytes(Buf.ByteArray.Owned.extract(v))
+          hd.writeBytes(v)
         }
       }
 

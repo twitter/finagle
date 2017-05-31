@@ -43,7 +43,7 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
 
   test("quit") {
     val result = client(Quit())
-    assert(Await.result(result) == NoOp())
+    assert(Await.result(result) == NoOp)
   }
 
   test("cas") {

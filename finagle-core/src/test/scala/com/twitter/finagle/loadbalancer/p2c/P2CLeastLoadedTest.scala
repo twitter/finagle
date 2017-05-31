@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.Rng
-import com.twitter.util.{Function => _, _}
+import com.twitter.util._
 import org.scalatest.FunSuite
 import scala.collection.mutable
 import scala.language.reflectiveCalls

@@ -6,6 +6,7 @@ import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
+import io.netty.handler.timeout.TimeoutException
 import io.netty.util.AttributeKey
 import java.io.IOException
 import java.util.concurrent.atomic.LongAdder
@@ -106,10 +107,11 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     // `channelActive`, not `handlerAdded`.
     ctx.channel.attr(ConnectionDurationKey).get match {
       case null => // the connection didn't initialize
-      case elapsed => connectionDuration.add(elapsed().inMilliseconds)
+      case elapsed =>
+        connectionDuration.add(elapsed().inMilliseconds)
+        connectionCount.decrement()
     }
 
-    connectionCount.decrement()
     super.channelInactive(ctx)
   }
 
@@ -119,6 +121,7 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     if (!Monitor.isActive) {
       val level = cause match {
         case _: IOException => Level.FINE
+        case _: TimeoutException => Level.FINE
         case f: Failure => f.logLevel
         case _ => Level.WARNING
       }

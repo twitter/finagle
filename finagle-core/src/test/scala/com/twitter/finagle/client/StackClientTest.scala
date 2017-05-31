@@ -5,7 +5,7 @@ import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty3.Netty3Transporter

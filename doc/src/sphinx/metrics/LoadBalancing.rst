@@ -50,8 +50,8 @@ All Balancers
 **algorithm/{type}**
   A gauge exported with the name of the algorithm used for load balancing.
 
-ApertureLoadBandBalancer
-<<<<<<<<<<<<<<<<<<<<<<<<
+Aperture Based Load Balancers
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 **aperture**
   A gauge of the width of the window over which endpoints are
@@ -68,3 +68,7 @@ ApertureLoadBandBalancer
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives
   updates from the `DeterministicOrdering` process global.
+
+**expired**
+  A counter of the number of endpoints which have been closed because they
+  have fallen out of the aperture window and become idle.

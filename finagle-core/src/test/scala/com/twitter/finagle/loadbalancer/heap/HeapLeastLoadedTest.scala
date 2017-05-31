@@ -164,14 +164,14 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     assert(newFactory.load == 0)
   }
 
-  test("close a factory when removed") {
+  test("don't close a factory when removed") {
     val ctx = new Ctx
     import ctx._
 
     val made = Seq.fill(N) { Await.result(b()) }
     mutableFactories.update(half2)
     Await.result(b()).close()
-    for (f <- half1) assert(f.isClosed)
+    for (f <- half1) assert(!f.isClosed)
   }
 
   test("report stats correctly") {

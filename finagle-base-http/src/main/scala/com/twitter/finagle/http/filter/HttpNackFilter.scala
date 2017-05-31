@@ -33,7 +33,7 @@ object HttpNackFilter {
   private val RetryableNackBody = Buf.Utf8("Request was not processed by the server due to an error and is safe to retry")
   private val NonRetryableNackBody = Buf.Utf8("Request was not processed by the server and should not be retried")
 
-  private val NonRetryableNackFlags = Failure.Rejected|Failure.NonRetryable
+  private val NonRetryableNackFlags = FailureFlags.Rejected|FailureFlags.NonRetryable
 
   private[finagle] def isRetryableNack(rep: Response): Boolean =
     rep.status == ResponseStatus && rep.headerMap.contains(RetryableNackHeader)
@@ -80,7 +80,7 @@ private class HttpNackFilter(statsReceiver: StatsReceiver)
       }
       rep
 
-    case f: Failure if f.isFlagged(NonRetryableNackFlags) =>
+    case f: FailureFlags[_] if f.isFlagged(NonRetryableNackFlags) =>
       nonretryableNackCounts.incr()
       val rep = Response(ResponseStatus)
       rep.headerMap.set(NonRetryableNackHeader, "true")

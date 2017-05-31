@@ -76,7 +76,7 @@ private[memcached] trait Framer extends FinagleFramer {
           // Remove the extracted frame from the accumulator, stripping the newline (2 chars)
           accum = accum.slice(frameLength + 2, accum.length)
 
-          val tokens = ParserUtils.split(Buf.ByteArray.Owned.extract(frameBuf), TokenDelimiter)
+          val tokens = ParserUtils.splitOnWhitespace(frameBuf)
 
           val bytesNeeded = dataLength(tokens)
 

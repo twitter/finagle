@@ -46,3 +46,13 @@ with a ``StatsFilter`` scoped to `tries`.
 **retries/request_limit**
   A counter of the number of times the limit of retry attempts for a logical
   request has been reached.
+
+**retries/not_open**
+  A counter of the number of times a request was deemed retryable but
+  was not retried due to the underlying ``Service`` not having a status
+  of ``Open``.
+
+**retries/cannot_retry**
+  A counter of the number of times a request was deemed requeueable but
+  was not requeued due to the underlying ``ServiceFactory`` not having a
+  status of ``Open``.

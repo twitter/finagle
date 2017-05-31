@@ -1,13 +1,12 @@
 package com.twitter.finagle.zookeeper
 
-import java.net.{InetAddress, InetSocketAddress}
-
-import org.apache.zookeeper.server.{ZKDatabase, ZooKeeperServer}
-import com.twitter.common.zookeeper.ZooKeeperClient
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import com.twitter.common.io.FileUtils.createTempDir
-import com.twitter.common.quantity.{Amount, Time}
+import com.twitter.conversions.time._
+import com.twitter.io.TempDirectory.create
+import com.twitter.finagle.common.zookeeper.ZooKeeperClient
 import com.twitter.zk.ServerCnxnFactory
+import java.net.{InetAddress, InetSocketAddress}
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
+import org.apache.zookeeper.server.{ZKDatabase, ZooKeeperServer}
 
 class ZkInstance {
   var connectionFactory: ServerCnxnFactory = null
@@ -26,19 +25,17 @@ class ZkInstance {
   def start() {
     started = true
 
-    val txn = new FileTxnSnapLog(createTempDir(), createTempDir())
+    val txn = new FileTxnSnapLog(create(), create())
     val zkdb = new ZKDatabase(txn)
     zookeeperServer = new ZooKeeperServer(
-      createTempDir(),
-      createTempDir(),
+      create(),
+      create(),
       ZooKeeperServer.DEFAULT_TICK_TIME)
     zookeeperServer.setMaxSessionTimeout(100)
     zookeeperServer.setMinSessionTimeout(100)
     connectionFactory = ServerCnxnFactory(InetAddress.getLoopbackAddress)
     connectionFactory.startup(zookeeperServer)
-    zookeeperClient = new ZooKeeperClient(
-      Amount.of(10, Time.MILLISECONDS),
-      zookeeperAddress)
+    zookeeperClient = new ZooKeeperClient(10.milliseconds, zookeeperAddress)
 
     // Disable noise from zookeeper logger
 //    java.util.logging.LogManager.getLogManager().reset();

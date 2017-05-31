@@ -355,32 +355,23 @@ object Finagle extends Build {
       caffeineLib,
       util("cache"),
       util("zk-test") % "test",
-      "com.twitter" % "libthrift" % libthriftVersion,
-      "com.twitter.common" % "io-json" % "0.0.54",
-      "com.twitter.common.zookeeper" % "server-set" % "1.0.112" excludeAll(
-        ExclusionRule("com.fasterxml.jackson.module", "jackson-module-scala_2.11"),
-        ExclusionRule("com.twitter", "finagle-core-java"),
-        ExclusionRule("com.twitter", "finagle-core_2.11"),
-        ExclusionRule("com.twitter", "util-core-java"),
-        ExclusionRule("com.twitter", "util-core_2.11"),
-        ExclusionRule("com.twitter.common", "service-thrift"),
-        ExclusionRule("org.apache.thrift", "libthrift"),
-        ExclusionRule("org.apache.zookeeper", "zookeeper"),
-        ExclusionRule("org.apache.zookeeper", "zookeeper-client"),
-        ExclusionRule("org.scala-lang.modules", "scala-parser-combinators_2.11")
-      ),
-      "com.twitter.common" % "service-thrift" % "1.0.55" excludeAll(
-        ExclusionRule("org.apache.thrift", "libthrift")
-      ),
       guavaLib,
+      "com.google.code.gson" % "gson" % "2.3.1" ,
       "org.apache.zookeeper" % "zookeeper" % zkVersion excludeAll(
         ExclusionRule("com.sun.jdmk", "jmxtools"),
         ExclusionRule("com.sun.jmx", "jmxri"),
         ExclusionRule("javax.jms", "jms")
-      )
+      ),
+      "commons-lang" % "commons-lang" % "2.6"
     ),
     libraryDependencies ++= jacksonLibs,
-    excludeFilter in unmanagedSources := "ZkTest.scala"
+    libraryDependencies ++= scroogeLibs,
+    ScroogeSBT.autoImport.scroogeLanguages in Compile := Seq("java"),
+    excludeFilter in unmanagedSources := "ZkTest.scala",
+    scalacOptions in (Compile, doc) ++= {
+      if (scalaVersion.value.startsWith("2.12")) Seq("-no-java-comments")
+      else Nil
+    }
   ).dependsOn(finagleCore)
 
   lazy val finagleTunable = Project(
@@ -521,10 +512,10 @@ object Finagle extends Build {
       util("app"),
       util("core"),
       util("logging"),
-      util("stats"),
-      "com.twitter.common" % "stats-util" % "0.0.60")
+      util("stats"))
   ).dependsOn(
     finagleCore,
+    finagleExp,
     finagleNetty4,
     finagleToggle)
 
@@ -536,6 +527,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-thriftmux",
     libraryDependencies ++= Seq(
+      "commons-lang" % "commons-lang" % "2.6",
       util("core"),
       util("logging"),
       util("stats")) ++ scroogeLibs

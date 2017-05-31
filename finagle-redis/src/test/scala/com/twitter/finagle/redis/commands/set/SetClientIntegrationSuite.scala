@@ -1,13 +1,16 @@
 package com.twitter.finagle.redis.integration
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
+import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+
 import scala.collection.{Set => CollectionSet}
 
 @Ignore
@@ -17,6 +20,8 @@ final class SetClientIntegrationSuite extends RedisClientTest {
   private[this] val oneElemAdded           = 1
   private[this] val oneElemAddErrorMessage = "Could not add one element"
   private[this] val key                    = Buf.Utf8("member")
+
+  val TIMEOUT = 5.seconds
 
   test("Correctly add, then pop members of a set", RedisTest, ClientTest) {
     withRedisClient { client =>
@@ -156,6 +161,24 @@ final class SetClientIntegrationSuite extends RedisClientTest {
       intercept[ClientError] {
         Await.result(client.sInter(Seq(Buf.Empty)))
       }
+    }
+  }
+
+  ignore("Correctly perform an sscan operation", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.sAdd(bufFoo, List(bufBar)))
+      Await.result(client.sAdd(bufFoo, List(bufBoo)))
+      val res = Await.result(client.sScan(bufFoo, 0L, None, None), TIMEOUT)
+      assert(BufToString(res(1)) == "bar")
+      val withCount = Await.result(client.sScan(bufFoo, 0L, Some(2L), None), TIMEOUT)
+      assert(BufToString(withCount(0)) == "0")
+      assert(BufToString(withCount(1)) == "bar")
+      assert(BufToString(withCount(2)) == "boo")
+      val pattern = Buf.Utf8("b*")
+      val withPattern = Await.result(client.sScan(bufFoo, 0L, None, Some(pattern)), TIMEOUT)
+      assert(BufToString(withCount(0)) == "0")
+      assert(BufToString(withCount(1)) == "bar")
+      assert(BufToString(withCount(2)) == "boo")
     }
   }
 }

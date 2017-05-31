@@ -76,7 +76,7 @@ private[finagle] class InetResolver(
   private[this] val successes = statsReceiver.counter("successes")
   private[this] val failures = statsReceiver.counter("failures")
   private[this] val log = Logger()
-  private[this] val timer = DefaultTimer.twitter
+  private[this] val timer = DefaultTimer
 
   /**
    * Resolve all hostnames and merge into a final Addr.
@@ -178,7 +178,7 @@ object FixedInetResolver {
     apply(unscopedStatsReceiver, 16000)
 
   def apply(unscopedStatsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver =
-    apply(unscopedStatsReceiver, maxCacheSize, Stream.empty, DefaultTimer.twitter)
+    apply(unscopedStatsReceiver, maxCacheSize, Stream.empty, DefaultTimer)
 
   /**
    * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
@@ -204,7 +204,7 @@ object FixedInetResolver {
     resolveHost: String => Future[Seq[InetAddress]],
     maxCacheSize: Long,
     backoffs: Stream[Duration] = Stream.empty,
-    timer: Timer = DefaultTimer.twitter
+    timer: Timer = DefaultTimer
   ): LoadingCache[String, Future[Seq[InetAddress]]] = {
 
     val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {

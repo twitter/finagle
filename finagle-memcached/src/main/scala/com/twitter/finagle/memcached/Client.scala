@@ -37,6 +37,13 @@ case class GetResult private[memcached](
 ) {
   lazy val values: Map[String, Buf] = hits.mapValues { _.value }
 
+  lazy val valuesWithFlags: Map[String, (Buf, Buf)] = hits.mapValues { v =>
+    v.flags match {
+      case Some(x) => (v.value, x)
+      case None => (v.value, Buf.Empty)
+    }
+  }
+
   def ++(o: GetResult): GetResult =
     GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
 }
@@ -47,6 +54,12 @@ case class GetsResult(getResult: GetResult) {
   def failures: Map[String, Throwable] = getResult.failures
   def values: Map[String, Buf] = getResult.values
   lazy val valuesWithTokens: Map[String, (Buf, Buf)] = hits.mapValues { v => (v.value, v.casUnique.get) }
+  lazy val valuesWithFlagsAndTokens: Map[String, (Buf, Buf, Buf)] = hits.mapValues { v =>
+    v.flags match {
+      case Some(x) => (v.value, x, v.casUnique.get)
+      case None => (v.value, Buf.Empty, v.casUnique.get)
+    }
+  }
   def ++(o: GetsResult): GetsResult = GetsResult(getResult ++ o.getResult)
 }
 
@@ -121,6 +134,12 @@ private object BaseClient {
 
   def getsFn[T]: Map[String, (T, Buf)] => Option[(T, Buf)] =
     GetFn.asInstanceOf[Map[String, (T, Buf)] => Option[(T, Buf)]]
+
+  def getWithFlagFn[T]: Map[String, (T, Buf)] => Option[(T, Buf)] =
+    GetFn.asInstanceOf[Map[String, (T, Buf)] => Option[(T, Buf)]]
+
+  def getsWithFlagFn[T]: Map[String, (T, Buf, Buf)] => Option[(T, Buf, Buf)] =
+    GetFn.asInstanceOf[Map[String, (T, Buf, Buf)] => Option[(T, Buf, Buf)]]
 }
 
 /**
@@ -264,6 +283,26 @@ trait BaseClient[T] {
     gets(Seq(key)).map(getsFn)
 
   /**
+   * Get a key from the server along with its flags
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[get]] if you do not need the flags.
+   */
+  def getWithFlag(key: String): Future[Option[(T, Buf)]] =
+    getWithFlag(Seq(key)).map(getWithFlagFn)
+
+  /**
+   * Get a key from the server along with its flags and a "cas unique" token.
+   *
+   * @return `None` if there is no value stored for `key`.
+   * @see [[get]] if you do not need the flags or the token.
+   * @see [[gets]] if you do not need the flags.
+   * @see [[getWithFlag]] if you do not need the token.
+   */
+  def getsWithFlag(key: String): Future[Option[(T, Buf, Buf)]] =
+    getsWithFlag(Seq(key)).map(getsWithFlagFn)
+
+  /**
    * Get a set of keys from the server.
    *
    * @return a Map[String, T] of all of the keys that the server had.
@@ -296,6 +335,49 @@ trait BaseClient[T] {
       } else {
         Future.value(result.valuesWithTokens.mapValues {
           case (v, u) => (bufferToType(v), u)
+        })
+      }
+    }
+  }
+
+  /**
+   * Get a set of keys from the server, together with their flags
+   *
+   * @return a Map[String, (T, Buf)] of all the
+   * keys the server had, together with their flags
+   * @see [[get]] if you do not need the flags
+   */
+  def getWithFlag(keys: Iterable[String]): Future[Map[String, (T, Buf)]] = {
+    getResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithFlags.mapValues {
+          case (v, u) => (bufferToType(v), u)
+        })
+      }
+    }
+  }
+
+  /**
+   * Get a set of keys from the server, together with a "cas unique"
+   * token and flags. The token is treated opaquely by the memcache
+   * client but is in reality a string-encoded u64.
+   *
+   * @return a Map[String, (T, Buf, Buf)] of all the keys
+   * the server had, together with ther "cas unique" token and flags
+   * @see [[get]] if you do not need the token or the flags.
+   * @see [[gets]] if you do not need the flag.
+   * @see [[getWithFlag]] if you do not need the token.
+   * @see [[checkAndSet]] for using the token.
+   */
+  def getsWithFlag(keys: Iterable[String]): Future[Map[String, (T, Buf, Buf)]] = {
+    getsResult(keys) flatMap { result =>
+      if (result.failures.nonEmpty) {
+        Future.exception(result.failures.values.head)
+      } else {
+        Future.value(result.valuesWithFlagsAndTokens.mapValues {
+          case (v, u, t) => (bufferToType(v), u, t)
         })
       }
     }
@@ -525,6 +607,11 @@ private[memcached] object ClientConstants {
     case CasResult.Exists   => JavaFalse
     case CasResult.NotFound => JavaFalse
   }
+
+  def hitsFromValues(values: Seq[Value]): Map[String, Value] = values.map { value =>
+    val Buf.Utf8(keyStr) = value.key
+    (keyStr, value)
+  }(breakOut)
 }
 
 /**
@@ -538,23 +625,23 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   protected def rawGet(command: RetrievalCommand): Future[GetResult] = {
     val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
 
-    service(command).map {
-      case Values(values) =>
-        val hits: Map[String, Value] = values.map { value =>
-          val Buf.Utf8(keyStr) = value.key
-          (keyStr, value)
-        }(breakOut)
+    service(command).transform {
+      case Return(Values(values)) =>
+        val hits: Map[String, Value] = hitsFromValues(values)
         val misses = util.NotFound(keys, hits.keySet)
-        GetResult(hits, misses)
-      case Error(e) => throw e
-      case other    =>
+        Future.value(GetResult(hits, misses))
+      case Return(Error(e)) => throw e
+      case Return(other) =>
         throw new IllegalStateException(
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
-    } handle {
-      case t: RequestException => GetResult(failures = keys.map { (_, t) }(breakOut))
-      case t: ChannelException => GetResult(failures = keys.map { (_, t) }(breakOut))
-      case t: ServiceException => GetResult(failures = keys.map { (_, t) }(breakOut))
+      case Throw(t: RequestException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case Throw(t: ChannelException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case Throw(t: ServiceException) =>
+        Future.value(GetResult(failures = keys.map { (_, t) }(breakOut)))
+      case t => Future.const(t.asInstanceOf[Try[GetResult]])
     }
   }
 
@@ -578,7 +665,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def set(key: String, flags: Int, expiry: Time, value: Buf): Future[Unit] = {
     try {
       service(Set(key, flags, expiry, value)).map {
-        case Stored() => ()
+        case Stored => ()
         case Error(e) => throw e
         case response => throw new IllegalStateException(s"Invalid response: $response")
       }
@@ -590,11 +677,11 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[CasResult] = {
     try {
       service(Cas(key, flags, expiry, value, casUnique)).flatMap {
-        case Stored()   => FutureStored
-        case Exists()   => FutureExists
-        case NotFound() => FutureNotFound
-        case Error(e)   => Future.exception(e)
-        case _          => Future.exception(new IllegalStateException)
+        case Stored => FutureStored
+        case Exists => FutureExists
+        case NotFound  => FutureNotFound
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -604,10 +691,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Add(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -617,10 +704,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Append(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -630,10 +717,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Prepend(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -643,10 +730,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
       service(Replace(key, flags, expiry, value)).flatMap {
-        case Stored()     => JavaTrue
-        case NotStored()  => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Stored => JavaTrue
+        case NotStored => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -656,10 +743,10 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def delete(key: String): Future[JBoolean] = {
     try {
       service(Delete(key)).flatMap {
-        case Deleted()    => JavaTrue
-        case NotFound()   => JavaFalse
-        case Error(e)     => Future.exception(e)
-        case _            => Future.exception(new IllegalStateException)
+        case Deleted => JavaTrue
+        case NotFound => JavaFalse
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -670,9 +757,9 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     try {
       service(Incr(key, delta)).flatMap {
         case Number(value) => Future.value(Some(value))
-        case NotFound()    => Future.None
-        case Error(e)      => Future.exception(e)
-        case _             => Future.exception(new IllegalStateException)
+        case NotFound => Future.None
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -683,9 +770,9 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     try {
       service(Decr(key, delta)).flatMap {
         case Number(value) => Future.value(Some(value))
-        case NotFound()    => Future.None
-        case Error(e)      => Future.exception(e)
-        case _             => Future.exception(new IllegalStateException)
+        case NotFound => Future.None
+        case Error(e) => Future.exception(e)
+        case _ => Future.exception(new IllegalStateException)
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))

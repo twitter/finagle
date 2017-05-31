@@ -1,25 +1,24 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.Balancer
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.loadbalancer.EndpointFactory
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
 import scala.collection.mutable
 
-trait ApertureSuite {
+private[loadbalancer] trait ApertureSuite {
   class Empty extends Exception
 
-  private[loadbalancer] trait TestBal
-    extends Balancer[Unit, Unit]
-    with Aperture[Unit, Unit] {
-
+  /**
+   * An aperture load balancer which exposes some of the internals
+   * via proxy methods.
+   */
+  trait TestBal extends Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
-    protected val maxEffort = 5
-    protected def statsReceiver = NullStatsReceiver
+    protected def maxEffort = 5
     protected def minAperture = 1
-    protected val useDeterministicOrdering = false
+    protected def useDeterministicOrdering = false
 
     protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
 
@@ -36,19 +35,45 @@ trait ApertureSuite {
     def rebuildx(): Unit = rebuild()
   }
 
-  case class Factory(i: Int) extends ServiceFactory[Unit, Unit] {
-    var n = 0
-    var p = 0
+  case class Factory(i: Int) extends EndpointFactory[Unit, Unit] {
+    def remake() = {}
+    def address = Address.Failed(new Exception)
 
-    def clear() { n = 0 }
+    var _total = 0
+    var _outstanding = 0
+    var _numCloses = 0
+
+    /**
+     * Returns the total number of services acquired via this factory.
+     */
+    def total: Int = _total
+
+    /**
+     * Returns the current number of outstanding services. Services are
+     * relinquished via calls to close.
+     */
+    def outstanding: Int = _outstanding
+
+    /**
+     * The number of times close was called on the factory.
+     */
+    def numCloses: Int = _numCloses
+
+    /**
+     * Clears the total number of services acquired and number of closes.
+     */
+    def clear(): Unit = {
+      _numCloses = 0
+      _total = 0
+    }
 
     def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = {
-      n += 1
-      p += 1
+      _total += 1
+      _outstanding += 1
       Future.value(new Service[Unit, Unit] {
         def apply(unit: Unit): Future[Unit] = ???
         override def close(deadline: Time): Future[Unit] = {
-          p -= 1
+          _outstanding -= 1
           Future.Done
         }
       })
@@ -59,9 +84,12 @@ trait ApertureSuite {
     override def status: Status = _status
     def status_=(v: Status) { _status = v }
 
-    def close(deadline: Time): Future[Unit] = ???
+    def close(deadline: Time): Future[Unit] = {
+      _numCloses += 1
+      Future.Done
+    }
 
-    override def toString: String = s"Factory(id=$i, requests=$n, status=$status)"
+    override def toString: String = s"Factory(id=$i, requests=$total, status=$status)"
   }
 
   class Counts extends Iterable[Factory] {
@@ -80,13 +108,13 @@ trait ApertureSuite {
      * should be bound by the aperture size.
      */
     def nonzero: Set[Int] = factories.filter({
-      case (_, f) => f.n > 0
+      case (_, f) => f.total > 0
     }).keys.toSet
 
 
     def apply(i: Int) = factories.getOrElseUpdate(i, Factory(i))
 
-    def range(n: Int): IndexedSeq[ServiceFactory[Unit, Unit]] =
+    def range(n: Int): IndexedSeq[EndpointFactory[Unit, Unit]] =
       Vector.tabulate(n) { i => apply(i) }
   }
 

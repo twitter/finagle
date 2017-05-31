@@ -83,7 +83,7 @@ class MethodBuilderTest extends FunSuite {
     Memcached.server,
     Memcached.client,
     Quit(),
-    NoOp()
+    NoOp
   )
 
   testTotalTimeout(
@@ -147,7 +147,7 @@ class MethodBuilderTest extends FunSuite {
     Memcached.server,
     Memcached.client,
     Quit(),
-    NoOp()
+    NoOp
   )
 
   testPerRequestTimeout(
@@ -157,5 +157,4 @@ class MethodBuilderTest extends FunSuite {
     mux.Request.empty,
     mux.Response.empty
   )
-
 }

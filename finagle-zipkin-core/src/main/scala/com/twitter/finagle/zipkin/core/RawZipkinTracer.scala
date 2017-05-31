@@ -23,7 +23,7 @@ private object RawZipkinTracer {
 // See https://github.com/openzipkin/zipkin-finagle
 abstract class RawZipkinTracer(
     statsReceiver: StatsReceiver,
-    timer: Timer = DefaultTimer.twitter)
+    timer: Timer = DefaultTimer)
   extends Tracer
 {
   import RawZipkinTracer._
@@ -86,8 +86,6 @@ abstract class RawZipkinTracer(
         spanMap.update(record.traceId)(_.setName(name))
       case tracing.Annotation.ServiceName(serviceName: String) =>
         spanMap.update(record.traceId)(_.setServiceName(serviceName))
-      case tracing.Annotation.Rpcname(service: String, rpc: String) =>
-        spanMap.update(record.traceId)(_.setServiceName(service).setName(rpc))
       case tracing.Annotation.BinaryAnnotation(key: String, value: Boolean) =>
         binaryAnnotation(record, key, (if (value) TrueBB else FalseBB).duplicate(), thrift.AnnotationType.BOOL)
       case tracing.Annotation.BinaryAnnotation(key: String, value: Array[Byte]) =>

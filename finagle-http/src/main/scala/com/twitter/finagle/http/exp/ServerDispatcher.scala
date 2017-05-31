@@ -129,7 +129,7 @@ private[finagle] abstract class GenSerialServerDispatcher[Req, Rep, In, Out](tra
   protected[exp] def isClosing: Boolean = state.get() == Closing
 
   /** Exposed for testing */
-  private[exp] def timer: Timer = DefaultTimer.twitter
+  private[exp] def timer: Timer = DefaultTimer
 
   // Note: this is racy, but that's inherent in draining (without
   // protocol support). Presumably, half-closing a TCP connection is

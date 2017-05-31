@@ -3,10 +3,10 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.{FailureFlags, Filter, Service}
 import com.twitter.finagle.Filter.TypeAgnostic
-import com.twitter.finagle.param.HighResTimer
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{Function => _, _}
+import com.twitter.finagle.param.HighResTimer
+import com.twitter.util._
 
 object RetryingService {
 

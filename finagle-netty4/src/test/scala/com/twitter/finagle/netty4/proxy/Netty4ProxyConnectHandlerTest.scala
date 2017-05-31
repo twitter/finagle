@@ -4,6 +4,7 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.proxy.{ProxyConnectException, ProxyHandler}
+import io.netty.util.concurrent.{Future, GenericFutureListener}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, OneInstancePerTest}
@@ -15,8 +16,20 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
   val fakeAddress = InetSocketAddress.createUnresolved("proxy", 0)
 
   class FakeProxyHandler extends ProxyHandler(fakeAddress) {
-    override def removeDecoder(ctx: ChannelHandlerContext): Unit = ()
-    override def removeEncoder(ctx: ChannelHandlerContext): Unit = ()
+
+    private[this] var removedDecoder = false
+    private[this] var removedEncder = false
+
+    def removedCodec: Boolean = removedDecoder && removedEncder
+
+    override def removeDecoder(ctx: ChannelHandlerContext): Unit = {
+      removedDecoder = true
+    }
+
+    override def removeEncoder(ctx: ChannelHandlerContext): Unit = {
+      removedEncder = true
+    }
+
     override def protocol(): String = "proxy"
     override def authScheme(): String = "auth"
     override def addCodec(ctx: ChannelHandlerContext): Unit = ()
@@ -26,11 +39,12 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
       Unpooled.wrappedBuffer("connect".getBytes())
   }
 
-  val (handler, channel) = {
-    val hd = new Netty4ProxyConnectHandler(new FakeProxyHandler)
+  val (handler, fakeHandler, channel) = {
+    val fh = new FakeProxyHandler
+    val hd = new Netty4ProxyConnectHandler(fh)
     val ch = new EmbeddedChannel(hd)
 
-    (hd, ch)
+    (hd, fh, ch)
   }
 
   test("success") {
@@ -39,13 +53,19 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
 
     channel.writeOutbound("foo")
     channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
-
     assert(channel.readOutbound[Any]() == null)
+
+    promise.addListener(new GenericFutureListener[Future[Any]] {
+      def operationComplete(future: Future[Any]): Unit =
+        // The codec should be already removed when connect promise is satsfied.
+        // See https://github.com/netty/netty/issues/6671
+        assert(fakeHandler.removedCodec)
+    })
+
     channel.writeInbound(Unpooled.wrappedBuffer("connected".getBytes))
+
     assert(promise.isDone)
-
     assert(channel.readOutbound[String]() == "foo")
-
     assert(channel.pipeline().get(classOf[Netty4ProxyConnectHandler]) == null)
     assert(!channel.finishAndReleaseAll())
   }
@@ -56,10 +76,10 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
 
     channel.writeOutbound("foo")
     channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
-
     assert(channel.readOutbound[String]() == null)
 
     channel.pipeline().fireExceptionCaught(new Exception())
+
     assert(promise.isDone)
 
     assert(intercept[Exception](channel.checkException()).isInstanceOf[ProxyConnectException])

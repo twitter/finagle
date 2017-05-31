@@ -4,7 +4,6 @@ import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 
 private[text] trait Decoder {
-  val TokenDelimiter: Byte = ' '
 
   // Constant for the length of a byte array that will contain a String representation of an Int,
   // which is used in the Decoder and Framer classes when converting a Buf to an Int
@@ -32,8 +31,7 @@ private[text] trait Decoder {
     needsData: Seq[Buf] => Int,
     awaitData: (Seq[Buf], Int) => Unit
   )(continue: Seq[Buf] => Decoding): Decoding = {
-    val bytes = Buf.ByteArray.Owned.extract(frame)
-    val tokens = ParserUtils.split(bytes, TokenDelimiter)
+    val tokens = ParserUtils.splitOnWhitespace(frame)
 
     val bytesNeeded = if (tokens.nonEmpty) needsData(tokens) else -1
     if (bytesNeeded == -1) {

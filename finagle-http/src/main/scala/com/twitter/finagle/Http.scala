@@ -12,8 +12,8 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpListener, Netty3HttpTransporter, Netty3ServerStreamTransport}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
-import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
+import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -308,9 +308,9 @@ object Http extends Client[Request, Response] with HttpRichClient
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[http.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -318,9 +318,9 @@ object Http extends Client[Request, Response] with HttpRichClient
       http.MethodBuilder.from(dest, this)
 
     /**
-     * '''Experimental:''' This API is under construction.
-     *
      * Create a [[http.MethodBuilder]] for a given destination.
+     *
+     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */

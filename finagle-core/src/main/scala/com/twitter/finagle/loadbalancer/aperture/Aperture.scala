@@ -91,7 +91,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
   )
 
-  private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
+  private[this] val coordinateUpdates =
+    statsReceiver.counter("coordinate_updates")
 
   private[this] val coordObservation = DeterministicOrdering.changes.respond { _ =>
     // One nice side-effect of deferring to the balancers `updater` is
@@ -188,7 +189,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     protected def rng: Rng = self.rng
     protected def bound: Int = aperture
-    protected def emptyNode = failingNode(emptyException)
+    protected def emptyNode: Node = failingNode(emptyException)
 
     def rebuild(): This = rebuild(original)
 

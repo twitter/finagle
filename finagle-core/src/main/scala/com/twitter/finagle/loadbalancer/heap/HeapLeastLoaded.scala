@@ -9,8 +9,8 @@ import scala.annotation.tailrec
 import scala.util.Random
 
 private object HeapBalancer {
-  val Penalty = Int.MaxValue
-  val Zero = Int.MinValue + 1
+  val Penalty: Int = Int.MaxValue
+  val Zero: Int = Int.MinValue + 1
 }
 
 /**
@@ -81,7 +81,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
 
   private[this] val loadGauge = statsReceiver.addGauge("load") {
     val loads = synchronized {
-      heap drop(1) map { n =>
+      heap.drop(1).map { n =>
         if (n.load < 0) n.load+Penalty
         else n.load
       }
@@ -106,7 +106,6 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     heap = heap.dropRight(1)
     size -= 1
     node.index = -1 // sentinel value indicating node is no longer in the heap.
-    serviceFactory.close()
     removes.incr()
   }
 
@@ -173,7 +172,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   private[this] class Wrapped(n: Node, underlying: Service[Req, Rep])
     extends ServiceProxy[Req, Rep](underlying)
   {
-    override def close(deadline: Time) =
+    override def close(deadline: Time): Future[Unit] =
       super.close(deadline) ensure {
         put(n)
       }
@@ -199,12 +198,12 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
   }
 
-  private[this] val nodesClosable: Closable = Closable.make { deadline =>
-    Closable.all(synchronized(heap).map(_.factory):_*).close(deadline)
-  }
-
-  def close(deadline: Time) = {
-    Closable.sequence(observation, nodesClosable).close(deadline)
+  def close(deadline: Time): Future[Unit] = {
+    // Note, we don't treat the endpoints as a
+    // resource that the load balancer owns, and as
+    // such we don't close it here. We expect the
+    // layers above to manage them accordingly.
+    observation.close(deadline)
   }
 
   /**
@@ -215,5 +214,5 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
 
   private[this] val nodeStatus: Node => Status = _.factory.status
 
-  override val toString = synchronized("HeapBalancer(%d)".format(size))
+  override val toString: String = synchronized("HeapBalancer(%d)".format(size))
 }

@@ -1,9 +1,9 @@
 package com.twitter.finagle.zookeeper
 
 import com.google.common.collect.ImmutableSet
-import com.twitter.common.net.pool.DynamicHostSet
-import com.twitter.common.net.pool.DynamicHostSet.MonitorException
-import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl}
+import com.twitter.finagle.common.net.pool.DynamicHostSet
+import com.twitter.finagle.common.net.pool.DynamicHostSet.MonitorException
+import com.twitter.finagle.common.zookeeper.{ServerSet, ServerSetImpl}
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.stats.DefaultStatsReceiver

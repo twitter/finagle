@@ -555,7 +555,7 @@ class EndToEndTest extends FunSuite
     assert(sr.counters(Seq("client", "failures")) == 2)
   }
 
-  test("scala thriftmux stack client deserialized response classification") {
+  test("scala thriftmux stack client deserialized response classification with `newIface`") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = ThriftMux.client
@@ -565,6 +565,64 @@ class EndToEndTest extends FunSuite
       .newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     testScalaFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux stack client deserialized response classification with `newServiceIface`") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .withStatsReceiver(sr)
+      .withResponseClassifier(scalaClassifier)
+      .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
+      .newServiceIface[TestService.ServiceIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    val ex = intercept[InvalidQueryException] {
+      await(client.query(TestService.Query.Args("hi")))
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 1)
+    eventually {
+      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 1)
+      assert(sr.counters.get(Seq("client", "TestService", "query", "success")) == None)
+    }
+
+    // test that we can examine the request as well.
+    intercept[InvalidQueryException] {
+      await(client.query(TestService.Query.Args("ok")))
+    }
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 2)
+    eventually {
+      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 1)
+      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 1)
+    }
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" ==  await(client.query(TestService.Query.Args("safe"))))
+    assert(sr.counters(Seq("client", "requests")) == 3)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 3)
+    eventually {
+      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 1)
+      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 2)
+    }
+
+    // this query produces a `Throw` response produced on the client side and
+    // we want to ensure that we can translate it to a `Success`.
+    intercept[RequestTimeoutException] {
+      await(client.query(TestService.Query.Args("slow")))
+    }
+    assert(sr.counters(Seq("client", "requests")) == 4)
+    assert(sr.counters(Seq("client", "success")) == 2)
+    assert(sr.counters(Seq("client", "TestService", "query", "requests")) == 4)
+    eventually {
+      assert(sr.counters(Seq("client", "TestService", "query", "success")) == 2)
+      assert(sr.counters(Seq("client", "TestService", "query", "failures")) == 2)
+    }
+
     server.close()
   }
 

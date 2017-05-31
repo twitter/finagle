@@ -1,49 +1,11 @@
-package com.twitter.finagle.netty3.ssl
+package com.twitter.finagle.netty3.ssl.client
 
 import com.twitter.finagle.{ChannelClosedException, InconsistentStateException, SslHandshakeException}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
-import javax.net.ssl.{SSLException, SSLSession}
+import javax.net.ssl.SSLSession
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
-
-/**
- * Handle server-side SSL Connections:
- *
- * 1. by delaying the upstream connect until the SSL handshake
- *    is complete (so that we don't send data through a connection
- *    we may later deem invalid), and
- * 2. invoking a shutdown callback on disconnect
- */
-private[netty3] class SslListenerConnectionHandler(
-    sslHandler: SslHandler,
-    onShutdown: () => Unit = () => Unit)
-  extends SimpleChannelUpstreamHandler {
-
-  // delay propagating connection upstream until we've completed the handshake
-  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
-    sslHandler.handshake().addListener(new ChannelFutureListener {
-      override def operationComplete(f: ChannelFuture): Unit =
-        if (f.isSuccess) {
-          SslListenerConnectionHandler.super.channelConnected(ctx, e)
-        } else {
-          Channels.close(ctx.getChannel)
-        }
-    })
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
-    // remove the ssl handler so that it doesn't trap the disconnect
-    if (e.getCause.isInstanceOf[SSLException])
-      ctx.getPipeline.remove("ssl")
-    super.exceptionCaught(ctx, e)
-  }
-
-  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
-    onShutdown()
-    super.channelClosed(ctx, e)
-  }
-}
 
 /**
  * Handle client-side SSL connections:
@@ -53,11 +15,11 @@ private[netty3] class SslListenerConnectionHandler(
  *    we may later deem invalid), and
  * 2. optionally performing hostname validation
  */
-class SslConnectHandler(
-  sslHandler: SslHandler,
-  sessionError: SSLSession => Option[Throwable] = Function.const(None)
-) extends SimpleChannelHandler
-{
+private[netty3] class SslClientConnectHandler(
+    sslHandler: SslHandler,
+    sessionError: SSLSession => Option[Throwable] = Function.const(None))
+  extends SimpleChannelHandler {
+
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
   private[this] def fail(c: Channel, t: Throwable) {
@@ -132,7 +94,7 @@ class SslConnectHandler(
               fail(ctx.getChannel, t)
             case None =>
               connectFuture.get.setSuccess()
-              SslConnectHandler.super.channelConnected(ctx, e)
+              SslClientConnectHandler.super.channelConnected(ctx, e)
           }
         } else if (f.isCancelled) {
           fail(ctx.getChannel, new InconsistentStateException(_))

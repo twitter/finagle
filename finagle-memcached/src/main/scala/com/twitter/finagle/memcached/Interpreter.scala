@@ -19,17 +19,17 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
       case Set(key, flags, expiry, value) =>
         map.lock(key) { data =>
           data(key) = Entry(value, expiry)
-          Stored()
+          Stored
         }
       case Add(key, flags, expiry, value) =>
         map.lock(key) { data =>
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              NotStored()
+              NotStored
             case _ =>
               data(key) = Entry(value, expiry)
-              Stored()
+              Stored
           }
         }
       case Replace(key, flags, expiry, value) =>
@@ -38,12 +38,12 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               data(key) = Entry(value, expiry)
-              Stored()
+              Stored
             case Some(_) =>
               data.remove(key) // expired
-              NotStored()
+              NotStored
             case _ =>
-              NotStored()
+              NotStored
           }
         }
       case Append(key, flags, expiry, value: Buf) =>
@@ -52,12 +52,12 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               data(key) = Entry(entry.value.concat(value), expiry)
-              Stored()
+              Stored
             case Some(_) =>
               data.remove(key) // expired
-              NotStored()
+              NotStored
             case _ =>
-              NotStored()
+              NotStored
           }
         }
       case Cas(key, flags, expiry, value, casUnique) =>
@@ -68,12 +68,12 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
               val currentValue = entry.value
               if (casUnique.equals(generateCasUnique(currentValue))) {
                 data(key) = Entry(value, expiry)
-                Stored()
+                Stored
               } else {
-                NotStored()
+                NotStored
               }
             case _ =>
-              NotStored()
+              NotStored
           }
         }
       case Prepend(key, flags, expiry, value) =>
@@ -82,12 +82,12 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               data(key) = Entry(value.concat(entry.value), expiry)
-              Stored()
+              Stored
             case Some(_) =>
               data.remove(key) // expired
-              NotStored()
+              NotStored
             case _ =>
-              NotStored()
+              NotStored
           }
         }
       case Get(keys) =>
@@ -109,9 +109,9 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
       case Delete(key) =>
         map.lock(key) { data =>
           if (data.remove(key).isDefined)
-            Deleted()
+            Deleted
           else
-            NotFound()
+            NotFound
         }
       case Incr(key, delta) =>
         map.lock(key) { data =>
@@ -132,9 +132,9 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
               Number(result)
             case Some(_) =>
               data.remove(key) // expired
-              NotFound()
+              NotFound
             case _ =>
-              NotFound()
+              NotFound
           }
         }
       case Decr(key, value) =>
@@ -142,7 +142,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           apply(Incr(key, -value))
         }
       case _ =>
-        NoOp()
+        NoOp
     }
   }
 

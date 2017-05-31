@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference
  * part of the respective group is now part of a topology with a sense of order and
  * proximity.
  *
- * A unique permutation for a group of servers (that [[Apertures]] expand over) can be
+ * A unique permutation for a group of servers (that `Apertures` expand over) can be
  * then derived by mapping the servers to the same coordinate space and iterating through
  * the space using a uniform traversal (see the [[Iterator Iterators]] defined on [[Ring]]
  * for more details). Thus, when the group of peers converges on an aperture size, the

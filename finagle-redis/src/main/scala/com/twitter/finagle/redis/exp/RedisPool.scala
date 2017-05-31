@@ -29,7 +29,7 @@ object RedisPool {
     statsReceiver: StatsReceiver): Service[Command, Reply] =
     useFor() match {
       case Some(Subscription) => new SubscribeDispatcher(transport)
-      case _                  => new PipeliningDispatcher(transport, statsReceiver, DefaultTimer.twitter)
+      case _                  => new PipeliningDispatcher(transport, statsReceiver, DefaultTimer)
     }
 
   def module: Stackable[ServiceFactory[Command, Reply]] =

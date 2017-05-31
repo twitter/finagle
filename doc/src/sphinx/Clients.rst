@@ -561,9 +561,20 @@ behind a client parameter [#probation]_.
 Behavior when no nodes are available
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 When there are no nodes in the `com.twitter.finagle.Status.Open` state, the balancers
-must make a decision. One approach is to fail the request at this point. Instead,
-Finagle makes an optimistic decision that its view of the nodes may be out-of-date
-and picks a node it hopes has become available.
+must make a decision. Finagle's default behavior makes an optimistic decision
+that its view of the nodes may be out-of-date and picks a node it hopes has become available.
+This can be customized to fail the request immediately through
+``LoadBalancerFactory.WhenNoNodesOpenParam`` which will cause clients to see
+a non-retryable ``c.t.f.loadbalancer.NoNodesOpenException``:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam
+  import com.twitter.finagle.loadbalancer.WhenNoNodesOpen
+  import com.twitter.finagle.Http
+
+  Http.client
+    .configured(WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast))
 
 :ref:`Related stats <loadbalancer_stats>`
 

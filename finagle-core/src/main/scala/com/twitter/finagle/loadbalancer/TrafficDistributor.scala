@@ -8,32 +8,20 @@ import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
 private object TrafficDistributor {
-
   /**
-   * A [[ServiceFactory]] which admits that a concrete address flows through
-   * the [[TrafficDistributor]].
-   */
-  case class EndpointServiceFactory[Req, Rep](
-      underlying: ServiceFactory[Req, Rep],
-      address: Address)
-    extends ServiceFactoryProxy[Req, Rep](underlying)
-
-  /**
-   * A [[ServiceFactory]] and its associated weight. The `closeGate` defers closes
-   * to `factory` until it is set.
+   * A [[ServiceFactory]] and its associated weight.
    */
   case class WeightedFactory[Req, Rep](
-      factory: EndpointServiceFactory[Req, Rep],
-      closeGate: Promise[Unit],
-      weight: Double)
+    factory: EndpointFactory[Req, Rep],
+    weight: Double)
 
   /**
    * An intermediate representation of the endpoints that a load balancer
    * operates over, capable of being updated.
    */
   type BalancerEndpoints[Req, Rep] =
-    Var[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
-      with Updatable[Activity.State[Set[EndpointServiceFactory[Req, Rep]]]]
+    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]]
+      with Updatable[Activity.State[Set[EndpointFactory[Req, Rep]]]]
 
   /**
    * Represents cache entries for load balancer instances. Stores both
@@ -52,6 +40,7 @@ private object TrafficDistributor {
    */
   case class WeightClass[Req, Rep](
       balancer: ServiceFactory[Req, Rep],
+      endpoints: BalancerEndpoints[Req, Rep],
       weight: Double,
       size: Int)
 
@@ -89,7 +78,7 @@ private object TrafficDistributor {
 
     private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
       val tupled = classes.map {
-        case WeightClass(b, weight, size) => (b, weight*size)
+        case WeightClass(b, _, weight, size) => (b, weight*size)
       }
       val (bs, ws) = tupled.unzip
       (bs.toIndexedSeq, Drv.fromWeights(ws.toSeq))
@@ -98,9 +87,19 @@ private object TrafficDistributor {
     def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
       balancers(drv(rng))(conn)
 
-    def close(deadline: Time): Future[Unit] = {
-      Closable.all(balancers: _*).close(deadline)
-    }
+    private[this] def endpoints: Seq[Closable] =
+      classes.toSeq.map { wc =>
+        wc.endpoints.sample() match {
+          case Activity.Ok(set) => Closable.all(set.toSeq:_*)
+          case _ => Closable.nop
+        }
+      }
+
+    def close(deadline: Time): Future[Unit] =
+      Closable.all(
+        Closable.all(balancers:_*),
+        Closable.all(endpoints:_*)
+      ).close(deadline)
 
     private[this] val svcFactoryStatus: ServiceFactory[Req, Rep] => Status =
       sf => sf.status
@@ -132,16 +131,12 @@ private object TrafficDistributor {
 private class TrafficDistributor[Req, Rep](
     dest: Activity[Set[Address]],
     newEndpoint: Address => ServiceFactory[Req, Rep],
-    newBalancer: Activity[Set[TrafficDistributor.EndpointServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
+    newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
     eagerEviction: Boolean,
     rng: Rng = Rng.threadLocal,
     statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep] {
   import TrafficDistributor._
-
-  // Allows per endpoint closes to be overwritten by
-  // a call to close on an instance of TrafficDistributor.
-  private[this] val outerClose = new Promise[Unit]
 
   /**
    * Creates a `newEndpoint` for each distinct [[Address]] in the `addrs`
@@ -165,19 +160,11 @@ private class TrafficDistributor[Req, Rep](
             // An update with an existing Address that has a new weight
             // results in the the weight being overwritten but the [[ServiceFactory]]
             // instance is maintained.
-            case Some(wf@WeightedFactory(_, _, w)) if w != weight =>
+            case Some(wf@WeightedFactory(_, w)) if w != weight =>
               cache.updated(addr, wf.copy(weight = weight))
             case None =>
-              // The `closeGate` allows us to defer closing an endpoint service
-              // factory until it is removed from this cache. Without it, an endpoint may
-              // be closed prematurely when moving across weight classes if the
-              // weight class is removed.
-              val closeGate = new Promise[Unit]
-              val endpoint = new EndpointServiceFactory(newEndpoint(addr), addr) {
-                override def close(when: Time) =
-                  (closeGate or outerClose).before { super.close(when) }
-              }
-              cache.updated(addr, WeightedFactory(endpoint, closeGate, weight))
+              val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
+              cache.updated(addr, WeightedFactory(endpoint, weight))
             case _ => cache
           }
         }
@@ -187,8 +174,7 @@ private class TrafficDistributor[Req, Rep](
         val removed = merged.keySet -- weightedAddrs.map(_._1)
         removed.foldLeft(merged) { case (cache, addr) =>
           cache.get(addr) match {
-            case Some(WeightedFactory(f, g, _)) if eagerEviction || f.status != Status.Open =>
-              g.setDone()
+            case Some(WeightedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
               f.close()
               cache - addr
             case _ => cache
@@ -218,7 +204,7 @@ private class TrafficDistributor[Req, Rep](
 
         val merged = weightedGroups.foldLeft(balancers) {
           case (cache, (weight, factories)) =>
-            val unweighted = factories.map { case WeightedFactory(f, _, _) => f }
+            val unweighted = factories.map { case WeightedFactory(f, _) => f }
             val newCacheEntry = if (cache.contains(weight)) {
               // an update that contains an existing weight class updates
               // the balancers backing collection.
@@ -246,7 +232,8 @@ private class TrafficDistributor[Req, Rep](
         }
     }.map {
       case Activity.Ok(cache) => Activity.Ok(cache.map {
-        case (weight, CachedBalancer(bal, _, size)) => WeightClass(bal, weight, size)
+        case (weight, CachedBalancer(bal, endpoints, size)) =>
+          WeightClass(bal, endpoints, weight, size)
       })
       case Activity.Pending => Activity.Pending
       case failed@Activity.Failed(_) => failed
@@ -276,7 +263,7 @@ private class TrafficDistributor[Req, Rep](
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
         val emptyBal = newBalancer(
-          Activity(Var(Activity.Ok(Set.empty[EndpointServiceFactory[Req, Rep]]))))
+          Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
         updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal
@@ -297,15 +284,19 @@ private class TrafficDistributor[Req, Rep](
         staleState
     }
 
+  // Note, we only call close on the underlying `ref` when the TrafficDistributor
+  // is closed. The backing resources (i.e. balancers and endpoints) are
+  // otherwise managed by the caches in `partition` and `weightEndpoints`.
   private[this] val ref = new ServiceFactoryRef(init)
   private[this] val obs = underlying.register(Witness(ref))
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = ref(conn)
 
   def close(deadline: Time): Future[Unit] = {
-    outerClose.setDone()
     meanWeightGauge.remove()
-    Closable.all(obs, ref).close(deadline)
+    // Note, we want to sequence here since we want to stop
+    // flushing to `ref` before we call close on it.
+    Closable.sequence(obs, ref).close(deadline)
   }
 
   override def status: Status = ref.status

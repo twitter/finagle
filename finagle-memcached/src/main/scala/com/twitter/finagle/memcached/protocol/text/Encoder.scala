@@ -1,11 +1,12 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.io.{Buf, ByteWriter}
+import java.nio.charset.StandardCharsets
 
-object Encoder {
-  private val SPACE         = " ".getBytes
-  private val DELIMITER     = "\r\n".getBytes
-  private val END           = "END".getBytes
+private object Encoder {
+  val SPACE = " ".getBytes(StandardCharsets.UTF_8)
+  val DELIMITER = "\r\n".getBytes(StandardCharsets.UTF_8)
+  val END = "END".getBytes(StandardCharsets.UTF_8)
 }
 
 class Encoder {
@@ -14,26 +15,26 @@ class Encoder {
   private[this] def encodeTokensWithData(bw: ByteWriter, twd: TokensWithData): Unit = twd match {
     case TokensWithData(tokens, data, casUnique) =>
       tokens.foreach { token =>
-        bw.writeBytes(Buf.ByteArray.Owned.extract(token))
+        bw.writeBytes(token)
         bw.writeBytes(SPACE)
       }
 
-      bw.writeBytes(Buf.ByteArray.Owned.extract(Buf.Utf8(data.length.toString)))
+      bw.writeBytes(data.length.toString.getBytes(StandardCharsets.US_ASCII))
 
       casUnique.foreach { token =>
         bw.writeBytes(SPACE)
-        bw.writeBytes(Buf.ByteArray.Owned.extract(token))
+        bw.writeBytes(token)
       }
 
       bw.writeBytes(DELIMITER)
-      bw.writeBytes(Buf.ByteArray.Owned.extract(data))
+      bw.writeBytes(data)
       bw.writeBytes(DELIMITER)
   }
 
   private[this] def encodeTokens(bw: ByteWriter, t: Tokens): Unit = t match {
     case Tokens(tokens) =>
       tokens.foreach { token =>
-        bw.writeBytes(Buf.ByteArray.Owned.extract(token))
+        bw.writeBytes(token)
         bw.writeBytes(SPACE)
       }
 

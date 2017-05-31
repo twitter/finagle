@@ -71,13 +71,13 @@ class Zk2Resolver(
     timer: Timer) =
     this(statsReceiver, removalWindow, batchWindow, unhealthyWindow,
       FixedInetResolver(statsReceiver, dnsCacheSize(), Backoff.exponentialJittered(1.second, 5.minutes),
-        DefaultTimer.twitter), timer)
+        DefaultTimer), timer)
 
   def this(statsReceiver: StatsReceiver,
     removalWindow: Duration,
     batchWindow: Duration,
     unhealthyWindow: Duration) =
-    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer.twitter)
+    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer)
 
   def this(statsReceiver: StatsReceiver) =
     this(statsReceiver, 40.seconds, 5.seconds, 5.minutes)
