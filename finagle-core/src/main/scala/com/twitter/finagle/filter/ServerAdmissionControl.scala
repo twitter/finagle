@@ -2,6 +2,7 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle._
 import com.twitter.finagle.Filter.TypeAgnostic
+import com.twitter.finagle.param.ProtocolLibrary
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
 
@@ -18,10 +19,20 @@ import scala.collection.JavaConverters._
  * order does not matter. Admission control is enabled through
  * [[ServerAdmissionControl.Param]]. Each filter should provide its own mechanism
  * for enabling, disabling and configuration.
+ *
+ * Additionally, functions of [[ServerAdmissionControl.ServerParams]] => [[Filter]]
+ * can also be registered, allowing for more fine-grained behavior.
  */
 private[twitter] object ServerAdmissionControl {
+
+  /**
+   * Passed to filter factories to allow behavioral adjustment on a per-service
+   * basis rather than globally
+   */
+  case class ServerParams(protocol: String)
+
   // a map of admission control filters, key by name
-  private[this] val acs: ConcurrentMap[String, TypeAgnostic] = new ConcurrentHashMap()
+  private[this] val acs: ConcurrentMap[String, ServerParams => TypeAgnostic] = new ConcurrentHashMap()
 
   val role = new Stack.Role("Server Admission Controller")
 
@@ -38,12 +49,20 @@ private[twitter] object ServerAdmissionControl {
   }
 
   /**
+   * Add a function that takes ServerParams and generates a filter. This allows
+   * for customization of the filter for different server stacks.
+   */
+  def register(name: String, mkFilter: ServerParams => TypeAgnostic): Unit = {
+    acs.putIfAbsent(name, mkFilter)
+  }
+
+  /**
    * Add a filter to the list of admission control filters. If a controller
    * with the same name already exists in the map, it's a no-op. It must
    * be called before the server construction to take effect.
    */
   def register(name: String, filter: TypeAgnostic): Unit =
-    acs.putIfAbsent(name, filter)
+    acs.putIfAbsent(name, _ => filter)
 
   /**
    * Add multiple filters to the list of admission control filters. If a controller
@@ -52,7 +71,7 @@ private[twitter] object ServerAdmissionControl {
    */
   def register(pairs: (String, TypeAgnostic)*): Unit =
     pairs.foreach { case (name, filter) =>
-      acs.putIfAbsent(name, filter)
+      acs.putIfAbsent(name, _ => filter)
     }
 
 
@@ -69,22 +88,25 @@ private[twitter] object ServerAdmissionControl {
   def unregisterAll(): Unit = acs.clear()
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = {
-    new Stack.Module1[Param, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Param, ProtocolLibrary, ServiceFactory[Req, Rep]] {
       val role = ServerAdmissionControl.role
       val description = "Proactively reject requests when the server operates beyond its capacity"
       def make(
         _enabled: Param,
+        protoLib: ProtocolLibrary,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val Param(enabled) = _enabled
+        val ProtocolLibrary(protoString) = protoLib
+        val conf = ServerParams(protoString)
 
         if (!enabled || acs.isEmpty) {
           next
         } else {
           // assume the order of filters doesn't matter
           val typeAgnosticFilters =
-            acs.values.asScala.foldLeft(Filter.TypeAgnostic.Identity){ case (sum, f) =>
-              f.andThen(sum)
+            acs.values.asScala.foldLeft(Filter.TypeAgnostic.Identity){ case (sum, mkFilter) =>
+              mkFilter(conf).andThen(sum)
             }
           typeAgnosticFilters.toFilter.andThen(next)
         }
