@@ -224,8 +224,8 @@ case class Field(
   def id: String = if (name.isEmpty) origName else name
   override val toString = "Field(%s)".format(id)
 
-  def isUnsigned(): Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
-  def isSigned(): Boolean = !isUnsigned()
+  def isUnsigned: Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
+  def isSigned: Boolean = !isUnsigned
 }
 
 /**
