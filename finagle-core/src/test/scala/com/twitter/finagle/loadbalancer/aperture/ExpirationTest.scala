@@ -56,13 +56,40 @@ class ExpirationTest extends FunSuite with ApertureSuite {
 
   test("does not expire uninitialized nodes") { f =>
     val bal = new ExpiryBal
-    val ep0, ep1= Factory(0)
+    val ep0, ep1 = Factory(0)
     bal.update(Vector(ep0, ep1))
     assert(bal.aperturex == 1)
 
     f.tc.advance(bal.idleTime)
     bal.mockTimer.tick()
     assert(bal.noExpired)
+  }
+
+  test("expired counter is incremented once per close") { f =>
+    val bal = new ExpiryBal
+    val eps = Vector(Factory(0), Factory(1))
+    bal.update(eps.map(newLazyEndpointFactory))
+    bal.adjustx(1)
+    assert(bal.aperturex == 2)
+
+    (0 to 10).foreach { _ => Await.result(bal()).close() }
+    bal.adjustx(-1)
+    assert(bal.aperturex == 1)
+
+    f.tc.advance(bal.idleTime)
+    bal.mockTimer.tick()
+    assert(bal.expired == 1)
+    assert(eps.map(_.numCloses).sum == 1)
+
+    // Although calling `remake` on an already expired node is harmless,
+    // it makes the expired counter hard to reason about, so we want to
+    // ensure that we only increment it once per expiration.
+    (0 to 100).foreach { _ =>
+      f.tc.advance(bal.idleTime)
+      bal.mockTimer.tick()
+      assert(bal.expired == 1)
+      assert(eps.map(_.numCloses).sum == 1)
+    }
   }
 
   test("expires nodes outside of aperture") { f =>

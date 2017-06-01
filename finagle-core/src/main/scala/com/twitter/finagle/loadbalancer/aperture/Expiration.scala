@@ -53,6 +53,7 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
      */
     def tryExpire(): Unit = {
       if (shouldExpire()) {
+        resetIdleTime()
         expiredCounter.incr()
         factory.remake()
       }
@@ -66,6 +67,10 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
 
     private[this] def shouldExpire(): Boolean = lock.synchronized {
       outstanding == 0 && Time.now - idleTime >= endpointIdleTime
+    }
+
+    private[this] def resetIdleTime(): Unit = lock.synchronized {
+      idleTime = Time.Top
     }
 
     private[this] def onRequest(): Unit = lock.synchronized {
