@@ -18,7 +18,6 @@ private[finagle] class ClientTransport[Command, Response](
   extends Transport[Command, Response] {
 
   private[this] val decoder = new ClientDecoder
-  private[this] val encoder = new Encoder
 
   // Decoding must be in a read loop because read() must return a response,
   // but we may get only get a partial message from the transport,
