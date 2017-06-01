@@ -109,7 +109,7 @@ object exp {
       // install handlers to replicate this behavior when streaming.
       if (streaming) {
         pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
-        pipeline.addLast("expectContinue", RespondToExpectContinue)
+        pipeline.addLast("expectContinue", new NettyHttp.HttpServerExpectContinueHandler)
         pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxRequestSize))
       }
       else
