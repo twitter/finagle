@@ -61,7 +61,7 @@ object Finagle extends Build {
     version := libVersion,
     organization := "com.twitter",
     scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.11.8", "2.12.1"),
+    crossScalaVersions := Seq("2.11.11", "2.12.1"),
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
       "org.scalatest" %% "scalatest" % "3.0.0" % "test",
