@@ -34,6 +34,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-mux: Disable Netty4RefCountingControl decoder when message fragmentation
+    is enabled. ``PHAB_ID=D58153``
+
   * finagle: Fixed Java API for `withStack` for Client and Server implementations.
     Java users now get the correct types for calls such as `c.t.f.Http.client().withStack`
     and `c.t.f.Http.server().withStack`. ``RB_ID=915440``

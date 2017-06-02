@@ -18,6 +18,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
+import com.twitter.logging.Logger
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
 
@@ -25,6 +26,8 @@ import java.net.SocketAddress
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
+  private val log = Logger.get
+
   /**
    * The current version of the mux protocol.
    */
@@ -91,12 +94,23 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4RefCountingControl = MuxImpl(
-        params => Netty4Transporter.raw(
-          RefCountingFramer,
-          _,
-          params,
-          transportFactory = new RefCountingTransport(_)
-        ),
+        params => {
+          val MaxFrameSize(maxFrameSize) = params[MaxFrameSize]
+
+          // there's no payload copy saved when dealing with fragmented
+          // messages so revert to the copying decoder.
+          if (maxFrameSize == Int.MaxValue.bytes)
+            Netty4Transporter.raw(
+              RefCountingFramer,
+              _,
+              params,
+              transportFactory = new RefCountingTransport(_)
+            )
+          else {
+            log.info("disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value")
+            Netty4Transporter.raw(CopyingFramer, _, params)
+          }
+        },
         params => Netty4Listener(CopyingFramer, params)
       )
 
