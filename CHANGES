@@ -67,6 +67,8 @@ Runtime Behavior Changes
   * finagle-core: Aperture load balancers now expire idle sessions which fall
     out of the aperture window. ``RB_ID=916508``
 
+  * finagle-http: Uses Netty 4 as the default transport implementation. ``PHAB_ID=D58698``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
