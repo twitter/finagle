@@ -132,7 +132,7 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
       else field.fieldType match {
         case Type.Tiny        => ByteValue(reader.readByte())
         case Type.Short       => ShortValue(reader.readShortLE())
-        case Type.Int24       => IntValue(reader.readIntLE())
+        case Type.Int24       => IntValue(reader.readMediumLE())
         case Type.Long        => IntValue(reader.readIntLE())
         case Type.LongLong    => LongValue(reader.readLongLE())
         case Type.Float       => FloatValue(reader.readFloatLE())
