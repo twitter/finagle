@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4.channel
 
-import com.twitter.finagle.netty4.poolReceiveBuffers
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
 import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
@@ -53,11 +52,5 @@ private[netty4] class Netty4RawServerChannelInitializer(
 
     // Add SslHandler to the pipeline.
     pipeline.addFirst("tlsInit", new Netty4ServerSslHandler(params))
-
-    // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` are enabled).
-    if (poolReceiveBuffers()) {
-      pipeline.addFirst("receiveBuffersSizeTracker",
-        new RecvBufferSizeStatsHandler(stats.scope("transport")))
-    }
   }
 }

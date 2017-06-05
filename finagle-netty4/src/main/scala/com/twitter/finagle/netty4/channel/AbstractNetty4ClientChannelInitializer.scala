@@ -2,7 +2,6 @@ package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.poolReceiveBuffers
 import com.twitter.finagle.netty4.proxy.{HttpProxyConnectHandler, Netty4ProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
 import com.twitter.finagle.param.{Label, Logger, Stats}
@@ -104,12 +103,6 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
     httpHostAndCredentials.foreach {
       case (host, credentials) => pipe.addFirst("httpProxyConnect",
         new HttpProxyConnectHandler(host, credentials))
-    }
-
-    // Enable tracking of the receive buffer sizes (when `poolReceiveBuffers` is enabled).
-    if (poolReceiveBuffers()) {
-      pipe.addFirst("receiveBuffersSizeTracker",
-        new RecvBufferSizeStatsHandler(stats.scope("transport")))
     }
   }
 }

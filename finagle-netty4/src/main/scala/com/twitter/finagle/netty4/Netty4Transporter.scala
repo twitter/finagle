@@ -11,7 +11,6 @@ import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.PooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.epoll.EpollSocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
@@ -79,12 +78,6 @@ private[finagle] object Netty4Transporter {
           .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
           .option[JInt](ChannelOption.CONNECT_TIMEOUT_MILLIS, compensatedConnectTimeoutMs.toInt)
           .handler(init)
-
-      // Use pooling if enabled.
-      if (poolReceiveBuffers()) {
-        bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR,
-          new RecvByteBufAllocatorProxy(PooledByteBufAllocator.DEFAULT))
-      }
 
       val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
       keepAlive.foreach(bootstrap.option[JBool](ChannelOption.SO_KEEPALIVE, _))

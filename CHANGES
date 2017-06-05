@@ -69,6 +69,9 @@ Runtime Behavior Changes
 
   * finagle-http: Uses Netty 4 as the default transport implementation. ``PHAB_ID=D58698``
 
+  * finagle-netty4: `poolReceiveBuffers` toggle is removed (suppressed by `UsePooling`).
+    ``RB_ID=917912``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
