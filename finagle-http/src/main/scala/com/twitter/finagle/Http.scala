@@ -50,12 +50,6 @@ trait HttpRichClient { self: Client[Request, Response] =>
 object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
-  // Toggles transport implementation to Netty 4.
-  private[this] object useNetty4 {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseNetty4")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
-
   // Toggles transport implementation to Http/2.
   private[this] object useHttp2 {
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2")
@@ -82,10 +76,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   }
 
   object HttpImpl {
-    implicit val httpImplParam: Stack.Param[HttpImpl] = new Stack.Param[HttpImpl] {
-      lazy val default = if (useNetty4()) Netty4Impl else Netty3Impl
-      override def show(p: HttpImpl): Seq[(String, () => String)] = Seq(("impl", () => p.implName))
-    }
+    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
   }
 
   val Netty3Impl: HttpImpl = HttpImpl(

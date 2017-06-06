@@ -67,7 +67,9 @@ Runtime Behavior Changes
   * finagle-core: Aperture load balancers now expire idle sessions which fall
     out of the aperture window. ``RB_ID=916508``
 
-  * finagle-http: Uses Netty 4 as the default transport implementation. ``PHAB_ID=D58698``
+  * finagle-http: Uses Netty 4 as the default transport implementation.
+    Use `.configured(Http.Netty3Impl)` to switch implementation over to Netty 3.
+    ``PHAB_ID=D58698`` ``RB_ID=917936``
 
   * finagle-netty4: `poolReceiveBuffers` toggle is removed (suppressed by `UsePooling`).
     ``RB_ID=917912``
