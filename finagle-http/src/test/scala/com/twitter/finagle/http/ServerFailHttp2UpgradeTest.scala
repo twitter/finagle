@@ -13,7 +13,7 @@ class ServerFailHttp2UpgradeTest extends AbstractHttp1EndToEndTest {
 
   def serverImpl(): finagle.Http.Server = finagle.Http.server.configuredParams(finagle.Http.Http2)
 
-  def featureImplemented(feature: Feature): Boolean = true
+  def featureImplemented(feature: Feature): Boolean = feature != NoBodyMessage
 
   test("Upgrade counters are not incremented") {
     val client = nonStreamingConnect(Service.mk { req: Request =>

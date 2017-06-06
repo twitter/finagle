@@ -37,6 +37,7 @@ abstract class AbstractEndToEndTest extends FunSuite
   object ClientAbort extends Feature
   object HeaderFields extends Feature
   object ReaderClose extends Feature
+  object NoBodyMessage extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -1432,4 +1433,134 @@ abstract class AbstractEndToEndTest extends FunSuite
     testMethodBuilderRetries(stats, server, builder)
   }
 
+  testIfImplemented(NoBodyMessage)(
+    "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field"
+  ) {
+    def check(resStatus: Status): Unit = {
+      val svc = new Service[Request, Response] {
+        def apply(request: Request) = {
+          val response = Response(Version.Http11, resStatus)
+
+          Future.value(response)
+        }
+      }
+      val server = serverImpl()
+        .serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+      val res = await(client(Request(Method.Get, "/")))
+      assert(res.status == resStatus)
+      assert(!res.isChunked)
+      assert(res.content.isEmpty)
+      assert(res.contentLength.isEmpty)
+      await(client.close())
+      await(server.close())
+    }
+
+    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
+      check(_)
+    }
+  }
+
+  testIfImplemented(NoBodyMessage)(
+    "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field" +
+    "when non-empty body is returned"
+  ) {
+    def check(resStatus: Status): Unit = {
+      val svc = new Service[Request, Response] {
+        def apply(request: Request) = {
+          val body = Buf.Utf8("some data")
+          val response = Response(Version.Http11, resStatus)
+          response.content = body
+
+          Future.value(response)
+        }
+      }
+      val server = serverImpl()
+        .serve("localhost:*", svc)
+
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = clientImpl()
+        .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+      val res = await(client(Request(Method.Get, "/")))
+      assert(res.status == resStatus)
+      assert(!res.isChunked)
+      assert(res.content.isEmpty)
+      assert(res.contentLength.isEmpty)
+      await(client.close())
+      await(server.close())
+    }
+
+    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
+      check(_)
+    }
+  }
+
+  // We exclude SwitchingProtocols(101) since it should only be sent in response to a upgrade request
+  List(Status.Continue, Status.Processing, Status.NoContent)
+    .foreach { resStatus =>
+      testIfImplemented(NoBodyMessage)(
+        s"response with status code ${resStatus.code} must not have a message body nor " +
+          "Content-Length header field when non-empty body with explicit Content-Length is returned"
+      ) {
+        val svc = new Service[Request, Response] {
+          def apply(request: Request) = {
+            val body = Buf.Utf8("some data")
+            val response = Response(Version.Http11, resStatus)
+            response.content = body
+            response.headerMap.set(Fields.ContentLength, body.length.toString)
+
+            Future.value(response)
+          }
+        }
+        val server = serverImpl()
+          .serve("localhost:*", svc)
+
+        val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+        val client = clientImpl()
+          .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+        val res = await(client(Request(Method.Get, "/")))
+        assert(res.status == resStatus)
+        assert(!res.isChunked)
+        assert(res.length == 0)
+        assert(res.contentLength.isEmpty)
+        await(client.close())
+        await(server.close())
+      }
+    }
+
+  testIfImplemented(NoBodyMessage)(
+    "response with status code 304 must not have a message body *BUT* Content-Length " +
+      "header field when non-empty body with explicit Content-Length is returned"
+  ) {
+    val body = Buf.Utf8("some data")
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response(Version.Http11, Status.NotModified)
+        response.content = body
+        response.headerMap.set(Fields.ContentLength, body.length.toString)
+
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val res = await(client(Request(Method.Get, "/")))
+    assert(res.status == Status.NotModified)
+    assert(!res.isChunked)
+    assert(res.length == 0)
+    assert(res.contentLength.contains(body.length.toLong))
+    await(client.close())
+    await(server.close())
+  }
 }
