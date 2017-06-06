@@ -310,6 +310,8 @@ time allowed for a request to be outstanding. An important implementation detail
 :src:`TimeoutFilter <com/twitter/finagle/service/TimeoutFilter.scala>` is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
 already been dispatched, the only way to cancel the request is to terminate the connection.
+Note that HTTP/2 and Mux both have first-class support for request cancellation without
+needing to tear down the connection.
 
 The default timeout for the `Request Timeout` module is unbounded (i.e., ``Duration.Top``).
 Here is an example [#example]_ of how to override that default.
@@ -325,10 +327,16 @@ Here is an example [#example]_ of how to override that default.
     .withRequestTimeout(42.seconds)
     .newService("twitter.com")
 
+Regarding :ref:`retries <client_retries>`, the timeout is given to each attempt.
+
+As Finagle does not know whether or not a request is idempotent, request timeouts
+are not retried by default. However this can be configured through a
+:ref:`retry policy <client_retries>`.
+
 See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
 
-.. note:: Requests timed out by the `Request Timeout` module are not retried by default
-          given it's not known whether or not they were written to the wire.
+.. note:: This module only works with request/response usage and does not
+          support streaming (such as with HTTP).
 
 The `Expiration` module is attached at the connection level and expires a service/session
 after a certain amount of idle time. The module is implemented by
