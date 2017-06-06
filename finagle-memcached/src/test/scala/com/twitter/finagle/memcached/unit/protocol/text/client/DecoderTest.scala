@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
 import com.twitter.finagle.memcached.protocol.text.client.ClientDecoder
-import com.twitter.finagle.memcached.protocol.text.{TokensWithData, ValueLines, Tokens, StatLines}
+import com.twitter.finagle.memcached.protocol.text.{Decoding, StatLines, Tokens, TokensWithData, ValueLines}
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -11,21 +11,27 @@ import org.scalatest.mockito.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class DecoderTest extends FunSuite with MockitoSugar {
 
-  class Context {
-    val decoder = new ClientDecoder
+  class DecodingClientDecoder extends ClientDecoder[Decoding] {
+    type Value = TokensWithData
+
+    override protected def parseValue(
+      tokens: Seq[Buf],
+      data: Buf): TokensWithData = TokensWithData(tokens, data, None)
+
+    protected def parseResponse(tokens: Seq[Buf]): Decoding = Tokens(tokens)
+    protected def parseResponseValues(valueLines: Seq[TokensWithData]): Decoding = ValueLines(valueLines)
+    protected def parseStatLines(lines: Seq[Tokens]): Decoding = StatLines(lines.map(Tokens(_)))
   }
 
   test("decode tokens") {
-    val context = new Context
-    import context._
+    val decoder = new DecodingClientDecoder
 
     val buffer = Buf.Utf8("STORED")
     assert(decoder.decode(buffer) == Tokens(Seq(Buf.Utf8("STORED"))))
   }
 
   test("decode data") {
-    val context = new Context
-    import context._
+    val decoder = new DecodingClientDecoder
 
     decoder.decode(Buf.Utf8("VALUE foo 0 1"))
     decoder.decode(Buf.Utf8("1"))
@@ -37,8 +43,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
   }
 
   test("decode data with flag") {
-    val context = new Context
-    import context._
+    val decoder = new DecodingClientDecoder
 
     decoder.decode(Buf.Utf8("VALUE foo 20 1"))
     decoder.decode(Buf.Utf8("1"))
@@ -50,16 +55,14 @@ class DecoderTest extends FunSuite with MockitoSugar {
   }
 
   test("decode end") {
-    val context = new Context
-    import context._
+    val decoder = new DecodingClientDecoder
 
     val buffer = Buf.Utf8("END")
     assert(decoder.decode(buffer) == ValueLines(Seq[TokensWithData]()))
   }
 
   test("decode stats") {
-    val context = new Context
-    import context._
+    val decoder = new DecodingClientDecoder
 
     decoder.decode(Buf.Utf8("STAT items:1:number 1"))
     decoder.decode(Buf.Utf8("STAT items:1:age 1468"))

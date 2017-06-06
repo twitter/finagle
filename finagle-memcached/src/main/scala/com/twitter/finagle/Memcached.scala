@@ -11,8 +11,7 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
-import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
-import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+import com.twitter.finagle.memcached.protocol.text.client.{ClientTransport, MemcachedClientDecoder}
 import com.twitter.finagle.memcached.protocol.text.CommandToBuf
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty4ServerFramer}
@@ -261,7 +260,7 @@ object Memcached extends finagle.Client[Command, Response]
       new PipeliningDispatcher(
         new ClientTransport[Command, Response](
           new CommandToBuf,
-          new DecodingToResponse,
+          new MemcachedClientDecoder,
           transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
         DefaultTimer

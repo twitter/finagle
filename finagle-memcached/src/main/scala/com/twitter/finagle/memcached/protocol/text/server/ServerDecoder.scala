@@ -7,14 +7,9 @@ import com.twitter.io.Buf
 import scala.collection.immutable
 
 private[memcached] object ServerDecoder {
-
   private sealed trait State
   private case object AwaitingCommand extends State
   private case class AwaitingData(tokens: Seq[Buf], bytesNeeded: Int) extends State
-
-  // Constant for the length of a byte array that will contain a String representation of an Int,
-  // which is used in the Decoder class when converting a Buf to an Int
-  private val MaxLengthOfIntString = Int.MinValue.toString.length
 }
 
 /**
@@ -22,19 +17,20 @@ private[memcached] object ServerDecoder {
  *
  * @note Class contains mutable state. Not thread-safe.
  */
-private[finagle] class ServerDecoder(storageCommands: immutable.Set[Buf]) extends Decoder {
+private[finagle] class ServerDecoder(storageCommands: immutable.Set[Buf]) extends Decoder[Decoding] {
   import ServerDecoder._
 
+  private[this] val byteArrayForBuf2Int = ParserUtils.newByteArrayForBuf2Int()
   private[this] var state: State = AwaitingCommand
 
   def decode(buffer: Buf): Decoding =
     state match {
       case AwaitingCommand =>
-        decodeLine(buffer, needsData, awaitData) { tokens =>
+        Decoder.decodeLine(buffer, needsData, awaitData) { tokens =>
           Tokens(tokens)
         }
       case AwaitingData(tokens, bytesNeeded) =>
-        decodeData(bytesNeeded, buffer) { data =>
+        Decoder.decodeData(bytesNeeded, buffer) { data =>
           state = AwaitingCommand
 
           val commandName = tokens.head
