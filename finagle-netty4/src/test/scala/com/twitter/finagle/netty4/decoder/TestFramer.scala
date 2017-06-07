@@ -1,6 +1,6 @@
-package com.twitter.finagle.netty4.framer
+package com.twitter.finagle.netty4.decoder
 
-import com.twitter.finagle.framer.Framer
+import com.twitter.finagle.decoder.Framer
 import com.twitter.io.Buf
 
 /**

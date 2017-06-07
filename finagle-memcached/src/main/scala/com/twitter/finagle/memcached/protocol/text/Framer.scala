@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.framer.{Framer => FinagleFramer}
+import com.twitter.finagle.decoder.{Framer => FinagleFramer}
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import scala.collection.mutable.ArrayBuffer

@@ -1,14 +1,11 @@
-package com.twitter.finagle.framer
+package com.twitter.finagle.decoder
 
 import com.twitter.io.Buf
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.util.Random
 
 
-@RunWith(classOf[JUnitRunner])
 class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
 
   val MaxTestFrameSize = 32

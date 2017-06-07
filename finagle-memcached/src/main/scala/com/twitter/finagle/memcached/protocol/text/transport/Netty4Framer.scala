@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.protocol.text.transport
 
 import com.twitter.finagle.netty4.codec.BufCodec
-import com.twitter.finagle.netty4.framer.FrameHandler
+import com.twitter.finagle.netty4.decoder.DecoderHandler
 import io.netty.channel._
 
 /**
@@ -13,7 +13,7 @@ private[finagle] object Netty4ServerFramer extends (ChannelPipeline => Unit) {
 
   def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("endec", BufCodec)
-    pipeline.addLast("framer", new FrameHandler(new ServerFramer(StorageCommands)))
+    pipeline.addLast("framer", new DecoderHandler(new ServerFramer(StorageCommands)))
   }
 }
 
@@ -25,6 +25,6 @@ private[finagle] object Netty4ClientFramer extends (ChannelPipeline => Unit) {
 
   def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("endec", BufCodec)
-    pipeline.addLast("framer", new FrameHandler(new ClientFramer))
+    pipeline.addLast("framer", new DecoderHandler(new ClientFramer))
   }
 }

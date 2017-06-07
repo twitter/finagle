@@ -1,4 +1,4 @@
-package com.twitter.finagle.framer
+package com.twitter.finagle.decoder
 
 import com.twitter.io.{Buf, ByteReader}
 import scala.collection.mutable.ArrayBuffer

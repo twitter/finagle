@@ -1,10 +1,10 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.framer.LengthFieldFramer
+import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
-import com.twitter.finagle.netty4.{Netty4Transporter, Netty4HashedWheelTimer}
+import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}

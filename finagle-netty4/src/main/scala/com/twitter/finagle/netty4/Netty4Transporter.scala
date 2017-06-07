@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4
 
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
-import com.twitter.finagle.framer.Framer
+import com.twitter.finagle.decoder.Framer
 import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
