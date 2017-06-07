@@ -103,7 +103,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       Name.bound(Address(serverC.boundAddress.asInstanceOf[InetSocketAddress])), "C")
     val addressB = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val serviceB = new Service[String, String] {
-      def apply(request: String) = {
+      def apply(request: String): Future[String] = {
         val e = intercept[HasRemoteInfo] {
           Trace.letId(traceId, true) {
             Await.result(clientB(request), 1.second)

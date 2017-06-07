@@ -14,7 +14,7 @@ import scala.util.control.NoStackTrace
  * has been set.
  */
 trait HasRemoteInfo extends Exception {
-  private[this] var _remoteInfo: RemoteInfo = RemoteInfo.NotAvailable
+  @volatile private[this] var _remoteInfo: RemoteInfo = RemoteInfo.NotAvailable
 
   def remoteInfo(): RemoteInfo = _remoteInfo
 
@@ -24,8 +24,8 @@ trait HasRemoteInfo extends Exception {
   def exceptionMessage(): String = super.getMessage()
 
   override def getMessage(): String =
-    if (exceptionMessage == null) null
-    else s"$exceptionMessage. Remote Info: $remoteInfo"
+    if (exceptionMessage() == null) null
+    else s"${exceptionMessage()}. Remote Info: ${remoteInfo()}"
 }
 
 /**

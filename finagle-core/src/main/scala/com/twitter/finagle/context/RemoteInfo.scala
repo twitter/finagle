@@ -5,7 +5,7 @@ import com.twitter.finagle.tracing.TraceId
 import java.net.SocketAddress
 
 /**
- * Contains the remote information for a request, if available
+ * Contains the remote information for a request, if available.
  */
 sealed trait RemoteInfo
 
@@ -21,22 +21,29 @@ object RemoteInfo {
      */
     val AddressCtx = new Contexts.local.Key[SocketAddress]
 
+    /**
+     * The `SocketAddress` of the upstream client (sender of the request),
+     * when available.
+     */
     def addr: Option[SocketAddress] = Contexts.local.get(AddressCtx)
   }
+
+  private val NotAvailableStr: String = "Not Available"
 
   /**
    * Represents the case where remote information is not available,
    * or has not yet been set.
    */
   object NotAvailable extends RemoteInfo {
-    override def toString(): String = "Not Available"
+    override def toString(): String = NotAvailableStr
   }
 
   /**
-   * Represents the case where remote information is available:
-   * the upstream (sender of the request) address/client id,
-   * downstream (sender of the response) address/client id,
-   * and the trace id.
+   * Represents the case where remote information is available.
+   *
+   * Includes the upstream's (sender of the request) socket address and id,
+   * downstream's (sender of the response) socket address and label, and the
+   * trace id.
    */
   case class Available(
       upstreamAddr: Option[SocketAddress],
@@ -44,28 +51,19 @@ object RemoteInfo {
       downstreamAddr: Option[SocketAddress],
       downstreamId: Option[ClientId],
       traceId: TraceId)
-    extends RemoteInfo
-  {
-    private[this] val upstreamAddrStr = upstreamAddr match {
-      case Some(addr) => addr.toString
-      case None => "Not Available"
+    extends RemoteInfo {
+    private[this] def addr(a: Option[SocketAddress]): String = a match {
+      case Some(adr) => adr.toString
+      case None => NotAvailableStr
     }
-    private[this] val upstreamIdStr = upstreamId match {
-      case Some(clientId) => clientId.name
-      case None => "Not Available"
-    }
-    private[this] val downstreamAddrStr = downstreamAddr match {
-      case Some(addr) => addr.toString
-      case None => "Not Available"
-    }
-    private[this] val downstreamIdStr = downstreamId match {
-      case Some(clientId) => clientId.name
-      case None => "Not Available"
+    private[this] def id(clientId: Option[ClientId]): String = clientId match {
+      case Some(cid) => cid.name
+      case None => NotAvailableStr
     }
 
     override def toString(): String =
-      s"Upstream Address: $upstreamAddrStr, Upstream Client Id: $upstreamIdStr, " +
-      s"Downstream Address: $downstreamAddrStr, Downstream Client Id: $downstreamIdStr, " +
+      s"Upstream Address: ${addr(upstreamAddr)}, Upstream id: ${id(upstreamId)}, " +
+      s"Downstream Address: ${addr(downstreamAddr)}, Downstream label: ${id(downstreamId)}, " +
       s"Trace Id: $traceId"
   }
 }
