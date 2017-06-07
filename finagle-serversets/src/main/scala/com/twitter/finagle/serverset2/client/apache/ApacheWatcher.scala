@@ -5,16 +5,18 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.Var
 import org.apache.zookeeper.{Watcher, WatchedEvent}
 
-private[serverset2] class ApacheWatcher(statsIn: StatsReceiver = NullStatsReceiver)
+private[serverset2] class ApacheWatcher(statsIn: StatsReceiver = NullStatsReceiver, watchSessionStateEvents: Boolean = true)
     extends Watcher with EventStats {
   protected val stats = statsIn
   val state = Var[WatchState](WatchState.Pending)
   def process(event: WatchedEvent) = {
     event.getType match {
       case Watcher.Event.EventType.None =>
-        EventDeliveryThread.offer(
-          state,
-          WatchState.SessionState(ApacheSessionState(event.getState)))
+        if (watchSessionStateEvents) {
+          EventDeliveryThread.offer(
+            state,
+            WatchState.SessionState(ApacheSessionState(event.getState)))
+        }
       case e =>
         EventDeliveryThread.offer(
           state,
