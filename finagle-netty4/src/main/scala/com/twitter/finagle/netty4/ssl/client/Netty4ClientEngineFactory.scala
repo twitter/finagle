@@ -5,8 +5,13 @@ import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
 import com.twitter.finagle.ssl._
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
+import com.twitter.util.security.{Pkcs8EncodedKeySpecFile, X509CertificateFile}
+import com.twitter.util.{Try, Return, Throw}
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{OpenSsl, SslContext, SslContextBuilder}
+import java.io.File
+import java.security.{KeyFactory, PrivateKey}
+import java.security.spec.InvalidKeySpecException
 import javax.net.ssl.SSLEngine
 
 /**
@@ -28,18 +33,41 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         context.newEngine(allocator)
     }
 
+  private[this] def getPrivateKey(keyFile: File): Try[PrivateKey] = {
+    val encodedKeySpec = new Pkcs8EncodedKeySpecFile(keyFile).readPkcs8EncodedKeySpec()
+
+    // keeps identical behavior to netty
+    // https://github.com/netty/netty/blob/netty-4.1.11.Final/handler/src/main/java/io/netty/handler/ssl/SslContext.java#L1006
+    encodedKeySpec.flatMap { keySpec =>
+      Try {
+        KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+      }.handle {
+        case _: InvalidKeySpecException => KeyFactory.getInstance("DSA").generatePrivate(keySpec)
+      }.handle {
+        case _: InvalidKeySpecException => KeyFactory.getInstance("EC").generatePrivate(keySpec)
+      }.handle {
+        case ex: InvalidKeySpecException =>
+          throw new InvalidKeySpecException("Neither RSA, DSA nor EC worked", ex)
+      }
+    }
+  }
+
   private[this] def addKey(
     builder: SslContextBuilder,
     keyCredentials: KeyCredentials
-  ): SslContextBuilder =
+  ): Try[SslContextBuilder] =
     keyCredentials match {
       case KeyCredentials.Unspecified =>
-        builder // Do Nothing
-      case KeyCredentials.CertAndKey(certFile, keyFile) =>
+        Return(builder) // Do Nothing
+      case KeyCredentials.CertAndKey(certFile, keyFile) => Try {
         builder.keyManager(certFile, keyFile)
-      case _: KeyCredentials.CertKeyAndChain =>
-        throw SslConfigurationException.notSupported(
-          "KeyCredentials.CertKeyAndChain", "Netty4ClientEngineFactory")
+      }
+      case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
+        for {
+          key <- getPrivateKey(keyFile)
+          cert <- new X509CertificateFile(certFile).readX509Certificate()
+          chain <- new X509CertificateFile(chainFile).readX509Certificate()
+        } yield builder.keyManager(key, cert, chain)
     }
 
   /**
@@ -58,7 +86,10 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
    */
   def apply(address: Address, config: SslClientConfiguration): Engine = {
     val builder = SslContextBuilder.forClient()
-    val withKey = addKey(builder, config.keyCredentials)
+    val withKey = addKey(builder, config.keyCredentials) match {
+      case Return(builderWithKey) => builderWithKey
+      case Throw(ex) => throw new SslConfigurationException(ex.getMessage, ex)
+    }
     val withProvider = Netty4SslConfigurations.configureProvider(withKey, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
     val withAppProtocols = Netty4SslConfigurations.configureApplicationProtocols(

@@ -65,12 +65,12 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
     val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
-    intercept[IllegalArgumentException] {
+    intercept[SslConfigurationException] {
       val engine = factory(address, config)
     }
   }
 
-  test("config with cert, key, and chain fails") {
+  test("config with cert, key, and chain succeeds") {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
 
@@ -80,9 +80,10 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
     val keyCredentials = KeyCredentials.CertKeyAndChain(tempCertFile, tempKeyFile, tempCertFile)
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
-    intercept[SslConfigurationException] {
-      val engine = factory(address, config)
-    }
+    val engine = factory(address, config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
   }
 
   test("config with insecure trust credentials succeeds") {
