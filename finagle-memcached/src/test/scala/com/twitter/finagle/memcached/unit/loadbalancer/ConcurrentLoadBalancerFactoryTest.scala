@@ -1,5 +1,6 @@
 package com.twitter.finagle.memcached.loadbalancer
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.client.{StackClient, StringClient}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.server.StringServer
@@ -25,7 +26,7 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
       .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 4)
-    assert(Await.result(client("hello\n")) == "hello")
+    assert(Await.result(client("hello\n"), 15.seconds) == "hello")
   }
 
   test("creates fixed number of service factories based on params") {

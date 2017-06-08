@@ -1,13 +1,18 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.memcached._
-import com.twitter.util.Await
+import com.twitter.util.{Await, Awaitable}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class PoolingReadRepairClientTest extends FunSuite {
+
+  val TimeOut = 15.seconds
+
+  private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
   class Context {
     val full: MockClient = new MockClient(Map("key" -> "value", "foo" -> "bar"))
@@ -19,7 +24,7 @@ class PoolingReadRepairClientTest extends FunSuite {
     val context = new Context
     import context._
 
-    assert(Await.result(pooled.withStrings.get("key")) == Some("value"))
+    assert(awaitResult(pooled.withStrings.get("key")) == Some("value"))
   }
 
   test("return the correct value and read-repair") {
@@ -27,7 +32,7 @@ class PoolingReadRepairClientTest extends FunSuite {
     import context._
 
     assert(partial.map.size                            == 1)
-    assert(Await.result(pooled.withStrings.get("foo")) == Some("bar"))
+    assert(awaitResult(pooled.withStrings.get("foo")) == Some("bar"))
     assert(partial.map.size                            == 2)
   }
 

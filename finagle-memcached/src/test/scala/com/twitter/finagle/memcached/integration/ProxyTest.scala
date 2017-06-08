@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Await, Awaitable}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -13,6 +13,10 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {
+
+  val TimeOut = 15.seconds
+
+  private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
   type MemcacheService = Service[Command, Response]
   /**
@@ -68,10 +72,10 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
   }
 
   test("Proxied Memcached Servers should handle a basic get/set operation") {
-    Await.result(externalClient.delete("foo"))
-    assert(Await.result(externalClient.get("foo")) == None)
-    Await.result(externalClient.set("foo", Buf.Utf8("bar")))
-    val foo = Await.result(externalClient.get("foo"))
+    awaitResult(externalClient.delete("foo"))
+    assert(awaitResult(externalClient.get("foo")) == None)
+    awaitResult(externalClient.set("foo", Buf.Utf8("bar")))
+    val foo = awaitResult(externalClient.get("foo"))
     assert(foo.isDefined)
     val Buf.Utf8(res) = foo.get
     assert(res == "bar")
@@ -80,11 +84,11 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("stats is supported") {
-      Await.result(externalClient.delete("foo"))
-      assert(Await.result(externalClient.get("foo")) == None)
-      Await.result(externalClient.set("foo", Buf.Utf8("bar")))
+      awaitResult(externalClient.delete("foo"))
+      assert(awaitResult(externalClient.get("foo")) == None)
+      awaitResult(externalClient.set("foo", Buf.Utf8("bar")))
       Seq(None, Some("slabs")).foreach { arg =>
-        val stats = Await.result(externalClient.stats(arg))
+        val stats = awaitResult(externalClient.stats(arg))
         assert(stats != null)
         assert(!stats.isEmpty)
         stats.foreach { line =>
@@ -97,14 +101,14 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("stats (cachedump) is supported") {
-      Await.result(externalClient.delete("foo"))
-      assert(Await.result(externalClient.get("foo")) == None)
-      Await.result(externalClient.set("foo", Buf.Utf8("bar")))
-      val slabs = Await.result(externalClient.stats(Some("slabs")))
+      awaitResult(externalClient.delete("foo"))
+      assert(awaitResult(externalClient.get("foo")) == None)
+      awaitResult(externalClient.set("foo", Buf.Utf8("bar")))
+      val slabs = awaitResult(externalClient.stats(Some("slabs")))
       assert(slabs != null)
       assert(!slabs.isEmpty)
       val n = slabs.head.split(" ")(1).split(":")(0).toInt
-      val stats = Await.result(externalClient.stats(Some("cachedump " + n + " 100")))
+      val stats = awaitResult(externalClient.stats(Some("cachedump " + n + " 100")))
       assert(stats != null)
       assert(!stats.isEmpty)
       stats.foreach { stat =>
@@ -116,10 +120,10 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
   }
 
   test("quit is supported") {
-    Await.result(externalClient.get("foo")) // do nothing
-    Await.result(externalClient.quit())
+    awaitResult(externalClient.get("foo")) // do nothing
+    awaitResult(externalClient.quit())
     intercept[ServiceClosedException] {
-      Await.result(externalClient.get("foo"))
+      awaitResult(externalClient.get("foo"))
     }
   }
 

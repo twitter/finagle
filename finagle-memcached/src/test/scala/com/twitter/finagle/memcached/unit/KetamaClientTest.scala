@@ -1,22 +1,27 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.conversions.time._
 import com.twitter.concurrent.Broker
 import com.twitter.finagle._
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
-import com.twitter.util.{ReadWriteVar, Await, Future}
+import com.twitter.util.{Await, Awaitable, Future, ReadWriteVar}
 import scala.collection.mutable
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
-import org.mockito.Mockito.{verify, verifyZeroInteractions, when, times, RETURNS_SMART_NULLS}
+import org.mockito.Mockito.{RETURNS_SMART_NULLS, times, verify, verifyZeroInteractions, when}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class KetamaClientTest extends FunSuite with MockitoSugar {
+
+  val TimeOut = 15.seconds
+
+  private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
   test("load known good results (key, hash(?), continuum ceiling(?), IP)") {
     val stream = getClass.getClassLoader.getResourceAsStream("ketama_results")
@@ -64,7 +69,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
       when(expectedService.apply(any[Incr])) thenReturn Future.value(randomResponse)
 
-      assert(Await.result(mockClient.incr("foo")).get == randomResponse.value)
+      assert(awaitResult(mockClient.incr("foo")).get == randomResponse.value)
     }
 
     info("release")
@@ -88,7 +93,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     assert(r.poll == None)
     r.raise(new CancelledRequestException())
     try {
-      Await.result(r)
+      awaitResult(r)
       assert(false)
     } catch {
       case e: Throwable => Unit
@@ -102,7 +107,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     verifyZeroInteractions(mockService)
     when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
     mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
-    assert(Await.result(r2).get == 42)
+    assert(awaitResult(r2).get == 42)
   }
 
   test("ejects dead clients") {
@@ -129,7 +134,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       def newService(node: CacheNode) = services.get(node).get
       val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService, broker)
 
-      Await.result(ketamaClient.get("foo"))
+      awaitResult(ketamaClient.get("foo"))
       verify(serviceA, times(1)).apply(any())
 
       broker !! NodeMarkedDead(nodeKeyA)
@@ -138,7 +143,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     info("goes to secondary if primary is down")
     new KetamaClientBuilder {
       when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
-      Await.result(ketamaClient.get("foo"))
+      awaitResult(ketamaClient.get("foo"))
       verify(serviceB, times(1)).apply(any())
     }
 
@@ -146,7 +151,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     new KetamaClientBuilder {
       broker !! NodeMarkedDead(nodeKeyB)
       intercept[ShardNotAvailableException] {
-        Await.result(ketamaClient.get("foo"))
+        awaitResult(ketamaClient.get("foo"))
       }
     }
 
@@ -154,7 +159,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     new KetamaClientBuilder {
       when(serviceA(any())) thenReturn Future.value(Values(Seq(value)))
       broker !! NodeRevived(nodeKeyA)
-      Await.result(ketamaClient.get("foo"))
+      awaitResult(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())
       broker !! NodeRevived(nodeKeyB)
     }
@@ -163,12 +168,12 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     new KetamaClientBuilder {
       mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeB))) // nodeA leaves
       when(serviceB(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
-      Await.result(ketamaClient.get("foo"))
+      awaitResult(ketamaClient.get("foo"))
       verify(serviceB, times(1)).apply(any())
 
       mutableAddrs.update(Addr.Bound(CacheNode.toAddress(nodeA), CacheNode.toAddress(nodeB))) // nodeA joins
       when(serviceA(Get(Seq(key)))) thenReturn Future.value(Values(Seq(value)))
-      Await.result(ketamaClient.get("foo"))
+      awaitResult(ketamaClient.get("foo"))
       verify(serviceA, times(2)).apply(any())
     }
   }
