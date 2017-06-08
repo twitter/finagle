@@ -1,9 +1,3 @@
 {
-  "toggles": [
-    {
-      "id": "com.twitter.finagle.thrift.UseNetty4",
-      "description": "Use netty4 as the transport implementation",
-      "fraction": 0.0
-    }
-  ]
+
 }

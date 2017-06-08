@@ -144,14 +144,12 @@ trait ThriftTest { self: FunSuite =>
 
   private val clients = Map[String, NewClient](
     "builder" -> newBuilderClient,
-    "api-netty3" -> newAPIClient(Thrift.ThriftImpl.Netty3),
-    "api-netty4" -> newAPIClient(Thrift.ThriftImpl.Netty4)
+    "api" -> newAPIClient(Thrift.ThriftImpl.param.default)
   )
 
   private val servers = Map[String, NewServer](
     "builder" -> newBuilderServer,
-    "api-netty3" -> newAPIServer(Thrift.ThriftImpl.Netty3),
-    "api-netty4" -> newAPIServer(Thrift.ThriftImpl.Netty4)
+    "api" -> newAPIServer(Thrift.ThriftImpl.param.default)
   )
 
   /** Invoke this in your test to run all defined thrift tests */

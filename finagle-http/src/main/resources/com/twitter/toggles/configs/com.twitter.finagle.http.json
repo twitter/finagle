@@ -12,7 +12,7 @@
     },
     {
       "id": "com.twitter.finagle.http.UseHttp2",
-      "description": "Use http/2 as the protocol implementation. If it fails to upgrade to http/2, it will downgrade to netty4 http/1.1. Supersedes the com.twitter.finagle.http.UseNetty4 toggle.",
+      "description": "Use http/2 as the protocol implementation. If it fails to upgrade to http/2, it will downgrade to http/1.1.",
       "fraction": 0.0
     }
   ]
