@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{ClientRegistry, StackBasedClient, StackClient}
+import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}

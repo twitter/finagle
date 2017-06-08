@@ -1,8 +1,9 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.RemoteInfo
+import com.twitter.finagle.service.FailedService
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Await, Future, Time}

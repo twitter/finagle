@@ -108,7 +108,7 @@ object Failure {
       /**
        * Represents the remote info of the upstream caller and/or
        * downstream backend.
-       * See [[com.twitter.finagle.service.ExceptionRemoteInfoFactory]]
+       * See [[com.twitter.finagle.client.ExceptionRemoteInfoFactory]]
        */
       RemoteInfo,
 

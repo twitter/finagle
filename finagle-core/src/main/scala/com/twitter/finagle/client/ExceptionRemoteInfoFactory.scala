@@ -1,7 +1,6 @@
-package com.twitter.finagle.service
+package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
@@ -54,7 +53,7 @@ private[finagle] object ExceptionRemoteInfoFactory {
   }
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[service.ExceptionRemoteInfoFactory]].
+   * Creates a [[com.twitter.finagle.Stackable]] [[client.ExceptionRemoteInfoFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
