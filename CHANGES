@@ -13,6 +13,12 @@ New Features
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: The Framer type has been transformed into a specialized version of a
+    more generic abstraction, Decoder[T]. ``PHAB_ID=D59495``
+ 
 6.45.0
 ------
 
@@ -121,9 +127,6 @@ Breaking API Changes
   * finagle-core: LoadBalancerFactory now takes an EndpointFactory which is an
     extension of ServiceFactory that carries an address and has the ability to
     be rebuilt. ``RB_ID=916956``
-
-  * finagle-core: The Framer type has been transformed into a specialized version of a
-    more generic abstraction, Decoder[T]. ``PHAB_ID=D59495``
 
   * finagle-base-http: Remove deprecated `c.t.f.http.Message.ContentTypeWwwFrom`.
     Use `c.t.f.http.Message.ContentTypeWwwForm` instead. ``RB_ID=915543`
