@@ -2,7 +2,6 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.Future
 import java.net.SocketAddress
@@ -38,17 +37,17 @@ private[finagle] object ExceptionRemoteInfoFactory {
     case e: HasRemoteInfo =>
       e.setRemoteInfo(RemoteInfo.Available(
         currentUpstream.addr,
-        currentUpstream.id.map(ClientId(_)),
+        currentUpstream.id,
         Some(downstreamAddr),
-        Some(ClientId(downstreamLabel)),
+        Some(downstreamLabel),
         Trace.id))
       Future.exception(e)
     case f: Failure =>
       Future.exception(f.withSource(Failure.Source.RemoteInfo, RemoteInfo.Available(
         currentUpstream.addr,
-        currentUpstream.id.map(ClientId(_)),
+        currentUpstream.id,
         Some(downstreamAddr),
-        Some(ClientId(downstreamLabel)),
+        Some(downstreamLabel),
         Trace.id)))
   }
 

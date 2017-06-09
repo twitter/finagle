@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.service.FailedService
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Await, Future, Time}
 import java.net.InetSocketAddress
@@ -32,7 +31,7 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
       }
     }
     assert(actual.remoteInfo == RemoteInfo.Available(
-      Some(upstreamAddr), Some(ClientId("upstream")), Some(downstreamAddr), Some(ClientId("downstream")), traceId))
+      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId))
   }
 
   test("ExceptionRemoteInfoFactory should add remote info to request exceptions") {
@@ -55,7 +54,7 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
       }
     }
     assert(actual.remoteInfo == RemoteInfo.Available(
-      Some(upstreamAddr), Some(ClientId("upstream")), Some(downstreamAddr), Some(ClientId("downstream")), traceId))
+      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId))
   }
 
   test("ExceptionRemoteInfoFactory should add remote info to Failures") {
@@ -77,6 +76,6 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
       }
     }
     assert(actual.getSource(Failure.Source.RemoteInfo).contains(RemoteInfo.Available(
-      Some(upstreamAddr), Some(ClientId("upstream")), Some(downstreamAddr), Some(ClientId("downstream")), traceId)))
+      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId)))
   }
 }

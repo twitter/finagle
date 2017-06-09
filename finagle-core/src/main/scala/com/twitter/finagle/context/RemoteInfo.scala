@@ -1,6 +1,5 @@
 package com.twitter.finagle.context
 
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.TraceId
 import java.net.SocketAddress
 
@@ -47,23 +46,23 @@ object RemoteInfo {
    */
   case class Available(
       upstreamAddr: Option[SocketAddress],
-      upstreamId: Option[ClientId],
+      upstreamId: Option[String],
       downstreamAddr: Option[SocketAddress],
-      downstreamId: Option[ClientId],
+      downstreamLabel: Option[String],
       traceId: TraceId)
     extends RemoteInfo {
     private[this] def addr(a: Option[SocketAddress]): String = a match {
       case Some(adr) => adr.toString
       case None => NotAvailableStr
     }
-    private[this] def id(clientId: Option[ClientId]): String = clientId match {
-      case Some(cid) => cid.name
+    private[this] def id(clientId: Option[String]): String = clientId match {
+      case Some(name) => name
       case None => NotAvailableStr
     }
 
     override def toString(): String =
       s"Upstream Address: ${addr(upstreamAddr)}, Upstream id: ${id(upstreamId)}, " +
-      s"Downstream Address: ${addr(downstreamAddr)}, Downstream label: ${id(downstreamId)}, " +
+      s"Downstream Address: ${addr(downstreamAddr)}, Downstream label: ${id(downstreamLabel)}, " +
       s"Trace Id: $traceId"
   }
 }

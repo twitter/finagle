@@ -9,7 +9,6 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.{Retries, RetryPolicy}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
@@ -56,7 +55,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       }
 
       assert(e.remoteInfo ==
-        RemoteInfo.Available(None, None, Some(server.boundAddress), Some(ClientId("B")), traceId))
+        RemoteInfo.Available(None, None, Some(server.boundAddress), Some("B"), traceId))
       Await.ready(server.close(), 1.second)
     }
   }
@@ -78,7 +77,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
         Await.result(client("hi"), 1.second)
       }
     }
-    assert(e.remoteInfo == RemoteInfo.Available(None, None, Some(server.boundAddress), Some(ClientId("B")), traceId))
+    assert(e.remoteInfo == RemoteInfo.Available(None, None, Some(server.boundAddress), Some("B"), traceId))
     Await.ready(server.close(), 1.second)
   }
 
@@ -111,7 +110,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
         }
 
         // Make sure the remote info upstream addr is pulled from the local context
-        assert(e.remoteInfo == RemoteInfo.Available(RemoteInfo.Upstream.addr, Some(ClientId("A")), Some(serverC.boundAddress), Some(ClientId("C")), traceId))
+        assert(e.remoteInfo == RemoteInfo.Available(RemoteInfo.Upstream.addr, Some("A"), Some(serverC.boundAddress), Some("C"), traceId))
 
         // The upstream addr isn't available for us to check, but we'll do a sanity check that it's not
         // Server C's address and is actually filled in.
@@ -168,7 +167,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
         Await.result(clientA("hi"), 1.second)
       }
     }
-    assert(e.remoteInfo == RemoteInfo.Available(None, None, Some(serverB.boundAddress), Some(ClientId("B")), traceId))
+    assert(e.remoteInfo == RemoteInfo.Available(None, None, Some(serverB.boundAddress), Some("B"), traceId))
     Await.ready(serverC.close(), 1.second)
     Await.ready(serverB.close(), 1.second)
 

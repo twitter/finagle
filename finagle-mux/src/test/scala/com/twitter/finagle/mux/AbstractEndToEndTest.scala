@@ -9,7 +9,6 @@ import com.twitter.finagle.mux.transport.{BadMessageException, Message}
 import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
 import com.twitter.io.{Buf, ByteReader, ByteWriter}
 import com.twitter.util._
@@ -461,7 +460,7 @@ EOF
       // RemoteInfo should have been added by the client stack
       failure.getSource(Failure.Source.RemoteInfo) match {
         case Some(a: RemoteInfo.Available) =>
-          assert(a.downstreamId == Some(ClientId(serviceName)))
+          assert(a.downstreamLabel == Some(serviceName))
           assert(a.downstreamAddr.isDefined)
 
         case other => fail(s"Unexpected remote info: $other")

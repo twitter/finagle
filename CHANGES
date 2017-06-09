@@ -18,7 +18,12 @@ Breaking API Changes
 
   * finagle-core: The Framer type has been transformed into a specialized version of a
     more generic abstraction, Decoder[T]. ``PHAB_ID=D59495``
- 
+
+  * finagle-core: Replace the `c.t.f.context.RemoteInfo.Available` constructor
+    which takes `ClientId` in favor of a version taking `String`. `ClientId` is
+    Twitter's Thrift specific concept and this should be more generic.
+    ``PHAB_ID=D60136``
+
 6.45.0
 ------
 
