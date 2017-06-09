@@ -836,8 +836,6 @@ The filter can be configured with the following parameters:
 MethodBuilder
 -------------
 
-.. warning:: These APIs are experimental and subject to change.
-
 .. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
           We are waiting on user interest before expanding to more protocols.
 

@@ -269,8 +269,6 @@ object ThriftMux
     /**
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
      *
-     * '''Experimental:''' This API is under construction.
-     *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
     def methodBuilder(dest: String): thriftmux.MethodBuilder =
@@ -278,8 +276,6 @@ object ThriftMux
 
     /**
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
-     *
-     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */

@@ -7,9 +7,6 @@ import com.twitter.finagle.client.RefcountedClosable
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.util.Duration
 
-/**
- * '''Experimental:''' This API is under construction.
- */
 object MethodBuilder {
   import client.MethodBuilder._
 
@@ -132,8 +129,6 @@ object MethodBuilder {
  * they must create separate Finagle clients for each grouping. While long-lived
  * clients in Finagle are not expensive, they are not free. They create
  * duplicate metrics and waste heap, file descriptors, and CPU.
- *
- * '''Experimental:''' This API is under construction.
  *
  * = Example =
  *

@@ -10,6 +10,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
+    `MethodBuilder` is a collection of APIs for client configuration at a higher level than
+    the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.
+    See the user guide for details: https://twitter.github.io/finagle/guide/MethodBuilder.html
+    ``PHAB_ID=D60032``
+
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 

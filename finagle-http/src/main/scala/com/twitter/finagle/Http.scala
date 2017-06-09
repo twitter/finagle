@@ -301,8 +301,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     /**
      * Create a [[http.MethodBuilder]] for a given destination.
      *
-     * '''Experimental:''' This API is under construction.
-     *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
     def methodBuilder(dest: String): http.MethodBuilder =
@@ -310,8 +308,6 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     /**
      * Create a [[http.MethodBuilder]] for a given destination.
-     *
-     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
