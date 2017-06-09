@@ -23,6 +23,11 @@ scala_library(
     'util/util-stats',
     'util/util-tunable/src/main/scala:scala',
   ],
+  strict_deps=True,
+  exports=[
+    'util/util-logging',
+    'util/util-registry',
+  ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

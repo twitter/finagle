@@ -17,5 +17,8 @@ scala_library(
   ],
   fatal_warnings=True,
   strict_deps=True,
+  exports=[
+    '3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations',
+  ],
   sources=rglobs('*.scala'),
 )
