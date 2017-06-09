@@ -1,3 +1,5 @@
+# New Thing Goes Here
+
 # Finagle
 
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
