@@ -31,7 +31,7 @@ class KeyValidationBenchmark extends StdBenchAnnotations {
     i = 0
 
   @Benchmark
-  def createGet: KeyValidation = {
+  def createGet: Command = {
     i += 1
     Get(keys(i % N))
   }

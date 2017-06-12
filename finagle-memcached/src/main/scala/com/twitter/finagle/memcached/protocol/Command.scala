@@ -4,62 +4,6 @@ import com.twitter.io.Buf
 import com.twitter.util.Time
 import scala.collection.immutable
 
-private object KeyValidation {
-  private val MaxKeyLength = 250
-
-  private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
-
-  private[this] object processor extends Buf.Processor {
-    def apply(byte: Byte): Boolean = !invalidChar(byte)
-
-    private def invalidChar(b: Byte): Boolean =
-      b <= ' ' && (b == '\n' || b == '\u0000' || b == '\r' || b == ' ')
-  }
-
-  /** Return -1 if no invalid bytes */
-  private def invalidByteIndex(key: Buf): Int = key.process(processor)
-
-  private val KeyCheck: Buf => Unit = checkKey(_)
-
-  def checkKey(key: Buf): Unit = {
-    if (key == null)
-      throw new IllegalArgumentException("Invalid keys: key cannot be null")
-
-    if (tooLong(key))
-      throw new IllegalArgumentException(
-        "Invalid keys: key cannot be longer than %d bytes (%d)".format(MaxKeyLength, key.length))
-
-    val index = invalidByteIndex(key)
-    if (index != -1) {
-      val ch = key.get(index)
-      throw new IllegalArgumentException(
-        "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(ch))
-    }
-  }
-}
-
-/**
- * This trait contains cache command key validation logic.
- * The validation is done by searching each buffer for invalid character defined in
- * Bufs.INVALID_KEY_CHARACTER, during construction of this trait.
- *
- * All cache commands accepting key/keys should mixin this trait.
- */
-trait KeyValidation {
-  import KeyValidation._
-
-  def keys: Seq[Buf]
-
-  {
-    // Validating keys
-    val ks = keys
-    if (ks == null)
-      throw new IllegalArgumentException("Invalid keys: cannot have null for keys")
-
-    ks.foreach(KeyCheck)
-  }
-}
-
 sealed abstract class Command(val name: String)
 
 private[memcached] object StorageCommand {
@@ -88,8 +32,9 @@ sealed abstract class ArithmeticCommand(
   KeyValidation.checkKey(key)
 }
 
-sealed abstract class RetrievalCommand(name: String) extends NonStorageCommand(name) with KeyValidation {
+sealed abstract class RetrievalCommand(name: String) extends NonStorageCommand(name) {
   def keys: Seq[Buf]
+  KeyValidation.checkKeys(keys)
 }
 
 // storage commands
