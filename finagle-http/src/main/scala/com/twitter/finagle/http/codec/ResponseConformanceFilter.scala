@@ -72,19 +72,21 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
     val contentLength = rep.length
     if (contentLength > 0) {
       rep.clearContent()
-      logger.error(
+      logger.info(
         "Response with a status code of %d must not have a body-message but it has " +
           "a %d-byte payload, thus the content has been removed.",
         rep.statusCode, contentLength)
     }
 
-    if (rep.status != NotModified && mustNotIncludeMessageBody(rep.status)) {
+    if (rep.status != NotModified) {
       if (rep.contentLength.isDefined) {
+        val contentLength = rep.contentLengthOrElse(-1)
         rep.headerMap.remove(Fields.ContentLength)
-        logger.error(
+        logger.info(
           "Response with a status code of %d must not have a Content-Length header field " +
-            "thus the field has been removed.",
-          rep.statusCode)
+            "thus the field has been removed. Content-Length: %d",
+          rep.statusCode,
+          contentLength)
       }
     }
   }
@@ -150,7 +152,7 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
     }
 
     if (!response.content.isEmpty) {
-      logger.error(
+      logger.info(
           "Received response to HEAD request (%s) that contained a static body of length %d. " +
             "Discarding body. If this is desired behavior, consider adding HeadFilter to your service",
           request.toString, response.content.length)
