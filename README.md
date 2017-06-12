@@ -1,5 +1,7 @@
 # Finagle
 
+Hi CLA robots!
+
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
 [![Codecov branch](https://img.shields.io/codecov/c/github/twitter/finagle/develop.svg)](http://codecov.io/github/twitter/finagle?branch=develop)
 [![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
