@@ -135,9 +135,7 @@ class MysqlBufReader(buf: Buf) extends ProxyByteReader {
 }
 
 
-class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter {
-
-  protected val writer: ByteWriter = ByteWriter(bytes)
+class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter(ByteWriter(bytes)) {
 
   /**
    * Writes `b` to the buffer `num` times
