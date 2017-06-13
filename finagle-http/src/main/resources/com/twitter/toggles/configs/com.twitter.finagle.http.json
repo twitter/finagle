@@ -6,11 +6,6 @@
       "fraction": 1.0
     },
     {
-      "id": "com.twitter.finagle.http.serverErrorsAsFailures",
-      "description": "Superseded by `com.twitter.finagle.http.serverErrorsAsFailuresV2`",
-      "fraction": 0.0
-    },
-    {
       "id": "com.twitter.finagle.http.UseHttp2",
       "description": "Use http/2 as the protocol implementation. If it fails to upgrade to http/2, it will downgrade to http/1.1.",
       "fraction": 0.0
