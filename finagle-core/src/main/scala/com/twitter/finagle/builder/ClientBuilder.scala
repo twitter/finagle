@@ -167,9 +167,10 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
 /**
  * A builder of Finagle [[com.twitter.finagle.Client Clients]].
  *
- * Please see the
- * [[https://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
- * for information on the preferred `with`-style client-construction APIs.
+ * Please see the user guide for information on the preferred
+ * [[https://twitter.github.io/finagle/guide/Configuration.html `with`-style]] and
+ * [[https://twitter.github.io/finagle/guide/MethodBuilder.html MethodBuilder]]
+ * client-construction APIs.
  *
  * {{{
  * val client = ClientBuilder()
@@ -241,8 +242,10 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *
- * @see The [[https://twitter.github.io/finagle/guide/Configuration.html user guide]]
- *      for information on the preferred `with`-style APIs insead.
+ * @see The user guide for information on the preferred
+ * [[https://twitter.github.io/finagle/guide/Configuration.html `with`-style]] and
+ * [[https://twitter.github.io/finagle/guide/MethodBuilder.html MethodBuilder]]
+ * client-construction APIs.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
     private[finagle] val client: StackBasedClient[Req, Rep]) {
@@ -611,15 +614,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Applicable only to service-builds (`build()`)
    *
-   * To migrate to the Stack-based APIs, use this method in conjunction with
-   * `ClientBuilder.stack`.
+   * To migrate to the Stack-based APIs, use `MethodBuilder`.
    * For example:
    * {{{
    * import com.twitter.finagle.Http
    *
-   * ClientBuilder()
-   *   .stack(Http.client)
-   *   .timeout(duration)
+   * Http.client
+   *   .methodBuilder("inet!localhost:8080")
+   *   .withTotalTimeout(duration)
    * }}}
    *
    * @note if the request is not complete after `duration` the work that is
@@ -794,15 +796,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * The configured policy has jittered backoffs between retries.
    *
-   * To migrate to the Stack-based APIs, use this method in conjunction with
-   * `ClientBuilder.stack`.
+   * To migrate to the Stack-based APIs, use `MethodBuilder`.
    * For example:
    * {{{
    * import com.twitter.finagle.Http
+   * import com.twitter.finagle.service.{ReqRep, ResponseClass}
+   * import com.twitter.util.Return
    *
-   * ClientBuilder()
-   *   .stack(Http.client)
-   *   .retries(value)
+   * Http.client
+   *   .methodBuilder("inet!localhost:8080")
+   *   // retry all HTTP 4xx and 5xx responses
+   *   .withRetryForClassifier {
+   *     case ReqRep(_, Return(rep)) if rep.statusCode >= 400 && rep.statusCode <= 599 =>
+   *       ResponseClass.RetryableFailure
+   *   }
    * }}}
    *
    * @param value the maximum number of attempts (including retries) that
@@ -829,15 +836,20 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Retry failed requests according to the given [[RetryPolicy]].
    *
-   * To migrate to the Stack-based APIs, use this method in conjunction with
-   * `ClientBuilder.stack`.
+   * To migrate to the Stack-based APIs, use `MethodBuilder`.
    * For example:
    * {{{
    * import com.twitter.finagle.Http
+   * import com.twitter.finagle.service.{ReqRep, ResponseClass}
+   * import com.twitter.util.Return
    *
-   * ClientBuilder()
-   *   .stack(Http.client)
-   *   .retryPolicy(value)
+   * Http.client
+   *   .methodBuilder("inet!localhost:8080")
+   *   // retry all HTTP 4xx and 5xx responses
+   *   .withRetryForClassifier {
+   *     case ReqRep(_, Return(rep)) if rep.statusCode >= 400 && rep.statusCode <= 599 =>
+   *       ResponseClass.RetryableFailure
+   *   }
    * }}}
    *
    * @note The failures seen in the client will '''not include'''
