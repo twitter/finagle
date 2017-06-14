@@ -60,7 +60,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       f.raise(new UtilTimeoutException("boom!"))
       verify(trans, never()).close()
 
-      ctl.advance(PipeliningDispatcher.TimeToWaitForStalledPipeline)
+      ctl.advance(GenPipeliningDispatcher.TimeToWaitForStalledPipeline)
       timer.tick()
       verify(trans, times(1)).close()
     }
@@ -80,7 +80,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       verify(trans, never()).close()
       readP.setDone()
 
-      ctl.advance(PipeliningDispatcher.TimeToWaitForStalledPipeline)
+      ctl.advance(GenPipeliningDispatcher.TimeToWaitForStalledPipeline)
       timer.tick()
       verify(trans, never()).close()
     }

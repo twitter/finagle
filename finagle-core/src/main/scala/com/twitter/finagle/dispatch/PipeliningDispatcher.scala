@@ -6,7 +6,7 @@ import com.twitter.finagle.Failure
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Timer, Time}
+import com.twitter.util.{Future, Promise, Time, Timer, Try}
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -24,28 +24,28 @@ import com.twitter.util.{Future, Promise, Timer, Time}
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-private[finagle] class PipeliningDispatcher[Req, Rep](
-    trans: Transport[Req, Rep],
+abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
+    trans: Transport[In, Out],
     statsReceiver: StatsReceiver,
     timer: Timer)
-  extends GenSerialClientDispatcher[Req, Rep, Req, Rep](
+  extends GenSerialClientDispatcher[Req, Rep, In, Out](
     trans,
     statsReceiver) { self =>
-  import PipeliningDispatcher._
+  import GenPipeliningDispatcher._
 
   // thread-safety provided by synchronization on this
   private[this] var stalled = false
-  private[this] val q = new AsyncQueue[Promise[Rep]]
+  private[this] val q = new AsyncQueue[Q]
 
   private[this] val queueSize =
     statsReceiver.scope("pipelining").addGauge("pending") {
       q.size
     }
 
-  private[this] val transRead: Promise[Rep] => Unit =
+  private[this] val transRead: Q => Unit =
     p =>
-      trans.read().respond { res =>
-        try p.updateIfEmpty(res)
+      trans.read().respond { out =>
+        try respond(p, out)
         finally loop()
       }
 
@@ -54,10 +54,14 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
 
   loop()
 
+  protected def respond(q: Q, out: Try[Out]): Unit
+
+  protected def pipeline(req: Req, p: Promise[Rep]): Future[Q]
+
   // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
   // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    trans.write(req).before { q.offer(p); Future.Done }
+    pipeline(req, p).flatMap { toQueue => q.offer(toQueue); Future.Done }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)
@@ -74,7 +78,7 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
               if (!stalled) {
                 stalled = true
                 val addr = trans.remoteAddress
-                PipeliningDispatcher.log.warning(
+                GenPipeliningDispatcher.log.warning(
                   s"pipelined connection stalled with ${q.size} items, talking to $addr")
               }
             }
@@ -85,7 +89,7 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
   }
 }
 
-private object PipeliningDispatcher {
+object GenPipeliningDispatcher {
   val log = Logger.get(getClass.getName)
 
   val TimeToWaitForStalledPipeline = 10.seconds
@@ -102,4 +106,15 @@ private object PipeliningDispatcher {
       case _ => None
     }
   }
+}
+
+class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep],
+  statsReceiver: StatsReceiver,
+  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Promise[Rep]](trans, statsReceiver, timer) {
+
+  override protected def respond(p: Promise[Rep], out: Try[Rep]): Unit =
+    p.updateIfEmpty(out)
+
+  override protected def pipeline(req: Req, p: Promise[Rep]): Future[Promise[Rep]] =
+    trans.write(req).map(_ => p)
 }
