@@ -6,88 +6,111 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.client.MemcachedClientDecoder
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
+import scala.collection.mutable.ArrayBuffer
 
 class MemcachedClientDecoderTest extends FunSuite {
 
-  test("parseResponse NOT_FOUND") {
-    val context = new MemcachedClientDecoder
+  private class Context {
+    val decoder = new MemcachedClientDecoder
 
-    val buffer = Buf.Utf8("NOT_FOUND")
-    assert(context.decode(buffer) == NotFound)
-  }
+    def decodeString(data: String): IndexedSeq[Response] =
+      decodeBuf(Buf.Utf8(data))
 
-  test("parseResponse STORED") {
-    val context = new MemcachedClientDecoder
-
-    val buffer = Buf.Utf8("STORED")
-    assert(context.decode(buffer) == Stored)
-  }
-
-  test("parseResponse EXISTS") {
-    val context = new MemcachedClientDecoder
-
-    val buffer = Buf.Utf8("EXISTS")
-    assert(context.decode(buffer) == Exists)
-  }
-
-  test("parseResponse ERROR") {
-    val context = new MemcachedClientDecoder
-
-    val buffer = Buf.Utf8("ERROR")
-    assert(context
-      .decode(buffer).asInstanceOf[protocol.Error]
-      .cause
-      .getClass == classOf[NonexistentCommand])
-  }
-
-  test("parseResponse STATS") {
-    val context = new MemcachedClientDecoder
-
-    val line1 = Buf.Utf8("STAT items:1:number 1")
-    val line2 = Buf.Utf8("STAT items:1:age 1468")
-    val line3 = Buf.Utf8("ITEM foo [5 b; 1322514067 s]")
-    val end = Buf.Utf8("END")
-
-    val lines = Seq(line1, line2, line3)
-    val tokens = lines.map(ParserUtils.splitOnWhitespace)
-
-    assert(context.decode(line1) == null)
-    assert(context.decode(line2) == null)
-    assert(context.decode(line3) == null)
-    val info = context.decode(end)
-
-    assert(info.getClass == classOf[InfoLines])
-    val ilines = info.asInstanceOf[InfoLines].lines
-    assert(ilines.size == 3)
-    ilines.zipWithIndex.foreach { case(line, idx) =>
-      val key = tokens(idx).head
-      val values = tokens(idx).drop(1)
-      assert(line.key == key)
-      assert(line.values.size == values.size)
-      line.values.zipWithIndex.foreach { case(token, tokIdx) =>
-        assert(token == values(tokIdx))
-      }
+    private def decodeBuf(data: Buf): IndexedSeq[Response] = {
+      val out = new ArrayBuffer[Response]
+      decoder.decodeData(data, out)
+      out.toVector
     }
   }
 
+  test("parseResponse NOT_FOUND") {
+    assert(new Context().decodeString("NOT_FOUND") == Seq(NotFound))
+  }
+
+  test("parseResponse STORED") {
+    assert(new Context().decodeString("STORED") == Seq(Stored))
+  }
+
+  test("parseResponse EXISTS") {
+    assert(new Context().decodeString("EXISTS") == Seq(Exists))
+  }
+
+  test("parseResponse ERROR") {
+    new Context().decodeString("ERROR") match {
+      case Seq(protocol.Error(_: NonexistentCommand)) => assert(true)
+      case other => fail(s"Unexpected output: $other")
+    }
+  }
+
+  test("parse VALUE line") {
+    val context = new Context
+    assert(context.decodeString("VALUE key 0 0").isEmpty)
+    assert(context.decoder.nextFrameBytes() == 0) // in data mode with size 0
+    assert(context.decodeString("").isEmpty)
+    assert(context.decoder.nextFrameBytes() == -1)
+    context.decodeString("END") match {
+      case Seq(Values(Seq(v))) =>
+        assert(v == Value(
+          key = Buf.Utf8("key"),
+          value = Buf.Empty,
+          casUnique = None,
+          flags = Some(Buf.Utf8("0"))))
+
+      case other => fail(s"Unexpected output: $other")
+    }
+  }
+
+  test("parse STATS") {
+    val context = new Context
+
+    val line1 = "STAT items:1:number 1"
+    val line2 = "STAT items:1:age 1468"
+    val line3 = "ITEM foo [5 b; 1322514067 s]"
+    val end = "END"
+
+    val lines = Seq(line1, line2, line3)
+    val tokens = lines.map( str => ParserUtils.splitOnWhitespace(Buf.Utf8(str)))
+
+    assert(context.decodeString(line1) == Seq.empty)
+    assert(context.decoder.nextFrameBytes() == -1)
+    assert(context.decodeString(line2) == Seq.empty)
+    assert(context.decoder.nextFrameBytes() == -1)
+    assert(context.decodeString(line3) == Seq.empty)
+    assert(context.decoder.nextFrameBytes() == -1)
+
+    context.decodeString(end) match {
+      case Seq(InfoLines(ilines)) =>
+        assert(ilines.size == 3)
+        ilines.zipWithIndex.foreach { case(line, idx) =>
+          val key = tokens(idx).head
+          val values = tokens(idx).drop(1)
+          assert(line.key == key)
+          assert(line.values.size == values.size)
+          line.values.zipWithIndex.foreach { case(token, tokIdx) =>
+            assert(token == values(tokIdx))
+          }
+        }
+
+      case other => fail(s"Unexpected value: $other")
+    }
+    assert(context.decoder.nextFrameBytes() == -1)
+  }
+
   test("parseResponse CLIENT_ERROR") {
-    val context = new MemcachedClientDecoder
 
     val errorMessage = "sad panda error"
-    val buffer = Buf.Utf8(s"CLIENT_ERROR $errorMessage")
-    val error = context.decode(buffer).asInstanceOf[protocol.Error]
-    assert(error.cause.getClass == classOf[ClientError])
-    assert(error.cause.getMessage() == errorMessage)
+    new Context().decodeString(s"CLIENT_ERROR $errorMessage") match {
+      case Seq(Error(cause)) => assert(cause.getMessage() == errorMessage)
+      case other => fail(s"Unexpected output: $other")
+    }
   }
 
   test("parseResponse SERVER_ERROR") {
-    val context = new MemcachedClientDecoder
-
     val errorMessage = "sad panda error"
-    val buffer = Buf.Utf8(s"SERVER_ERROR $errorMessage")
-    val error = context.decode(buffer).asInstanceOf[protocol.Error]
-    assert(error.cause.getClass == classOf[ServerError])
-    assert(error.cause.getMessage() == errorMessage)
+    new Context().decodeString(s"SERVER_ERROR $errorMessage") match {
+      case Seq(Error(cause: ServerError)) => assert(cause.getMessage() == errorMessage)
+      case other => fail(s"Unexpected output: $other")
+    }
   }
-
 }
+

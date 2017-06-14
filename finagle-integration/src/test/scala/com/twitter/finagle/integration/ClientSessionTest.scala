@@ -2,7 +2,8 @@ package com.twitter.finagle.integration
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http
+import com.twitter.finagle.memcached.{protocol => memcached}
 import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -67,7 +68,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
       when(manager.shouldClose).thenReturn(false)
       when(manager.onClose).thenReturn(closeP)
       val wrappedT = new http.HttpTransport(
-        new IdentityStreamTransport(Transport.cast[Request, Response](tr)), manager)
+        new IdentityStreamTransport(Transport.cast[http.Request, http.Response](tr)), manager)
       () => wrappedT.status
     }
   )
@@ -76,7 +77,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     "http-dispatcher",
     { tr: Transport[Any, Any] =>
       val dispatcher = new HttpClientDispatcher(
-        new IdentityStreamTransport(Transport.cast[Request, Response](tr)),
+        new IdentityStreamTransport(Transport.cast[http.Request, http.Response](tr)),
         NullStatsReceiver
       )
       () => dispatcher.status
@@ -84,14 +85,14 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   )
 
   class MyClient extends com.twitter.finagle.Memcached.Client {
-    def newDisp(transport: Transport[Buf, Buf]):
-      Service[memcached.protocol.Command, memcached.protocol.Response] =
+    def newDisp(transport: Transport[Buf, memcached.Response]):
+      Service[memcached.Command, memcached.Response] =
       super.newDispatcher(transport)
   }
 
   testSessionStatus(
     "memcached-dispatcher",
-    { tr: Transport[Buf, Buf] =>
+    { tr: Transport[Buf, memcached.Response] =>
       val cl: MyClient = new MyClient
       val svc = cl.newDisp(tr)
       () => svc.status

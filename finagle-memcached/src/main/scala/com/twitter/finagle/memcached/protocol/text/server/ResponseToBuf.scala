@@ -93,7 +93,7 @@ private[finagle] object ResponseToBuf {
       // + 5 to estimated size for END + DELIMITER.
       val bw = ByteWriter.dynamic(100 * values.size + 5)
 
-      val tokensWithData = values map {
+      values.foreach {
         case Value(key, value, casUnique, Some(flags)) =>
           writeResponseWithData(Seq(VALUE, key, flags), value, casUnique, bw)
         case Value(key, value, casUnique, None) =>

@@ -11,10 +11,10 @@ import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
-import com.twitter.finagle.memcached.protocol.text.client.{ClientTransport, MemcachedClientDecoder}
+import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.CommandToBuf
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty4ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
@@ -251,16 +251,15 @@ object Memcached extends finagle.Client[Command, Response]
     ): Client = copy(stack, params)
 
     protected type In = Buf
-    protected type Out = Buf
+    protected type Out = Response
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
-      Netty4Transporter.raw(Netty4ClientFramer, addr, params)
+      Netty4Transporter.raw(MemcachedNetty4ClientFramer, addr, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
         new ClientTransport[Command, Response](
           new CommandToBuf,
-          new MemcachedClientDecoder,
           transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
         DefaultTimer
