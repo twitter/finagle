@@ -26,7 +26,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
         when(trans.write(())).thenReturn(Future.Done)
         when(trans.read()).thenReturn(Future.never)
         when(trans.onClose).thenReturn(Future.never)
-        val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+        val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
         val f = dispatch(())
         f.raise(exc)
         verify(trans, numClosed).close()
@@ -41,7 +41,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       assert(!f.isDefined)
@@ -49,24 +49,26 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
   }
 
   test("PipeliningDispatcher: should actually handle timeout interrupts after waiting") {
+    val stallTimeout = 10.seconds
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
       val trans = mock[Transport[Unit, Unit]]
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       verify(trans, never()).close()
 
-      ctl.advance(GenPipeliningDispatcher.TimeToWaitForStalledPipeline)
+      ctl.advance(stallTimeout)
       timer.tick()
       verify(trans, times(1)).close()
     }
   }
 
   test("PipeliningDispatcher: should not handle interrupts after waiting if the pipeline clears") {
+    val stallTimeout = 10.seconds
     val timer = new MockTimer
     Time.withCurrentTimeFrozen { ctl =>
       val trans = mock[Transport[Unit, Unit]]
@@ -74,13 +76,13 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(readP)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       verify(trans, never()).close()
       readP.setDone()
 
-      ctl.advance(GenPipeliningDispatcher.TimeToWaitForStalledPipeline)
+      ctl.advance(stallTimeout)
       timer.tick()
       verify(trans, never()).close()
     }
@@ -102,7 +104,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       .thenReturn(p2)
     val closeP = new Promise[Throwable]
     when(trans.onClose).thenReturn(closeP)
-    val dispatcher = new PipeliningDispatcher[String, String](trans, stats, timer)
+    val dispatcher = new PipeliningDispatcher[String, String](trans, stats, 10.seconds, timer)
 
     assertGaugeSize(0)
 

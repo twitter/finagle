@@ -2,11 +2,11 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.Failure
+import com.twitter.finagle.{Failure, Stack}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, Promise, Time, Timer, Try}
+import com.twitter.util.{Duration, Future, Promise, Time, Timer, Try}
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -27,6 +27,7 @@ import com.twitter.util.{Future, Promise, Time, Timer, Try}
 abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
     trans: Transport[In, Out],
     statsReceiver: StatsReceiver,
+    stallTimeout: Duration,
     timer: Timer)
   extends GenSerialClientDispatcher[Req, Rep, In, Out](
     trans,
@@ -70,9 +71,9 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
 
     p.setInterruptHandler {
       case t: Throwable =>
-        timer.schedule(Time.now + TimeToWaitForStalledPipeline) {
+        timer.schedule(Time.now + stallTimeout) {
           if (!f.isDefined) {
-            f.raise(StalledPipelineException)
+            f.raise(stalledPipelineException(stallTimeout))
             self.synchronized {
               // we check stalled so that we log exactly once per failed pipeline
               if (!stalled) {
@@ -92,11 +93,9 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
 object GenPipeliningDispatcher {
   val log = Logger.get(getClass.getName)
 
-  val TimeToWaitForStalledPipeline = 10.seconds
-
-  val StalledPipelineException =
+  def stalledPipelineException(timeout: Duration) =
     Failure(
-      s"The connection pipeline could not make progress in $TimeToWaitForStalledPipeline",
+      s"The connection pipeline could not make progress in $timeout",
       Failure.Interrupted)
 
   object Timeout {
@@ -108,9 +107,18 @@ object GenPipeliningDispatcher {
   }
 }
 
+case class StalledPipelineTimeout(timeout: Duration) {
+  def mk(): (StalledPipelineTimeout, Stack.Param[StalledPipelineTimeout]) =
+    (this, StalledPipelineTimeout.param)
+}
+object StalledPipelineTimeout {
+  implicit val param = Stack.Param(StalledPipelineTimeout(timeout = 10.seconds))
+}
+
 class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep],
   statsReceiver: StatsReceiver,
-  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Promise[Rep]](trans, statsReceiver, timer) {
+  stallTimeout: Duration,
+  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Promise[Rep]](trans, statsReceiver, stallTimeout, timer) {
 
   override protected def respond(p: Promise[Rep], out: Try[Rep]): Unit =
     p.updateIfEmpty(out)

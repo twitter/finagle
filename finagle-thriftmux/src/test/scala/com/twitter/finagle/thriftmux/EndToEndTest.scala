@@ -789,7 +789,7 @@ class EndToEndTest extends FunSuite
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack=StackClient.newStack) {
       override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) =
-        new PipeliningDispatcher(transport, NullStatsReceiver, new MockTimer)
+        new PipeliningDispatcher(transport, NullStatsReceiver, 10.seconds, new MockTimer)
     }
 
     val service = await(OldPlainPipeliningThriftClient.newClient(
