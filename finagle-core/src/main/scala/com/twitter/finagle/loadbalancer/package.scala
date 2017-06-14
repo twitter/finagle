@@ -11,30 +11,4 @@ package com.twitter.finagle
  * out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
  * and Updating).
  */
-package object loadbalancer {
-
-  @volatile private[this] var addressOrdering: Ordering[Address] =
-    new Ordering[Address] {
-      def compare(a0: Address, a1: Address): Int = Address.OctetOrdering.compare(a0, a1)
-      override def toString: String = "Address.OctetOrdering"
-    }
-
-  /**
-   * Set the default [[Address]] ordering for the entire process (outside of clients
-   * which override it).
-   *
-   * @see [[LoadBalancerFactory.AddressOrdering]] for more info.
-   */
-  def defaultAddressOrdering(order: Ordering[Address]): Unit = {
-    addressOrdering = order
-  }
-
-  /**
-   * Returns the default process global [[Address]] ordering as set via
-   * `defaultAddressOrdering`. If no value is set, [[Address.OctetOrdering]]
-   * is used with the assumption that hosts resolved via Finagle provide the
-   * load balancer with resolved InetAddresses. If a separate resolution process
-   * is used, outside of Finagle, the default ordering should be overriden.
-   */
-  def defaultAddressOrdering: Ordering[Address] = addressOrdering
-}
+package object loadbalancer

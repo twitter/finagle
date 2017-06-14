@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
+import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param.Stats
@@ -153,6 +154,48 @@ class LoadBalancerFactoryTest extends FunSuite
     // we will not see a failure, even though there are no nodes open
     assert(factory.status == Status.Busy)
     Await.result(factory(ClientConnection.nil), 5.seconds)
+  }
+
+  test("default address ordering") {
+    val ordering = LoadBalancerFactory.AddressOrdering.param.default.ordering
+
+    val ips: Seq[Array[Byte]] = (10 until 0 by -1).map { i =>
+      Array[Byte](10, 0, 0, i.toByte)
+    }
+
+    val addresses: Seq[Address.Inet] = ips.map { ip =>
+      val inet = InetAddress.getByAddress(ip)
+      Address.Inet(new InetSocketAddress(inet, 0), Addr.Metadata.empty)
+    }
+
+    assert(addresses.sorted(ordering) == addresses.sorted(ordering))
+
+    // breaks ties via port
+    val ip = Array[Byte](10, 0, 0, 1)
+    val addr0 = Address(new InetSocketAddress(InetAddress.getByAddress(ip), 80))
+    val addr1 = Address(new InetSocketAddress(InetAddress.getByAddress(ip), 8080))
+    assert(Vector(addr1, addr0).sorted(ordering).last == addr1)
+
+    val sorted = addresses.sorted(ordering)
+    assert(sorted.indices.exists { i => sorted(i) != addresses(i) })
+
+    val failed = Address.Failed(new Exception)
+    val withFailed = failed +: addresses
+    assert(withFailed.sorted(ordering).last == failed)
+
+    val sf = finagle.exp.Address.ServiceFactory(ServiceFactory.const[Int, Int] {
+      Service.mk[Int, Int] { _ => ??? }
+    }, Addr.Metadata.empty)
+    val withSf = sf +: addresses
+    assert(withSf.sorted(ordering).last == sf)
+
+    val unresolved = Address(InetSocketAddress.createUnresolved("dest", 0))
+    val withUnResolved = unresolved +: addresses
+    assert(withUnResolved.sorted(ordering).head == unresolved)
+
+    val all = unresolved +: failed +: sf +: addresses
+    // it doesn't really matter which one comes last here
+    assert(all.sorted(ordering).last == sf)
   }
 
   test("Respects the AddressOrdering") {

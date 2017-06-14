@@ -30,6 +30,12 @@ Breaking API Changes
     Twitter's Thrift specific concept and this should be more generic.
     ``PHAB_ID=D60136``
 
+  * finagle-core: Remove the ability to set a global address sort. This is no longer
+    necessary as setting this per client is sufficient. ``PHAB_ID=D60698``
+
+  * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
+    ``PHAB_ID=D60698``
+
 6.45.0
 ------
 
