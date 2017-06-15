@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.io.{Buf, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter}
 import java.nio.charset.StandardCharsets
 
 private object Encoder {
@@ -25,7 +25,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] {
     casUnique: Option[Buf] = None
   ): Buf = {
     // estimated size + 50 for casUnique, data length, DELIMITERS
-    val bw = ByteWriter.dynamic(50 + data.length + 10 * command.length)
+    val bw = BufByteWriter.dynamic(50 + data.length + 10 * command.length)
 
     bw.writeBytes(command)
     bw.writeBytes(SPACE)
@@ -57,7 +57,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] {
 
   protected final def encodeCommand(command: Seq[Buf]): Buf = {
     // estimated size + 2 for DELIMITER
-    val bw = ByteWriter.dynamic(10 * command.size + 2)
+    val bw = BufByteWriter.dynamic(10 * command.size + 2)
     command.foreach { token =>
       bw.writeBytes(token)
       bw.writeBytes(SPACE)

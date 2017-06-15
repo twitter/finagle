@@ -10,19 +10,17 @@ import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 abstract class AbstractEndToEndTest extends FunSuite
   with Eventually
   with IntegrationPatience
@@ -78,7 +76,7 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   test(s"$implName: (no) Dtab propagation") {
     val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val bw = ByteWriter.fixed(4)
+      val bw = BufByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
       Future.value(Response(bw.owned()))
     })

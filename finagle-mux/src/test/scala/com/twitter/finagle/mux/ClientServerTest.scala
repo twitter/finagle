@@ -10,7 +10,7 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -241,7 +241,7 @@ private[mux] abstract class ClientServerTest
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
-          val bw = ByteWriter.fixed(8)
+          val bw = BufByteWriter.fixed(8)
           bw.writeLongBE(Trace.id.flags.toLong)
           Future.value(Response(bw.owned()))
         }

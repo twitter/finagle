@@ -1,7 +1,7 @@
 package com.twitter.finagle.mysql.transport
 
-import com.twitter.io.{Buf, ByteReader, ByteWriter, ProxyByteReader, ProxyByteWriter}
-import java.nio.charset.{Charset => JCharset, StandardCharsets}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader, ProxyByteReader, ProxyByteWriter}
+import java.nio.charset.{StandardCharsets, Charset => JCharset}
 import scala.collection.mutable.{Buffer => MutableBuffer}
 
 /**
@@ -15,7 +15,7 @@ object MysqlBuf {
 
   def reader(bytes: Array[Byte]): MysqlBufReader = reader(Buf.ByteArray.Owned(bytes))
 
-  def writer(bytes: Array[Byte]): MysqlBufWriter = new MysqlBufWriter(bytes)
+  def writer(bytes: Array[Byte]): MysqlBufWriter = new MysqlBufWriter(BufByteWriter(bytes))
 
   /**
    * Calculates the size required to store a length
@@ -135,7 +135,8 @@ class MysqlBufReader(buf: Buf) extends ProxyByteReader {
 }
 
 
-class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter(ByteWriter(bytes)) {
+class MysqlBufWriter(underlying: BufByteWriter)
+  extends ProxyByteWriter(underlying) with BufByteWriter {
 
   /**
    * Writes `b` to the buffer `num` times
@@ -201,4 +202,6 @@ class MysqlBufWriter(bytes: Array[Byte]) extends ProxyByteWriter(ByteWriter(byte
     writeBytes(bytes)
     this
   }
+
+  def owned(): Buf = underlying.owned()
 }

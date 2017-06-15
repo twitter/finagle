@@ -1,6 +1,6 @@
 package com.twitter.finagle.context
 
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Return, Throw, Try}
 
 /**
@@ -18,7 +18,7 @@ private[finagle] object Retries
     Contexts.broadcast.get(Retries)
 
   override def marshal(retries: Retries): Buf = {
-    val bw: ByteWriter = ByteWriter.fixed(4)
+    val bw = BufByteWriter.fixed(4)
     bw.writeIntBE(retries.retries)
     bw.owned()
   }

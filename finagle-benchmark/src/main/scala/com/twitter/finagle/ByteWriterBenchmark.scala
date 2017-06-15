@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.io.ByteWriter
+import com.twitter.io.{BufByteWriter, ByteWriter}
 import org.openjdk.jmh.annotations._
 
 /**
@@ -31,7 +31,7 @@ class ByteWriterBenchmark extends StdBenchAnnotations {
 
   @Setup(Level.Iteration)
   def setup(): Unit =
-    byteWriter = ByteWriter(bytesOut)
+    byteWriter = BufByteWriter(bytesOut)
 
   @Benchmark
   @BenchmarkMode(Array(Mode.SingleShotTime))

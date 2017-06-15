@@ -3,7 +3,7 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.netty4.Bufs
 import com.twitter.finagle.tracing.{Flags, SpanId, TraceId}
 import com.twitter.finagle.{Dentry, Dtab, Failure, NameTree, Path}
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Duration, Time}
 import java.nio.charset.{StandardCharsets => Charsets}
 import scala.collection.mutable.ArrayBuffer
@@ -118,7 +118,7 @@ private[twitter] object Message {
         // 8 bytes for length encoding of k, v
         size += 8 + k.length + v.length
       }
-      val bw = ByteWriter.fixed(size)
+      val bw = BufByteWriter.fixed(size)
       bw.writeShortBE(version)
       iter = headers.iterator
       while (iter.hasNext) {
@@ -176,7 +176,7 @@ private[twitter] object Message {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = ByteWriter.fixed(1+1+1+24+1+1+1)
+          val hd = BufByteWriter.fixed(1+1+1+24+1+1+1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)
@@ -263,7 +263,7 @@ private[twitter] object Message {
       }
 
       // then, allocate and populate the header
-      val hd = ByteWriter.fixed(n)
+      val hd = BufByteWriter.fixed(n)
       hd.writeShortBE(contexts.length)
       iter = contexts.iterator
       while (iter.hasNext) {
@@ -312,7 +312,7 @@ private[twitter] object Message {
         }
       }
 
-      val hd = ByteWriter.fixed(n)
+      val hd = BufByteWriter.fixed(n)
       hd.writeByte(status)
       hd.writeShortBE(contexts.length)
       iter = contexts.iterator
@@ -425,7 +425,7 @@ private[twitter] object Message {
   case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage {
     def typ = Types.Tlease
     lazy val buf: Buf = {
-      val bw = ByteWriter.fixed(9)
+      val bw = BufByteWriter.fixed(9)
       bw.writeByte(unit)
       bw.writeLongBE(howLong)
       bw.owned()
