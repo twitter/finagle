@@ -6,5 +6,6 @@ java_thrift_library(name='thrift-scala',
   provides=artifact(org='com.twitter',
                     name='finagle-zipkin-thrift',
                     repo = artifactory,),
+  strict_deps=True,
 )
 

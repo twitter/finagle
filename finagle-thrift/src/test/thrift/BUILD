@@ -9,6 +9,7 @@ java_thrift_library(
   name='thrift-scala',
   language='scala',
   sources=['echo.thrift'],
+  strict_deps=True,
 )
 
 java_thrift_library(name='test-thrift-scala',
@@ -16,6 +17,7 @@ java_thrift_library(name='test-thrift-scala',
   compiler='scrooge',
   language='scala',
   rpc_style='finagle',
+  strict_deps=True,
 )
 java_thrift_library(name='test-thrift-java',
   sources=['test.thrift', 'fb303.thrift'],
