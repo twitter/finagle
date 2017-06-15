@@ -15,12 +15,13 @@ import com.twitter.util.{Duration, Future, Promise, Time, Timer, Try}
  * [[GenSerialClientDispatcher]] to serialize requests.
  *
  * Because many requests might be sharing the same transport,
- * [[com.twitter.util.Future Futures]] returned by PipeliningDispatcher#apply
+ * [[com.twitter.util.Future Futures]] returned by GenPipeliningDispatcher#apply
  * are masked, and will only propagate the interrupt if the future doesn't
- * return after 10 seconds after the interruption.  This ensures that
- * interrupting a Future in one request won't change the result of another
- * request unless the connection is stuck, and does not look like it will make
- * progress.
+ * return after a configurable amount of time after the interruption.
+ * This ensures that interrupting a Future in one request won't change the
+ * result of another request unless the connection is stuck, and does not
+ * look like it will make progress. Use [[StalledPipelineTimeout]] to
+ * configure this timeout.
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
@@ -110,11 +111,11 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
 }
 
 object GenPipeliningDispatcher {
-  val log = Logger.get(getClass.getName)
+  private val log = Logger.get(getClass.getName)
 
   private case class Pending[T, Rep](value: T, promise: Promise[Rep])
 
-  def stalledPipelineException(timeout: Duration) =
+  private def stalledPipelineException(timeout: Duration) =
     Failure(
       s"The connection pipeline could not make progress in $timeout",
       Failure.Interrupted)
@@ -128,6 +129,11 @@ object GenPipeliningDispatcher {
   }
 }
 
+/**
+  * A class eligible for configuring a timeout
+  * [[com.twitter.util.Duration]] to consider a pipeline to have stalled
+  * (stopped making progress after an initial interruption).
+  */
 case class StalledPipelineTimeout(timeout: Duration) {
   def mk(): (StalledPipelineTimeout, Stack.Param[StalledPipelineTimeout]) =
     (this, StalledPipelineTimeout.param)
@@ -136,7 +142,8 @@ object StalledPipelineTimeout {
   implicit val param = Stack.Param(StalledPipelineTimeout(timeout = 10.seconds))
 }
 
-class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep],
+class PipeliningDispatcher[Req, Rep](
+  trans: Transport[Req, Rep],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
   timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](trans, statsReceiver, stallTimeout, timer) {
@@ -145,5 +152,5 @@ class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep],
     p.updateIfEmpty(out)
 
   final override protected def pipeline(req: Req, p: Promise[Rep]): Future[Unit] =
-    trans.write(req).map(_ => p)
+    trans.write(req)
 }

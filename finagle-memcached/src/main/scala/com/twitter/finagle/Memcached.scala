@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import _root_.java.net.SocketAddress
-
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
@@ -30,7 +29,6 @@ import com.twitter.hashing
 import com.twitter.io.Buf
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, Duration, Monitor}
-
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
