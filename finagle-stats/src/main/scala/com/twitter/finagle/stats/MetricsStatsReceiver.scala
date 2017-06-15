@@ -172,15 +172,15 @@ class MetricsStatsReceiver(
   val registry: Metrics,
   sink: Sink,
   histogramFactory: String => HistogramInterface
-) extends WithHistogramDetails
-  with StatsReceiverWithCumulativeGauges {
+) extends StatsReceiverWithCumulativeGauges with WithHistogramDetails {
+
   import MetricsStatsReceiver._
 
   def this(registry: Metrics, sink: Sink) = this(registry, sink, MetricsStatsReceiver.defaultFactory)
   def this(registry: Metrics) = this(registry, Sink.default)
   def this() = this(MetricsStatsReceiver.defaultRegistry)
 
-  val repr = this
+  def repr: MetricsStatsReceiver = this
 
   // Use for backward compatibility with ostrich caching behavior
   private[this] val counters = new ConcurrentHashMap[Seq[String], Counter]

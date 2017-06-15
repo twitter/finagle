@@ -192,7 +192,7 @@ object LoadBalancerFactory {
       val param.Reporter(reporter) = params[param.Reporter]
 
       val rawStatsReceiver = statsReceiver match {
-        case sr: RollupStatsReceiver => sr.self
+        case sr: RollupStatsReceiver => sr.underlying.head
         case sr => sr
       }
 

@@ -115,7 +115,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
       assert(Await.result(client.multiply(4,2), 10.seconds) == 2)
 
       val key = Seq(name, "codec_connection_preparation_latency_ms")
-      assert(statsReceiver.repr.stats.contains(key) == true)
+      assert(statsReceiver.stats.contains(key) == true)
     }
   }
 }
