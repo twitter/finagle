@@ -24,7 +24,7 @@ import com.twitter.util.{Duration, Future, Promise, Time, Timer, Try}
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
+abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
     trans: Transport[In, Out],
     statsReceiver: StatsReceiver,
     stallTimeout: Duration,
@@ -36,17 +36,17 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
 
   // thread-safety provided by synchronization on this
   private[this] var stalled = false
-  private[this] val q = new AsyncQueue[Q]
+  private[this] val q = new AsyncQueue[Pending[T, Rep]]
 
   private[this] val queueSize =
     statsReceiver.scope("pipelining").addGauge("pending") {
       q.size
     }
 
-  private[this] val transRead: Q => Unit =
+  private[this] val transRead: Pending[T, Rep] => Unit =
     p =>
       trans.read().respond { out =>
-        try respond(p, out)
+        try respond(p.value, p.promise, out)
         finally loop()
       }
 
@@ -55,14 +55,33 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
 
   loop()
 
-  protected def respond(q: Q, out: Try[Out]): Unit
+  /**
+    * Handle the server response `out` given the corresponding element `value`
+    * enqueued during dispatch.
+    *
+    * This typically involves fulfilling `p` with a function of `(T, Try[Out]) => Rep`
+    *
+    * @param value the corresponding element returned by `pipeline` during dispatch
+    * @param p the promise to fulfill the rpc
+    * @param out the server response
+    */
+  protected def respond(value: T, p: Promise[Rep], out: Try[Out]): Unit
 
-  protected def pipeline(req: Req, p: Promise[Rep]): Future[Q]
+  /**
+    * Send a request `req` to the server and provide a value `T` to insert into the
+    * pipeline queue. The value is provided back to `respond` to handle the corresponding
+    * request.
+    *
+    * @param req the request to send
+    * @param p the promise to fulfill when the request is handled.
+    * @return a value associated with `req` that is handed back during response handling.
+    */
+  protected def pipeline(req: Req, p: Promise[Rep]): Future[T]
 
   // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
   // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    pipeline(req, p).flatMap { toQueue => q.offer(toQueue); Future.Done }
+    pipeline(req, p).flatMap { toQueue => q.offer(Pending(toQueue, p)); Future.Done }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)
@@ -93,6 +112,8 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, Q](
 object GenPipeliningDispatcher {
   val log = Logger.get(getClass.getName)
 
+  private case class Pending[T, Rep](value: T, promise: Promise[Rep])
+
   def stalledPipelineException(timeout: Duration) =
     Failure(
       s"The connection pipeline could not make progress in $timeout",
@@ -118,11 +139,11 @@ object StalledPipelineTimeout {
 class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
-  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Promise[Rep]](trans, statsReceiver, stallTimeout, timer) {
+  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](trans, statsReceiver, stallTimeout, timer) {
 
-  override protected def respond(p: Promise[Rep], out: Try[Rep]): Unit =
+  final override protected def respond(value: Unit, p: Promise[Rep], out: Try[Rep]): Unit =
     p.updateIfEmpty(out)
 
-  override protected def pipeline(req: Req, p: Promise[Rep]): Future[Promise[Rep]] =
+  final override protected def pipeline(req: Req, p: Promise[Rep]): Future[Unit] =
     trans.write(req).map(_ => p)
 }
