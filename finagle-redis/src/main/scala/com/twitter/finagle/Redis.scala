@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, StalledPipelineTimeout}
 import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
@@ -74,7 +74,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(
         new StageTransport(transport),
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        params[StalledPipelineTimeout].timeout
       )
 
     // Java-friendly forwarders
