@@ -563,6 +563,21 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(client.close())
     }
 
+    test(s"$implName (streaming): aggregates responses that must not have a body") {
+      val service = new HttpService {
+        def apply(request: Request): Future[Response] = {
+          val resp = Response()
+          resp.status = Status.NoContent
+          Future.value(resp)
+        }
+      }
+
+      val client = connect(service)
+      val resp = await(client(Request()))
+      assert(!resp.isChunked)
+      assert(resp.content.isEmpty)
+    }
+
     test(s"$implName (streaming)" + ": stream via ResponseProxy class") {
       case class EnrichedResponse(resp: Response) extends ResponseProxy {
         override val response = resp
