@@ -16,14 +16,7 @@ import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
   SourceCodec, UpgradeCodec, UpgradeCodecFactory
 }
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
-import io.netty.handler.codec.http2.{
-  Http2Codec,
-  Http2CodecUtil,
-  Http2FrameLogger,
-  Http2ResetFrame,
-  Http2ServerUpgradeCodec,
-  Http2StreamChannelBootstrap
-}
+import io.netty.handler.codec.http2._
 import io.netty.handler.logging.LogLevel
 import io.netty.util.AsciiString
 
@@ -66,7 +59,10 @@ private[http2] class Http2CleartextServerInitializer(
           .option(ChannelOption.ALLOCATOR, channel.alloc())
           .handler(initializer)
 
-        val codec = new Http2Codec(true /* server */, bootstrap, logger, initialSettings)
+        val codec = new Http2CodecBuilder(true /* server */, bootstrap)
+          .frameLogger(logger)
+          .initialSettings(initialSettings)
+          .build()
         new Http2ServerUpgradeCodec(codec) {
           override def upgradeTo(ctx: ChannelHandlerContext, upgradeRequest: FullHttpRequest) {
             upgradeCounter.incr()

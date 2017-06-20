@@ -19,6 +19,8 @@ New Features
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
+  * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
