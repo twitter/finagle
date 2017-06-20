@@ -111,12 +111,6 @@ Runtime Behavior Changes
   * finagle-netty4: `poolReceiveBuffers` toggle is removed (suppressed by `UsePooling`).
     ``RB_ID=917912``
 
-  * finagle-http: To conform to RFC 2616, a message body is NO LONGER sent when 1xx, 204
-    and 304 responses are returned. To conform with RFC 7230, a Content-Length header field
-    is NOT sent for 1xx and 204 responses. Both rules are enforced even if users intentionally
-    add body data or the header field for these responses. If violation of these rules is
-    detected then an error message is logged. ``RB_ID=917827``
-
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

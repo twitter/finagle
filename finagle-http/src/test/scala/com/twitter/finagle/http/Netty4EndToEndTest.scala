@@ -11,6 +11,5 @@ class Netty4EndToEndTest extends AbstractEndToEndTest {
 
   def serverImpl(): FinagleHttp.Server = FinagleHttp.server.configured(FinagleHttp.Netty4Impl)
 
-  def featureImplemented(feature: Feature): Boolean =
-    feature != NoBodyMessage
+  def featureImplemented(feature: Feature): Boolean = true
 }
