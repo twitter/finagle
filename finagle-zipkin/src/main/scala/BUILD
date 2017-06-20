@@ -21,4 +21,5 @@ scala_library(
   sources=rglobs('*.scala'),
   # Exposes a service-loaded class.
   scope='forced',
+  strict_deps=True,
 )

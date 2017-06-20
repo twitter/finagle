@@ -13,4 +13,5 @@ scala_library(
     'util/util-stats',
   ],
   sources=rglobs('*.scala'),
+  strict_deps=True,
 )

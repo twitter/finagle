@@ -15,7 +15,8 @@ scala_library(name='external',
     'finagle/finagle-memcached/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
   ],
-  sources=EXTERNAL_SOURCES
+  sources=EXTERNAL_SOURCES,
+  strict_deps=True,
 )
 
 junit_tests(

@@ -13,6 +13,7 @@ scala_library(
   ],
   fatal_warnings=True,
   sources=rglobs('com/twitter/finagle/exp/*.scala'),
+  strict_deps=True,
 )
 
 benchmark(name='benchmark',
