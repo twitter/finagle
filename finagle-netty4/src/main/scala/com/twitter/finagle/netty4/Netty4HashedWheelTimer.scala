@@ -6,9 +6,8 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.netty4.util.Netty4Timer
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Time, Try}
+import com.twitter.util.{Duration, Time}
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Configures `ticksPerWheel` on the singleton instance of `Netty4Timer`.
@@ -28,16 +27,12 @@ private object timerTickDuration extends GlobalFlag[Duration](
  * A default instance of Netty timer that needs to be shared between [[Netty4HashedWheelTimer]]
  * object (used in protocols) and instances (service-loaded).
  *
- * @note We override `maxPendingTimeouts` just to the maximum possible value just to make
- *       Netty's timer maintain its internal `pendingTimeouts` counter. We wont' need it
- *       after https://github.com/netty/netty/pull/6682 is merged.
  */
 private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
   new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */true),
   timerTickDuration().inMilliseconds, TimeUnit.MILLISECONDS,
   timerTicksPerWheel(),
-  /*leakDetection = */false,
-  /*maxPendingTimeouts = */Long.MaxValue) { self =>
+  /*leakDetection = */false) { self =>
 
   private[this] val statsPollInterval = 10.seconds
 
@@ -60,16 +55,8 @@ private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
   private object pendingTasksStat extends io.netty.util.TimerTask {
     private[this] val pendingTasks = FinagleStatsReceiver.stat("timer", "pending_tasks")
 
-    // This represents HashedWheelTimer's private field `pendingTimeouts`.
-    // We can remove when https://github.com/netty/netty/pull/6682 is available.
-    private[this] val pendingTimeouts: Try[AtomicLong] = Try {
-      val field = classOf[io.netty.util.HashedWheelTimer].getDeclaredField("pendingTimeouts")
-      field.setAccessible(true)
-      field.get(self).asInstanceOf[AtomicLong]
-    }
-
     def run(timeout: io.netty.util.Timeout): Unit = {
-      pendingTimeouts.foreach(pt => pendingTasks.add(pt.get()))
+      pendingTasks.add(self.pendingTimeouts)
       self.newTimeout(pendingTasksStat, statsPollInterval.inSeconds, TimeUnit.SECONDS)
     }
   }
