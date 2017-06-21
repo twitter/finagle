@@ -10,7 +10,7 @@ import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
@@ -155,7 +155,7 @@ class EndToEndTest extends FunSuite
         .dest(dest)
         .build()
       val thriftBuilder = ClientBuilder()
-        .codec(ThriftClientFramedCodec(Some(clientId)).protocolFactory(pf))
+        .stack(Thrift.client.withProtocolFactory(pf).withClientId(clientId))
         .hostConnectionLimit(1)
         .dest(dest)
         .build()

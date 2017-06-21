@@ -1,7 +1,6 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.Thrift.ThriftImpl
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.tracing.{BufferingTracer, DefaultTracer, Trace}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -54,7 +53,7 @@ trait ThriftTest { self: FunSuite =>
 
   private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
     val server = ServerBuilder()
-      .codec(ThriftServerFramedCodec(protocolFactory))
+      .stack(Thrift.server.withProtocolFactory(protocolFactory))
       .bindTo(new InetSocketAddress(loopback, 0))
       .name("thriftserver")
       .tracer(DefaultTracer)
@@ -73,8 +72,14 @@ trait ThriftTest { self: FunSuite =>
     clientIdOpt: Option[ClientId]
   ) => new {
     val serviceFactory = ClientBuilder()
+        .stack {
+          val base = Thrift.client.withProtocolFactory(protocolFactory)
+          clientIdOpt match {
+            case Some(id) => base.withClientId(id)
+            case None => base
+          }
+        }
       .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
-      .codec(ThriftClientFramedCodec(clientIdOpt).protocolFactory(protocolFactory))
       .name("thriftclient")
       .hostConnectionLimit(2)
       .tracer(DefaultTracer)
@@ -87,11 +92,10 @@ trait ThriftTest { self: FunSuite =>
     }
   }
 
-  private def newAPIServer(impl: ThriftImpl): NewServer =
+  private def newAPIServer(): NewServer =
     (protocolFactory: TProtocolFactory) => new {
     val server = Thrift.server
       .withLabel("thriftserver")
-      .configured(impl)
       .withProtocolFactory(protocolFactory)
       .serveIface("localhost:*", processor)
     val boundAddr = server.boundAddress
@@ -101,7 +105,7 @@ trait ThriftTest { self: FunSuite =>
     }
   }
 
-  private def newAPIClient(impl: ThriftImpl): NewClient = (
+  private def newAPIClient(): NewClient = (
     protocolFactory: TProtocolFactory,
     addr: SocketAddress,
     clientIdOpt: Option[ClientId]
@@ -113,7 +117,6 @@ trait ThriftTest { self: FunSuite =>
       }
 
       thrift
-        .configured(impl)
         .newIface[Iface](
           Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
           "thriftclient")
@@ -144,12 +147,12 @@ trait ThriftTest { self: FunSuite =>
 
   private val clients = Map[String, NewClient](
     "builder" -> newBuilderClient,
-    "api" -> newAPIClient(Thrift.ThriftImpl.param.default)
+    "api" -> newAPIClient()
   )
 
   private val servers = Map[String, NewServer](
     "builder" -> newBuilderServer,
-    "api" -> newAPIServer(Thrift.ThriftImpl.param.default)
+    "api" -> newAPIServer()
   )
 
   /** Invoke this in your test to run all defined thrift tests */

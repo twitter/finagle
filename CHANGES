@@ -38,6 +38,10 @@ Breaking API Changes
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``
 
+  * finagle-thrift: The Netty3 thrift implementation has been removed.
+    ``PHAB_ID=D63670``
+
+
 6.45.0
 ------
 

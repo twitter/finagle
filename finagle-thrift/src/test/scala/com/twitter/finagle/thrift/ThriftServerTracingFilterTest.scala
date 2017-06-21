@@ -5,15 +5,12 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType}
-import org.junit.runner.RunWith
 import org.mockito.Matchers
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
-class ThriftServerFramedCodecTest extends FunSuite with MockitoSugar {
+class ThriftServerTracingFilterTest extends FunSuite with MockitoSugar {
   val protocolFactory = new TBinaryProtocol.Factory()
 
   test("ThriftServerTracingFilter read header correctly") {
