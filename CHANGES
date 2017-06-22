@@ -35,6 +35,9 @@ Breaking API Changes
   * finagle-core: Remove the ability to set a global address sort. This is no longer
     necessary as setting this per client is sufficient. ``PHAB_ID=D60698``
 
+  * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
+    ``PHAB_ID=D63970``
+
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``
 

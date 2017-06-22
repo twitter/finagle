@@ -69,7 +69,10 @@ class PoolingReadRepairClient(allClients: Seq[BaseClient[Buf]],
     buf.toSeq
   }
 
-  def release() = allClients.map(_.release())
+  def close(deadline: Time): Future[Unit] =
+    Closable.all(allClients: _*).close(deadline)
+
+  def release(): Unit = allClients.map(_.release())
   def set(key: String, flags: Int, expiry: Time, value: Buf) = {
     val futures = allClients.map(_.set(key, flags, expiry, value))
     val base = futures.head
