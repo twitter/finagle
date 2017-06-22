@@ -240,11 +240,9 @@ object Http extends Client[Request, Response] with HttpRichClient
      * number of uncompressed bytes of header name/values.
      * These may be set independently via the .configured API.
      */
-    def withMaxHeaderSize(size: StorageUnit): Client = {
-      this
-        .configured(http.param.MaxHeaderSize(size))
-        .configured(http2.param.MaxHeaderListSize(Some(size)))
-    }
+    def withMaxHeaderSize(size: StorageUnit): Client = this
+      .configured(http.param.MaxHeaderSize(size))
+      .configured(http2.param.MaxHeaderListSize(Some(size)))
 
     /**
      * Configures the maximum initial line length the client can
@@ -410,6 +408,16 @@ object Http extends Client[Request, Response] with HttpRichClient
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
+
+    /**
+     * For HTTP1*, configures the max size of headers
+     * For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
+     * number of uncompressed bytes of header name/values.
+     * These may be set independently via the .configured API.
+     */
+    def withMaxHeaderSize(size: StorageUnit): Server = this
+      .configured(http.param.MaxHeaderSize(size))
+      .configured(http2.param.MaxHeaderListSize(Some(size)))
 
     /**
      * Configures the maximum request size this server can receive.
