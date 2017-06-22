@@ -1,15 +1,12 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle.Init
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.util.ByteArrays
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw, Time, Try}
+import com.twitter.util._
 import java.net.InetSocketAddress
 import scala.util.Random
-
-object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
 
 /**
  * This is a tracing system similar to Dapper:
@@ -32,10 +29,10 @@ object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
  */
 object Trace {
   private case class TraceCtx(terminal: Boolean, tracers: List[Tracer]) {
-    def withTracer(tracer: Tracer) = copy(tracers=tracer :: this.tracers)
-    def withTerminal(terminal: Boolean) =
+    def withTracer(tracer: Tracer): TraceCtx = copy(tracers = tracer :: this.tracers)
+    def withTerminal(terminal: Boolean): TraceCtx =
       if (terminal == this.terminal) this
-      else copy(terminal=terminal)
+      else copy(terminal = terminal)
   }
 
   private object TraceCtx {
@@ -234,12 +231,21 @@ object Trace {
    * service handling code inside this to get proper tracing with all
    * the correct fields filled in.
    */
-  def traceService[T](service: String, rpc: String, hostOpt: Option[InetSocketAddress]=None)(f: => T): T = {
+  def traceService[T](
+    service: String,
+    rpc: String,
+    hostOpt: Option[InetSocketAddress] = None
+  )(
+    f: => T
+  ): T = {
     Trace.letId(Trace.nextId) {
       Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordServiceName(service)
       Trace.recordRpc(rpc)
-      hostOpt.map { Trace.recordServerAddr(_) }
+      hostOpt match {
+        case Some(addr) => Trace.recordServerAddr(addr)
+        case None =>
+      }
       Trace.record(Annotation.ServerRecv())
       try f finally {
         Trace.record(Annotation.ServerSend())
@@ -276,8 +282,6 @@ object Trace {
    * tracers in the stack.
    */
   def record(rec: => Record): Unit = {
-    if (debugTrace())
-      System.err.println(rec)
     if (isActivelyTracing)
       uncheckedRecord(rec)
   }
@@ -311,15 +315,11 @@ object Trace {
     * Convenience methods that construct records of different kinds.
     */
   def record(ann: Annotation): Unit = {
-    if (debugTrace())
-      System.err.println(Record(id, Time.now, ann, None))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, None))
    }
 
   def record(ann: Annotation, duration: Duration): Unit = {
-    if (debugTrace())
-      System.err.println(Record(id, Time.now, ann, Some(duration)))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
   }

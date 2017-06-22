@@ -35,6 +35,10 @@ Breaking API Changes
   * finagle-core: Remove the ability to set a global address sort. This is no longer
     necessary as setting this per client is sufficient. ``PHAB_ID=D60698``
 
+  * finagle-core: Remove global flag `com.twitter.finagle.tracing.debugTrace`.
+    This functionality is better suited as a concrete `Tracer` implementation instead
+    of mixed into the generic code. ``PHAB_ID=D63252``
+
   * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
     ``PHAB_ID=D63970``
 
