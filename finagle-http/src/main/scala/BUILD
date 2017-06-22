@@ -26,4 +26,7 @@ scala_library(
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   strict_deps=True,
+  exports=[
+    'finagle/finagle-base-http',
+  ],
 )
