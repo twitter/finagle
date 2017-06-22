@@ -101,7 +101,7 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 
   /** $partitioned */
   def newRichClient(dest: String): memcached.Client = {
-    val (n, l) = Resolver.evalLabeled(dest)
+    val (n, l) = evalLabeledDest(dest)
     newTwemcacheClient(n, l)
   }
 
@@ -110,9 +110,24 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 
   /** $partitioned */
   def newTwemcacheClient(dest: String): TwemcacheClient = {
-    val (n, l) = Resolver.evalLabeled(dest)
+    val (n, l) = evalLabeledDest(dest)
     newTwemcacheClient(n, l)
   }
+
+  private def evalLabeledDest(dest: String): (Name, String) = {
+    val _dest = if (LocalMemcached.enabled) {
+      mkDestination("localhost", LocalMemcached.port)
+    } else dest
+    Resolver.evalLabeled(_dest)
+  }
+
+  /**
+    * The memcached client should be using fixed hosts that do not change
+    * IP addresses. Force usage of the FixedInetResolver to prevent spurious
+    * DNS lookups and polling.
+    */
+  private def mkDestination(hostName: String, port: Int): String =
+    s"${FixedInetResolver.scheme}!$hostName:$port"
 }
 
 /**
