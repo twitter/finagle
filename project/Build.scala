@@ -32,6 +32,8 @@ object Finagle extends Build {
     "io.netty" % "netty-handler" % netty4Version,
     "io.netty" % "netty-transport" % netty4Version,
     "io.netty" % "netty-transport-native-epoll" % netty4Version classifier "linux-x86_64",
+    // this package is a dep of native-epoll above, explicitly add this for coursier plugin
+    "io.netty" % "netty-transport-native-unix-common" % netty4Version,
     "io.netty" % "netty-handler-proxy" % netty4Version
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
