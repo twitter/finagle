@@ -2,7 +2,6 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.metrics._
 import com.twitter.common.stats.{Statistics, ApproximateHistogram}
-import com.twitter.util.events.Sink
 
 object ImmediateMetricsStatsReceiver {
   def newHistogramInterface(name: String): HistogramInterface = {
@@ -50,7 +49,7 @@ object ImmediateMetricsStatsReceiver {
  * Any value added is immediately aggregated in the result.
  */
 class ImmediateMetricsStatsReceiver(registry: Metrics)
-  extends MetricsStatsReceiver(registry, Sink.default, ImmediateMetricsStatsReceiver.newHistogramInterface) {
+  extends MetricsStatsReceiver(registry, ImmediateMetricsStatsReceiver.newHistogramInterface) {
 
   def this() = this(MetricsStatsReceiver.defaultRegistry)
 }

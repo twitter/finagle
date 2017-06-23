@@ -45,9 +45,20 @@ Breaking API Changes
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``
 
+  * finagle-stats: `c.t.f.stats.MetricsStatsReceiver` no longer has constructor variants
+    which take a `c.t.u.events.Sink` as util-events is now deprecated. ``PHAB_ID=D64437``
+
   * finagle-thrift: The Netty3 thrift implementation has been removed.
     ``PHAB_ID=D63670``
 
+  * finagle-zipkin-core: `c.t.f.zipkin.core.SamplingTracer` no longer has constructor
+    which takes a `c.t.u.events.Sink` as util-events is now deprecated. ``PHAB_ID=D64437``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-stats, finagle-zipkin-core: No longer publishing `c.t.u.events` as util-events
+    is now deprecated. ``PHAB_ID=D64437``
 
 6.45.0
 ------

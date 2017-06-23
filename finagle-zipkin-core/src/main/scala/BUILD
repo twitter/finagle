@@ -13,7 +13,6 @@ scala_library(
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-thrift/src/main/java:java',
     'util/util-core/src/main/scala:scala',
-    'util/util-events/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),

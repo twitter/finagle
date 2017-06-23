@@ -22,7 +22,6 @@ scala_library(
     'scrooge/scrooge-core/src/main/scala',
     'util/util-app/src/main/scala',
     'util/util-core/src/main/scala',
-    'util/util-events/src/main/scala',
     'util/util-logging/src/main/scala',
     'util/util-stats/src/main/scala',
   ],

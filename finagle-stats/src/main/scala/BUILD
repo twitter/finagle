@@ -19,7 +19,6 @@ scala_library(
     'src/java/com/twitter/common/stats:util',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
-    'util/util-events/src/main/scala:scala',
     'util/util-lint/src/main/scala:scala',
     'util/util-logging',
     'util/util-registry',
