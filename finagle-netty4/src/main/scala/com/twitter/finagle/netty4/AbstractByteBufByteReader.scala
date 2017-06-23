@@ -4,6 +4,7 @@ import com.twitter.io.{Buf, ByteReader}
 import com.twitter.io.ByteReader.UnderflowException
 import java.lang.{Double => JDouble, Float => JFloat}
 import io.netty.buffer.ByteBuf
+import java.nio.charset.Charset
 
 /**
  * Abstract implementation of `ByteReader` that wraps the Netty 4 `ByteBuf` type.
@@ -28,6 +29,13 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
   final def remaining: Int = bb.readableBytes()
 
   final def remainingUntil(byte: Byte): Int = bb.bytesBefore(byte)
+
+  final def readString(numBytes: Int, charset: Charset): String = {
+    checkRemaining(numBytes)
+    val result = bb.toString(bb.readerIndex, numBytes, charset)
+    bb.readerIndex(bb.readerIndex + numBytes)
+    result
+  }
 
   final def readByte(): Byte = {
     checkRemaining(1)
