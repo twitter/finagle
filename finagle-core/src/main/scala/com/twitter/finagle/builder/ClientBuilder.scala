@@ -3,20 +3,19 @@ package com.twitter.finagle.builder
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient}
+import com.twitter.finagle.client.{DefaultPool, StackClient}
 import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.BindingFactory
-import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.tracing.{NullTracer, TraceInitializerFilter}
+import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util
@@ -25,7 +24,6 @@ import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
-import org.jboss.netty.channel.Channel
 import scala.annotation.{implicitNotFound, varargs}
 
 /**
@@ -1378,92 +1376,4 @@ private[finagle] object ClientBuilderClient {
       }
     }
   }
-}
-
-/**
- * A [[com.twitter.finagle.client.StackClient]] based on a
- * [[com.twitter.finagle.Codec]].
- */
-private case class CodecClient[Req, Rep](
-    codecFactory: CodecFactory[Req, Rep]#Client,
-    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-    params: Stack.Params = ClientConfig.DefaultParams)
-  extends StackClient[Req, Rep] {
-  import com.twitter.finagle.param._
-
-  def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(params = ps)
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(stack = stack)
-
-  def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
-    val codec = codecFactory(ClientCodecConfig(label))
-
-    val prepConn = new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
-      def parameters: Seq[Stack.Param[_]] = Nil
-      val role: Stack.Role = StackClient.Role.prepConn
-      val description = "Connection preparation phase as defined by a Codec"
-      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-        val Stats(stats) = ps[Stats]
-        val underlying = codec.prepareConnFactory(next, ps)
-        new ServiceFactoryProxy(underlying) {
-          private val stat = stats.stat("codec_connection_preparation_latency_ms")
-          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
-            val begin = Time.now
-            super.apply(conn) ensure {
-              stat.add((Time.now - begin).inMilliseconds)
-            }
-          }
-        }
-      }
-    }
-
-    val clientStack = {
-      val stack0 = stack
-        .replace(StackClient.Role.prepConn, prepConn)
-        .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req, Rep]) =>
-        codec.prepareServiceFactory(next))
-        .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
-
-      // disable failFast if the codec requests it or it is
-      // disabled via the ClientBuilder parameter.
-      val FailFast(failFast) = params[FailFast]
-      if (!codec.failFastOk || !failFast) stack0.remove(FailFastFactory.role) else stack0
-    }
-
-    case class Client(
-      stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
-      params: Stack.Params = params
-    ) extends StdStackClient[Req, Rep, Client] {
-      protected def copy1(
-        stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
-        params: Stack.Params = this.params): Client = copy(stack, params)
-
-      protected type In = Any
-      protected type Out = Any
-
-      protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
-        val Stats(stats) = params[Stats]
-        val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
-        Netty3Transporter[Any, Any](codec.pipelineFactory, addr,
-          params + Netty3Transporter.TransportFactory(newTransport))
-      }
-
-      protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep] =
-        codec.newClientDispatcher(transport, params)
-    }
-
-    val proto = params[ProtocolLibrary]
-
-    // don't override a configured protocol value
-    val clientParams =
-      if (proto != ProtocolLibrary.param.default) params
-      else params + ProtocolLibrary(codec.protocolLibraryName)
-
-    Client(
-      stack = clientStack,
-      params = clientParams
-    ).newClient(dest, label)
-  }
-
-  // not called
-  def newService(dest: Name, label: String): Service[Req, Rep] = ???
 }

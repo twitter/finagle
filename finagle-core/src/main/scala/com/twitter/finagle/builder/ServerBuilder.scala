@@ -5,13 +5,12 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, StackBasedServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
   ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
@@ -270,47 +269,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Server
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    stack({ ps =>
-      val Label(label) = ps[Label]
-      val BindTo(addr) = ps[BindTo]
-      val Stats(stats) = ps[Stats]
-      val codec = codecFactory(ServerCodecConfig(label, addr))
-
-
-      val newStack = StackServer.newStack[Req1, Rep1].replace(
-        StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
-          codec.prepareConnFactory(next, ps + Stats(stats.scope(label)))
-      ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
-
-      case class Server(
-        stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
-        params: Stack.Params = ps
-      ) extends StdStackServer[Req1, Rep1, Server] {
-        protected type In = Any
-        protected type Out = Any
-
-        protected def copy1(
-          stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
-          params: Stack.Params = this.params
-        ) = copy(stack, params)
-
-        protected def newListener(): Listener[Any, Any] =
-          Netty3Listener(codec.pipelineFactory, params)
-
-        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) =
-          codec.newServerDispatcher(transport, service)
-      }
-
-      val proto = ps[ProtocolLibrary]
-      val serverParams =
-        if (proto != ProtocolLibrary.param.default) ps
-        else ps + ProtocolLibrary(codec.protocolLibraryName)
-
-      Server(
-        stack = newStack,
-        params = serverParams
-      )
-    })
+    stack(CodecServer[Req1, Rep1](codecFactory))
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
