@@ -39,6 +39,12 @@ Breaking API Changes
     This functionality is better suited as a concrete `Tracer` implementation instead
     of mixed into the generic code. ``PHAB_ID=D63252``
 
+  * finagle-core: ``PHAB_ID=D63526``
+
+    - `ClientBuilder.codec` and `ServerBuilder.codec` have been removed. Use `.stack` instead.
+    - `ClientBuilder.channelFactory` and `ServerBuilder.channelFactory` have been removed.
+       Use `.stack` instead.
+
   * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
     ``PHAB_ID=D63970``
 

@@ -45,13 +45,13 @@ class StackTest extends FunSuite {
   test("ClientBuilder: Status.busy propagates from failAccrual to the top of the stack") {
     new TestCtx {
       val server = ServerBuilder()
-        .codec(StringCodec)
+        .stack(stringServer)
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(failService)
 
       val client = ClientBuilder()
-        .codec(StringCodec)
+        .stack(stringClient)
         .failureAccrualParams((5, 1.minute))
         .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)

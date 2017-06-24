@@ -10,8 +10,6 @@ import org.junit.Test;
 import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
-import com.twitter.finagle.client.StackClient;
-import com.twitter.finagle.client.StackClient$;
 import com.twitter.finagle.client.Transporter;
 import com.twitter.finagle.factory.TimeoutFactory;
 import com.twitter.finagle.filter.MaskCancelFilter;
@@ -22,7 +20,6 @@ import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
 import com.twitter.finagle.loadbalancer.WhenNoNodesOpens;
 import com.twitter.finagle.naming.BindingFactory;
-import com.twitter.finagle.netty3.Netty3Transporter;
 import com.twitter.finagle.param.ExceptionStatsHandler;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
@@ -56,8 +53,8 @@ public class StackParamCompilationTest {
 
   @Test
   public void testParams() {
-    StackClient<String, String> client =
-      ClientBuilder.<String, String>stackClientOfCodec(null)
+    ClientBuilder<?, ?, ?, ?, ?> client =
+      ClientBuilder.get()
         .configured(new Label("").mk())
         .configured(new Timer(DefaultTimer.getInstance()).mk())
         .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
@@ -92,7 +89,6 @@ public class StackParamCompilationTest {
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
         .configured(new LoadBalancerFactory.WhenNoNodesOpenParam(
             WhenNoNodesOpens.FAIL_FAST).mk())
-        .configured(new Netty3Transporter.ChannelFactory(null).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
           .configured(new FailFastFactory.FailFast(true).mk())
@@ -121,8 +117,7 @@ public class StackParamCompilationTest {
         .configured(new Transport.ClientSsl(
           Option.<SslClientConfiguration>empty()).mk())
         .configured(new Transport.ServerSsl(
-          Option.<SslServerConfiguration>empty()).mk())
-        .configuredParams(StackClient$.MODULE$.defaultParams());
+          Option.<SslServerConfiguration>empty()).mk());
 
     ClientBuilder.get().failFast(true);
   }

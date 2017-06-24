@@ -2,19 +2,20 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.{Deadline, Contexts}
+import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class StackServerTest extends FunSuite {
+class StackServerTest extends FunSuite with StringServer {
   test("Deadline isn't changed until after it's recorded") {
     val echo = ServiceFactory.const(Service.mk[Unit, Deadline] { unit =>
       Future.value(Contexts.broadcast(Deadline))
@@ -37,7 +38,7 @@ class StackServerTest extends FunSuite {
     }
   }
 
-  test("uses ExpiringService") {
+  test("StackServer uses ExpiringService") {
     @volatile var closed = false
     val connSF = new ServiceFactory[Int, Int] {
       val svc = Service.mk[Int, Int] { i => Future.value(i) }
@@ -76,5 +77,19 @@ class StackServerTest extends FunSuite {
       timer.tick()
       assert(closed)
     }
+  }
+
+  test("StackServer added to server registry") {
+    ServerRegistry.clear()
+    val name = "testServer"
+    val s = Service.const[String](Future.value("foo"))
+    val server = stringServer.withLabel(name).serve(new InetSocketAddress(0), s)
+
+    assert(ServerRegistry.registrants.count { e: StackRegistry.Entry =>
+      val param.Label(actual) = e.params[param.Label]
+      name == actual
+    } == 1)
+
+    Await.ready(server.close(), 10.seconds)
   }
 }

@@ -58,32 +58,6 @@ object ClientBuilder {
   def safeBuildFactory[Req, Rep](builder: Complete[Req, Rep]): ServiceFactory[Req, Rep] =
     builder.buildFactory()(ClientConfigEvidence.FullyConfigured)
 
-  /**
-   * Returns a [[com.twitter.finagle.client.StackClient]] which is equivalent to a
-   * `ClientBuilder` configured with the same codec; that is, given
-   * {{{
-   *   val cb = ClientBuilder()
-   *     .dest(dest)
-   *     .name(name)
-   *     .codec(codec)
-   *
-   *   val sc = ClientBuilder.stackClientOfCodec(codec)
-   * }}}
-   * then the following are equivalent
-   * {{{
-   *   cb.build()
-   *   sc.newService(dest, name)
-   * }}}
-   * and the following are also equivalent
-   * {{{
-   *   cb.buildFactory()
-   *   sc.newClient(dest, name)
-   * }}}
-   */
-  def stackClientOfCodec[Req, Rep](
-    codecFactory: CodecFactory[Req, Rep]#Client
-  ): StackClient[Req, Rep] =
-    ClientBuilderClient(CodecClient[Req, Rep](codecFactory))
 }
 
 object ClientConfig {
@@ -172,7 +146,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *
  * {{{
  * val client = ClientBuilder()
- *   .codec(Http)
+ *   .stack(Http.client)
  *   .hosts("localhost:10000,localhost:10001,localhost:10003")
  *   .hostConnectionLimit(1)
  *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
@@ -181,7 +155,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *   .build()
  * }}}
  *
- * The `ClientBuilder` requires the definition of `cluster`, `codec`,
+ * The `ClientBuilder` requires the definition of `cluster`, `stack`,
  * and `hostConnectionLimit`. In Scala, these are statically type
  * checked, and in Java the lack of any of the above causes a runtime
  * error.
@@ -196,7 +170,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * Service<HttpRequest, HttpResponse> service =
  *  ClientBuilder.safeBuild(
  *    ClientBuilder.get()
- *      .codec(new Http())
+ *      .stack(Http.client())
  *      .hosts("localhost:10000,localhost:10001,localhost:10003")
  *      .hostConnectionLimit(1)
  *      .tcpConnectTimeout(1.second)
@@ -464,64 +438,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def loadBalancer(loadBalancer: LoadBalancerFactory): This =
     configured(LoadBalancerFactory.Param(loadBalancer))
-
-  /**
-   * Specify the codec. The codec implements the network protocol
-   * used by the client, and consequently determines the `Req` and `Rep`
-   * type variables. One of the codec variations is required.
-   *
-   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ClientBuilder().stack(Http.client)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codec: Codec[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    this.codec(Function.const(codec)(_))
-
-  /**
-   * A variation of `codec` that supports codec factories.  This is
-   * used by codecs that need dynamic construction, but should be
-   * transparent to the user.
-   *
-   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ClientBuilder().stack(Http.client)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codecFactory: CodecFactory[Req1, Rep1]
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
-    this.codec(codecFactory.client)
-
-  /**
-   * A variation of codec for codecs that support only client-codecs.
-   *
-   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ClientBuilder().stack(Http.client)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codecFactory: CodecFactory[Req1, Rep1]#Client
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] = {
-    // in order to know the protocol library name, we need to produce
-    // a throw-away codec. given that the codec API is on its way out
-    // in favor of Stack, this is a reasonable compromise.
-    val codec = codecFactory(ClientCodecConfig("ClientBuilder protocolLibraryName"))
-    copy(CodecClient[Req1, Rep1](codecFactory).withParams(params))
-      .configured(ProtocolLibrary(codec.protocolLibraryName))
-  }
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used

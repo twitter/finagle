@@ -2,12 +2,9 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{StringClient, DefaultPool}
-import com.twitter.finagle.context.RemoteInfo
-import com.twitter.finagle.integration.StringCodec
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.client.{DefaultPool, StringClient}
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.service.{Retries, RetryPolicy}
+import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
@@ -179,7 +176,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .codec(StringCodec)
+      .stack(stringServer)
       .bindTo(address)
       .name("FinagleServer")
       .build(never)
@@ -189,7 +186,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("client")
         .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-        .codec(StringCodec)
+        .stack(stringClient)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
         .hostConnectionLimit(1)
@@ -218,7 +215,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("client")
         .addrs(Address.failing)
-        .codec(StringCodec)
+        .stack(stringClient)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
         .hostConnectionLimit(1)
@@ -255,7 +252,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .codec(StringCodec)
+      .stack(stringServer)
       .bindTo(address)
       .name("FinagleServer")
       .build(always)
@@ -265,7 +262,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("testClient")
         .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-        .codec(StringCodec)
+        .stack(stringClient)
         .hostConnectionLimit(1)
         .reportTo(mem)
         .retries(1)
@@ -277,43 +274,6 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
 
     Await.result(client("ping"), 10.second)
-    Await.ready(server.close(), 1.second)
-
-    val requests = mem.counters(Seq("testClient", "requests"))
-    val triesRequests = mem.counters(Seq("testClient", "tries", "requests"))
-
-    assert(requests == 1)
-    assert(triesRequests == 1)
-
-    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
-    Await.ready(client.close(), 1.second)
-  }
-
-  test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
-    val always = new Service[String, String] {
-      def apply(request: String) = Future.value("pong")
-    }
-    val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = ServerBuilder()
-      .codec(StringCodec)
-      .bindTo(address)
-      .name("FinagleServer")
-      .build(always)
-
-    val mem = new InMemoryStatsReceiver
-    val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
-    val client = ClientBuilder.stackClientOfCodec(StringCodec.client)
-      .configured(DefaultPool.Param(
-        /* low        */ 1,
-        /* high       */ 1,
-        /* bufferSize */ 0,
-        /* idleTime   */ 5.seconds,
-        /* maxWaiters */ 1))
-      .configured(Stats(mem))
-      .configured(Retries.Policy(RetryPolicy.tries(1)))
-      .newService(Name.bound(addr), "testClient")
-
-    Await.result(client("ping"), 1.second)
     Await.ready(server.close(), 1.second)
 
     val requests = mem.counters(Seq("testClient", "requests"))
