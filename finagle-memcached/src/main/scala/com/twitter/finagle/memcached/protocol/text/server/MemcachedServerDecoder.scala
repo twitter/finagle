@@ -2,14 +2,14 @@ package com.twitter.finagle.memcached.protocol.text.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text.{Decoding, TokensWithData, Tokens}
 import com.twitter.finagle.memcached.util.Bufs.RichBuf
-import com.twitter.finagle.memcached.util.ParserUtils
+import com.twitter.finagle.memcached.util.ParserUtils.isDigits
 import com.twitter.io.Buf
 import com.twitter.util.Time
+import scala.collection.immutable
 import scala.Function.tupled
 
-object DecodingToCommand {
+object MemcachedServerDecoder {
   private val NOREPLY = Buf.Utf8("noreply")
   private val SET     = Buf.Utf8("set")
   private val ADD     = Buf.Utf8("add")
@@ -24,23 +24,25 @@ object DecodingToCommand {
   private val QUIT    = Buf.Utf8("quit")
   private val STATS   = Buf.Utf8("stats")
   private val CAS     = Buf.Utf8("cas")
-}
-
-abstract class AbstractDecodingToCommand[C] {
-  import ParserUtils._
 
   // Taken from memcached.c
-  private val RealtimeMaxdelta = 60*60*24*30
+  private[this] val RealtimeMaxdelta = 60*60*24*30
 
-  def decode(decoding: Decoding): C = decoding match {
-    case Tokens(tokens) => parseNonStorageCommand(tokens)
-    case TokensWithData(tokens, data, casUnique) => parseStorageCommand(tokens, data, casUnique)
-    case other => throw new IllegalArgumentException(
-      s"Expecting `Tokens` or `TokensWithData`, got $other")
+  private def validateArithmeticCommand(tokens: Seq[Buf]) = {
+    if (tokens.size < 2) throw new ClientError("Too few arguments")
+    if (tokens.size == 3 && tokens.last != NOREPLY) throw new ClientError("Too many arguments")
+    if (!isDigits(tokens(1))) throw new ClientError("Delta is not a number")
+
+    (tokens.head, tokens(1).toLong)
   }
 
-  protected def parseNonStorageCommand(tokens: Seq[Buf]): C
-  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): C
+  protected def validateDeleteCommand(tokens: Seq[Buf]): Buf = {
+    if (tokens.size < 1) throw new ClientError("No key")
+    if (tokens.size == 2 && !isDigits(tokens.last)) throw new ClientError("Timestamp is poorly formed")
+    if (tokens.size > 2) throw new ClientError("Too many arguments")
+
+    tokens.head
+  }
 
   protected def validateStorageCommand(tokens: Seq[Buf], data: Buf): (Buf, Int, Time, Buf) = {
     val expiry = getExpiry(tokens)
@@ -52,14 +54,6 @@ abstract class AbstractDecodingToCommand[C] {
     (tokens(0), tokens(1).toInt, expiry, data, casUnique)
   }
 
-  protected def validateDeleteCommand(tokens: Seq[Buf]): Buf = {
-    if (tokens.size < 1) throw new ClientError("No key")
-    if (tokens.size == 2 && !isDigits(tokens.last)) throw new ClientError("Timestamp is poorly formed")
-    if (tokens.size > 2) throw new ClientError("Too many arguments")
-
-    tokens.head
-  }
-
   private def getExpiry(tokens: Seq[Buf]): Time = {
     tokens(2).toInt match {
       case 0 => Time.epoch
@@ -69,20 +63,29 @@ abstract class AbstractDecodingToCommand[C] {
   }
 }
 
-class DecodingToCommand extends AbstractDecodingToCommand[Command] {
-  import DecodingToCommand._
-  import ParserUtils._
-
-  private[this] def validateArithmeticCommand(tokens: Seq[Buf]) = {
-    if (tokens.size < 2) throw new ClientError("Too few arguments")
-    if (tokens.size == 3 && tokens.last != NOREPLY) throw new ClientError("Too many arguments")
-    if (!isDigits(tokens(1))) throw new ClientError("Delta is not a number")
-
-    (tokens.head, tokens(1).toLong)
-  }
+private[memcached] class MemcachedServerDecoder(
+    storageCommands: immutable.Set[Buf])
+  extends ServerDecoder[Command](storageCommands) {
+  import MemcachedServerDecoder._
 
   private[this] def validateAnyStorageCommand(tokens: Seq[Buf]) {
     if (tokens.isEmpty) throw new ClientError("No arguments specified")
+  }
+
+  protected def parseNonStorageCommand(tokens: Seq[Buf]): Command = {
+    validateAnyStorageCommand(tokens)
+    val commandName = tokens.head
+    val args = tokens.tail
+    commandName match {
+      case GET     => Get(args)
+      case GETS    => Gets(args)
+      case DELETE  => Delete(validateDeleteCommand(args))
+      case INCR    => tupled(Incr)(validateArithmeticCommand(args))
+      case DECR    => tupled(Decr)(validateArithmeticCommand(args))
+      case QUIT    => Quit()
+      case STATS   => Stats(args)
+      case _       => throw new NonexistentCommand(Buf.slowHexString(commandName))
+    }
   }
 
   protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf]) = {
@@ -100,22 +103,6 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
         tupled(Cas)(validateCasCommand(args, data, casUniqueValue))
       }
       case _         => throw new NonexistentCommand(Buf.slowHexString(commandName))
-    }
-  }
-
-  protected def parseNonStorageCommand(tokens: Seq[Buf]) = {
-    validateAnyStorageCommand(tokens)
-    val commandName = tokens.head
-    val args = tokens.tail
-    commandName match {
-      case GET     => Get(args)
-      case GETS    => Gets(args)
-      case DELETE  => Delete(validateDeleteCommand(args))
-      case INCR    => tupled(Incr)(validateArithmeticCommand(args))
-      case DECR    => tupled(Decr)(validateArithmeticCommand(args))
-      case QUIT    => Quit()
-      case STATS   => Stats(args)
-      case _       => throw new NonexistentCommand(Buf.slowHexString(commandName))
     }
   }
 }

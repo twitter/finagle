@@ -7,43 +7,35 @@ import com.twitter.io.Buf
 import scala.collection.immutable
 
 private[memcached] object ServerDecoder {
-  private sealed trait State
-  private case object AwaitingCommand extends State
-  private case class AwaitingData(tokens: Seq[Buf], bytesNeeded: Int) extends State
+
+  private val NeedMoreData: Null = null
+
+  private def validateStorageCommand(tokens: Seq[Buf]) = {
+    if (tokens.size < 5) throw new ClientError("Too few arguments")
+    if (tokens.size > 6) throw new ClientError("Too many arguments")
+    if (!ParserUtils.isDigits(tokens(4))) throw new ClientError("Bad frame length")
+  }
 }
 
 /**
- * Decodes Buf-encoded Commands into Decodings. Used by the server.
+ * Decodes Buf-encoded Commands into Commands. Used by the server.
  *
  * @note Class contains mutable state. Not thread-safe.
  */
-private[finagle] class ServerDecoder(storageCommands: immutable.Set[Buf]) extends Decoder[Decoding] {
+private[finagle] abstract class ServerDecoder[R >: Null](
+    storageCommands: immutable.Set[Buf])
+  extends Decoder[R] {
   import ServerDecoder._
+
+  /** Type that represents a complete cache value */
+  protected type Value
+
+  private sealed trait State
+  private case object AwaitingCommand extends State
+  private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int) extends State
 
   private[this] val byteArrayForBuf2Int = ParserUtils.newByteArrayForBuf2Int()
   private[this] var state: State = AwaitingCommand
-
-  def decode(buffer: Buf): Decoding =
-    state match {
-      case AwaitingCommand =>
-        Decoder.decodeLine(buffer, needsData, awaitData) { tokens =>
-          Tokens(tokens)
-        }
-      case AwaitingData(tokens, bytesNeeded) =>
-        Decoder.decodeData(bytesNeeded, buffer) { data =>
-          state = AwaitingCommand
-
-          val commandName = tokens.head
-          if (commandName.equals(Buf.Utf8("cas"))) // cas command
-            TokensWithData(tokens.slice(0, 5), data, Some(tokens(5)))
-          else // other commands
-            TokensWithData(tokens, data)
-        }
-    }
-
-  private[this] def awaitData(tokens: Seq[Buf], bytesNeeded: Int) {
-    state = AwaitingData(tokens, bytesNeeded)
-  }
 
   private[this] def needsData(tokens: Seq[Buf]): Int = {
     val commandName = tokens.head
@@ -55,9 +47,32 @@ private[finagle] class ServerDecoder(storageCommands: immutable.Set[Buf]) extend
     } else -1
   }
 
-  private[this] def validateStorageCommand(tokens: Seq[Buf]) = {
-    if (tokens.size < 5) throw new ClientError("Too few arguments")
-    if (tokens.size > 6) throw new ClientError("Too many arguments")
-    if (!ParserUtils.isDigits(tokens(4))) throw new ClientError("Bad frame length")
-  }
+  /** Parse a sequence of tokens into a command */
+  protected def parseNonStorageCommand(tokens: Seq[Buf]): R
+
+  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): R
+
+  def decode(buffer: Buf): R =
+    state match {
+      case AwaitingCommand =>
+        val tokens = ParserUtils.splitOnWhitespace(buffer)
+        val dataBytes = needsData(tokens)
+        if (dataBytes == -1) {
+          parseNonStorageCommand(tokens)
+        } else {
+          // We are waiting for data next
+          state = AwaitingData(Nil, tokens, dataBytes)
+          NeedMoreData
+        }
+      case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
+        // The framer should have given us the right sized Buf
+        assert(buffer.length == bytesNeeded)
+        state = AwaitingCommand
+
+        val commandName = tokens.head
+        if (commandName.equals(Buf.Utf8("cas"))) // cas command
+          parseStorageCommand(tokens.slice(0, 5), buffer, Some(tokens(5)))
+        else // other commands
+          parseStorageCommand(tokens, buffer, None)
+    }
 }

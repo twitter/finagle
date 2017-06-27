@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text.server
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.memcached.protocol.text.Decoding
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 import com.twitter.finagle.transport.Transport
@@ -17,16 +16,15 @@ private[finagle] class ServerTransport(
     underlying: Transport[Buf, Buf]
 ) extends Transport[Response, Command] {
 
-  private[this] val decoder = new ServerDecoder(StorageCommands)
-  private[this] val decodingToCommand = new DecodingToCommand
+  private[this] val decoder = new MemcachedServerDecoder(StorageCommands)
 
   // Decoding must be in a read loop because read() must return a response,
   // but we may get only get a partial message from the transport,
   // necessitating a further read.
   private[this] val decode: Buf => Future[Command] = buf => {
-    val decoding: Decoding = decoder.decode(buf)
-    if (decoding != null) {
-      Future.value(decodingToCommand.decode(decoding))
+    val command: Command = decoder.decode(buf)
+    if (command != null) {
+      Future.value(command)
     } else {
       readLoop()
     }

@@ -1,28 +1,20 @@
 package com.twitter.finagle.memcached.unit.protocol.text.server
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
-import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
+import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
+import com.twitter.finagle.memcached.protocol.text.server.MemcachedServerDecoder
 import com.twitter.finagle.memcached.protocol.{Set, Stats}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
-import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-@RunWith(classOf[JUnitRunner])
-class DecodingToCommandTest extends FunSuite {
+class MemcachedServerDecoderTest extends FunSuite with OneInstancePerTest {
 
-  class Context {
-    val decodingToCommand = new DecodingToCommand
-    case class ExpectedTimeTable(expireTime: Int, expirationTime: Time)
-  }
+  val decoder = new MemcachedServerDecoder(StorageCommands)
+  case class ExpectedTimeTable(expireTime: Int, expirationTime: Time)
 
   test("parseCommand SET with expire times") {
-    val context = new Context
-    import context._
-
     val key = "testKey"
     val flags = "0"
     val data = "Hello World"
@@ -38,12 +30,10 @@ class DecodingToCommandTest extends FunSuite {
         )
 
       forAll(expireTimeTableData) { (expectedTime: ExpectedTimeTable, allowedDelta: Duration) =>
-        val buffer = TokensWithData(
-          Seq("set", key, flags, expectedTime.expireTime.toString, dataSize).map(Buf.Utf8(_)),
-          Buf.Utf8(data),
-          None
-        )
-        val command = decodingToCommand.decode(buffer)
+        // first frame; decoding should return null because expecting data frame to follow
+        assert(
+          decoder.decode(Buf.Utf8(s"set $key $flags ${expectedTime.expireTime} $dataSize"))== null)
+        val command = decoder.decode(Buf.Utf8(data))
         assert(command.getClass == classOf[Set])
         val set = command.asInstanceOf[Set]
         assert(set.key == Buf.Utf8(key))
@@ -54,16 +44,12 @@ class DecodingToCommandTest extends FunSuite {
   }
 
   test("parseCommand STAT") {
-    val context = new Context
-    import context._
-
     Seq(None, Some("slabs"), Some("items")).foreach { arg =>
-      val cmd = arg match {
-        case None => Seq("stats") map { Buf.Utf8(_) }
-        case Some(s) => Seq("stats", s) map { Buf.Utf8(_) }
+      val buffer = arg match {
+        case None => Buf.Utf8("stats")
+        case Some(s) => Buf.Utf8(s"stats $s")
       }
-      val buffer = Tokens(cmd)
-      val command = decodingToCommand.decode(buffer)
+      val command = decoder.decode(buffer)
       assert(command.getClass == classOf[Stats])
       val stats = command.asInstanceOf[Stats]
       stats.args.headOption match {
@@ -72,5 +58,4 @@ class DecodingToCommandTest extends FunSuite {
       }
     }
   }
-
 }
