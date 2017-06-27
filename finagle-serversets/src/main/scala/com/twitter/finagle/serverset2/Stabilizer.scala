@@ -1,14 +1,10 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.concurrent.NamedPoolThreadFactory
-import com.twitter.conversions.time._
-import com.twitter.finagle.util.{HashedWheelTimer, TimerStats}
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.stats.{FinagleStatsReceiver, Stat}
 import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.util._
-import java.util.concurrent.TimeUnit
-import org.jboss.netty.{util => netty}
 
 /**
  * An Epoch is a Event that notifies its listener
@@ -31,33 +27,19 @@ private[serverset2] class Epoch(
 
 private[serverset2] object Stabilizer {
 
-  // Use our own timer to avoid doing work in the global timer's thread and causing timer deviation
-  // the notify() run each epoch can trigger some slow work.
-  // nettyHwt required to get TimerStats
-  private val nettyHwt = new netty.HashedWheelTimer(
-      new NamedPoolThreadFactory("finagle-serversets Stabilizer timer", true/*daemons*/),
-      HashedWheelTimer.TickDuration.inMilliseconds,
-      TimeUnit.MILLISECONDS,
-      HashedWheelTimer.TicksPerWheel)
-  private val epochTimer = HashedWheelTimer(nettyHwt)
+  private val epochTimer: Timer = new ScheduledThreadPoolTimer(
+    poolSize = 1,
+    new NamedPoolThreadFactory("finagle-serversets Stabilizer timer", /*makeDaemons = */true)
+  )
 
-  TimerStats.deviation(
-    nettyHwt,
-    10.milliseconds,
-    FinagleStatsReceiver.scope("zk2").scope("timer"))
-
-  TimerStats.hashedWheelTimerInternals(
-    nettyHwt,
-    () => 10.seconds,
-    FinagleStatsReceiver.scope("zk2").scope("timer"))
-
-  private val notifyMs = FinagleStatsReceiver.scope("serverset2").scope("stabilizer").stat("notify_ms")
+  private val notifyMs: Stat =
+    FinagleStatsReceiver.scope("serverset2").scope("stabilizer").stat("notify_ms")
 
   // Create an event of epochs for the given duration.
   def epochs(period: Duration): Epoch =
     new Epoch(
       new Event[Unit] {
-        def register(w: Witness[Unit]) = {
+        def register(w: Witness[Unit]): Closable = {
           epochTimer.schedule(period) {
             val elapsed = Stopwatch.start()
             w.notify(())
@@ -67,7 +49,6 @@ private[serverset2] object Stabilizer {
       },
       period
     )
-
 
   // Used for delaying removals
   private case class State(

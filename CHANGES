@@ -66,6 +66,9 @@ Runtime Behavior Changes
   * finagle-stats, finagle-zipkin-core: No longer publishing `c.t.u.events` as util-events
     is now deprecated. ``PHAB_ID=D64437``
 
+  * finagle-serversets: `Stabilizer` is no longer exporting `pending_tasks` and `deviation_ms`
+    stats. See `notify_ms` instead.  ``PHAB_ID=D65571``
+
 6.45.0
 ------
 
