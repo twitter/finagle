@@ -36,7 +36,6 @@ import com.twitter.finagle.service.Retries;
 import com.twitter.finagle.service.RetryBudgets;
 import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
-import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.client.SslClientConfiguration;
 import com.twitter.finagle.ssl.server.SslServerConfiguration;
 import com.twitter.finagle.stats.NullStatsReceiver;
@@ -70,9 +69,7 @@ public class StackParamCompilationTest {
           new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
         .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
         .configured(
-          new Transporter.SocksProxy(
-            SocksProxyFlags.socksProxy(),
-            SocksProxyFlags.socksUsernameAndPassword()).mk())
+          new Transporter.SocksProxy(Option.empty(), Option.empty()).mk())
         .configured(
           new Transporter.HttpProxy(
             Option.<SocketAddress>empty(),

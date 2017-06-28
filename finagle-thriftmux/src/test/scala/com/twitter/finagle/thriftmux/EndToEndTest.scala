@@ -16,7 +16,7 @@ import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultTimer, HashedWheelTimer}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -516,7 +516,7 @@ class EndToEndTest extends FunSuite
         if (x == "safe")
           Future.value("safe")
         else if (x == "slow")
-          Future.sleep(1.second)(HashedWheelTimer.Default).before(Future.value("slow"))
+          Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
         else
           Future.exception(new InvalidQueryException(x.length))
     }
@@ -1314,7 +1314,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("methodBuilder timeouts from Stack") {
-    implicit val timer = HashedWheelTimer.Default
+    implicit val timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
@@ -1335,7 +1335,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("methodBuilder timeouts from ClientBuilder") {
-    implicit val timer = HashedWheelTimer.Default
+    implicit val timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }
@@ -1359,7 +1359,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("methodBuilder timeouts from configured ClientBuilder") {
-    implicit val timer = HashedWheelTimer.Default
+    implicit val timer = DefaultTimer
     val service = new TestService.FutureIface {
       def query(x: String): Future[String] = {
         Future.sleep(50.millis).before { Future.value(x) }

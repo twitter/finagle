@@ -7,7 +7,6 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/com/google/inject:guice',
-    '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
     'finagle/finagle-base-http/src/main/scala:scala',
     'finagle/finagle-example/src/main/thrift:thrift-scala',

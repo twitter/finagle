@@ -12,6 +12,7 @@ scala_library(
     'finagle/finagle-exp/src/main/scala',
     'finagle/finagle-memcached/src/main/scala',
     'finagle/finagle-mux/src/main/scala',
+    'finagle/finagle-netty3/src/main/scala',
     'finagle/finagle-netty4/src/main/scala',
     'finagle/finagle-serversets/src/main/scala',
     'finagle/finagle-stats/src/main/scala',

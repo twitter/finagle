@@ -9,7 +9,6 @@ scala_library(
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-core',
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
     '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
-    '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-base-http/src/main/scala:scala',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',

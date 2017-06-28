@@ -27,7 +27,7 @@ object Finagle extends Build {
   val guavaLib = "com.google.guava" % "guava" % "19.0"
   val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
   val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
-  val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
+  val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % netty4Version,
     "io.netty" % "netty-transport" % netty4Version,
@@ -169,8 +169,9 @@ object Finagle extends Build {
     // Core, support.
     finagleToggle,
     finagleCore,
-    finagleStats,
     finagleNetty4,
+    finagleNetty3,
+    finagleStats,
     finagleZipkinCore,
     finagleZipkin,
     finagleServersets,
@@ -264,7 +265,9 @@ object Finagle extends Build {
       util("tunable"),
       caffeineLib,
       jsr305Lib,
-      nettyLib)
+      netty3Lib % "test"
+    ),
+    unmanagedClasspath in Test <++= (fullClasspath in (LocalProject("finagle-netty3"), Compile))
   ).dependsOn(finagleToggle)
 
   lazy val finagleNetty4 = Project(
@@ -284,6 +287,24 @@ object Finagle extends Build {
       util("stats")
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleToggle)
+
+  lazy val finagleNetty3 = Project(
+    id = "finagle-netty3",
+    base = file("finagle-netty3"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "finagle-netty3",
+    libraryDependencies ++= Seq(
+      util("app"),
+      util("cache"),
+      util("codec"),
+      util("core"),
+      util("codec"),
+      util("lint"),
+      util("stats"),
+      netty3Lib
+    )
+  ).dependsOn(finagleCore)
 
   lazy val finagleStats = Project(
     id = "finagle-stats",
@@ -421,7 +442,7 @@ object Finagle extends Build {
       util("logging"),
       "commons-lang" % "commons-lang" % "2.6"
     )
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleNetty3)
 
   lazy val finagleNetty4Http = Project(
     id = "finagle-netty4-http",
@@ -449,8 +470,7 @@ object Finagle extends Build {
       netty4Http2,
       util("cache"),
       util("core"),
-      util("logging"),
-      nettyLib
+      util("logging")
     ) ++ netty4Libs
   ).dependsOn(finagleCore, finagleNetty4, finagleNetty4Http, finagleBaseHttp)
 

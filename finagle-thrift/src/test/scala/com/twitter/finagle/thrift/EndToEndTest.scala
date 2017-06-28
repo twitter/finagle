@@ -12,7 +12,7 @@ import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, Nu
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
-import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.TempFile
 import com.twitter.test._
 import com.twitter.util._
@@ -380,7 +380,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         if (x == "safe")
           Future.value("safe")
         else if (x == "slow")
-          Future.sleep(1.second)(HashedWheelTimer.Default).before(Future.value("slow"))
+          Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
         else
           Future.exception(new InvalidQueryException(x.length))
     }

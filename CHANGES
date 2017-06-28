@@ -24,6 +24,9 @@ New Features
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle: Finagle is now decoupled from Netty 3. Depend on `finagle-netty3`
+    explicitly if needed. ``PHAB_ID=D65268``
+
   * finagle-core: The Framer type has been transformed into a specialized version of a
     more generic abstraction, Decoder[T]. ``PHAB_ID=D59495``
 
