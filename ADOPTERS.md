@@ -49,6 +49,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Salesforce](https://www.salesforce.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
+* [Sigma](https://sig.ma)
 * [SmartNews](https://www.smartnews.com/en/)
   * ["Scala (Finagle) @ SmartNews"][12]
 * [SoFi](https://www.sofi.com/)
