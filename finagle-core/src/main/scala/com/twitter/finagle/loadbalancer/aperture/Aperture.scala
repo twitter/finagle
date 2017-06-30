@@ -47,7 +47,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def rng: Rng
 
   /**
-   * The minimum allowable aperture. Must be greater than zero.
+   * The minimum aperture as specified by the user config. Note this value is advisory
+   * and the distributor may actually derive a new min based on this.  See `minUnits`
+   * for more details.
    */
   protected def minAperture: Int
 
@@ -79,10 +81,14 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def aperture: Int = dist.aperture
 
   /**
-   * The number of available serving units.
-   * The maximum aperture size.
+   * The maximum aperture serving units.
    */
-  protected def units: Int = dist.units
+  protected def maxUnits: Int = dist.max
+
+  /**
+   * The minimum aperture serving units.
+   */
+  protected def minUnits: Int = dist.min
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
@@ -91,8 +97,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
   )
 
-  private[this] val coordinateUpdates =
-    statsReceiver.counter("coordinate_updates")
+  private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
 
   private[this] val coordObservation = DeterministicOrdering.changes.respond { _ =>
     // One nice side-effect of deferring to the balancers `updater` is
@@ -135,8 +140,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     type This = Distributor
 
-    private[this] val max: Int = vector.size
-    private[this] val min: Int = {
+    val max: Int = vector.size
+
+    val min: Int = {
       val default = math.min(minAperture, vector.size)
       if (!useDeterministicOrdering) default else {
         coordinate match {
@@ -169,11 +175,6 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     @volatile private[this] var _aperture: Int = initAperture
     // Make sure the aperture is within bounds [minAperture, maxAperture].
     adjust(0)
-
-    /**
-     * Returns the number of available serving units.
-     */
-    def units: Int = max
 
     /**
      * Returns the current aperture.

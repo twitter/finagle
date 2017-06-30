@@ -11,8 +11,8 @@ class LoadBandTest extends FunSuite with ApertureSuite {
   private val rng = Rng()
 
   private class Bal(
-      protected val lowLoad: Double = 0.5,
-      protected val highLoad: Double = 2.0)
+      protected val lowLoad: Double,
+      protected val highLoad: Double)
     extends TestBal
     with LeastLoaded[Unit, Unit]
     with LoadBand[Unit, Unit] {
@@ -44,8 +44,8 @@ class LoadBandTest extends FunSuite with ApertureSuite {
 
   test("Aperture tracks concurrency") {
     val counts = new Counts
-    val low = 0.5
-    val high = 2.0
+    val low = 0.875
+    val high = 1.125
     val bal = new Bal(lowLoad = low, highLoad = high)
 
     val numNodes = rng.nextInt(100)

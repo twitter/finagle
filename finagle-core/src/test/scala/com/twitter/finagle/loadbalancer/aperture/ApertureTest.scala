@@ -99,7 +99,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     val counts = new Counts
     val bal = new Bal
     bal.update(counts.range(10))
-    assert(bal.unitsx == 10)
+    assert(bal.maxUnitsx == 10)
     bal.applyn(100)
     assert(counts.nonzero.size == 1)
 

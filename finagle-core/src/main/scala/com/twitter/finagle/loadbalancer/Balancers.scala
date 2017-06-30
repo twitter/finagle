@@ -159,12 +159,10 @@ object Balancers {
    * services so that the concurrent load to each service, measured over a window specified
    * by `smoothWin`, stays within the load band delimited by `lowLoad` and `highLoad`.
    *
-   * For example, if the load band is [0.5, 2], the aperture will be adjusted so that no
-   * service inside the aperture has a load less than 0.5 or more than 2, so long as
-   * offered load (or concurrency) permits it.
-   *
-   * The default load band, [0.5, 2], matches closely the load distribution
-   * given by least-loaded without any aperture windowing.
+   * The default load band configuration attempts to create a 1:1 relationship between
+   * a client's offered load and the aperture size. Given a homogeneous replica set – this
+   * optimizes for at least one concurrent request per node and gives the balancer
+   * sufficient data to compare load across nodes.
    *
    * Among the benefits of aperture balancing are:
    *
@@ -215,9 +213,9 @@ object Balancers {
    * for more details.
    */
   def aperture(
-    smoothWin: Duration = 5.seconds,
-    lowLoad: Double = 0.5,
-    highLoad: Double = 2.0,
+    smoothWin: Duration = 15.seconds,
+    lowLoad: Double = 0.875,
+    highLoad: Double = 1.125,
     minAperture: Int = 1,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
@@ -288,8 +286,8 @@ object Balancers {
    */
   def aperturePeakEwma(
     smoothWin: Duration = 15.seconds,
-    lowLoad: Double = 0.5,
-    highLoad: Double = 2.0,
+    lowLoad: Double = 0.875,
+    highLoad: Double = 1.125,
     minAperture: Int = 1,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal,
