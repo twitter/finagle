@@ -9,7 +9,7 @@ import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.util.{Await, Duration, Future, MockTimer, Promise, Time}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -91,5 +91,28 @@ class StackServerTest extends FunSuite with StringServer {
     } == 1)
 
     Await.ready(server.close(), 10.seconds)
+  }
+
+  test("ListeningStackServer closes ServiceFactories") {
+    val serviceFactoryClosed: Promise[Unit] = new Promise[Unit]
+    val fn: ServiceFactory[String, String] => ServiceFactory[String, String] = { factory =>
+      new ServiceFactoryProxy[String, String](factory) {
+        override def close(deadline: Time): Future[Unit] = {
+          serviceFactoryClosed.setDone()
+          factory.close(deadline)
+        }
+      }
+    }
+
+    val csf = CanStackFrom.fromFun[ServiceFactory[String, String]]
+    val stackable = csf.toStackable(new Stack.Role("something"), fn)
+    val stk: Stack[ServiceFactory[String, String]] = StackServer.newStack.prepend(stackable)
+    val factory = ServiceFactory.const(Service.const[String](Future.value("hi")))
+
+    val server = stringServer
+      .withStack(stk)
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
+    Await.result(server.close(), 2.seconds)
+    assert(serviceFactoryClosed.isDefined)
   }
 }

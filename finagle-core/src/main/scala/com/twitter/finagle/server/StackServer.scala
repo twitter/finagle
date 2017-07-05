@@ -224,7 +224,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         // when #4 is finished.  So we ignore it and close everything else.  Note that
         // closing the connections here will do #2 and drain them via the Dispatcher.
         val closingSessions = sessions.close(deadline)
-        val closingFactory = factory.close(deadline)
+        val closingFactory = serviceFactory.close(deadline)
 
         // and once they're drained we can then wait on the listener physically closing them
         Future.join(Seq(closingSessions, closingFactory)).before(ulClosed)
