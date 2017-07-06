@@ -8,7 +8,8 @@ import com.twitter.finagle.netty3.ssl.server.SslServerConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.{Label, Logger, Stats, Timer}
 import com.twitter.finagle.server.{Listener, ServerRegistry}
-import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.ssl.server.{
+  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.HasLogLevel
@@ -95,6 +96,13 @@ object Netty3Listener {
     pipeline: ChannelPipeline,
     engineFactory: SslServerEngineFactory,
     config: SslServerConfiguration
+  ): Unit = addTlsToPipeline(pipeline, engineFactory, config, SslServerSessionVerifier.AlwaysValid)
+
+  def addTlsToPipeline(
+    pipeline: ChannelPipeline,
+    engineFactory: SslServerEngineFactory,
+    config: SslServerConfiguration,
+    sessionVerifier: SslServerSessionVerifier
   ): Unit = {
     val engine = engineFactory(config)
     val handler = new SslHandler(engine.self)
@@ -114,15 +122,16 @@ object Netty3Listener {
     // handshake is complete before continuing.
     def onShutdown(): Unit =
       try {
-        val method = engine.getClass.getMethod("shutdown")
-        method.invoke(engine)
+        val sslEngine = engine.self
+        val method = sslEngine.getClass.getMethod("shutdown")
+        method.invoke(sslEngine)
       } catch {
         case _: NoSuchMethodException =>
       }
 
     pipeline.addFirst(
       "sslConnect",
-      new SslServerConnectHandler(handler, onShutdown))
+      new SslServerConnectHandler(handler, config, sessionVerifier, onShutdown))
   }
 
   val channelFactory: ServerChannelFactory =
@@ -270,10 +279,11 @@ class Netty3Listener[In, Out](
 
   private[this] def addFirstTlsHandlers(pipeline: ChannelPipeline, params: Stack.Params): Unit = {
     val SslServerEngineFactory.Param(serverEngine) = params[SslServerEngineFactory.Param]
+    val SslServerSessionVerifier.Param(sessionVerifier) = params[SslServerSessionVerifier.Param]
     val Transport.ServerSsl(serverConfig) = params[Transport.ServerSsl]
 
     for (config <- serverConfig) {
-      addTlsToPipeline(pipeline, serverEngine, config)
+      addTlsToPipeline(pipeline, serverEngine, config, sessionVerifier)
     }
   }
 

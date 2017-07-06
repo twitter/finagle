@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty3.ssl.client
 
-import com.twitter.finagle.SslHandshakeException
+import com.twitter.finagle.{Address, SslVerificationFailedException}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import javax.net.ssl.{SSLEngine, SSLSession}
@@ -36,14 +37,17 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
   }
 
   class SslClientConnectHandlerHelper extends SslConnectHandlerHelper {
-    val verifier = mock[SSLSession => Option[Throwable]]
-    when(verifier(any[SSLSession])) thenReturn None
+    val address = mock[Address]
+    val config = mock[SslClientConfiguration]
+    val sessionVerifier = mock[SslClientSessionVerifier]
+    when(sessionVerifier.apply(
+      any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn true
 
     val connectFuture = Channels.future(channel, true)
     val connectRequested = new DownstreamChannelStateEvent(
       channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
 
-    val ch = new SslClientConnectHandler(sslHandler, verifier)
+    val ch = new SslClientConnectHandler(sslHandler, address, config, sessionVerifier)
     ch.handleDownstream(ctx, connectRequested)
 
     def checkDidClose() {
@@ -92,21 +96,21 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("SslClientConnectHandler should when connect is successful initiate a handshake") {
+  test("SslClientConnectHandler when connect is successful should initiate a handshake") {
     val h = new helper2
     import h._
 
     verify(sslHandler).handshake()
   }
 
-  test("SslClientConnectHandler should when connect is successful not propagate success") {
+  test("SslClientConnectHandler when connect is successful should not propagate success") {
     val h = new helper2
     import h._
 
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("SslClientConnectHandler should when connect is successful propagate handshake failures as SslHandshakeException") {
+  test("SslClientConnectHandler when connect is successful should propagate handshake failures as SslVerificationFailedException") {
     val h = new helper2
     import h._
 
@@ -114,10 +118,10 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     handshakeFuture.setFailure(exc)
     assert(connectFuture.isDone)
     assert(connectFuture.getCause ==
-      new SslHandshakeException(exc, remoteAddress))
+      new SslVerificationFailedException(exc, remoteAddress))
   }
 
-  test("SslClientConnectHandler should when connect is successful propagate connection cancellation") {
+  test("SslClientConnectHandler when connect is successful should propagate connection cancellation") {
     val h = new helper2
     import h._
 
@@ -125,7 +129,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     checkDidClose()
   }
 
-  test("SslClientConnectHandler should when connect is successful when handshake is successful propagate success") {
+  test("SslClientConnectHandler when handshake is successful should propagate success") {
     val h = new helper2
     import h._
 
@@ -142,24 +146,39 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(e.getValue == remoteAddress)
   }
 
-  test("SslClientConnectHandler should when connect is successful when handshake is successful verify") {
+  test("SslClientConnectHandler should apply session verification when handshake is successful") {
     val h = new helper2
     import h._
 
-    verify(verifier, times(0)).apply(any[SSLSession])
+    verify(sessionVerifier, times(0)).apply(
+      any[Address], any[SslClientConfiguration], any[SSLSession])
     handshakeFuture.setSuccess()
-    verify(verifier).apply(any[SSLSession])
+    verify(sessionVerifier, times(1)).apply(
+      any[Address], any[SslClientConfiguration], any[SSLSession])
   }
 
-  test("SslClientConnectHandler should when connect is successful when handshake is successful propagate verification failure") {
+  test("SslClientConnectHandler should close when session verification fails") {
     val h = new helper2
     import h._
 
-    val e = new Exception("session sucks")
-    when(verifier(any[SSLSession])) thenReturn Some(e)
+    when(sessionVerifier(
+      any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn false
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause == e)
+    assert(connectFuture.getCause.isInstanceOf[SslVerificationFailedException])
+    checkDidClose()
+  }
+
+  test("SslClientConnectHandler should close when session verification throws") {
+    val h = new helper2
+    import h._
+
+    val e = new RuntimeException("Failed verification")
+    when(sessionVerifier(
+      any[Address], any[SslClientConfiguration], any[SSLSession])) thenThrow e
+    handshakeFuture.setSuccess()
+    assert(connectFuture.isDone)
+    assert(connectFuture.getCause.getMessage.startsWith("Failed verification"))
     checkDidClose()
   }
 

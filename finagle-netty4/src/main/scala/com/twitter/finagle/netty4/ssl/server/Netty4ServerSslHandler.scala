@@ -2,7 +2,8 @@ package com.twitter.finagle.netty4.ssl.server
 
 import com.twitter.finagle.netty4.ssl.Alpn
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
-import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.ssl.server.{
+  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
@@ -10,7 +11,7 @@ import io.netty.handler.ssl.SslHandler
 
 /**
  * A channel handler that takes [[Stack.Params]] and upgrades the pipeline with missing
- * TLS/SSL pieces required for server-side transport encryption.
+ * SSL/TLS pieces required for server-side transport encryption.
  *
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
@@ -53,7 +54,16 @@ private[netty4] class Netty4ServerSslHandler(
     // create an `SslHandler`.
     new SslHandler(engine.self)
 
-  private[this] def addHandlersToPipeline(pipeline: ChannelPipeline,
+  private[this] def createSslConnectHandler(
+    sslHandler: SslHandler,
+    config: SslServerConfiguration
+  ): SslServerConnectHandler = {
+    val SslServerSessionVerifier.Param(sessionVerifier) = params[SslServerSessionVerifier.Param]
+    new SslServerConnectHandler(sslHandler, config, sessionVerifier)
+  }
+
+  private[this] def addHandlersToPipeline(
+    pipeline: ChannelPipeline,
     sslHandler: SslHandler,
     sslConnectHandler: SslServerConnectHandler
   ): Unit = {
@@ -74,7 +84,9 @@ private[netty4] class Netty4ServerSslHandler(
       val combined: SslServerConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      addHandlersToPipeline(ch.pipeline(), sslHandler, new SslServerConnectHandler(sslHandler))
+      val sslConnectHandler: SslServerConnectHandler = createSslConnectHandler(sslHandler, combined)
+      addHandlersToPipeline(ch.pipeline(), sslHandler, sslConnectHandler)
     }
   }
+
 }

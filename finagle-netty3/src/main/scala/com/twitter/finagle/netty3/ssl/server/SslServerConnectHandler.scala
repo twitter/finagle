@@ -1,8 +1,10 @@
 package com.twitter.finagle.netty3.ssl.server
 
+import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import javax.net.ssl.SSLException
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
+import scala.util.control.NonFatal
 
 /**
  * Handle server-side SSL Connections:
@@ -14,6 +16,8 @@ import org.jboss.netty.handler.ssl.SslHandler
  */
 private[netty3] class SslServerConnectHandler(
     sslHandler: SslHandler,
+    config: SslServerConfiguration,
+    sessionVerifier: SslServerSessionVerifier,
     onShutdown: () => Unit = () => Unit)
   extends SimpleChannelUpstreamHandler {
 
@@ -22,7 +26,15 @@ private[netty3] class SslServerConnectHandler(
     sslHandler.handshake().addListener(new ChannelFutureListener {
       override def operationComplete(f: ChannelFuture): Unit =
         if (f.isSuccess) {
-          SslServerConnectHandler.super.channelConnected(ctx, e)
+          try {
+            if (sessionVerifier(config, sslHandler.getEngine.getSession)) {
+              SslServerConnectHandler.super.channelConnected(ctx, e)
+            } else {
+              Channels.close(ctx.getChannel)
+            }
+          } catch {
+            case NonFatal(_) => Channels.close(ctx.getChannel)
+          }
         } else {
           Channels.close(ctx.getChannel)
         }

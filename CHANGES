@@ -10,6 +10,10 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: `SslClientSessionVerifier` and `SslServerSessionVerifier` have been added
+    as `Stack` params for executing custom SSL/TLS `Session` verification logic on the
+    establishment of an SSL/TLS `Session`. ``PHAB_ID=D63256``
+
   * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
     `MethodBuilder` is a collection of APIs for client configuration at a higher level than
     the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.

@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty3.ssl.server
 
+import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerSessionVerifier}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import javax.net.ssl.{SSLEngine, SSLSession}
@@ -15,10 +16,10 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
   class SslConnectHandlerHelper {
     val ctx = mock[ChannelHandlerContext]
     val sslHandler = mock[SslHandler]
-    val session = mock[SSLSession]
-    when(session.getPeerCertificates) thenReturn Array.empty[Certificate]
+    val sslSession = mock[SSLSession]
+    when(sslSession.getPeerCertificates) thenReturn Array.empty[Certificate]
     val engine = mock[SSLEngine]
-    when(engine.getSession) thenReturn session
+    when(engine.getSession) thenReturn sslSession
     when(sslHandler.getEngine) thenReturn engine
     val channel = mock[Channel]
     when(ctx.getChannel) thenReturn channel
@@ -37,7 +38,10 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     var shutdownCount = 0
     def onShutdown() = shutdownCount += 1
 
-    val connectHandler = new SslServerConnectHandler(sslHandler, onShutdown)
+    val config = mock[SslServerConfiguration]
+    val verifier = mock[SslServerSessionVerifier]
+
+    val connectHandler = new SslServerConnectHandler(sslHandler, config, verifier, onShutdown)
     val event = new UpstreamChannelStateEvent(
       channel, ChannelState.CONNECTED, remoteAddress)
 
@@ -57,10 +61,35 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new SslServerConnectHandlerHelper
     import h._
 
+    when(verifier.apply(config, sslSession)) thenReturn true
+
     verify(sslHandler, times(1)).handshake()
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
     handshakeFuture.setSuccess()
     verify(ctx, times(1)).sendUpstream(any[ChannelEvent])
+  }
+
+  test("SslServerConnectHandler should not connect when verification fails") {
+    val h = new SslServerConnectHandlerHelper
+    import h._
+
+    when(verifier.apply(config, sslSession)) thenReturn false
+
+    verify(sslHandler, times(1)).handshake()
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
+    handshakeFuture.setSuccess()
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
+  }
+
+  test("SslServerConnectHandler should not connect when verification throws") {
+    val h = new SslServerConnectHandlerHelper
+    import h._
+
+    when(verifier.apply(config, sslSession)) thenThrow new RuntimeException("Failed verification")
+    verify(sslHandler, times(1)).handshake()
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
+    handshakeFuture.setSuccess()
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
 }

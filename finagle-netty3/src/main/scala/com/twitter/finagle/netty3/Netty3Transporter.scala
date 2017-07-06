@@ -2,15 +2,15 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
-import com.twitter.finagle.netty3.channel.{ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+import com.twitter.finagle.netty3.channel.{
+  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.client.SslClientConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.netty3.Netty3Transporter.{ChannelFactory, TransportFactory}
 import com.twitter.finagle.param.{Label, Logger}
 import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
-import com.twitter.finagle.ssl.SessionVerifier
-import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.client.{SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.HashedWheelTimer
@@ -300,18 +300,16 @@ private[netty3] class Netty3Transporter[In, Out](
     params: Stack.Params
   ): Unit = {
     val SslClientEngineFactory.Param(clientEngine) = params[SslClientEngineFactory.Param]
+    val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
     val Transport.ClientSsl(clientConfig) = params[Transport.ClientSsl]
     val Transporter.EndpointAddr(addr) = params[Transporter.EndpointAddr]
 
     for (config <- clientConfig) {
       val engine = clientEngine(addr, config)
 
-      val verifier = config.hostname
-        .map(SessionVerifier.hostname)
-        .getOrElse(SessionVerifier.AlwaysValid)
-
       val sslHandler = new SslHandler(engine.self)
-      val sslConnectHandler = new SslClientConnectHandler(sslHandler, verifier)
+      val sslConnectHandler = new SslClientConnectHandler(
+        sslHandler, addr, config, sessionVerifier)
 
       pipeline.addFirst("sslConnect", sslConnectHandler)
       pipeline.addFirst("ssl", sslHandler)

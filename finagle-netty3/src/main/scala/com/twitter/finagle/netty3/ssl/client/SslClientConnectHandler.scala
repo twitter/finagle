@@ -1,11 +1,13 @@
 package com.twitter.finagle.netty3.ssl.client
 
-import com.twitter.finagle.{ChannelClosedException, InconsistentStateException, SslHandshakeException}
+import com.twitter.finagle.{
+  Address, ChannelClosedException, InconsistentStateException, SslVerificationFailedException}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
-import javax.net.ssl.SSLSession
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
+import scala.util.control.NonFatal
 
 /**
  * Handle client-side SSL connections:
@@ -17,7 +19,9 @@ import org.jboss.netty.handler.ssl.SslHandler
  */
 private[netty3] class SslClientConnectHandler(
     sslHandler: SslHandler,
-    sessionError: SSLSession => Option[Throwable] = Function.const(None))
+    address: Address,
+    config: SslClientConfiguration,
+    sessionVerifier: SslClientSessionVerifier)
   extends SimpleChannelHandler {
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
@@ -89,17 +93,38 @@ private[netty3] class SslClientConnectHandler(
     sslHandler.handshake().addListener(new ChannelFutureListener {
       override def operationComplete(f: ChannelFuture): Unit =
         if (f.isSuccess) {
-          sessionError(sslHandler.getEngine.getSession) match {
-            case Some(t) =>
-              fail(ctx.getChannel, t)
-            case None =>
-              connectFuture.get.setSuccess()
-              SslClientConnectHandler.super.channelConnected(ctx, e)
+          val engine = sslHandler.getEngine
+          if (engine.isInboundDone) {
+            // Likely that the server failed to verify the client or the handshake failed in an unexpected way.
+            fail(
+              ctx.getChannel,
+              new SslVerificationFailedException(
+                new Exception("Failed server verification"),
+                ctx.getChannel.getRemoteAddress))
+          } else {
+            try {
+              if (sessionVerifier(address, config, engine.getSession)) {
+                connectFuture.get.setSuccess()
+                SslClientConnectHandler.super.channelConnected(ctx, e)
+              } else {
+                fail(
+                  ctx.getChannel,
+                  new SslVerificationFailedException(
+                    new Exception("Failed client verification"),
+                    ctx.getChannel.getRemoteAddress))
+              }
+            } catch {
+              case NonFatal(e) =>
+                fail(
+                  ctx.getChannel,
+                  new SslVerificationFailedException(
+                    e, ctx.getChannel.getRemoteAddress))
+            }
           }
         } else if (f.isCancelled) {
           fail(ctx.getChannel, new InconsistentStateException(_))
         } else {
-          fail(ctx.getChannel, new SslHandshakeException(f.getCause, _))
+          fail(ctx.getChannel, new SslVerificationFailedException(f.getCause, _))
         }
     })
   }

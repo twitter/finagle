@@ -1,5 +1,7 @@
 package com.twitter.finagle.netty4.ssl.client
 
+import com.twitter.finagle.{Address, SslVerificationFailedException}
+import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientSessionVerifier}
 import io.netty.channel.Channel
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
@@ -13,9 +15,19 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   val fakeAddress = InetSocketAddress.createUnresolved("ssl", 8081)
+  val address = Address.Inet(fakeAddress, Map.empty)
+  val config = SslClientConfiguration()
+
+  class TestVerifier(result: => Boolean) extends SslClientSessionVerifier {
+    def apply(
+      address: Address,
+      config: SslClientConfiguration,
+      session: SSLSession
+    ): Boolean = result
+  }
 
   val (channel, sslHandler, handshakePromise) = {
     val ch = new EmbeddedChannel()
@@ -30,7 +42,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
   }
 
   test("success") {
-    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(
+      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -44,9 +57,9 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
     channel.finishAndReleaseAll()
   }
 
-  test("failed session validation") {
-    val e = new Exception("whoa")
-    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => Some(e)))
+  test("session verification failed") {
+    channel.pipeline().addFirst(
+      new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(false)))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -54,14 +67,32 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
     assert(channel.outboundMessages().size() == 0)
 
     handshakePromise.setSuccess(channel)
-    assert(connectPromise.cause() == e)
-    assert(intercept[Exception](channel.checkException()) == e)
+    assert(connectPromise.cause().isInstanceOf[SslVerificationFailedException])
+    assert(intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException])
+
+    channel.finishAndReleaseAll()
+  }
+
+  test("failed session validation") {
+    val e = new Exception("whoa")
+    channel.pipeline().addFirst(
+      new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(throw e)))
+    val connectPromise = channel.connect(fakeAddress)
+    assert(!connectPromise.isDone)
+
+    channel.writeOutbound("pending write")
+    assert(channel.outboundMessages().size() == 0)
+
+    handshakePromise.setSuccess(channel)
+    assert(connectPromise.cause.getMessage.startsWith("whoa"))
+    assert(intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException])
 
     channel.finishAndReleaseAll()
   }
 
   test("cancelled after connected") {
-    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(
+      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -72,7 +103,8 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar with OneInstanceP
   }
 
   test("failed handshake") {
-    channel.pipeline().addFirst(new SslClientConnectHandler(sslHandler, _ => None))
+    channel.pipeline().addFirst(
+      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 

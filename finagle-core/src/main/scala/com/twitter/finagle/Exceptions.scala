@@ -428,6 +428,26 @@ object ChannelWriteException {
 }
 
 /**
+ * Indicates that an error occurred while `SslClientSessionVerification` was
+ * being performed, or the server disconnected from the client in a way that
+ * indicates that there was high probability that the server failed to verify
+ * the client's certificate.
+ */
+case class SslVerificationFailedException(
+    ex: Option[Throwable],
+    remoteAddr: Option[SocketAddress])
+  extends ChannelException(ex, remoteAddr) {
+  def this(underlying: Throwable, remoteAddress: SocketAddress) =
+    this(Option(underlying), Option(remoteAddress))
+  def this() = this(None, None)
+
+  /**
+   * The cause of this exception, or `null` if there is no cause.
+   */
+  def underlying: Throwable = ex.orNull
+}
+
+/**
  * Indicates that an error occurred while an SSL handshake was being performed
  * with a server at a given `remoteAddress`.
  */
