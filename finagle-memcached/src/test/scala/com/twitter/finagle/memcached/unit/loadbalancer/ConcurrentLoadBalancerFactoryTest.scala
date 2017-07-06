@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.client.{StackClient, StringClient}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.{Address, Name, Service}
+import com.twitter.finagle.{Address, Name, Service, Stack}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
@@ -12,6 +12,12 @@ import org.scalatest.FunSuite
 
 class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with StringServer {
   val echoService = Service.mk[String, String](Future.value(_))
+
+  test("Default num connections param is 4") {
+    val ConcurrentLoadBalancerFactory.Param(numConnections) =
+      Stack.Params.empty[ConcurrentLoadBalancerFactory.Param]
+    assert(numConnections == 4)
+  }
 
   test("makes service factory stack") {
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
