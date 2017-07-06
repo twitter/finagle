@@ -1280,6 +1280,48 @@ abstract class AbstractEndToEndTest extends FunSuite
     await(server.close())
   }
 
+  test(s"$implName: Graceful shutdown & draining") {
+    val p = new Promise[Unit]
+    @volatile var holdResponses = false
+
+    val service = new HttpService {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = request.uri
+
+        if (holdResponses) p.map { _ => response }
+        else Future.value(response)
+      }
+    }
+
+    val server = serverImpl().serve(new InetSocketAddress(0), service)
+    val client = clientImpl().newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client")
+
+    await(client(Request("/1")))
+
+    holdResponses = true
+
+    val rep = client(Request("/2"))
+
+    Thread.sleep(100)
+
+    server.close(5.seconds)
+
+    Thread.sleep(100)
+    p.setDone()
+
+    assert(await(rep).contentString == "/2")
+
+    val f = intercept[FailureFlags[_]] {
+      await(client(Request("/3")))
+    }
+
+    // Connection refused
+    assert(f.isFlagged(FailureFlags.Rejected))
+  }
+
   test(implName + ": methodBuilder timeouts from Stack") {
     implicit val timer = HashedWheelTimer.Default
     val svc = new Service[Request, Response] {
