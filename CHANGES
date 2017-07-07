@@ -14,6 +14,12 @@ New Features
     as `Stack` params for executing custom SSL/TLS `Session` verification logic on the
     establishment of an SSL/TLS `Session`. ``PHAB_ID=D63256``
 
+  * finagle-core: `tls` methods which take an `SslClientSessionVerifier` have
+    been added to `ClientBuilder` and `ClientTransportParams`
+    (withTransport.tls). `tls` methods which take an `SslServerSessionVerifier`
+    have been added to `ServerBuilder` and `ServerTransportParams`
+    (withTransport.tls). ``PHAB_ID=D68645``
+
   * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
     `MethodBuilder` is a collection of APIs for client configuration at a higher level than
     the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.

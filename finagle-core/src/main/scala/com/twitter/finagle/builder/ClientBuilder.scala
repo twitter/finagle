@@ -12,7 +12,9 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.FailFastFactory.FailFast
-import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration, SslClientEngineFactory,
+  SslClientSessionVerifier, SslContextClientEngineFactory}
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
@@ -850,6 +852,44 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tls(config: SslClientConfiguration, engineFactory: SslClientEngineFactory): This =
     configured(Transport.ClientSsl(Some(config)))
     .configured(SslClientEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(config, sessionVerifier)
+   * }}}
+   */
+  def tls(
+    config: SslClientConfiguration,
+    sessionVerifier: SslClientSessionVerifier
+  ): This =
+    configured(Transport.ClientSsl(Some(config)))
+    .configured(SslClientSessionVerifier.Param(sessionVerifier))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(config, engineFactory, sessionVerifier)
+   * }}}
+   */
+  def tls(
+    config: SslClientConfiguration,
+    engineFactory: SslClientEngineFactory,
+    sessionVerifier: SslClientSessionVerifier
+  ): This =
+    configured(Transport.ClientSsl(Some(config)))
+    .configured(SslClientEngineFactory.Param(engineFactory))
+    .configured(SslClientSessionVerifier.Param(sessionVerifier))
 
   /**
    * Encrypt the connection with SSL/TLS.  Hostname verification will be

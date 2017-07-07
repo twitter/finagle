@@ -4,7 +4,8 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+  SslClientConfiguration, SslClientEngineFactory,
+  SslClientSessionVerifier, SslContextClientEngineFactory}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import javax.net.ssl.SSLContext
@@ -41,6 +42,27 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     self
       .configured(Transport.ClientSsl(Some(config)))
       .configured(SslClientEngineFactory.Param(engineFactory))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(config: SslClientConfiguration, sessionVerifier: SslClientSessionVerifier): A =
+    self
+      .configured(Transport.ClientSsl(Some(config)))
+      .configured(SslClientSessionVerifier.Param(sessionVerifier))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this client.
+   */
+  def tls(
+    config: SslClientConfiguration,
+    engineFactory: SslClientEngineFactory,
+    sessionVerifier: SslClientSessionVerifier
+  ): A =
+    self
+      .configured(Transport.ClientSsl(Some(config)))
+      .configured(SslClientEngineFactory.Param(engineFactory))
+      .configured(SslClientSessionVerifier.Param(sessionVerifier))
 
   /**
    * Enables SSL/TLS support (connection encrypting) on this client.

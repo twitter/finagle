@@ -8,7 +8,8 @@ import com.twitter.finagle.server.{Listener, StackBasedServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
-  ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+  ConstServerEngineFactory, SslServerConfiguration,
+  SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
@@ -378,6 +379,41 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): This =
     configured(Transport.ServerSsl(Some(config)))
     .configured(SslServerEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, sessionVerifier)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration, sessionVerifier: SslServerSessionVerifier): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerSessionVerifier.Param(sessionVerifier))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, engineFactory, sessionVerifier)
+   * }}}
+   */
+  def tls(
+    config: SslServerConfiguration,
+    engineFactory: SslServerEngineFactory,
+    sessionVerifier: SslServerSessionVerifier
+  ): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerEngineFactory.Param(engineFactory))
+    .configured(SslServerSessionVerifier.Param(sessionVerifier))
 
   /**
    * Encrypt the connection with SSL/TLS.

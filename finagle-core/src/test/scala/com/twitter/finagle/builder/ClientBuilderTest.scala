@@ -5,10 +5,15 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import javax.net.ssl.SSLSession
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
@@ -135,5 +140,38 @@ class ClientBuilderTest extends FunSuite
     val svc = ClientBuilder().stack(stringClient).hostConnectionCoresize(1).hosts("").build()
     val f = svc.close()
     eventually { f.isDefined }
+  }
+
+  private val config = SslClientConfiguration()
+  private val engine = mock[Engine]
+  private val engineFactory = new SslClientEngineFactory {
+    def apply(address: Address, config: SslClientConfiguration): Engine = engine
+  }
+  private val sessionVerifier = new SslClientSessionVerifier {
+    def apply(address: Address, config: SslClientConfiguration, session: SSLSession): Boolean = true
+  }
+
+  test("ClientBuilder sets SSL/TLS configuration") {
+    val client = ClientBuilder().tls(config)
+    assert(client.params[Transport.ClientSsl].e == Some(config))
+  }
+
+  test("ClientBuilder sets SSL/TLS configuration, engine factory") {
+    val client = ClientBuilder().tls(config, engineFactory)
+    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
+  }
+
+  test("ClientBuilder sets SSL/TLS configuration, verifier") {
+    val client = ClientBuilder().tls(config, sessionVerifier)
+    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
+  }
+
+  test("ClientBuilder sets SSL/TLS configuration, engine factory, verifier") {
+    val client = ClientBuilder().tls(config, engineFactory, sessionVerifier)
+    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
+    assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }
 }
