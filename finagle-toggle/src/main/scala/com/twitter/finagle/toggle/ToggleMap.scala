@@ -106,8 +106,9 @@ object ToggleMap {
    */
   private def hashedToggle(
     id: String,
-    pf: PartialFunction[Int, Boolean]
-  ): Toggle[Int] = new Toggle[Int](id) {
+    pf: PartialFunction[Int, Boolean],
+    fraction: Double
+  ): Toggle.Fractional[Int] = new Toggle.Fractional[Int](id) {
     override def toString: String = s"Toggle($id)"
     private[this] def hash(i: Int): Int = {
       val h = MurmurHash3.mix(HashSeed, i)
@@ -115,6 +116,8 @@ object ToggleMap {
     }
     def isDefinedAt(x: Int): Boolean = pf.isDefinedAt(hash(x))
     def apply(x: Int): Boolean = pf(hash(x))
+
+    def currentFraction: Double = fraction
   }
 
   private[this] val MetadataOrdering: Ordering[Toggle.Metadata] =
@@ -305,10 +308,10 @@ object ToggleMap {
       Toggle.on(id) // 100%
     } else if (start <= end) {
       // the range is contiguous without overflows.
-      hashedToggle(id, { case i => i >= start && i <= end })
+      hashedToggle(id, { case i => i >= start && i <= end }, fraction)
     } else {
       // the range overflows around Int.MaxValue
-      hashedToggle(id, { case i  => i >= start || i <= end })
+      hashedToggle(id, { case i  => i >= start || i <= end }, fraction)
     }
   }
 
@@ -354,13 +357,13 @@ object ToggleMap {
 
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
 
-  private class MutableToggle(id: String) extends Toggle[Int](id) {
+  private class MutableToggle(id: String) extends Toggle.Fractional[Int](id) {
     private[this] val fractionAndToggle =
       new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 
     override def toString: String = s"MutableToggle($id)"
 
-    private[ToggleMap] def currentFraction: Double =
+    def currentFraction: Double =
       fractionAndToggle.get()._1
 
     private[ToggleMap] def setFraction(fraction: Double): Unit = {
@@ -470,11 +473,13 @@ object ToggleMap {
     private[this] def fractions: Map[String, Double] =
       flag.overrides()
 
-    private[this] class FlagToggle(id: String) extends Toggle[Int](id) {
+    private[this] class FlagToggle(id: String) extends Toggle.Fractional[Int](id) {
       private[this] val fractionAndToggle =
         new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 
       override def toString: String = s"FlagToggle($id)"
+
+      def currentFraction: Double = fractionAndToggle.get()._1
 
       def isDefinedAt(t: Int): Boolean =
         fractions.get(id) match {

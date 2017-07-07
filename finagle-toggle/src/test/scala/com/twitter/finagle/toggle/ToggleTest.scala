@@ -27,6 +27,17 @@ class ToggleTest extends FunSuite
   private val on = Toggle.on[Int]("com.twitter.on")
   private val off = Toggle.off[Int]("com.twitter.off")
 
+  def newToggle[T](
+    id: String,
+    pf: PartialFunction[T, Boolean],
+    fraction: Double
+  ): Toggle.Fractional[T] = new Toggle.Fractional[T](id) {
+    override def toString: String = s"Toggle($id)"
+    def isDefinedAt(x: T): Boolean = pf.isDefinedAt(x)
+    def apply(v1: T): Boolean = pf(v1)
+    def currentFraction: Double = fraction
+  }
+
   test("True") {
     forAll(IntGen) { i =>
       assert(on.isDefinedAt(i))
@@ -151,4 +162,45 @@ class ToggleTest extends FunSuite
     Toggle.Metadata("com.toggle.Test", 0.0, Some("a description"), "test")
   }
 
+  test("Toggle.Fractional.min throws exception if ids don't match") {
+    intercept[IllegalArgumentException] {
+      Toggle.Fractional.min(on, off)
+    }
+  }
+
+  test("Toggle.Fractional.min isDefinedAt is result of isDefinedAt for toggle with lower fraction") {
+    val definedAtZero = Toggle.on[Int]("com.foo")
+    val undefinedAtZero = newToggle[Int]("com.foo", { case x if x > 0 => true }, 1.0)
+
+    val toggle1 = Toggle.Fractional.min(definedAtZero, definedAtZero)
+    assert(toggle1.isDefinedAt(0))
+
+    val toggle2 = Toggle.Fractional.min(undefinedAtZero, definedAtZero)
+    assert(!toggle2.isDefinedAt(0))
+
+    val toggle3 = Toggle.Fractional.min(definedAtZero, undefinedAtZero)
+    assert(toggle3.isDefinedAt(0))
+  }
+
+  test("Toggle.Fractional.min currentFraction is min of both toggles' currentFractions") {
+    val a = newToggle[Int]("com.foo", { case _ => true }, 0.5)
+    val b = newToggle[Int]("com.foo", { case _ => true }, 0.8)
+
+    val toggle1 = Toggle.Fractional.min(a, b)
+    assert(toggle1.currentFraction == 0.5)
+
+    val toggle2 = Toggle.Fractional.min(b, a)
+    assert(toggle2.currentFraction == 0.5)
+  }
+
+  test("Toggle.Fractional.min apply uses currentFraction") {
+    val a = newToggle[Int]("com.foo", { case _ => false }, 0.0)
+    val b = newToggle[Int]("com.foo", { case _ => true }, 1.0)
+
+    val toggle1 = Toggle.Fractional.min(a, b)
+    assert(toggle1(5) == false)
+
+    val toggle2 = Toggle.Fractional.min(b, b)
+    assert(toggle2(5) == true)
+  }
 }
