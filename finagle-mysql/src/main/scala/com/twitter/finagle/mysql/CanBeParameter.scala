@@ -71,6 +71,14 @@ object CanBeParameter {
     }
   }
 
+  implicit val bigIntCanBeParameter = {
+    new CanBeParameter[BigInt] {
+      def sizeOf(param: BigInt) = 8
+      def typeCode(param: BigInt) = Type.LongLong
+      def write(writer: MysqlBufWriter, param: BigInt) = writer.writeBytes(param.toByteArray)
+    }
+  }
+
   implicit val floatCanBeParameter = {
     new CanBeParameter[Float] {
       def sizeOf(param: Float) = 4

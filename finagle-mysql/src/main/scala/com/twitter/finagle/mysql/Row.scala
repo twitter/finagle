@@ -20,6 +20,14 @@ trait Row {
   /** The values for this Row. */
   val values: IndexedSeq[Value]
 
+  /**/
+  val ignoreUnsigned: Boolean
+
+  @inline
+  def isSigned(field: Field): Boolean = {
+    ignoreUnsigned || field.isSigned
+  }
+
   /**
    * Retrieves the index of the column with the given
    * name.
@@ -50,7 +58,7 @@ trait Row {
  * text-based protocol.
  * [[http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow]]
  */
-class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map[String, Int]) extends Row {
+class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map[String, Int], val ignoreUnsigned: Boolean = true) extends Row {
   private val reader = MysqlBuf.reader(rawRow)
 
   /**
@@ -70,16 +78,17 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
         RawValue(field.fieldType, field.charset, false, bytes)
       else {
         val str = new String(bytes, Charset(charset))
+        println(field, str)
         field.fieldType match {
-          case Type.Tiny if field.isSigned      => ByteValue(str.toByte)
+          case Type.Tiny if isSigned(field)     => ByteValue(str.toByte)
           case Type.Tiny                        => ShortValue(str.toShort)
-          case Type.Short if field.isSigned     => ShortValue(str.toShort)
+          case Type.Short if isSigned(field)    => ShortValue(str.toShort)
           case Type.Short                       => IntValue(str.toInt)
-          case Type.Int24 if field.isSigned     => IntValue(str.toInt)
+          case Type.Int24 if isSigned(field)    => IntValue(str.toInt)
           case Type.Int24                       => IntValue(str.toInt)
-          case Type.Long if field.isSigned      => IntValue(str.toInt)
+          case Type.Long if isSigned(field)     => IntValue(str.toInt)
           case Type.Long                        => LongValue(str.toLong)
-          case Type.LongLong if field.isSigned  => LongValue(str.toLong)
+          case Type.LongLong if isSigned(field) => LongValue(str.toLong)
           case Type.LongLong                    => BigIntValue(BigInt(str))
           case Type.Float                       => FloatValue(str.toFloat)
           case Type.Double                      => DoubleValue(str.toDouble)
@@ -105,7 +114,7 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
  * mysql binary protocol.
  * [[http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html]]
  */
-class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map[String, Int]) extends Row {
+class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map[String, Int], val ignoreUnsigned: Boolean = true) extends Row {
   private val reader: MysqlBufReader = MysqlBuf.reader(rawRow)
   reader.skip(1)
 
@@ -135,15 +144,15 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
     for ((field, idx) <- fields.zipWithIndex) yield {
       if (isNull(idx)) NullValue
       else field.fieldType match {
-        case Type.Tiny if field.isSigned      => ByteValue(reader.readByte())
+        case Type.Tiny if isSigned(field)     => ByteValue(reader.readByte())
         case Type.Tiny                        => ShortValue(reader.readUnsignedByte())
-        case Type.Short if field.isSigned     => ShortValue(reader.readShortLE())
+        case Type.Short if isSigned(field)    => ShortValue(reader.readShortLE())
         case Type.Short                       => IntValue(reader.readUnsignedShortLE())
-        case Type.Int24 if field.isSigned     => IntValue(reader.readIntLE())
+        case Type.Int24 if isSigned(field)    => IntValue(reader.readIntLE())
         case Type.Int24                       => IntValue(reader.readIntLE())
-        case Type.Long if field.isSigned      => IntValue(reader.readIntLE())
+        case Type.Long if isSigned(field)     => IntValue(reader.readIntLE())
         case Type.Long                        => LongValue(reader.readUnsignedIntLE())
-        case Type.LongLong if field.isSigned  => LongValue(reader.readLongLE())
+        case Type.LongLong if isSigned(field) => LongValue(reader.readLongLE())
         case Type.LongLong                    => BigIntValue(reader.readUnsignedLongLE())
         case Type.Float                       => FloatValue(reader.readFloatLE())
         case Type.Double                      => DoubleValue(reader.readDoubleLE())
