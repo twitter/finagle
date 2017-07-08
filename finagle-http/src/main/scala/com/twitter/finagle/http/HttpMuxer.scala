@@ -22,13 +22,15 @@ import java.util.logging.Logger
  *
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
-class HttpMuxer(protected val routes: Seq[Route])
+class HttpMuxer(_routes: Seq[Route])
   extends Service[Request, Response] {
 
   def this() = this(Seq.empty[Route])
 
   private[this] val sorted: Seq[Route] =
-    routes.sortBy(_.pattern.length).reverse
+    _routes.sortBy(_.pattern.length).reverse
+
+  protected def routes: Seq[Route] = _routes
 
   def patterns: Seq[String] = sorted.map(_.pattern)
 
@@ -50,14 +52,14 @@ class HttpMuxer(protected val routes: Seq[Route])
   }
 
   /**
-   * Extract path from Request; look for a matching pattern; if found, dispatch the
-   * Request to the registered service; otherwise create a NOT_FOUND response
+   * Find the route that a request will take, or None if there's no matching
+   * route.
    */
-  def apply(request: Request): Future[Response] = {
+  def route(request: Request): Option[Route] = {
     val path = normalize(request.path)
 
     // find the longest pattern that matches (the patterns are already sorted)
-    val matching = sorted.find { route =>
+    sorted.find { route =>
       val pattern = route.pattern
       if (pattern == "")
         path == "/" || path == "" // special cases
@@ -66,11 +68,16 @@ class HttpMuxer(protected val routes: Seq[Route])
       else
         path == pattern // exact match
     }
+  }
 
-    matching match {
-      case Some(Route(_, handler, _)) => handler(request)
-      case None => Future.value(Response(request.version, Status.NotFound))
-    }
+
+  /**
+   * Extract path from Request; look for a matching pattern; if found, dispatch the
+   * Request to the registered service; otherwise create a NOT_FOUND response
+   */
+  def apply(request: Request): Future[Response] = route(request) match {
+    case Some(Route(_, handler, _)) => handler(request)
+    case None => Future.value(Response(request.version, Status.NotFound))
   }
 
   /**
@@ -91,11 +98,8 @@ class HttpMuxer(protected val routes: Seq[Route])
  *
  * @see [[HttpMuxers]] for Java compatibility APIs.
  */
-object HttpMuxer extends Service[Request, Response] {
+object HttpMuxer extends HttpMuxer {
   @volatile private[this] var underlying = new HttpMuxer()
-
-  override def apply(request: Request): Future[Response] =
-    underlying(request)
 
   /**
    * add handlers to mutate dispatching strategies.
@@ -114,15 +118,22 @@ object HttpMuxer extends Service[Request, Response] {
   def addRichHandler(pattern: String, service: Service[Request, Response]): Unit =
     addHandler(Route(pattern = pattern, handler = service))
 
-  def patterns: Seq[String] = underlying.patterns
-  def routes: Seq[Route] = underlying.routes
-
   private[this] val log = Logger.getLogger(getClass.getName)
 
   for (handler <- LoadService[HttpMuxHandler]()) {
     log.info("HttpMuxer[%s] = %s(%s)".format(handler.route.pattern, handler.getClass.getName, handler))
     addHandler(handler.route)
   }
+
+  override def apply(req: Request): Future[Response] = underlying(req)
+
+  override def route(req: Request): Option[Route] = underlying.route(req)
+
+  override def routes: Seq[Route] = underlying.routes
+
+  override def patterns: Seq[String] = underlying.patterns
+
+  override def withHandler(route: Route): HttpMuxer = underlying.withHandler(route)
 }
 
 /**
