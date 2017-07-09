@@ -183,6 +183,14 @@ object Command {
   val HVALS = Buf.Utf8("HVALS")
   val HSTRLEN = Buf.Utf8("HSTRLEN")
 
+  // Geo Commands
+  val GEOADD            = Buf.Utf8("GEOADD")
+  val GEOHASH           = Buf.Utf8("GEOHASH")
+  val GEOPOS            = Buf.Utf8("GEOPOS")
+  val GEODIST           = Buf.Utf8("GEODIST")
+  val GEORADIUS         = Buf.Utf8("GEORADIUS")
+  val GEORADIUSBYMEMBER = Buf.Utf8("GEORADIUSBYMEMBER")
+
   // Command Arguments
   val WITHSCORES = Buf.Utf8("WITHSCORES")
   val LIMIT = Buf.Utf8("LIMIT")
