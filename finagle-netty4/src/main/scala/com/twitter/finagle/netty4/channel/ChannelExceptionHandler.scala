@@ -37,10 +37,10 @@ private[netty4] class ChannelExceptionHandler(
 
   override def exceptionCaught(ctx: ChannelHandlerContext, t: Throwable): Unit = {
     val wrappedException = t match {
-      case e: ReadTimeoutException =>
+      case _: ReadTimeoutException =>
         readTimeoutCounter.incr()
         new ReadTimedOutException(ctx.channel.remoteAddress)
-      case e: WriteTimeoutException =>
+      case _: WriteTimeoutException =>
         writeTimeoutCounter.incr()
         new WriteTimedOutException(ctx.channel.remoteAddress)
       case e => e
