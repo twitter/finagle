@@ -5,13 +5,10 @@ import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel._
-import org.junit.runner.RunWith
 import org.mockito.Mockito.when
 import org.scalatest.FunSpec
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
   trait SocketTest {
     val e = mock[ChannelStateEvent]
@@ -34,7 +31,7 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
     it("should count connections") {
       val sr = new InMemoryStatsReceiver()
 
-      def connectionsIs(num: Int) {
+      def connectionsIs(num: Int): Unit = {
         assert(sr.gauges(Seq("connections"))() == num)
       }
 
@@ -49,6 +46,9 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       handler.channelOpen(ctx, e)
 
       connectionsIs(1)
+
+      handler.channelClosed(ctx, e)
+      connectionsIs(0)
 
       handler.channelClosed(ctx, e)
       connectionsIs(0)

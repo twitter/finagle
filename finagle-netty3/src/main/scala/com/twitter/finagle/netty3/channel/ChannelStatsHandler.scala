@@ -84,6 +84,7 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
       connectionDuration.add(elapsed().inMilliseconds)
       connectionCount.decrementAndGet()
+      elapsed = null
     }
 
     super.channelClosed(ctx, e)
