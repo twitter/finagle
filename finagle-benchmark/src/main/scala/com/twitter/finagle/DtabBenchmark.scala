@@ -11,9 +11,6 @@ class DtabBenchmark extends StdBenchAnnotations {
       |    /zk       => /$/com.foobar.serverset;
       |    /zk       => /$/com.foobar.fixedserverset;
       |
-      |    /srvns#   => /$/com.foobar.srvns;
-      |    /srvns    => /srvns#/prod;
-      |
       |    /srv#     => /$/com.foobar.srv;
       |    /srv      => /srv#/production;
       |    /srv      => /srv#/prod;
