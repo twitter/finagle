@@ -24,8 +24,26 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] {
     data: Buf,
     casUnique: Option[Buf] = None
   ): Buf = {
-    // estimated size + 50 for casUnique, data length, DELIMITERS
-    val bw = BufByteWriter.dynamic(50 + data.length + 10 * command.length)
+
+    val lengthString = Integer.toString(data.length)
+
+    val messageSize = {
+      val casLength = casUnique match {
+        case Some(token) => 1 + token.length // SPACE + token
+        case None => 0
+      }
+
+      // the '+ 1' accounts for the space separator
+      command.length + 1 +
+      key.length + 1 +
+      flags.length + 1 +
+      expiry.length + 1 +
+      lengthString.length + // trailing space accounted for in casLength, if it's necessary
+      casLength + 2 +  // CAS + '\r\n'
+      data.length + 2  // data + '\r\n'
+    }
+
+    val bw = BufByteWriter.fixed(messageSize)
 
     bw.writeBytes(command)
     bw.writeBytes(SPACE)
@@ -39,7 +57,7 @@ private[finagle] abstract class AbstractCommandToBuf[Cmd] {
     bw.writeBytes(expiry)
     bw.writeBytes(SPACE)
 
-    bw.writeBytes(data.length.toString.getBytes(StandardCharsets.UTF_8))
+    bw.writeString(lengthString, StandardCharsets.US_ASCII)
 
     casUnique match {
       case Some(token) =>
