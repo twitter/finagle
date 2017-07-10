@@ -20,7 +20,7 @@ trait Row {
   /** The values for this Row. */
   val values: IndexedSeq[Value]
 
-  /**/
+  /** The value is to consider unsigned flag of field or not */
   val ignoreUnsigned: Boolean
 
   @inline
@@ -78,7 +78,6 @@ class StringEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
         RawValue(field.fieldType, field.charset, false, bytes)
       else {
         val str = new String(bytes, Charset(charset))
-        println(field, str)
         field.fieldType match {
           case Type.Tiny if isSigned(field)     => ByteValue(str.toByte)
           case Type.Tiny                        => ShortValue(str.toShort)
