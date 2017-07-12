@@ -144,7 +144,7 @@ private object TrafficDistributorTest {
     protected[this] def deregisterGauge(name: Seq[String]): Unit =
       underlying.gauges -= name
 
-    def counters: Map[Seq[String], Int] = underlying.counters.toMap
+    def counters: Map[Seq[String], Long] = underlying.counters.toMap
     def stats: Map[Seq[String], Seq[Float]] = underlying.stats.toMap
     def gauges: Map[Seq[String], () => Float] = underlying.gauges.toMap
 

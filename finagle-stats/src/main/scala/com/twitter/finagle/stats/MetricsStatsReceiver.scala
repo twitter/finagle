@@ -127,7 +127,7 @@ class MetricsStatsReceiver(
       if (counter == null) {
         counter = new Counter {
           val metricsCounter = registry.createCounter(format(names))
-          def incr(delta: Int): Unit = {
+          def incr(delta: Long): Unit = {
             metricsCounter.add(delta)
           }
         }

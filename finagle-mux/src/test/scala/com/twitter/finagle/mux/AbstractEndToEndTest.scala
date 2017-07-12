@@ -338,7 +338,7 @@ EOF
         case _ => false
       }
 
-      val leaseCtr: () => Int = { () =>
+      val leaseCtr: () => Long = { () =>
         val Some((_, ctr)) = sr.counters.find {
           case (_ +: Seq("mux", "leased"), value) => true
           case _ => false

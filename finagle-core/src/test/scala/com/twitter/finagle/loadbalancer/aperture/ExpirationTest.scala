@@ -21,7 +21,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     extends TestBal
     with Expiration[Unit, Unit] {
 
-    def expired: Int = stats.counters(Seq("expired"))
+    def expired: Long = stats.counters(Seq("expired"))
     def noExpired: Boolean = stats.counters.get(Seq("expired")).isEmpty
 
     protected def endpointIdleTime: Duration = idleTime / 2
