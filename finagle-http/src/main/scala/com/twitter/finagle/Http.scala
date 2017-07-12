@@ -193,7 +193,7 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
       new EndpointerModule[Request, Response](
-        Seq(implicitly[Stack.Param[HttpImpl]]),
+        Seq(implicitly[Stack.Param[HttpImpl]], implicitly[Stack.Param[param.Stats]]),
         { (prms: Stack.Params, addr: InetSocketAddress) =>
 
           val transporter = params[HttpImpl].transporter(prms)(addr)
@@ -203,11 +203,11 @@ object Http extends Client[Request, Response] with HttpRichClient
               // that would live for the life of the session.
               Contexts.letClearAll {
                 transporter().map { trans =>
-                  val streamTransport = params[HttpImpl].clientTransport(trans)
+                  val streamTransport = prms[HttpImpl].clientTransport(trans)
 
                   new HttpClientDispatcher(
                     new HttpTransport(streamTransport),
-                    params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+                    prms[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
                   )
                 }
               }
