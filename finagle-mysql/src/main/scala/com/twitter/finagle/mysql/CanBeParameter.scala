@@ -75,7 +75,22 @@ object CanBeParameter {
     new CanBeParameter[BigInt] {
       def sizeOf(param: BigInt) = 8
       def typeCode(param: BigInt) = Type.LongLong
-      def write(writer: MysqlBufWriter, param: BigInt) = writer.writeBytes(param.toByteArray)
+      def write(writer: MysqlBufWriter, param: BigInt) = {
+        val byteArray: Array[Byte] = param.toByteArray
+        val lengthOfByteArray: Int = byteArray.length
+
+        if (lengthOfByteArray > 8) {
+          throw new Exception(s"The length of BigInt is larger than 8 bytes: $lengthOfByteArray > 8")
+        }
+
+        for (i <- 0 until lengthOfByteArray) {
+          writer.writeByte(byteArray(i))
+        }
+
+        for (i <- lengthOfByteArray until 8) {
+          writer.writeByte(0x0)
+        }
+      }
     }
   }
 
