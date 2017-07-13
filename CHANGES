@@ -29,6 +29,10 @@ New Features
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
+  * finagle-mysql: `IsolationLevel` support was added with 
+    `Transactions.transactionWithIsolation` method, so the default level can be overridden 
+    at the transaction level. ``PHAB_ID=D68944``
+
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 
 Breaking API Changes
