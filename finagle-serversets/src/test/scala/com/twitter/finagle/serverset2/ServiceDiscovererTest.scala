@@ -37,7 +37,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   }
 
   def ep(port: Int) = Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
-  val ForeverEpoch = Epoch(Duration.Top)(new MockTimer)
+  val ForeverEpoch = Epoch(Duration.Top, new MockTimer)
   val retryStream = RetryStream()
 
   def createEntry(id: Int): Buf = {
@@ -292,7 +292,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
       val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
       val period = 1.second
       implicit val timer = new MockTimer
-      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, Epoch(period)(timer), timer)
+      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, Epoch(period, timer), timer)
 
       val stabilizedHealth = new AtomicReference[ClientHealth](ClientHealth.Healthy)
       sd.health.changes.register(Witness {

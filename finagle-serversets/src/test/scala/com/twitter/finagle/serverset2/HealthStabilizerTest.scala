@@ -16,7 +16,7 @@ class HealthStabilizerTest extends FunSuite with BeforeAndAfter {
   val unhealthy = Var.value[ClientHealth](ClientHealth.Unhealthy)
 
   val timer = new MockTimer
-  val limboEpoch = Epoch(10.seconds)(timer)
+  val limboEpoch = Epoch(10.seconds, timer)
   var closeMe = Closable.nop
   val stats = new InMemoryStatsReceiver()
 
