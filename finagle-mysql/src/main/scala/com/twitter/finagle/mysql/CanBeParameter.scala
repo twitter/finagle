@@ -80,7 +80,7 @@ object CanBeParameter {
         val lengthOfByteArray: Int = byteArray.length
 
         if (lengthOfByteArray > 8) {
-          throw new Exception(s"The length of BigInt is larger than 8 bytes: $lengthOfByteArray > 8")
+          throw new BigIntTooLongException(size = lengthOfByteArray)
         }
 
         for (i <- 0 until lengthOfByteArray) {
@@ -205,3 +205,5 @@ object CanBeParameter {
     }
   }
 }
+
+class BigIntTooLongException(size: Int) extends Exception(s"BigInt is stored as Unsigned Long, thus it cannot be longer than 8 bytes. Size = $size")
