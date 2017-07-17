@@ -4,7 +4,7 @@ import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Tra
 import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Transporter}
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
@@ -100,7 +100,6 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
   object Client {
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mysql") +
-      Timer(Netty4HashedWheelTimer) +
       DefaultPool.Param(
         low = 0, high = 1, bufferSize = 0,
         idleTime = Duration.Top,

@@ -16,7 +16,7 @@ import com.twitter.finagle.memcached.protocol.text.CommandToBuf
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -216,8 +216,7 @@ object Memcached extends finagle.Client[Command, Response]
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       PendingRequestFilter.Param(limit = defaultPendingRequestLimit) +
-      ProtocolLibrary(ProtocolLibraryName) +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary(ProtocolLibraryName)
 
     /**
      * A default client stack which supports the pipelined memcached client.
@@ -396,8 +395,7 @@ object Memcached extends finagle.Client[Command, Response]
      * Default stack parameters used for memcached server.
      */
     private val params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("memcached") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("memcached")
   }
 
   /**

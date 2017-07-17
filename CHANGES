@@ -20,6 +20,14 @@ New Features
     have been added to `ServerBuilder` and `ServerTransportParams`
     (withTransport.tls). ``PHAB_ID=D68645``
 
+  * finagle-core: Timer tasks submitted to the `c.t.f.util.DefaultTimer` can have their
+    execution time monitored. Slow executing tasks may result in a log message at level WARN
+    and a counter of slow tasks is kept under `finagle/timer/slow`. This can be enabled using
+    the global flag `c.t.f.util.defaultTimerProbeSlowTasks` and the maximum allowed runtime
+    and minimum duration between log messages can be tuned using the global flags
+    `c.t.f.util.defaultTimerSlowTaskMaxRuntime`, and
+    `c.t.f.util.defaultTimerSlowTaskLogMinInterval`, respectively. ``PHAB_ID=D70279``
+
   * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
     `MethodBuilder` is a collection of APIs for client configuration at a higher level than
     the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.

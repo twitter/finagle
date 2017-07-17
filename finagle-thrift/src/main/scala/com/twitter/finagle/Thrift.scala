@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -189,7 +188,6 @@ object Thrift
 
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("thrift")
-      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -375,7 +373,6 @@ object Thrift
 
     private val params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("thrift")
-      Timer(Netty4HashedWheelTimer)
   }
 
   /**

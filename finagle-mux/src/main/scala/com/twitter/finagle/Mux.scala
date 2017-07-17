@@ -8,8 +8,8 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{ProtocolLibrary, Timer, WithDefaultLoadBalancer}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
@@ -184,8 +184,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     private val params: Stack.Params = StackClient.defaultParams +
-      ProtocolLibrary("mux") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("mux")
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
@@ -270,8 +269,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     private val params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("mux") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("mux")
 
     /**
      * Returns the headers that a server sends to a client.

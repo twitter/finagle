@@ -13,7 +13,6 @@ import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpLi
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
-import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -174,8 +173,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackClient.defaultParams +
         protocolLibrary +
-        responseClassifierParam +
-        param.Timer(Netty4HashedWheelTimer)
+        responseClassifierParam
 
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
@@ -369,8 +367,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackServer.defaultParams +
         protocolLibrary +
-        responseClassifierParam +
-        param.Timer(Netty4HashedWheelTimer)
+        responseClassifierParam
 
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
