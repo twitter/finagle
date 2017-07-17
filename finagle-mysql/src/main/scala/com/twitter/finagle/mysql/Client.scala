@@ -67,6 +67,29 @@ trait Transactions {
    * is the connection returned to the pool for re-use.
    */
   def transaction[T](f: Client => Future[T]): Future[T]
+
+  /**
+   * Execute `f` in a transaction using the given Isolation Level for this transaction only.
+   * This Isolation Level overrides the session and global database settings for the transaction.
+   *
+   * If `f` throws an exception, the transaction is rolled back. Otherwise, the transaction is
+   * committed.
+   *
+   * @example {{{
+   *   client.transaction[Foo](IsolationLevel.RepeatableRead) { c =>
+   *    for {
+   *       r0 <- c.query(q0)
+   *       r1 <- c.query(q1)
+   *       response: Foo <- buildResponse(r1, r2)
+   *     } yield response
+   *   }
+   * }}}
+   * @note we use a ServiceFactory that returns the same Service repeatedly to the client. This is
+   * to assure that a new MySQL connection (i.e. Service) from the connection pool (i.e.,
+   * ServiceFactory) will be used for each new transaction. Only upon completion of the transaction
+   * is the connection returned to the pool for re-use.
+   */
+  def transactionWithIsolation[T](isolationLevel: IsolationLevel)(f: Client => Future[T]): Future[T]
 }
 
 trait Cursors {
@@ -122,7 +145,15 @@ private class StdClient(factory: ServiceFactory[Request, Result], statsReceiver:
     }
   }
 
+  def transactionWithIsolation[T](isolationLevel: IsolationLevel)(f: Client => Future[T]): Future[T] = {
+    transact(Some(isolationLevel), f)
+  }
+
   def transaction[T](f: Client => Future[T]): Future[T] = {
+    transact(None, f)
+  }
+
+  private[this] def transact[T](isolationLevel: Option[IsolationLevel], f: Client => Future[T]): Future[T] = {
     val singleton = new ServiceFactory[Request, Result] {
       val svc = factory()
       // Because the `singleton` is used in the context of a `FactoryToService` we override
@@ -136,10 +167,12 @@ private class StdClient(factory: ServiceFactory[Request, Result], statsReceiver:
       def apply(conn: ClientConnection) = proxiedService
       def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
     }
-
     val client = Client(singleton, statsReceiver)
     val transaction = for {
-      _ <- client.query("START TRANSACTION")
+      _ <- isolationLevel match {
+        case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}; START TRANSACTION")
+        case None => client.query("START TRANSACTION")
+      }
       result <- f(client)
       _ <- client.query("COMMIT")
     } yield {

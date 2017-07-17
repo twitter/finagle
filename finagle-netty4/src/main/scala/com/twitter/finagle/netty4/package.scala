@@ -31,14 +31,14 @@ package object netty4 {
   // NOTE: Before overriding it, we check whether or not it was set before. This way users
   // will have a chance to tune it.
   //
-  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers` or `UsePooling`).
+  // NOTE: Only applicable when pooling is enabled (see `UsePooling`).
   if (System.getProperty("io.netty.allocator.numDirectArenas") == null) {
     System.setProperty("io.netty.allocator.numDirectArenas", numWorkers().toString)
   }
 
   // Set the number of heap arenas the number of logical cores * 2.
   //
-  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers` or `UsePooling`).
+  // NOTE: Only applicable when pooling is enabled (see `UsePooling`).
   if (System.getProperty("io.netty.allocator.numHeapArenas") == null) {
     System.setProperty("io.netty.allocator.numHeapArenas", numWorkers().toString)
   }
@@ -51,19 +51,15 @@ package object netty4 {
   // inbound messages sent over TCP). Every allocation that exceeds 128kb will fall back
   // to an unpooled allocator.
   //
-  // The `io.netty.allocator.maxOrder` (default: 4 (receive buffers) or 7 (end-to-end)) determines
-  // the number of left binary shifts we need to apply to the `io.netty.allocator.pageSize`
-  // (default: 8192): 8192 << 4 = 128kb.
+  // The `io.netty.allocator.maxOrder` (default: 7) determines the number of left binary
+  // shifts we need to apply to the `io.netty.allocator.pageSize`
+  // (default: 8192): 8192 << 7 = 1mb.
   //
   // NOTE: Before overriding it, we check whether or not it was set before. This way users
   // will have a chance to tune it.
   //
-  // NOTE: Only applicable when pooling is enabled (see `poolReceiveBuffers` or `UsePooling`).
+  // NOTE: Only applicable when pooling is enabled (see `UsePooling`).
   if (System.getProperty("io.netty.allocator.maxOrder") == null) {
-    if (!usePooling()) {
-      System.setProperty("io.netty.allocator.maxOrder", "4")
-    } else {
-      System.setProperty("io.netty.allocator.maxOrder", "7")
-    }
+    System.setProperty("io.netty.allocator.maxOrder", "7")
   }
 }

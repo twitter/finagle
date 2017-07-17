@@ -4,47 +4,45 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.netty4.util.Netty4Timer
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.stats.{FinagleStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.ServiceLoadedTimer
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Time, Try}
+import com.twitter.util.{Duration, Time}
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Configures `ticksPerWheel` on the singleton instance of `Netty4Timer`.
+ * Configures `ticksPerWheel` on the singleton instance of `HashedWheelTimer`.
  */
 private object timerTicksPerWheel extends GlobalFlag[Int](
-  512,
-  "Netty 4 timer ticks per wheel")
+    512,
+    "Netty 4 timer ticks per wheel")
 
 /**
- * Configures `tickDuration` on the singleton instance of `Netty4Timer`.
+ * Configures `tickDuration` on the singleton instance of `HashedWheelTimer`.
  */
 private object timerTickDuration extends GlobalFlag[Duration](
-  10.milliseconds,
-  "Netty 4 timer tick duration")
+    10.milliseconds,
+    "Netty 4 timer tick duration")
 
 /**
- * A default instance of Netty timer that needs to be shared between [[Netty4HashedWheelTimer]]
- * object (used in protocols) and instances (service-loaded).
- *
- * @note We override `maxPendingTimeouts` just to the maximum possible value just to make
- *       Netty's timer maintain its internal `pendingTimeouts` counter. We wont' need it
- *       after https://github.com/netty/netty/pull/6682 is merged.
+ * A Netty timer for use with [[Netty4HashedWheelTimer]].
  */
-private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
-  new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */true),
-  timerTickDuration().inMilliseconds, TimeUnit.MILLISECONDS,
-  timerTicksPerWheel(),
-  /*leakDetection = */false,
-  /*maxPendingTimeouts = */Long.MaxValue) { self =>
+private class HashedWheelTimer(
+    statsReceiver: StatsReceiver,
+    tickDuration: Duration,
+    ticksPerWheel: Int)
+  extends io.netty.util.HashedWheelTimer(
+    new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */true),
+    tickDuration.inMilliseconds, TimeUnit.MILLISECONDS,
+    ticksPerWheel,
+    /*leakDetection = */false) { self =>
 
   private[this] val statsPollInterval = 10.seconds
 
   private object deviationStat extends io.netty.util.TimerTask {
 
     private[this] val tickDuration = timerTickDuration()
-    private[this] val deviationMs = FinagleStatsReceiver.stat("timer", "deviation_ms")
+    private[this] val deviationMs = statsReceiver.stat("timer", "deviation_ms")
     private[this] var nextAt = Time.now + tickDuration
 
     def run(timeout: io.netty.util.Timeout): Unit = {
@@ -58,24 +56,32 @@ private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
   }
 
   private object pendingTasksStat extends io.netty.util.TimerTask {
-    private[this] val pendingTasks = FinagleStatsReceiver.stat("timer", "pending_tasks")
-
-    // This represents HashedWheelTimer's private field `pendingTimeouts`.
-    // We can remove when https://github.com/netty/netty/pull/6682 is available.
-    private[this] val pendingTimeouts: Try[AtomicLong] = Try {
-      val field = classOf[io.netty.util.HashedWheelTimer].getDeclaredField("pendingTimeouts")
-      field.setAccessible(true)
-      field.get(self).asInstanceOf[AtomicLong]
-    }
+    private[this] val pendingTasks = statsReceiver.stat("timer", "pending_tasks")
 
     def run(timeout: io.netty.util.Timeout): Unit = {
-      pendingTimeouts.foreach(pt => pendingTasks.add(pt.get()))
+      pendingTasks.add(self.pendingTimeouts)
       self.newTimeout(pendingTasksStat, statsPollInterval.inSeconds, TimeUnit.SECONDS)
     }
   }
 
   self.newTimeout(deviationStat, timerTickDuration().inMilliseconds, TimeUnit.MILLISECONDS)
   self.newTimeout(pendingTasksStat, statsPollInterval.inSeconds, TimeUnit.SECONDS)
+}
+
+private object HashedWheelTimer {
+  /**
+   * A singleton instance of [[HashedWheelTimer]] that is used for the all service loaded
+   * instances of [[Netty4HashedWheelTimer]]. Configuration is done via global flags.
+   *
+   * @note Stats are reported into the "finagle" scope.
+   */
+  val instance: HashedWheelTimer = {
+    new HashedWheelTimer(
+      FinagleStatsReceiver,
+      timerTickDuration(),
+      timerTicksPerWheel()
+    )
+  }
 }
 
 /**
@@ -87,7 +93,8 @@ private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
  * This class is intended to be service-loaded instead of directly instantiated.
  * See [[com.twitter.finagle.util.LoadService]] and [[com.twitter.finagle.util.DefaultTimer]].
  *
- * This timer also exports some stats under `finagle/timer` (see [[FinagleStatsReceiver]]):
+ * This timer also exports metrics under `finagle/timer` (see
+ * [[https://twitter.github.io/finagle/guide/Metrics.html#timer metrics documentation]]):
  *
  * 1. `deviation_ms`
  * 2. `pending_tasks`
@@ -97,17 +104,14 @@ private object hashedWheelTimer extends io.netty.util.HashedWheelTimer(
  * 1. `-com.twitter.finagle.netty4.timerTickDuration=100.milliseconds`
  * 2. `-com.twitter.finagle.netty4.timerTicksPerWheel=512`
  */
-private[finagle] class Netty4HashedWheelTimer extends Netty4Timer(hashedWheelTimer) {
+private[netty4] class Netty4HashedWheelTimer
+  extends Netty4Timer(HashedWheelTimer.instance)
+  with ServiceLoadedTimer {
 
   private[this] val log = Logger.get()
 
   // This timer is "unstoppable".
   override def stop(): Unit =
     log.warning(s"Ignoring call to `Timer.stop()` on an unstoppable Netty4Timer.\n" +
-      s"Current stack trace: ${ Thread.currentThread.getStackTrace.mkString("\n") }")
+      s"Current stack trace: ${Thread.currentThread.getStackTrace.mkString("\n")}")
 }
-
-/**
- * A singleton instance of [[Netty4HashedWheelTimer]].
- */
-private[finagle] object Netty4HashedWheelTimer extends Netty4HashedWheelTimer

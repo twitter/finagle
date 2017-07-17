@@ -14,7 +14,7 @@ import scala.util.control.NoStackTrace
  * has been set.
  */
 trait HasRemoteInfo extends Exception {
-  private[this] var _remoteInfo: RemoteInfo = RemoteInfo.NotAvailable
+  @volatile private[this] var _remoteInfo: RemoteInfo = RemoteInfo.NotAvailable
 
   def remoteInfo(): RemoteInfo = _remoteInfo
 
@@ -24,8 +24,8 @@ trait HasRemoteInfo extends Exception {
   def exceptionMessage(): String = super.getMessage()
 
   override def getMessage(): String =
-    if (exceptionMessage == null) null
-    else s"$exceptionMessage. Remote Info: $remoteInfo"
+    if (exceptionMessage() == null) null
+    else s"${exceptionMessage()}. Remote Info: ${remoteInfo()}"
 }
 
 /**
@@ -425,6 +425,26 @@ case class ChannelWriteException(ex: Option[Throwable])
 object ChannelWriteException {
   def apply(underlying: Throwable): ChannelWriteException =
     new ChannelWriteException(Option(underlying))
+}
+
+/**
+ * Indicates that an error occurred while `SslClientSessionVerification` was
+ * being performed, or the server disconnected from the client in a way that
+ * indicates that there was high probability that the server failed to verify
+ * the client's certificate.
+ */
+case class SslVerificationFailedException(
+    ex: Option[Throwable],
+    remoteAddr: Option[SocketAddress])
+  extends ChannelException(ex, remoteAddr) {
+  def this(underlying: Throwable, remoteAddress: SocketAddress) =
+    this(Option(underlying), Option(remoteAddress))
+  def this() = this(None, None)
+
+  /**
+   * The cause of this exception, or `null` if there is no cause.
+   */
+  def underlying: Throwable = ex.orNull
 }
 
 /**

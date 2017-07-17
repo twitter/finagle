@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.util.{Return, Throw}
+import com.twitter.util.{Return, Throw, Try}
 import com.twitter.io.Buf
 
 case class ClientId(name: String) {
@@ -29,8 +29,8 @@ object ClientId {
       case Some(ClientId(name)) => Buf.Utf8(name)
     }
 
-    def tryUnmarshal(buf: Buf) = buf match {
-      case buf if buf.isEmpty => Return.None
+    def tryUnmarshal(buf: Buf): Try[Option[ClientId]] = buf match {
+      case b if b.isEmpty => Return.None
       case Buf.Utf8(name) => Return(Some(ClientId(name)))
       case invalid => Throw(new IllegalArgumentException("client id not a utf8 string"))
     }
@@ -41,9 +41,9 @@ object ClientId {
   def current: Option[ClientId] =
     Contexts.broadcast.getOrElse(clientIdCtx, NoClientFn)
 
-  private[finagle] def let[R](clientId: ClientId)(f: => R): R =
-    Contexts.broadcast.let(clientIdCtx, Some(clientId))(f)
-
+  /**
+   * See [[ClientId.asCurrent]]
+   */
   private[finagle] def let[R](clientId: Option[ClientId])(f: => R): R = {
     clientId match {
       case Some(_) => Contexts.broadcast.let(clientIdCtx, clientId)(f)

@@ -3,7 +3,8 @@ package com.twitter.finagle.param
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
-  SslContextServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+  SslContextServerEngineFactory, SslServerConfiguration,
+  SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.transport.Transport
 import java.io.File
 import javax.net.ssl.SSLContext
@@ -18,19 +19,40 @@ import javax.net.ssl.SSLContext
 class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
   extends TransportParams(self) {
 
-  /*
+  /**
    * Enables SSL/TLS support (connection encrypting) on this server.
    */
   def tls(config: SslServerConfiguration): A =
     self.configured(Transport.ServerSsl(Some(config)))
 
-  /*
+  /**
    * Enables SSL/TLS support (connection encrypting) on this server.
    */
   def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): A =
     self
       .configured(Transport.ServerSsl(Some(config)))
       .configured(SslServerEngineFactory.Param(engineFactory))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(config: SslServerConfiguration, sessionVerifier: SslServerSessionVerifier): A =
+    self
+      .configured(Transport.ServerSsl(Some(config)))
+      .configured(SslServerSessionVerifier.Param(sessionVerifier))
+
+  /**
+   * Enables SSL/TLS support (connection encrypting) on this server.
+   */
+  def tls(
+    config: SslServerConfiguration,
+    engineFactory: SslServerEngineFactory,
+    sessionVerifier: SslServerSessionVerifier
+  ): A =
+    self
+      .configured(Transport.ServerSsl(Some(config)))
+      .configured(SslServerEngineFactory.Param(engineFactory))
+      .configured(SslServerSessionVerifier.Param(sessionVerifier))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) on this server. Only `certificatePath` and

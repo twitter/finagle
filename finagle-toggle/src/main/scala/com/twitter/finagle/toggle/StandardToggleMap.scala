@@ -165,7 +165,7 @@ object StandardToggleMap {
     urls.head
   }
 
-  private[this] def loadJsonConfigWithEnv(
+  private[finagle] def loadJsonConfigWithEnv(
     configName: String,
     descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {

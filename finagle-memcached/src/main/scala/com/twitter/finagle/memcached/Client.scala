@@ -161,7 +161,7 @@ private object BaseClient {
  *                the expiration time arrives (measured on the cache server).
  *
  */
-trait BaseClient[T] {
+trait BaseClient[T] extends Closable {
   import BaseClient._
 
   /**
@@ -500,7 +500,7 @@ trait BaseClient[T] {
    * Send a quit command to the server. Alternative to release, for
    * protocol compatibility.
    */
-  def quit(): Future[Unit] = Future(release())
+  def quit(): Future[Unit] = close()
 
   /**
    * Send a stats command with optional arguments to the server.
@@ -524,8 +524,14 @@ trait BaseClient[T] {
   def stats(): Future[Seq[String]] = stats(None)
 
   /**
+   * Close the underlying resources.
+   */
+  def close(deadline: Time): Future[Unit]
+
+  /**
    * release the underlying service(s)
    */
+  @deprecated("Prefer `close` instead", "2017-06-20")
   def release(): Unit
 }
 
@@ -591,6 +597,7 @@ trait ProxyClient extends Client {
 
   def stats(args: Option[String]): Future[Seq[String]] = proxyClient.stats(args)
 
+  def close(deadline: Time): Future[Unit] = proxyClient.close(deadline)
   def release(): Unit = proxyClient.release()
 }
 
@@ -799,9 +806,11 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     }
   }
 
-  def release(): Unit = {
+  def close(deadline: Time): Future[Unit] =
     service.close()
-  }
+
+  def release(): Unit =
+    service.close()
 }
 
 /**
@@ -1004,7 +1013,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
 
   // When host ejection is on, the host should be returned to the ring
   // immediately after it is woken, so it can satisfy a probe request
-  override def startProbing() = synchronized {
+  override def startProbing(): Unit = synchronized {
     super.startProbing()
     if (ejectFailedHost) healthBroker ! NodeRevived(key)
   }
@@ -1240,6 +1249,13 @@ private[finagle] class KetamaPartitionedClient(
   override def decr(key: String, delta: Long) =
     ready.interruptible().before(super.decr(key, delta))
 
+  def close(deadline: Time): Future[Unit] = synchronized {
+    val closables = mutable.ArrayBuffer[Closable]()
+    closables ++= nodes.values.map(_.node.handle)
+    closables += listener
+    Closables.all(closables.result(): _*).close(deadline)
+  }
+
   def release(): Unit = synchronized {
     nodes.foreach { case (_, n) =>
       n.node.handle.release()
@@ -1263,6 +1279,9 @@ class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
     val index = hash % clients.size
     clients(index.toInt)
   }
+
+  def close(deadline: Time): Future[Unit] =
+    Closables.all(clients: _*).close(deadline)
 
   def release(): Unit = {
     clients.foreach { _.release() }
@@ -1313,6 +1332,9 @@ class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher)
     val index = hash % clients.length
     clients(index.toInt)
   }
+
+  def close(deadline: Time): Future[Unit] =
+    Closable.all(clients: _*).close(deadline)
 
   def release(): Unit = {
     clients.foreach { _.release() }

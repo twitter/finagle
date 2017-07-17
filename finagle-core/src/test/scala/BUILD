@@ -4,14 +4,17 @@ scala_library(
   name='stringprotocol',
   dependencies=[
     '3rdparty/jvm/io/netty:netty',
-    'finagle/finagle-core/src/main/scala:scala',
-    'util/util-core/src/main/scala:scala',
+    'finagle/finagle-core',
+    'finagle/finagle-netty3',
+    'util/util-core',
+    'util/util-stats',
   ],
   sources=[
     './com/twitter/finagle/client/StringClient.scala',
     './com/twitter/finagle/server/StringServer.scala'
   ],
   fatal_warnings=True,
+  strict_deps=True,
 )
 
 junit_tests(
@@ -25,6 +28,7 @@ junit_tests(
     '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-core/src/test/resources',
+    'finagle/finagle-netty3',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-hashing/src/main/scala:scala',

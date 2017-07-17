@@ -42,6 +42,10 @@ Timer
   :src:`HashedWheelTimer.Default <com/twitter/finagle/util/HashedWheelTimer.scala>`
   from their expected time.
 
+**finagle/timer/slow**
+  A counter of the number of tasks found to be executing for longer
+  than 2 seconds.
+
 ClientRegistry
 <<<<<<<<<<<<<<
 

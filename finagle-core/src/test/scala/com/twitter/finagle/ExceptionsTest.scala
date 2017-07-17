@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.context.RemoteInfo
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.{SpanId, TraceId}
 import com.twitter.util.Duration
 import java.net.{InetSocketAddress, SocketAddress}
@@ -101,9 +100,9 @@ class ExceptionsTest extends FunSuite {
     val upstreamAddr = new InetSocketAddress("2.3.4.5", 100)
     val upstreamId = "upstream"
 
-    exc.setRemoteInfo(RemoteInfo.Available(Some(upstreamAddr), Some(ClientId(upstreamId)), Some(downstreamAddr), Some(ClientId(downstreamId)), traceId))
-    assert(exc.getMessage() == "foo. Remote Info: Upstream Address: /2.3.4.5:100, Upstream Client Id: upstream, " +
-      "Downstream Address: /1.2.3.4:100, Downstream Client Id: downstream, " +
+    exc.setRemoteInfo(RemoteInfo.Available(Some(upstreamAddr), Some(upstreamId), Some(downstreamAddr), Some(downstreamId), traceId))
+    assert(exc.getMessage() == "foo. Remote Info: Upstream Address: /2.3.4.5:100, Upstream id: upstream, " +
+      "Downstream Address: /1.2.3.4:100, Downstream label: downstream, " +
       s"Trace Id: $traceId")
   }
 

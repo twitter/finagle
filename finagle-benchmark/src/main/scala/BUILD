@@ -12,6 +12,7 @@ scala_library(
     'finagle/finagle-exp/src/main/scala',
     'finagle/finagle-memcached/src/main/scala',
     'finagle/finagle-mux/src/main/scala',
+    'finagle/finagle-netty3/src/main/scala',
     'finagle/finagle-netty4/src/main/scala',
     'finagle/finagle-serversets/src/main/scala',
     'finagle/finagle-stats/src/main/scala',
@@ -22,11 +23,11 @@ scala_library(
     'scrooge/scrooge-core/src/main/scala',
     'util/util-app/src/main/scala',
     'util/util-core/src/main/scala',
-    'util/util-events/src/main/scala',
     'util/util-logging/src/main/scala',
     'util/util-stats/src/main/scala',
   ],
   sources=rglobs('*.scala'),
+  strict_deps=True,
 )
 
 jvm_binary(

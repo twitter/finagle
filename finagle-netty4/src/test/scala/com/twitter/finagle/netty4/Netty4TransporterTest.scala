@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.{ConnectionFailedException, Failure, ReadTimedOutException, WriteTimedOutException}
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.netty4.framer.TestFramer
+import com.twitter.finagle.netty4.decoder.TestFramer
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration}

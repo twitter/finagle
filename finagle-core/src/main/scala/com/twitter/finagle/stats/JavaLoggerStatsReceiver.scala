@@ -23,7 +23,7 @@ class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
   }
 
   def counter(name: String*): Counter = new Counter {
-    def incr(delta: Int) {
+    def incr(delta: Long): Unit = {
       logger.info("%s incr %d".format(formatName(name), delta))
     }
   }

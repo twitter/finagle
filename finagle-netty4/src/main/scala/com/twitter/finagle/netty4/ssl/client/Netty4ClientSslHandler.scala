@@ -2,17 +2,18 @@ package com.twitter.finagle.netty4.ssl.client
 
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.ssl.Alpn
-import com.twitter.finagle.ssl.{ApplicationProtocols, Engine, SessionVerifier}
-import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
+import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Address, Stack}
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 
 /**
  * A channel handler that takes [[Stack.Params]] and upgrades the pipeline with missing
- * TLS/SSL pieces required for client-side transport encryption.
+ * SSL/TLS pieces required for client-side transport encryption.
  *
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
@@ -80,13 +81,11 @@ private[netty4] class Netty4ClientSslHandler(
 
   private[this] def createSslConnectHandler(
     sslHandler: SslHandler,
+    address: Address,
     config: SslClientConfiguration
   ): SslClientConnectHandler = {
-    val sessionValidation = config.hostname
-      .map(SessionVerifier.hostname)
-      .getOrElse(SessionVerifier.AlwaysValid)
-
-    new SslClientConnectHandler(sslHandler, sessionValidation)
+    val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
+    new SslClientConnectHandler(sslHandler, address, config, sessionVerifier)
   }
 
   private[this] def addHandlersToPipeline(
@@ -113,7 +112,8 @@ private[netty4] class Netty4ClientSslHandler(
       val combined: SslClientConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(address, combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      val sslConnectHandler: SslClientConnectHandler = createSslConnectHandler(sslHandler, combined)
+      val sslConnectHandler: SslClientConnectHandler =
+        createSslConnectHandler(sslHandler, address, combined)
       addHandlersToPipeline(ch.pipeline(), sslHandler, sslConnectHandler)
     }
   }

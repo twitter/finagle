@@ -4,11 +4,8 @@ import com.twitter.conversions.storage._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class FixedLengthMessageAggregatorTest extends FunSuite {
 
   test("full messages pass through") {
@@ -94,5 +91,26 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
 
     val bodyObserved = channel.readInbound[HttpContent]()
     assert(bodyObserved.content == content)
+  }
+
+  test("responses that will not have a body are aggregated") {
+    Set(
+      HttpResponseStatus.NO_CONTENT,
+      HttpResponseStatus.NOT_MODIFIED,
+      HttpResponseStatus.CONTINUE,
+      HttpResponseStatus.SWITCHING_PROTOCOLS,
+      HttpResponseStatus.PROCESSING
+    ).foreach { status =>
+
+      val agg = new FixedLengthMessageAggregator(11.byte)
+      val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
+      val head = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
+
+      assert(!channel.writeInbound(head)) // shouldn't pass through
+      assert(channel.writeInbound(new DefaultLastHttpContent()))
+
+      val reqObserved = channel.readInbound[FullHttpResponse]()
+      assert(reqObserved.status == status)
+    }
   }
 }

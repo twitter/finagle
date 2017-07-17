@@ -1,10 +1,13 @@
 package com.twitter.finagle.toggle
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.util.{DefaultIndenter, DefaultPrettyPrinter}
+import com.fasterxml.jackson.databind.{MappingJsonFactory, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Try
 import java.net.URL
+import scala.collection.mutable
 import scala.collection.{breakOut, immutable}
 
 /**
@@ -179,4 +182,52 @@ object JsonToggleMap {
     jsonToggles.toToggleMap(url.toString, descriptionMode)
   }
 
+  private case class Component(source: String, fraction: Double)
+  private case class LibraryToggle(current: Current, components: Seq[Component])
+  private case class Library(libraryName: String, toggles: Seq[LibraryToggle])
+  private case class Libraries(libraries: Seq[Library])
+  private case class Current(
+    id: String,
+    fraction: Double,
+    lastValue: Option[Boolean],
+    description: Option[String])
+
+  private val factory = new MappingJsonFactory()
+  factory.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
+  private val printer = new DefaultPrettyPrinter
+  printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
+  mapper.writer(printer)
+
+  private[this] def toLibraryToggles(toggleMap: ToggleMap): Seq[LibraryToggle] = {
+    // create a map of id to metadata for faster lookups
+    val idToMetadata = toggleMap.iterator.map { md => md.id -> md }.toMap
+
+    // create a mapping of id to a seq of its components.
+    val idToComponents = mutable.Map.empty[String, mutable.ArrayBuffer[Component]]
+    ToggleMap.components(toggleMap).foreach { tm =>
+      tm.iterator.foreach { md =>
+        val components: mutable.ArrayBuffer[Component] =
+          idToComponents.getOrElse(md.id, mutable.ArrayBuffer.empty[Component])
+        idToComponents.put(md.id, components += Component(md.source, md.fraction))
+      }
+    }
+
+    idToComponents.map { case (id, details) =>
+      val md = idToMetadata(id)
+      val lastApply = toggleMap(id) match {
+        case captured: Toggle.Captured => captured.lastApply
+        case _ => None
+      }
+      LibraryToggle(Current(id, md.fraction, lastApply, md.description), details)
+    }.toSeq
+  }
+
+
+  /**
+   * Serialize a [[ToggleMap]] to JSON format
+   */
+  def toJson(registry: Map[String, ToggleMap]): String = {
+    val libs = registry.map { case (name, toggleMap) => Library(name, toLibraryToggles(toggleMap)) }
+    mapper.writeValueAsString(Libraries(libs.toSeq))
+  }
 }

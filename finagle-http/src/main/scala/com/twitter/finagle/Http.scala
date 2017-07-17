@@ -13,7 +13,6 @@ import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3HttpLi
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http2.{Http2Listener, Http2Transporter}
 import com.twitter.finagle.netty4.http.exp.{Netty4HttpListener, Netty4HttpTransporter}
-import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.netty4.http.{Netty4ClientStreamTransport, Netty4ServerStreamTransport}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -50,12 +49,6 @@ trait HttpRichClient { self: Client[Request, Response] =>
 object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
-  // Toggles transport implementation to Netty 4.
-  private[this] object useNetty4 {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseNetty4")
-    def apply(): Boolean = underlying(ServerInfo().id.hashCode)
-  }
-
   // Toggles transport implementation to Http/2.
   private[this] object useHttp2 {
     private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2")
@@ -82,10 +75,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   }
 
   object HttpImpl {
-    implicit val httpImplParam: Stack.Param[HttpImpl] = new Stack.Param[HttpImpl] {
-      lazy val default = if (useNetty4()) Netty4Impl else Netty3Impl
-      override def show(p: HttpImpl): Seq[(String, () => String)] = Seq(("impl", () => p.implName))
-    }
+    implicit val httpImplParam: Stack.Param[HttpImpl] = Stack.Param(Netty4Impl)
   }
 
   val Netty3Impl: HttpImpl = HttpImpl(
@@ -183,8 +173,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackClient.defaultParams +
         protocolLibrary +
-        responseClassifierParam +
-        param.Timer(Netty4HashedWheelTimer)
+        responseClassifierParam
 
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
@@ -249,11 +238,9 @@ object Http extends Client[Request, Response] with HttpRichClient
      * number of uncompressed bytes of header name/values.
      * These may be set independently via the .configured API.
      */
-    def withMaxHeaderSize(size: StorageUnit): Client = {
-      this
-        .configured(http.param.MaxHeaderSize(size))
-        .configured(http2.param.MaxHeaderListSize(Some(size)))
-    }
+    def withMaxHeaderSize(size: StorageUnit): Client = this
+      .configured(http.param.MaxHeaderSize(size))
+      .configured(http2.param.MaxHeaderListSize(Some(size)))
 
     /**
      * Configures the maximum initial line length the client can
@@ -310,8 +297,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     /**
      * Create a [[http.MethodBuilder]] for a given destination.
      *
-     * '''Experimental:''' This API is under construction.
-     *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
     def methodBuilder(dest: String): http.MethodBuilder =
@@ -319,8 +304,6 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     /**
      * Create a [[http.MethodBuilder]] for a given destination.
-     *
-     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -384,8 +367,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     private val params: Stack.Params = {
       val vanilla = StackServer.defaultParams +
         protocolLibrary +
-        responseClassifierParam +
-        param.Timer(Netty4HashedWheelTimer)
+        responseClassifierParam
 
       if (useHttp2()) vanilla ++ Http2 else vanilla
     }
@@ -423,6 +405,16 @@ object Http extends Client[Request, Response] with HttpRichClient
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
+
+    /**
+     * For HTTP1*, configures the max size of headers
+     * For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
+     * number of uncompressed bytes of header name/values.
+     * These may be set independently via the .configured API.
+     */
+    def withMaxHeaderSize(size: StorageUnit): Server = this
+      .configured(http.param.MaxHeaderSize(size))
+      .configured(http2.param.MaxHeaderListSize(Some(size)))
 
     /**
      * Configures the maximum request size this server can receive.

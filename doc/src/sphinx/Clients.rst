@@ -63,26 +63,32 @@ to `twitter.com`.
   import java.net.SocketAddress
 
   val twitter: Service[Request, Response] = Http.client
-    .configured(Transporter.HttpProxy(Some(new InetSocketAddress("my-proxy-server.com", 3128))))
-    .withSessionQualifier.noFailFast
-    .newService("twitter.com")
+    .withTransport.httpProxyTo(
+      host = "twitter.com:443",
+      credentials = Transporter.Credentials("user", "password")
+    )
+    .newService("inet!my-proxy-server.com:3128") // using local DNS to resolve proxy
 
+While this setup may look somewhat counter intuitive with regards to where the ultimate destination
+and the proxy server address are applied, it enables a variety of resiliency features by utilizing
+Finagle's naming and load balancing subsystems. Given a web proxy server address/name falls under
+a standard name resolution process, it might be (and should be) backed by a replica set (multiple
+hosts) to get the greatest out of a client.
 
 .. note::
 
-  The web proxy server, represented as a static `SocketAddress`, acts as a single point of failure
-  for a client. Whenever a proxy server is down, no traffic is served through the client no matter
-  how big its replica set. This is why :ref:`Fail Fast <client_fail_fast>` is disabled on this
-  client.
-
-  There is better HTTP proxy support coming to Finagle along with the Netty 4 upgrade.
+  There is also a legacy support to web proxy servers available in Finagle via the
+  `Transporter.HttpProxy` stack param. In that case, proxy server is forced to represented as a single
+  `SocketAddress`, which not only introduces a single point of failure within a client (i.e., a
+  client goes offline if a web proxy server is down), but also disables Finagle's resiliency features
+  such as failure detection and load balancing.
 
 SOCKS5 Proxy
 ~~~~~~~~~~~~
 
 SOCKS5 proxy support in Finagle is designed and implemented exclusively for testing/development
 (assuming that SOCKS proxy is provided via `ssh -D`), not for production usage. For production
-traffic, an HTTP proxy should be used instead.
+traffic, an HTTP(S) proxy should be used instead.
 
 Use the following CLI flags to enable SOCKS proxy on every Finagle client on a given JVM instance
 (username and password are optional).
@@ -310,6 +316,8 @@ time allowed for a request to be outstanding. An important implementation detail
 :src:`TimeoutFilter <com/twitter/finagle/service/TimeoutFilter.scala>` is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
 already been dispatched, the only way to cancel the request is to terminate the connection.
+Note that HTTP/2 and Mux both have first-class support for request cancellation without
+needing to tear down the connection.
 
 The default timeout for the `Request Timeout` module is unbounded (i.e., ``Duration.Top``).
 Here is an example [#example]_ of how to override that default.
@@ -325,10 +333,16 @@ Here is an example [#example]_ of how to override that default.
     .withRequestTimeout(42.seconds)
     .newService("twitter.com")
 
+Regarding :ref:`retries <client_retries>`, the timeout is given to each attempt.
+
+As Finagle does not know whether or not a request is idempotent, request timeouts
+are not retried by default. However this can be configured through a
+:ref:`retry policy <client_retries>`.
+
 See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
 
-.. note:: Requests timed out by the `Request Timeout` module are not retried by default
-          given it's not known whether or not they were written to the wire.
+.. note:: This module only works with request/response usage and does not
+          support streaming (such as with HTTP).
 
 The `Expiration` module is attached at the connection level and expires a service/session
 after a certain amount of idle time. The module is implemented by
@@ -827,8 +841,6 @@ The filter can be configured with the following parameters:
 
 MethodBuilder
 -------------
-
-.. warning:: These APIs are experimental and subject to change.
 
 .. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
           We are waiting on user interest before expanding to more protocols.

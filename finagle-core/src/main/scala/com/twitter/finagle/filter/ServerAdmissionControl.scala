@@ -3,6 +3,7 @@ package com.twitter.finagle.filter
 import com.twitter.finagle._
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.param.ProtocolLibrary
+import com.twitter.util.{Future, Promise, Time}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
 
@@ -28,8 +29,11 @@ private[twitter] object ServerAdmissionControl {
   /**
    * Passed to filter factories to allow behavioral adjustment on a per-service
    * basis rather than globally
+   *
+   * @param onServerClose can be used by filters to close any resources that may linger after the
+   *                      server closes
    */
-  case class ServerParams(protocol: String)
+  case class ServerParams(protocol: String, onServerClose: Future[Unit])
 
   // a map of admission control filters, key by name
   private[this] val acs: ConcurrentMap[String, ServerParams => TypeAgnostic] = new ConcurrentHashMap()
@@ -98,7 +102,8 @@ private[twitter] object ServerAdmissionControl {
       ): ServiceFactory[Req, Rep] = {
         val Param(enabled) = _enabled
         val ProtocolLibrary(protoString) = protoLib
-        val conf = ServerParams(protoString)
+        val onServerClose = new Promise[Unit]
+        val conf = ServerParams(protoString, onServerClose)
 
         if (!enabled || acs.isEmpty) {
           next
@@ -108,7 +113,13 @@ private[twitter] object ServerAdmissionControl {
             acs.values.asScala.foldLeft(Filter.TypeAgnostic.Identity){ case (sum, mkFilter) =>
               mkFilter(conf).andThen(sum)
             }
-          typeAgnosticFilters.toFilter.andThen(next)
+
+          new ServiceFactoryProxy[Req, Rep](typeAgnosticFilters.toFilter.andThen(next)) {
+            override def close(deadline: Time): Future[Unit] = {
+              onServerClose.setDone()
+              self.close(deadline)
+            }
+          }
         }
       }
     }

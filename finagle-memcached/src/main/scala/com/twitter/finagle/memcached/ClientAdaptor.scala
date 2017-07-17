@@ -1,15 +1,15 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-
 import com.twitter.bijection.Bijection
 import com.twitter.io.Buf
 import com.twitter.util.{Time, Future}
 
 class ClientAdaptor[T](
-  val self: Client,
-  bijection: Bijection[Buf, T]
-) extends BaseClient[T] with Proxy {
+    val self: Client,
+    bijection: Bijection[Buf, T])
+  extends BaseClient[T]
+  with Proxy {
   def bufferToType(a: Buf): T = bijection(a)
 
   def set(key: String, flags: Int, expiry: Time, value: T): Future[Unit] =
@@ -25,14 +25,15 @@ class ClientAdaptor[T](
   def checkAndSet(key: String, flags: Int, expiry: Time, value: T, casUnique: Buf): Future[CasResult] =
     self.checkAndSet(key, flags, expiry, bijection.inverse(value), casUnique)
 
-  def getResult(keys: Iterable[String]): Future[GetResult]   = self.getResult(keys)
+  def getResult(keys: Iterable[String]): Future[GetResult] = self.getResult(keys)
   def getsResult(keys: Iterable[String]): Future[GetsResult] = self.getsResult(keys)
 
-  def delete(key: String): Future[JBoolean]                   = self.delete(key)
-  def incr(key: String, delta: Long): Future[Option[JLong]]   = self.incr(key, delta)
-  def decr(key: String, delta: Long): Future[Option[JLong]]   = self.decr(key, delta)
+  def delete(key: String): Future[JBoolean] = self.delete(key)
+  def incr(key: String, delta: Long): Future[Option[JLong]] = self.incr(key, delta)
+  def decr(key: String, delta: Long): Future[Option[JLong]] = self.decr(key, delta)
 
-  def stats(args: Option[String]): Future[Seq[String]]       = self.stats(args)
+  def stats(args: Option[String]): Future[Seq[String]] = self.stats(args)
 
+  def close(deadline: Time): Future[Unit] = self.close()
   def release(): Unit = self.release()
 }

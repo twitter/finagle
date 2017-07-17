@@ -39,6 +39,7 @@ private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
   private[this] def shouldAggregate(msg: HttpMessage): Boolean = {
     // We never dechunk 'Transfer-Encoding: chunked' messages
     if (HttpUtil.isTransferEncodingChunked(msg)) false
+    else if (noContentResponse(msg)) true // No body so aggregate the LastHttpContent
     else {
       // We will dechunk a message if it has a content-length header that is less
       // than or equal to the maxContentLength parameter.
@@ -55,5 +56,21 @@ private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
         msg.isInstanceOf[HttpRequest]
       }
     }
+  }
+
+  private[this] def noContentResponse(msg: HttpMessage): Boolean = msg match {
+    case res: HttpResponse =>
+      res.status.code match {
+        case 101 =>
+          // The Hixie 76 websocket handshake response may have content
+          !((res.headers.contains(HttpHeaderNames.SEC_WEBSOCKET_ACCEPT)) &&
+            (res.headers.contains(HttpHeaderNames.UPGRADE, HttpHeaderValues.WEBSOCKET, true)))
+
+        case code if code >= 100 && code < 200 => true
+        case 204 | 205 | 304 => true
+        case _ => false
+      }
+
+    case _ => false
   }
 }

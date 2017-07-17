@@ -5,8 +5,6 @@ import com.twitter.util.{Duration, Future}
 import scala.collection.mutable
 
 /**
- * '''Experimental:''' This API is under construction.
- *
  * @see [[MethodBuilderScaladoc]]
  */
 private[finagle] class MethodBuilderTimeout[Req, Rep] private[client] (

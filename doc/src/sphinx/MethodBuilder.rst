@@ -1,8 +1,6 @@
 MethodBuilder
 =============
 
-.. warning:: These APIs are experimental and subject to change.
-
 .. note:: Currently there is ``MethodBuilder`` support for HTTP and ThriftMux.
           We are waiting on user interest before expanding to more protocols.
 
@@ -329,6 +327,39 @@ Service-per-method, ``ServiceIface``.
       .newServiceIface[GraphService.ServiceIface](methodName = "follow")
       .follow
 
+If you are working with code that prefers Scrooge's ``FutureIface`` you can
+convert the ``ServiceIface`` by wrapping it with a ``MethodIface``.
+
+.. code-block:: scala
+
+  import com.twitter.conversions.time._
+  import com.twitter.finagle.{Filter, ThriftMux}
+  import com.twitter.finagle.example.graph._
+  import com.twitter.util.Future
+
+  val stackClient = ThriftMux.client.withLabel("thriftmux_example")
+  val serviceIface: GraphService.ServiceIface =
+    stackClient
+      .methodBuilder("inet!localhost:8989")
+      .withTimeoutPerRequest(20.milliseconds)
+      .newServiceIface[GraphService.ServiceIface](methodName = "followers")
+
+  // `FutureIface` is a collection of methods that return `Futures`.
+  // It will use the configuration from the `ServiceIface` which allows you to decorate
+  // the endpoints with `Filters`.
+  val loggingFilter: Filter[GraphService.Follow.Args, GraphService.Follow.SuccessType] = ???
+  val filtered: GraphService.ServiceIface =
+    serviceIface.copy(follow = loggingFilter.andThen(serviceIface.follow))
+  val futureIface: GraphService.FutureIface =
+    new GraphService.MethodIface(filtered)
+
+  val result: Future[Int] =
+    futureIface.follow(follower = 568825492L, followee = 4196983835L)
+
+Further details on the differences between ``ServiceIface`` and ``FutureIface``
+and how to work with them are in
+`Scrooge's Finagle docs <https://twitter.github.io/scrooge/Finagle.html>`_.
+
 .. _mb_logical_req:
 
 Logical request definition
@@ -336,6 +367,6 @@ Logical request definition
 
 ``MethodBuilder``\'s logical requests represent the result of the
 initial request, after any retries have occurred. Concretely, should a request result
-in a retryable failure on the first attempt, but succeed upon retry, this considered
+in a retryable failure on the first attempt, but succeed upon retry, this is considered
 a single successful logical request while the logical request latency is the sum of
 both the initial attempt and the retry.

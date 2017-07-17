@@ -6,7 +6,8 @@ private[finagle] object IOExceptionStrings {
   val ChannelClosedStrings: Set[String] = Set(
     "Connection reset by peer", // Found on linux
     "Broken pipe", // Found on linux
-    "An existing connection was forcibly closed by the remote host" // Found on windows
+    "An existing connection was forcibly closed by the remote host", // Found on windows
+    "syscall:read(..) failed: Connection reset by peer" // Found on linux w/ native epoll
   )
 
   /** Strings that commonly signal failure to establish a socket connection */

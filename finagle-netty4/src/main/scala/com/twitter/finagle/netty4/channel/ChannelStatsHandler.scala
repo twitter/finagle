@@ -69,11 +69,13 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     msg match {
       case buffer: ByteBuf =>
         val readableBytes = buffer.readableBytes
-        val channelWriteCount = ctx.channel.attr(ConnectionStatsKey).get.bytesWritten
-        channelWriteCount.add(readableBytes)
         sentBytes.incr(readableBytes)
+        ctx.channel.attr(ConnectionStatsKey).get match {
+          case null =>
+          case connStats => connStats.bytesWritten.add(readableBytes)
+        }
       case _ =>
-        log.warning("ChannelStatsHandler received non-channelbuffer write")
+        log.warning("ChannelStatsHandler received non-ByteBuf write: " + msg)
     }
 
     super.write(ctx, msg, p)
@@ -82,12 +84,14 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
     msg match {
       case buffer: ByteBuf =>
-        val channelReadCount = ctx.channel.attr(ConnectionStatsKey).get.bytesRead
         val readableBytes = buffer.readableBytes
-        channelReadCount.add(readableBytes)
         receivedBytes.incr(readableBytes)
+        ctx.channel.attr(ConnectionStatsKey).get match {
+          case null =>
+          case connStats => connStats.bytesRead.add(readableBytes)
+        }
       case _ =>
-        log.warning("ChannelStatsHandler received non-channelbuffer read")
+        log.warning("ChannelStatsHandler received non-ByteBuf read: " + msg)
     }
 
     super.channelRead(ctx, msg)
@@ -99,14 +103,17 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    val channelStats = ctx.channel.attr(ConnectionStatsKey).get
-    connectionReceivedBytes.add(channelStats.bytesRead.sum())
-    connectionSentBytes.add(channelStats.bytesWritten.sum())
-
-    // we do a null check here because ConnectionDurationKey is added on
-    // `channelActive`, not `handlerAdded`.
-    ctx.channel.attr(ConnectionDurationKey).get match {
-      case null => // the connection didn't initialize
+    // protect against Netty calling this multiple times
+    ctx.channel.attr(ConnectionStatsKey).getAndSet(null) match {
+      case ChannelStats(bytesRead, bytesWritten) =>
+        connectionReceivedBytes.add(bytesRead.sum())
+        connectionSentBytes.add(bytesWritten.sum())
+      case null =>
+    }
+    // protect against multiple calls, and also a channel can go
+    // inactive without ever seeing `channelActive`
+    ctx.channel.attr(ConnectionDurationKey).getAndSet(null) match {
+      case null =>
       case elapsed =>
         connectionDuration.add(elapsed().inMilliseconds)
         connectionCount.decrement()

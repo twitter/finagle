@@ -2,24 +2,39 @@ package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.{BalancerNode, NodeT}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.Ema
 import com.twitter.util.{Duration, Future, Return, Time, Throw}
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * LoadBand is an aperture controller targeting a load band.
- * `lowLoad` and `highLoad` are watermarks used to adjust the
- * aperture. Whenever the the capacity-adjusted, exponentially
- * smoothed, load is less than `lowLoad`, the aperture is shrunk by
- * one serving unit; when it exceeds `highLoad`, the aperture is
- * opened by one serving unit.
+ * LoadBand is an aperture controller targeting a load band. `lowLoad` and `highLoad` are
+ * thresholds used to adjust the aperture. Whenever the capacity-adjusted,
+ * exponentially smoothed, load is less than `lowLoad`, the aperture is shrunk by
+ * one serving unit. When it exceeds `highLoad`, the aperture is opened by one serving
+ * unit.
  *
  * The upshot is that `lowLoad` and `highLoad` define an acceptable
  * band of load for each serving unit.
+ *
+ * There are several goals that the LoadBand controller tries to achieve:
+ *
+ * 1. Distributed clients should be able to converge on a uniform aperture size if
+ * they are offered the same amount of load. The tighter the high and low bands, the
+ * less "wiggle" room distributed clients have to diverge aperture sizes. This is an
+ * important property to maintain, especially when using [[DeterministicOrdering]], in
+ * order to have a more uniform load distribution.
+ *
+ * 2. Large changes or oscillations in the aperture window size are minimized in order to
+ * avoid creating undue resource (e.g. sessions) churn. The `smoothWindow` allows to
+ * dampen the rate of changes by rolling the offered load into an exponentially weighted
+ * moving average.
  */
 private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { self: Aperture[Req, Rep] =>
 
   protected type Node <: LoadBandNode
+
+  protected def statsReceiver: StatsReceiver
 
   /**
    * The time-smoothing factor used to compute the capacity-adjusted
@@ -45,6 +60,13 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { 
   private[this] val monoTime = new Ema.Monotime
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
+  private[this] val sr = statsReceiver.scope("loadband")
+  private[this] val widenCounter = sr.counter("widen")
+  private[this] val narrowCounter = sr.counter("narrow")
+
+  @volatile private[this] var offeredLoadEma: Double = 0L
+  private[this] val emaGauge = sr.addGauge("offered_load_ema") { offeredLoadEma.toFloat }
+
   /**
    * Adjust `total` by `delta` in order to keep track of total load across all
    * nodes.
@@ -60,7 +82,7 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { 
     // update (ts = 2)
     // t1:
     // update (ts = 1) // breaks monotonicity
-    val avg = synchronized {
+    offeredLoadEma = synchronized {
       ema.update(monoTime.nanos(), total.addAndGet(delta))
     }
 
@@ -71,12 +93,15 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { 
     // Adjustments are somewhat racy: aperture and units may change
     // from underneath us. But this is not a big deal. If we
     // overshoot, the controller will self-correct quickly.
-    val a = avg/aperture
+    val avgLoad = offeredLoadEma / aperture
 
-    if (a >= highLoad && aperture < units)
+    if (avgLoad >= highLoad && aperture < maxUnits) {
       widen()
-    else if (a <= lowLoad && aperture > minAperture)
+      widenCounter.incr()
+    } else if (avgLoad <= lowLoad && aperture > minUnits) {
       narrow()
+      narrowCounter.incr()
+    }
   }
 
   protected trait LoadBandNode extends NodeT[Req, Rep] {

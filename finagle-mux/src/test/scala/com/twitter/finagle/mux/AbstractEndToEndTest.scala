@@ -1,28 +1,26 @@
 package com.twitter.finagle.mux
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Mux.param.MuxImpl
 import com.twitter.finagle._
+import com.twitter.finagle.client.StdStackClient
 import com.twitter.finagle.context.RemoteInfo
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.mux.transport.{BadMessageException, Message}
+import com.twitter.finagle.server.StdStackServer
 import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing._
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util._
 import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket}
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalactic.source.Position
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 abstract class AbstractEndToEndTest extends FunSuite
   with Eventually
   with IntegrationPatience
@@ -30,8 +28,8 @@ abstract class AbstractEndToEndTest extends FunSuite
   with AssertionsForJUnit {
 
   def implName: String
-  def clientImpl(): MuxImpl
-  def serverImpl(): MuxImpl
+  def clientImpl(): StdStackClient[Request, Response, Mux.Client]
+  def serverImpl(): StdStackServer[Request, Response, Mux.Server]
 
   var saveBase: Dtab = Dtab.empty
 
@@ -54,14 +52,14 @@ abstract class AbstractEndToEndTest extends FunSuite
 
   test(s"$implName: Dtab propagation") {
 
-    val server = Mux.server.configured(serverImpl).serve("localhost:*", Service.mk[Request, Response] { _ =>
+    val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
       Dtab.local.print(printer)
       Future.value(Response(Buf.Utf8(stringer.toString)))
     })
 
-    val client = Mux.client.configured(clientImpl).newService(
+    val client = clientImpl.newService(
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     Dtab.unwind {
@@ -77,13 +75,13 @@ abstract class AbstractEndToEndTest extends FunSuite
   }
 
   test(s"$implName: (no) Dtab propagation") {
-    val server = Mux.server.configured(serverImpl).serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val bw = ByteWriter.fixed(4)
+    val server = serverImpl.serve("localhost:*", Service.mk[Request, Response] { _ =>
+      val bw = BufByteWriter.fixed(4)
       bw.writeIntBE(Dtab.local.size)
       Future.value(Response(bw.owned()))
     })
 
-    val client = Mux.client.configured(clientImpl).newService(
+    val client = clientImpl.newService(
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
@@ -105,9 +103,8 @@ abstract class AbstractEndToEndTest extends FunSuite
     var count: Int = 0
     var client: Service[Request, Response] = null
 
-    val server = Mux.server
+    val server = serverImpl
       .configured(param.Tracer(tracer))
-      .configured(serverImpl)
       .configured(param.Label("theServer"))
       .serve("localhost:*", new Service[Request, Response] {
         def apply(req: Request) = {
@@ -117,9 +114,8 @@ abstract class AbstractEndToEndTest extends FunSuite
         }
       })
 
-    client = Mux.client
+    client = clientImpl
       .configured(param.Tracer(tracer))
-      .configured(clientImpl)
       .newService(
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "theClient")
 
@@ -152,14 +148,14 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
-    val a, b = Mux.server.configured(serverImpl).serve("localhost:*", service)
+    val a, b = serverImpl.serve("localhost:*", service)
     val name =
       Name.bound(
         Address(a.boundAddress.asInstanceOf[InetSocketAddress]),
         Address(b.boundAddress.asInstanceOf[InetSocketAddress])
       )
 
-    val client = Mux.client.configured(clientImpl).configured(clientImpl).newService(name, "client")
+    val client = clientImpl.newService(name, "client")
 
     assert(n.get == 0)
     assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
@@ -178,12 +174,12 @@ abstract class AbstractEndToEndTest extends FunSuite
       }
     }
 
-    val server = Mux.serve("localhost:*", service)
+    val server = serverImpl.serve("localhost:*", service)
     val address = Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress]))
     // Don't mask failures so we can examine which flags were propagated
     // Remove the retries module because otherwise requests will be retried until the default budget
     // is exceeded and then flagged as NonRetryable.
-    val client = Mux.client.transformed(_.remove(Failure.role).remove(Retries.Role))
+    val client = clientImpl.transformed(_.remove(Failure.role).remove(Retries.Role))
         .newService(address, "client")
 
     def check(f: Failure): Unit = {
@@ -212,8 +208,8 @@ abstract class AbstractEndToEndTest extends FunSuite
       def close(deadline: Time): Future[Unit] = Future.Done
     }
 
-    val server = Mux.server.configured(serverImpl).serve("localhost:*", factory)
-    val client = Mux.client.configured(clientImpl).newService(
+    val server = serverImpl.serve("localhost:*", factory)
+    val client = clientImpl.newService(
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     // This will try until it exhausts its budget. That's o.k.
@@ -281,8 +277,8 @@ EOF
     // We need to reserve a port here because we're going to be
     // rebinding the server.
     val port = nextPort()
-    val client = Mux.client.configured(clientImpl).newService(s"localhost:$port")
-    var server = Mux.server.configured(serverImpl).serve(s"localhost:$port", echo)
+    val client = clientImpl.newService(s"localhost:$port")
+    var server = serverImpl.serve(s"localhost:$port", echo)
 
     // Activate the client; this establishes a session.
     Await.result(client(req), 5.seconds)
@@ -294,7 +290,7 @@ EOF
     intercept[Throwable] { Await.result(client(req), 5.seconds) }
 
     // And eventually we recover.
-    server = Mux.server.configured(serverImpl).serve(s"localhost:$port", echo)
+    server = serverImpl.serve(s"localhost:$port", echo)
     eventually { Await.result(client(req), 5.seconds) }
 
     Await.result(server.close(), 30.seconds)
@@ -317,8 +313,7 @@ EOF
       }
       val lessor = new FakeLessor
 
-      val server = Mux.server
-        .configured(serverImpl)
+      val server = serverImpl
         .configured(Lessor.Param(lessor))
         .serve("localhost:*", new Service[mux.Request, mux.Response] {
           def apply(req: Request) = ???
@@ -327,7 +322,7 @@ EOF
 
       val sr = new InMemoryStatsReceiver
 
-      val factory = Mux.client.configured(clientImpl).configured(param.Stats(sr)).newClient(
+      val factory = clientImpl.configured(param.Stats(sr)).newClient(
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
       val fclient = factory()
@@ -343,7 +338,7 @@ EOF
         case _ => false
       }
 
-      val leaseCtr: () => Int = { () =>
+      val leaseCtr: () => Long = { () =>
         val Some((_, ctr)) = sr.counters.find {
           case (_ +: Seq("mux", "leased"), value) => true
           case _ => false
@@ -373,14 +368,12 @@ EOF
     val service = new Service[Request, Response] {
       def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
     }
-    val server = Mux.server
-      .configured(serverImpl)
+    val server = serverImpl
       .withLabel("server")
       .withStatsReceiver(sr)
       .serve("localhost:*", service)
 
-    val client = Mux.client
-      .configured(clientImpl)
+    val client = clientImpl
       .withStatsReceiver(sr)
       .newService(
         Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
@@ -442,9 +435,7 @@ EOF
     try {
       server.start()
       val sr = new InMemoryStatsReceiver
-      val client = Mux.client
-        .configured(clientImpl)
-        .withLabel(serviceName)
+      val client = clientImpl.withLabel(serviceName)
         .withStatsReceiver(sr)
         .withMonitor(monitor)
         .newService(s"${InetAddress.getLoopbackAddress.getHostAddress}:${server.port}")
@@ -467,7 +458,7 @@ EOF
       // RemoteInfo should have been added by the client stack
       failure.getSource(Failure.Source.RemoteInfo) match {
         case Some(a: RemoteInfo.Available) =>
-          assert(a.downstreamId == Some(ClientId(serviceName)))
+          assert(a.downstreamLabel == Some(serviceName))
           assert(a.downstreamAddr.isDefined)
 
         case other => fail(s"Unexpected remote info: $other")

@@ -5,19 +5,18 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, SerialServerDispatcher, StalledPipelineTimeout}
 import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
-import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
 import com.twitter.finagle.memcached.protocol.text.CommandToBuf
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
-import com.twitter.finagle.memcached.protocol.text.transport.{Netty4ClientFramer, Netty4ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.transport.{MemcachedNetty4ClientFramer, Netty4ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -102,7 +101,7 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 
   /** $partitioned */
   def newRichClient(dest: String): memcached.Client = {
-    val (n, l) = Resolver.evalLabeled(dest)
+    val (n, l) = evalLabeledDest(dest)
     newTwemcacheClient(n, l)
   }
 
@@ -111,9 +110,24 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 
   /** $partitioned */
   def newTwemcacheClient(dest: String): TwemcacheClient = {
-    val (n, l) = Resolver.evalLabeled(dest)
+    val (n, l) = evalLabeledDest(dest)
     newTwemcacheClient(n, l)
   }
+
+  private def evalLabeledDest(dest: String): (Name, String) = {
+    val _dest = if (LocalMemcached.enabled) {
+      mkDestination("localhost", LocalMemcached.port)
+    } else dest
+    Resolver.evalLabeled(_dest)
+  }
+
+  /**
+    * The memcached client should be using fixed hosts that do not change
+    * IP addresses. Force usage of the FixedInetResolver to prevent spurious
+    * DNS lookups and polling.
+    */
+  private def mkDestination(hostName: String, port: Int): String =
+    s"${FixedInetResolver.scheme}!$hostName:$port"
 }
 
 /**
@@ -202,8 +216,7 @@ object Memcached extends finagle.Client[Command, Response]
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       PendingRequestFilter.Param(limit = defaultPendingRequestLimit) +
-      ProtocolLibrary(ProtocolLibraryName) +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary(ProtocolLibraryName)
 
     /**
      * A default client stack which supports the pipelined memcached client.
@@ -252,18 +265,18 @@ object Memcached extends finagle.Client[Command, Response]
     ): Client = copy(stack, params)
 
     protected type In = Buf
-    protected type Out = Buf
+    protected type Out = Response
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
-      Netty4Transporter.raw(Netty4ClientFramer, addr, params)
+      Netty4Transporter.raw(MemcachedNetty4ClientFramer, addr, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
         new ClientTransport[Command, Response](
           new CommandToBuf,
-          new DecodingToResponse,
           transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        params[StalledPipelineTimeout].timeout,
         DefaultTimer
       )
 
@@ -382,8 +395,7 @@ object Memcached extends finagle.Client[Command, Response]
      * Default stack parameters used for memcached server.
      */
     private val params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("memcached") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("memcached")
   }
 
   /**

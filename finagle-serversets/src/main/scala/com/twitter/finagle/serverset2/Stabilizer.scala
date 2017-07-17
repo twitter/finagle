@@ -1,64 +1,38 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.{HashedWheelTimer, TimerStats}
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.stats.{FinagleStatsReceiver, Stat}
 import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.util._
-import java.util.concurrent.TimeUnit
-import org.jboss.netty.{util => netty}
 
 /**
  * An Epoch is a Event that notifies its listener
  * once per `period`
  */
-private [serverset2] object Epoch {
-  def apply(period: Duration)(implicit timer: Timer): Epoch =
-    new Epoch(new Event[Unit] {
-      override def register(w: Witness[Unit]): Closable =
-        timer.schedule(period) {
-          w.notify(())
-        }
-    }, period)
-}
-
 private[serverset2] class Epoch(
-  val event: Event[Unit],
-  val period: Duration
-)
+    val event: Event[Unit],
+    val period: Duration)
 
-private[serverset2] object Stabilizer {
+private[serverset2] object Epoch {
+  private val epochTimer: Timer = new ScheduledThreadPoolTimer(
+    poolSize = 1,
+    new NamedPoolThreadFactory("finagle-serversets Stabilizer timer", /*makeDaemons = */true)
+  )
 
-  // Use our own timer to avoid doing work in the global timer's thread and causing timer deviation
-  // the notify() run each epoch can trigger some slow work.
-  // nettyHwt required to get TimerStats
-  private val nettyHwt = new netty.HashedWheelTimer(
-      new NamedPoolThreadFactory("finagle-serversets Stabilizer timer", true/*daemons*/),
-      HashedWheelTimer.TickDuration.inMilliseconds,
-      TimeUnit.MILLISECONDS,
-      HashedWheelTimer.TicksPerWheel)
-  private val epochTimer = HashedWheelTimer(nettyHwt)
+  private val notifyMs: Stat =
+    FinagleStatsReceiver.scope("serverset2", "stabilizer").stat("notify_ms")
 
-  TimerStats.deviation(
-    nettyHwt,
-    10.milliseconds,
-    FinagleStatsReceiver.scope("zk2").scope("timer"))
-
-  TimerStats.hashedWheelTimerInternals(
-    nettyHwt,
-    () => 10.seconds,
-    FinagleStatsReceiver.scope("zk2").scope("timer"))
-
-  private val notifyMs = FinagleStatsReceiver.scope("serverset2").scope("stabilizer").stat("notify_ms")
-
-  // Create an event of epochs for the given duration.
-  def epochs(period: Duration): Epoch =
+  /** Create an event of epochs for the given duration. */
+  def apply(period: Duration, timer: Timer = epochTimer): Epoch =
     new Epoch(
       new Event[Unit] {
-        def register(w: Witness[Unit]) = {
-          epochTimer.schedule(period) {
+        // accommodate Timers that have a minimum floor.
+        private[this] val schedulingPeriod = period.max(1.millisecond)
+
+        def register(w: Witness[Unit]): Closable = {
+          timer.schedule(schedulingPeriod) {
             val elapsed = Stopwatch.start()
             w.notify(())
             notifyMs.add(elapsed().inMilliseconds)
@@ -68,6 +42,9 @@ private[serverset2] object Stabilizer {
       period
     )
 
+}
+
+private[serverset2] object Stabilizer {
 
   // Used for delaying removals
   private case class State(

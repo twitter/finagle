@@ -94,6 +94,14 @@ object FailureFlags {
       case _ => Future.const(t)
     }
   }
+
+  /**
+   * A way for non-finagle folks to test if a throwable is flagged
+   */
+  def isFlagged(flags: Long)(t: Throwable): Boolean = t match {
+    case f: FailureFlags[_] => f.isFlagged(flags)
+    case _ => false
+  }
 }
 
 /**

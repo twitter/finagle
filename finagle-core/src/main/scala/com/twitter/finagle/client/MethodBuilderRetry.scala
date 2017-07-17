@@ -6,8 +6,6 @@ import com.twitter.finagle.stats.{BlacklistStatsReceiver, ExceptionStatsHandler,
 import com.twitter.util.{Throw, Try}
 
 /**
- * '''Experimental:''' This API is under construction.
- *
  * @see [[MethodBuilderScaladoc]]
  */
 private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (

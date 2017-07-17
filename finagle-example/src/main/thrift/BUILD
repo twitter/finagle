@@ -8,6 +8,7 @@ java_thrift_library(name='thrift-scala',
   compiler='scrooge',
   language='scala',
   rpc_style='finagle',
+  strict_deps=True,
 )
 
 java_thrift_library(name='thrift-java',

@@ -79,6 +79,12 @@ trait StringClient {
       transport: Transport[In, Out]
     ): Service[String, String] =
       new SerialClientDispatcher(transport)
+
+    def withEndpoint(s: Service[String, String]): Client =
+      withStack(stack.replace(
+        StackClient.Role.prepConn,
+        (_: ServiceFactory[String, String]) => ServiceFactory.const(s))
+      )
   }
 
   val stringClient = Client()

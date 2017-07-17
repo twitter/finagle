@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.framer.{Framer => FinagleFramer}
+import com.twitter.finagle.decoder.{Framer => FinagleFramer}
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import scala.collection.mutable.ArrayBuffer
@@ -13,7 +13,23 @@ private[memcached] object Framer {
 
   private val EmptySeq = IndexedSeq.empty[Buf]
 
-  private val TokenDelimiter: Byte = ' '
+  /**
+   * Return the number of bytes before `\r\n` (newline), or -1 if no newlines found
+   */
+  def bytesBeforeLineEnd(buf: Buf): Int = {
+    val finder = new Buf.Processor {
+      private[this] var prevCh: Byte = _
+      def apply(byte: Byte): Boolean = {
+        if (prevCh == '\r' && byte == '\n') false
+        else {
+          prevCh = byte
+          true
+        }
+      }
+    }
+    val pos = buf.process(finder)
+    if (pos == -1) -1 else pos - 1
+  }
 }
 
 /**
@@ -38,25 +54,6 @@ private[memcached] trait Framer extends FinagleFramer {
   private[this] var state: State = AwaitingTextFrame
 
   protected val byteArrayForBuf2Int: Array[Byte] = ParserUtils.newByteArrayForBuf2Int()
-
-  /**
-   * Return the number of bytes before `\r\n` (newline), or -1 if no newlines found
-   */
-  private[this] def bytesBeforeLineEnd(buf: Buf): Int = {
-    val finder = new Buf.Processor {
-      private[this] var prevCh: Byte = _
-      def apply(byte: Byte): Boolean = {
-        if (byte == '\n' && prevCh == '\r') {
-          false
-        } else {
-          prevCh = byte
-          true
-        }
-      }
-    }
-    val pos = buf.process(finder)
-    if (pos == -1) -1 else pos - 1
-  }
 
   /**
    * Using the current accumulation of Bufs, read the next frame. If no frame can be read,

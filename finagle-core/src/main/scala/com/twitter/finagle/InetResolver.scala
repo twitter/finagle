@@ -35,7 +35,7 @@ private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: Fu
       dnsCond.acquire().flatMap { permit =>
         resolvePool(InetAddress.getAllByName(host).toSeq)
           .onFailure { e =>
-            log.info(s"Failed to resolve $host. Error $e")
+            log.debug(s"Failed to resolve $host. Error $e")
             dnsLookupFailures.incr()
           }
           .ensure { permit.release() }
@@ -110,7 +110,7 @@ private[finagle] class InetResolver(
         // Either no hosts or resolution failed for every host
         failures.incr()
         latencyStat.add(elapsed().inMilliseconds)
-        log.info(s"Resolution failed for all hosts in $hp")
+        log.debug(s"Resolution failed for all hosts in $hp")
 
         seq.collectFirst {
           case Throw(e) => e

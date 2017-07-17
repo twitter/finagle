@@ -2,17 +2,14 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty4.Netty4HashedWheelTimer
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
-import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.transport.ThriftClientPreparer
-import com.twitter.finagle.thrift.transport.netty3.Netty3Transport
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
-import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, Duration, Monitor}
@@ -127,27 +124,6 @@ object Thrift
    * pipeline that would be required to ensure that the bytes were on the heap before
    * entering the Finagle transport types.
    */
-  case class ThriftImpl(
-      transporter: Stack.Params => SocketAddress => Transporter[ThriftClientRequest, Array[Byte]],
-      listener: Stack.Params => Listener[Array[Byte], Array[Byte]]) {
-
-    def mk(): (ThriftImpl, Stack.Param[ThriftImpl]) = (this, ThriftImpl.param)
-
-  }
-
-  object ThriftImpl {
-    private[this] val UseNetty4ToggleId: String = "com.twitter.finagle.thrift.UseNetty4"
-    private[this] val netty4Toggle: Toggle[Int] = Toggles(UseNetty4ToggleId)
-    private[this] def useNetty4: Boolean = netty4Toggle(ServerInfo().id.hashCode)
-
-    val Netty3: ThriftImpl = ThriftImpl(Netty3Transport.Client, Netty3Transport.Server)
-    val Netty4: ThriftImpl = ThriftImpl(Netty4Transport.Client, Netty4Transport.Server)
-
-    implicit val param: Stack.Param[ThriftImpl] = Stack.Param(
-      if (useNetty4) Netty4
-      else Netty3
-    )
-  }
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
@@ -212,7 +188,6 @@ object Thrift
 
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("thrift")
-      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -244,7 +219,7 @@ object Thrift
     override protected lazy val Stats(stats) = params[Stats]
 
     protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
-      params[ThriftImpl].transporter(params)(addr)
+      Netty4Transport.Client(params)(addr)
 
     protected def newDispatcher(
       transport: Transport[ThriftClientRequest, Array[Byte]]
@@ -398,7 +373,6 @@ object Thrift
 
     private val params: Stack.Params = StackServer.defaultParams +
       ProtocolLibrary("thrift")
-      Timer(Netty4HashedWheelTimer)
   }
 
   /**
@@ -424,7 +398,7 @@ object Thrift
     override val Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
       params[Server.param.MaxReusableBufferSize]
 
-    protected def newListener(): Listener[In, Out] = params[ThriftImpl].listener(params)
+    protected def newListener(): Listener[In, Out] = Netty4Transport.Server(params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],

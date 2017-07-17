@@ -4,8 +4,8 @@ import com.twitter.concurrent.{AsyncQueue, Broker, Offer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Status}
-import com.twitter.io.{Buf, ByteReader, ByteWriter}
-import com.twitter.util.{Future, Promise,Time, Throw, Return}
+import com.twitter.io.{Buf, BufByteWriter, ByteReader}
+import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,7 +39,7 @@ private[finagle] object MuxFramer {
      */
     def encodeFrameSize(size: Int): Buf = {
       require(size > 0)
-      val bw = ByteWriter.fixed(4)
+      val bw = BufByteWriter.fixed(4)
       bw.writeIntBE(size)
       bw.owned()
     }

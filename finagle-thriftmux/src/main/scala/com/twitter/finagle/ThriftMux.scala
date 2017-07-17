@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.client.{ClientRegistry, StackBasedClient, StackClient}
+import com.twitter.finagle.client.{ClientRegistry, ExceptionRemoteInfoFactory, StackBasedClient, StackClient}
+import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
@@ -85,8 +86,8 @@ import scala.util.control.NonFatal
  */
 object ThriftMux
   extends Client[ThriftClientRequest, Array[Byte]]
-  with Server[Array[Byte], Array[Byte]]
-{
+  with Server[Array[Byte], Array[Byte]] {
+
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
    */
@@ -134,6 +135,20 @@ object ThriftMux
       rpcTracer.andThen(super.make(next))
   }
 
+  object Client {
+
+    def apply(): Client =
+      new Client()
+        .withLabel("thrift")
+        .withStatsReceiver(ClientStatsReceiver)
+
+    // not a `val` in order to avoid initialization issues
+    private def muxer: StackClient[mux.Request, mux.Response] =
+      Mux.client
+        .copy(stack = BaseClientStack)
+        .configured(ProtocolLibrary("thriftmux"))
+  }
+
   /**
    * A ThriftMux `com.twitter.finagle.Client`.
    *
@@ -142,8 +157,7 @@ object ThriftMux
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(
-      muxer: StackClient[mux.Request, mux.Response] = Mux.client.copy(stack = BaseClientStack)
-        .configured(ProtocolLibrary("thriftmux")))
+      muxer: StackClient[mux.Request, mux.Response] = Client.muxer)
     extends StackBasedClient[ThriftClientRequest, Array[Byte]]
     with Stack.Parameterized[Client]
     with Stack.Transformable[Client]
@@ -210,15 +224,16 @@ object ThriftMux
     private[this] object ThriftMuxToMux extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
       def apply(req: ThriftClientRequest, service: Service[mux.Request, mux.Response]): Future[Array[Byte]] = {
         if (req.oneway) return Future.exception(
-          new Exception("ThriftMux does not support one-way messages"))
+          new UnsupportedOperationException("ThriftMux does not support one-way messages"))
 
-        // We do a dance here to ensure that the proper ClientId is set when
-        // `service` is applied because Mux relies on
-        // com.twitter.finagle.thrift.ClientIdContext to propagate ClientIds.
-        ClientId.let(clientId) {
-          // TODO set the Path here.
-          val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
-          service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
+        // We set ClientId a bit early, because ThriftMux relies on that broadcast
+        // context to be set when dispatching.
+        ExceptionRemoteInfoFactory.letUpstream(Upstream.addr, ClientId.current.map(_.name)) {
+          ClientId.let(clientId) {
+            // TODO set the Path here.
+            val muxreq = mux.Request(Path.empty, Buf.ByteArray.Owned(req.message))
+            service(muxreq).map(rep => Buf.ByteArray.Owned.extract(rep.body))
+          }
         }
       }
     }
@@ -243,18 +258,16 @@ object ThriftMux
 
     def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] = {
       clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
-      ThriftMuxToMux andThen deserializingClassifier.newService(dest, label)
+      ThriftMuxToMux.andThen(deserializingClassifier.newService(dest, label))
     }
 
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
       clientId.foreach(id => ClientRegistry.export(params, "ClientId", id.name))
-      ThriftMuxToMux andThen deserializingClassifier.newClient(dest, label)
+      ThriftMuxToMux.andThen(deserializingClassifier.newClient(dest, label))
     }
 
     /**
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
-     *
-     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -263,8 +276,6 @@ object ThriftMux
 
     /**
      * Create a [[thriftmux.MethodBuilder]] for a given destination.
-     *
-     * '''Experimental:''' This API is under construction.
      *
      * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
      */
@@ -301,8 +312,6 @@ object ThriftMux
   }
 
   val client: ThriftMux.Client = Client()
-    .configured(Label("thrift"))
-    .configured(Stats(ClientStatsReceiver))
 
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]

@@ -2,7 +2,8 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status, Version}
+import com.twitter.finagle.http.Status._
 import com.twitter.io.Buf
 import com.twitter.io.Reader.ReaderDiscarded
 import com.twitter.util.{Await, Future}
@@ -75,6 +76,70 @@ class ResponseConformanceFilterTest extends FunSuite {
 
     // Make sure to close the Reader/Writer pair, just in case someone is listening
     intercept[ReaderDiscarded] { Await.result(res.writer.write(Buf.Empty), 5.seconds) }
+  }
+
+  List(Continue, SwitchingProtocols, Processing, NoContent, NotModified).foreach { status =>
+    test(s"response with status code ${status.code} must not have a message body nor " +
+      "Content-Length header field"
+    ) {
+      val res = Response(Version.Http11, status)
+      val response = fetchResponse(res)
+
+      assert(response.status == status)
+      assert(response.length == 0)
+      assert(!response.isChunked)
+      assert(response.headerMap.get(Fields.ContentLength).isEmpty)
+    }
+  }
+
+  List(Continue, SwitchingProtocols, Processing, NoContent, NotModified).foreach { status =>
+    test(s"response with status code ${status.code} must not have a message body nor " +
+      "Content-Length header field when non-empty body is returned"
+    ) {
+      val body = Buf.Utf8("some data")
+      val res = Response(Version.Http11, status)
+      res.content = body
+
+      val response = fetchResponse(res)
+
+      assert(response.status == status)
+      assert(response.length == 0)
+      assert(!response.isChunked)
+      assert(response.headerMap.get(Fields.ContentLength).isEmpty)
+    }
+  }
+
+  List(Continue, SwitchingProtocols, Processing, NoContent).foreach { status =>
+    test(s"response with status code ${status.code} must not have a message body nor " +
+      "Content-Length header field when non-empty body with explicit Content-Length is returned"
+    ) {
+      val body = Buf.Utf8("some data")
+      val res = Response(Version.Http11, status)
+      res.content = body
+      res.contentLength = body.length.toLong
+
+      val response = fetchResponse(res)
+
+      assert(response.status == status)
+      assert(response.length == 0)
+      assert(!response.isChunked)
+      assert(response.headerMap.get(Fields.ContentLength).isEmpty)
+    }
+  }
+
+  test("response with status code 304 must not have a message body *BUT* Content-Length " +
+    "header field when non-empty body with explicit Content-Length is returned") {
+    val body = Buf.Utf8("some data")
+    val res = Response(Version.Http11, Status.NotModified)
+    res.content = body
+    res.contentLength = body.length.toLong
+
+    val response = fetchResponse(res)
+
+    assert(response.status == Status.NotModified)
+    assert(response.length == 0)
+    assert(!response.isChunked)
+    assert(response.headerMap.get(Fields.ContentLength).contains(body.length.toString))
   }
 
   def fetchResponse(res: Response): Response = {

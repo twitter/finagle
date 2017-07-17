@@ -28,7 +28,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   def counter(name: String*): Counter = new Counter {
     counters.putIfAbsent(name, new AtomicLong(0))
-    def incr(delta: Int) { counters.get(name).getAndAdd(delta) }
+    def incr(delta: Long) { counters.get(name).getAndAdd(delta) }
   }
 
   def stat(name: String*): Stat = new Stat {

@@ -20,7 +20,7 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
     val factory = spy(new MockServiceFactory(service))
     val client = Client(factory)
 
-    val result = client.transaction[String] { c =>
+    val result = client.transactionWithIsolation[String](IsolationLevel.ReadCommitted) { c =>
       for {
         r1 <- c.query(sqlQuery)
         r2 <- c.query(sqlQuery)
@@ -29,7 +29,7 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
 
     Await.result(result) must equal ("success")
     service.requests must equal (List(
-      "START TRANSACTION", sqlQuery, sqlQuery, "COMMIT"
+      "SET TRANSACTION ISOLATION LEVEL READ COMMITTED; START TRANSACTION", sqlQuery, sqlQuery, "COMMIT"
     ).map(QueryRequest(_)))
 
     verify(factory, times(1)).apply()

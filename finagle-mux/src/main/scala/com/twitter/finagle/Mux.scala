@@ -8,8 +8,8 @@ import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.param.{ProtocolLibrary, Timer, WithDefaultLoadBalancer}
+import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
@@ -18,6 +18,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
+import com.twitter.logging.Logger
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
 
@@ -25,6 +26,8 @@ import java.net.SocketAddress
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
+  private val log = Logger.get
+
   /**
    * The current version of the mux protocol.
    */
@@ -91,12 +94,23 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        * @note this is experimental and not yet tested in production.
        */
       val Netty4RefCountingControl = MuxImpl(
-        params => Netty4Transporter.raw(
-          RefCountingFramer,
-          _,
-          params,
-          transportFactory = new RefCountingTransport(_)
-        ),
+        params => {
+          val MaxFrameSize(maxFrameSize) = params[MaxFrameSize]
+
+          // there's no payload copy saved when dealing with fragmented
+          // messages so revert to the copying decoder.
+          if (maxFrameSize == Int.MaxValue.bytes)
+            Netty4Transporter.raw(
+              RefCountingFramer,
+              _,
+              params,
+              transportFactory = new RefCountingTransport(_)
+            )
+          else {
+            log.info("disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value")
+            Netty4Transporter.raw(CopyingFramer, _, params)
+          }
+        },
         params => Netty4Listener(CopyingFramer, params)
       )
 
@@ -170,8 +184,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     private val params: Stack.Params = StackClient.defaultParams +
-      ProtocolLibrary("mux") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("mux")
 
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
@@ -256,8 +269,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     private val params: Stack.Params = StackServer.defaultParams +
-      ProtocolLibrary("mux") +
-      Timer(Netty4HashedWheelTimer)
+      ProtocolLibrary("mux")
 
     /**
      * Returns the headers that a server sends to a client.

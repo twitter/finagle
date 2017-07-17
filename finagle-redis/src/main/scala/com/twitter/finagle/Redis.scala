@@ -2,8 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.netty4.{Netty4HashedWheelTimer, Netty4Transporter}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, StalledPipelineTimeout}
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
@@ -43,8 +43,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
      * Default stack parameters used for redis client.
      */
     private val params: Stack.Params = StackClient.defaultParams +
-      param.ProtocolLibrary("redis") +
-      param.Timer(Netty4HashedWheelTimer)
+      param.ProtocolLibrary("redis")
 
     /**
      * A default client stack which supports the pipelined redis client.
@@ -74,7 +73,8 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
       RedisPool.newDispatcher(
         new StageTransport(transport),
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        params[StalledPipelineTimeout].timeout
       )
 
     // Java-friendly forwarders

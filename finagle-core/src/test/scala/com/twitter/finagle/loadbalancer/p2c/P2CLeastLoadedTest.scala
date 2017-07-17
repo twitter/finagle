@@ -47,8 +47,8 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     private val zero = () => 0
 
     def rsize = r.gauges.getOrElse(Seq("size"), zero)()
-    def adds = r.counters.getOrElse(Seq("adds"), 0)
-    def removes = r.counters.getOrElse(Seq("removes"), 0)
+    def adds = r.counters.getOrElse(Seq("adds"), 0L)
+    def removes = r.counters.getOrElse(Seq("removes"), 0L)
     def load = r.gauges.getOrElse(Seq("load"), zero)()
     def available = r.gauges.getOrElse(Seq("available"), zero)()
   }

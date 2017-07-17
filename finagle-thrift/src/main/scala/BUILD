@@ -18,8 +18,8 @@ scala_library(
     'util/util-core/src/main/scala:scala',
     'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
-    '3rdparty/jvm/com/fasterxml/jackson:jackson-annotations',
   ],
+  strict_deps=True,
   sources=rglobs('*.scala'),
   fatal_warnings=True,
 )

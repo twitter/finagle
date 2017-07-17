@@ -101,8 +101,6 @@ private[finagle] object MethodBuilder {
 }
 
 /**
- * '''Experimental:''' This API is under construction.
- *
  * @see `methodBuilder` methods on client protocols, such as `Http.Client`
  *      or `ThriftMux.Client` for an entry point.
  *

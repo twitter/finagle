@@ -1,10 +1,10 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.socks._
 import com.twitter.finagle.{Address, Stack}
-import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 
 /**
  * Transporters construct a `Future[Transport[In, Out]]`.
@@ -68,10 +68,21 @@ object Transporter {
       (this, SocksProxy.param)
   }
   object SocksProxy {
-    implicit val param = Stack.Param(SocksProxy(
-      SocksProxyFlags.socksProxy,
-      SocksProxyFlags.socksUsernameAndPassword
-    ))
+
+    private[this] def socksProxy: Option[SocketAddress] =
+      (socksProxyHost.get, socksProxyPort.get) match {
+        case (Some(host), Some(port)) => Some(new InetSocketAddress(host, port))
+        case _ => None
+      }
+
+    private[this] def socksUsernameAndPassword: Option[(String, String)] =
+      (socksUsernameFlag.get, socksPasswordFlag.get) match {
+        case (Some(username), Some(password)) => Some((username,password))
+        case _ => None
+      }
+
+
+    implicit val param = Stack.Param(SocksProxy(socksProxy, socksUsernameAndPassword))
   }
 
   /**

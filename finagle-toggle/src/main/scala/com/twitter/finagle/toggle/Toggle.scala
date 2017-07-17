@@ -81,6 +81,55 @@ object Toggle {
   }
 
   /**
+   * Namespace for methods that operate on `Toggle.Fractional`
+   */
+  object Fractional {
+    /**
+     * A [[Toggle]] whose fraction is the minimum of that of `a` and `b`.
+     *
+     * The ids of a and b must be the same.
+     */
+    private[toggle] def min[T](
+      a: Toggle.Fractional[T],
+      b: Toggle.Fractional[T]
+    ): Toggle.Fractional[T] =
+      if (a.id != b.id) throw new IllegalArgumentException(
+        s"Cannot combine Toggles using Toggle.minOf when ids do not match: ${a.id}, ${b.id}")
+      else
+        new Toggle.Fractional[T](a.id) {
+
+          private[this] def currentToggle: Toggle.Fractional[T] = {
+            val fractionA = a.currentFraction
+            val fractionB = b.currentFraction
+
+            // For mutable, uninitialiazed toggles, a marker fraction of Double.NaN is used. In this
+            // case, we prefer to use the other toggle. Any comparisons with Double.NaN return false,
+            // so we add a condition to also use toggle a if b's fraction is Double.NaN.
+            // If a and b are both uninitialized, we just use one of them -- here, a.
+            if (fractionA <= fractionB || fractionB.isNaN) a
+            else b
+          }
+
+          def isDefinedAt(x: T): Boolean = currentToggle.isDefinedAt(x)
+
+          override def apply(v1: T): Boolean =
+            currentToggle(v1)
+
+          def currentFraction: Double = currentToggle.currentFraction
+        }
+  }
+
+  /**
+   * [[Toggle]] where `currentFraction` is
+   * the fraction of inputs for which the [[Toggle]] returns `true`.
+   *
+   * `currentFraction` should return a value between `0.0 and 1.0`, inclusive.
+   */
+  private[toggle] abstract class Fractional[-T](id: String) extends Toggle[T](id) {
+    def currentFraction: Double
+  }
+
+  /**
    * Whether or not the given `fraction` is valid.
    *
    * @param fraction must be between `0.0 and 1.0`, inclusive.
@@ -156,11 +205,15 @@ object Toggle {
 
   private def apply[T](
     id: String,
-    pf: PartialFunction[T, Boolean]
-  ): Toggle[T] = new Toggle[T](id) {
+    pf: PartialFunction[T, Boolean],
+    fraction: Double
+  ): Toggle.Fractional[T] = new Toggle.Fractional[T](id) {
+    validateFraction(id, fraction)
+
     override def toString: String = s"Toggle($id)"
     def isDefinedAt(x: T): Boolean = pf.isDefinedAt(x)
     def apply(v1: T): Boolean = pf(v1)
+    def currentFraction: Double = fraction
   }
 
   private[this] val AlwaysTrue: PartialFunction[Any, Boolean] =
@@ -169,8 +222,8 @@ object Toggle {
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `true`.
    */
-  def on[T](id: String): Toggle[T] =
-    apply(id, AlwaysTrue)
+  def on[T](id: String): Toggle.Fractional[T] =
+    apply(id, AlwaysTrue, 1.0)
 
   private[this] val AlwaysFalse: PartialFunction[Any, Boolean] =
     { case _ => false }
@@ -178,8 +231,8 @@ object Toggle {
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `false`.
    */
-  def off[T](id: String): Toggle[T] =
-    apply(id, AlwaysFalse)
+  def off[T](id: String): Toggle.Fractional[T] =
+    apply(id, AlwaysFalse, 0.0)
 
   /**
    * A [[Toggle]] which is defined for no inputs.

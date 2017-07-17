@@ -4,8 +4,6 @@ import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.util.Duration
 
 /**
- * '''Experimental:''' This API is under construction.
- *
  * @note This interface primarily exists to share Scaladocs across
  *       protocol-specific `MethodBuilder` implementations.
  */

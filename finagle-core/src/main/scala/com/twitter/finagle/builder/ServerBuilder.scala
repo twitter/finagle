@@ -4,21 +4,19 @@ import com.twitter.util
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
-import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, StackBasedServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, Engine, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
-  ConstServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+  ConstServerEngineFactory, SslServerConfiguration,
+  SslServerEngineFactory, SslServerSessionVerifier}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.io.File
 import java.net.SocketAddress
 import javax.net.ssl.SSLEngine
-import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
 
 /**
@@ -126,7 +124,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
  * {{{
  * ServerBuilder()
- *   .codec(Http)
+ *   .stack(Http.server)
  *   .hostConnectionMaxLifeTime(5.minutes)
  *   .readTimeout(2.minutes)
  *   .name("servicename")
@@ -134,7 +132,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  *   .build(plusOneService)
  * }}}
  *
- * The `ServerBuilder` requires the definition of `codec`, `bindTo`
+ * The `ServerBuilder` requires the definition of `stack`, `bindTo`
  * and `name`. In Scala, these are statically type
  * checked, and in Java the lack of any of the above causes a runtime
  * error.
@@ -149,7 +147,7 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * ServerBuilder.safeBuild(
  *  plusOneService,
  *  ServerBuilder.get()
- *   .codec(Http)
+ *   .stack(Http.server())
  *   .hostConnectionMaxLifeTime(5.minutes)
  *   .readTimeout(2.minutes)
  *   .name("servicename")
@@ -227,90 +225,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def configured[P](paramAndStackParam: (P, Stack.Param[P])): This =
     copy(params.+(paramAndStackParam._1)(paramAndStackParam._2), mk)
-
-  /**
-   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ServerBuilder().stack(Http.server)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codec: Codec[Req1, Rep1]
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    this.codec((_: ServerCodecConfig) => codec)
-      ._configured(ProtocolLibrary(codec.protocolLibraryName))
-
-  /**
-   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ServerBuilder().stack(Http.server)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codecFactory: CodecFactory[Req1, Rep1]
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    this.codec(codecFactory.server)
-      ._configured(ProtocolLibrary(codecFactory.protocolLibraryName))
-
-  /**
-   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
-   * instead. For example:
-   * {{{
-   * import com.twitter.finagle.Http
-   *
-   * ServerBuilder().stack(Http.server)
-   * }}}
-   */
-  def codec[Req1, Rep1](
-    codecFactory: CodecFactory[Req1, Rep1]#Server
-  ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
-    stack({ ps =>
-      val Label(label) = ps[Label]
-      val BindTo(addr) = ps[BindTo]
-      val Stats(stats) = ps[Stats]
-      val codec = codecFactory(ServerCodecConfig(label, addr))
-
-
-      val newStack = StackServer.newStack[Req1, Rep1].replace(
-        StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
-          codec.prepareConnFactory(next, ps + Stats(stats.scope(label)))
-      ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
-
-      case class Server(
-        stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
-        params: Stack.Params = ps
-      ) extends StdStackServer[Req1, Rep1, Server] {
-        protected type In = Any
-        protected type Out = Any
-
-        protected def copy1(
-          stack: Stack[ServiceFactory[Req1, Rep1]] = this.stack,
-          params: Stack.Params = this.params
-        ) = copy(stack, params)
-
-        protected def newListener(): Listener[Any, Any] =
-          Netty3Listener(codec.pipelineFactory, params)
-
-        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) =
-          codec.newServerDispatcher(transport, service)
-      }
-
-      val proto = ps[ProtocolLibrary]
-      val serverParams =
-        if (proto != ProtocolLibrary.param.default) ps
-        else ps + ProtocolLibrary(codec.protocolLibraryName)
-
-      Server(
-        stack = newStack,
-        params = serverParams
-      )
-    })
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Server]] that will be used
@@ -412,10 +326,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
     _configured(BindTo(address))
 
-  @deprecated("use com.twitter.finagle.netty3.numWorkers flag instead", "2015-11-18")
-  def channelFactory(cf: ServerChannelFactory): This =
-    _configured(Netty3Listener.ChannelFactory(cf))
-
   /**
    * To migrate to the Stack-based APIs, use `configured`.
    * For example:
@@ -469,6 +379,41 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tls(config: SslServerConfiguration, engineFactory: SslServerEngineFactory): This =
     configured(Transport.ServerSsl(Some(config)))
     .configured(SslServerEngineFactory.Param(engineFactory))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, sessionVerifier)
+   * }}}
+   */
+  def tls(config: SslServerConfiguration, sessionVerifier: SslServerSessionVerifier): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerSessionVerifier.Param(sessionVerifier))
+
+  /**
+   * Encrypt the connection with SSL/TLS.
+   *
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(config, engineFactory, sessionVerifier)
+   * }}}
+   */
+  def tls(
+    config: SslServerConfiguration,
+    engineFactory: SslServerEngineFactory,
+    sessionVerifier: SslServerSessionVerifier
+  ): This =
+    configured(Transport.ServerSsl(Some(config)))
+    .configured(SslServerEngineFactory.Param(engineFactory))
+    .configured(SslServerSessionVerifier.Param(sessionVerifier))
 
   /**
    * Encrypt the connection with SSL/TLS.

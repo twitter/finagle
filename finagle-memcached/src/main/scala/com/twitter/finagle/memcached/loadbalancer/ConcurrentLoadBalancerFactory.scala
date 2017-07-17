@@ -1,6 +1,8 @@
 package com.twitter.finagle.memcached.loadbalancer
 
+import com.twitter.finagle.memcached.Toggles
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.{Addr, Address, Stack, ServiceFactory, Stackable}
 
 /**
@@ -13,6 +15,13 @@ import com.twitter.finagle.{Addr, Address, Stack, ServiceFactory, Stackable}
  */
 object ConcurrentLoadBalancerFactory {
   private val ReplicaKey = "concurrent_lb_replica"
+
+  private[this] val UseOneConnection =
+    Toggles("com.twitter.finagle.memcached.UseOneConnection")(ServerInfo().id.hashCode)
+
+  private[this] val numConnections: Int =
+    if (UseOneConnection) 1
+    else 4
 
   // package private for testing
   private[finagle] def replicate(num: Int): Address => Set[Address] = {
@@ -30,7 +39,7 @@ object ConcurrentLoadBalancerFactory {
     def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
   }
   object Param {
-    implicit val param = Stack.Param(Param(4))
+    implicit val param = Stack.Param(Param(numConnections))
   }
 
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =

@@ -11,7 +11,7 @@ import com.twitter.util.Duration
  * @see [[TimeoutFilter]]
  * @see [[LatencyCompensation]]
  */
-private[finagle] object DynamicTimeout {
+object DynamicTimeout {
 
   private[this] val PerRequestKey = new Contexts.local.Key[Duration]()
   private[this] val TotalKey = new Contexts.local.Key[Duration]()
