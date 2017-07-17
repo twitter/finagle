@@ -129,30 +129,30 @@ object Finagle extends Build {
           <url>https://www.twitter.com/</url>
         </developer>
       </developers>,
-    publishTo <<= version { (v: String) =>
+    publishTo := {
       val nexus = "https://oss.sonatype.org/"
-      if (v.trim.endsWith("SNAPSHOT"))
+      if (version.value.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at nexus + "content/repositories/snapshots")
       else
         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
 
     // Prevent eviction warnings
-    dependencyOverrides <++= scalaVersion { vsn =>
+    dependencyOverrides ++= (scalaVersion { vsn =>
       Set(
         "com.twitter" % "libthrift" % libthriftVersion
       )
-    },
+    }).value,
 
-    resourceGenerators in Compile <+=
-      (resourceManaged in Compile, name, version) map { (dir, name, ver) =>
-        val file = dir / "com" / "twitter" / name / "build.properties"
-        val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
-        val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
-        val contents = s"name=$name\nversion=$ver\nbuild_revision=$buildRev\nbuild_name=$buildName"
-        IO.write(file, contents)
-        Seq(file)
-      }
+    resourceGenerators in Compile += Def.task {
+      val dir = (resourceManaged in Compile).value
+      val file = dir / "com" / "twitter" / name.value / "build.properties"
+      val buildRev = Process("git" :: "rev-parse" :: "HEAD" :: Nil).!!.trim
+      val buildName = new java.text.SimpleDateFormat("yyyyMMdd-HHmmss").format(new java.util.Date)
+      val contents = s"name=${name.value}\nversion=${version.value}\nbuild_revision=$buildRev\nbuild_name=$buildName"
+      IO.write(file, contents)
+      Seq(file)
+    }
   )
 
   val jmockSettings = Seq(
@@ -267,7 +267,7 @@ object Finagle extends Build {
       jsr305Lib,
       netty3Lib % "test"
     ),
-    unmanagedClasspath in Test <++= (fullClasspath in (LocalProject("finagle-netty3"), Compile))
+    unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty3"), Compile)).value
   ).dependsOn(finagleToggle)
 
   lazy val finagleNetty4 = Project(
@@ -634,20 +634,20 @@ object Finagle extends Build {
     id = "finagle-doc",
     base = file("doc"),
     settings = Defaults.coreDefaultSettings ++ site.settings ++ site.sphinxSupport() ++ sharedSettings ++ Seq(
-      scalacOptions in doc <++= version.map(v => Seq("-doc-title", "Finagle", "-doc-version", v)),
+      scalacOptions in doc ++= Seq("-doc-title", "Finagle", "-doc-version", version.value),
       includeFilter in Sphinx := ("*.html" | "*.png" | "*.svg" | "*.js" | "*.css" | "*.gif" | "*.txt"),
 
       // Workaround for sbt bug: Without a testGrouping for all test configs,
       // the wrong tests are run
-      testGrouping <<= definedTests in Test map partitionTests,
-      testGrouping in DocTest <<= definedTests in DocTest map partitionTests
+      testGrouping := (definedTests in Test map partitionTests).value,
+      testGrouping in DocTest := (definedTests in DocTest map partitionTests).value
 
     )).configs(DocTest).settings(inConfig(DocTest)(Defaults.testSettings): _*).settings(
-    unmanagedSourceDirectories in DocTest <+= baseDirectory { _ / "src/sphinx/code" },
+    unmanagedSourceDirectories in DocTest += baseDirectory.value / "src/sphinx/code",
     //resourceDirectory in DocTest <<= baseDirectory { _ / "src/test/resources" }
 
     // Make the "test" command run both, test and doctest:test
-    test <<= Seq(test in Test, test in DocTest).dependOn
+    test := Seq(test in Test, test in DocTest).dependOn.value
     ).dependsOn(finagleCore, finagleHttp, finagleMySQL)
 
   /* Test Configuration for running tests on doc sources */
