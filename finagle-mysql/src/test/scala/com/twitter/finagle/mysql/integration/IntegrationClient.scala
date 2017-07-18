@@ -45,7 +45,7 @@ trait IntegrationClient {
     .withCredentials(username, password)
     .withDatabase(db)
 
-  val client: Option[Client with Cursors] = if (isAvailable) {
+  val client: Option[Client with Transactions with Cursors] = if (isAvailable) {
     logger.log(Level.INFO, "Attempting to connect to mysqld @ localhost:3306")
     val username = p.getProperty("username", "<user>")
     val password = p.getProperty("password", null)

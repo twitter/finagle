@@ -170,9 +170,10 @@ private class StdClient(factory: ServiceFactory[Request, Result], statsReceiver:
     val client = Client(singleton, statsReceiver)
     val transaction = for {
       _ <- isolationLevel match {
-        case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}; START TRANSACTION")
-        case None => client.query("START TRANSACTION")
+        case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}")
+        case None => Future.Done
       }
+      _ <- client.query("START TRANSACTION")
       result <- f(client)
       _ <- client.query("COMMIT")
     } yield {
