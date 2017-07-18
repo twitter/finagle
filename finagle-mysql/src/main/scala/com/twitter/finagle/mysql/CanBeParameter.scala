@@ -83,7 +83,7 @@ object CanBeParameter {
           throw new BigIntTooLongException(size = lengthOfByteArray)
         }
 
-        for (i <- 0 until lengthOfByteArray) {
+        for (i <- (lengthOfByteArray - 1) to 0 by -1) {
           writer.writeByte(byteArray(i))
         }
 
