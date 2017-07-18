@@ -47,6 +47,7 @@ private[http2] class MultiplexedTransporter(
   private[this] var dead = false
 
   // exposed for testing
+  private[http2] def numChildren: Int = synchronized { children.size() }
   private[http2] def setStreamId(num: Int): Unit = id.set(num)
 
   private[this] val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
@@ -399,6 +400,7 @@ private[http2] class MultiplexedTransporter(
         }
 
         state = Dead
+        children.remove(curId)
       }
 
       _onClose.updateIfEmpty(Return(exn))
