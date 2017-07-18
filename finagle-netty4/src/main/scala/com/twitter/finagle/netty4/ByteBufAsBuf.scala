@@ -61,7 +61,7 @@ private[finagle] class ByteBufAsBuf(
     }
     val readerIndex = underlying.readerIndex()
     val off = readerIndex + from
-    val len = math.min(length, until - from)
+    val len = math.min(length - from, until - from)
     val index = underlying.forEachByte(off, len, byteProcessor)
     if (index == -1) -1
     else index - readerIndex

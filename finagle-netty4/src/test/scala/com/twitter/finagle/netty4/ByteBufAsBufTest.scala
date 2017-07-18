@@ -160,89 +160,20 @@ class ByteBufAsBufTest
       assert(new ByteBufAsBuf(Unpooled.wrappedBuffer(out)) == buf)
     }
   }
-
-  test("process returns -1 when fully processed") {
-    forAll { bytes: Array[Byte] =>
-      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-
-      var n = 0
-      val processor = new Buf.Processor {
-        def apply(byte: Byte): Boolean = {
-          n += 1
-          true
-        }
-      }
-      assert(-1 == buf.process(processor))
-      assert(buf.length == n)
-    }
-  }
-
-  test("process returns index where processing stopped") {
-    val processor = new Buf.Processor {
-      def apply(byte: Byte): Boolean = false
-    }
-    forAll { bytes: Array[Byte] =>
-      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      assert(buf.process(processor) == (if (buf.isEmpty) -1 else 0))
-
-      def maxThree() = new Buf.Processor {
-        private[this] var n = 0
-        def apply(byte: Byte): Boolean = {
-          n += 1
-          n <= 3
-        }
-      }
-
-      if (bytes.length <= 3) {
-        assert(-1 == buf.process(maxThree()))
-      } else {
-        assert(3 == buf.process(maxThree()))
-        if (bytes.length > 10) {
-          assert(4 == buf.process(1, 5, maxThree()))
-          assert(5 == buf.process(2, 9, maxThree()))
-          assert(-1 == buf.process(0, 3, maxThree()))
-        }
-      }
-    }
-  }
-
-  test("process handles empty inputs") {
-    val processor = new Buf.Processor {
-      def apply(byte: Byte): Boolean = false
-    }
-    forAll { bytes: Array[Byte] =>
-      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      assert(-1 == buf.process(1, 0, processor))
-      assert(-1 == buf.process(buf.length, buf.length + 1, processor))
-    }
-  }
-
-  test("process handles large until") {
-    val processor = new Buf.Processor {
-      def apply(byte: Byte): Boolean = true
-    }
-    forAll { bytes: Array[Byte] =>
-      val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-      assert(-1 == buf.process(0, buf.length, processor))
-      assert(-1 == buf.process(0, buf.length + 1, processor))
-    }
-  }
-
-  test("process handles readerIndex") {
-    val processor = new Buf.Processor {
-      def apply(byte: Byte): Boolean = false
-    }
-    forAll { bytes: Array[Byte] =>
-      whenever(bytes.length > 1) {
-        val bb = Unpooled.wrappedBuffer(bytes)
-        bb.readByte()
-        val buf = new ByteBufAsBuf(bb)
-        assert(0 == buf.process(processor))
-        if (buf.length >= 2) {
-          assert(1 == buf.process(1, 2, processor))
-        }
-      }
-    }
-  }
-
 }
+
+class ByteBufAsBufProcessTest extends ReadableBufProcessorTest(
+  "ByteBufAsBuf",
+  { bytes: Array[Byte] =>
+    val bb = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+    new ReadableBufProcessorTest.CanProcess {
+      def process(
+        from: Int,
+        until: Int,
+        processor: Buf.Processor
+      ): Int = bb.process(from, until, processor)
+      def process(processor: Buf.Processor): Int = bb.process(processor)
+      def readBytes(num: Int): Unit = bb.underlying.readBytes(num)
+    }
+  }
+)
