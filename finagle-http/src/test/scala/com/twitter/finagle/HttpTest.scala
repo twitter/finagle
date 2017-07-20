@@ -106,6 +106,7 @@ class HttpTest extends FunSuite {
     assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "404")) == 1)
     assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
     assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
+    assert(clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size")))
   }
 
   test("server uses custom response classifier when specified") {

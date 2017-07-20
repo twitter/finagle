@@ -126,8 +126,8 @@ Dispatching
 
 .. _dispatching:
 
-Metrics scoped under `dispatcher` represent information about a client's dispatching
-layer.
+The client metrics scoped under `dispatcher` represent information about a
+client's dispatching layer.
 
 Depending on the underlying protocol, dispatchers may have different request
 queueing rules.
