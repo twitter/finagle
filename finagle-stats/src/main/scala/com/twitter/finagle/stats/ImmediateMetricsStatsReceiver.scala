@@ -15,7 +15,6 @@ object ImmediateMetricsStatsReceiver {
           override def count(): Long = stats.populationSize()
           override def min(): Long = stats.min()
           override def max(): Long = stats.max()
-          override def stddev(): Double = stats.standardDeviation()
           override def sum(): Long = stats.sum()
 
           override def percentiles(): Array[Percentile] = {

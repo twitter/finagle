@@ -183,7 +183,7 @@ class MetricsStatsReceiver(
     val gauge = new AbstractGauge[java.lang.Double](format(names)) {
       override def read = new java.lang.Double(f)
     }
-    registry.register(gauge)
+    registry.registerGauge(gauge)
   }
 
   protected[this] def deregisterGauge(names: Seq[String]) {

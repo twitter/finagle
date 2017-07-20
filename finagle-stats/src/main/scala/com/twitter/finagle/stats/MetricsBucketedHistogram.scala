@@ -107,7 +107,6 @@ class MetricsBucketedHistogram(
         override def max(): Long = _max
         override def percentiles(): Array[Percentile] = ps
         override def avg(): Double = _avg
-        override def stddev(): Double = 0.0 // unsupported
         override def min(): Long = _min
         override def sum(): Long = _sum
 
