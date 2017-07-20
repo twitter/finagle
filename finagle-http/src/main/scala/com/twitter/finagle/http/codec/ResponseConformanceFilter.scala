@@ -139,9 +139,15 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
     response.headerMap.remove(Fields.TransferEncoding)
 
     if (response.isChunked) {
-      // This was intended to be a chunked response, so we "MUST NOT" include a content-length
-      // header: https://tools.ietf.org/html/rfc7230#section-3.3.2
-      response.headerMap.remove(Fields.ContentLength)
+
+      // This previously removed the content-length field to conform with
+      // https://tools.ietf.org/html/rfc7230#section-3.3.2. However, it was found
+      // that since netty doesn't know what type of request each response belongs
+      // to, it would mistake some HEAD responses as chunked GET responses, due
+      // to the lack of body. This resulted in "chunked" HEAD responses and the
+      // content-length header was then incorrectly stripped here.
+      // This means that if a user incorrectly sets both chunked transfer encoding
+      // and content-length, the content-length will pass through.
 
       // Make sure we don't leave any writers hanging in case they simply called `close`.
       response.reader.discard()
