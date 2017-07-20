@@ -71,6 +71,29 @@ object CanBeParameter {
     }
   }
 
+  implicit val bigIntCanBeParameter = {
+    new CanBeParameter[BigInt] {
+      def sizeOf(param: BigInt) = 8
+      def typeCode(param: BigInt) = Type.LongLong
+      def write(writer: MysqlBufWriter, param: BigInt) = {
+        val byteArray: Array[Byte] = param.toByteArray
+        val lengthOfByteArray: Int = byteArray.length
+
+        if (lengthOfByteArray > 8) {
+          throw new BigIntTooLongException(size = lengthOfByteArray)
+        }
+
+        for (i <- (lengthOfByteArray - 1) to 0 by -1) {
+          writer.writeByte(byteArray(i))
+        }
+
+        for (i <- lengthOfByteArray until 8) {
+          writer.writeByte(0x0)
+        }
+      }
+    }
+  }
+
   implicit val floatCanBeParameter = {
     new CanBeParameter[Float] {
       def sizeOf(param: Float) = 4
@@ -182,3 +205,5 @@ object CanBeParameter {
     }
   }
 }
+
+class BigIntTooLongException(size: Int) extends Exception(s"BigInt is stored as Unsigned Long, thus it cannot be longer than 8 bytes. Size = $size")

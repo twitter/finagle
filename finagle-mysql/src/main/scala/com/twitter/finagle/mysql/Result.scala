@@ -146,6 +146,22 @@ object EOF extends Decoder[EOF] {
 case class EOF(warnings: Short, serverStatus: ServerStatus) extends Result
 
 /**
+ * These bit masks are to understand whether corresponding attribute
+ * is set for the field. Link to source code from mysql is below.
+ * [[https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h]]
+ */
+object FieldAttributes {
+  val NotNullBitMask: Short = 1
+  val PrimaryKeyBitMask: Short = 2
+  val UniqueKeyBitMask: Short = 4
+  val MultipleKeyBitMask: Short = 8
+  val BlobBitMask: Short = 16
+  val UnsignedBitMask: Short = 32
+  val ZeroFillBitMask: Short = 64
+  val BinaryBitMask: Short = 128
+}
+
+/**
  * Represents the column meta-data associated with a query.
  * Sent during ResultSet transmission and as part of the
  * meta-data associated with a Row.
@@ -207,6 +223,9 @@ case class Field(
 ) extends Result {
   def id: String = if (name.isEmpty) origName else name
   override val toString = "Field(%s)".format(id)
+
+  def isUnsigned: Boolean = (flags & FieldAttributes.UnsignedBitMask) > 0
+  def isSigned: Boolean = !isUnsigned
 }
 
 /**
