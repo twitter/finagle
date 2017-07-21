@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.finagle.decoder.{Framer => FinagleFramer}
 import com.twitter.finagle.memcached.util.ParserUtils
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import scala.collection.mutable.ArrayBuffer
 
 private[memcached] object Framer {
@@ -28,6 +28,25 @@ private[memcached] object Framer {
       }
     }
     val pos = buf.process(finder)
+    if (pos == -1) -1 else pos - 1
+  }
+
+  /**
+   * Return the number of bytes before `\r\n` (newline) in the reader's underlying
+   * buffer, or -1 if no newlines found
+   */
+  def bytesBeforeLineEnd(reader: ByteReader): Int = {
+    val finder = new Buf.Processor {
+      private[this] var prevCh: Byte = _
+      def apply(byte: Byte): Boolean = {
+        if (prevCh == '\r' && byte == '\n') false
+        else {
+          prevCh = byte
+          true
+        }
+      }
+    }
+    val pos = reader.process(finder)
     if (pos == -1) -1 else pos - 1
   }
 }

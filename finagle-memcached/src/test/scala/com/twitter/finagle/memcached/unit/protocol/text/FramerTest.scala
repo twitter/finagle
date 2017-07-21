@@ -1,8 +1,9 @@
 package com.twitter.finagle.memcached.unit.protocol.text
 
 import com.twitter.finagle.memcached.protocol.StorageCommand
+import com.twitter.finagle.memcached.protocol.text.Framer
 import com.twitter.finagle.memcached.protocol.text.server.ServerFramer
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import org.scalatest.FunSuite
 
 class FramerTest extends FunSuite {
@@ -72,5 +73,25 @@ class FramerTest extends FunSuite {
     val framer = new TestFramer
     assert(framer(Buf.Utf8("set foo 0 0 10\r\n")) == Seq(Buf.Utf8("set foo 0 0 10")))
     assert(framer(Buf.Utf8("abc\r\ndef\r\n\r\n")) == Seq(Buf.Utf8("abc\r\ndef\r\n")))
+  }
+
+  test("bytesBeforeLineEnd returns -1 on empty ByteReader") {
+    val reader = ByteReader(Buf.Empty)
+    assert(Framer.bytesBeforeLineEnd(reader) == -1)
+  }
+
+  test("bytesBeforeLineEnd returns 0 when reader's underlying buf starts with \r\n") {
+    val reader = ByteReader(Buf.Utf8("\r\n"))
+    assert(Framer.bytesBeforeLineEnd(reader) == 0)
+  }
+
+  test("bytesBeforeLineEnd returns -1 when reader's underling buf does not contain \r\n") {
+    val reader = ByteReader(Buf.Utf8("foo bar baz"))
+    assert(Framer.bytesBeforeLineEnd(reader) == -1)
+  }
+
+  test("bytesBeforeLineEnd returns index of \r\n in reader's underlying buf") {
+    val reader = ByteReader(Buf.Utf8("foo \r\n bar"))
+    assert(Framer.bytesBeforeLineEnd(reader) == 4)
   }
 }
