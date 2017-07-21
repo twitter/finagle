@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.{ConnectionFailedException, Failure, ReadTimedOutException, WriteTimedOutException}
+import com.twitter.finagle.{ConnectionFailedException, Failure, ProxyConnectException, ReadTimedOutException, Stack, WriteTimedOutException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.decoder.TestFramer
 import com.twitter.finagle.transport.Transport
@@ -11,6 +11,8 @@ import com.twitter.util.{Await, Duration}
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAddress}
+import java.nio.channels.UnresolvedAddressException
+//import java.nio.channels.UnresolvedAddressException
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -224,5 +226,26 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     eventually {
       assert(observedExn.isInstanceOf[WriteTimedOutException])
     }
+  }
+
+  test("Respect non-retriable failures") {
+    val fakeAddress = new InetSocketAddress(InetAddress.getLoopbackAddress, 50)
+
+    def shouldNotBeWrapped(e: Exception): Unit = {
+      val init: ChannelPipeline => Unit = { pipeline =>
+        pipeline.addLast(new ChannelOutboundHandlerAdapter() {
+          override def connect(
+              ctx: ChannelHandlerContext,
+              remote: SocketAddress, local: SocketAddress,
+              promise: ChannelPromise): Unit = promise.setFailure(e)
+        })
+      }
+
+      val transporter = Netty4Transporter.raw[Unit, Unit](init, fakeAddress, Stack.Params.empty)
+      assert(Await.result(transporter().liftToTry, 10.seconds).throwable == e)
+    }
+
+    shouldNotBeWrapped(new UnresolvedAddressException())
+    shouldNotBeWrapped(new ProxyConnectException("boom", fakeAddress))
   }
 }

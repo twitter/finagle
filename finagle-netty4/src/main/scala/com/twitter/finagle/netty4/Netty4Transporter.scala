@@ -6,7 +6,9 @@ import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, Stack}
+import com.twitter.finagle.{
+  CancelledConnectionException, ConnectionFailedException, Failure, ProxyConnectException, Stack
+}
 import com.twitter.io.Buf
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Promise, Stopwatch}
@@ -103,7 +105,11 @@ private[finagle] object Netty4Transporter {
           } else if (channelF.cause != null) {
             failedConnectLatencyStat.add(latency)
             transportP.setException(channelF.cause match {
+              // there is no need to retry on unresolved address
               case e: UnresolvedAddressException => e
+              // there is no need to retry if proxy connect failed
+              case e: ProxyConnectException => e
+              // the rest of failures could benefit from retries
               case NonFatal(e) => Failure.rejected(new ConnectionFailedException(e, addr))
             })
           }

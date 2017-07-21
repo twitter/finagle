@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, Failure}
+import com.twitter.finagle.{ChannelClosedException, ProxyConnectException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
@@ -149,13 +149,12 @@ private[netty4] class HttpProxyConnectHandler(
       ctx.pipeline().remove(self) // drains pending writes when removed
 
       connectPromise.trySuccess()
-      // We don't release `req` since by specs, we don't expect any payload sent back from a
-      // a web proxy server in a successful case.
     } else {
-      val failure = new ConnectionFailedException(
-        Failure(s"Unexpected status returned from an HTTP proxy server: $proxyResponseStatus."),
-        ctx.channel().remoteAddress()
-      )
+      val failure =
+        new ProxyConnectException(
+          s"Unexpected status returned from an HTTP proxy server: $proxyResponseStatus.",
+          ctx.channel().remoteAddress()
+        )
 
       fail(ctx, failure)
       ctx.close()

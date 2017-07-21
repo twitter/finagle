@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.proxy
 
+import com.twitter.finagle.ProxyConnectException
 import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners
 import io.netty.channel.{Channel, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.handler.proxy.ProxyHandler
@@ -64,7 +65,9 @@ private[netty4] class Netty4ProxyConnectHandler(
         } else {
           // SOCKS/HTTP proxy handshake promise is failed so given `ProxyHandler` is going to
           // close the channel and fail pending writes, we only need to fail the connect promise.
-          promise.tryFailure(future.cause())
+          promise.tryFailure(
+            new ProxyConnectException(future.cause().getMessage, ctx.channel().remoteAddress())
+          )
         }
       }
     })

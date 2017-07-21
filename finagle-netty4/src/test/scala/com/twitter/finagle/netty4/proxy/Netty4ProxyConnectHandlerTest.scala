@@ -1,9 +1,10 @@
 package com.twitter.finagle.netty4.proxy
 
+import com.twitter.finagle.ProxyConnectException
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.proxy.{ProxyConnectException, ProxyHandler}
+import io.netty.handler.proxy.ProxyHandler
 import io.netty.util.concurrent.{Future, GenericFutureListener}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -79,11 +80,9 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     assert(channel.readOutbound[String]() == null)
 
     channel.pipeline().fireExceptionCaught(new Exception())
+    intercept[Exception](channel.checkException())
 
     assert(promise.isDone)
-
-    assert(intercept[Exception](channel.checkException()).isInstanceOf[ProxyConnectException])
-
     assert(promise.cause.isInstanceOf[ProxyConnectException])
     assert(!channel.finishAndReleaseAll())
   }

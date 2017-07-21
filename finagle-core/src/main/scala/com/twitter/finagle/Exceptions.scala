@@ -299,6 +299,21 @@ class ChannelException(underlying: Option[Throwable], remoteAddr: Option[SocketA
 }
 
 /**
+ * Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request.
+ */
+class ProxyConnectException(
+    message: String,
+    remoteAddress: SocketAddress,
+    val flags: Long = FailureFlags.NonRetryable)
+  extends Exception(message) with NoStackTrace with FailureFlags[ProxyConnectException] {
+
+  protected def copyWithFlags(flags: Long): ProxyConnectException =
+    new ProxyConnectException(message, remoteAddress, flags)
+
+  override def getMessage: String = s"Proxy connect to $remoteAddress failed with: $message"
+}
+
+/**
  * Indicates that the client failed to establish a connection. Typically this
  * class will be extended to provide additional information relevant to a
  * particular category of connection failure.

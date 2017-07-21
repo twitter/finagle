@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException}
+import com.twitter.finagle.{ChannelClosedException, ProxyConnectException}
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandlerAdapter, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.channel.embedded.EmbeddedChannel
@@ -112,9 +112,9 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
       Unpooled.wrappedBuffer("do not talk to me ever again".getBytes("UTF-8"))
     )
 
-    assert(intercept[Exception](channel.writeInbound(rep.retain())).isInstanceOf[ConnectionFailedException])
+    assert(intercept[Exception](channel.writeInbound(rep.retain())).isInstanceOf[ProxyConnectException])
     assert(!connectPromise.isSuccess)
-    assert(connectPromise.cause().isInstanceOf[ConnectionFailedException])
+    assert(connectPromise.cause().isInstanceOf[ProxyConnectException])
     assert(rep.release())
 
     channel.finishAndReleaseAll()
