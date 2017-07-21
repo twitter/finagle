@@ -247,7 +247,7 @@ class Zk2Resolver(
 
   /**
    * Construct a Var[Addr] from the components of a ServerSet path.
-   * 
+   *
    * Note: the shard ID parameter is not exposed in the Resolver argument
    * string, but it may be passed by callers that reference this object
    * directly (e.g. ServerSet Namers).
@@ -265,10 +265,14 @@ class Zk2Resolver(
   /**
    * Bind a string into a variable address using the zk2 scheme.
    *
+   * NOTE: This specific API doesn't take "zk2!" as a protocol prefix, but when used with just
+   *       Resolver, "zk2!" is expected as a prefix. Clients should be using the Resolver API
+   *       rather than this direct interface.
+   *
    * Argument strings must adhere to either of the following formats:
    *
-   *     zk2!<hosts>:2181!<path>
-   *     zk2!<hosts>:2181!<path>!<endpoint>
+   *     <hosts>:2181!<path>
+   *     <hosts>:2181!<path>!<endpoint>
    *
    * where
    *
