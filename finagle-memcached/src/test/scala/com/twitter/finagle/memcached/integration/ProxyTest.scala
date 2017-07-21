@@ -3,6 +3,7 @@ package com.twitter.finagle.memcached.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable}

@@ -5,6 +5,7 @@ import com.twitter.finagle.Address
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.Name
 import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.io.Buf

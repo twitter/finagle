@@ -14,6 +14,8 @@ import com.twitter.finagle.Address$;
 import com.twitter.finagle.Memcached;
 import com.twitter.finagle.Name$;
 import com.twitter.finagle.Service;
+import com.twitter.finagle.memcached.integration.external.TestMemcachedServer;
+import com.twitter.finagle.memcached.integration.external.TestMemcachedServer$;
 import com.twitter.finagle.memcached.java.Client;
 import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory;

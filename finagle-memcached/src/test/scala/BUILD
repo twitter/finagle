@@ -1,6 +1,6 @@
 EXTERNAL_SOURCES = [
-  'com/twitter/finagle/memcached/integration/ExternalMemcached.scala',
-  'com/twitter/finagle/memcached/integration/InProcessMemcached.scala'
+  'com/twitter/finagle/memcached/integration/external/ExternalMemcached.scala',
+  'com/twitter/finagle/memcached/integration/external/InProcessMemcached.scala'
 ]
 
 scala_library(name='external',

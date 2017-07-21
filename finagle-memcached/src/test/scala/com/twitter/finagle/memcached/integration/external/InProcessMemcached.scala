@@ -1,8 +1,7 @@
-package com.twitter.finagle.memcached.integration
+package com.twitter.finagle.memcached.integration.external
 
 import _root_.java.net.SocketAddress
-import com.twitter.finagle.ListeningServer
-import com.twitter.finagle.Memcached
+import com.twitter.finagle.{ListeningServer, Memcached}
 import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle.memcached.{Entry, Interpreter, InterpreterService}
 import com.twitter.io.Buf

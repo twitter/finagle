@@ -6,6 +6,7 @@ import com.twitter.finagle.Memcached
 import com.twitter.finagle.Name
 import com.twitter.finagle.Service
 import com.twitter.finagle.memcached.Interpreter
+import com.twitter.finagle.memcached.integration.external.InProcessMemcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
 import com.twitter.util.TimeConversions._

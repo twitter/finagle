@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.protocol.text
+package com.twitter.finagle.memcached.unit.protocol.text
 
 import com.twitter.finagle.memcached.protocol.text.server.ResponseToBuf
 import org.scalatest.FunSuite

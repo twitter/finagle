@@ -1,8 +1,9 @@
-package com.twitter.finagle.memcached.loadbalancer
+package com.twitter.finagle.memcached.unit.loadbalancer
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.{StackClient, StringClient}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.{Address, Name, Service, Stack}
 import com.twitter.finagle.stats.InMemoryStatsReceiver

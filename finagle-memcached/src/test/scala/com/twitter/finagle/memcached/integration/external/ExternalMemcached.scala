@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcached.integration
+package com.twitter.finagle.memcached.integration.external
 
-import collection.JavaConversions._
 import com.twitter.conversions.time._
-import com.twitter.util.{Stopwatch, Duration, RandomSocket}
-import java.net.{InetAddress, BindException, ServerSocket, InetSocketAddress}
+import com.twitter.util.{Duration, RandomSocket, Stopwatch}
+import java.net.{BindException, InetAddress, InetSocketAddress, ServerSocket}
+import scala.collection.JavaConversions._
 import scala.collection._
 import scala.util.control.NonFatal
 
