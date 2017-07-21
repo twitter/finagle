@@ -15,6 +15,45 @@ private[finagle] object ByteBufAsBuf {
   }
 
   /**
+   * Process `bb` 1-byte at a time using the given
+   * [[Buf.Processor]], starting at index `from` of `bb` until
+   * index `until`. Processing will halt if the processor
+   * returns `false` or after processing the final byte.
+   *
+   * @return -1 if the processor processed all bytes or
+   *         the last processed index if the processor returns
+   *         `false`.
+   *         Will return -1 if `from` is greater than or equal to
+   *         `until` or `length` of the underlying buffer.
+   *         Will return -1 if `until` is greater than or equal to
+   *         `length` of the underlying buffer.
+   *
+   * @param from the starting index, inclusive. Must be non-negative.
+   *
+   * @param until the ending index, exclusive. Must be non-negative.
+   */
+  def process(from: Int, until: Int, processor: Buf.Processor, bb: ByteBuf): Int = {
+    Buf.checkSliceArgs(from, until)
+
+    val length = bb.readableBytes()
+
+    // check if chunk to process is empty
+    if (until <= from || from >= length) -1
+    else {
+      val byteProcessor = new ByteProcessor {
+        def process(value: Byte): Boolean = processor(value)
+      }
+      val readerIndex = bb.readerIndex()
+      val off = readerIndex + from
+      val len = math.min(length - from, until - from)
+      val index = bb.forEachByte(off, len, byteProcessor)
+      if (index == -1) -1
+      else index - readerIndex
+    }
+  }
+
+
+  /**
    * Construct a [[Buf]] wrapper for `ByteBuf`.
    *
    * @note this wrapper does not support ref-counting and therefore should either
@@ -53,19 +92,8 @@ private[finagle] class ByteBufAsBuf(
   def get(index: Int): Byte =
     underlying.getByte(underlying.readerIndex() + index)
 
-  def process(from: Int, until: Int, processor: Buf.Processor): Int = {
-    checkSliceArgs(from, until)
-    if (isSliceEmpty(from, until)) return -1
-    val byteProcessor = new ByteProcessor {
-      def process(value: Byte): Boolean = processor(value)
-    }
-    val readerIndex = underlying.readerIndex()
-    val off = readerIndex + from
-    val len = math.min(length - from, until - from)
-    val index = underlying.forEachByte(off, len, byteProcessor)
-    if (index == -1) -1
-    else index - readerIndex
-  }
+  def process(from: Int, until: Int, processor: Buf.Processor): Int =
+    ByteBufAsBuf.process(from, until, processor, underlying)
 
   def write(bytes: Array[Byte], off: Int): Unit = {
     checkWriteArgs(bytes.length, off)
@@ -89,12 +117,12 @@ private[finagle] class ByteBufAsBuf(
   def length: Int = underlying.readableBytes
 
   def slice(from: Int, until: Int): Buf = {
-    checkSliceArgs(from, until)
+    Buf.checkSliceArgs(from, until)
     if (isSliceEmpty(from, until)) Buf.Empty
     else if (isSliceIdentity(from, until)) this
     else {
       val off = underlying.readerIndex() + from
-      val len = Math.min(length - from, until - from)
+      val len = Math.min(length, until) - from
       new ByteBufAsBuf(underlying.slice(off, len))
     }
   }

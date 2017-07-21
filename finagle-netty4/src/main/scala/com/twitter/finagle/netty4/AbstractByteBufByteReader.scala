@@ -30,6 +30,12 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
 
   final def remainingUntil(byte: Byte): Int = bb.bytesBefore(byte)
 
+  def process(processor: Buf.Processor): Int =
+    process(0, bb.readableBytes(), processor)
+
+  def process(from: Int, until: Int, processor: Buf.Processor): Int =
+    ByteBufAsBuf.process(from, until, processor, bb)
+
   final def readString(numBytes: Int, charset: Charset): String = {
     checkRemaining(numBytes)
     val result = bb.toString(bb.readerIndex, numBytes, charset)

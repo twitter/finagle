@@ -10,6 +10,7 @@ object ReadableBufProcessorTest {
     def process(from: Int, until: Int, processor: Buf.Processor): Int
     def process(processor: Buf.Processor): Int
     def readBytes(num: Int)
+    def readerIndex(): Int
   }
 
   def newExceptionalProcessor(): Buf.Processor = new Buf.Processor {
@@ -142,16 +143,9 @@ abstract class ReadableBufProcessorTest(
     forAll { bytes: Array[Byte] =>
       whenever(bytes.length > 0) {
         val b = newProcessable(bytes)
+        assert(b.readerIndex == 0)
         assert(b.process(newConsumeAllProcessor) == -1)
-
-        // should not throw
-        b.readBytes(bytes.length)
-
-        // we're at the end so this should throw
-        intercept[IndexOutOfBoundsException] {
-          b.readBytes(1)
-        }
-
+        assert(b.readerIndex == 0)
       }
     }
   }

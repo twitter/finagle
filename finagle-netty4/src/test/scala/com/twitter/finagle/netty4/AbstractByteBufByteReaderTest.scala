@@ -9,9 +9,31 @@ import org.scalacheck.Gen
 import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class CopyingByteBufByteReaderTest extends AbstractByteBufByteReaderTest {
-  override protected def wrapByteBufInReader(bb: ByteBuf): ByteReader =
+object CopyingByteBufByteReaderTest {
+
+  def wrapByteBufInReader(bb: ByteBuf): ByteReader =
     new CopyingByteBufByteReader(bb)
+
+  def newReader(f: ByteBuf => Unit): ByteReader = {
+    val buf = UnpooledByteBufAllocator.DEFAULT.buffer(10, Int.MaxValue)
+    f(buf)
+    wrapByteBufInReader(buf)
+  }
+
+  def readerWith(bytes: Byte*): ByteReader = newReader { bb =>
+    bytes.foreach(bb.writeByte(_))
+  }
+}
+
+class CopyingByteBufByteReaderTest extends AbstractByteBufByteReaderTest {
+  protected def newReader(f: (ByteBuf) => Unit): ByteReader =
+    CopyingByteBufByteReaderTest.newReader(f)
+
+  protected def readerWith(bytes: Byte*): ByteReader =
+    CopyingByteBufByteReaderTest.readerWith(bytes: _*)
+
+  protected def wrapByteBufInReader(bb: ByteBuf): ByteReader =
+    CopyingByteBufByteReaderTest.wrapByteBufInReader(bb)
 
   test("Buf instances are backed by a precisely sized Buf.ByteArray") {
     val br = readerWith(0x00, 0x01)
@@ -28,21 +50,28 @@ class CopyingByteBufByteReaderTest extends AbstractByteBufByteReaderTest {
   }
 }
 
+class CopyingByteBufByteReaderProcessorTest extends ReadableBufProcessorTest(
+  "CopyingByteBufByteReader", { bytes: Array[Byte] =>
+    val br = CopyingByteBufByteReaderTest.readerWith(bytes: _*)
+    new ReadableBufProcessorTest.CanProcess {
+      def process(from: Int, until: Int, processor: Buf.Processor): Int =
+        br.process(from, until, processor)
+      def process(processor: Buf.Processor): Int = br.process(processor)
+      def readBytes(num: Int): Unit = br.readBytes(num)
+      def readerIndex(): Int = bytes.length - br.remaining
+    }
+  }
+)
+
 abstract class AbstractByteBufByteReaderTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private val SignedMediumMax = 0x800000
 
   protected def wrapByteBufInReader(bb: ByteBuf): ByteReader
 
-  protected def newReader(f: ByteBuf => Unit): ByteReader = {
-    val buf = UnpooledByteBufAllocator.DEFAULT.buffer(10, Int.MaxValue)
-    f(buf)
-    wrapByteBufInReader(buf)
-  }
+  protected def newReader(f: ByteBuf => Unit): ByteReader
 
-  protected def readerWith(bytes: Byte*): ByteReader = newReader { bb =>
-    bytes.foreach(bb.writeByte(_))
-  }
+  protected def readerWith(bytes: Byte*): ByteReader
 
   private def maskMedium(i: Int) = i & 0x00ffffff
 

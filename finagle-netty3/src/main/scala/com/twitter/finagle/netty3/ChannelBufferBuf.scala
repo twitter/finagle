@@ -26,7 +26,7 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
   }
 
   def process(from: Int, until: Int, processor: Buf.Processor): Int = {
-    checkSliceArgs(from, until)
+    Buf.checkSliceArgs(from, until)
     if (isSliceEmpty(from, until)) return -1
     val off = underlying.readerIndex + from
     val endAt = math.min(length, underlying.readerIndex + until)
@@ -59,7 +59,7 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
   }
 
   def slice(i: Int, j: Int): Buf = {
-    checkSliceArgs(i, j)
+    Buf.checkSliceArgs(i, j)
     if (isSliceEmpty(i, j)) Buf.Empty
     else if (isSliceIdentity(i, j)) this
     else {

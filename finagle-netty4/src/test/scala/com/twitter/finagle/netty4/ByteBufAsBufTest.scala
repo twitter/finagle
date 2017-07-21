@@ -174,6 +174,7 @@ class ByteBufAsBufProcessTest extends ReadableBufProcessorTest(
       ): Int = bb.process(from, until, processor)
       def process(processor: Buf.Processor): Int = bb.process(processor)
       def readBytes(num: Int): Unit = bb.underlying.readBytes(num)
+      def readerIndex(): Int = bb.underlying.readerIndex()
     }
   }
 )
