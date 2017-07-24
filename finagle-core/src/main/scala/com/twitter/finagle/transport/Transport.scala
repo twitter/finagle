@@ -159,7 +159,7 @@ object Transport {
   /**
    * $param the SSL/TLS client configuration for a `Transport`.
    */
-  case class ClientSsl(e: Option[SslClientConfiguration]) {
+  case class ClientSsl(sslClientConfiguration: Option[SslClientConfiguration]) {
     def mk(): (ClientSsl, Stack.Param[ClientSsl]) =
       (this, ClientSsl.param)
   }
@@ -170,7 +170,7 @@ object Transport {
   /**
    * $param the SSL/TLS server configuration for a `Transport`.
    */
-  case class ServerSsl(e: Option[SslServerConfiguration]) {
+  case class ServerSsl(sslServerConfiguration: Option[SslServerConfiguration]) {
     def mk(): (ServerSsl, Stack.Param[ServerSsl]) =
       (this, ServerSsl.param)
   }

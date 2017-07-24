@@ -25,24 +25,24 @@ class ServerTransportParamsTest
 
   test("withTransport.tls sets SSL/TLS configuration") {
     val server = stringServer.withTransport.tls(config)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
   }
 
   test("withTransport.tls sets configuration, engine factory") {
     val server = stringServer.withTransport.tls(config, engineFactory)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerEngineFactory.Param].factory == engineFactory)
   }
 
   test("withTransport.tls sets configuration, verifier") {
     val server = stringServer.withTransport.tls(config, sessionVerifier)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerSessionVerifier.Param].verifier == sessionVerifier)
   }
 
   test("withTransport.tls sets configuration, engine factory, verifier") {
     val server = stringServer.withTransport.tls(config, engineFactory, sessionVerifier)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerEngineFactory.Param].factory == engineFactory)
     assert(server.params[SslServerSessionVerifier.Param].verifier == sessionVerifier)
   }

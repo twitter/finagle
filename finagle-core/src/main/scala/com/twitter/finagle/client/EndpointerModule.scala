@@ -3,6 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle.{Stack, ServiceFactory, param, Address}
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stack.Endpoint
+import com.twitter.finagle.transport.Transport
 import java.net.InetSocketAddress
 
 /**
@@ -22,7 +23,8 @@ class EndpointerModule[Req, Rep](
   val description = "Send requests over the wire"
   val parameters = Seq(
     implicitly[Stack.Param[Transporter.EndpointAddr]],
-    implicitly[Stack.Param[param.Stats]]
+    implicitly[Stack.Param[param.Stats]],
+    implicitly[Stack.Param[Transport.ClientSsl]]
   ) ++ extraParams
 
   def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {

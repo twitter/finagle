@@ -63,24 +63,24 @@ class ServerBuilderTest extends FunSuite
 
   test("ServerBuilder sets SSL/TLS configuration") {
     val server = ServerBuilder().tls(config)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
   }
 
   test("ServerBuilder sets SSL/TLS configuration, engine factory") {
     val server = ServerBuilder().tls(config, engineFactory)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerEngineFactory.Param].factory == engineFactory)
   }
 
   test("ServerBuilder sets SSL/TLS configuration, verifier") {
     val server = ServerBuilder().tls(config, sessionVerifier)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerSessionVerifier.Param].verifier == sessionVerifier)
   }
 
   test("ServerBuilder sets SSL/TLS configuration, engine factory, verifier") {
     val server = ServerBuilder().tls(config, engineFactory, sessionVerifier)
-    assert(server.params[Transport.ServerSsl].e == Some(config))
+    assert(server.params[Transport.ServerSsl].sslServerConfiguration == Some(config))
     assert(server.params[SslServerEngineFactory.Param].factory == engineFactory)
     assert(server.params[SslServerSessionVerifier.Param].verifier == sessionVerifier)
   }

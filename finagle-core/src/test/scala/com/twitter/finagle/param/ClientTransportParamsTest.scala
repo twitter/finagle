@@ -26,24 +26,24 @@ class ClientTransportParamsTest
 
   test("withTransport.tls sets SSL/TLS configuration") {
     val client = stringClient.withTransport.tls(config)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
   }
 
   test("withTransport.tls sets SSL/TLS configuration, engine factory") {
     val client = stringClient.withTransport.tls(config, engineFactory)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
   }
 
   test("withTransport.tls sets SSL/TLS configuration, verifier") {
     val client = stringClient.withTransport.tls(config, sessionVerifier)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }
 
   test("withTransport.tls sets SSL/TLS configuration, engine factory, verifier") {
     val client = stringClient.withTransport.tls(config, engineFactory, sessionVerifier)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }

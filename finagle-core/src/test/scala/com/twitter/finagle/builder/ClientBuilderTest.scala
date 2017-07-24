@@ -153,24 +153,24 @@ class ClientBuilderTest extends FunSuite
 
   test("ClientBuilder sets SSL/TLS configuration") {
     val client = ClientBuilder().tls(config)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
   }
 
   test("ClientBuilder sets SSL/TLS configuration, engine factory") {
     val client = ClientBuilder().tls(config, engineFactory)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
   }
 
   test("ClientBuilder sets SSL/TLS configuration, verifier") {
     val client = ClientBuilder().tls(config, sessionVerifier)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }
 
   test("ClientBuilder sets SSL/TLS configuration, engine factory, verifier") {
     val client = ClientBuilder().tls(config, engineFactory, sessionVerifier)
-    assert(client.params[Transport.ClientSsl].e == Some(config))
+    assert(client.params[Transport.ClientSsl].sslClientConfiguration == Some(config))
     assert(client.params[SslClientEngineFactory.Param].factory == engineFactory)
     assert(client.params[SslClientSessionVerifier.Param].verifier == sessionVerifier)
   }
