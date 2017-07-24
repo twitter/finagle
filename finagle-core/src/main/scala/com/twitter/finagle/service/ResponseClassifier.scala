@@ -38,4 +38,14 @@ object ResponseClassifier {
     case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
   }
 
+  /**
+   * Implementation for the [[ResponseClassifier]] that retries requests on all throws.
+   *
+   * This would be useful for instances of idempotent requests, for example
+   * on database reads or similar.
+   */
+  val RetryOnThrows: ResponseClassifier = named("RetryOnThrowsResponseClassifier") {
+    case ReqRep(_, Throw(_)) => ResponseClass.RetryableFailure
+  }
+
 }

@@ -1,7 +1,8 @@
 package com.twitter.finagle.service
 
-import com.twitter.finagle.Failure
+import com.twitter.finagle.{Failure, TimeoutException}
 import com.twitter.finagle.service.ResponseClass._
+import com.twitter.conversions.time._
 import com.twitter.util.{Return, Throw}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -39,6 +40,19 @@ class ResponseClassifierTest extends FunSuite {
 
     assert(!classifier.isDefinedAt(ReqRep(0, aReturn)))
     assert(Success == classifier.applyOrElse(ReqRep(0, aReturn), ResponseClassifier.Default))
+  }
+
+  test("Retry on all throws") {
+    assert("RetryOnThrowsResponseClassifier" == ResponseClassifier.RetryOnThrows.toString)
+
+    assert(RetryableFailure ==
+      ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(Failure.rejected))))
+
+    assert(RetryableFailure ==
+      ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(new TimeoutException {
+        protected val timeout = 0.seconds
+        protected val explanation = "timeout"
+      }))))
   }
 
 }
