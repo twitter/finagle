@@ -5,8 +5,9 @@ import com.twitter.finagle.loadbalancer.aperture.{ApertureLeastLoaded, ApertureP
 import com.twitter.finagle.loadbalancer.heap.HeapLeastLoaded
 import com.twitter.finagle.loadbalancer.p2c.{P2CLeastLoaded, P2CPeakEwma}
 import com.twitter.finagle.loadbalancer.roundrobin.RoundRobinBalancer
+import com.twitter.finagle.{param, Stack}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.{DefaultTimer, Rng}
+import com.twitter.finagle.util.Rng
 import com.twitter.finagle.{ServiceFactory, ServiceFactoryProxy, NoBrokersAvailableException}
 import com.twitter.util.{Activity, Duration, Future, Time, Stopwatch}
 import scala.util.Random
@@ -86,11 +87,13 @@ object Balancers {
     override def toString: String = "P2CLeastLoaded"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      sr: StatsReceiver,
-      exc: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] =
+      exc: NoBrokersAvailableException,
+      params: Stack.Params
+    ): ServiceFactory[Req, Rep] = {
+      val sr = params[param.Stats].statsReceiver
       newScopedBal(sr, "p2c_least_loaded",
         new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc))
+    }
   }
 
   /**
@@ -127,11 +130,13 @@ object Balancers {
     override def toString: String = "P2CPeakEwma"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      sr: StatsReceiver,
-      exc: NoBrokersAvailableException
-    ): ServiceFactory[Req, Rep] =
+      exc: NoBrokersAvailableException,
+      params: Stack.Params
+    ): ServiceFactory[Req, Rep] = {
+      val sr = params[param.Stats].statsReceiver
       newScopedBal(sr, "p2c_peak_ewma",
         new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, maxEffort, rng, sr, exc))
+    }
   }
 
   /**
@@ -146,9 +151,10 @@ object Balancers {
       override def toString: String = "HeapLeastLoaded"
       def newBalancer[Req, Rep](
         endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-        sr: StatsReceiver,
-        exc: NoBrokersAvailableException
+        exc: NoBrokersAvailableException,
+        params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
+        val sr = params[param.Stats].statsReceiver
         newScopedBal(sr, "heap_least_loaded",
           new HeapLeastLoaded(endpoints, sr, exc, rng))
       }
@@ -224,12 +230,14 @@ object Balancers {
     override def toString: String = "ApertureLeastLoaded"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      sr: StatsReceiver,
-      exc: NoBrokersAvailableException
+      exc: NoBrokersAvailableException,
+      params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
+      val sr = params[param.Stats].statsReceiver
+      val timer = params[param.Timer].timer
       newScopedBal(sr, "aperture_least_loaded",
         new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, DefaultTimer, exc, useDeterministicOrdering))
+          highLoad, minAperture, maxEffort, rng, sr, timer, exc, useDeterministicOrdering))
     }
   }
 
@@ -296,12 +304,14 @@ object Balancers {
     override def toString: String = "AperturePeakEwma"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      sr: StatsReceiver,
-      exc: NoBrokersAvailableException
+      exc: NoBrokersAvailableException,
+      params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
+      val sr = params[param.Stats].statsReceiver
+      val timer = params[param.Timer].timer
       newScopedBal(sr, "aperture_peak_ewma",
         new AperturePeakEwma(endpoints, smoothWin, smoothWin, Stopwatch.systemNanos, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, DefaultTimer, exc, useDeterministicOrdering))
+          highLoad, minAperture, maxEffort, rng, sr, timer, exc, useDeterministicOrdering))
     }
   }
 
@@ -324,9 +334,10 @@ object Balancers {
     override def toString: String = "RoundRobin"
     def newBalancer[Req, Rep](
       endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-      sr: StatsReceiver,
-      exc: NoBrokersAvailableException
+      exc: NoBrokersAvailableException,
+      params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
+      val sr = params[param.Stats].statsReceiver
       newScopedBal(sr, "round_robin",
         new RoundRobinBalancer(endpoints, sr, exc, maxEffort))
     }

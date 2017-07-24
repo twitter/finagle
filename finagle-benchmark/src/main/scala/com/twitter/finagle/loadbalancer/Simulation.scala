@@ -1,6 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.{param, Stack}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.finagle.NoBrokersAvailableException
 import com.twitter.util.{Activity, Future, Stopwatch, Var}
@@ -64,22 +65,22 @@ private object Simulation extends com.twitter.app.App {
       val balancer = bal() match {
         case "p2c" => Balancers.p2c().newBalancer(
           activityServers,
-          statsReceiver=sr.scope("p2c"),
-          noBrokers)
+          noBrokers,
+          Stack.Params.empty + param.Stats(sr.scope("p2c")))
         case "ewma" => Balancers.p2cPeakEwma().newBalancer(
           activityServers,
-          statsReceiver=sr.scope("p2c_ewma"),
-          noBrokers)
+          noBrokers,
+          Stack.Params.empty + param.Stats(sr.scope("p2c_ewma")))
         case "aperture" =>
           Balancers.aperture().newBalancer(
             activityServers,
-            statsReceiver=sr.scope("aperture"),
-            noBrokers)
+            noBrokers,
+            Stack.Params.empty + param.Stats(sr.scope("aperture")))
         case "rr" =>
           Balancers.roundRobin().newBalancer(
             activityServers,
-            statsReceiver=sr.scope("round_robin"),
-            noBrokers)
+            noBrokers,
+            Stack.Params.empty + param.Stats(sr.scope("round_robin")))
       }
       ClientFactory(id, balancer, sr)
     }

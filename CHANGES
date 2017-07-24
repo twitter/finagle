@@ -70,6 +70,9 @@ Breaking API Changes
     - `ClientBuilder.channelFactory` and `ServerBuilder.channelFactory` have been removed.
        Use `.stack` instead.
 
+  * finagle-core: LoadBalancerFactory now takes `Stack.Params` which allows a client to
+    more easily pass in the stack context. ``PHAB_ID=D73129``
+
   * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
     ``PHAB_ID=D63970``
 

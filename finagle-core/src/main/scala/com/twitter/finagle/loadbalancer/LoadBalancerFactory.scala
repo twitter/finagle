@@ -250,7 +250,7 @@ object LoadBalancerFactory {
         }
 
         val underlying = loadBalancerFactory.newBalancer(
-          orderedEndpoints, balancerStats, balancerExc)
+          orderedEndpoints, balancerExc, params + param.Stats(balancerStats))
         params[WhenNoNodesOpenParam].whenNoNodesOpen match {
           case WhenNoNodesOpen.PickOne => underlying
           case WhenNoNodesOpen.FailFast => new NoNodesOpenServiceFactory(underlying)
@@ -308,18 +308,16 @@ abstract class LoadBalancerFactory {
    * So the interface to build a balancer is wrapped in an [[com.twitter.util.Activity]]
    * which allows us to observe this process for changes.
    *
-   * @param statsReceiver The StatsReceiver which balancers report stats to. See
-   * [[com.twitter.finagle.loadbalancer.Balancer]] to see which stats are exported
-   * across implementations.
-   *
    * @param emptyException The exception returned when a balancer's collection is empty.
+   *
+   * @param params A collection of parameters usually passed in from the client stack.
    *
    * @note `endpoints` are ordered by the [[LoadBalancerFactory.AddressOrdering]] param.
    */
   def newBalancer[Req, Rep](
     endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
+    emptyException: NoBrokersAvailableException,
+    params: Stack.Params
   ): ServiceFactory[Req, Rep]
 }
 
@@ -344,9 +342,9 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
 
   def newBalancer[Req, Rep](
     endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-    statsReceiver: StatsReceiver,
-    emptyException: NoBrokersAvailableException
+    emptyException: NoBrokersAvailableException,
+    params: Stack.Params
   ): ServiceFactory[Req, Rep] = {
-    underlying.newBalancer(endpoints, statsReceiver, emptyException)
+    underlying.newBalancer(endpoints, emptyException, params)
   }
 }

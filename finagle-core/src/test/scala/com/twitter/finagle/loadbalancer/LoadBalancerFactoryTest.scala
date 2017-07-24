@@ -6,7 +6,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{InMemoryHostStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -209,8 +209,8 @@ class LoadBalancerFactoryTest extends FunSuite
     val mockBalancer = new LoadBalancerFactory {
       def newBalancer[Req, Rep](
         endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-        statsReceiver: StatsReceiver,
-        emptyException: NoBrokersAvailableException
+        emptyException: NoBrokersAvailableException,
+        params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
         eps = endpoints.sample().toVector.map(_.address.toString)
         ServiceFactory.const(Service.mk(_ => ???))

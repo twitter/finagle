@@ -384,8 +384,8 @@ class TrafficDistributorTest extends FunSuite {
     ): ServiceFactory[Int, Int] = {
       DefaultBalancerFactory.newBalancer(
         set.map(_.toVector),
-        NullStatsReceiver,
-        new NoBrokersAvailableException("test"))
+        new NoBrokersAvailableException("test"),
+        Stack.Params.empty)
     }
 
     val dist = new TrafficDistributor[Int, Int](

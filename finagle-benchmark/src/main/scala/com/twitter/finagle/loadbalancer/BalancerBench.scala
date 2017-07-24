@@ -120,7 +120,7 @@ class HeapBalancerBench extends StdBenchAnnotations {
   @Setup
   def setup() {
     heap = Balancers.heap().newBalancer(
-      newActivity(numNodes), NullStatsReceiver, NoBrokersExc
+      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
     )
   }
 
@@ -142,10 +142,10 @@ class P2CBalancerBench extends StdBenchAnnotations {
   @Setup
   def setup() {
     p2c = Balancers.p2c().newBalancer(
-      newActivity(numNodes), NullStatsReceiver, NoBrokersExc
+      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
     )
     p2cEwma = Balancers.p2cPeakEwma().newBalancer(
-      newActivity(numNodes), NullStatsReceiver, NoBrokersExc
+      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
     )
   }
 
@@ -169,7 +169,7 @@ class ApertureBalancerBench extends StdBenchAnnotations {
   @Setup
   def setup() {
     aperture = Balancers.aperture().newBalancer(
-      newActivity(numNodes), NullStatsReceiver, NoBrokersExc
+      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
     )
   }
 

@@ -566,6 +566,13 @@ object Stack {
 }
 
 /**
+ * `Stack.Params` forwarder to provide a clean Java API.
+ */
+object StackParams {
+  val empty = Stack.Params.empty
+}
+
+/**
  * Produce a stack from a `T`-typed element.
  */
 trait Stackable[T] extends Stack.Head {

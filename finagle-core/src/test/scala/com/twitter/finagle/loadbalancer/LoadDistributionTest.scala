@@ -3,7 +3,6 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.ConstantService
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Activity, Await, Future, Time, Var}
 import org.junit.runner.RunWith
@@ -70,8 +69,8 @@ abstract class LoadDistributionTest(newBalancerFactory: Rng => LoadBalancerFacto
     Vector.tabulate(n)(i =>
       newBalancerFactory(Rng(i)).newBalancer(
         Activity(serverset.map(Activity.Ok(_))),
-        NullStatsReceiver,
-        new NoBrokersAvailableException()
+        new NoBrokersAvailableException(),
+        Stack.Params.empty
       )
     )
 
