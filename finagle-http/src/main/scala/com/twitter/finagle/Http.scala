@@ -110,15 +110,7 @@ object Http extends Client[Request, Response] with HttpRichClient
 
   private val protocolLibrary = param.ProtocolLibrary("http")
 
-  /** exposed for testing */
-  private[finagle] val ServerErrorsAsFailuresToggleId =
-    "com.twitter.finagle.http.serverErrorsAsFailuresV2"
-
-  private[this] val serverErrorsAsFailuresToggle =
-    http.Toggles(ServerErrorsAsFailuresToggleId)
-
-  private[this] def treatServerErrorsAsFailures: Boolean =
-    serverErrorsAsFailuresToggle(ServerInfo().id.hashCode)
+  private[this] def treatServerErrorsAsFailures: Boolean = serverErrorsAsFailures()
 
   /** exposed for testing */
   private[finagle] val responseClassifierParam: param.ResponseClassifier = {

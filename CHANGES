@@ -100,6 +100,9 @@ Runtime Behavior Changes
   * finagle-serversets: `Stabilizer` is no longer exporting `pending_tasks` and `deviation_ms`
     stats. See `notify_ms` instead.  ``PHAB_ID=D65571``
 
+  * finagle-http: `serverErrorsAsFailuresV2` toggle is turned into a flag `serverErrorsAsFailures`.
+    ``PHAB_ID=D73265``
+
 6.45.0
 ------
 
