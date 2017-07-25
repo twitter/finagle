@@ -51,6 +51,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
         maxEffort = 0,
         rng = Rng.threadLocal,
         statsReceiver = NullStatsReceiver,
+        label = "",
         timer = new NullTimer,
         emptyException = new NoBrokersAvailableException,
         useDeterministicOrdering = false

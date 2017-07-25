@@ -4,9 +4,14 @@ import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
 import com.twitter.finagle.util.Rng
+import com.twitter.logging.Logger
 import com.twitter.util.{Future, Time}
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
+
+private object Aperture {
+  private val log = Logger.get()
+}
 
 /**
  * The aperture distributor balances load onto a window, the aperture, of
@@ -25,6 +30,7 @@ import scala.collection.mutable.ListBuffer
  */
 private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self =>
   import DeterministicOrdering._
+  import Aperture._
 
   protected type Node <: ApertureNode
 
@@ -89,6 +95,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * The minimum aperture serving units.
    */
   protected def minUnits: Int = dist.min
+
+  /**
+   * Label used to identify this instance when logging internal state.
+   */
+  protected def label: String
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
@@ -175,6 +186,19 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     @volatile private[this] var _aperture: Int = initAperture
     // Make sure the aperture is within bounds [minAperture, maxAperture].
     adjust(0)
+
+    if (useDeterministicOrdering) {
+      // We log the contents of the aperture on each distributor rebuild when using
+      // deterministic ordering. Rebuilds are not frequent and usually concentrated around
+      // events where this information would be valuable (i.e. coordinate changes or
+      // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
+      val apertureSlice = vector
+        .take(math.min(aperture, 100))
+        .map(_.factory.address)
+        .mkString("[", ", ", "]")
+      val lbl = if (label.isEmpty) "<unlabelled>" else label
+      log.info(s"Aperture updated for client $lbl: size=$aperture nodes=$apertureSlice")
+    }
 
     /**
      * Returns the current aperture.
