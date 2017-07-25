@@ -127,7 +127,8 @@ private[redis] trait KeyCommands { self: BaseClient =>
   def pTtl(key: Buf): Future[Option[JLong]] =
     doRequest(PTtl(key)) {
       case IntegerReply(n) =>
-        if (n != -1) Future.value(Some(n))
+        // -2 indicates key doesn't exist, -1 is key exists but no ttl set.
+        if (n != -2) Future.value(Some(n))
         else Future.value(None)
     }
 

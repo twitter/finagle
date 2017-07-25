@@ -4,7 +4,7 @@ import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Await, Duration}
 import java.util.UUID
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -17,6 +17,7 @@ import scala.collection.mutable
 final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll {
   var client: Client = _
   var dict: mutable.HashMap[String, mutable.HashMap[String, String]] = _
+  val TIMEOUT = Duration.fromSeconds(10)
 
   override def beforeAll(): Unit = {
     // Until the Redis Server Btree changes are checked in and merged into master
@@ -83,6 +84,81 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
 
   test("Correctly return cardinality function for outerkey using BCARD command") {
     testBcard(client, dict)
+  }
+
+  test("Correctly merge lkeys with destination and set expiry") {
+    val bufFoo = Buf.Utf8("foo")
+    val bufBoo = Buf.Utf8("boo")
+    val bufBaz = Buf.Utf8("baz")
+    val bufBar = Buf.Utf8("bar")
+    val bufMoo = Buf.Utf8("moo")
+
+    Await.result(client.bAdd(bufFoo, bufBaz, bufBar), TIMEOUT)
+    Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)
+    var result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar"))
+    assert(ttl > 0 && ttl <= 10000)
+
+    Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), 90000), TIMEOUT)
+    result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+    assert(result.map( t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
+    assert(ttl > 10000 && ttl <= 90000) // ttl is updated only if a field was added
+    Await.result(client.flushAll(), TIMEOUT) //clear the keys
+  }
+
+
+  test("Correctly merge lkeys with destination without expiry") {
+    val bufFoo = Buf.Utf8("foo")
+    val bufBoo = Buf.Utf8("boo")
+    val bufBaz = Buf.Utf8("baz")
+    val bufBar = Buf.Utf8("bar")
+    val bufMoo = Buf.Utf8("moo")
+
+    Await.result(client.bAdd(bufFoo, bufBaz, bufBar), TIMEOUT)
+    var result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar"))
+
+    //merge foo-> baz,boo  moo,boo
+    Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), -1), TIMEOUT)
+    result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+    assert(ttl == -1)
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //moo->boo added, baz's value is unchanged
+    Await.result(client.flushAll(), TIMEOUT) //clear the keys
+  }
+
+  test("TTL updated on merge only if a field was added.") {
+    val bufFoo = Buf.Utf8("foo")
+    val bufBoo = Buf.Utf8("boo")
+    val bufBaz = Buf.Utf8("baz")
+    val bufBar = Buf.Utf8("bar")
+    val bufMoo = Buf.Utf8("moo")
+
+    //add foo -> baz, bar
+    Await.result(client.bAdd(bufFoo, bufBaz, bufBar), TIMEOUT)
+    Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)
+    var result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar"))
+    assert(ttl > 0 && ttl <= 10000)
+
+    //merge foo -> baz,moo  moo,boo
+    Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufMoo, bufMoo -> bufBoo), 30000), TIMEOUT)
+    result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // only moo->boo is added
+    assert(ttl > 10000 && ttl <= 30000) // ttl updated.
+
+    //merge foo -> baz,bar  moo,bar
+    Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBar, bufMoo -> bufBar), 30000), TIMEOUT)
+    result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
+    ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // values not updated
+    assert(ttl > 10000 && ttl <= 30000) // ttl was not updated updated.
+    Await.result(client.flushAll(), TIMEOUT)  //clear the keys
   }
 
   def defaultTest(client: Client) {
@@ -169,7 +245,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBrange(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       val innerKeys = inner.toList.sortBy(_._1)
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), None, None))
+      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None, None))
       validate(outerKey, innerKeys, target)
     }
 
@@ -185,7 +261,8 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val start = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.drop(start)
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), Option(Buf.Utf8(innerKeys.head._1)), None))
+      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size,
+        Option(Buf.Utf8(innerKeys.head._1)), None), TIMEOUT)
       validate(outerKey, innerKeys, target)
     }
 
@@ -201,7 +278,8 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val end = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.dropRight(end)
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), None, Option(Buf.Utf8(innerKeys.last._1))))
+      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None,
+        Option(Buf.Utf8(innerKeys.last._1))), TIMEOUT)
       validate(outerKey, innerKeys, target)
     }
 
@@ -219,6 +297,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       val end = rand.nextInt(innerKeys.size)
       val target = client.bRange(
         Buf.Utf8(outerKey),
+        innerKeys.size,
         Option(Buf.Utf8(innerKeys(start)._1)),
         Option(Buf.Utf8(innerKeys(end)._1))
       )
@@ -244,7 +323,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val start = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (start <= p._1))
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey),
+      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size,
         Option(Buf.Utf8(start)), None))
       validate(outerKey, innerKeys, target)
     }
@@ -260,7 +339,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val end = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (p._1 <= end))
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), None,
+      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None,
         Option(Buf.Utf8(end))))
       validate(outerKey, innerKeys, target)
     }
@@ -279,6 +358,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       innerKeys = innerKeys.filter(p => (start <= p._1 && p._1 <= end))
       val target = client.bRange(
         Buf.Utf8(outerKey),
+        innerKeys.size,
         Option(Buf.Utf8(start)),
         Option(Buf.Utf8(end)))
 

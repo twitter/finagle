@@ -31,6 +31,7 @@ object Command {
   val BREM              = Buf.Utf8("BREM")
   val BGET              = Buf.Utf8("BGET")
   val BRANGE            = Buf.Utf8("BRANGE")
+  val BMERGEEX            = Buf.Utf8("BMERGEEX")
 
   // Transactions
   val DISCARD           = Buf.Utf8("DISCARD")
@@ -173,6 +174,8 @@ object Command {
   val HLEN             = Buf.Utf8("HLEN")
   val HMGET            = Buf.Utf8("HMGET")
   val HMSET            = Buf.Utf8("HMSET")
+  val HMSETEX          = Buf.Utf8("HMSETEX")
+  val HMADDEX          = Buf.Utf8("HMERGEEX")
   val HSCAN            = Buf.Utf8("HSCAN")
   val HSET             = Buf.Utf8("HSET")
   val HSETNX           = Buf.Utf8("HSETNX")

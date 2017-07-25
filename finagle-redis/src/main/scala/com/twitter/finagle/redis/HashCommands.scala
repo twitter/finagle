@@ -87,6 +87,23 @@ private[redis] trait HashCommands { self: BaseClient =>
     }
 
   /**
+   * Sets values for given fields stored at the hash `key` and sets the ttl.
+   */
+  def hMSetEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long): Future[Unit] =
+    doRequest(HMSetEx(key, fv, milliseconds)) {
+      case StatusReply(msg) => Future.Unit
+    }
+
+  /**
+   * Adds values for given fields stored at the hash `key` if it doesn't exist
+   * and sets the ttl. Version set at the destination is retained if it already exists.
+   */
+  def hMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long): Future[Unit] =
+    doRequest(HMergeEx(key, fv, milliseconds)) {
+      case StatusReply(msg) => Future.Unit
+    }
+
+  /**
    * Returns keys in given hash `key`, starting at `cursor`.
    */
   def hScan(

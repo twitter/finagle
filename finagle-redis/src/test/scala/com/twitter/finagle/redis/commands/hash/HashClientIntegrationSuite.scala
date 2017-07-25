@@ -76,6 +76,57 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
+
+  test("Correctly merge lkeys with destination and set expiry", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
+      Await.result(client.pExpireAt(bufFoo, 10000), TIMEOUT)
+      var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
+      var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar"))
+      assert(ttl > 0)
+
+      Await.result(client.hMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), 90000), TIMEOUT)
+      result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
+      ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
+      assert(ttl > 10000 && ttl < 90000) // ttl is updated only if a field was added
+    }
+  }
+
+
+  test("Correctly merge lkeys with destination without expiry", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
+      var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar"))
+
+      Await.result(client.hMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), -1), TIMEOUT)
+      result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
+      var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+      assert(ttl == -1)
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
+    }
+  }
+
+  test("TTL updated on merge only if a field was added.", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
+      Await.result(client.pExpireAt(bufFoo, 10000), TIMEOUT)
+      var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
+      var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar"))
+      assert(ttl > 0 && ttl < 10000)
+
+      Await.result(client.hMergeEx(bufFoo, Map(bufBaz -> bufMoo, bufMoo -> bufMoo), 90000), TIMEOUT)
+      result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
+      ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // only boo is added
+      assert(ttl > 10000 && ttl < 90000) // ttl updated.
+    }
+  }
+
   test(
     "Correctly set multiple values one of which is an empty string value",
     RedisTest,

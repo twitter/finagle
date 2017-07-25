@@ -58,13 +58,20 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
    */
   def bRange(
     key: Buf,
+    count: Int,
     startField: Option[Buf],
     endField: Option[Buf]
   ): Future[Seq[(Buf, Buf)]] = {
-    doRequest(BRange(key, startField, endField)) {
+    doRequest(BRange(key, Buf.Utf8(count.toString), startField, endField)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toBuf(messages)))
       case EmptyMBulkReply      => Future.Nil
+    }
+  }
+
+  def bMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long): Future[Unit] = {
+    doRequest(BMergeEx(key, fv, milliseconds)) {
+      case StatusReply(msg) => Future.Unit
     }
   }
 }

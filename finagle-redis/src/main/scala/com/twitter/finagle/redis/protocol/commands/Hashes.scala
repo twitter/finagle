@@ -51,6 +51,28 @@ case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
   }
 }
 
+case class HMSetEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
+  def name: Buf = Command.HMSETEX
+  override def body: Seq[Buf] = {
+    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
+      f :: v :: Nil
+    }(collection.breakOut)
+
+    key +: ( Buf.Utf8(milliseconds.toString) +: fvList)
+  }
+}
+
+case class HMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
+  def name: Buf = Command.HMADDEX
+  override def body: Seq[Buf] = {
+    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
+      f :: v :: Nil
+    }(collection.breakOut)
+
+    key +: ( Buf.Utf8(milliseconds.toString) +: fvList)
+  }
+}
+
 case class HScan(
   key: Buf,
   cursor: Long,
