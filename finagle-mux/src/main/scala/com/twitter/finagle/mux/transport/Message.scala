@@ -366,10 +366,10 @@ private[twitter] object Message {
    * (PingTag) in order to avoid re-encoding this frequently sent
    * message.
    */
-  final class PreEncodedTping extends Message {
-    def typ = ???
-    def tag = ???
-    lazy val buf = encode(Tping(Tags.PingTag))
+  object PreEncodedTping extends Message {
+    def typ: Byte = Types.Tping
+    def tag: Int = Tags.PingTag
+    val buf: Buf = encode(Tping(Tags.PingTag))
   }
 
   /** Response to a `Tping` message */
@@ -440,8 +440,10 @@ private[twitter] object Message {
 
   object Rmessage {
     def unapply(m: Message): Option[Int] =
-      if (m.typ < 0) Some(m.tag)
+      if (isRmessage(m)) Some(m.tag)
       else None
+
+    def isRmessage(m: Message): Boolean = m.typ < 0
   }
 
   object ControlMessage {
@@ -628,18 +630,34 @@ private[twitter] object Message {
 
   /**
    * Try to decode the contents of a `ByteReader` to [[Message]]. This function
-   * assumes the content of the `ByteReader` represents exactly one message. This
-   * function _does not_ assume ownership of the passed `ByteReader` and it is up
-   * to the caller to release the underlying resources.
+   * assumes the content of the `ByteReader` represents exactly one message.
+   *
+   * @note This function _does not_ assume ownership of the passed `ByteReader`
+   *       and it is up to the caller to release the underlying resources.
    *
    * @note may throw a [[Failure]] wrapped [[BadMessageException]]
    */
   def decode(byteReader: ByteReader): Message = {
-    if (byteReader.remaining < 4) throwBadMessageException(s"short message: ${Buf.slowHexString(byteReader.readAll())}")
+    if (byteReader.remaining < 4) throwBadMessageException(
+      "short message: " + Buf.slowHexString(byteReader.readAll()))
     val head = byteReader.readIntBE()
     val typ = Tags.extractType(head)
     val tag = Tags.extractTag(head)
 
+    decodeMessageBody(typ, tag, byteReader)
+  }
+
+  /**
+   * Try to decode the contents of the `ByteReader` to a [[Message]]. The 4-byte
+   * header that represents the tag and type must already be stripped and that information
+   * is provided as function arguments.
+   *
+   * @note This function _does not_ assume ownership of the passed `ByteReader`
+   *       and it is up to the caller to release the underlying resources.
+   *
+   * @note may throw a [[Failure]] wrapped [[BadMessageException]]
+   */
+  def decodeMessageBody(typ: Byte, tag: Int, byteReader: ByteReader): Message = {
     if (Tags.isFragment(tag)) Fragment(typ, tag, byteReader.readAll())
     else typ match {
       case Types.Tinit =>
@@ -665,7 +683,7 @@ private[twitter] object Message {
   }
 
   def encode(msg: Message): Buf = msg match {
-    case m: PreEncodedTping => m.buf
+    case PreEncodedTping => PreEncodedTping.buf
     case m: Message =>
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
         throwBadMessageException(s"invalid tag number ${m.tag}")

@@ -66,8 +66,6 @@ private[twitter] class ClientSession(
 
   // keeps track of outstanding Rmessages.
   private[this] val outstanding = new AtomicInteger()
-
-  private[this] val pingMessage = new Message.PreEncodedTping
   private[this] val pingPromise = new AtomicReference[Promise[Unit]](null)
 
   private[this] val log = Logger.getLogger(getClass.getName)
@@ -196,7 +194,7 @@ private[twitter] class ClientSession(
   def ping(): Future[Unit] = {
     val done = new Promise[Unit]
     if (pingPromise.compareAndSet(null, done)) {
-      trans.write(pingMessage).before(done)
+      trans.write(Message.PreEncodedTping).before(done)
     } else {
       FuturePingNack
     }
