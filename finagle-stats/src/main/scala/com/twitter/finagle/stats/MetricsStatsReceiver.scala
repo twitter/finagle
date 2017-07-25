@@ -117,7 +117,7 @@ class MetricsStatsReceiver(
   /**
    * Create and register a counter inside the underlying Metrics library
    */
-  def counter(names: String*): Counter = {
+  def counter(verbosity: Verbosity, names: String*): Counter = {
     if (log.isLoggable(Level.TRACE))
       log.trace(s"Calling StatsReceiver.counter on $names")
     counterRequests.increment()
@@ -140,7 +140,7 @@ class MetricsStatsReceiver(
   /**
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
-  def stat(names: String*): Stat = {
+  def stat(verbosity: Verbosity, names: String*): Stat = {
     if (log.isLoggable(Level.TRACE))
       log.trace(s"Calling StatsReceiver.stat for $names")
     statRequests.increment()
@@ -172,14 +172,14 @@ class MetricsStatsReceiver(
     stat
   }
 
-  override def addGauge(name: String*)(f: => Float): Gauge = {
+  override def addGauge(verbosity: Verbosity, name: String*)(f: => Float): Gauge = {
     if (log.isLoggable(Level.TRACE))
       log.trace(s"Calling StatsReceiver.addGauge for $name")
     gaugeRequests.increment()
-    super.addGauge(name: _*)(f)
+    super.addGauge(verbosity, name: _*)(f)
   }
 
-  protected[this] def registerGauge(names: Seq[String], f: => Float) {
+  protected[this] def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float) {
     val gauge = new AbstractGauge[java.lang.Double](format(names)) {
       override def read = new java.lang.Double(f)
     }

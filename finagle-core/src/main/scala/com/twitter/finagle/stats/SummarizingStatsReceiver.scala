@@ -12,7 +12,8 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
-  val repr = this
+
+  def repr = this
 
   private[this] val counters = new ConcurrentHashMap[Seq[String], AtomicLong]()
 
@@ -26,21 +27,22 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   private[this] var _gauges = Map[Seq[String], () => Float]()
   def gauges: Map[Seq[String], () => Float] = synchronized { _gauges }
 
-  def counter(name: String*): Counter = new Counter {
+  def counter(verbosity: Verbosity, name: String*): Counter = new Counter {
     counters.putIfAbsent(name, new AtomicLong(0))
     def incr(delta: Long) { counters.get(name).getAndAdd(delta) }
   }
 
-  def stat(name: String*): Stat = new Stat {
-    def add(value: Float) = SummarizingStatsReceiver.this.synchronized {
+  def stat(verbosity: Verbosity, name: String*): Stat = new Stat {
+    def add(value: Float): Unit = SummarizingStatsReceiver.this.synchronized {
       stats.get(name) += value
     }
   }
 
   // Ignoring gauges for now, but we may consider sampling them.
-  protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = synchronized {
-    _gauges += (name -> (() => f))
-  }
+  protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
+    synchronized {
+      _gauges += (name -> (() => f))
+    }
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {
     _gauges -= name

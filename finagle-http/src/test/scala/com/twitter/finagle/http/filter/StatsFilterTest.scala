@@ -2,7 +2,7 @@ package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, Verbosity}
 import com.twitter.util.{Await, Duration, Future, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -48,10 +48,10 @@ class StatsFilterTest extends FunSuite {
     }
 
     // Verify that the counters and stats were only created once
-    verify(receiver).counter("status", "404")
-    verify(receiver).counter("status", "4XX")
-    verify(receiver).stat("time", "404")
-    verify(receiver).stat("time", "4XX")
-    verify(receiver).stat("response_size")
+    verify(receiver).counter(Verbosity.Default, "status", "404")
+    verify(receiver).counter(Verbosity.Default, "status", "4XX")
+    verify(receiver).stat(Verbosity.Default, "time", "404")
+    verify(receiver).stat(Verbosity.Default, "time", "4XX")
+    verify(receiver).stat(Verbosity.Default, "response_size")
   }
 }

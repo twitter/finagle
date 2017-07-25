@@ -135,10 +135,12 @@ private object TrafficDistributorTest {
   {
     private[this] val underlying = new InMemoryStatsReceiver()
     override val repr: AnyRef = this
-    override def counter(name: String*): ReadableCounter = underlying.counter(name: _*)
-    override def stat(name: String*): ReadableStat = underlying.stat(name: _*)
+    override def counter(verbosity: Verbosity, name: String*): ReadableCounter =
+      underlying.counter(verbosity, name: _*)
+    override def stat(verbosity: Verbosity, name: String*): ReadableStat =
+      underlying.stat(verbosity, name: _*)
 
-    protected[this] def registerGauge(name: Seq[String], f: => Float): Unit =
+    protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
       underlying.addGauge(name: _*)(f)
 
     protected[this] def deregisterGauge(name: Seq[String]): Unit =
