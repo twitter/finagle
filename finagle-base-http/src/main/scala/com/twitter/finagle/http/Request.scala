@@ -109,7 +109,7 @@ abstract class Request extends Message {
     val u = uri
     u.indexOf('?') match {
       case -1 => u
-      case n  => u.substring(0, n)
+      case n => u.substring(0, n)
     }
   }
 
@@ -119,11 +119,11 @@ abstract class Request extends Message {
     val p = path
     val leaf = p.lastIndexOf('/') match {
       case -1 => p
-      case n  => p.substring(n + 1)
+      case n => p.substring(n + 1)
     }
     leaf.lastIndexOf('.') match {
       case -1 => ""
-      case n  => leaf.substring(n + 1).toLowerCase
+      case n => leaf.substring(n + 1).toLowerCase
     }
   }
 
@@ -198,9 +198,10 @@ abstract class Request extends Message {
 
   /** Get all parameters. */
   def getParams(): JList[JMap.Entry[String, String]] =
-    params.toList.map { case (k, v) =>
-      // cast to appease asJava
-      new AbstractMap.SimpleImmutableEntry(k, v).asInstanceOf[JMap.Entry[String, String]]
+    params.toList.map {
+      case (k, v) =>
+        // cast to appease asJava
+        new AbstractMap.SimpleImmutableEntry(k, v).asInstanceOf[JMap.Entry[String, String]]
     }.asJava
 
   /** Check if parameter exists. */
@@ -244,7 +245,6 @@ abstract class Request extends Message {
   protected def httpMessage: HttpMessage = httpRequest
 }
 
-
 object Request {
 
   /**
@@ -262,7 +262,8 @@ object Request {
   /** Decode a Request from Array[Byte] */
   def decodeBytes(b: Array[Byte]): Request = {
     val decoder = new DecoderEmbedder(
-      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue)
+    )
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val req = decoder.poll().asInstanceOf[HttpRequest]
     assert(req ne null)
@@ -279,7 +280,7 @@ object Request {
    */
   @varargs
   def apply(params: Tuple2[String, String]*): Request =
-    apply("/", params:_*)
+    apply("/", params: _*)
 
   /**
    * Create an HTTP/1.1 GET Request from URI and query string parameters.
@@ -288,8 +289,9 @@ object Request {
    */
   def apply(uri: String, params: Tuple2[String, String]*): Request = {
     val encoder = new QueryStringEncoder(uri)
-    params.foreach { case (key, value) =>
-      encoder.addParam(key, value)
+    params.foreach {
+      case (key, value) =>
+        encoder.addParam(key, value)
     }
     apply(Method.Get, encoder.toString)
   }
@@ -372,14 +374,16 @@ object Request {
   private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
     new Request {
       val httpRequest: HttpRequest = httpRequestArg
-      lazy val remoteSocketAddress: InetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      lazy val remoteSocketAddress: InetSocketAddress =
+        channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
 
   /** Create a query string from URI and parameters. */
   def queryString(uri: String, params: Tuple2[String, String]*): String = {
     val encoder = new QueryStringEncoder(uri)
-    params.foreach { case (key, value) =>
-      encoder.addParam(key, value)
+    params.foreach {
+      case (key, value) =>
+        encoder.addParam(key, value)
     }
     encoder.toString
   }

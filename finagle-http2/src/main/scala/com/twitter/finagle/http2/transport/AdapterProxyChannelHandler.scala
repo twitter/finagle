@@ -22,9 +22,8 @@ import scala.collection.mutable.HashMap
  * @param setupFn is run on each of the channels for each of the streams, and
  *                should be for a pipeline for HttpObject.
  */
-private[http2] class AdapterProxyChannelHandler(
-    setupFn: ChannelPipeline => Unit)
-  extends ChannelDuplexHandler {
+private[http2] class AdapterProxyChannelHandler(setupFn: ChannelPipeline => Unit)
+    extends ChannelDuplexHandler {
 
   import AdapterProxyChannelHandler._
 
@@ -48,14 +47,18 @@ private[http2] class AdapterProxyChannelHandler(
   private[this] def getEmbeddedChannel(
     ctx: ChannelHandlerContext,
     streamId: Int
-  ): EmbeddedChannel = map.getOrElseUpdate(
-    streamId,
-    new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
-  ).embedded
+  ): EmbeddedChannel =
+    map
+      .getOrElseUpdate(
+        streamId,
+        new CompletingChannel(setupEmbeddedChannel(ctx, streamId))
+      )
+      .embedded
 
   private[this] def closeAll(): Unit = {
-    map.foreach { case (_, value) =>
-      value.embedded.close()
+    map.foreach {
+      case (_, value) =>
+        value.embedded.close()
     }
     map.clear()
   }
@@ -75,16 +78,18 @@ private[http2] class AdapterProxyChannelHandler(
 
   override def close(ctx: ChannelHandlerContext, promise: ChannelPromise): Unit = {
     val combiner = new PromiseCombiner()
-    map.foreach { case (_, value) =>
-      val p = value.embedded.newPromise()
-      combiner.add(p)
-      value.embedded.close(p)
+    map.foreach {
+      case (_, value) =>
+        val p = value.embedded.newPromise()
+        combiner.add(p)
+        value.embedded.close(p)
     }
     combiner.finish(promise)
   }
 
-  private[this] val flushTuple: ((Int, CompletingChannel)) => Unit = { case (_, value) =>
-    value.embedded.flush()
+  private[this] val flushTuple: ((Int, CompletingChannel)) => Unit = {
+    case (_, value) =>
+      value.embedded.flush()
   }
 
   override def flush(ctx: ChannelHandlerContext): Unit = {
@@ -115,7 +120,8 @@ private[http2] class AdapterProxyChannelHandler(
     case upgrade: UpgradeEvent => ctx.fireChannelRead(upgrade)
     case _ =>
       val wrongType = new IllegalArgumentException(
-        s"Expected a StreamMessage or UpgradeEvent, got ${msg.getClass.getName} instead.")
+        s"Expected a StreamMessage or UpgradeEvent, got ${msg.getClass.getName} instead."
+      )
       log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
       ctx.fireExceptionCaught(wrongType)
   }
@@ -134,7 +140,8 @@ private[http2] class AdapterProxyChannelHandler(
         }
       case _ =>
         val wrongType = new IllegalArgumentException(
-          s"Expected a StreamMessage, got ${msg.getClass.getName} instead.")
+          s"Expected a StreamMessage, got ${msg.getClass.getName} instead."
+        )
         log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
         promise.setFailure(wrongType)
     }
@@ -156,10 +163,8 @@ private[http2] class AdapterProxyChannelHandler(
    * asynchronous handlers to work properly, as well as handlers that aggregate
    * or disaggregate message.
    */
-  class InboundPropagator(
-      underlying: ChannelHandlerContext,
-      streamId: Int)
-    extends ChannelInboundHandlerAdapter {
+  class InboundPropagator(underlying: ChannelHandlerContext, streamId: Int)
+      extends ChannelInboundHandlerAdapter {
 
     override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
       underlying.fireChannelRead(Message(msg.asInstanceOf[HttpObject], streamId))
@@ -180,10 +185,8 @@ private[http2] class AdapterProxyChannelHandler(
    * asynchronous handlers to work properly, as well as handlers that aggregate
    * or disaggregate message.
    */
-  class OutboundPropagator(
-      underlying: ChannelHandlerContext,
-      streamId: Int)
-    extends ChannelOutboundHandlerAdapter {
+  class OutboundPropagator(underlying: ChannelHandlerContext, streamId: Int)
+      extends ChannelOutboundHandlerAdapter {
 
     import AdapterProxyChannelHandler._
 
@@ -207,6 +210,7 @@ private[http2] class AdapterProxyChannelHandler(
 }
 
 private[http2] object AdapterProxyChannelHandler {
+
   /**
    * Creates a new promise that can be used instead of the `sink` promise, but
    * has the right Channel.

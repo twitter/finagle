@@ -15,9 +15,9 @@ import java.net.InetSocketAddress
  * @param fn function that returns a ServiceFactory given params and a remote host
  */
 class EndpointerModule[Req, Rep](
-    extraParams: Seq[Stack.Param[_]],
-    fn: (Stack.Params, InetSocketAddress) => ServiceFactory[Req, Rep])
-  extends Stack.Module[ServiceFactory[Req, Rep]] {
+  extraParams: Seq[Stack.Param[_]],
+  fn: (Stack.Params, InetSocketAddress) => ServiceFactory[Req, Rep]
+) extends Stack.Module[ServiceFactory[Req, Rep]] {
 
   val role = Endpoint
   val description = "Send requests over the wire"

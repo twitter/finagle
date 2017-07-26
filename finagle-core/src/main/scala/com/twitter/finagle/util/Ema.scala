@@ -29,11 +29,11 @@ private[finagle] class Ema(window: Long) {
       time = stamp
       ema = x
     } else {
-      val td = stamp-time
+      val td = stamp - time
       assert(td >= 0, "Nonmonotonic timestamp")
       time = stamp
-      val w = if (window == 0) 0 else math.exp(-td.toDouble/window)
-      ema = x*(1-w) + ema*w
+      val w = if (window == 0) 0 else math.exp(-td.toDouble / window)
+      ema = x * (1 - w) + ema * w
     }
     ema
   }
@@ -77,7 +77,7 @@ private[finagle] object Ema {
    * TODO: stops increasing if it overflows.
    */
   class Monotime {
-     private[this] var last = System.nanoTime()
+    private[this] var last = System.nanoTime()
 
     def nanos(): Long = {
       val sample = System.nanoTime()

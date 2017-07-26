@@ -20,7 +20,8 @@ private[netty4] object ThriftFrameCodec {
       ThriftFrameCodec.lengthFieldOffset,
       ThriftFrameCodec.lengthFieldLength,
       ThriftFrameCodec.lengthAdjustment,
-      ThriftFrameCodec.initialBytesToStrip)
+      ThriftFrameCodec.initialBytesToStrip
+    )
 
     new CombinedChannelDuplexHandler(decoder, encoder)
   }

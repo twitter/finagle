@@ -8,20 +8,20 @@ import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 
 private object TrafficDistributor {
+
   /**
    * A [[ServiceFactory]] and its associated weight.
    */
-  case class WeightedFactory[Req, Rep](
-    factory: EndpointFactory[Req, Rep],
-    weight: Double)
+  case class WeightedFactory[Req, Rep](factory: EndpointFactory[Req, Rep], weight: Double)
 
   /**
    * An intermediate representation of the endpoints that a load balancer
    * operates over, capable of being updated.
    */
   type BalancerEndpoints[Req, Rep] =
-    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]]
-      with Updatable[Activity.State[Set[EndpointFactory[Req, Rep]]]]
+    Var[Activity.State[Set[EndpointFactory[Req, Rep]]]] with Updatable[
+      Activity.State[Set[EndpointFactory[Req, Rep]]]
+    ]
 
   /**
    * Represents cache entries for load balancer instances. Stores both
@@ -31,7 +31,8 @@ private object TrafficDistributor {
   case class CachedBalancer[Req, Rep](
     balancer: ServiceFactory[Req, Rep],
     endpoints: BalancerEndpoints[Req, Rep],
-    size: Int)
+    size: Int
+  )
 
   /**
    * A load balancer and its associated weight. Size refers to the
@@ -39,10 +40,11 @@ private object TrafficDistributor {
    * operates over these.
    */
   case class WeightClass[Req, Rep](
-      balancer: ServiceFactory[Req, Rep],
-      endpoints: BalancerEndpoints[Req, Rep],
-      weight: Double,
-      size: Int)
+    balancer: ServiceFactory[Req, Rep],
+    endpoints: BalancerEndpoints[Req, Rep],
+    weight: Double,
+    size: Int
+  )
 
   /**
    * Folds and accumulates over an [[Activity]] based event `stream` while biasing
@@ -61,9 +63,9 @@ private object TrafficDistributor {
       case (Activity.Pending, Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Failed(_), Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Ok(state), Activity.Ok(update)) => Activity.Ok(f(state, update))
-      case (stale@Activity.Ok(state), Activity.Failed(_)) if init != state => stale
-      case (stale@Activity.Ok(state), Activity.Pending) if init != state => stale
-      case (_, failed@Activity.Failed(_)) => failed
+      case (stale @ Activity.Ok(state), Activity.Failed(_)) if init != state => stale
+      case (stale @ Activity.Ok(state), Activity.Pending) if init != state => stale
+      case (_, failed @ Activity.Failed(_)) => failed
       case (_, Activity.Pending) => Activity.Pending
     }
   }
@@ -72,13 +74,13 @@ private object TrafficDistributor {
    * Distributes requests to `classes` according to their weight and size.
    */
   private class Distributor[Req, Rep](
-      classes: Iterable[WeightClass[Req, Rep]],
-      rng: Rng = Rng.threadLocal)
-    extends ServiceFactory[Req, Rep] {
+    classes: Iterable[WeightClass[Req, Rep]],
+    rng: Rng = Rng.threadLocal
+  ) extends ServiceFactory[Req, Rep] {
 
     private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
       val tupled = classes.map {
-        case WeightClass(b, _, weight, size) => (b, weight*size)
+        case WeightClass(b, _, weight, size) => (b, weight * size)
       }
       val (bs, ws) = tupled.unzip
       (bs.toIndexedSeq, Drv.fromWeights(ws.toSeq))
@@ -90,16 +92,18 @@ private object TrafficDistributor {
     private[this] def endpoints: Seq[Closable] =
       classes.toSeq.map { wc =>
         wc.endpoints.sample() match {
-          case Activity.Ok(set) => Closable.all(set.toSeq:_*)
+          case Activity.Ok(set) => Closable.all(set.toSeq: _*)
           case _ => Closable.nop
         }
       }
 
     def close(deadline: Time): Future[Unit] =
-      Closable.all(
-        Closable.all(balancers:_*),
-        Closable.all(endpoints:_*)
-      ).close(deadline)
+      Closable
+        .all(
+          Closable.all(balancers: _*),
+          Closable.all(endpoints: _*)
+        )
+        .close(deadline)
 
     private[this] val svcFactoryStatus: ServiceFactory[Req, Rep] => Status =
       sf => sf.status
@@ -129,13 +133,13 @@ private object TrafficDistributor {
  * is no longer eligible to receive traffic (as indicated by its `status` field).
  */
 private class TrafficDistributor[Req, Rep](
-    dest: Activity[Set[Address]],
-    newEndpoint: Address => ServiceFactory[Req, Rep],
-    newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
-    eagerEviction: Boolean,
-    rng: Rng = Rng.threadLocal,
-    statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends ServiceFactory[Req, Rep] {
+  dest: Activity[Set[Address]],
+  newEndpoint: Address => ServiceFactory[Req, Rep],
+  newBalancer: Activity[Set[EndpointFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
+  eagerEviction: Boolean,
+  rng: Rng = Rng.threadLocal,
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) extends ServiceFactory[Req, Rep] {
   import TrafficDistributor._
 
   /**
@@ -155,35 +159,37 @@ private class TrafficDistributor[Req, Rep](
         // with duplicate `weight` metadata, only one of the instances and its associated
         // factory is cached. Last write wins.
         val weightedAddrs: Set[(Address, Double)] = addrs.map(WeightedAddress.extract)
-        val merged = weightedAddrs.foldLeft(active) { case (cache, (addr, weight)) =>
-          cache.get(addr) match {
-            // An update with an existing Address that has a new weight
-            // results in the the weight being overwritten but the [[ServiceFactory]]
-            // instance is maintained.
-            case Some(wf@WeightedFactory(_, w)) if w != weight =>
-              cache.updated(addr, wf.copy(weight = weight))
-            case None =>
-              val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
-              cache.updated(addr, WeightedFactory(endpoint, weight))
-            case _ => cache
-          }
+        val merged = weightedAddrs.foldLeft(active) {
+          case (cache, (addr, weight)) =>
+            cache.get(addr) match {
+              // An update with an existing Address that has a new weight
+              // results in the the weight being overwritten but the [[ServiceFactory]]
+              // instance is maintained.
+              case Some(wf @ WeightedFactory(_, w)) if w != weight =>
+                cache.updated(addr, wf.copy(weight = weight))
+              case None =>
+                val endpoint = new LazyEndpointFactory(() => newEndpoint(addr), addr)
+                cache.updated(addr, WeightedFactory(endpoint, weight))
+              case _ => cache
+            }
         }
 
         // Remove stale cache entries. When `eagerEviction` is false cache
         // entries are only removed in subsequent stream updates.
         val removed = merged.keySet -- weightedAddrs.map(_._1)
-        removed.foldLeft(merged) { case (cache, addr) =>
-          cache.get(addr) match {
-            case Some(WeightedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
-              f.close()
-              cache - addr
-            case _ => cache
-          }
+        removed.foldLeft(merged) {
+          case (cache, addr) =>
+            cache.get(addr) match {
+              case Some(WeightedFactory(f, _)) if eagerEviction || f.status != Status.Open =>
+                f.close()
+                cache - addr
+              case _ => cache
+            }
         }
     }.map {
       case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
       case Activity.Pending => Activity.Pending
-      case failed@Activity.Failed(_) => failed
+      case failed @ Activity.Failed(_) => failed
     }
   }
 
@@ -222,21 +228,23 @@ private class TrafficDistributor[Req, Rep](
         // weight classes that no longer exist in the update are removed from
         // the cache and the associated balancer instances are closed.
         val removed = balancers.keySet -- weightedGroups.keySet
-        removed.foldLeft(merged) { case (cache, weight) =>
-          cache.get(weight) match {
-            case Some(CachedBalancer(bal, _, _)) =>
-              bal.close()
-              cache - weight
-            case _ => cache
-          }
+        removed.foldLeft(merged) {
+          case (cache, weight) =>
+            cache.get(weight) match {
+              case Some(CachedBalancer(bal, _, _)) =>
+                bal.close()
+                cache - weight
+              case _ => cache
+            }
         }
     }.map {
-      case Activity.Ok(cache) => Activity.Ok(cache.map {
-        case (weight, CachedBalancer(bal, endpoints, size)) =>
-          WeightClass(bal, endpoints, weight, size)
-      })
+      case Activity.Ok(cache) =>
+        Activity.Ok(cache.map {
+          case (weight, CachedBalancer(bal, endpoints, size)) =>
+            WeightClass(bal, endpoints, weight, size)
+        })
       case Activity.Pending => Activity.Pending
-      case failed@Activity.Failed(_) => failed
+      case failed @ Activity.Failed(_) => failed
     }
   }
 
@@ -252,7 +260,13 @@ private class TrafficDistributor[Req, Rep](
   private[this] def updateMeanWeight(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
     val size = classes.map(_.size).sum
     meanWeight =
-      if (size != 0) classes.map { c => c.weight * c.size }.sum.toFloat / size
+      if (size != 0)
+        classes
+          .map { c =>
+            c.weight * c.size
+          }
+          .sum
+          .toFloat / size
       else 0.0F
   }
 
@@ -262,8 +276,7 @@ private class TrafficDistributor[Req, Rep](
     weightClasses.foldLeft(init) {
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
-        val emptyBal = newBalancer(
-          Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
+        val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty[EndpointFactory[Req, Rep]]))))
         updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal

@@ -94,6 +94,7 @@ abstract class Response extends Message {
 }
 
 object Response {
+
   /**
    * Utility class to make it possible to mock/spy a Response.
    */
@@ -116,13 +117,14 @@ object Response {
   /** Decode a [[Response]] from a byte array */
   def decodeBytes(b: Array[Byte]): Response = {
     val decoder = new DecoderEmbedder(
-      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue)
+    )
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val res = decoder.poll().asInstanceOf[HttpResponse]
     assert(res ne null)
     Response(res)
   }
-  
+
   /** Create Response. */
   def apply(): Response =
     apply(Version.Http11, Status.Ok)

@@ -7,9 +7,7 @@ import javax.net.ssl.SSLContext
  * This class provides an ability to use an initialized supplied
  * `javax.net.ssl.SSLContext` as the basis for creating [[Engine Engines]].
  */
-class SslContextServerEngineFactory(
-    sslContext: SSLContext)
-  extends SslServerEngineFactory {
+class SslContextServerEngineFactory(sslContext: SSLContext) extends SslServerEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an [[SslServerConfiguration]]
@@ -24,11 +22,17 @@ class SslContextServerEngineFactory(
    */
   def apply(config: SslServerConfiguration): Engine = {
     SslConfigurations.checkKeyCredentialsNotSupported(
-      "SslContextServerEngineFactory", config.keyCredentials)
+      "SslContextServerEngineFactory",
+      config.keyCredentials
+    )
     SslConfigurations.checkTrustCredentialsNotSupported(
-      "SslContextServerEngineFactory", config.trustCredentials)
+      "SslContextServerEngineFactory",
+      config.trustCredentials
+    )
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "SslContextServerEngineFactory", config.applicationProtocols)
+      "SslContextServerEngineFactory",
+      config.applicationProtocols
+    )
 
     val engine = SslServerEngineFactory.createEngine(sslContext)
     SslServerEngineFactory.configureEngine(engine, config)

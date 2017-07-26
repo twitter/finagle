@@ -37,11 +37,11 @@ object RetryingService {
  *      for more details.
  */
 class RetryFilter[Req, Rep](
-    retryPolicy: RetryPolicy[(Req, Try[Rep])],
-    timer: Timer,
-    statsReceiver: StatsReceiver,
-    retryBudget: RetryBudget)
-  extends Filter[Req, Rep, Req, Rep] {
+  retryPolicy: RetryPolicy[(Req, Try[Rep])],
+  timer: Timer,
+  statsReceiver: StatsReceiver,
+  retryBudget: RetryBudget
+) extends Filter[Req, Rep, Req, Rep] {
 
   /**
    * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
@@ -154,16 +154,16 @@ object RetryFilter {
  * responses as well as failures.
  */
 final class RetryExceptionsFilter[Req, Rep](
-    retryPolicy: RetryPolicy[Try[Nothing]],
-    timer: Timer,
-    statsReceiver: StatsReceiver,
-    retryBudget: RetryBudget)
-  extends RetryFilter[Req, Rep](
-    RetryPolicy.convertExceptionPolicy(retryPolicy),
-    timer,
-    statsReceiver,
-    retryBudget)
-{
+  retryPolicy: RetryPolicy[Try[Nothing]],
+  timer: Timer,
+  statsReceiver: StatsReceiver,
+  retryBudget: RetryBudget
+) extends RetryFilter[Req, Rep](
+      RetryPolicy.convertExceptionPolicy(retryPolicy),
+      timer,
+      statsReceiver,
+      retryBudget
+    ) {
 
   /**
    * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
@@ -208,7 +208,8 @@ object RetryExceptionsFilter {
     new RetryExceptionsFilter[Req, Rep](
       RetryPolicy.backoff(backoffs)(shouldRetry),
       timer,
-      statsReceiver)
+      statsReceiver
+    )
 
   def typeAgnostic(
     retryPolicy: RetryPolicy[Try[Nothing]],

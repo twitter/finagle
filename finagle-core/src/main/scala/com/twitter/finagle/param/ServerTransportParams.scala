@@ -3,8 +3,11 @@ package com.twitter.finagle.param
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.{ApplicationProtocols, CipherSuites, KeyCredentials}
 import com.twitter.finagle.ssl.server.{
-  SslContextServerEngineFactory, SslServerConfiguration,
-  SslServerEngineFactory, SslServerSessionVerifier}
+  SslContextServerEngineFactory,
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import java.io.File
 import javax.net.ssl.SSLContext
@@ -17,7 +20,7 @@ import javax.net.ssl.SSLContext
  * @see [[com.twitter.finagle.param.TransportParams]]
  */
 class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
-  extends TransportParams(self) {
+    extends TransportParams(self) {
 
   /**
    * Enables SSL/TLS support (connection encrypting) on this server.
@@ -78,10 +81,13 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     nextProtocols: Option[String]
   ): A = {
     val keyCredentials = caCertificatePath match {
-      case Some(caPath) => KeyCredentials.CertKeyAndChain(
-        new File(certificatePath), new File(keyPath), new File(caPath))
-      case None => KeyCredentials.CertAndKey(
-        new File(certificatePath), new File(keyPath))
+      case Some(caPath) =>
+        KeyCredentials.CertKeyAndChain(
+          new File(certificatePath),
+          new File(keyPath),
+          new File(caPath)
+        )
+      case None => KeyCredentials.CertAndKey(new File(certificatePath), new File(keyPath))
     }
     val cipherSuites = ciphers match {
       case Some(suites) => CipherSuites.fromString(suites)
@@ -94,7 +100,8 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     val configuration = SslServerConfiguration(
       keyCredentials = keyCredentials,
       cipherSuites = cipherSuites,
-      applicationProtocols = applicationProtocols)
+      applicationProtocols = applicationProtocols
+    )
     tls(configuration)
   }
 
@@ -107,7 +114,6 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * @param context the SSL context to use
    */
   def tls(context: SSLContext): A =
-    tls(SslServerConfiguration(),
-      new SslContextServerEngineFactory(context))
+    tls(SslServerConfiguration(), new SslContextServerEngineFactory(context))
 
 }

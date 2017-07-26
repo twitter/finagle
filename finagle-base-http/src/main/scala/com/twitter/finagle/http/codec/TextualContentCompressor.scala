@@ -8,8 +8,7 @@ import org.jboss.netty.handler.codec.http.{HttpContentCompressor, HttpHeaders, H
  * Custom compressor that only handles text-like content-types with the default
  * compression level.
  */
-private[http]
-class TextualContentCompressor extends HttpContentCompressor {
+private[http] class TextualContentCompressor extends HttpContentCompressor {
   import TextualContentCompressor._
 
   override def newContentEncoder(msg: HttpMessage, acceptEncoding: String) =
@@ -45,5 +44,6 @@ private[finagle] object TextualContentCompressor {
     "application/rss+xml",
     "application/x-javascript",
     "application/xhtml+xml",
-    "application/xml")
+    "application/xml"
+  )
 }

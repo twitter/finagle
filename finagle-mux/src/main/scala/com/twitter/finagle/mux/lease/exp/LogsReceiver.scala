@@ -16,7 +16,6 @@ object NullLogsReceiver extends LogsReceiver {
   def flush() {}
 }
 
-
 /**
  * This is not threadsafe.
  * The assumption is that this is only used in a single-threaded context.
@@ -30,8 +29,9 @@ class DedupingLogsReceiver(log: Logger) extends LogsReceiver {
   }
 
   def flush() {
-    val strings = map.asScala map { case (left, right) =>
-      "%s=%s".format(left, right)
+    val strings = map.asScala map {
+      case (left, right) =>
+        "%s=%s".format(left, right)
     }
     log.info(strings.mkString(", "))
 

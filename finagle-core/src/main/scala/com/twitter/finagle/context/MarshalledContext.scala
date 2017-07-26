@@ -26,7 +26,7 @@ final class MarshalledContext private[context] extends Context {
   private[context] case class Translucent(key: Buf, value: Buf) extends Cell {
     private[this] var cachedEnv: Some[_] = null
 
-    // Should only be called after this Cell has been looked up by its key as the 
+    // Should only be called after this Cell has been looked up by its key as the
     // key is only used to unmarshal if the parsed result hasn't been cached
     def unmarshal[A](key: Key[A]): Option[A] = {
       val result = {
@@ -41,8 +41,8 @@ final class MarshalledContext private[context] extends Context {
               val bytesString = Buf.slowHexString(bytesToDisplay)
               val message =
                 s"Failed to deserialize marshalled context entry for key ${key.id}. " +
-                s"Value has length ${value.length}. First ${bytesToDisplay.length} bytes " +
-                s"of the value: 0x$bytesString"
+                  s"Value has length ${value.length}. First ${bytesToDisplay.length} bytes " +
+                  s"of the value: 0x$bytesString"
               log.warning(e, message)
               None
           }
@@ -61,6 +61,7 @@ final class MarshalledContext private[context] extends Context {
    * is undefined.
    */
   abstract class Key[A](val id: String) {
+
     /**
      * A unique identifier defining this marshaller. This is
      * transmitted together with marshalled values in order to
@@ -89,14 +90,16 @@ final class MarshalledContext private[context] extends Context {
     letLocal(env.updated(key.marshalId, Real(key, Some(value))))(fn)
 
   def let[A, B, R](key1: Key[A], value1: A, key2: Key[B], value2: B)(fn: => R): R = {
-    val next = env.updated(key1.marshalId, Real(key1, Some(value1)))
+    val next = env
+      .updated(key1.marshalId, Real(key1, Some(value1)))
       .updated(key2.marshalId, Real(key2, Some(value2)))
     letLocal(next)(fn)
   }
 
   def let[R](pairs: Iterable[KeyValuePair[_]])(fn: => R): R = {
-    val next = pairs.foldLeft(env) { case (e, KeyValuePair(k, v)) =>
-      e.updated(k.marshalId, Real(k, Some(v)))
+    val next = pairs.foldLeft(env) {
+      case (e, KeyValuePair(k, v)) =>
+        e.updated(k.marshalId, Real(k, Some(v)))
     }
     letLocal(next)(fn)
   }
@@ -140,9 +143,13 @@ final class MarshalledContext private[context] extends Context {
   }
 
   // Exposed for testing
-  private[context] def doUnmarshal(env: Map[Buf, Cell], contexts: Iterable[(Buf, Buf)]): Map[Buf, Cell] = {
-    contexts.foldLeft(env) { case (env, (k, v)) =>
-      env.updated(k, Translucent(k, v))
+  private[context] def doUnmarshal(
+    env: Map[Buf, Cell],
+    contexts: Iterable[(Buf, Buf)]
+  ): Map[Buf, Cell] = {
+    contexts.foldLeft(env) {
+      case (env, (k, v)) =>
+        env.updated(k, Translucent(k, v))
     }
   }
 

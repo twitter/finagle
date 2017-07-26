@@ -52,8 +52,9 @@ object Retries {
    *       requests using a [[RetryPolicy]]
    */
   case class Budget(
-      retryBudget: RetryBudget,
-      requeueBackoffs: Stream[Duration] = Budget.emptyBackoffSchedule) {
+    retryBudget: RetryBudget,
+    requeueBackoffs: Stream[Duration] = Budget.emptyBackoffSchedule
+  ) {
     def this(retryBudget: RetryBudget) =
       this(retryBudget, Budget.emptyBackoffSchedule)
 
@@ -62,6 +63,7 @@ object Retries {
   }
 
   object Budget extends Stack.Param[Budget] {
+
     /**
      * Default backoff stream to use for automatic retries.
      * All Zero's.
@@ -112,7 +114,12 @@ object Retries {
         val timer = timerP.timer
 
         val filters = newRequeueFilter(
-          retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timer, next
+          retryBudget,
+          budgetP.requeueBackoffs,
+          withdrawsOnly = false,
+          scoped,
+          timer,
+          next
         )
         svcFactory(retryBudget, filters, scoped, requeues, next)
       }
@@ -159,13 +166,25 @@ object Retries {
 
         val filters =
           if (retryPolicy eq RetryPolicy.Never) {
-            newRequeueFilter(retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timerP.timer, next)
+            newRequeueFilter(
+              retryBudget,
+              budgetP.requeueBackoffs,
+              withdrawsOnly = false,
+              scoped,
+              timerP.timer,
+              next
+            )
           } else {
-            val retryFilter = new RetryExceptionsFilter[Req, Rep](
-              retryPolicy, timerP.timer, statsRecv, retryBudget)
+            val retryFilter =
+              new RetryExceptionsFilter[Req, Rep](retryPolicy, timerP.timer, statsRecv, retryBudget)
             // note that we wrap the budget, since the retry filter wraps this
             val requeueFilter = newRequeueFilter(
-              retryBudget, budgetP.requeueBackoffs, withdrawsOnly = true, scoped, timerP.timer, next
+              retryBudget,
+              budgetP.requeueBackoffs,
+              withdrawsOnly = true,
+              scoped,
+              timerP.timer,
+              next
             )
             retryFilter.andThen(requeueFilter)
           }
@@ -193,7 +212,8 @@ object Retries {
       // failures when it isn't Open, we wouldn't need to gate on status.
       () => next.status == Status.Open,
       MaxRequeuesPerReq,
-      timer)
+      timer
+    )
   }
 
   private[this] def svcFactory[Req, Rep](
@@ -223,10 +243,10 @@ object Retries {
        */
       private[this] def applySelf(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] =
         self(conn).transform {
-          case Throw(e@RetryPolicy.RetryableWriteException(_)) if n > 0 =>
+          case Throw(e @ RetryPolicy.RetryableWriteException(_)) if n > 0 =>
             if (status == Status.Open) {
               requeuesCounter.incr()
-              applySelf(conn, n-1)
+              applySelf(conn, n - 1)
             } else {
               notOpenCounter.incr()
               Future.exception(e)
@@ -238,7 +258,7 @@ object Retries {
           // trigger circuit breaking
           case Return(deadSvc) if deadSvc.status == Status.Closed && n > 0 =>
             requeuesCounter.incr()
-            applySelf(conn, n-1)
+            applySelf(conn, n - 1)
           case t => Future.const(t)
         }
 

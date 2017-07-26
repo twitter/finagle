@@ -14,7 +14,8 @@ private[netty4] class Netty4Timer(underlying: io.netty.util.Timer) extends Timer
         new io.netty.util.TimerTask {
           def run(timeout: io.netty.util.Timeout): Unit = if (!timeout.isCancelled) { f }
         },
-        math.max(0, (when - Time.now).inMilliseconds), TimeUnit.MILLISECONDS
+        math.max(0, (when - Time.now).inMilliseconds),
+        TimeUnit.MILLISECONDS
       )
 
       def cancel(): Unit = timeout.cancel()

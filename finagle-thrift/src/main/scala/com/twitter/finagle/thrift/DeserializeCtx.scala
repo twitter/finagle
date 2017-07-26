@@ -19,9 +19,7 @@ import com.twitter.util.Try
  * to be seen by [[deserialize]]. `request` is of type `Any` because
  * requests in generated Scala and Java services do not share a supertype.
  */
-class DeserializeCtx[Rep](
-    val request: Any,
-    replyDeserializer: Array[Byte] => Try[Rep]) {
+class DeserializeCtx[Rep](val request: Any, replyDeserializer: Array[Byte] => Try[Rep]) {
 
   // thread safety provided via synchronization on this
   private var deserialized: Try[Rep] = null

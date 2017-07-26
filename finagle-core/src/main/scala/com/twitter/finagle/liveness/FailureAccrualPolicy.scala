@@ -16,6 +16,7 @@ import com.twitter.util.{Duration, Stopwatch}
  *      for more details.
  */
 abstract class FailureAccrualPolicy {
+
   /** Invoked by FailureAccrualFactory when a request is successful. */
   def recordSuccess(): Unit
 
@@ -66,8 +67,10 @@ object FailureAccrualPolicy {
     window: Long,
     markDeadFor: Stream[Duration]
   ) extends FailureAccrualPolicy {
-    assert(requiredSuccessRate >= 0.0 && requiredSuccessRate <= 1.0,
-      s"requiredSuccessRate must be [0, 1]: $requiredSuccessRate")
+    assert(
+      requiredSuccessRate >= 0.0 && requiredSuccessRate <= 1.0,
+      s"requiredSuccessRate must be [0, 1]: $requiredSuccessRate"
+    )
     assert(window > 0, s"window must be positive: $window")
 
     // Pad the back of the stream to mark dead for a constant amount (300 seconds)

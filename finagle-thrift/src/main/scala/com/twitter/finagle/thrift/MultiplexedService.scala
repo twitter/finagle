@@ -11,11 +11,11 @@ import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 private[finagle] class MultiplexedFinagleService(
-    services: Map[String, Service[Array[Byte], Array[Byte]]],
-    defaultService: Option[String],
-    protocolFactory: TProtocolFactory,
-    maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize)
-  extends Service[Array[Byte], Array[Byte]] {
+  services: Map[String, Service[Array[Byte], Array[Byte]]],
+  defaultService: Option[String],
+  protocolFactory: TProtocolFactory,
+  maxThriftBufferSize: Int = Thrift.Server.maxThriftBufferSize
+) extends Service[Array[Byte], Array[Byte]] {
 
   private val serviceMap = services.mapValues(getFunctionMap)
 
@@ -24,12 +24,18 @@ private[finagle] class MultiplexedFinagleService(
   ): collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]] =
     Try {
       scroogeFinagleServiceFunctionMap(service)
-    }.handle { case NonFatal(_) =>
-      thriftFinagleServiceFunctionMap(service)
     }.handle {
-      case NonFatal(e) =>
-        throw new IllegalArgumentException("%s cannot be multiplexed".format(service.getClass.getName), e)
-    }.get
+        case NonFatal(_) =>
+          thriftFinagleServiceFunctionMap(service)
+      }
+      .handle {
+        case NonFatal(e) =>
+          throw new IllegalArgumentException(
+            "%s cannot be multiplexed".format(service.getClass.getName),
+            e
+          )
+      }
+      .get
 
   /**
    * Get the function map from scrooge generated scala services.
@@ -40,7 +46,8 @@ private[finagle] class MultiplexedFinagleService(
     val m = target.getClass.getMethod("functionMap")
     val accessible = m.isAccessible
     m.setAccessible(true)
-    val result = m.invoke(target)
+    val result = m
+      .invoke(target)
       .asInstanceOf[collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]]]
     m.setAccessible(accessible)
     result
@@ -55,8 +62,11 @@ private[finagle] class MultiplexedFinagleService(
     val f = target.getClass.getDeclaredField("functionMap")
     val accessible = f.isAccessible
     f.setAccessible(true)
-    val functionMap = f.get(target)
-      .asInstanceOf[java.util.Map[String, com.twitter.util.Function2[TProtocol, Integer, Future[Array[Byte]]]]]
+    val functionMap = f
+      .get(target)
+      .asInstanceOf[java.util.Map[String, com.twitter.util.Function2[TProtocol, Integer, Future[
+        Array[Byte]
+      ]]]]
       .asScala
       .mapValues(function => (prot: TProtocol, seqId: Int) => function(prot, seqId))
     f.setAccessible(accessible)
@@ -70,8 +80,12 @@ private[finagle] class MultiplexedFinagleService(
       val msg = iprot.readMessageBegin()
       val index = msg.name.indexOf(TMultiplexedProtocol.SEPARATOR)
       if (index == -1 && defaultService.isEmpty) {
-        exception(msg.name, msg.seqid, TApplicationException.PROTOCOL_ERROR,
-          s"This is a multiplexed service, with available service names: [${serviceMap.keys.mkString(", ")}]")
+        exception(
+          msg.name,
+          msg.seqid,
+          TApplicationException.PROTOCOL_ERROR,
+          s"This is a multiplexed service, with available service names: [${serviceMap.keys.mkString(", ")}]"
+        )
       } else {
         val serviceName = if (index == -1) defaultService.get else msg.name.substring(0, index)
         val functionName = msg.name.substring(index + 1)
@@ -83,9 +97,11 @@ private[finagle] class MultiplexedFinagleService(
           case _ =>
             TProtocolUtil.skip(iprot, TType.STRUCT)
             val errorMsg = if (functionMap.isEmpty) {
-              s"""Invalid service name: ${serviceName}, available serivce names: [${serviceMap.keys.mkString(", ")}]"""
+              s"""Invalid service name: ${serviceName}, available serivce names: [${serviceMap.keys
+                .mkString(", ")}]"""
             } else {
-              s"""Invalid method name: ${functionName}, available method names: [${functionMap.get.keys.mkString(", ")}]"""
+              s"""Invalid method name: ${functionName}, available method names: [${functionMap.get.keys
+                .mkString(", ")}]"""
             }
             exception(msg.name, msg.seqid, TApplicationException.UNKNOWN_METHOD, errorMsg)
         }
@@ -95,7 +111,12 @@ private[finagle] class MultiplexedFinagleService(
     }
   }
 
-  private[this] def exception(name: String, seqid: Int, code: Int, message: String): Future[Array[Byte]] = {
+  private[this] def exception(
+    name: String,
+    seqid: Int,
+    code: Int,
+    message: String
+  ): Future[Array[Byte]] = {
     try {
       val x = new TApplicationException(code, message)
       val memoryBuffer = reusableBuffer

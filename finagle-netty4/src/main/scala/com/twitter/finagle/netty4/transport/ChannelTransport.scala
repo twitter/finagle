@@ -23,16 +23,14 @@ import scala.util.control.NonFatal
  *       handlers inserted after that won't get any of the inbound traffic.
  */
 private[finagle] class ChannelTransport(
-    ch: nettyChan.Channel,
-    readQueue: AsyncQueue[Any] = new AsyncQueue[Any])
-  extends Transport[Any, Any] {
+  ch: nettyChan.Channel,
+  readQueue: AsyncQueue[Any] = new AsyncQueue[Any]
+) extends Transport[Any, Any] {
 
   import ChannelTransport._
 
-
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
-
 
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
     case e =>
@@ -101,7 +99,8 @@ private[finagle] class ChannelTransport(
     val p = new Promise[Unit]
     op.addListener(new nettyChan.ChannelFutureListener {
       def operationComplete(f: nettyChan.ChannelFuture): Unit =
-        if (f.isSuccess) p.setDone() else {
+        if (f.isSuccess) p.setDone()
+        else {
           p.setException(ChannelException(f.cause, remoteAddress))
         }
     })
@@ -159,37 +158,40 @@ private[finagle] class ChannelTransport(
 
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
-  ch.pipeline.addLast(HandlerName, new nettyChan.ChannelInboundHandlerAdapter {
+  ch.pipeline.addLast(
+    HandlerName,
+    new nettyChan.ChannelInboundHandlerAdapter {
 
-    override def channelActive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-      // Upon startup we immediately begin the process of buffering at most one inbound
-      // message in order to detect channel close events. Otherwise we would have
-      // different buffering behavior before and after the first `Transport.read()` event.
-      ReadManager.readIfNeeded()
-      super.channelActive(ctx)
+      override def channelActive(ctx: nettyChan.ChannelHandlerContext): Unit = {
+        // Upon startup we immediately begin the process of buffering at most one inbound
+        // message in order to detect channel close events. Otherwise we would have
+        // different buffering behavior before and after the first `Transport.read()` event.
+        ReadManager.readIfNeeded()
+        super.channelActive(ctx)
+      }
+
+      override def channelReadComplete(ctx: nettyChan.ChannelHandlerContext): Unit = {
+        // Check to see if we need more data
+        ReadManager.readIfNeeded()
+        super.channelReadComplete(ctx)
+      }
+
+      override def channelRead(ctx: nettyChan.ChannelHandlerContext, msg: Any): Unit = {
+        ReadManager.decrement()
+
+        if (!readQueue.offer(msg)) // Dropped messages are fatal
+          fail(Failure(s"offer failure on $this $readQueue"))
+      }
+
+      override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
+        fail(new ChannelClosedException(remoteAddress))
+      }
+
+      override def exceptionCaught(ctx: nettyChan.ChannelHandlerContext, e: Throwable): Unit = {
+        fail(ChannelException(e, remoteAddress))
+      }
     }
-
-    override def channelReadComplete(ctx: nettyChan.ChannelHandlerContext): Unit = {
-      // Check to see if we need more data
-      ReadManager.readIfNeeded()
-      super.channelReadComplete(ctx)
-    }
-
-    override def channelRead(ctx: nettyChan.ChannelHandlerContext, msg: Any): Unit = {
-      ReadManager.decrement()
-
-      if (!readQueue.offer(msg)) // Dropped messages are fatal
-        fail(Failure(s"offer failure on $this $readQueue"))
-    }
-
-    override def channelInactive(ctx: nettyChan.ChannelHandlerContext): Unit = {
-      fail(new ChannelClosedException(remoteAddress))
-    }
-
-    override def exceptionCaught(ctx: nettyChan.ChannelHandlerContext, e: Throwable): Unit = {
-      fail(ChannelException(e, remoteAddress))
-    }
-  })
+  )
 }
 
 private[finagle] object ChannelTransport {

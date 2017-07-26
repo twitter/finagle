@@ -17,17 +17,18 @@ import scala.util.control.NonFatal
  * take calls to write or read.
  */
 private[http2] class Http2UpgradingTransport(
-    t: Transport[Any, Any],
-    ref: RefTransport[Any, Any],
-    p: Promise[Option[MultiplexedTransporter]],
-    params: Stack.Params)
-  extends TransportProxy[Any, Any](t) {
+  t: Transport[Any, Any],
+  ref: RefTransport[Any, Any],
+  p: Promise[Option[MultiplexedTransporter]],
+  params: Stack.Params
+) extends TransportProxy[Any, Any](t) {
 
   import Http2Transporter._
 
   private[this] val finishedWriting = Promise[Unit]
-  finishedWriting.setInterruptHandler { case NonFatal(exn) =>
-    finishedWriting.updateIfEmpty(Throw(exn))
+  finishedWriting.setInterruptHandler {
+    case NonFatal(exn) =>
+      finishedWriting.updateIfEmpty(Throw(exn))
   }
 
   def write(any: Any): Future[Unit] = {
@@ -54,10 +55,10 @@ private[http2] class Http2UpgradingTransport(
   }
 
   def read(): Future[Any] = t.read().flatMap {
-    case _@UpgradeEvent.UPGRADE_REJECTED =>
+    case _ @UpgradeEvent.UPGRADE_REJECTED =>
       upgradeRejected()
       ref.read()
-    case _@UpgradeEvent.UPGRADE_SUCCESSFUL =>
+    case _ @UpgradeEvent.UPGRADE_SUCCESSFUL =>
       finishedWriting.before {
         upgradeSuccessful()
         ref.read()
@@ -73,11 +74,10 @@ private[http2] class Http2UpgradingTransport(
 }
 
 private object Http2UpgradingTransport {
-  class ClosedWhileUpgradingException(
-      private[finagle] val flags: Long = FailureFlags.Empty)
-    extends Exception("h2c transport was closed while upgrading")
-    with HasLogLevel
-    with FailureFlags[ClosedWhileUpgradingException] {
+  class ClosedWhileUpgradingException(private[finagle] val flags: Long = FailureFlags.Empty)
+      extends Exception("h2c transport was closed while upgrading")
+      with HasLogLevel
+      with FailureFlags[ClosedWhileUpgradingException] {
 
     def logLevel: Level = Level.DEBUG // this happens often on interrupts, so let's be quiet
     protected def copyWithFlags(newFlags: Long): ClosedWhileUpgradingException =

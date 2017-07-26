@@ -19,10 +19,11 @@ private[finagle] object StatsFactoryWrapper {
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
-        else new StatsFactoryWrapper(
-          next,
-          new RollupStatsReceiver(statsReceiver.scope("service_creation"))
-        )
+        else
+          new StatsFactoryWrapper(
+            next,
+            new RollupStatsReceiver(statsReceiver.scope("service_creation"))
+          )
       }
     }
 }
@@ -31,11 +32,8 @@ private[finagle] object StatsFactoryWrapper {
  * A [[com.twitter.finagle.ServiceFactoryProxy]] that tracks statistics on
  * [[com.twitter.finagle.Service]] creation failures and service acquisition latency.
  */
-class StatsFactoryWrapper[Req, Rep](
-    self: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver)
-  extends ServiceFactoryProxy[Req, Rep](self)
-{
+class StatsFactoryWrapper[Req, Rep](self: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
+    extends ServiceFactoryProxy[Req, Rep](self) {
   private[this] val failureStats = statsReceiver.scope("failures")
   private[this] val latencyStat = statsReceiver.stat("service_acquisition_latency_ms")
 

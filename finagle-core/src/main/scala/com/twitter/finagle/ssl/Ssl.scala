@@ -3,7 +3,6 @@ package com.twitter.finagle.ssl
 import java.util.logging.Logger
 import javax.net.ssl._
 
-
 /*
  * SSL helper object, capable of creating cached SSLEngine instances
  * backed by both the native APR/OpenSSL bindings, or pure Java JSSE.
@@ -65,7 +64,7 @@ object Ssl {
   /**
    * Get a client engine from the given context
    */
-  def client(sslContext : SSLContext): Engine = JSSE.client(sslContext)
+  def client(sslContext: SSLContext): Engine = JSSE.client(sslContext)
 
   /**
    * Get a client engine that doesn't check the validity of certificates
@@ -83,7 +82,8 @@ object Ssl {
   /**
    * Get a client engine from the given context
    */
-  def client(sslContext: SSLContext, peerHost: String, peerPort: Int): Engine = JSSE.client(sslContext, peerHost, peerPort)
+  def client(sslContext: SSLContext, peerHost: String, peerPort: Int): Engine =
+    JSSE.client(sslContext, peerHost, peerPort)
 
   /**
    * Get a client engine that doesn't check the validity of certificates

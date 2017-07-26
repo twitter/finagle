@@ -13,9 +13,7 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
  *       or users calling [[close]] directly on the underlying
  *       resource.
  */
-private[finagle] class RefcountedClosable[T <: Closable](
-    closable: T)
-  extends Closable {
+private[finagle] class RefcountedClosable[T <: Closable](closable: T) extends Closable {
 
   private[this] val count = new AtomicInteger(0)
   private[this] val isClosed = new AtomicBoolean(false)

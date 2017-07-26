@@ -18,6 +18,7 @@ import com.twitter.util.Future
  * other 503 response.
  */
 object HttpNackFilter {
+
   /** The `Role` assigned to a `HttpNackFilter` within a `Stack`. */
   val role: Stack.Role = Stack.Role("HttpNack")
 
@@ -30,11 +31,13 @@ object HttpNackFilter {
   /** Response status for a nacked request */
   val ResponseStatus: Status = Status.ServiceUnavailable
 
-  private val RetryableNackBody = Buf.Utf8("Request was not processed by the server due to an error and is safe to retry")
-  private val NonRetryableNackBody = Buf.Utf8("Request was not processed by the server and should not be retried")
+  private val RetryableNackBody =
+    Buf.Utf8("Request was not processed by the server due to an error and is safe to retry")
+  private val NonRetryableNackBody =
+    Buf.Utf8("Request was not processed by the server and should not be retried")
 
-  private val NonRetryableNackFlags = FailureFlags.Rejected|FailureFlags.NonRetryable
-  private val RetryableNackFlags = FailureFlags.Rejected|FailureFlags.Retryable
+  private val NonRetryableNackFlags = FailureFlags.Rejected | FailureFlags.NonRetryable
+  private val RetryableNackFlags = FailureFlags.Rejected | FailureFlags.Retryable
 
   private[twitter] object RetryableNack {
     def unapply(t: Throwable): Option[Throwable] = t match {
@@ -57,7 +60,7 @@ object HttpNackFilter {
     rep.status == ResponseStatus && rep.headerMap.contains(NonRetryableNackHeader)
 
   private[finagle] def module: Stackable[ServiceFactory[Request, Response]] =
-    new Stack.Module1[param.Stats,ServiceFactory[Request, Response]] {
+    new Stack.Module1[param.Stats, ServiceFactory[Request, Response]] {
       val role: Stack.Role = HttpNackFilter.role
       val description = "Convert rejected requests to 503s, respecting retryability"
 
@@ -75,8 +78,7 @@ object HttpNackFilter {
     new HttpNackFilter(statsReceiver)
 }
 
-private class HttpNackFilter(statsReceiver: StatsReceiver)
-  extends SimpleFilter[Request, Response] {
+private class HttpNackFilter(statsReceiver: StatsReceiver) extends SimpleFilter[Request, Response] {
   import HttpNackFilter._
 
   private[this] val nackCounts = statsReceiver.counter("nacks")

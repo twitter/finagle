@@ -8,9 +8,7 @@ import javax.net.ssl.SSLContext
  * This class provides an ability to use an initialized supplied
  * `javax.net.ssl.SSLContext` as the basis for creating [[Engine Engines]].
  */
-class SslContextClientEngineFactory(
-    sslContext: SSLContext)
-  extends SslClientEngineFactory {
+class SslContextClientEngineFactory(sslContext: SSLContext) extends SslClientEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an [[Address]] and an [[SslClientConfiguration]]
@@ -27,11 +25,17 @@ class SslContextClientEngineFactory(
    */
   def apply(address: Address, config: SslClientConfiguration): Engine = {
     SslConfigurations.checkKeyCredentialsNotSupported(
-      "SslContextClientEngineFactory", config.keyCredentials)
+      "SslContextClientEngineFactory",
+      config.keyCredentials
+    )
     SslConfigurations.checkTrustCredentialsNotSupported(
-      "SslContextClientEngineFactory", config.trustCredentials)
+      "SslContextClientEngineFactory",
+      config.trustCredentials
+    )
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "SslContextClientEngineFactory", config.applicationProtocols)
+      "SslContextClientEngineFactory",
+      config.applicationProtocols
+    )
 
     val engine = SslClientEngineFactory.createEngine(sslContext, address, config)
     SslClientEngineFactory.configureEngine(engine, config)

@@ -1,8 +1,11 @@
 package com.twitter.finagle.http.codec
 
 import org.jboss.netty.channel.{
-  SimpleChannelUpstreamHandler, Channels,
-  ChannelHandlerContext, MessageEvent}
+  SimpleChannelUpstreamHandler,
+  Channels,
+  ChannelHandlerContext,
+  MessageEvent
+}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 
 /**
@@ -15,8 +18,11 @@ private[http] class RespondToExpectContinue extends SimpleChannelUpstreamHandler
       case request: HttpRequest if HttpHeaders.is100ContinueExpected(request) =>
         // Write the response immediately.
         Channels.write(
-          ctx, Channels.future(ctx.getChannel),
-          OneHundredContinueResponse, e.getRemoteAddress)
+          ctx,
+          Channels.future(ctx.getChannel),
+          OneHundredContinueResponse,
+          e.getRemoteAddress
+        )
 
         // Remove the the ``Expect:'' header, and let the upstream
         // continue receiving chunks after this.

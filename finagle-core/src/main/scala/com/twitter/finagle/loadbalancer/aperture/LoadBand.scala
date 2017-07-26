@@ -30,7 +30,8 @@ import java.util.concurrent.atomic.AtomicInteger
  * dampen the rate of changes by rolling the offered load into an exponentially weighted
  * moving average.
  */
-private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { self: Aperture[Req, Rep] =>
+private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] {
+  self: Aperture[Req, Rep] =>
 
   protected type Node <: LoadBandNode
 
@@ -116,7 +117,7 @@ private[loadbalancer] trait LoadBand[Req, Rep] extends BalancerNode[Req, Rep] { 
               }
           })
 
-        case t@Throw(_) =>
+        case t @ Throw(_) =>
           adjustTotalLoad(-1)
           Future.const(t)
       }

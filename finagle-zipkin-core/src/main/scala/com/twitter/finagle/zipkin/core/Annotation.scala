@@ -9,8 +9,8 @@ import java.nio.ByteBuffer
  */
 case class ZipkinAnnotation(
   timestamp: Time,
-  value:     String,
-  endpoint:  Endpoint
+  value: String,
+  endpoint: Endpoint
 ) {
 
   def toThrift: thrift.Annotation = {

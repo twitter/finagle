@@ -1,7 +1,12 @@
 package com.twitter.finagle.ssl.client
 
 import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, KeyCredentials, Protocols, TrustCredentials}
+  ApplicationProtocols,
+  CipherSuites,
+  KeyCredentials,
+  Protocols,
+  TrustCredentials
+}
 
 /**
  * SslClientConfiguration represents the collection of parameters that an engine factory
@@ -24,9 +29,10 @@ import com.twitter.finagle.ssl.{
  * client engine.
  */
 case class SslClientConfiguration(
-    hostname: Option[String] = None,
-    keyCredentials: KeyCredentials = KeyCredentials.Unspecified,
-    trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
-    cipherSuites: CipherSuites = CipherSuites.Unspecified,
-    protocols: Protocols = Protocols.Unspecified,
-    applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified)
+  hostname: Option[String] = None,
+  keyCredentials: KeyCredentials = KeyCredentials.Unspecified,
+  trustCredentials: TrustCredentials = TrustCredentials.Unspecified,
+  cipherSuites: CipherSuites = CipherSuites.Unspecified,
+  protocols: Protocols = Protocols.Unspecified,
+  applicationProtocols: ApplicationProtocols = ApplicationProtocols.Unspecified
+)

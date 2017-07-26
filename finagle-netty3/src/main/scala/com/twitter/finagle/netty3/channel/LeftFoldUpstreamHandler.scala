@@ -5,7 +5,6 @@ package com.twitter.finagle.netty3.channel
  * management. For certain use cases, these both simplify state
  * machines and enhance composability.
  */
-
 import org.jboss.netty.channel._
 
 import com.twitter.concurrent.Serialized
@@ -111,8 +110,8 @@ class LeftFoldUpstreamHandler {
 }
 
 private[channel] class LeftFoldHandlerToChannelHandler(initial: LeftFoldUpstreamHandler)
-  extends SimpleChannelUpstreamHandler with Serialized
-{
+    extends SimpleChannelUpstreamHandler
+    with Serialized {
   private[this] var state = initial
 
   override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) =

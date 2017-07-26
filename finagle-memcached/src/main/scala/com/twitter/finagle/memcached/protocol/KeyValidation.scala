@@ -43,13 +43,15 @@ private[memcached] object KeyValidation {
 
     if (tooLong(key))
       throw new IllegalArgumentException(
-        s"Invalid keys: key cannot be longer than $MaxKeyLength bytes (${key.length})")
+        s"Invalid keys: key cannot be longer than $MaxKeyLength bytes (${key.length})"
+      )
 
     val index = invalidByteIndex(key)
     if (index != -1) {
       val ch = key.get(index)
       throw new IllegalArgumentException(
-        f"Invalid keys: key cannot have whitespace or control characters: '0x${ch}%x'")
+        f"Invalid keys: key cannot have whitespace or control characters: '0x${ch}%x'"
+      )
     }
   }
 

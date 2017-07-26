@@ -24,8 +24,7 @@ private[finagle] object Bufs {
   implicit def seqOfNonEmptyStringToBuf(strings: Traversable[String]): Seq[Buf] = {
     if (strings == null) {
       null
-    }
-    else {
+    } else {
       strings.map(nonEmptyStringToBuf)(breakOut)
     }
   }

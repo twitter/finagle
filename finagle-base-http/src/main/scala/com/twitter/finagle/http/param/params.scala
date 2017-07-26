@@ -32,8 +32,7 @@ object MaxInitialLineSize {
 }
 
 case class MaxRequestSize(size: StorageUnit) {
-  require(size < 2.gigabytes,
-    s"MaxRequestSize should be less than 2 Gb, but was $size")
+  require(size < 2.gigabytes, s"MaxRequestSize should be less than 2 Gb, but was $size")
 }
 object MaxRequestSize {
   implicit val maxRequestSizeParam: Stack.Param[MaxRequestSize] =
@@ -41,8 +40,7 @@ object MaxRequestSize {
 }
 
 case class MaxResponseSize(size: StorageUnit) {
-  require(size < 2.gigabytes,
-    s"MaxResponseSize should be less than 2 Gb, but was $size")
+  require(size < 2.gigabytes, s"MaxResponseSize should be less than 2 Gb, but was $size")
 }
 object MaxResponseSize {
   implicit val maxResponseSizeParam: Stack.Param[MaxResponseSize] =

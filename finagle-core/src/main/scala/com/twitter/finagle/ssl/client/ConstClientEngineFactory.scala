@@ -15,9 +15,7 @@ case object UnknownSocketAddress extends SocketAddress
  * which use a SocketAddress => Engine interface. It should only be used
  * for legacy purposes.
  */
-class ConstClientEngineFactory(
-    newEngine: SocketAddress => Engine)
-  extends SslClientEngineFactory {
+class ConstClientEngineFactory(newEngine: SocketAddress => Engine) extends SslClientEngineFactory {
 
   private[this] def addressToSocketAddress(
     address: Address,
@@ -46,11 +44,17 @@ class ConstClientEngineFactory(
    */
   def apply(address: Address, config: SslClientConfiguration): Engine = {
     SslConfigurations.checkKeyCredentialsNotSupported(
-      "ConstClientEngineFactory", config.keyCredentials)
+      "ConstClientEngineFactory",
+      config.keyCredentials
+    )
     SslConfigurations.checkTrustCredentialsNotSupported(
-      "ConstClientEngineFactory", config.trustCredentials)
+      "ConstClientEngineFactory",
+      config.trustCredentials
+    )
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "ConstClientEngineFactory", config.applicationProtocols)
+      "ConstClientEngineFactory",
+      config.applicationProtocols
+    )
 
     val engine = newEngine(addressToSocketAddress(address, config))
     SslClientEngineFactory.configureEngine(engine, config)

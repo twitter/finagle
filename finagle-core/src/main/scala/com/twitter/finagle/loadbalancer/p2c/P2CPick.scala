@@ -14,6 +14,7 @@ import com.twitter.finagle.loadbalancer.{DistributorT, NodeT}
  * 10 (October 2001), 1094-1104.
  */
 private[loadbalancer] trait P2CPick[Node <: NodeT[_, _]] { self: DistributorT[Node] =>
+
   /**
    * The random number generator used by `pick` to select two nodes
    * for comparison.

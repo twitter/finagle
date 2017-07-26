@@ -20,4 +20,3 @@ object MuxCancelledCategorizer {
     case MuxCancelledCategorizer(_) => CancelledCategorizer.Cancelled
   }
 }
-

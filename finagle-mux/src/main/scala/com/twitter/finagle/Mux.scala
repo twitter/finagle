@@ -37,6 +37,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
    * Mux-specific stack params.
    */
   object param {
+
     /**
      * A class eligible for configuring the maximum size of a mux frame.
      * Any message that is larger than this value is fragmented across multiple
@@ -65,12 +66,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * servers and clients can use the same parameter).
      */
     case class MuxImpl(
-        transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
-        listener: Stack.Params => Listener[Buf, Buf]) {
+      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
+      listener: Stack.Params => Listener[Buf, Buf]
+    ) {
       def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
         (this, MuxImpl.param)
     }
-
 
     object MuxImpl {
       private val RefCountToggleId: String = "com.twitter.finagle.mux.RefCountControlMessages"
@@ -84,7 +85,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
        */
       val Netty4 = MuxImpl(
         params => Netty4Transporter.raw(CopyingFramer, _, params),
-        params => Netty4Listener(CopyingFramer, params))
+        params => Netty4Listener(CopyingFramer, params)
+      )
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
@@ -107,7 +109,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
               transportFactory = new RefCountingTransport(_)
             )
           else {
-            log.info("disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value")
+            log.info(
+              "disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value"
+            )
             Netty4Transporter.raw(CopyingFramer, _, params)
           }
         },
@@ -134,8 +138,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     maxFrameSize: StorageUnit,
     statsReceiver: StatsReceiver
   ): Handshake.Negotiator = (peerHeaders, trans) => {
-    val remoteMaxFrameSize = Handshake.valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
-      .map { cb => MuxFramer.Header.decodeFrameSize(cb) }
+    val remoteMaxFrameSize = Handshake
+      .valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
+      .map { cb =>
+        MuxFramer.Header.decodeFrameSize(cb)
+      }
     // Decorate the transport with the MuxFramer. We need to handle the
     // cross product of local and remote configuration. The idea is that
     // both clients and servers can specify the maximum frame size they
@@ -144,7 +151,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     (maxFrameSize, remoteMaxFrameSize) match {
       // The remote peer has suggested a max frame size less than the
       // sentinal value. We need to configure the framer to fragment.
-      case (_, s@Some(remote)) if remote < Int.MaxValue =>
+      case (_, s @ Some(remote)) if remote < Int.MaxValue =>
         MuxFramer(trans, s, framerStats)
       // The local instance has requested a max frame size less than the
       // sentinal value. We need to be prepared for the remote to send
@@ -172,9 +179,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       tracingFilter andThen next
   }
 
-  private[finagle] class ClientProtoTracing extends ProtoTracing("clnt", StackClient.Role.protoTracing)
+  private[finagle] class ClientProtoTracing
+      extends ProtoTracing("clnt", StackClient.Role.protoTracing)
 
   object Client {
+
     /** Prepends bound residual paths to outbound Mux requests's destinations. */
     private object MuxBindingFactory extends BindingFactory.Module[mux.Request, mux.Response] {
       protected[this] def boundPathFilter(residual: Path) =
@@ -199,16 +208,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * receive from a server.
      */
     private def headers(maxFrameSize: StorageUnit): Handshake.Headers = Seq(
-      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
-        maxFrameSize.inBytes.toInt)
+      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
     )
   }
 
   case class Client(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
-      params: Stack.Params = Client.params)
-    extends StdStackClient[mux.Request, mux.Response, Client]
-    with WithDefaultLoadBalancer[Client] {
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Client.stack,
+    params: Stack.Params = Client.params
+  ) extends StdStackClient[mux.Request, mux.Response, Client]
+      with WithDefaultLoadBalancer[Client] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -235,18 +243,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         trans = transport,
         version = LatestVersion,
         headers = Client.headers(maxFrameSize),
-        negotiate = negotiate(maxFrameSize, statsReceiver))
+        negotiate = negotiate(maxFrameSize, statsReceiver)
+      )
 
-      val statsTrans = new StatsTransport(
-        negotiatedTrans,
-        excRecorder,
-        statsReceiver.scope("transport"))
+      val statsTrans =
+        new StatsTransport(negotiatedTrans, excRecorder, statsReceiver.scope("transport"))
 
-      val session = new mux.ClientSession(
-        statsTrans,
-        detectorConfig,
-        name,
-        statsReceiver)
+      val session = new mux.ClientSession(statsTrans, detectorConfig, name, statsReceiver)
 
       mux.ClientDispatcher.newRequestResponse(session)
     }
@@ -260,7 +263,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   def newClient(dest: Name, label: String): ServiceFactory[mux.Request, mux.Response] =
     client.newClient(dest, label)
 
-  private[finagle] class ServerProtoTracing extends ProtoTracing("srv", StackServer.Role.protoTracing)
+  private[finagle] class ServerProtoTracing
+      extends ProtoTracing("srv", StackServer.Role.protoTracing)
 
   object Server {
     private val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
@@ -284,15 +288,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       clientHeaders: Handshake.Headers,
       maxFrameSize: StorageUnit
     ): Handshake.Headers = {
-      Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
-        maxFrameSize.inBytes.toInt))
+      Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt))
     }
   }
 
   case class Server(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
-      params: Stack.Params = Server.params)
-    extends StdStackServer[mux.Request, mux.Response, Server] {
+    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
+    params: Stack.Params = Server.params
+  ) extends StdStackServer[mux.Request, mux.Response, Server] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
@@ -320,19 +323,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         trans = transport,
         version = LatestVersion,
         headers = Server.headers(_, maxFrameSize),
-        negotiate = negotiate(maxFrameSize, statsReceiver))
+        negotiate = negotiate(maxFrameSize, statsReceiver)
+      )
 
-      val statsTrans = new StatsTransport(
-        negotiatedTrans,
-        excRecorder,
-        statsReceiver.scope("transport"))
+      val statsTrans =
+        new StatsTransport(negotiatedTrans, excRecorder, statsReceiver.scope("transport"))
 
-      mux.ServerDispatcher.newRequestResponse(
-        statsTrans,
-        service,
-        lessor,
-        tracer,
-        statsReceiver)
+      mux.ServerDispatcher.newRequestResponse(statsTrans, service, lessor, tracer, statsReceiver)
     }
   }
 

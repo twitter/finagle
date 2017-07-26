@@ -15,11 +15,11 @@ import scala.util.control.NonFatal
  * correctly, by handling [[Message]] instead of [[HttpObject]] directly.
  */
 private[http2] class RichHttpToHttp2ConnectionHandler(
-    dec: Http2ConnectionDecoder,
-    enc: Http2ConnectionEncoder,
-    initialSettings: Http2Settings,
-    onActive: () => Unit)
-  extends HttpToHttp2ConnectionHandler(dec, enc, initialSettings, false) {
+  dec: Http2ConnectionDecoder,
+  enc: Http2ConnectionEncoder,
+  initialSettings: Http2Settings,
+  onActive: () => Unit
+) extends HttpToHttp2ConnectionHandler(dec, enc, initialSettings, false) {
 
   private[this] val log = Logger.get(getClass.getName)
 
@@ -34,7 +34,7 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       msg match {
         case req: HttpRequest =>
           RichHttp2ServerDowngrader.stripConnectionHeaders(req.headers)
-          val headers = HttpConversionUtil.toHttp2Headers(req, false /* validateHeaders */)
+          val headers = HttpConversionUtil.toHttp2Headers(req, false /* validateHeaders */ )
           val endStream = req match {
             case full: FullHttpRequest if !full.content.isReadable => true
             case _ => false
@@ -44,14 +44,26 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
 
           val http1Headers = req.headers
           val dependencyId = http1Headers.getInt(
-            HttpConversionUtil.ExtensionHeaderNames.STREAM_DEPENDENCY_ID.text, 0)
+            HttpConversionUtil.ExtensionHeaderNames.STREAM_DEPENDENCY_ID.text,
+            0
+          )
 
           val weight = http1Headers.getShort(
             HttpConversionUtil.ExtensionHeaderNames.STREAM_WEIGHT.text,
-            Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT)
+            Http2CodecUtil.DEFAULT_PRIORITY_WEIGHT
+          )
 
           encoder.writeHeaders(
-            ctx, streamId, headers, dependencyId, weight, false /* exclusive */, 0, endStream, p)
+            ctx,
+            streamId,
+            headers,
+            dependencyId,
+            weight,
+            false /* exclusive */,
+            0,
+            endStream,
+            p
+          )
           // client can decide if a request is unhealthy immediately
           if (p.isDone && !p.isSuccess) {
             throw p.cause
@@ -72,9 +84,10 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       combiner.finish(promise)
     } catch {
       case e: Http2Exception =>
-        val status = if (e.isInstanceOf[HeaderListSizeException])
-          HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
-        else HttpResponseStatus.BAD_REQUEST
+        val status =
+          if (e.isInstanceOf[HeaderListSizeException])
+            HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
+          else HttpResponseStatus.BAD_REQUEST
         val rep = new DefaultFullHttpResponse(
           HttpVersion.HTTP_1_1,
           status
@@ -97,11 +110,17 @@ private[http2] class RichHttpToHttp2ConnectionHandler(
       case Ping =>
         encoder.writePing(ctx, false /* ack */, Http2CodecUtil.emptyPingBuf, promise)
       case GoAway(_, streamId, errorCode) =>
-        encoder.writeGoAway(ctx, streamId, errorCode, /* debugData */ Unpooled.EMPTY_BUFFER, promise)
+        encoder.writeGoAway(
+          ctx,
+          streamId,
+          errorCode, /* debugData */ Unpooled.EMPTY_BUFFER,
+          promise
+        )
 
       case _ =>
         val wrongType = new IllegalArgumentException(
-          s"Expected a Message, got ${msg.getClass.getName} instead.")
+          s"Expected a Message, got ${msg.getClass.getName} instead."
+        )
         log.error(wrongType, "Tried to write the wrong type to the http2 client pipeline")
         promise.setFailure(wrongType)
     }

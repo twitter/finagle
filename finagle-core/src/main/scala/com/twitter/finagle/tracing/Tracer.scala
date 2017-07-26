@@ -6,8 +6,7 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.logging.Logger
 
-private[tracing] object RecordTimeFormat
-  extends TimeFormat("MMdd HH:mm:ss.SSS")
+private[tracing] object RecordTimeFormat extends TimeFormat("MMdd HH:mm:ss.SSS")
 
 object Record {
   def apply(traceId: TraceId, timestamp: Time, annotation: Annotation): Record = {
@@ -24,34 +23,35 @@ object Record {
  * @param duration Did this event have a duration? For example: how long did a certain code block take to run
  */
 case class Record(
-    traceId: TraceId,
-    timestamp: Time,
-    annotation: Annotation,
-    duration: Option[Duration]) {
+  traceId: TraceId,
+  timestamp: Time,
+  annotation: Annotation,
+  duration: Option[Duration]
+) {
   override def toString: String = s"${RecordTimeFormat.format(timestamp)} $traceId] $annotation"
 }
 
 sealed trait Annotation
 object Annotation {
-  case object WireSend                             extends Annotation
-  case object WireRecv                             extends Annotation
-  case class WireRecvError(error: String)          extends Annotation
-  case class ClientSend()                          extends Annotation
-  case class ClientRecv()                          extends Annotation
-  case class ClientRecvError(error: String)        extends Annotation
-  case class ServerSend()                          extends Annotation
-  case class ServerRecv()                          extends Annotation
-  case class ServerSendError(error: String)        extends Annotation
-  case class ClientSendFragment()                  extends Annotation
-  case class ClientRecvFragment()                  extends Annotation
-  case class ServerSendFragment()                  extends Annotation
-  case class ServerRecvFragment()                  extends Annotation
-  case class Message(content: String)              extends Annotation
-  case class ServiceName(service: String)          extends Annotation
-  case class Rpc(name: String)                     extends Annotation
-  case class ClientAddr(ia: InetSocketAddress)     extends Annotation
-  case class ServerAddr(ia: InetSocketAddress)     extends Annotation
-  case class LocalAddr(ia: InetSocketAddress)      extends Annotation
+  case object WireSend extends Annotation
+  case object WireRecv extends Annotation
+  case class WireRecvError(error: String) extends Annotation
+  case class ClientSend() extends Annotation
+  case class ClientRecv() extends Annotation
+  case class ClientRecvError(error: String) extends Annotation
+  case class ServerSend() extends Annotation
+  case class ServerRecv() extends Annotation
+  case class ServerSendError(error: String) extends Annotation
+  case class ClientSendFragment() extends Annotation
+  case class ClientRecvFragment() extends Annotation
+  case class ServerSendFragment() extends Annotation
+  case class ServerRecvFragment() extends Annotation
+  case class Message(content: String) extends Annotation
+  case class ServiceName(service: String) extends Annotation
+  case class Rpc(name: String) extends Annotation
+  case class ClientAddr(ia: InetSocketAddress) extends Annotation
+  case class ServerAddr(ia: InetSocketAddress) extends Annotation
+  case class LocalAddr(ia: InetSocketAddress) extends Annotation
 
   case class BinaryAnnotation(key: String, value: Any) extends Annotation {
     /* Needed to not break backwards compatibility.  Can be removed later */
@@ -60,6 +60,7 @@ object Annotation {
 }
 
 object Tracer {
+
   /**
    * Useful constant for the return value of [[Tracer.sampleTrace]]
    */
@@ -178,11 +179,7 @@ object BroadcastTracer {
       first.isActivelyTracing(traceId) || second.isActivelyTracing(traceId)
   }
 
-  private class Three(
-      first: Tracer,
-      second: Tracer,
-      third: Tracer)
-    extends Tracer {
+  private class Three(first: Tracer, second: Tracer, third: Tracer) extends Tracer {
     override def toString: String =
       s"BroadcastTracer($first, $second, $third)"
 
@@ -204,8 +201,8 @@ object BroadcastTracer {
         return Tracer.SomeTrue
 
       if (containsBool(false, s1) &&
-          containsBool(false, s2) &&
-          containsBool(false, s3)) {
+        containsBool(false, s2) &&
+        containsBool(false, s3)) {
         Tracer.SomeFalse
       } else {
         None
@@ -228,9 +225,13 @@ object BroadcastTracer {
     }
 
     def sampleTrace(traceId: TraceId): Option[Boolean] = {
-      if (tracers.exists { t => containsBool(true, t.sampleTrace(traceId)) })
+      if (tracers.exists { t =>
+          containsBool(true, t.sampleTrace(traceId))
+        })
         Tracer.SomeTrue
-      else if (tracers.forall { t => containsBool(false, t.sampleTrace(traceId)) })
+      else if (tracers.forall { t =>
+          containsBool(false, t.sampleTrace(traceId))
+        })
         Tracer.SomeFalse
       else
         None
@@ -269,9 +270,7 @@ object DefaultTracer extends Tracer with Proxy {
  * A tracer that buffers each record in memory. These may then be
  * iterated over.
  */
-class BufferingTracer extends Tracer
-  with Iterable[Record]
-{
+class BufferingTracer extends Tracer with Iterable[Record] {
   private[this] var buf: List[Record] = Nil
 
   def record(record: Record): Unit = synchronized {

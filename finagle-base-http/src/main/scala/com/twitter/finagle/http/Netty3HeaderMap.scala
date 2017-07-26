@@ -31,12 +31,12 @@ private final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
   override def contains(key: String): Boolean =
     headers.contains(key)
 
-  def += (kv: (String, String)): this.type = {
+  def +=(kv: (String, String)): this.type = {
     set(kv._1, kv._2)
     this
   }
 
-  def -= (key: String): this.type = {
+  def -=(key: String): this.type = {
     headers.remove(key)
     this
   }
@@ -45,7 +45,7 @@ private final class Netty3HeaderMap(headers: HttpHeaders) extends HeaderMap {
     headers.getAll(key).asScala
 
   def set(k: String, v: String): HeaderMap = {
-    headers.set(k,v)
+    headers.set(k, v)
     this
   }
 

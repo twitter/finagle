@@ -27,6 +27,7 @@ import scala.util.control.NonFatal
  * the size of `window`.
  */
 private[finagle] object MuxFramer {
+
   /**
    * Defines mux framer keys and values exchanged as part of a
    * mux session header during initialization.
@@ -53,8 +54,7 @@ private[finagle] object MuxFramer {
         val size = ByteReader(buf).readIntBE()
         require(size > 0)
         size
-      }
-      finally br.close()
+      } finally br.close()
     }
   }
 
@@ -63,10 +63,7 @@ private[finagle] object MuxFramer {
    * `FragmentStream` carries some mutable state. In particular, `fragments` is a mutable
    * iterator and its contents should not be written concurrently.
    */
-  case class FragmentStream(
-    tag: Int,
-    fragments: Iterator[Buf],
-    writePromise: Promise[Unit])
+  case class FragmentStream(tag: Int, fragments: Iterator[Buf], writePromise: Promise[Unit])
 
   /**
    * Represents an interrupt for a stream.
@@ -86,8 +83,10 @@ private[finagle] object MuxFramer {
     writeWindowBytes: Option[Int],
     statsReceiver: StatsReceiver
   ): Transport[Message, Message] = new Transport[Message, Message] {
-    require(writeWindowBytes.isEmpty || writeWindowBytes.exists(_ > 0),
-      s"writeWindowBytes must be positive: $writeWindowBytes")
+    require(
+      writeWindowBytes.isEmpty || writeWindowBytes.exists(_ > 0),
+      s"writeWindowBytes must be positive: $writeWindowBytes"
+    )
 
     // stats for both read and write paths
     private[this] val pendingWriteStreams, pendingReadStreams = new AtomicInteger(0)
@@ -112,46 +111,48 @@ private[finagle] object MuxFramer {
     private[this] def fragment(msg: Message, maxSize: Int): Iterator[Buf] =
       if (msg.buf.length <= maxSize) {
         Iterator.single(Message.encode(msg))
-      } else new Iterator[Buf] {
-        // Create a mux header with the tag MSB set to 1. This signifies
-        // that the message is part of a set of fragments. Note that the
-        // decoder needs to respect this and not attempt to decode fragments
-        // past their headers.
-        private[this] val header: Array[Byte] = {
-          val tag = Message.Tags.setMsb(msg.tag)
-          Array[Byte](msg.typ,
-            (tag >> 16 & 0xff).toByte,
-            (tag >> 8 & 0xff).toByte,
-            (tag & 0xff).toByte
-          )
-        }
-
-        private[this] val headerBuf = Buf.ByteArray.Owned(header)
-        private[this] val buf = msg.buf
-        private[this] val readable = buf.length
-
-        @volatile private[this] var read = 0
-
-        def hasNext: Boolean = read < readable
-
-        def next(): Buf = {
-          if (!hasNext) throw new NoSuchElementException
-
-          if (readable - read <= maxSize) {
-            // Toggle the tag MSB in the header region which signifies
-            // the end of the sequence. Note, our header is denormalized
-            // across 4 bytes.
-            header(1) = (header(1) ^ (1 << 7)).toByte
+      } else
+        new Iterator[Buf] {
+          // Create a mux header with the tag MSB set to 1. This signifies
+          // that the message is part of a set of fragments. Note that the
+          // decoder needs to respect this and not attempt to decode fragments
+          // past their headers.
+          private[this] val header: Array[Byte] = {
+            val tag = Message.Tags.setMsb(msg.tag)
+            Array[Byte](
+              msg.typ,
+              (tag >> 16 & 0xff).toByte,
+              (tag >> 8 & 0xff).toByte,
+              (tag & 0xff).toByte
+            )
           }
-          // ensure we don't slice past the end of the msg.buf
-          val frameLength = math.min(readable - read, maxSize)
-          // note that the size of a frame is implicitly prepended by the transports
-          // pipeline and is derived from readable bytes.
-          val b = headerBuf.concat(buf.slice(from = read, until = read + frameLength))
-          read += frameLength
-          b
+
+          private[this] val headerBuf = Buf.ByteArray.Owned(header)
+          private[this] val buf = msg.buf
+          private[this] val readable = buf.length
+
+          @volatile private[this] var read = 0
+
+          def hasNext: Boolean = read < readable
+
+          def next(): Buf = {
+            if (!hasNext) throw new NoSuchElementException
+
+            if (readable - read <= maxSize) {
+              // Toggle the tag MSB in the header region which signifies
+              // the end of the sequence. Note, our header is denormalized
+              // across 4 bytes.
+              header(1) = (header(1) ^ (1 << 7)).toByte
+            }
+            // ensure we don't slice past the end of the msg.buf
+            val frameLength = math.min(readable - read, maxSize)
+            // note that the size of a frame is implicitly prepended by the transports
+            // pipeline and is derived from readable bytes.
+            val b = headerBuf.concat(buf.slice(from = read, until = read + frameLength))
+            read += frameLength
+            b
+          }
         }
-      }
 
     // Queues incoming streams which are dequeued and
     // flushed in `writeLoop`.
@@ -183,14 +184,15 @@ private[finagle] object MuxFramer {
      * of interrupts, for example.
      */
     private[this] def writeLoop(streams: Seq[FragmentStream]): Future[Unit] =
-      if (streams.isEmpty) newWriteLoop.sync() else {
+      if (streams.isEmpty) newWriteLoop.sync()
+      else {
         val round = streams.foldLeft[Seq[Future[FragmentStream]]](Nil) {
-          case (writes, s@FragmentStream(_, fragments, writep)) if fragments.hasNext =>
+          case (writes, s @ FragmentStream(_, fragments, writep)) if fragments.hasNext =>
             val buf = fragments.next()
             writeStreamBytes.add(buf.length)
             val write = trans.write(buf).transform {
               case Return(_) => Future.value(s)
-              case exc@Throw(_) =>
+              case exc @ Throw(_) =>
                 // `streams` should only contain streams where the
                 // the write promise is not complete because interrupted
                 // streams are filtered out before entering `writeLoop`.
@@ -212,24 +214,31 @@ private[finagle] object MuxFramer {
           // After each round, we choose between the following cases
           // (note, if more than one offer is available we choose the
           // first available w.r.t to the argument order):
-          Offer.prioritize[Unit](
-            // 1. Remove a stream which has been interrupted. We interrupt first
-            // to allow a backup in `writeq` to be drained on interrupts. Note that
-            // an interrupt before an element reaches the writeq is possible and
-            // handled in `write`.
-            interrupts.recv.map { case Interrupt(tag, exc) =>
-              writeLoop(nextStreams.foldLeft[Seq[FragmentStream]](Nil) {
-                case (ss, FragmentStream(`tag`, _, writep)) =>
-                  writep.update(Throw(exc))
-                  ss
-                case (ss, s) => s +: ss
-              })
-            },
-            // 2. Add an incoming stream.
-            writeq.recv.map { s => writeLoop(s +: nextStreams) },
-            // 3. Dispatch another round of writes.
-            unitOffer.map { _ => writeLoop(nextStreams) }
-          ).sync()
+          Offer
+            .prioritize[Unit](
+              // 1. Remove a stream which has been interrupted. We interrupt first
+              // to allow a backup in `writeq` to be drained on interrupts. Note that
+              // an interrupt before an element reaches the writeq is possible and
+              // handled in `write`.
+              interrupts.recv.map {
+                case Interrupt(tag, exc) =>
+                  writeLoop(nextStreams.foldLeft[Seq[FragmentStream]](Nil) {
+                    case (ss, FragmentStream(`tag`, _, writep)) =>
+                      writep.update(Throw(exc))
+                      ss
+                    case (ss, s) => s +: ss
+                  })
+              },
+              // 2. Add an incoming stream.
+              writeq.recv.map { s =>
+                writeLoop(s +: nextStreams)
+              },
+              // 3. Dispatch another round of writes.
+              unitOffer.map { _ =>
+                writeLoop(nextStreams)
+              }
+            )
+            .sync()
         }
       }
 
@@ -239,40 +248,42 @@ private[finagle] object MuxFramer {
     def write(msg: Message): Future[Unit] =
       if (writeWindowBytes.isEmpty) {
         trans.write(Message.encode(msg))
-      } else msg match {
-        // The sender of a Tdispatch has indicated it is no longer
-        // interested in the request, in which case, we need to make
-        // sure the Tdispatch is removed from the writeLoop if it
-        // exists.
-        case m@Message.Tdiscarded(tag, why) =>
-          val intr = interrupts ! Interrupt(tag, Failure(why))
-          intr.before { trans.write(Message.encode(m)) }
+      } else
+        msg match {
+          // The sender of a Tdispatch has indicated it is no longer
+          // interested in the request, in which case, we need to make
+          // sure the Tdispatch is removed from the writeLoop if it
+          // exists.
+          case m @ Message.Tdiscarded(tag, why) =>
+            val intr = interrupts ! Interrupt(tag, Failure(why))
+            intr.before { trans.write(Message.encode(m)) }
 
-        case m: Message =>
-          val p = new Promise[Unit]
-          p.setInterruptHandler { case NonFatal(exc) =>
-            // if an Rdispatch stream is interrupted, we send the
-            // receiver an `Rdiscarded` so they can safely relinquish
-            // any outstanding fragments and we remove the pending stream
-            // from our `writeLoop`. Note, `Tdiscarded` is handled above.
-            if (m.typ == Message.Types.Rdispatch) {
-              val intr = interrupts ! Interrupt(m.tag, exc)
-              // We make sure to interrupt before sending the Rdiscarded
-              // so we can sequence the discard relative to fragments sitting
-              // in the writeLoop.
-              intr.before { trans.write(Message.encode(Message.Rdiscarded(m.tag))) }
+          case m: Message =>
+            val p = new Promise[Unit]
+            p.setInterruptHandler {
+              case NonFatal(exc) =>
+                // if an Rdispatch stream is interrupted, we send the
+                // receiver an `Rdiscarded` so they can safely relinquish
+                // any outstanding fragments and we remove the pending stream
+                // from our `writeLoop`. Note, `Tdiscarded` is handled above.
+                if (m.typ == Message.Types.Rdispatch) {
+                  val intr = interrupts ! Interrupt(m.tag, exc)
+                  // We make sure to interrupt before sending the Rdiscarded
+                  // so we can sequence the discard relative to fragments sitting
+                  // in the writeLoop.
+                  intr.before { trans.write(Message.encode(Message.Rdiscarded(m.tag))) }
+                }
             }
-          }
-          pendingWriteStreams.incrementAndGet()
-          // There is no upper bound on writeq and elements can only
-          // be removed via interrupts. However, the transport can
-          // be bounded which is the underlying resource backing the
-          // writeq.
-          val nq = writeq ! FragmentStream(m.tag, fragment(m, writeWindowBytes.get), p)
-          nq.before(p).ensure {
-            pendingWriteStreams.decrementAndGet()
-          }
-      }
+            pendingWriteStreams.incrementAndGet()
+            // There is no upper bound on writeq and elements can only
+            // be removed via interrupts. However, the transport can
+            // be bounded which is the underlying resource backing the
+            // writeq.
+            val nq = writeq ! FragmentStream(m.tag, fragment(m, writeWindowBytes.get), p)
+            nq.before(p).ensure {
+              pendingWriteStreams.decrementAndGet()
+            }
+        }
 
     /**
      * Stores fully aggregated mux messages that were read from `trans`.
@@ -317,12 +328,14 @@ private[finagle] object MuxFramer {
           // a fully buffered message or the last fragment for `tag`.
           // We distinguish between the two by checking for the presence
           // of `tag` in `tags`.
-          val resBuf = if (!tags.contains(t)) buf else {
-            val head = buf.slice(0, 4)
-            val rest = tags(t)
-            val last = buf.slice(4, buf.length)
-            Buf(Seq(head, rest, last))
-          }
+          val resBuf =
+            if (!tags.contains(t)) buf
+            else {
+              val head = buf.slice(0, 4)
+              val rest = tags(t)
+              val last = buf.slice(4, buf.length)
+              Buf(Seq(head, rest, last))
+            }
           readq.offer(Message.decode(resBuf))
           tags - t
         }
@@ -332,7 +345,9 @@ private[finagle] object MuxFramer {
 
     // failures are pushed to the readq which are propagated to
     // the layers above.
-    readLoop(Map.empty).onFailure { exc => readq.fail(exc) }
+    readLoop(Map.empty).onFailure { exc =>
+      readq.fail(exc)
+    }
 
     def read(): Future[Message] = readq.poll()
 

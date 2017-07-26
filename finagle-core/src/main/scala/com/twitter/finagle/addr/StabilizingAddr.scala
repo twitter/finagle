@@ -8,7 +8,7 @@ import com.twitter.util.{Duration, Future, Time, Timer}
 import scala.collection.immutable.Queue
 
 private[finagle] object StabilizingAddr {
-  private[finagle/*(testing*/] object State extends Enumeration {
+  private[finagle /*(testing*/ ] object State extends Enumeration {
     type Health = Value
     // explicitly define intuitive ids as they
     // are exported for stats.
@@ -58,11 +58,12 @@ private[finagle] object StabilizingAddr {
      * transition resets the grace period.
      */
     def loop(
-        remq: Queue[(Address, Time)],
-        h: Health,
-        active: Set[Address],
-        needPush: Boolean,
-        srcAddr: Addr): Future[Unit] = {
+      remq: Queue[(Address, Time)],
+      h: Health,
+      active: Set[Address],
+      needPush: Boolean,
+      srcAddr: Addr
+    ): Future[Unit] = {
       nq = remq.size
       Offer.select(
         pulse map { newh =>
@@ -82,9 +83,8 @@ private[finagle] object StabilizingAddr {
               loop(remq, newh, active, needPush, srcAddr)
           }
         },
-
         addr map {
-          case addr@Addr.Bound(newSet, _) =>
+          case addr @ Addr.Bound(newSet, _) =>
             // Update our pending queue so that newly added
             // entries aren't later removed.
             var q = remq filter { case (e, _) => !(newSet contains e) }
@@ -105,7 +105,6 @@ private[finagle] object StabilizingAddr {
 
             loop(q, h, active, true, addr)
         },
-
         if (h != Healthy || remq.isEmpty) Offer.never
         else {
           // Note: remq is ordered by 'until' time.
@@ -114,8 +113,8 @@ private[finagle] object StabilizingAddr {
             loop(nextq, h, active - elem, true, srcAddr)
           }
         },
-
-        if (!needPush) Offer.never else {
+        if (!needPush) Offer.never
+        else {
           // We always bind if active is nonempty. Otherwise we
           // pass through the current active address.
           val attrs = srcAddr match {

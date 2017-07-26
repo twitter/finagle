@@ -37,17 +37,16 @@ import com.twitter.util._
  *      for more details.
  */
 private[finagle] class RequeueFilter[Req, Rep](
-    retryBudget: RetryBudget,
-    retryBackoffs: Stream[Duration],
-    statsReceiver: StatsReceiver,
-    canRetry: () => Boolean,
-    maxRetriesPerReq: Double,
-    timer: Timer)
-  extends SimpleFilter[Req, Rep] {
+  retryBudget: RetryBudget,
+  retryBackoffs: Stream[Duration],
+  statsReceiver: StatsReceiver,
+  canRetry: () => Boolean,
+  maxRetriesPerReq: Double,
+  timer: Timer
+) extends SimpleFilter[Req, Rep] {
   import RequeueFilter.Requeueable
 
-  require(maxRetriesPerReq >= 0,
-    s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
+  require(maxRetriesPerReq >= 0, s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
 
   private[this] val requeueCounter = statsReceiver.counter("requeues")
   private[this] val budgetExhaustCounter = statsReceiver.counter("budget_exhausted")
@@ -72,7 +71,7 @@ private[finagle] class RequeueFilter[Req, Rep](
   ): Future[Rep] = {
     Contexts.broadcast.let(context.Retries, context.Retries(attempt)) {
       service(req).transform {
-        case t@Throw(Requeueable(_)) =>
+        case t @ Throw(Requeueable(_)) =>
           if (!canRetry()) {
             canNotRetryCounter.incr()
             responseFuture(attempt, t)
@@ -84,10 +83,12 @@ private[finagle] class RequeueFilter[Req, Rep](
                 applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
               case delay #:: rest =>
                 // Delay and then retry.
-                timer.doLater(delay) {
-                  requeueCounter.incr()
-                  applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
-                }.flatten
+                timer
+                  .doLater(delay) {
+                    requeueCounter.incr()
+                    applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
+                  }
+                  .flatten
               case _ =>
                 // Schedule has run out of entries. Budget is empty.
                 budgetExhaustCounter.incr()

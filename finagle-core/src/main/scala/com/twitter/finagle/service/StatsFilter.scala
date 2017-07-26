@@ -2,7 +2,11 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
+import com.twitter.finagle.stats.{
+  ExceptionStatsHandler,
+  MultiCategorizingExceptionStatsHandler,
+  StatsReceiver
+}
 import com.twitter.util._
 import java.util.concurrent.atomic.LongAdder
 import java.util.concurrent.TimeUnit
@@ -56,7 +60,8 @@ object StatsFilter {
   /** Basic categorizer with all exceptions under 'failures'. */
   val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
     mkFlags = FailureFlags.flagsOf,
-    mkSource = SourcedException.unapply) {
+    mkSource = SourcedException.unapply
+  ) {
 
     override def toString: String = "DefaultCategorizer"
   }
@@ -67,8 +72,13 @@ object StatsFilter {
   def typeAgnostic(
     statsReceiver: StatsReceiver,
     exceptionStatsHandler: ExceptionStatsHandler
-  ): TypeAgnostic = typeAgnostic(
-    statsReceiver, ResponseClassifier.Default, exceptionStatsHandler, TimeUnit.MILLISECONDS)
+  ): TypeAgnostic =
+    typeAgnostic(
+      statsReceiver,
+      ResponseClassifier.Default,
+      exceptionStatsHandler,
+      TimeUnit.MILLISECONDS
+    )
 
   def typeAgnostic(
     statsReceiver: StatsReceiver,
@@ -77,8 +87,7 @@ object StatsFilter {
     timeUnit: TimeUnit
   ): TypeAgnostic = new TypeAgnostic {
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
-      new StatsFilter[Req, Rep](
-        statsReceiver, responseClassifier, exceptionStatsHandler, timeUnit)
+      new StatsFilter[Req, Rep](statsReceiver, responseClassifier, exceptionStatsHandler, timeUnit)
   }
 
 }
@@ -105,12 +114,11 @@ object StatsFilter {
  * request failures.
  */
 class StatsFilter[Req, Rep](
-    statsReceiver: StatsReceiver,
-    responseClassifier: ResponseClassifier,
-    exceptionStatsHandler: ExceptionStatsHandler,
-    timeUnit: TimeUnit)
-  extends SimpleFilter[Req, Rep]
-{
+  statsReceiver: StatsReceiver,
+  responseClassifier: ResponseClassifier,
+  exceptionStatsHandler: ExceptionStatsHandler,
+  timeUnit: TimeUnit
+) extends SimpleFilter[Req, Rep] {
   import StatsFilter.SyntheticException
 
   def this(
@@ -162,8 +170,9 @@ class StatsFilter[Req, Rep](
 
     val result = try {
       service(request)
-    } catch { case NonFatal(e) =>
-      Future.exception(e)
+    } catch {
+      case NonFatal(e) =>
+        Future.exception(e)
     }
 
     result.respond { response =>
@@ -209,10 +218,8 @@ private[finagle] object StatsServiceFactory {
     }
 }
 
-class StatsServiceFactory[Req, Rep](
-    factory: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver)
-  extends ServiceFactoryProxy[Req, Rep](factory) {
+class StatsServiceFactory[Req, Rep](factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
+    extends ServiceFactoryProxy[Req, Rep](factory) {
   private[this] val availableGauge = statsReceiver.addGauge("available") {
     if (isAvailable) 1F else 0F
   }

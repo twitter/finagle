@@ -2,7 +2,11 @@ package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
-import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  MultiCategorizingExceptionStatsHandler,
+  NullStatsReceiver,
+  StatsReceiver
+}
 import com.twitter.finagle.util._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -35,15 +39,15 @@ import java.util.concurrent.atomic.AtomicReference
  * increases.
  */
 private class ThresholdFailureDetector(
-    ping: () => Future[Unit],
-    minPeriod: Duration = 5.seconds,
-    threshold: Double = 2,
-    windowSize: Int = 100,
-    closeTimeout: Duration = 4.seconds,
-    nanoTime: () => Long = System.nanoTime,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    implicit val timer: Timer = DefaultTimer)
-  extends FailureDetector {
+  ping: () => Future[Unit],
+  minPeriod: Duration = 5.seconds,
+  threshold: Double = 2,
+  windowSize: Int = 100,
+  closeTimeout: Duration = 4.seconds,
+  nanoTime: () => Long = System.nanoTime,
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  implicit val timer: Timer = DefaultTimer
+) extends FailureDetector {
   require(windowSize > 0)
   private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
   private[this] val pingLatencyStat = statsReceiver.stat("ping_latency_us")
@@ -60,9 +64,10 @@ private class ThresholdFailureDetector(
   private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Open)
 
   private[this] val onBusyTimeout: Throwable => Unit =
-    x => x match {
-      case _: TimeoutException => markBusy()
-      case _ =>
+    x =>
+      x match {
+        case _: TimeoutException => markBusy()
+        case _ =>
     }
 
   def status: Status = state.get
@@ -99,7 +104,7 @@ private class ThresholdFailureDetector(
     p.within(closeTimeout).transform {
       case Return(_) =>
         val rtt = nanoTime() - timestampNs
-        pingLatencyStat.add(rtt.toFloat/1000)
+        pingLatencyStat.add(rtt.toFloat / 1000)
         maxPingNs.add(rtt)
         markOpen()
         Future.sleep(minPeriod - rtt.nanoseconds) before loop()

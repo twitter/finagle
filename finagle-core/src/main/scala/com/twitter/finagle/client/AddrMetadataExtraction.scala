@@ -31,7 +31,8 @@ object AddrMetadataExtraction {
       val description = "May extract metadata from the destination address and name"
       val parameters = Seq(
         implicitly[Stack.Param[LoadBalancerFactory.Dest]],
-        implicitly[Stack.Param[BindingFactory.Dest]])
+        implicitly[Stack.Param[BindingFactory.Dest]]
+      )
 
       def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val LoadBalancerFactory.Dest(addr) = params[LoadBalancerFactory.Dest]

@@ -62,7 +62,8 @@ object MethodBuilder {
       dest,
       stack,
       params,
-      Config.create(thriftMuxClient.stack, params))
+      Config.create(thriftMuxClient.stack, params)
+    )
     new MethodBuilder(thriftMuxClient, mb)
   }
 
@@ -225,9 +226,9 @@ object MethodBuilder {
  * @see The [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]].
  */
 class MethodBuilder(
-    rich: ThriftRichClient,
-    mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]])
-  extends client.MethodBuilderScaladoc[MethodBuilder] {
+  rich: ThriftRichClient,
+  mb: client.MethodBuilder[ThriftClientRequest, Array[Byte]]
+) extends client.MethodBuilderScaladoc[MethodBuilder] {
 
   def withTimeoutTotal(howLong: Duration): MethodBuilder =
     new MethodBuilder(rich, mb.withTimeout.total(howLong))

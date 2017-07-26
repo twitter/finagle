@@ -15,8 +15,7 @@ class ConstantService[Req, Rep](reply: Future[Rep]) extends Service[Req, Rep] {
  * A [[com.twitter.finagle.Service]] that fails with a constant Throwable.
  */
 class FailedService(failure: Throwable)
-  extends ConstantService[Any, Nothing](Future.exception(failure))
-{
+    extends ConstantService[Any, Nothing](Future.exception(failure)) {
   override def status: Status = Status.Closed
 }
 
@@ -24,5 +23,4 @@ class FailedService(failure: Throwable)
  * A static [[FailedService]] object.
  */
 object NilService
-  extends FailedService(
-    new Exception("dispatch to invalid service") with NoStackTrace)
+    extends FailedService(new Exception("dispatch to invalid service") with NoStackTrace)

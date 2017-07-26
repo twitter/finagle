@@ -27,10 +27,11 @@ import scala.util.control.NonFatal
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
-object statsFilter extends GlobalFlag[String](
-  "",
-  "Comma-separated regexes that indicate which metrics to filter out")
-
+object statsFilter
+    extends GlobalFlag[String](
+      "",
+      "Comma-separated regexes that indicate which metrics to filter out"
+    )
 
 /**
  * Comma-separated blacklist of files. Each file may have multiple filters,
@@ -38,15 +39,18 @@ object statsFilter extends GlobalFlag[String](
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
-object statsFilterFile extends GlobalFlag[Set[File]](
-  Set.empty[File],
-  "Comma separated files of newline separated regexes that indicate which metrics to filter out")
+object statsFilterFile
+    extends GlobalFlag[Set[File]](
+      Set.empty[File],
+      "Comma separated files of newline separated regexes that indicate which metrics to filter out"
+    )
 
-object useCounterDeltas extends GlobalFlag[Boolean](
-  false,
-  "Return deltas for counters instead of absolute values. " +
-    "Provides compatibility with the behavior from 'Ostrich'"
-)
+object useCounterDeltas
+    extends GlobalFlag[Boolean](
+      false,
+      "Return deltas for counters instead of absolute values. " +
+        "Provides compatibility with the behavior from 'Ostrich'"
+    )
 
 object JsonExporter {
 
@@ -56,10 +60,7 @@ object JsonExporter {
   private val log = Logger.get()
 }
 
-class JsonExporter(
-    registry: Metrics,
-    timer: Timer)
-  extends Service[Request, Response] { self =>
+class JsonExporter(registry: Metrics, timer: Timer) extends Service[Request, Response] { self =>
 
   import JsonExporter._
 
@@ -93,9 +94,8 @@ class JsonExporter(
 
   def apply(request: Request): Future[Response] = {
     if (registryLoaded.compareAndSet(false, true)) {
-      GlobalRegistry.get.put(
-        Seq("stats", "commons_metrics", "counters_latched"),
-        useCounterDeltas().toString)
+      GlobalRegistry.get
+        .put(Seq("stats", "commons_metrics", "counters_latched"), useCounterDeltas().toString)
     }
 
     val response = Response()
@@ -109,8 +109,12 @@ class JsonExporter(
       if (vals.isEmpty) {
         false
       } else {
-        if (vals.exists(_ == "60")) true else {
-          log.warning(s"${getClass.getName} request (from ${request.userAgent.getOrElse("")} ${request.remoteSocketAddress}) ignored due to unsupported period: '${vals.mkString(",")}'")
+        if (vals.exists(_ == "60")) true
+        else {
+          log.warning(
+            s"${getClass.getName} request (from ${request.userAgent.getOrElse("")} ${request.remoteSocketAddress}) ignored due to unsupported period: '${vals
+              .mkString(",")}'"
+          )
           false
         }
       }
@@ -129,8 +133,9 @@ class JsonExporter(
   ): Boolean = {
     val vals = params.getAll(name)
     if (vals.nonEmpty)
-      vals.exists { v => v == "1" || v == "true" }
-    else
+      vals.exists { v =>
+        v == "1" || v == "true"
+      } else
       default
   }
 
@@ -153,7 +158,8 @@ class JsonExporter(
     filtered: Boolean,
     counterDeltasOn: Boolean = false
   ): String = {
-    val gauges = try registry.sampleGauges().asScala catch {
+    val gauges = try registry.sampleGauges().asScala
+    catch {
       case NonFatal(e) =>
         // because gauges run arbitrary user code, we want to protect ourselves here.
         // while the underlying registry should protect against individual misbehaving

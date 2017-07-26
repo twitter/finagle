@@ -43,16 +43,17 @@ object ExpiringService {
 
         (idle, life) match {
           case (None, None) => next
-          case _ => new ServiceFactoryProxy(next) {
-            override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-              self(conn).map { service =>
-                new ExpiringService(service, idle, life, timer, statsReceiver) {
-                  def onExpire(): Unit = {
-                    conn.close()
+          case _ =>
+            new ServiceFactoryProxy(next) {
+              override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+                self(conn).map { service =>
+                  new ExpiringService(service, idle, life, timer, statsReceiver) {
+                    def onExpire(): Unit = {
+                      conn.close()
+                    }
                   }
                 }
-              }
-          }
+            }
         }
       }
     }
@@ -81,12 +82,13 @@ object ExpiringService {
 
         (idle, life) match {
           case (None, None) => next
-          case _ => next.map { service =>
-            val closeOnRelease = new CloseOnReleaseService(service)
-            new ExpiringService(closeOnRelease, idle, life, timer, statsReceiver) {
-              def onExpire(): Unit = { closeOnRelease.close() }
+          case _ =>
+            next.map { service =>
+              val closeOnRelease = new CloseOnReleaseService(service)
+              new ExpiringService(closeOnRelease, idle, life, timer, statsReceiver) {
+                def onExpire(): Unit = { closeOnRelease.close() }
+              }
             }
-          }
         }
       }
     }
@@ -107,8 +109,7 @@ abstract class ExpiringService[Req, Rep](
   maxLifeTime: Option[Duration],
   timer: Timer,
   stats: StatsReceiver
-) extends ServiceProxy[Req, Rep](self)
-{
+) extends ServiceProxy[Req, Rep](self) {
   private[this] var active = true
   private[this] val latch = new AsyncLatch
 
@@ -120,9 +121,11 @@ abstract class ExpiringService[Req, Rep](
   private[this] val didExpire = new Promise[Unit]
 
   private[this] def startTimer(duration: Option[Duration], counter: Counter) =
-    duration.map { t: Duration =>
-      timer.schedule(t.fromNow) { expire(counter) }
-    }.getOrElse { NullTimerTask }
+    duration
+      .map { t: Duration =>
+        timer.schedule(t.fromNow) { expire(counter) }
+      }
+      .getOrElse { NullTimerTask }
 
   private[this] def expire(counter: Counter) {
     if (deactivate()) {
@@ -134,7 +137,8 @@ abstract class ExpiringService[Req, Rep](
   }
 
   private[this] def deactivate(): Boolean = synchronized {
-    if (!active) false else {
+    if (!active) false
+    else {
       active = false
       idleTask.cancel()
       lifeTask.cancel()
@@ -155,7 +159,8 @@ abstract class ExpiringService[Req, Rep](
 
   override def apply(req: Req): Future[Rep] = {
     val decrLatch = synchronized {
-      if (!active) false else {
+      if (!active) false
+      else {
         if (latch.incr() == 1) {
           idleTask.cancel()
           idleTask = NullTimerTask

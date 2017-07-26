@@ -2,7 +2,12 @@ package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.ProxyConnectException
 import com.twitter.finagle.netty4.channel.ConnectPromiseDelayListeners
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.channel.{
+  Channel,
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPromise
+}
 import io.netty.handler.proxy.ProxyHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -23,9 +28,10 @@ import java.net.{InetSocketAddress, SocketAddress}
  *       is placed before.
  */
 private[netty4] class Netty4ProxyConnectHandler(
-    proxyHandler: ProxyHandler,
-    bypassLocalhostConnections: Boolean = false)
-  extends ChannelOutboundHandlerAdapter with ConnectPromiseDelayListeners { self =>
+  proxyHandler: ProxyHandler,
+  bypassLocalhostConnections: Boolean = false
+) extends ChannelOutboundHandlerAdapter
+    with ConnectPromiseDelayListeners { self =>
 
   private[this] final val proxyCodecKey: String = "netty4ProxyCodec"
 
@@ -81,21 +87,21 @@ private[netty4] class Netty4ProxyConnectHandler(
     local: SocketAddress,
     promise: ChannelPromise
   ): Unit = remote match {
-      case isa: InetSocketAddress if shouldBypassProxy(isa) =>
-        // We're bypassing proxies for any localhost connections.
-        ctx.pipeline().remove(self)
-        ctx.connect(remote, local, promise)
+    case isa: InetSocketAddress if shouldBypassProxy(isa) =>
+      // We're bypassing proxies for any localhost connections.
+      ctx.pipeline().remove(self)
+      ctx.connect(remote, local, promise)
 
-      case isa: InetSocketAddress if !isa.isUnresolved =>
-        // We're replacing resolved InetSocketAddress with unresolved one such that
-        // Netty's `HttpProxyHandler` will prefer hostname over the IP address as a destination
-        // for a proxy server. This is a safer way to do HTTP proxy handshakes since not
-        // all HTTP proxy servers allow for IP addresses to be passed as destinations/host headers.
-        val unresolvedRemote = InetSocketAddress.createUnresolved(isa.getHostName, isa.getPort)
-        connectThroughProxy(ctx, unresolvedRemote, local, promise)
+    case isa: InetSocketAddress if !isa.isUnresolved =>
+      // We're replacing resolved InetSocketAddress with unresolved one such that
+      // Netty's `HttpProxyHandler` will prefer hostname over the IP address as a destination
+      // for a proxy server. This is a safer way to do HTTP proxy handshakes since not
+      // all HTTP proxy servers allow for IP addresses to be passed as destinations/host headers.
+      val unresolvedRemote = InetSocketAddress.createUnresolved(isa.getHostName, isa.getPort)
+      connectThroughProxy(ctx, unresolvedRemote, local, promise)
 
-      case _ =>
-        connectThroughProxy(ctx, remote, local, promise)
+    case _ =>
+      connectThroughProxy(ctx, remote, local, promise)
   }
 
   // We don't override either `exceptionCaught` or `channelInactive` here since `ProxyHandler`

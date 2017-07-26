@@ -18,8 +18,11 @@ package object http {
   private[finagle] val Toggles: ToggleMap =
     StandardToggleMap(LibraryName, DefaultStatsReceiver)
 
-
-  object serverErrorsAsFailures extends GlobalFlag(true, "Treat responses with status codes in " +
-    "the 500s as failures. See " +
-    "`com.twitter.finagle.http.service.HttpResponseClassifier.ServerErrorsAsFailures`")
+  object serverErrorsAsFailures
+      extends GlobalFlag(
+        true,
+        "Treat responses with status codes in " +
+          "the 500s as failures. See " +
+          "`com.twitter.finagle.http.service.HttpResponseClassifier.ServerErrorsAsFailures`"
+      )
 }

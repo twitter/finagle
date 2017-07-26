@@ -78,16 +78,14 @@ object Drv {
       prob(s) = p(s)
       alias(s) = l
 
-      p(l) = (p(s)+p(l))-1D // Same as p(l)-(1-p(s)), but more stable
+      p(l) = (p(s) + p(l)) - 1D // Same as p(l)-(1-p(s)), but more stable
       if (p(l) < 1) small.enqueue(l)
       else large.enqueue(l)
     }
 
-    while (large.nonEmpty)
-      prob(large.dequeue()) = 1
+    while (large.nonEmpty) prob(large.dequeue()) = 1
 
-    while (small.nonEmpty)
-      prob(small.dequeue()) = 1
+    while (small.nonEmpty) prob(small.dequeue()) = 1
 
     Aliased(alias, prob)
   }
@@ -100,7 +98,7 @@ object Drv {
    */
   def apply(dist: Seq[Double]): Drv = {
     val sum = dist.sum
-    assert(dist.size == 0 || (sum < 1+ε && sum > 1-ε), "Bad sum %0.001f".format(sum))
+    assert(dist.size == 0 || (sum < 1 + ε && sum > 1 - ε), "Bad sum %0.001f".format(sum))
     newVose(dist)
   }
 
@@ -111,8 +109,8 @@ object Drv {
   def fromWeights(weights: Seq[Double]): Drv = {
     val sum = weights.sum
     if (sum == 0)
-      Drv(Seq.fill(weights.size) { 1D/weights.size })
+      Drv(Seq.fill(weights.size) { 1D / weights.size })
     else
-      Drv(weights map (_/sum))
+      Drv(weights map (_ / sum))
   }
 }

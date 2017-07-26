@@ -15,16 +15,17 @@ private[twitter] case class ServersetPath(
   zkHosts: String,
   zkPath: Path,
   endpoint: Option[String],
-  shardId: Option[Int])
+  shardId: Option[Int]
+)
 
-/** 
+/**
  * Parse serverset paths of the form:
  *
  *   /zkHosts/zkPath(:endpoint)?(#shardId)?
  */
 private[twitter] object ServersetPath {
   def of(path: Path): Option[ServersetPath] = path match {
-    case Path.Utf8(zkHosts, rest@_*) =>
+    case Path.Utf8(zkHosts, rest @ _*) =>
       rest.lastOption match {
         case Some(JobSyntax(name, endpoint, shardId)) =>
           val zkPath = Path.Utf8(rest.init: _*) ++ Path.Utf8(name)
@@ -45,11 +46,12 @@ private[twitter] object ServersetPath {
 
     def lex(s: String): Seq[Token] = {
       s.foldLeft(List.empty[Token]) {
-        case (ts, ':') => Colon :: ts
-        case (ts, '#') => NumberSign :: ts
-        case (Elem(s) :: ts, c) => Elem(s+c) :: ts
-        case (ts, c) => Elem(c.toString) :: ts
-      }.reverse
+          case (ts, ':') => Colon :: ts
+          case (ts, '#') => NumberSign :: ts
+          case (Elem(s) :: ts, c) => Elem(s + c) :: ts
+          case (ts, c) => Elem(c.toString) :: ts
+        }
+        .reverse
     }
 
     /**

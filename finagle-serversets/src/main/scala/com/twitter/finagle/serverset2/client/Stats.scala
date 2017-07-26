@@ -11,12 +11,15 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
     lazy val success = stats.counter(s"${name}_successes")
 
     def apply[T](result: Future[T]): Future[T] = {
-      Stat.timeFuture(stats.stat(s"${name}_latency_ms"))(result).onSuccess { _ =>
-        success.incr()
-      }.onFailure {
-        case ke: KeeperException => stats.counter(ke.name).incr()
-        case _ => failure.incr()
-      }
+      Stat
+        .timeFuture(stats.stat(s"${name}_latency_ms"))(result)
+        .onSuccess { _ =>
+          success.incr()
+        }
+        .onFailure {
+          case ke: KeeperException => stats.counter(ke.name).incr()
+          case _ => failure.incr()
+        }
       result
     }
   }
@@ -56,12 +59,15 @@ private[serverset2] trait StatsReader extends StatsClient with ZooKeeperReader {
   protected val underlying: ZooKeeperReader
 
   def exists(path: String): Future[Option[Data.Stat]] = ReadFilter(underlying.exists(path))
-  def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] = WatchFilter(underlying.existsWatch(path))
+  def existsWatch(path: String): Future[Watched[Option[Data.Stat]]] =
+    WatchFilter(underlying.existsWatch(path))
   def getData(path: String): Future[Node.Data] = ReadFilter(underlying.getData(path))
-  def getDataWatch(path: String): Future[Watched[Node.Data]] = WatchFilter(underlying.getDataWatch(path))
+  def getDataWatch(path: String): Future[Watched[Node.Data]] =
+    WatchFilter(underlying.getDataWatch(path))
   def getACL(path: String): Future[Node.ACL] = ReadFilter(underlying.getACL(path))
   def getChildren(path: String): Future[Node.Children] = ReadFilter(underlying.getChildren(path))
-  def getChildrenWatch(path: String): Future[Watched[Node.Children]] = WatchFilter(underlying.getChildrenWatch(path))
+  def getChildrenWatch(path: String): Future[Watched[Node.Children]] =
+    WatchFilter(underlying.getChildrenWatch(path))
 
   def sync(path: String): Future[Unit] = ReadFilter(underlying.sync(path))
 }
@@ -76,11 +82,13 @@ private[serverset2] trait StatsWriter extends StatsClient with ZooKeeperWriter {
     createMode: CreateMode
   ): Future[String] = createMode match {
     case CreateMode.Ephemeral => EphemeralFilter(underlying.create(path, data, acl, createMode))
-    case CreateMode.EphemeralSequential => EphemeralFilter(underlying.create(path, data, acl, createMode))
+    case CreateMode.EphemeralSequential =>
+      EphemeralFilter(underlying.create(path, data, acl, createMode))
     case _ => WriteFilter(underlying.create(path, data, acl, createMode))
   }
 
-  def delete(path: String, version: Option[Int]): Future[Unit] = WriteFilter(underlying.delete(path, version))
+  def delete(path: String, version: Option[Int]): Future[Unit] =
+    WriteFilter(underlying.delete(path, version))
 
   def setACL(path: String, acl: Seq[Data.ACL], version: Option[Int]): Future[Data.Stat] =
     WriteFilter(underlying.setACL(path, acl, version))
@@ -99,7 +107,11 @@ private[serverset2] trait StatsRW extends ZooKeeperRW with StatsReader with Stat
   protected val underlying: ZooKeeperRW
 }
 
-private[serverset2] trait StatsRWMulti extends ZooKeeperRWMulti with StatsReader with StatsWriter with StatsMulti {
+private[serverset2] trait StatsRWMulti
+    extends ZooKeeperRWMulti
+    with StatsReader
+    with StatsWriter
+    with StatsMulti {
   protected val underlying: ZooKeeperRWMulti
 }
 

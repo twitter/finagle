@@ -87,17 +87,19 @@ object exp {
     }
   }
 
-  private[finagle] val Netty4HttpTransporter: Stack.Params => SocketAddress => Transporter[Any, Any] =
+  private[finagle] val Netty4HttpTransporter
+    : Stack.Params => SocketAddress => Transporter[Any, Any] =
     (params: Stack.Params) =>
-      (addr: SocketAddress) => Netty4Transporter.raw(
-        pipelineInit = ClientPipelineInit(params),
-        addr = addr,
-        params = params
-      )
+      (addr: SocketAddress) =>
+        Netty4Transporter.raw(
+          pipelineInit = ClientPipelineInit(params),
+          addr = addr,
+          params = params
+    )
 
   private[finagle] val ClientPipelineInit: Stack.Params => ChannelPipeline => Unit = {
-    params: Stack.Params =>
-      pipeline: ChannelPipeline => {
+    params: Stack.Params => pipeline: ChannelPipeline =>
+      {
         val maxChunkSize = params[http.param.MaxChunkSize].size
         val maxHeaderSize = params[http.param.MaxHeaderSize].size
         val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
@@ -122,7 +124,6 @@ object exp {
     val log = params[Logger].log
 
     { pipeline: ChannelPipeline =>
-
       compressionLevel match {
         case lvl if lvl > 0 =>
           pipeline.addLast("httpCompressor", new NettyHttp.HttpContentCompressor(lvl))
@@ -144,8 +145,7 @@ object exp {
         pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
         pipeline.addLast("expectContinue", new NettyHttp.HttpServerExpectContinueHandler)
         pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxRequestSize))
-      }
-      else
+      } else
         pipeline.addLast(
           "httpDechunker",
           new NettyHttp.HttpObjectAggregator(maxRequestSize.inBytes.toInt)
@@ -162,8 +162,8 @@ object exp {
   }
 
   private[finagle] val ServerPipelineInit: Stack.Params => ChannelPipeline => Unit = {
-    params: Stack.Params =>
-      pipeline: ChannelPipeline => {
+    params: Stack.Params => pipeline: ChannelPipeline =>
+      {
         val maxInitialLineSize = params[http.param.MaxInitialLineSize].size
         val maxHeaderSize = params[http.param.MaxHeaderSize].size
         val maxRequestSize = params[http.param.MaxRequestSize].size
@@ -180,9 +180,10 @@ object exp {
       }
   }
 
-  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any] = (params: Stack.Params) =>
-    Netty4Listener[Any, Any](
-      params = params,
-      pipelineInit = ServerPipelineInit(params)
+  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any] =
+    (params: Stack.Params) =>
+      Netty4Listener[Any, Any](
+        params = params,
+        pipelineInit = ServerPipelineInit(params)
     )
 }

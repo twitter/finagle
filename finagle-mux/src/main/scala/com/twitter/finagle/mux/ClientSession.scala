@@ -52,11 +52,11 @@ import java.util.logging.{Level, Logger}
  * @param sr The `StatsReceiver` which the session uses to export internal stats.
  */
 private[twitter] class ClientSession(
-    trans: Transport[Message, Message],
-    detectorConfig: FailureDetector.Config,
-    name: String,
-    sr: StatsReceiver)
-  extends Transport[Message, Message] {
+  trans: Transport[Message, Message],
+  detectorConfig: FailureDetector.Config,
+  name: String,
+  sr: StatsReceiver
+) extends Transport[Message, Message] {
   import ClientSession._
 
   // Maintain the sessions's state, whose access is mediated by `lock`
@@ -70,7 +70,8 @@ private[twitter] class ClientSession(
 
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] def safeLog(msg: String, level: Level = Level.INFO): Unit =
-    try log.log(level, msg) catch {
+    try log.log(level, msg)
+    catch {
       case _: Throwable =>
     }
 
@@ -97,12 +98,14 @@ private[twitter] class ClientSession(
 
       val writeStamp = lock.writeLockInterruptibly()
       try {
-        state = if (outstanding.get() > 0) Draining else {
-          if (log.isLoggable(Level.FINE))
-            safeLog(s"Finished draining a connection to $name", Level.FINE)
-          drainedCounter.incr()
-          Drained
-        }
+        state =
+          if (outstanding.get() > 0) Draining
+          else {
+            if (log.isLoggable(Level.FINE))
+              safeLog(s"Finished draining a connection to $name", Level.FINE)
+            drainedCounter.incr()
+            Drained
+          }
         trans.write(Message.Rdrain(tag))
       } finally lock.unlockWrite(writeStamp)
 
@@ -115,8 +118,8 @@ private[twitter] class ClientSession(
             safeLog(s"leased for ${millis.milliseconds} to $name", Level.FINE)
           leaseCounter.incr()
         case Draining | Drained =>
-          // Ignore the lease if we're closed, since these are anyway
-          // a irrecoverable states.
+        // Ignore the lease if we're closed, since these are anyway
+        // a irrecoverable states.
       } finally lock.unlockWrite(writeStamp)
 
     case Message.Tping(tag) => trans.write(Message.Rping(tag))
@@ -168,8 +171,8 @@ private[twitter] class ClientSession(
   }
 
   private[this] def processRead(msg: Message) = msg match {
-    case m@Message.Rmessage(_) => processRmsg(m)
-    case m@Message.ControlMessage(_) => processControlMsg(m)
+    case m @ Message.Rmessage(_) => processRmsg(m)
+    case m @ Message.ControlMessage(_) => processControlMsg(m)
     case _ => // do nothing.
   }
 
@@ -200,11 +203,11 @@ private[twitter] class ClientSession(
     }
   }
 
-  private[this] val detector = FailureDetector(
-    detectorConfig, ping, sr.scope("failuredetector"))
+  private[this] val detector = FailureDetector(detectorConfig, ping, sr.scope("failuredetector"))
 
   override def status: Status =
-    Status.worst(detector.status,
+    Status.worst(
+      detector.status,
       trans.status match {
         case Status.Closed => Status.Closed
         case Status.Busy => Status.Busy
@@ -213,7 +216,7 @@ private[twitter] class ClientSession(
           try state match {
             case Draining => Status.Busy
             case Drained => Status.Closed
-            case leased@Leasing(_) if leased.expired => Status.Busy
+            case leased @ Leasing(_) if leased.expired => Status.Busy
             case Leasing(_) | Dispatching => Status.Open
           } finally lock.unlockRead(readStamp)
       }
@@ -231,8 +234,8 @@ private[twitter] class ClientSession(
 }
 
 private object ClientSession {
-  val FuturePingNack: Future[Nothing] = Future.exception(Failure(
-    "A ping is already outstanding on this session."))
+  val FuturePingNack: Future[Nothing] =
+    Future.exception(Failure("A ping is already outstanding on this session."))
 
   sealed trait State
   case object Dispatching extends State

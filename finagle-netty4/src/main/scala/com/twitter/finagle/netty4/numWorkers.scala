@@ -9,4 +9,5 @@ import com.twitter.jvm.numProcs
  * @note For the default value, we set a floor of 8 workers so in the case of constrained
  *       environments we don't end up with detrimentally small worker pool sizes.
  */
-object numWorkers extends GlobalFlag(math.max(8, (numProcs() * 2).ceil.toInt), "number of netty4 worker threads")
+object numWorkers
+    extends GlobalFlag(math.max(8, (numProcs() * 2).ceil.toInt), "number of netty4 worker threads")

@@ -20,8 +20,7 @@ private[finagle] object ChannelRequestStatsHandler {
  */
 @Sharable
 private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
-  extends ChannelInboundHandlerAdapter
-{
+    extends ChannelInboundHandlerAdapter {
   import ChannelRequestStatsHandler.ConnectionRequestsKey
 
   private[this] val requestCount = statsReceiver.stat("connection_requests")

@@ -13,9 +13,11 @@ private[netty4] object Allocator {
   // See CSL-3027 for more details.
   val Unpooled =
     if (trackReferenceLeaks.enabled) LeakDetectingAllocator
-    else new UnpooledByteBufAllocator(/* preferDirect */ false, /* disableLeakDetector */ true)
+    else new UnpooledByteBufAllocator( /* preferDirect */ false, /* disableLeakDetector */ true)
 
-  implicit val allocatorParam: Stack.Param[Allocator] = Stack.Param(Allocator(
-    if (usePooling()) PooledByteBufAllocator.DEFAULT else Unpooled
-  ))
+  implicit val allocatorParam: Stack.Param[Allocator] = Stack.Param(
+    Allocator(
+      if (usePooling()) PooledByteBufAllocator.DEFAULT else Unpooled
+    )
+  )
 }

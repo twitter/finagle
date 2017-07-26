@@ -22,9 +22,9 @@ import java.util.concurrent.atomic.AtomicReference
  * Instead, it speaks http/2 from birth.
  */
 private[http2] class PriorKnowledgeTransporter(
-    underlying: Transporter[Any, Any],
-    params: Stack.Params)
-  extends Transporter[Any, Any] { self =>
+  underlying: Transporter[Any, Any],
+  params: Stack.Params
+) extends Transporter[Any, Any] { self =>
 
   private[this] val log = Logger.get()
   private[this] val Stats(statsReceiver) = params[Stats]
@@ -75,14 +75,15 @@ private[http2] class PriorKnowledgeTransporter(
   }
 
   def apply(): Future[Transport[Any, Any]] = getMulti().flatMap { multi =>
-    new ConstFuture(multi().map(Http2Transporter.unsafeCast).handle { case exn: Throwable =>
-      log.warning(
-        exn,
-        s"A previously successful connection to address $remoteAddress stopped being successful."
-      )
+    new ConstFuture(multi().map(Http2Transporter.unsafeCast).handle {
+      case exn: Throwable =>
+        log.warning(
+          exn,
+          s"A previously successful connection to address $remoteAddress stopped being successful."
+        )
 
-      ref.set(null)
-      deadTransport(exn)
+        ref.set(null)
+        deadTransport(exn)
     })
   }
 }

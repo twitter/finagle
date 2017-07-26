@@ -30,14 +30,16 @@ private[twitter] object parsers {
 
   object double {
     def unapply(s: String): Option[Double] =
-      try Some(s.toDouble) catch {
+      try Some(s.toDouble)
+      catch {
         case _: NumberFormatException => None
       }
   }
 
   object int {
     def unapply(s: String): Option[Int] =
-      try Some(s.toInt) catch {
+      try Some(s.toInt)
+      catch {
         case _: NumberFormatException => None
       }
   }
@@ -45,11 +47,13 @@ private[twitter] object parsers {
   object long {
     def unapply(s: String): Option[Long] = {
       // strip off trailing 'L' if present
-      val str = if (s.endsWith("L"))
+      val str =
+        if (s.endsWith("L"))
           s.substring(0, s.length - 1)
         else s
 
-      try Some(str.toLong) catch {
+      try Some(str.toLong)
+      catch {
         case _: NumberFormatException => None
       }
     }
@@ -61,7 +65,8 @@ private[twitter] object parsers {
    */
   object longHex {
     def unapply(s: String): Option[Long] = {
-      try Some(java.lang.Long.parseLong(s.stripPrefix("0x"), 16)) catch {
+      try Some(java.lang.Long.parseLong(s.stripPrefix("0x"), 16))
+      catch {
         case _: NumberFormatException => None
       }
     }
@@ -73,12 +78,13 @@ private[twitter] object parsers {
         case "1" | "true" => Some(true)
         case "0" | "false" => Some(false)
         case _ => None
-       }
+      }
   }
 
   object duration {
     def unapply(s: String): Option[Duration] =
-      try Some(Duration.parse(s)) catch {
+      try Some(Duration.parse(s))
+      catch {
         case _: NumberFormatException => None
       }
   }

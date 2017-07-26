@@ -20,10 +20,11 @@ import com.twitter.util.{Time, TimerTask, Duration}
  * @param evictor a Function invoked for each eviction
  */
 private[finagle] class Cache[A](
-  cacheSize: Int, ttl: Duration,
+  cacheSize: Int,
+  ttl: Duration,
   timer: com.twitter.util.Timer,
-  evictor: Option[A => Unit] = None)
-{
+  evictor: Option[A => Unit] = None
+) {
   require(cacheSize > 0)
 
   // We assume monotonically increasing time.  Thus the items at the
@@ -123,7 +124,7 @@ private[finagle] class Cache[A](
   def evictAll() = {
     val evicted = synchronized {
       val oldDeque = deque
-      deque = new ArrayDeque[(Time, A)]  // clear deque
+      deque = new ArrayDeque[(Time, A)] // clear deque
       cancelTimer()
       oldDeque
     }

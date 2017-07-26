@@ -39,7 +39,8 @@ object StatsScoping {
       val parameters = Seq(
         implicitly[Stack.Param[AddrMetadata]],
         implicitly[Stack.Param[Scoper]],
-        implicitly[Stack.Param[Stats]])
+        implicitly[Stack.Param[Stats]]
+      )
 
       def make(
         params: Stack.Params,

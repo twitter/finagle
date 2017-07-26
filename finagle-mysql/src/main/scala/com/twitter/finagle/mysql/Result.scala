@@ -33,8 +33,10 @@ object HandshakeInit extends Decoder[HandshakeInit] {
       // the rest of the fields are optional and protocol version specific
       val capLow = if (br.remaining >= 2) br.readUnsignedShortLE() else 0
 
-      require(protocol == 10 && (capLow & Capability.Protocol41) != 0,
-        "unsupported protocol version")
+      require(
+        protocol == 10 && (capLow & Capability.Protocol41) != 0,
+        "unsupported protocol version"
+      )
 
       val charset = br.readUnsignedByte().toShort
       val status = br.readShortLE().toShort
@@ -61,8 +63,7 @@ object HandshakeInit extends Decoder[HandshakeInit] {
         charset,
         status
       )
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -93,8 +94,7 @@ object OK extends Decoder[OK] {
         br.readUnsignedShortLE(),
         new String(br.take(br.remaining))
       )
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -120,8 +120,7 @@ object Error extends Decoder[Error] {
       val state = new String(br.take(6))
       val msg = new String(br.take(br.remaining))
       Error(code, state, msg)
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -138,8 +137,7 @@ object EOF extends Decoder[EOF] {
     try {
       br.skip(1)
       EOF(br.readShortLE(), ServerStatus(br.readShortLE()))
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -187,8 +185,7 @@ object Field extends Decoder[Field] {
         flags,
         decimals
       )
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -226,8 +223,7 @@ object PrepareOK extends Decoder[PrepareOK] {
       br.skip(1)
       val warningCount = br.readUnsignedShortLE()
       PrepareOK(stmtId, numCols, numParams, warningCount)
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -245,7 +241,7 @@ case class PrepareOK(
  * the server when sending a prepared statement
  * CloseRequest
  */
-object CloseStatementOK extends OK(0,0,0,0, "Internal Close OK")
+object CloseStatementOK extends OK(0, 0, 0, 0, "Internal Close OK")
 
 /**
  * Resultset returned from the server containing field definitions and
@@ -261,13 +257,19 @@ object ResultSet {
     rowPackets: Seq[Packet]
   ): Try[ResultSet] = Try(decode(isBinaryEncoded)(header, fieldPackets, rowPackets))
 
-  def decode(isBinaryEncoded: Boolean)(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]): ResultSet = {
+  def decode(
+    isBinaryEncoded: Boolean
+  )(header: Packet, fieldPackets: Seq[Packet], rowPackets: Seq[Packet]): ResultSet = {
     val fields = fieldPackets.map(Field.decode).toIndexedSeq
 
     decodeRows(isBinaryEncoded, rowPackets, fields)
   }
 
-  def decodeRows(isBinaryEncoded: Boolean, rowPackets: Seq[Packet], fields: IndexedSeq[Field]): ResultSet = {
+  def decodeRows(
+    isBinaryEncoded: Boolean,
+    rowPackets: Seq[Packet],
+    fields: IndexedSeq[Field]
+  ): ResultSet = {
     // A name -> index map used to allow quick lookups for rows based on name.
     val indexMap = fields.map(_.id).zipWithIndex.toMap
 
@@ -310,5 +312,6 @@ object FetchResult {
 }
 
 case class FetchResult(rowPackets: Seq[Packet], containsLastRow: Boolean) extends Result {
-  override def toString: String = s"FetchResult(rows=${rowPackets.size}, containsLastRow=$containsLastRow)"
+  override def toString: String =
+    s"FetchResult(rows=${rowPackets.size}, containsLastRow=$containsLastRow)"
 }

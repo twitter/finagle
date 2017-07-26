@@ -47,6 +47,7 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
    * 2. There are no outstanding service acquistion requests.
    */
   protected trait ExpiringNode extends NodeT[Req, Rep] {
+
     /**
      * Attempts to expire the underlying resources that back this endpoint
      * iff it is considered idle.
@@ -96,7 +97,7 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
               }
           })
 
-        case t@Throw(_) =>
+        case t @ Throw(_) =>
           onResponse()
           Future.const(t)
       }

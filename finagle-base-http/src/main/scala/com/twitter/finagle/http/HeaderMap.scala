@@ -15,8 +15,8 @@ import scala.collection.mutable
  * to append a key-value.
  */
 abstract class HeaderMap
-  extends mutable.Map[String, String]
-  with mutable.MapLike[String, String, HeaderMap] {
+    extends mutable.Map[String, String]
+    with mutable.MapLike[String, String, HeaderMap] {
 
   /**
    * Retrieves all values for a given header name.
@@ -62,12 +62,11 @@ abstract class HeaderMap
    * but with standard formatting for dates in HTTP headers.
    */
   @deprecated("Use `.set(String, Date)` instead", "2017-02-01")
-  def += (kv: (String, Date)): HeaderMap =
-    += ((kv._1, HeaderMap.format(kv._2)))
+  def +=(kv: (String, Date)): HeaderMap =
+    +=((kv._1, HeaderMap.format(kv._2)))
 
   override def empty: HeaderMap = MapHeaderMap()
 }
-
 
 object HeaderMap {
 

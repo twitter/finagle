@@ -12,20 +12,20 @@ import java.util.concurrent.atomic.AtomicLong
  * load into account and as such doesn't mix-in a load metric.
  */
 private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
-    protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
-    protected val statsReceiver: StatsReceiver,
-    protected val emptyException: NoBrokersAvailableException,
-    protected val maxEffort: Int = 5)
-  extends ServiceFactory[Req, Rep]
-  with Balancer[Req, Rep]
-  with Updating[Req, Rep] {
+  protected val endpoints: Activity[IndexedSeq[EndpointFactory[Req, Rep]]],
+  protected val statsReceiver: StatsReceiver,
+  protected val emptyException: NoBrokersAvailableException,
+  protected val maxEffort: Int = 5
+) extends ServiceFactory[Req, Rep]
+    with Balancer[Req, Rep]
+    with Updating[Req, Rep] {
 
   protected[this] val maxEffortExhausted: Counter =
     statsReceiver.counter("max_effort_exhausted")
 
   protected class Node(val factory: EndpointFactory[Req, Rep])
-    extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT[Req, Rep] {
+      extends ServiceFactoryProxy[Req, Rep](factory)
+      with NodeT[Req, Rep] {
     // Note: These stats are never updated.
     def load: Double = 0.0
     def pending: Int = 0
@@ -37,8 +37,7 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
   /**
    * A simple round robin distributor.
    */
-  protected class Distributor(vector: Vector[Node])
-    extends DistributorT[Node](vector) {
+  protected class Distributor(vector: Vector[Node]) extends DistributorT[Node](vector) {
     type This = Distributor
 
     /**
@@ -100,6 +99,6 @@ private[loadbalancer] final class RoundRobinBalancer[Req, Rep](
 
   protected def initDistributor(): Distributor = new Distributor(Vector.empty)
 
-  protected def newNode(factory: EndpointFactory[Req,Rep]): Node = new Node(factory)
+  protected def newNode(factory: EndpointFactory[Req, Rep]): Node = new Node(factory)
   protected def failingNode(cause: Throwable): Node = new Node(new FailingEndpointFactory(cause))
 }

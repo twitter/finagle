@@ -24,15 +24,16 @@ import scala.collection.JavaConverters._
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String)
-  extends Exception(why)
-  with HasLogLevel
-{
+case class ClientDiscardedRequestException(why: String) extends Exception(why) with HasLogLevel {
   def logLevel: com.twitter.logging.Level = com.twitter.logging.Level.DEBUG
 }
 
-object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled. " +
-  "Temporary measure to allow servers to deploy without hurting clients.")
+object gracefulShutdownEnabled
+    extends GlobalFlag(
+      true,
+      "Graceful shutdown enabled. " +
+        "Temporary measure to allow servers to deploy without hurting clients."
+    )
 
 /**
  * A tracker is responsible for tracking pending transactions
@@ -56,7 +57,7 @@ private class Tracker[T] {
   private[this] def enter(): Boolean = {
     val n = state.get
     if (n <= 0) false
-    else if (!state.compareAndSet(n, n+1)) enter()
+    else if (!state.compareAndSet(n, n + 1)) enter()
     else true
   }
 
@@ -69,7 +70,7 @@ private class Tracker[T] {
     if (n < 0) {
       if (state.incrementAndGet() == -1)
         _drained.setDone()
-    } else if (!state.compareAndSet(n, n-1)) exit()
+    } else if (!state.compareAndSet(n, n - 1)) exit()
   }
 
   /**
@@ -144,10 +145,11 @@ private class Tracker[T] {
    * The number of tracked tags.
    */
   def npending: Int =
-    math.abs(state.get)-1
+    math.abs(state.get) - 1
 }
 
 private[twitter] object ServerDispatcher {
+
   /**
    * Construct a new request-response dispatcher.
    */
@@ -185,12 +187,13 @@ private[twitter] object ServerDispatcher {
  * handles concerns of leasing and draining.
  */
 private[twitter] class ServerDispatcher(
-    trans: Transport[Message, Message],
-    service: Service[Message, Message],
-    lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
-    tracer: Tracer,
-    statsReceiver: StatsReceiver
-) extends Closable with Lessee {
+  trans: Transport[Message, Message],
+  service: Service[Message, Message],
+  lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
+  tracer: Tracer,
+  statsReceiver: StatsReceiver
+) extends Closable
+    with Lessee {
   import ServerDispatcher.State
 
   private[this] implicit val injectTimer = DefaultTimer
@@ -295,9 +298,10 @@ private[twitter] class ServerDispatcher(
       Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
         trans.peerCertificate match {
           case None => loop()
-          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
-            loop()
-          }
+          case Some(cert) =>
+            Contexts.local.let(Transport.peerCertCtx, cert) {
+              loop()
+            }
         }
       }
     }
@@ -326,11 +330,12 @@ private[twitter] class ServerDispatcher(
   @tailrec
   private[this] def hangup(deadline: Time): Future[Unit] = state.get match {
     case State.Closed => Future.Done
-    case s@(State.Draining | State.Open) =>
-      if (!state.compareAndSet(s, State.Closed)) hangup(deadline) else {
+    case s @ (State.Draining | State.Open) =>
+      if (!state.compareAndSet(s, State.Closed)) hangup(deadline)
+      else {
         trans.close(deadline)
       }
-    }
+  }
 
   def close(deadline: Time): Future[Unit] = {
     if (!state.compareAndSet(State.Open, State.Draining))
@@ -359,9 +364,9 @@ private[twitter] class ServerDispatcher(
   }
 
   /**
-    * Emit a lease to the clients of this server.  If howlong is less than or
-    * equal to 0, also nack all requests until a new lease is issued.
-    */
+   * Emit a lease to the clients of this server.  If howlong is less than or
+   * equal to 0, also nack all requests until a new lease is issued.
+   */
   def issue(howlong: Duration): Unit = {
     require(howlong >= Message.Tlease.MinLease)
 

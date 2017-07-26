@@ -6,12 +6,12 @@ import io.netty.channel.{Channel, ChannelInitializer}
 import io.netty.channel.socket.SocketChannel
 
 /**
-  * This handler sets us up for protocol negotiation over TLS
-  */
-private[http2] class Http2TlsServerInitializer (
-    init: ChannelInitializer[Channel],
-    params: Stack.Params)
-  extends ChannelInitializer[SocketChannel] {
+ * This handler sets us up for protocol negotiation over TLS
+ */
+private[http2] class Http2TlsServerInitializer(
+  init: ChannelInitializer[Channel],
+  params: Stack.Params
+) extends ChannelInitializer[SocketChannel] {
 
   def initChannel(ch: SocketChannel): Unit = {
     val p = ch.pipeline()

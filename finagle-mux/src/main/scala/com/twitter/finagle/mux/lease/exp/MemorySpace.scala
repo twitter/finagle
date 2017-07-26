@@ -33,7 +33,6 @@ private[lease] class MemorySpace(
     rSnooper: RequestSnooper
   ) = this(info, minDiscount, maxDiscount, rSnooper, NullLogsReceiver)
 
-
   private[this] val printableZeroBytes = 0.bytes.toString
 
   /**

@@ -20,10 +20,14 @@ object StackServer {
 
   private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
 
-  private[this] class JvmTracing[Req, Rep] extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+  private[this] class JvmTracing[Req, Rep]
+      extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     override def role: Role = Role.jvmTracing
     override def description: String = "Server-side JVM tracing"
-    override def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+    override def make(
+      _tracer: param.Tracer,
+      next: ServiceFactory[Req, Rep]
+    ): ServiceFactory[Req, Rep] = {
       val param.Tracer(tracer) = _tracer
       if (tracer.isNull) next
       else newJvmFilter[Req, Rep].andThen(next)
@@ -38,7 +42,7 @@ object StackServer {
     val jvmTracing = Stack.Role("JvmTracing")
     val preparer = Stack.Role("preparer")
     val protoTracing = Stack.Role("protoTracing")
-   }
+  }
 
   /**
    * Creates a default finagle server [[com.twitter.finagle.Stack]].
@@ -67,8 +71,10 @@ object StackServer {
     // as possible. By installing `ExpiringService` here, we are guaranteed
     // to wrap the server's dispatcher.
     stk.push(ExpiringService.server)
-    stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
-      new ServerDestTracingProxy[Req, Rep](next)))
+    stk.push(
+      Role.serverDestTracing,
+      ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next))
+    )
     stk.push(TimeoutFilter.serverModule)
     stk.push(DtabStatsFilter.module)
     // Admission Control filters are inserted after `StatsFilter` so that rejected
@@ -104,8 +110,8 @@ object StackServer {
  * parameterized.
  */
 trait StackBasedServer[Req, Rep]
-  extends Server[Req, Rep]
-  with Stack.Parameterized[StackBasedServer[Req, Rep]]
+    extends Server[Req, Rep]
+    with Stack.Parameterized[StackBasedServer[Req, Rep]]
 
 /**
  * A [[com.twitter.finagle.Server]] that composes a
@@ -114,8 +120,8 @@ trait StackBasedServer[Req, Rep]
  * @see [[ListeningServer]] for a template implementation that tracks session resources.
  */
 trait StackServer[Req, Rep]
-  extends StackBasedServer[Req, Rep]
-  with Stack.Parameterized[StackServer[Req, Rep]] {
+    extends StackBasedServer[Req, Rep]
+    with Stack.Parameterized[StackServer[Req, Rep]] {
 
   /** The current stack used in this StackServer. */
   def stack: Stack[ServiceFactory[Req, Rep]]
@@ -142,19 +148,21 @@ trait StackServer[Req, Rep]
  *      transport + dispatcher pattern.
  */
 trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This]]
-  extends StackServer[Req, Rep]
-  with Stack.Parameterized[This]
-  with CommonParams[This]
-  with WithServerTransport[This]
-  with WithServerSession[This]
-  with WithServerAdmissionControl[This] { self: This =>
+    extends StackServer[Req, Rep]
+    with Stack.Parameterized[This]
+    with CommonParams[This]
+    with WithServerTransport[This]
+    with WithServerSession[This]
+    with WithServerAdmissionControl[This] { self: This =>
 
   /**
    * Constructs a new `ListeningServer` from the `ServiceFactory`.
    * Each new session is passed to the `trackSession` function exactly once
    * to facilitate connection resource management.
    */
-  protected def newListeningServer(serviceFactory: ServiceFactory[Req, Rep], addr: SocketAddress)(trackSession: ClientConnection => Unit): ListeningServer
+  protected def newListeningServer(serviceFactory: ServiceFactory[Req, Rep], addr: SocketAddress)(
+    trackSession: ClientConnection => Unit
+  ): ListeningServer
 
   final def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     new ListeningServer with CloseAwaitably {
@@ -288,7 +296,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
  *      servers.
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-  extends ListeningStackServer[Req, Rep, This] { self: This =>
+    extends ListeningStackServer[Req, Rep, This] { self: This =>
 
   /**
    * The type we write into the transport.
@@ -332,16 +340,18 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       ServerRegistry.registryName,
       params[ProtocolLibrary].name,
       params[Label].label,
-      "Listener")
+      "Listener"
+    )
     GlobalRegistry.get.put(listenerImplKey, listener.toString)
 
     listener.listen(addr) { transport =>
       val clientConnection = new ClientConnectionImpl(transport)
       val futureService = transport.peerCertificate match {
         case None => serviceFactory(clientConnection)
-        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
-          serviceFactory(clientConnection)
-        }
+        case Some(cert) =>
+          Contexts.local.let(Transport.peerCertCtx, cert) {
+            serviceFactory(clientConnection)
+          }
       }
       futureService.respond {
         case Return(service) =>
@@ -357,8 +367,9 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
           // also gracefully deny new sessions.
           val d = newDispatcher(
             transport,
-            Service.const(Future.exception(
-              Failure.rejected("Terminating session and ignoring request", exc)))
+            Service.const(
+              Future.exception(Failure.rejected("Terminating session and ignoring request", exc))
+            )
           )
 
           // Now that we have a dispatcher, we have a higher notion of what `close(..)` does, so use it

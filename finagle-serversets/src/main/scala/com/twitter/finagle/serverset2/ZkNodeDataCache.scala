@@ -52,9 +52,10 @@ import scala.collection.JavaConverters._
  * (accessed via asMap) thus we need to keep instances of each of these underlying classes.
  */
 private[serverset2] abstract class ZkNodeDataCache[Entity](
-    clusterPath: String,
-    entityType: String,
-    statsReceiver: StatsReceiver) {
+  clusterPath: String,
+  entityType: String,
+  statsReceiver: StatsReceiver
+) {
   private[this] val logger = Logger(getClass)
 
   /** zkSession needs to be set via setSession before the cache is used */
@@ -85,7 +86,9 @@ private[serverset2] abstract class ZkNodeDataCache[Entity](
 
   private[this] val entityCache = EvictingCache.lazily(new LoadingFutureCache(underlying))
 
-  private[this] val gauge = statsReceiver.addGauge(s"numberOf${entityType}Nodes") { underlying.estimatedSize }
+  private[this] val gauge = statsReceiver.addGauge(s"numberOf${entityType}Nodes") {
+    underlying.estimatedSize
+  }
 
   protected def parseNode(path: String, data: String): Seq[Entity]
 
@@ -105,18 +108,14 @@ private[serverset2] abstract class ZkNodeDataCache[Entity](
 }
 
 /** See [[ZkNodeDataCache]] comment */
-private[serverset2] class ZkEntryCache(
-    clusterPath: String,
-    statsReceiver: StatsReceiver)
-  extends ZkNodeDataCache[Entry](clusterPath, "Entry", statsReceiver) {
+private[serverset2] class ZkEntryCache(clusterPath: String, statsReceiver: StatsReceiver)
+    extends ZkNodeDataCache[Entry](clusterPath, "Entry", statsReceiver) {
   override def parseNode(path: String, data: String): Seq[Entry] = Entry.parseJson(path, data)
 }
 
 /** See [[ZkNodeDataCache]] comment */
-private[serverset2] class ZkVectorCache(
-    clusterPath: String,
-    statsReceiver: StatsReceiver)
-  extends ZkNodeDataCache[Vector](clusterPath, "Vector", statsReceiver) {
+private[serverset2] class ZkVectorCache(clusterPath: String, statsReceiver: StatsReceiver)
+    extends ZkNodeDataCache[Vector](clusterPath, "Vector", statsReceiver) {
   override def parseNode(path: String, data: String): Seq[Vector] = Vector.parseJson(data) match {
     case Some(vector) => Seq(vector)
     case _ => Nil

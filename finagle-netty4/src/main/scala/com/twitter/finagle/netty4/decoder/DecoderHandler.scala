@@ -20,7 +20,6 @@ private[finagle] class DecoderHandler[T](decoder: Decoder[T]) extends ChannelInb
       }
 
     case _ =>
-      ctx.fireExceptionCaught(Failure(
-        s"DecoderHandler saw non-Buf message: ${msg.toString}"))
+      ctx.fireExceptionCaught(Failure(s"DecoderHandler saw non-Buf message: ${msg.toString}"))
   }
 }

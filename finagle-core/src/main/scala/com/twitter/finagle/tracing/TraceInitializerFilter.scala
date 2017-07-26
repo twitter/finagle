@@ -7,13 +7,13 @@ object TraceInitializerFilter {
   val role = Stack.Role("TraceInitializerFilter")
 
   private[finagle] class Module[Req, Rep](newId: Boolean)
-    extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+      extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     def this() = this(true)
     val role = TraceInitializerFilter.role
     val description = "Initialize the tracing system"
     def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
       val param.Tracer(tracer) = _tracer
-      new TraceInitializerFilter[Req,Rep](tracer, newId).andThen(next)
+      new TraceInitializerFilter[Req, Rep](tracer, newId).andThen(next)
     }
   }
 
@@ -49,14 +49,14 @@ object TraceInitializerFilter {
  * @param tracer An instance of a tracer to use. Eg: ZipkinTracer
  * @param newId Set the next TraceId when the tracer is pushed (used for clients)
  */
-class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean) extends SimpleFilter[Req, Rep] {
+class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean)
+    extends SimpleFilter[Req, Rep] {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
     if (tracer.isNull) {
-      if (newId) Trace.letId(Trace.nextId) { service(request) }
-      else service(request)
+      if (newId) Trace.letId(Trace.nextId) { service(request) } else service(request)
     } else {
-      if (newId) Trace.letTracerAndNextId(tracer) { service(request) }
-      else Trace.letTracer(tracer) { service(request) }
+      if (newId) Trace.letTracerAndNextId(tracer) { service(request) } else
+        Trace.letTracer(tracer) { service(request) }
     }
 }
 
@@ -85,7 +85,12 @@ sealed class AnnotatingTracingFilter[Req, Rep](
   finagleVersion: () => String = () => Init.finagleVersion,
   traceMetaData: Boolean = true
 ) extends SimpleFilter[Req, Rep] {
-  def this(label: String, before: Annotation, after: Annotation, afterFailure: String => Annotation) =
+  def this(
+    label: String,
+    before: Annotation,
+    after: Annotation,
+    afterFailure: String => Annotation
+  ) =
     this(label, "unknown", before, after, afterFailure)
 
   def this(label: String, before: Annotation, after: Annotation) = {
@@ -110,7 +115,9 @@ sealed class AnnotatingTracingFilter[Req, Rep](
         resp match {
           case Return(_) =>
           case Throw(error) =>
-            Trace.record(afterFailure("%s: %s".format(error.getClass().getName(), error.getMessage())))
+            Trace.record(
+              afterFailure("%s: %s".format(error.getClass().getName(), error.getMessage()))
+            )
         }
         Trace.record(after)
       }
@@ -136,12 +143,13 @@ object ServerTracingFilter {
     label: String,
     finagleVersion: () => String = () => Init.finagleVersion
   ) extends AnnotatingTracingFilter[Req, Rep](
-    label,
-    "srv",
-    Annotation.ServerRecv(),
-    Annotation.ServerSend(),
-    Annotation.ServerSendError(_),
-    finagleVersion)
+        label,
+        "srv",
+        Annotation.ServerRecv(),
+        Annotation.ServerSend(),
+        Annotation.ServerSendError(_),
+        finagleVersion
+      )
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
@@ -168,12 +176,13 @@ object ClientTracingFilter {
     label: String,
     finagleVersion: () => String = () => Init.finagleVersion
   ) extends AnnotatingTracingFilter[Req, Rep](
-    label,
-    "clnt",
-    Annotation.ClientSend(),
-    Annotation.ClientRecv(),
-    Annotation.ClientRecvError(_),
-    finagleVersion)
+        label,
+        "clnt",
+        Annotation.ClientSend(),
+        Annotation.ClientRecv(),
+        Annotation.ClientRecvError(_),
+        finagleVersion
+      )
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
@@ -200,13 +209,14 @@ private[finagle] object WireTracingFilter {
     label: String,
     finagleVersion: () => String = () => Init.finagleVersion
   ) extends AnnotatingTracingFilter[Req, Rep](
-    label,
-    "clnt",
-    Annotation.WireSend,
-    Annotation.WireRecv,
-    Annotation.WireRecvError(_),
-    finagleVersion,
-    false)
+        label,
+        "clnt",
+        Annotation.WireSend,
+        Annotation.WireRecv,
+        Annotation.WireRecvError(_),
+        finagleVersion,
+        false
+      )
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {

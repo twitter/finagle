@@ -7,11 +7,11 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * An Updater processes updates in sequence. At most one
  * update is processed at time; pending updates may be collapsed.
- * 
- * When an update is in progress, new updates are enqueued to 
+ *
+ * When an update is in progress, new updates are enqueued to
  * be handled by the thread currently processing updates; the
  * control is returned to the caller thread immediately. Thus
- * the thread issuing the first update will process all updates 
+ * the thread issuing the first update will process all updates
  * until the queue of updates has been drained.
  *
  * Fairness is not guaranteed. Provided a sufficiently high rate of

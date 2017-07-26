@@ -29,8 +29,7 @@ private final class MapHeaderMap extends HeaderMap {
 
   // For Map/MapLike
   def iterator: Iterator[(String, String)] = {
-    for ((_, vs) <- underlying.iterator; v <- vs) yield
-      (v.header, v.value)
+    for ((_, vs) <- underlying.iterator; v <- vs) yield (v.header, v.value)
   }
 
   // For Map/MapLike
@@ -40,7 +39,7 @@ private final class MapHeaderMap extends HeaderMap {
   }
 
   // For Map/MapLike
-  def -= (key: String): this.type = {
+  def -=(key: String): this.type = {
     underlying.remove(HeaderValuePair.canonicalName(key))
     this
   }

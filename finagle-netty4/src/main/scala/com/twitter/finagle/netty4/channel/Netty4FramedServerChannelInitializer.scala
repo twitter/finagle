@@ -18,9 +18,8 @@ private[netty4] object Netty4FramedServerChannelInitializer {
  *
  * @param params [[Stack.Params]] to configure the `Channel`.
  */
-private[netty4] class Netty4FramedServerChannelInitializer(
-    params: Stack.Params)
-  extends ChannelInitializer[Channel] {
+private[netty4] class Netty4FramedServerChannelInitializer(params: Stack.Params)
+    extends ChannelInitializer[Channel] {
 
   import Netty4FramedServerChannelInitializer._
 

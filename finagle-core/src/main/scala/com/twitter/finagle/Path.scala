@@ -18,11 +18,11 @@ case class Path(elems: Buf*) {
 
   def startsWith(other: Path) = elems.startsWith(other.elems)
 
-  def take(n: Int) = Path(elems.take(n):_*)
-  def drop(n: Int) = Path(elems.drop(n):_*)
+  def take(n: Int) = Path(elems.take(n): _*)
+  def drop(n: Int) = Path(elems.drop(n): _*)
   def ++(that: Path) =
     if (that.isEmpty) this
-    else Path((elems ++ that.elems):_*)
+    else Path((elems ++ that.elems): _*)
   def size = elems.size
   def isEmpty = elems.isEmpty
 
@@ -59,7 +59,7 @@ object Path {
     ('0' to '9') ++ ('A' to 'Z') ++ ('a' to 'z') ++ "_:.#$%-".toSeq
 
   private val charSet = {
-    val bits = new BitSet(Byte.MaxValue+1)
+    val bits = new BitSet(Byte.MaxValue + 1)
     for (c <- showableChars)
       bits.set(c.toInt)
     bits
@@ -135,18 +135,20 @@ object Path {
    */
   def read(s: String): Path = NameTreeParsers.parsePath(s)
 
- /**
-  * Utilities for constructing and pattern matching over
-  * Utf8-typed paths.
-  */
+  /**
+   * Utilities for constructing and pattern matching over
+   * Utf8-typed paths.
+   */
   object Utf8 {
     def apply(elems: String*): Path = {
-      val elems8 = elems map { el => Buf.Utf8(el) }
-      Path(elems8:_*)
+      val elems8 = elems map { el =>
+        Buf.Utf8(el)
+      }
+      Path(elems8: _*)
     }
 
     def unapplySeq(path: Path): Option[Seq[String]] = {
-      val Path(elems@_*) = path
+      val Path(elems @ _*) = path
 
       val n = elems.size
       val elemss = new Array[String](n)

@@ -17,6 +17,7 @@ import com.twitter.util.Duration
  * lease information, and lets the lessor query the lessee for draining info.
  */
 private[twitter] trait Lessee {
+
   /**
    * The Lessee is given the lease for d, starting now.
    */

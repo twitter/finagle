@@ -13,8 +13,11 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service._
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory,
-  SslClientSessionVerifier, SslContextClientEngineFactory}
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier,
+  SslContextClientEngineFactory
+}
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
@@ -68,9 +71,9 @@ object ClientConfig {
   val DefaultName = "client"
 
   private case class NilClient[Req, Rep](
-      stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-      params: Stack.Params = DefaultParams)
-    extends StackBasedClient[Req, Rep] {
+    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+    params: Stack.Params = DefaultParams
+  ) extends StackBasedClient[Req, Rep] {
 
     def withParams(ps: Stack.Params): StackBasedClient[Req, Rep] = copy(params = ps)
     def transformed(t: Stack.Transformer): StackBasedClient[Req, Rep] = copy(stack = t(stack))
@@ -79,8 +82,10 @@ object ClientConfig {
       newClient(dest, label).toService
 
     def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
-      ServiceFactory(() => Future.value(Service.mk[Req, Rep](_ => Future.exception(
-        new Exception("unimplemented")))))
+      ServiceFactory(
+        () =>
+          Future.value(Service.mk[Req, Rep](_ => Future.exception(new Exception("unimplemented"))))
+      )
   }
 
   def nilClient[Req, Rep]: StackBasedClient[Req, Rep] = NilClient[Req, Rep]()
@@ -114,19 +119,27 @@ object ClientConfig {
   private[builder] val DefaultParams = Stack.Params.empty +
     param.Stats(NullStatsReceiver) +
     param.Label(DefaultName) +
-    DefaultPool.Param(low = 1, high = Int.MaxValue,
-    bufferSize = 0, idleTime = 5.seconds, maxWaiters = Int.MaxValue) +
+    DefaultPool.Param(
+      low = 1,
+      high = Int.MaxValue,
+      bufferSize = 0,
+      idleTime = 5.seconds,
+      maxWaiters = Int.MaxValue
+    ) +
     param.Tracer(NullTracer) +
     param.Monitor(NullMonitor) +
     param.Reporter(NullReporterFactory) +
     Daemonize(false)
 }
 
-@implicitNotFound("Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}")
+@implicitNotFound(
+  "Builder is not fully configured: Cluster: ${HasCluster}, Codec: ${HasCodec}, HostConnectionLimit: ${HasHostConnectionLimit}"
+)
 trait ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
 
 private[builder] object ClientConfigEvidence {
-  implicit object FullyConfigured extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
+  implicit object FullyConfigured
+      extends ClientConfigEvidence[ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]
 }
 
 /**
@@ -221,15 +234,16 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * [[https://twitter.github.io/finagle/guide/MethodBuilder.html MethodBuilder]]
  * client-construction APIs.
  */
-class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
-    private[finagle] val client: StackBasedClient[Req, Rep]) {
+class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle] (
+  private[finagle] val client: StackBasedClient[Req, Rep]
+) {
   import ClientConfig._
   import com.twitter.finagle.param._
 
   // Convenient aliases.
   type FullySpecifiedConfig = FullySpecified[Req, Rep]
-  type ThisConfig           = ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
-  type This                 = ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
+  type ThisConfig = ClientConfig[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
+  type This = ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit]
 
   private[builder] def this() = this(ClientConfig.nilClient)
 
@@ -357,7 +371,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def addrs(
     addrs: Address*
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(Name.bound(addrs:_*))
+    dest(Name.bound(addrs: _*))
 
   /**
    * The logical destination of requests dispatched through this
@@ -851,7 +865,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def tls(config: SslClientConfiguration, engineFactory: SslClientEngineFactory): This =
     configured(Transport.ClientSsl(Some(config)))
-    .configured(SslClientEngineFactory.Param(engineFactory))
+      .configured(SslClientEngineFactory.Param(engineFactory))
 
   /**
    * Encrypt the connection with SSL/TLS.
@@ -869,7 +883,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     sessionVerifier: SslClientSessionVerifier
   ): This =
     configured(Transport.ClientSsl(Some(config)))
-    .configured(SslClientSessionVerifier.Param(sessionVerifier))
+      .configured(SslClientSessionVerifier.Param(sessionVerifier))
 
   /**
    * Encrypt the connection with SSL/TLS.
@@ -888,8 +902,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     sessionVerifier: SslClientSessionVerifier
   ): This =
     configured(Transport.ClientSsl(Some(config)))
-    .configured(SslClientEngineFactory.Param(engineFactory))
-    .configured(SslClientSessionVerifier.Param(sessionVerifier))
+      .configured(SslClientEngineFactory.Param(engineFactory))
+      .configured(SslClientSessionVerifier.Param(sessionVerifier))
 
   /**
    * Encrypt the connection with SSL/TLS.  Hostname verification will be
@@ -926,8 +940,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * SSL/TLS Hostname Validation is performed, on the passed in hostname
    */
   def tls(sslContext: SSLContext, hostname: Option[String]): This =
-    tls(SslClientConfiguration(hostname = hostname),
-      new SslContextClientEngineFactory(sslContext))
+    tls(SslClientConfiguration(hostname = hostname), new SslContextClientEngineFactory(sslContext))
 
   /**
    * Do not perform TLS validation. Probably dangerous.
@@ -975,7 +988,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * For the socks proxy use this username for authentication.
    * socksPassword and socksProxy must be set as well
    */
-  def socksUsernameAndPassword(credentials: (String,String)): This =
+  def socksUsernameAndPassword(credentials: (String, String)): This =
     configured(params[Transporter.SocksProxy].copy(credentials = Some(credentials)))
 
   /**
@@ -1116,7 +1129,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(Transporter.TrafficClass(value))
 
   /*** BUILD ***/
-
   // This is only used for client alterations outside of the stack.
   // a more ideal usage would be to retrieve the stats param inside your specific module
   // instead of using this statsReceiver as it keeps the params closer to where they're used
@@ -1139,8 +1151,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def buildFactory()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: ClientConfigEvidence[
+      HasCluster,
+      HasCodec,
+      HasHostConnectionLimit
+    ]
   ): ServiceFactory[Req, Rep] = {
     val Label(label) = params[Label]
     val DestName(dest) = params[DestName]
@@ -1159,8 +1174,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * }}}
    */
   def build()(
-    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]
+    implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: ClientConfigEvidence[
+      HasCluster,
+      HasCodec,
+      HasHostConnectionLimit
+    ]
   ): Service[Req, Rep] = {
     val Label(label) = params[Label]
     val DestName(dest) = params[DestName]
@@ -1193,14 +1211,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
  * A [[com.twitter.finagle.client.StackClient]] which adds the
  * filters historically included in `ClientBuilder` clients.
  */
-private[builder] case class ClientBuilderClient[Req, Rep](
-    client: StackClient[Req, Rep])
-  extends StackClient[Req, Rep] {
+private[builder] case class ClientBuilderClient[Req, Rep](client: StackClient[Req, Rep])
+    extends StackClient[Req, Rep] {
 
   def params: Stack.Params = client.params
   def withParams(ps: Stack.Params): StackClient[Req, Rep] = copy(client.withParams(ps))
   def stack: Stack[ServiceFactory[Req, Rep]] = client.stack
-  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] = copy(client.withStack(stack))
+  def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep] =
+    copy(client.withStack(stack))
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] =
     ClientBuilderClient.newClient(client, dest, label)
@@ -1214,7 +1232,7 @@ private[finagle] object ClientBuilderClient {
   import com.twitter.finagle.param._
 
   private[builder] class StatsFilterModule[Req, Rep]
-    extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
+      extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
     val role: Stack.Role = Stack.Role("ClientBuilder StatsFilter")
     val description: String =
       "Record request stats scoped to 'tries', measured after any retries have occurred"
@@ -1233,7 +1251,8 @@ private[finagle] object ClientBuilderClient {
   }
 
   private[builder] class GlobalTimeoutModule[Req, Rep]
-    extends Stack.Module2[TimeoutFilter.TotalTimeout, Timer, ServiceFactory[Req, Rep]] {
+      extends Stack.Module2[TimeoutFilter.TotalTimeout, Timer, ServiceFactory[Req, Rep]] {
+
     /** See [[TimeoutFilter.totalTimeoutRole]]. */
     val role: Stack.Role = Stack.Role("ClientBuilder GlobalTimeoutFilter")
     val description: String = "Application-configured global timeout"
@@ -1249,11 +1268,12 @@ private[finagle] object ClientBuilderClient {
         Duration.Zero,
         timeout => new GlobalRequestTimeoutException(timeout),
         timerParam.timer,
-        next)
+        next
+      )
   }
 
   private[builder] class ExceptionSourceFilterModule[Req, Rep]
-    extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
+      extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
     val role: Stack.Role = Stack.Role("ClientBuilder ExceptionSourceFilter")
     val description: String = "Exception source filter"
 
@@ -1287,8 +1307,11 @@ private[finagle] object ClientBuilderClient {
       private[this] val closed = new AtomicBoolean(false)
       override def close(deadline: Time): Future[Unit] = {
         if (!closed.compareAndSet(false, true)) {
-          logger.log(Level.WARNING, "Close on ServiceFactory called multiple times!",
-            new Exception/*stack trace please*/)
+          logger.log(
+            Level.WARNING,
+            "Close on ServiceFactory called multiple times!",
+            new Exception /*stack trace please*/
+          )
           return Future.exception(new IllegalStateException)
         }
 
@@ -1324,8 +1347,11 @@ private[finagle] object ClientBuilderClient {
       override def close(deadline: Time): Future[Unit] = {
         if (!released.compareAndSet(false, true)) {
           val Logger(logger) = client.params[Logger]
-          logger.log(java.util.logging.Level.WARNING, "Release on Service called multiple times!",
-            new Exception/*stack trace please*/)
+          logger.log(
+            java.util.logging.Level.WARNING,
+            "Release on Service called multiple times!",
+            new Exception /*stack trace please*/
+          )
           return Future.exception(new IllegalStateException)
         }
         super.close(deadline)

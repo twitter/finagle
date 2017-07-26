@@ -9,8 +9,7 @@ import com.twitter.util.{Try, Throw, Return, Future}
 /**
  * Delegate to the dtab contained inside of the request.
  */
-abstract class DtabFilter[Req <: Message, Rep <: Message]
-  extends SimpleFilter[Req, Rep] {
+abstract class DtabFilter[Req <: Message, Rep <: Message] extends SimpleFilter[Req, Rep] {
 
   def respondToInvalid(req: Req, msg: String): Future[Rep]
 
@@ -77,9 +76,11 @@ object DtabFilter {
       val dtabHeaders = strip(req)
       if (dtabHeaders.nonEmpty && !req.ctx(HasSetDtab)) {
         // Log an error immediately if we find any Dtab headers already in the request and report them
-        val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
-        log.error(s"discarding manually set dtab headers in request: $headersString\n" +
-          s"set Dtab.local instead to send Dtab information.")
+        val headersString = dtabHeaders.map({ case (k, v) => s"[$k: $v]" }).mkString(", ")
+        log.error(
+          s"discarding manually set dtab headers in request: $headersString\n" +
+            s"set Dtab.local instead to send Dtab information."
+        )
       }
 
       write(Dtab.local, req)

@@ -41,14 +41,13 @@ object ImmediateMetricsStatsReceiver {
   }
 }
 
-
 /**
  * This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
  * but ApproximateHistogram.
  * Any value added is immediately aggregated in the result.
  */
 class ImmediateMetricsStatsReceiver(registry: Metrics)
-  extends MetricsStatsReceiver(registry, ImmediateMetricsStatsReceiver.newHistogramInterface) {
+    extends MetricsStatsReceiver(registry, ImmediateMetricsStatsReceiver.newHistogramInterface) {
 
   def this() = this(MetricsStatsReceiver.defaultRegistry)
 }

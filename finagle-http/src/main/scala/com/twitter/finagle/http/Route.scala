@@ -15,9 +15,10 @@ import com.twitter.finagle.http.Method.{Get, Post}
  * @param index Optionally contains information for the route UI.
  */
 case class Route(
-    pattern: String,
-    handler: Service[Request, Response],
-    index: Option[RouteIndex] = None)
+  pattern: String,
+  handler: Service[Request, Response],
+  index: Option[RouteIndex] = None
+)
 
 /**
  * Contains the route UI information.
@@ -38,9 +39,10 @@ case class Route(
  * [[Method.Get]] and [[Method.Post]] are supported.
  */
 case class RouteIndex(
-    alias: String,
-    group: String,
-    path: Option[String] = None,
-    method: Method = Get) {
+  alias: String,
+  group: String,
+  path: Option[String] = None,
+  method: Method = Get
+) {
   assert(method == Get || method == Post, s"Unsupported method: $method")
 }

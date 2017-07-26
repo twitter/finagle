@@ -1,6 +1,5 @@
 package com.twitter.finagle.http.util
 
-
 object StringUtil {
 
   private val SomeIntRegex = """\A\s*(-?\d+).*\Z""".r

@@ -32,12 +32,12 @@ private object ResourceAwareQueue {
  *       In the other cases this queue can release buffers as required.
  */
 private[finagle] class ResourceAwareQueue[T](
-    maxPendingOffers: Int,
-    releaseFn: PartialFunction[T, T])
-  extends AsyncQueue[T](maxPendingOffers) {
+  maxPendingOffers: Int,
+  releaseFn: PartialFunction[T, T]
+) extends AsyncQueue[T](maxPendingOffers) {
   import ResourceAwareQueue.log
 
-  private[this] val id = identity[T]_
+  private[this] val id = identity[T] _
 
   override def offer(msg: T): Boolean = {
     val offerSucceeded = super.offer(msg)

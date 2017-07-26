@@ -32,7 +32,8 @@ private[serverset2] object ApacheData {
         ephemeralOwner = st.getEphemeralOwner,
         dataLength = st.getDataLength,
         numChildren = st.getNumChildren,
-        pzxid = st.getPzxid)
+        pzxid = st.getPzxid
+      )
 
     def zk(st: Data.Stat): org.apache.zookeeper.data.Stat =
       new org.apache.zookeeper.data.Stat(
@@ -46,6 +47,7 @@ private[serverset2] object ApacheData {
         st.ephemeralOwner,
         st.dataLength,
         st.numChildren,
-        st.pzxid)
+        st.pzxid
+      )
   }
 }

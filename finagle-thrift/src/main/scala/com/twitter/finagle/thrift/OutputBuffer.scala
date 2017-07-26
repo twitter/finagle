@@ -24,8 +24,6 @@ private[finagle] class OutputBuffer(protocolFactory: TProtocolFactory) {
 
   def toArray = {
     oprot.getTransport().flush()
-    java.util.Arrays.copyOfRange(
-      memoryBuffer.getArray(), 0, memoryBuffer.length())
+    java.util.Arrays.copyOfRange(memoryBuffer.getArray(), 0, memoryBuffer.length())
   }
 }
-

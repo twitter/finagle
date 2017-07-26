@@ -52,7 +52,8 @@ private[finagle] object MethodBuilder {
       dest,
       stack,
       stackClient.params,
-      Config.create(stackClient.stack, stackClient.params))
+      Config.create(stackClient.stack, stackClient.params)
+    )
   }
 
   /**
@@ -63,13 +64,14 @@ private[finagle] object MethodBuilder {
     stack: Stack[ServiceFactory[Req, Rep]]
   ): Stack[ServiceFactory[Req, Rep]] = {
     stack
-      // total timeouts are managed directly by MethodBuilder
+    // total timeouts are managed directly by MethodBuilder
       .remove(TimeoutFilter.totalTimeoutRole)
       // allow for dynamic per-request timeouts
       .replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
   }
 
   object Config {
+
     /**
      * @param originalStack the `Stack` before [[modifiedStack]] was called.
      */
@@ -82,7 +84,8 @@ private[finagle] object MethodBuilder {
         MethodBuilderTimeout.Config(
           stackHadTotalTimeout = originalStack.contains(TimeoutFilter.totalTimeoutRole),
           total = params[TimeoutFilter.TotalTimeout].timeout,
-          perRequest = params[TimeoutFilter.Param].timeout)
+          perRequest = params[TimeoutFilter.Param].timeout
+        )
       )
     }
   }
@@ -91,9 +94,7 @@ private[finagle] object MethodBuilder {
    * @see [[MethodBuilder.Config.create]] to construct an initial instance.
    *       Using its `copy` method is appropriate after that.
    */
-  case class Config private (
-      retry: MethodBuilderRetry.Config,
-      timeout: MethodBuilderTimeout.Config)
+  case class Config private (retry: MethodBuilderRetry.Config, timeout: MethodBuilderTimeout.Config)
 
   /** Used by the `ClientRegistry` */
   private[client] val RegistryKey = "methods"
@@ -107,11 +108,12 @@ private[finagle] object MethodBuilder {
  * @see [[https://twitter.github.io/finagle/guide/MethodBuilder.html user guide]]
  */
 private[finagle] final class MethodBuilder[Req, Rep](
-    val refCounted: RefcountedClosable[Service[Req, Rep]],
-    dest: Name,
-    stack: Stack[_],
-    stackParams: Stack.Params,
-    private[client] val config: MethodBuilder.Config) { self =>
+  val refCounted: RefcountedClosable[Service[Req, Rep]],
+  dest: Name,
+  stack: Stack[_],
+  stackParams: Stack.Params,
+  private[client] val config: MethodBuilder.Config
+) { self =>
   import MethodBuilder._
 
   //
@@ -207,12 +209,7 @@ private[finagle] final class MethodBuilder[Req, Rep](
    * `Config` modified.
    */
   private[client] def withConfig(config: Config): MethodBuilder[Req, Rep] =
-    new MethodBuilder(
-      refCounted,
-      dest,
-      stack,
-      stackParams,
-      config)
+    new MethodBuilder(refCounted, dest, stack, stackParams, config)
 
   private[this] def statsReceiver(name: String): StatsReceiver = {
     val clientName = stackParams[param.Label].label match {
@@ -237,7 +234,8 @@ private[finagle] final class MethodBuilder[Req, Rep](
     val retries = withRetry
     val timeouts = withTimeout
 
-    retries.logicalStatsFilter(stats)
+    retries
+      .logicalStatsFilter(stats)
       .andThen(addFailureSource(methodName))
       .andThen(timeouts.totalFilter)
       .andThen(retries.filter(stats))
@@ -277,11 +275,13 @@ private[finagle] final class MethodBuilder[Req, Rep](
     val entry = registryEntry()
     val keyPrefix = registryKeyPrefix(name)
     ClientRegistry.register(entry, keyPrefix :+ "statsReceiver", statsReceiver(name).toString)
-    withTimeout.registryEntries.foreach { case (suffix, value) =>
-      ClientRegistry.register(entry, keyPrefix ++ suffix, value)
+    withTimeout.registryEntries.foreach {
+      case (suffix, value) =>
+        ClientRegistry.register(entry, keyPrefix ++ suffix, value)
     }
-    withRetry.registryEntries.foreach { case (suffix, value) =>
-      ClientRegistry.register(entry, keyPrefix ++ suffix, value)
+    withRetry.registryEntries.foreach {
+      case (suffix, value) =>
+        ClientRegistry.register(entry, keyPrefix ++ suffix, value)
     }
   }
 

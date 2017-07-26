@@ -68,9 +68,11 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
     window: Duration,
     backoff: Stream[Duration]
   ): A = {
-    self.configured(FailureAccrualFactory.Param(
-      () => FailureAccrualPolicy.successRateWithinDuration(successRate, window, backoff)
-    ))
+    self.configured(
+      FailureAccrualFactory.Param(
+        () => FailureAccrualPolicy.successRateWithinDuration(successRate, window, backoff)
+      )
+    )
   }
 
   def successRateFailureAccrual(successRate: Double, window: Duration): A =
@@ -90,9 +92,11 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
     nFailures: Int,
     backoff: Stream[Duration]
   ): A = {
-    self.configured(FailureAccrualFactory.Param(
-      () => FailureAccrualPolicy.consecutiveFailures(nFailures, backoff)
-    ))
+    self.configured(
+      FailureAccrualFactory.Param(
+        () => FailureAccrualPolicy.consecutiveFailures(nFailures, backoff)
+      )
+    )
   }
 
   def consecutiveFailuresFailureAccrual(nFailures: Int): A =

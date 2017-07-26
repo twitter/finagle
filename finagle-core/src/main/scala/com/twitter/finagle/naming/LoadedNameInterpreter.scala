@@ -5,12 +5,13 @@ import com.twitter.finagle.util.LoadService
 import com.twitter.util.Activity
 
 class MultipleNameInterpretersException(val interpreters: Seq[NameInterpreter])
-  extends IllegalStateException(
-    s"Multiple `NameInterpreter`s found: ${interpreters.mkString(", ")}")
+    extends IllegalStateException(
+      s"Multiple `NameInterpreter`s found: ${interpreters.mkString(", ")}"
+    )
 
 // Note: exposed for testing.
 private[naming] class LoadedNameInterpreter(load: () => Seq[NameInterpreter])
-  extends NameInterpreter {
+    extends NameInterpreter {
 
   private[this] val self: NameInterpreter = {
     load().toList match {
@@ -33,5 +34,4 @@ private[naming] class LoadedNameInterpreter(load: () => Seq[NameInterpreter])
  * an illegal state. If no service-loaded [[NameInterpreter]]s are
  * found, use the [[DefaultInterpreter]].
  */
-object LoadedNameInterpreter extends LoadedNameInterpreter(
-  () => LoadService[NameInterpreter]())
+object LoadedNameInterpreter extends LoadedNameInterpreter(() => LoadService[NameInterpreter]())

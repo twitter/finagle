@@ -13,6 +13,7 @@ import scala.util.control.NonFatal
  * here is used by Finagle's load balancers.
  */
 trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
+
   /**
    * Returns the address which this endpoint connects to.
    */
@@ -30,7 +31,7 @@ trait EndpointFactory[Req, Rep] extends ServiceFactory[Req, Rep] {
  * An [[EndpointFactory]] that fails to construct services.
  */
 private final class FailingEndpointFactory[Req, Rep](cause: Throwable)
-  extends EndpointFactory[Req, Rep] {
+    extends EndpointFactory[Req, Rep] {
   val address: Address = Address.Failed(cause)
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = Future.exception(cause)
   def close(deadline: Time): Future[Unit] = Future.Done
@@ -75,9 +76,9 @@ private object LazyEndpointFactory {
  * objects per namer updates can be expensive.
  */
 private final class LazyEndpointFactory[Req, Rep](
-    mk: () => ServiceFactory[Req, Rep],
-    val address: Address)
-  extends EndpointFactory[Req, Rep] {
+  mk: () => ServiceFactory[Req, Rep],
+  val address: Address
+) extends EndpointFactory[Req, Rep] {
   import LazyEndpointFactory._
 
   private[this] val state = new AtomicReference[State[Req, Rep]](Init)
@@ -86,8 +87,10 @@ private final class LazyEndpointFactory[Req, Rep](
     state.get match {
       case Init =>
         if (state.compareAndSet(Init, Making)) {
-          val underlying = try mk() catch { case NonFatal(exc) =>
-            new FailingFactory[Req, Rep](exc)
+          val underlying = try mk()
+          catch {
+            case NonFatal(exc) =>
+              new FailingFactory[Req, Rep](exc)
           }
           // This is the only place where we can transition from `Making`
           // to any other state so this is safe. All other spin loops wait
@@ -114,7 +117,7 @@ private final class LazyEndpointFactory[Req, Rep](
   @tailrec def remake(): Unit = state.get match {
     case Init | Closed => // nop
     case Making => remake()
-    case s@Made(underlying) =>
+    case s @ Made(underlying) =>
       // Note, underlying is responsible for draining any outstanding
       // service acquistion requests gracefully.
       if (!state.compareAndSet(s, Init)) remake()
@@ -127,7 +130,7 @@ private final class LazyEndpointFactory[Req, Rep](
     case Init =>
       if (!state.compareAndSet(Init, Closed)) close(when)
       else Future.Done
-    case s@Made(underlying) =>
+    case s @ Made(underlying) =>
       if (!state.compareAndSet(s, Closed)) close(when)
       else underlying.close(when)
   }

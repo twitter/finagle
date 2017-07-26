@@ -69,12 +69,17 @@ resources for using Finagle.
 package object finagle {
   object stack {
     object Endpoint extends Stack.Role("Endpoint")
+
     /**
      * Creates a [[com.twitter.finagle.Stack.Leaf]] which always fails.
      */
-    def nilStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = Stack.Leaf(Endpoint,
-      new com.twitter.finagle.service.FailingFactory[Req, Rep](
-        new IllegalArgumentException("Unterminated stack")))
+    def nilStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] =
+      Stack.Leaf(
+        Endpoint,
+        new com.twitter.finagle.service.FailingFactory[Req, Rep](
+          new IllegalArgumentException("Unterminated stack")
+        )
+      )
   }
 
   private[this] val LibraryName: String = "com.twitter.finagle.core"

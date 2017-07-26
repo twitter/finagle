@@ -7,7 +7,11 @@ import com.twitter.io.Buf
 import java.net.{URI, URL}
 import java.nio.charset.StandardCharsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
+import org.jboss.netty.handler.codec.http.multipart.{
+  DefaultHttpDataFactory,
+  HttpDataFactory,
+  HttpPostRequestEncoder
+}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConverters._
@@ -26,8 +30,12 @@ case class SimpleElement(name: String, content: String) extends FormElement
 /*
  * HTML form file input field.
  */
-case class FileElement(name: String, content: Buf, contentType: Option[String] = None,
-  filename: Option[String] = None) extends FormElement
+case class FileElement(
+  name: String,
+  content: Buf,
+  contentType: Option[String] = None,
+  filename: Option[String] = None
+) extends FormElement
 
 /**
  * Provides a class for building [[org.jboss.netty.handler.codec.http.HttpRequest]]s.
@@ -64,21 +72,25 @@ case class FileElement(name: String, content: Buf, contentType: Option[String] =
  * for more involved requests. For example, it support easy creation of POST request to submit
  * multipart web forms with `buildMultipartPost` and default form post with `buildFormPost`.
  */
-
 /**
  * Factory for [[com.twitter.finagle.http.RequestBuilder]] instances
  */
 object RequestBuilder {
-  @implicitNotFound("Http RequestBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}.")
+  @implicitNotFound(
+    "Http RequestBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}."
+  )
   trait RequestEvidence[HasUrl, HasForm]
   private object RequestEvidence {
     implicit object FullyConfigured extends RequestEvidence[RequestConfig.Yes, Nothing]
   }
 
-  @implicitNotFound("Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}.")
+  @implicitNotFound(
+    "Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}."
+  )
   trait PostRequestEvidence[HasUrl, HasForm]
   private object PostRequestEvidence {
-    implicit object FullyConfigured extends PostRequestEvidence[RequestConfig.Yes, RequestConfig.Yes]
+    implicit object FullyConfigured
+        extends PostRequestEvidence[RequestConfig.Yes, RequestConfig.Yes]
   }
 
   type Complete = RequestBuilder[RequestConfig.Yes, Nothing]
@@ -142,21 +154,21 @@ object RequestConfig {
 }
 
 private[http] final case class RequestConfig[HasUrl, HasForm](
-  url: Option[URL]                  = None,
+  url: Option[URL] = None,
   headers: Map[String, Seq[String]] = Map.empty,
-  formElements: Seq[FormElement]    = Nil,
-  version: Version                  = Version.Http11,
-  proxied: Boolean                  = false
+  formElements: Seq[FormElement] = Nil,
+  version: Version = Version.Http11,
+  proxied: Boolean = false
 )
 
-class RequestBuilder[HasUrl, HasForm] private[http](
+class RequestBuilder[HasUrl, HasForm] private[http] (
   config: RequestConfig[HasUrl, HasForm]
 ) {
   import RequestConfig._
 
   type This = RequestBuilder[HasUrl, HasForm]
 
-  private[this] val SchemeWhitelist = Seq("http","https")
+  private[this] val SchemeWhitelist = Seq("http", "https")
 
   private[http] def this() = this(RequestConfig())
 
@@ -179,7 +191,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       else
         "%s:%d".format(host, u.getPort)
     val withHost = config.headers.updated(HttpHeaders.Names.HOST, Seq(hostValue))
-    val userInfo =  uri.getUserInfo
+    val userInfo = uri.getUserInfo
     val updated =
       if (userInfo == null || userInfo.isEmpty)
         withHost
@@ -194,11 +206,11 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Add simple form name/value pairs. In this mode, this RequestBuilder will only
    * be able to generate a multipart/form POST request.
    */
-   def addFormElement(kv: (String, String)*): RequestBuilder[HasUrl, Yes] = {
-     val elems = config.formElements
-     val updated = kv.foldLeft(elems) { case (es, (k, v)) => es :+ SimpleElement(k, v) }
-     new RequestBuilder(config.copy(formElements = updated))
-   }
+  def addFormElement(kv: (String, String)*): RequestBuilder[HasUrl, Yes] = {
+    val elems = config.formElements
+    val updated = kv.foldLeft(elems) { case (es, (k, v)) => es :+ SimpleElement(k, v) }
+    new RequestBuilder(config.copy(formElements = updated))
+  }
 
   /*
    * Add a FormElement to a request. In this mode, this RequestBuilder will only
@@ -216,7 +228,9 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
   def add(elems: Seq[FormElement]): RequestBuilder[HasUrl, Yes] = {
     val first = this.add(elems.head)
-    elems.tail.foldLeft(first) { (b, elem) => b.add(elem) }
+    elems.tail.foldLeft(first) { (b, elem) =>
+      b.add(elem)
+    }
   }
 
   /**
@@ -255,8 +269,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
   def addHeader(name: String, value: String): This = {
     val values = config.headers.getOrElse(name, Seq.empty)
-    val updated = config.headers.updated(
-      name, values ++ Seq(value))
+    val updated = config.headers.updated(name, values ++ Seq(value))
     new RequestBuilder(config.copy(headers = updated))
   }
 
@@ -286,7 +299,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Proxy-Authorization header using the provided {{ProxyCredentials}}.
    */
   def proxied(credentials: Option[ProxyCredentials]): This = {
-    val headers: Map[String,Seq[String]] = credentials map { creds =>
+    val headers: Map[String, Seq[String]] = credentials map { creds =>
       config.headers.updated(HttpHeaders.Names.PROXY_AUTHORIZATION, Seq(creds.basicAuthorization))
     } getOrElse config.headers
 
@@ -297,7 +310,10 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Construct an HTTP request with a specified method.
    */
   def build(method: Method, content: Option[Buf])(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = {
     content match {
       case Some(ct) => withContent(method, ct)
@@ -309,42 +325,60 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Construct an HTTP GET request.
    */
   def buildGet()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = withoutContent(Method.Get)
 
   /**
    * Construct an HTTP HEAD request.
    */
   def buildHead()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = withoutContent(Method.Head)
 
   /**
    * Construct an HTTP DELETE request.
    */
   def buildDelete()(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = withoutContent(Method.Delete)
 
   /**
    * Construct an HTTP POST request.
    */
   def buildPost(content: Buf)(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = withContent(Method.Post, content)
 
   /**
    * Construct an HTTP PUT request.
    */
   def buildPut(content: Buf)(
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = withContent(Method.Put, content)
 
   /**
    * Construct a form post request.
    */
-  def buildFormPost(multipart: Boolean = false) (
-    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.PostRequestEvidence[HasUrl, HasForm]
+  def buildFormPost(multipart: Boolean = false)(
+    implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.PostRequestEvidence[
+      HasUrl,
+      HasForm
+    ]
   ): Request = {
     val dataFactory = new DefaultHttpDataFactory(false) // we don't use disk
     val req = withoutContent(Method.Post)
@@ -353,10 +387,12 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
         HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpRequest)(
-          name, filename.getOrElse(""),
+          name,
+          filename.getOrElse(""),
           BufChannelBuffer(content),
           contentType.orNull,
-          false)
+          false
+        )
 
       case SimpleElement(name, value) =>
         encoder.addBodyAttribute(name, value)
@@ -375,7 +411,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       while (encoder.hasNextChunk) {
         chunks += encoder.nextChunk().getContent()
       }
-      encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks:_*))
+      encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks: _*))
     }
 
     from(encodedReq)
@@ -397,11 +433,11 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
   private[this] def hostString(uri: URI, url: URL): String = {
     (if (uri.getHost == null) {
-      // fallback to URL
-      url.getHost
-    } else {
-      uri.getHost
-    }).toLowerCase
+       // fallback to URL
+       url.getHost
+     } else {
+       uri.getHost
+     }).toLowerCase
   }
 
   // absoluteURI if proxied, otherwise relativeURI
@@ -428,8 +464,11 @@ class RequestBuilder[HasUrl, HasForm] private[http](
 
   private[http] def withoutContent(method: Method): Request = {
     val req = Request(config.version, method, resource)
-    config.headers foreach { case (field, values) =>
-      values.foreach { v => req.headerMap.add(field, v) }
+    config.headers foreach {
+      case (field, values) =>
+        values.foreach { v =>
+          req.headerMap.add(field, v)
+        }
     }
     req
   }
@@ -456,8 +495,11 @@ private object HttpPostRequestEncoderEx {
   /*
    * allow specifying post body as ChannelBuffer, the logic is adapted from netty code.
    */
-  def addBodyFileUpload(encoder: HttpPostRequestEncoder, factory: HttpDataFactory, request: HttpRequest)
-    (name: String, filename: String, content: ChannelBuffer, contentType: String, isText: Boolean) {
+  def addBodyFileUpload(
+    encoder: HttpPostRequestEncoder,
+    factory: HttpDataFactory,
+    request: HttpRequest
+  )(name: String, filename: String, content: ChannelBuffer, contentType: String, isText: Boolean) {
     require(name != null)
     require(filename != null)
     require(content != null)
@@ -473,7 +515,15 @@ private object HttpPostRequestEncoderEx {
       if (!isText) BinaryTransferEncodingMechanism
       else SevenBitTransferEncodingMechanism
 
-    val fileUpload = factory.createFileUpload(request, name, filename, scontentType, contentTransferEncoding, null, content.readableBytes)
+    val fileUpload = factory.createFileUpload(
+      request,
+      name,
+      filename,
+      scontentType,
+      contentTransferEncoding,
+      null,
+      content.readableBytes
+    )
     fileUpload.setContent(content)
     encoder.addBodyHttpData(fileUpload)
   }

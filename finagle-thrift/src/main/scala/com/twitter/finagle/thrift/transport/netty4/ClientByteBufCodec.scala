@@ -5,8 +5,12 @@ import com.twitter.finagle.thrift.transport.ExceptionFactory
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.{
-  ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter,
-  ChannelPromise, CombinedChannelDuplexHandler}
+  ChannelHandler,
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPromise,
+  CombinedChannelDuplexHandler
+}
 
 /**
  * Codec that converts outbount client requests to `ByteBuf`s
@@ -27,15 +31,16 @@ private[netty4] object ClientByteBufCodec {
   @Sharable
   private object ThriftClientArrayToByteBufEncoder extends ChannelOutboundHandlerAdapter {
 
-    override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = msg match {
-      case request: ThriftClientRequest =>
-        val buf = Unpooled.wrappedBuffer(request.message)
-        ctx.writeAndFlush(buf, promise)
+    override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit =
+      msg match {
+        case request: ThriftClientRequest =>
+          val buf = Unpooled.wrappedBuffer(request.message)
+          ctx.writeAndFlush(buf, promise)
 
-      case other =>
-        val ex = ExceptionFactory.wrongClientWriteType(other)
-        promise.setFailure(ex)
-        throw ex
-    }
+        case other =>
+          val ex = ExceptionFactory.wrongClientWriteType(other)
+          promise.setFailure(ex)
+          throw ex
+      }
   }
 }

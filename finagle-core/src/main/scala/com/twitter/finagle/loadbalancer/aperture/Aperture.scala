@@ -35,6 +35,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected type Node <: ApertureNode
 
   protected trait ApertureNode extends NodeT[Req, Rep] {
+
     /**
      * A token is a random integer associated with an Aperture node.
      * It persists through node updates, but is not necessarily
@@ -141,13 +142,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
    * @param initAperture The initial aperture to use.
    */
   protected class Distributor(
-      vector: Vector[Node],
-      original: Vector[Node],
-      busy: Vector[Node],
-      coordinate: Option[Coord],
-      initAperture: Int)
-    extends DistributorT[Node](vector)
-    with P2CPick[Node] {
+    vector: Vector[Node],
+    original: Vector[Node],
+    busy: Vector[Node],
+    coordinate: Option[Coord],
+    initAperture: Int
+  ) extends DistributorT[Node](vector)
+      with P2CPick[Node] {
 
     type This = Distributor
 
@@ -155,7 +156,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
     val min: Int = {
       val default = math.min(minAperture, vector.size)
-      if (!useDeterministicOrdering) default else {
+      if (!useDeterministicOrdering) default
+      else {
         coordinate match {
           // We want to additionally ensure that we get full ring coverage
           // when there are fewer clients than servers. For example, imagine the
@@ -255,8 +257,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       while (iter.hasNext) {
         val node = iter.next()
         node.status match {
-          case Status.Open   => resultNodes += node
-          case Status.Busy   => busyNodes += node
+          case Status.Open => resultNodes += node
+          case Status.Busy => busyNodes += node
           case Status.Closed => closedNodes += node
         }
       }
@@ -276,11 +278,11 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
      * 2. Otherwise, the vector is sorted by a node's token field.
      */
     def rebuild(vec: Vector[Node]): This = {
-     if (vec.isEmpty) {
+      if (vec.isEmpty) {
         new Distributor(vec, vec, busy, coordinate, aperture)
       } else {
         DeterministicOrdering() match {
-          case someCoord@Some(coord) if useDeterministicOrdering =>
+          case someCoord @ Some(coord) if useDeterministicOrdering =>
             val busyBuilder = new VectorBuilder[Node]
             val newVec = statusOrder(ringOrder(vec, coord.value), busyBuilder)
             new Distributor(newVec, vec, busyBuilder.result, someCoord, aperture)

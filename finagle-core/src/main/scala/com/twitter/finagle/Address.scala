@@ -24,10 +24,7 @@ object Address {
   /**
    * An address represented by an Internet socket address.
    */
-  case class Inet(
-      addr: InetSocketAddress,
-      metadata: Addr.Metadata)
-    extends Address
+  case class Inet(addr: InetSocketAddress, metadata: Addr.Metadata) extends Address
 
   /**
    * An address that fails with the given `cause`.
@@ -49,6 +46,7 @@ object Address {
 
 package exp {
   object Address {
+
     /** Create a new [[Address]] with the given [[com.twitter.finagle.ServiceFactory]]. */
     def apply[Req, Rep](factory: com.twitter.finagle.ServiceFactory[Req, Rep]): Address =
       Address.ServiceFactory(factory, Addr.Metadata.empty)
@@ -58,9 +56,9 @@ package exp {
      * that implements the endpoint.
      */
     case class ServiceFactory[Req, Rep](
-        factory: com.twitter.finagle.ServiceFactory[Req, Rep],
-        metadata: Addr.Metadata)
-      extends Address
+      factory: com.twitter.finagle.ServiceFactory[Req, Rep],
+      metadata: Addr.Metadata
+    ) extends Address
   }
 }
 
@@ -68,6 +66,7 @@ package exp {
  * A Java adaptation of the [[com.twitter.finagle.Address]] companion object.
  */
 object Addresses {
+
   /**
    * @see com.twitter.finagle.Address.Inet
    */

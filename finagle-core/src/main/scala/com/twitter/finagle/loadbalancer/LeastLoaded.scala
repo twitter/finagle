@@ -33,7 +33,7 @@ private trait LeastLoaded[Req, Rep] extends BalancerNode[Req, Rep] { self: Balan
               }
           })
 
-        case t@Throw(_) =>
+        case t @ Throw(_) =>
           counter.decrementAndGet()
           Future.const(t)
       }

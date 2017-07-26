@@ -45,8 +45,9 @@ object PendingRequestFilter {
       def make(_param: Param, _stats: param.Stats, next: ServiceFactory[Req, Rep]) = _param match {
         case Param(Some(limit)) =>
           val param.Stats(stats) = _stats
-          next.map(new PendingRequestFilter[Req, Rep](
-            limit, stats.scope("pending_requests")).andThen(_))
+          next.map(
+            new PendingRequestFilter[Req, Rep](limit, stats.scope("pending_requests")).andThen(_)
+          )
         case Param(None) => next
       }
     }
@@ -58,10 +59,8 @@ object PendingRequestFilter {
 /**
  * A filter which limits the number of pending requests to a service.
  */
-private[finagle] class PendingRequestFilter[Req, Rep](
-    limit: Int,
-    stats: StatsReceiver)
-  extends SimpleFilter[Req, Rep] {
+private[finagle] class PendingRequestFilter[Req, Rep](limit: Int, stats: StatsReceiver)
+    extends SimpleFilter[Req, Rep] {
 
   import PendingRequestFilter._
 
@@ -71,7 +70,9 @@ private[finagle] class PendingRequestFilter[Req, Rep](
   private[this] val rejections = stats.counter("rejected")
 
   private[this] val pending = new AtomicInteger(0)
-  private[this] val decFn: Any => Unit = { _: Any => pending.decrementAndGet() }
+  private[this] val decFn: Any => Unit = { _: Any =>
+    pending.decrementAndGet()
+  }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     // N.B. There's a race on the sad path of this filter when we increment and

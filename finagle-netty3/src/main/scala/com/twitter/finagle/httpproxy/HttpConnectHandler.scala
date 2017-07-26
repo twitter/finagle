@@ -1,7 +1,11 @@
 package com.twitter.finagle.httpproxy
 
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  ConnectionFailedException,
+  InconsistentStateException
+}
 import com.twitter.util.Base64StringEncoder
 
 import java.net.{InetSocketAddress, SocketAddress}
@@ -41,11 +45,11 @@ object HttpConnectHandler {
 }
 
 class HttpConnectHandler(
-    proxyAddr: SocketAddress,
-    addr: InetSocketAddress,
-    clientCodec: HttpClientCodec,
-    proxyCredentials: Option[Credentials])
-  extends SimpleChannelHandler {
+  proxyAddr: SocketAddress,
+  addr: InetSocketAddress,
+  clientCodec: HttpClientCodec,
+  proxyCredentials: Option[Credentials]
+) extends SimpleChannelHandler {
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 
@@ -92,8 +96,11 @@ class HttpConnectHandler(
         })
 
         val wrappedEvent = new DownstreamChannelStateEvent(
-          de.getChannel, wrappedConnectFuture,
-          de.getState, proxyAddr)
+          de.getChannel,
+          wrappedConnectFuture,
+          de.getState,
+          proxyAddr
+        )
 
         super.connectRequested(ctx, wrappedEvent)
 
@@ -114,7 +121,6 @@ class HttpConnectHandler(
       def operationComplete(f: ChannelFuture) {
         if (f.isSuccess)
           HttpConnectHandler.super.channelConnected(ctx, e)
-
         else if (f.isCancelled)
           fail(ctx.getChannel, new ChannelClosedException(addr))
       }
@@ -134,8 +140,10 @@ class HttpConnectHandler(
       ctx.getPipeline.remove(this)
       connectFuture.get.setSuccess()
     } else {
-      val cause = new Throwable("unexpected response status received by HttpConnectHandler:"
-        + resp.getStatus)
+      val cause = new Throwable(
+        "unexpected response status received by HttpConnectHandler:"
+          + resp.getStatus
+      )
 
       fail(e.getChannel, new ConnectionFailedException(cause, addr))
     }

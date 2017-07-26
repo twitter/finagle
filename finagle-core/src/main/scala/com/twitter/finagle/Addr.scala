@@ -23,7 +23,7 @@ object Addr {
   /** Address metadata */
   type Metadata = Map[String, Any]
   object Metadata {
-    def apply(pairs: (String, Any)*): Metadata = Map(pairs:_*)
+    def apply(pairs: (String, Any)*): Metadata = Map(pairs: _*)
     val empty: Metadata = Map.empty
   }
 
@@ -66,7 +66,7 @@ object Addr {
 
   object Bound {
     @varargs
-    def apply(addrs: Address*): Addr = Bound(Set(addrs:_*), Metadata.empty)
+    def apply(addrs: Address*): Addr = Bound(Set(addrs: _*), Metadata.empty)
 
     def apply(addrs: Set[Address]): Addr = Bound(addrs, Metadata.empty)
   }

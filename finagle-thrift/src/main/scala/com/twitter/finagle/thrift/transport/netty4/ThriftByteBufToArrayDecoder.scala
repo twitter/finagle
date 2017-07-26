@@ -26,7 +26,7 @@ private[netty4] object ThriftByteBufToArrayDecoder extends ChannelInboundHandler
   private def toArray(buffer: ByteBuf): Array[Byte] = {
     val array = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(array)
-    buffer.release()    // If you love it, set it free.
+    buffer.release() // If you love it, set it free.
     array
   }
 }

@@ -26,8 +26,7 @@ private[finagle] object Handshake {
    * than mux `Message` types to more easily allow for features that need to
    * operate on the raw byte frame (e.g. compression, checksums, etc).
    */
-  type Negotiator = (Headers, Transport[Buf, Buf]) =>
-    Transport[Message, Message]
+  type Negotiator = (Headers, Transport[Buf, Buf]) => Transport[Message, Message]
 
   /**
    * Returns Some(value) if `key` exists in `headers`, otherwise None.
@@ -123,7 +122,7 @@ private[finagle] object Handshake {
               case Return(Message.Rerr(_, msg)) =>
                 Future.exception(Failure(msg))
 
-              case t@Throw(_) =>
+              case t @ Throw(_) =>
                 Future.const(t.cast[Transport[Message, Message]])
             }
           }
@@ -135,11 +134,13 @@ private[finagle] object Handshake {
         // implement handshaking.
         case Return(false) => Future.value(msgTrans)
 
-        case t@Throw(_) =>
+        case t @ Throw(_) =>
           Future.const(t.cast[Transport[Message, Message]])
       }
 
-    handshake.onFailure { _ => msgTrans.close() }
+    handshake.onFailure { _ =>
+      msgTrans.close()
+    }
     new DeferredTransport(msgTrans, handshake)
   }
 
@@ -184,13 +185,14 @@ private[finagle] object Handshake {
         // a failed future.
         case Return(Message.Tinit(tag, ver, _)) =>
           val msg = s"unsupported version $ver, expected $version"
-          msgTrans.write(Message.Rerr(tag, msg))
+          msgTrans
+            .write(Message.Rerr(tag, msg))
             .before { Future.exception(Failure(msg)) }
 
         // A marker Rerr that queries whether or not we can do handshaking.
         // Echo back the Rerr message to indicate that we can and recurse
         // so we can be ready to handshake again.
-        case Return(rerr@Message.Rerr(tag, msg)) =>
+        case Return(rerr @ Message.Rerr(tag, msg)) =>
           msgTrans.write(rerr).before {
             Future.value(server(trans, version, headers, negotiate))
           }
@@ -198,18 +200,21 @@ private[finagle] object Handshake {
         // Client did not start a session with handshaking but we've consumed
         // a message from the transport. Replace the message and return the
         // original transport.
-        case Return(msg) => Future.value(new TransportProxy(msgTrans) {
-          private[this] val first = new AtomicBoolean(true)
-          def read(): Future[Message] =
-            if (first.compareAndSet(true, false)) Future.value(msg)
-            else msgTrans.read()
-          def write(req: Message): Future[Unit] = msgTrans.write(req)
-        })
+        case Return(msg) =>
+          Future.value(new TransportProxy(msgTrans) {
+            private[this] val first = new AtomicBoolean(true)
+            def read(): Future[Message] =
+              if (first.compareAndSet(true, false)) Future.value(msg)
+              else msgTrans.read()
+            def write(req: Message): Future[Unit] = msgTrans.write(req)
+          })
 
         case Throw(_) => Future.value(msgTrans)
       }
 
-    handshake.onFailure { _ => msgTrans.close() }
+    handshake.onFailure { _ =>
+      msgTrans.close()
+    }
     new DeferredTransport(msgTrans, handshake)
   }
 }
@@ -225,9 +230,9 @@ private[finagle] object Handshake {
  * is satisfied.
  */
 private class DeferredTransport(
-    init: Transport[Message, Message],
-    underlying: Future[Transport[Message, Message]])
-  extends Transport[Message, Message] {
+  init: Transport[Message, Message],
+  underlying: Future[Transport[Message, Message]]
+) extends Transport[Message, Message] {
 
   // we create a derivative promise while `underlying` is not defined
   // because the transport is multiplexed and interrupting on one

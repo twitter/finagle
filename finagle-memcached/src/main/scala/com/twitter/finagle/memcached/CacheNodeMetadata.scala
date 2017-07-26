@@ -36,7 +36,7 @@ private[memcached] object CacheNodeMetadata {
    */
   def fromAddrMetadata(metadata: Addr.Metadata): Option[CacheNodeMetadata] =
     metadata.get(key) match {
-      case some@Some(metadata: CacheNodeMetadata) =>
+      case some @ Some(metadata: CacheNodeMetadata) =>
         some.asInstanceOf[Option[CacheNodeMetadata]]
       case _ => None
     }
@@ -46,7 +46,8 @@ private[memcached] object CacheNodeMetadata {
    * and key of the [[CacheNodeMetadata]].
    */
   def unapply(metadata: Addr.Metadata): Option[(Int, Option[String])] =
-    fromAddrMetadata(metadata).map { case CacheNodeMetadata(weight, key) =>
-      (weight, key)
+    fromAddrMetadata(metadata).map {
+      case CacheNodeMetadata(weight, key) =>
+        (weight, key)
     }
 }

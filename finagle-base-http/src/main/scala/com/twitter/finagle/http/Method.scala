@@ -11,7 +11,7 @@ package com.twitter.finagle.http
  * @see For Java-friendly enums, see [[com.twitter.finagle.http.Methods]].
  * @see https://tools.ietf.org/html/rfc7230#section-3.1.1
  */
-final class Method private(val name: String) {
+final class Method private (val name: String) {
   override def toString: String = name
 
   override def equals(other: Any): Boolean = other match {

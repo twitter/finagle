@@ -27,7 +27,8 @@ private object JsonGenerator {
  * TraceId is from Zipkin.
  */
 sealed private[exception] case class ServiceException private[ServiceException] (
-  private val jsonValue: Map[String,Any]) {
+  private val jsonValue: Map[String, Any]
+) {
 
   /**
    * Create a map with all of the elements required by a chickadee service.
@@ -59,8 +60,12 @@ sealed private[exception] case class ServiceException private[ServiceException] 
    * exist yet.
    */
   def incremented(cardinality: Int = 1) =
-    copy(jsonValue.updated("cardinality",
-      jsonValue.getOrElse("cardinality", 1).asInstanceOf[Int] + cardinality))
+    copy(
+      jsonValue.updated(
+        "cardinality",
+        jsonValue.getOrElse("cardinality", 1).asInstanceOf[Int] + cardinality
+      )
+    )
 
   /**
    * Generate a json representation of this using jerkson
@@ -72,6 +77,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
  * The contents of a java throwable, in the model format for json serialization
  */
 sealed private[exception] case class ExceptionContents(e: Throwable) {
+
   /**
    * Generate the stack trace as a string of the concatenated java.lang.StackTraceElements
    * delimited by newline characters. The elements are in order with the stacktrace.

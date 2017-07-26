@@ -29,7 +29,7 @@ private[lease] class FakeGarbageCollectorMXBean(
   private[this] def ??? = throw new UnsupportedOperationException("not supported")
 
   def getMemoryPoolNames(): Array[String] = ???
-  def isValid  = true
+  def isValid = true
   def getName: String = ???
   def getObjectName: ObjectName = ???
 }
@@ -44,7 +44,8 @@ private[lease] class MemoryUsageInfo(usage: MemoryUsage) extends MemoryPoolInfo 
   def committed(): StorageUnit = usage.getCommitted().bytes
 }
 
-private[lease] case class FakeMemoryUsage(used: StorageUnit, committed: StorageUnit) extends MemoryPoolInfo
+private[lease] case class FakeMemoryUsage(used: StorageUnit, committed: StorageUnit)
+    extends MemoryPoolInfo
 
 private[lease] class JvmInfo(val pool: MemoryPool, val collector: GarbageCollectorMXBean) {
   def committed(): StorageUnit = pool.snapshot().committed()
@@ -65,5 +66,6 @@ private[lease] class JvmInfo(val pool: MemoryPool, val collector: GarbageCollect
     lr.record("gen_%s".format(state), generation().toString)
   }
 
-  override def toString(): String = "JvmInfo(committed" + committed() + ", generation=" + generation() + ", used=" + used() + ", remaining=" + remaining() + ")"
+  override def toString(): String =
+    "JvmInfo(committed" + committed() + ", generation=" + generation() + ", used=" + used() + ", remaining=" + remaining() + ")"
 }

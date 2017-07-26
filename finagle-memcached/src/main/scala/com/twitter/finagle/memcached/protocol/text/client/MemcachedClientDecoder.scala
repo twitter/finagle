@@ -11,17 +11,18 @@ private[finagle] final class MemcachedClientDecoder extends ClientDecoder[Respon
 
   protected def parseResponse(tokens: Seq[Buf]): Response = {
     if (tokens.isEmpty) NoOp
-    else tokens.head match {
-      case NOT_FOUND => NotFound
-      case STORED => Stored
-      case NOT_STORED => NotStored
-      case EXISTS => Exists
-      case DELETED => Deleted
-      case ERROR => Error(new NonexistentCommand(parseErrorMessage(tokens)))
-      case CLIENT_ERROR => Error(new ClientError(parseErrorMessage(tokens)))
-      case SERVER_ERROR => Error(new ServerError(parseErrorMessage(tokens)))
-      case ds => Number(ds.toLong)
-    }
+    else
+      tokens.head match {
+        case NOT_FOUND => NotFound
+        case STORED => Stored
+        case NOT_STORED => NotStored
+        case EXISTS => Exists
+        case DELETED => Deleted
+        case ERROR => Error(new NonexistentCommand(parseErrorMessage(tokens)))
+        case CLIENT_ERROR => Error(new ClientError(parseErrorMessage(tokens)))
+        case SERVER_ERROR => Error(new ServerError(parseErrorMessage(tokens)))
+        case ds => Number(ds.toLong)
+      }
   }
 
   protected def parseStatLines(lines: Seq[Tokens]): Response = {
@@ -30,7 +31,6 @@ private[finagle] final class MemcachedClientDecoder extends ClientDecoder[Respon
     }
     InfoLines(l)
   }
-
 
   protected def parseValue(tokens: Seq[Buf], data: Buf): Value = {
     val tokensLength = tokens.length

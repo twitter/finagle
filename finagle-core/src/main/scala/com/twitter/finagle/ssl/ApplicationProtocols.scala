@@ -17,12 +17,20 @@ object ApplicationProtocols {
   // IANA Application-Layer Protocol Negotiation (ALPN) IDs
   // From: http://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids
   private val alpnProtocolIds: Set[String] = Set(
-    "http/1.1", "spdy/1", "spdy/2", "spdy/3",
-    "stun.turn", "stun.nat-discovery", "h2",
-    "h2c", "webrtc", "c-webrtc", "ftp")
+    "http/1.1",
+    "spdy/1",
+    "spdy/2",
+    "spdy/3",
+    "stun.turn",
+    "stun.nat-discovery",
+    "h2",
+    "h2c",
+    "webrtc",
+    "c-webrtc",
+    "ftp"
+  )
 
-  private val otherProtocolIds: Set[String] = Set(
-    "spdy/3.1")
+  private val otherProtocolIds: Set[String] = Set("spdy/3.1")
 
   private val combinedProtocolIds: Set[String] = alpnProtocolIds ++ otherProtocolIds
 
@@ -47,9 +55,11 @@ object ApplicationProtocols {
    * }}}
    */
   case class Supported(appProtocols: Seq[String]) extends ApplicationProtocols {
-    require(appProtocols.forall(combinedProtocolIds.contains),
+    require(
+      appProtocols.forall(combinedProtocolIds.contains),
       "Each value must be one of the following protocols: " +
-      combinedProtocolIds.toSeq.sorted.mkString(","))
+        combinedProtocolIds.toSeq.sorted.mkString(",")
+    )
   }
 
   /**
@@ -59,7 +69,9 @@ object ApplicationProtocols {
    * @note Whitespace is allowed between values.
    */
   def fromString(appProtocols: String): ApplicationProtocols = {
-    val appProtos = appProtocols.split(",").view
+    val appProtos = appProtocols
+      .split(",")
+      .view
       .map(_.trim)
       .filterNot(_.isEmpty)
       .toSeq

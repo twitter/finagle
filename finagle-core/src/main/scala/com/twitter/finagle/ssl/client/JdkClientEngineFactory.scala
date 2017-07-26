@@ -21,10 +21,12 @@ object JdkClientEngineFactory extends SslClientEngineFactory {
    */
   def apply(address: Address, config: SslClientConfiguration): Engine = {
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "JdkClientEngineFactory", config.applicationProtocols)
+      "JdkClientEngineFactory",
+      config.applicationProtocols
+    )
 
-    val sslContext = SslConfigurations.initializeSslContext(
-      config.keyCredentials, config.trustCredentials)
+    val sslContext =
+      SslConfigurations.initializeSslContext(config.keyCredentials, config.trustCredentials)
     val engine = SslClientEngineFactory.createEngine(sslContext, address, config)
     SslClientEngineFactory.configureEngine(engine, config)
     engine

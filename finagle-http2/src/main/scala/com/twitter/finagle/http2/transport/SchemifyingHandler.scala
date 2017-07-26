@@ -13,7 +13,7 @@ import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.SCHE
 private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelDuplexHandler {
   override def userEventTriggered(ctx: ChannelHandlerContext, event: Any): Unit = {
     event match {
-      case _@UpgradeEvent.UPGRADE_REJECTED =>
+      case _ @UpgradeEvent.UPGRADE_REJECTED =>
         // we no longer need to schemify if the upgrade was rejected
         ctx.pipeline.remove(this)
       case _ => // nop
@@ -28,7 +28,7 @@ private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelDu
   override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
     msg match {
       case req: HttpRequest =>
-        if (!req.headers.contains(SCHEME.text(), defaultScheme, true /*ignoreCase*/))
+        if (!req.headers.contains(SCHEME.text(), defaultScheme, true /*ignoreCase*/ ))
           req.headers.add(SCHEME.text(), defaultScheme)
       case _ => // nop
     }

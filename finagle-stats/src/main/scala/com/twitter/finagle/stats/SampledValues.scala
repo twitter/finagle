@@ -8,6 +8,7 @@ import scala.collection.Map
  * the Metrics registry.
  */
 private[stats] case class SampledValues(
-    gauges: Map[String, Number],
-    counters: Map[String, Number],
-    histograms: Map[String, Snapshot])
+  gauges: Map[String, Number],
+  counters: Map[String, Number],
+  histograms: Map[String, Snapshot]
+)

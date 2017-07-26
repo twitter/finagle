@@ -7,6 +7,7 @@ import com.twitter.util.{Duration, Future, Return, Throw, Timer, Stopwatch}
 import java.util.concurrent.atomic.AtomicInteger
 
 object BackupRequestFilter {
+
   /**
    * Throwable used when the backup request timer is aborted.
    */
@@ -79,16 +80,16 @@ object BackupRequestFilter {
  * onto a different endpoint from the original. Eventually, this
  * should be implemented as a sort of queueing policy.
  */
-class BackupRequestFilter[Req, Rep] private[exp](
-    quantile: Int,
-    clipDuration: Duration,
-    timer: Timer,
-    statsReceiver: StatsReceiver,
-    history: Duration,
-    nowMs: () => Long,
-    recalculateWindow: Int,
-    quantileError: Double)
-  extends SimpleFilter[Req, Rep] {
+class BackupRequestFilter[Req, Rep] private[exp] (
+  quantile: Int,
+  clipDuration: Duration,
+  timer: Timer,
+  statsReceiver: StatsReceiver,
+  history: Duration,
+  nowMs: () => Long,
+  recalculateWindow: Int,
+  quantileError: Double
+) extends SimpleFilter[Req, Rep] {
 
   def this(
     quantile: Int,
@@ -116,7 +117,8 @@ class BackupRequestFilter[Req, Rep] private[exp](
     quantileError,
     history.inMilliseconds,
     LatencyHistogram.DefaultSlices,
-    nowMs)
+    nowMs
+  )
 
   @volatile
   private[this] var cachedCutoffMs = 0L
@@ -180,7 +182,7 @@ class BackupRequestFilter[Req, Rep] private[exp](
         val reps = Array(orig, backup)
         Future.selectIndex(reps).flatMap { firstIndex =>
           val first = reps(firstIndex)
-          val other = reps((firstIndex+1)%2)
+          val other = reps((firstIndex + 1) % 2)
           first.transform {
             case r @ Return(v) =>
               if (first eq backup) orig.raise(BackupRequestLost)

@@ -8,6 +8,7 @@ import org.jboss.netty.handler.codec.frame.TooLongFrameException
  * Tool for converting netty3 HttpServerCodec errors to meaningful responses.
  */
 private[http] object BadMessageConverter {
+
   /**
    * Convert exceptions into a HTTP response with an appropriate status code. The `ChannelFuture`
    * associated with the resulting `DownstreamMessageEvent` will close the `Channel` after

@@ -20,13 +20,13 @@ object HttpResponseClassifier {
    * @note that retryable nacks are categorized as a [[ResponseClass.RetryableFailure]].
    */
   val ServerErrorsAsFailures: ResponseClassifier =
-  ResponseClassifier.named("ServerErrorsAsFailures") {
-    case ReqRep(_, Return(r: Response)) if is500(r) =>
-      if (HttpNackFilter.isRetryableNack(r))
-        ResponseClass.RetryableFailure
-      else
-        ResponseClass.NonRetryableFailure
-  }
+    ResponseClassifier.named("ServerErrorsAsFailures") {
+      case ReqRep(_, Return(r: Response)) if is500(r) =>
+        if (HttpNackFilter.isRetryableNack(r))
+          ResponseClass.RetryableFailure
+        else
+          ResponseClass.NonRetryableFailure
+    }
 
   /**
    * Converts from the more natural `(http.Request, http.Response)` types

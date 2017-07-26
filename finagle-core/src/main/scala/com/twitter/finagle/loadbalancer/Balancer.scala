@@ -25,6 +25,7 @@ private trait BalancerNode[Req, Rep] { self: Balancer[Req, Rep] =>
  * a balancer (a `Distributor`) separately.
  */
 private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerNode[Req, Rep] {
+
   /**
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
@@ -93,7 +94,8 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
     statsReceiver.addGauge("load") {
       dist.vector.map(_.pending).sum
     },
-    statsReceiver.addGauge("size") { dist.vector.size })
+    statsReceiver.addGauge("size") { dist.vector.size }
+  )
 
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
@@ -101,8 +103,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
   private[this] val updates = statsReceiver.counter("updates")
 
   protected sealed trait Update
-  protected case class NewList(
-    svcFactories: IndexedSeq[EndpointFactory[Req, Rep]]) extends Update
+  protected case class NewList(svcFactories: IndexedSeq[EndpointFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -121,7 +122,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
      */
     protected def preprocess(updates: Seq[Update]): Seq[Update] = {
       if (updates.size == 1) { // We know that `updates` is `ArrayBuffer`
-        return updates         // so `size` is cheap.
+        return updates // so `size` is cheap.
       }
 
       val result: mutable.ListBuffer[Update] = mutable.ListBuffer.empty
@@ -130,13 +131,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
       val it = updates.iterator
       while (it.hasNext) {
         it.next() match {
-          case l@NewList(_) =>
+          case l @ NewList(_) =>
             listOrRebuild = l
-          case r@Rebuild(_) =>
+          case r @ Rebuild(_) =>
             if (listOrRebuild == null || listOrRebuild.isInstanceOf[Rebuild]) {
               listOrRebuild = r
             }
-          case i@Invoke(_) =>
+          case i @ Invoke(_) =>
             result += i
         }
       }
@@ -188,7 +189,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
         rebuilds.incr()
 
       case Rebuild(_stale) =>
-
       case Invoke(fn) =>
         fn(dist)
     }
@@ -224,7 +224,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] with BalancerN
 
     val n = dist.pick()
     if (n.factory.status == Status.Open) n
-    else pick(count-1)
+    else pick(count - 1)
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {

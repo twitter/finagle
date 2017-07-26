@@ -3,7 +3,10 @@ package com.twitter.finagle.netty3
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.netty3.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+  ChannelRequestStatsHandler,
+  ChannelStatsHandler,
+  IdleChannelHandler
+}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.client.SslClientConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
@@ -33,10 +36,10 @@ import scala.util.control.NonFatal
 
 /** Bridges a netty3 channel with a transport */
 private[netty3] class ChannelConnector[In, Out](
-    newChannel: () => Channel,
-    newTransport: Channel => Transport[In, Out],
-    statsReceiver: StatsReceiver)
-  extends (SocketAddress => Future[Transport[In, Out]]) {
+  newChannel: () => Channel,
+  newTransport: Channel => Transport[In, Out],
+  statsReceiver: StatsReceiver
+) extends (SocketAddress => Future[Transport[In, Out]]) {
   private[this] val connectLatencyStat = statsReceiver.stat("connect_latency_ms")
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
@@ -45,7 +48,8 @@ private[netty3] class ChannelConnector[In, Out](
     require(addr != null)
     val elapsed = Stopwatch.start()
 
-    val ch = try newChannel() catch {
+    val ch = try newChannel()
+    catch {
       case NonFatal(exc) => return Future.exception(exc)
     }
 
@@ -55,9 +59,10 @@ private[netty3] class ChannelConnector[In, Out](
     val connectFuture = ch.connect(addr)
 
     val promise = new Promise[Transport[In, Out]]
-    promise setInterruptHandler { case _cause =>
-      // Propagate cancellations onto the netty future.
-      connectFuture.cancel()
+    promise setInterruptHandler {
+      case _cause =>
+        // Propagate cancellations onto the netty future.
+        connectFuture.cancel()
     }
 
     connectFuture.addListener(new ChannelFutureListener {
@@ -68,10 +73,13 @@ private[netty3] class ChannelConnector[In, Out](
           promise.setValue(transport)
         } else if (f.isCancelled) {
           cancelledConnects.incr()
-          promise.setException(Failure(
-            cause = new CancelledConnectionException,
-            flags = Failure.Interrupted | Failure.Restartable,
-            logLevel = Level.DEBUG))
+          promise.setException(
+            Failure(
+              cause = new CancelledConnectionException,
+              flags = Failure.Interrupted | Failure.Restartable,
+              logLevel = Level.DEBUG
+            )
+          )
         } else {
           failedConnectLatencyStat.add(latency)
           promise.setException(f.getCause match {
@@ -98,8 +106,12 @@ object Netty3Transporter {
   )
 
   val channelFactory: NettyChannelFactory = new NioClientSocketChannelFactory(
-    Executor, 1 /*# boss threads*/, WorkerPool, HashedWheelTimer.nettyHwt) {
-    override def releaseExternalResources() = ()  // no-op; unreleasable
+    Executor,
+    1 /*# boss threads*/,
+    WorkerPool,
+    HashedWheelTimer.nettyHwt
+  ) {
+    override def releaseExternalResources() = () // no-op; unreleasable
   }
 
   /**
@@ -195,10 +207,10 @@ private[netty3] object FireChannelClosedLater extends ChannelFutureListener {
  *
  */
 private[netty3] class Netty3Transporter[In, Out](
-    val pipelineFactory: ChannelPipelineFactory,
-    val remoteAddress: SocketAddress,
-    val params: Stack.Params = Stack.Params.empty)
-  extends (StatsReceiver => Future[Transport[In, Out]]) {
+  val pipelineFactory: ChannelPipelineFactory,
+  val remoteAddress: SocketAddress,
+  val params: Stack.Params = Stack.Params.empty
+) extends (StatsReceiver => Future[Transport[In, Out]]) {
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
   private[this] val newTransport = makeNewTransport(params)
@@ -251,12 +263,15 @@ private[netty3] class Netty3Transporter[In, Out](
 
   private[this] def makeNewChannel(params: Stack.Params): ChannelPipeline => Channel = {
     val ChannelFactory(cf) = params[ChannelFactory]
-    (pipeline: ChannelPipeline) => cf.newChannel(pipeline)
+    (pipeline: ChannelPipeline) =>
+      cf.newChannel(pipeline)
   }
 
   private[this] def makeNewTransport(params: Stack.Params): Channel => Transport[In, Out] = {
     val TransportFactory(newTransport) = params[TransportFactory]
-    (ch: Channel) => Transport.cast[In, Out](classOf[Any].asInstanceOf[Class[Out]], newTransport(ch))  // We are lying about this type
+    (ch: Channel) =>
+      Transport
+        .cast[In, Out](classOf[Any].asInstanceOf[Class[Out]], newTransport(ch)) // We are lying about this type
   }
 
   private[this] def addFirstStatsHandlers(
@@ -264,9 +279,7 @@ private[netty3] class Netty3Transporter[In, Out](
     statsReceiver: StatsReceiver
   ): Unit = {
     pipeline.addFirst("channelStatsHandler", channelStatsHandler(statsReceiver))
-    pipeline.addFirst("channelRequestStatsHandler",
-      new ChannelRequestStatsHandler(statsReceiver)
-    )
+    pipeline.addFirst("channelRequestStatsHandler", new ChannelRequestStatsHandler(statsReceiver))
   }
 
   private[this] def addFirstIdleHandlers(
@@ -290,8 +303,10 @@ private[netty3] class Netty3Transporter[In, Out](
           0L
 
       pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
-      pipeline.addFirst("idleDetector",
-        new IdleStateHandler(HashedWheelTimer.nettyHwt, rms, wms, 0, TimeUnit.MILLISECONDS))
+      pipeline.addFirst(
+        "idleDetector",
+        new IdleStateHandler(HashedWheelTimer.nettyHwt, rms, wms, 0, TimeUnit.MILLISECONDS)
+      )
     }
   }
 
@@ -308,8 +323,7 @@ private[netty3] class Netty3Transporter[In, Out](
       val engine = clientEngine(addr, config)
 
       val sslHandler = new SslHandler(engine.self)
-      val sslConnectHandler = new SslClientConnectHandler(
-        sslHandler, addr, config, sessionVerifier)
+      val sslConnectHandler = new SslClientConnectHandler(sslHandler, addr, config, sessionVerifier)
 
       pipeline.addFirst("sslConnect", sslConnectHandler)
       pipeline.addFirst("ssl", sslHandler)
@@ -394,7 +408,9 @@ private[netty3] class Netty3Transporter[In, Out](
   def apply(statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
     val conn = new ChannelConnector[In, Out](
       () => newConfiguredChannel(statsReceiver),
-      newTransport, statsReceiver)
+      newTransport,
+      statsReceiver
+    )
     conn(remoteAddress)
   }
 

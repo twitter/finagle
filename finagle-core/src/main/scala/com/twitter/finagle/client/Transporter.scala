@@ -77,10 +77,9 @@ object Transporter {
 
     private[this] def socksUsernameAndPassword: Option[(String, String)] =
       (socksUsernameFlag.get, socksPasswordFlag.get) match {
-        case (Some(username), Some(password)) => Some((username,password))
+        case (Some(username), Some(password)) => Some((username, password))
         case _ => None
       }
-
 
     implicit val param = Stack.Param(SocksProxy(socksProxy, socksUsernameAndPassword))
   }

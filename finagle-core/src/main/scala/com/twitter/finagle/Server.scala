@@ -10,10 +10,8 @@ import java.net.{InetSocketAddress, SocketAddress}
  * server. Closing a server instance unbinds the port and
  * relinquishes resources that are associated with the server.
  */
-trait ListeningServer
-  extends Closable
-  with Awaitable[Unit]
-{
+trait ListeningServer extends Closable with Awaitable[Unit] {
+
   /**
    * The address to which this server is bound.
    */
@@ -43,14 +41,16 @@ trait ListeningServer
   final def close(deadline: Time): Future[Unit] = synchronized {
     isClosed = true
     val collected = Future.collect(announcements)
-    Future.join(Seq(
-      collected.flatMap { list =>
-        Closable.all(list:_*).close(deadline)
-      },
-      // StackServer assumes that closeServer is called synchronously, so we must be
-      // careful that it doesn't get scheduled for later.
-      closeServer(deadline)
-    ))
+    Future.join(
+      Seq(
+        collected.flatMap { list =>
+          Closable.all(list: _*).close(deadline)
+        },
+        // StackServer assumes that closeServer is called synchronously, so we must be
+        // careful that it doesn't get scheduled for later.
+        closeServer(deadline)
+      )
+    )
   }
 }
 
@@ -109,6 +109,7 @@ object NullServer extends ListeningServer with CloseAwaitably {
  * when the service is closed. Omitting the `addr` will bind to an ephemeral port.
  */
 trait Server[Req, Rep] {
+
   /** $addr */
   def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer
 
@@ -124,7 +125,7 @@ trait Server[Req, Rep] {
   def serve(addr: String, service: Service[Req, Rep]): ListeningServer =
     serve(addr, ServiceFactory.const(service))
 
-    /** $serveAndAnnounce */
+  /** $serveAndAnnounce */
   def serveAndAnnounce(
     name: String,
     addr: SocketAddress,

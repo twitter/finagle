@@ -6,6 +6,7 @@ import com.twitter.util.{Duration, Future}
 
 /** Implements http://www.w3.org/TR/cors/ */
 object Cors {
+
   /**
    * A Cross-Origin Resource Sharing policy.
    *
@@ -38,21 +39,23 @@ object Cors {
     allowsHeaders: Seq[String] => Option[Seq[String]],
     exposedHeaders: Seq[String] = Nil,
     supportsCredentials: Boolean = false,
-    maxAge: Option[Duration] = None)
+    maxAge: Option[Duration] = None
+  )
 
   /** A CORS policy that lets you do whatever you want.  Don't use this in production. */
-  val UnsafePermissivePolicy: Policy = Policy(
-    allowsOrigin  = { origin  => Some(origin) },
-    allowsMethods = { method  => Some(method :: Nil) },
-    allowsHeaders = { headers => Some(headers) },
-    supportsCredentials = true)
+  val UnsafePermissivePolicy: Policy = Policy(allowsOrigin = { origin =>
+    Some(origin)
+  }, allowsMethods = { method =>
+    Some(method :: Nil)
+  }, allowsHeaders = { headers =>
+    Some(headers)
+  }, supportsCredentials = true)
 
   /**
    * An HTTP filter that handles preflight (OPTIONS) requests and sets CORS response headers
    * as described in the W3C CORS spec.
    */
-  class HttpFilter(policy: Policy)
-      extends Filter[Request, Response, Request, Response] {
+  class HttpFilter(policy: Policy) extends Filter[Request, Response, Request, Response] {
 
     /*
      * Simple Cross-Origin Request, Actual Request, and Redirects
@@ -115,8 +118,8 @@ object Cors {
      */
     protected[this] def addExposedHeaders(response: Response): Response = {
       if (policy.exposedHeaders.nonEmpty) {
-        response.headerMap.add(
-          "Access-Control-Expose-Headers", policy.exposedHeaders.mkString(", "))
+        response.headerMap
+          .add("Access-Control-Expose-Headers", policy.exposedHeaders.mkString(", "))
       }
       response
     }
@@ -200,10 +203,11 @@ object Cors {
             policy.allowsHeaders(headers) map { allowedHeaders =>
               setHeaders(
                 setMethod(
-                  setMaxAge(
-                    setOriginAndCredentials(request.response, origin)),
-                  allowedMethods),
-                allowedHeaders)
+                  setMaxAge(setOriginAndCredentials(request.response, origin)),
+                  allowedMethods
+                ),
+                allowedHeaders
+              )
             }
           }
         }
@@ -218,10 +222,11 @@ object Cors {
      */
     def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
       val response = request match {
-        case Preflight() => Future {
-          // If preflight is not acceptable, just return a 200 without CORS headers
-          handlePreflight(request) getOrElse request.response
-        }
+        case Preflight() =>
+          Future {
+            // If preflight is not acceptable, just return a 200 without CORS headers
+            handlePreflight(request) getOrElse request.response
+          }
         case _ => service(request) map { handleSimple(request, _) }
       }
       response map { setVary(_) }
@@ -237,17 +242,21 @@ object Cors {
 object CorsFilter {
   private[this] val sep = ", *".r
 
-  def apply(origin:  String = "*",
-            methods: String = "GET",
-            headers: String = "x-requested-with",
-            exposes: String = ""): Filter[Request, Response, Request, Response] = {
+  def apply(
+    origin: String = "*",
+    methods: String = "GET",
+    headers: String = "x-requested-with",
+    exposes: String = ""
+  ): Filter[Request, Response, Request, Response] = {
     val methodList = Some(sep.split(methods).toSeq)
     val headerList = Some(sep.split(headers).toSeq)
     val exposeList = sep.split(exposes).toSeq
-    new Cors.HttpFilter(Cors.Policy(
-      { _ => Some(origin) },
-      { _ => methodList },
-      { _ => headerList },
-      exposeList))
+    new Cors.HttpFilter(Cors.Policy({ _ =>
+      Some(origin)
+    }, { _ =>
+      methodList
+    }, { _ =>
+      headerList
+    }, exposeList))
   }
 }

@@ -16,7 +16,6 @@ object OpenSSL {
 
   private[this] val log = Logger.getLogger(getClass.getName)
 
-
   // For flagging global initialization of APR and OpenSSL
   private[this] val initializedLibrary = new AtomicBoolean(false)
 
@@ -30,7 +29,7 @@ object OpenSSL {
    */
   class Linker {
     private[this] def classNamed(name: String): Class[_] =
-     Class.forName("org.apache.tomcat.jni." + name)
+      Class.forName("org.apache.tomcat.jni." + name)
 
     val aprClass = classNamed("Library")
     val aprInitMethod = aprClass.getMethod("initialize", classOf[String])
@@ -41,19 +40,18 @@ object OpenSSL {
     val sslClass = classNamed("SSL")
     val sslInitMethod = sslClass.getMethod("initialize", classOf[String])
 
-
     // OpenSSLEngine-specific configuration classes
-    val bufferPoolClass    = classNamed("ssl.DirectBufferPool")
-    val bufferPoolCtor     = bufferPoolClass.getConstructor(classOf[Int])
+    val bufferPoolClass = classNamed("ssl.DirectBufferPool")
+    val bufferPoolCtor = bufferPoolClass.getConstructor(classOf[Int])
 
     val configurationClass = classNamed("ssl.SSLConfiguration")
-    val configurationCtor  = configurationClass.getConstructor(classOf[MapOfStrings])
+    val configurationCtor = configurationClass.getConstructor(classOf[MapOfStrings])
 
     val contextHolderClass = classNamed("ssl.SSLContextHolder")
-    val contextHolderCtor  = contextHolderClass.getConstructor(classOf[Long], configurationClass)
+    val contextHolderCtor = contextHolderClass.getConstructor(classOf[Long], configurationClass)
 
-    val sslEngineClass     = classNamed("ssl.OpenSSLEngine")
-    val sslEngineCtor      = sslEngineClass.getConstructor(contextHolderClass, bufferPoolClass)
+    val sslEngineClass = classNamed("ssl.OpenSSLEngine")
+    val sslEngineCtor = sslEngineClass.getConstructor(contextHolderClass, bufferPoolClass)
 
     if (initializedLibrary.compareAndSet(false, true)) {
       aprInitMethod.invoke(aprClass, null)
@@ -73,12 +71,14 @@ object OpenSSL {
   /**
    * Get a server
    */
-  def server(certificatePath: String,
-             keyPath: String,
-             caPath: String,
-             ciphers: String,
-             nextProtos: String,
-             useCache: Boolean = true): Option[Engine] = {
+  def server(
+    certificatePath: String,
+    keyPath: String,
+    caPath: String,
+    ciphers: String,
+    nextProtos: String,
+    useCache: Boolean = true
+  ): Option[Engine] = {
     try {
       synchronized {
         if (null == linker) linker = new Linker()
@@ -86,9 +86,11 @@ object OpenSSL {
     } catch {
       case e: Exception =>
         // This is a warning rather than a Throwable because we fall back to JSSE
-        log.log(Level.FINEST,
-                "APR/OpenSSL could not be loaded: " +
-                e.getClass().getName() + ": " + e.getMessage())
+        log.log(
+          Level.FINEST,
+          "APR/OpenSSL could not be loaded: " +
+            e.getClass().getName() + ": " + e.getMessage()
+        )
         return None
     }
 
@@ -108,7 +110,9 @@ object OpenSSL {
 
       log.finest("OpenSSL context instantiated for certificate '%s'".format(certificatePath))
 
-      linker.contextHolderCtor.newInstance(mallocPool, config.asInstanceOf[AnyRef]).asInstanceOf[AnyRef]
+      linker.contextHolderCtor
+        .newInstance(mallocPool, config.asInstanceOf[AnyRef])
+        .asInstanceOf[AnyRef]
     }
 
     val contextHolder = synchronized {
@@ -118,10 +122,12 @@ object OpenSSL {
         makeContextHolder
     }
 
-    val engine: SSLEngine = linker.sslEngineCtor.newInstance(
-      contextHolder,
-      bufferPool
-    ).asInstanceOf[SSLEngine]
+    val engine: SSLEngine = linker.sslEngineCtor
+      .newInstance(
+        contextHolder,
+        bufferPool
+      )
+      .asInstanceOf[SSLEngine]
 
     Some(new Engine(engine, true))
   }

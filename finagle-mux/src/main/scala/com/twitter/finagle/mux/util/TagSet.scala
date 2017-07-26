@@ -10,15 +10,19 @@ import scala.collection.immutable.Range
  * tags before issuing larger ones.
  */
 private[mux] trait TagSet extends Iterable[Int] {
+
   /** The range of tags maintained by this TagSet */
   val range: Range
+
   /** Acquire a tag, if available */
   def acquire(): Option[Int]
+
   /** Release a previously acquired tag */
   def release(tag: Int)
 }
 
 private[mux] object TagSet {
+
   /**
    * Constructs a space-efficient TagSet for the range of available
    * tags in the mux protocol.
@@ -38,7 +42,8 @@ private[mux] object TagSet {
 
     def acquire(): Option[Int] = self.synchronized {
       val tag = bits.nextClearBit(start)
-      if (!range.contains(tag)) None else {
+      if (!range.contains(tag)) None
+      else {
         bits.set(tag)
         Some(tag)
       }
@@ -51,13 +56,13 @@ private[mux] object TagSet {
     }
 
     def iterator: Iterator[Int] = new Iterator[Int] {
-      private[this] var _next = start-1
+      private[this] var _next = start - 1
       next()
 
       def hasNext: Boolean = _next != -1
       def next(): Int = self.synchronized {
         val cur = _next
-        _next = bits.nextSetBit(_next+1)
+        _next = bits.nextSetBit(_next + 1)
         cur
       }
     }

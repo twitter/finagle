@@ -7,8 +7,7 @@ import java.util.logging.{Level, Logger}
 import scala.collection.mutable
 
 class JavaLoggerStatsReceiver(logger: Logger, timer: Timer)
-  extends StatsReceiverWithCumulativeGauges
-{
+    extends StatsReceiverWithCumulativeGauges {
   val repr = logger
   private val timerTasks = new mutable.HashMap[Seq[String], TimerTask]
 

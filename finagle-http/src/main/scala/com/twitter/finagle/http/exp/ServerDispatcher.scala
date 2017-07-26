@@ -28,8 +28,9 @@ private[finagle] object GenSerialServerDispatcher {
  * [[com.twitter.finagle.dispatch.SerialServerDispatcher SerialServerDispatcher]],
  * allowing the implementor to furnish custom dispatchers & handlers.
  */
-private[finagle] abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: StreamTransport[In, Out])
-  extends Closable {
+private[finagle] abstract class GenSerialServerDispatcher[Req, Rep, In, Out](
+  trans: StreamTransport[In, Out]
+) extends Closable {
 
   def this(trans: Transport[In, Out]) = this(new IdentityStreamTransport(trans))
 
@@ -60,7 +61,8 @@ private[finagle] abstract class GenSerialServerDispatcher[Req, Rep, In, Out](tra
    * transport is closed.
    */
   private[this] def loop(): Future[Unit] = {
-    trans.read()
+    trans
+      .read()
       .flatMap(dispatchAndHandleFn)
       .transform(continueLoopFn)
   }
@@ -68,40 +70,42 @@ private[finagle] abstract class GenSerialServerDispatcher[Req, Rep, In, Out](tra
   private[this] val handleFn: Rep => Future[Unit] = handle(_)
 
   // Dispatches and handles a message from the transport or closes down if necessary
-  private[this] val dispatchAndHandleFn: Multi[Out] => Future[Unit] = { case Multi(req, eos) =>
-    if (state.compareAndSet(Idle, Running)) {
-      val save = Local.save()
-      val dispatched = try {
-        Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
-          trans.peerCertificate match {
-            case None => dispatch(req)
-            case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
-              dispatch(req)
+  private[this] val dispatchAndHandleFn: Multi[Out] => Future[Unit] = {
+    case Multi(req, eos) =>
+      if (state.compareAndSet(Idle, Running)) {
+        val save = Local.save()
+        val dispatched = try {
+          Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+            trans.peerCertificate match {
+              case None => dispatch(req)
+              case Some(cert) =>
+                Contexts.local.let(Transport.peerCertCtx, cert) {
+                  dispatch(req)
+                }
             }
           }
+        } finally Local.restore(save)
+
+        val handled = dispatched.flatMap(handleFn)
+
+        // This version of `Future.join` doesn't collect the values from the Futures, but
+        // since they are both Future[Unit], we know what the result is and can avoid the
+        // overhead of collecting two Units just to throw them away via another flatMap.
+        Future.join(handled :: eos :: Nil)
+      } else {
+        // must have transitioned from Idle to Closing, by someone else who is
+        // responsible for closing the transport
+        val st = state.get
+        if (st == Closing) Eof
+        else {
+          // Something really bad happened. Shutdown and log as loudly as possible.
+          trans.close()
+          val msg = s"Dispatch loop found in illegal state: $st"
+          val ex = new IllegalStateException(msg)
+          logger.error(ex, msg)
+          Future.exception(ex)
         }
-      } finally Local.restore(save)
-
-      val handled = dispatched.flatMap(handleFn)
-
-      // This version of `Future.join` doesn't collect the values from the Futures, but
-      // since they are both Future[Unit], we know what the result is and can avoid the
-      // overhead of collecting two Units just to throw them away via another flatMap.
-      Future.join(handled::eos::Nil)
-    } else {
-      // must have transitioned from Idle to Closing, by someone else who is
-      // responsible for closing the transport
-      val st = state.get
-      if (st == Closing) Eof
-      else {
-        // Something really bad happened. Shutdown and log as loudly as possible.
-        trans.close()
-        val msg = s"Dispatch loop found in illegal state: $st"
-        val ex = new IllegalStateException(msg)
-        logger.error(ex, msg)
-        Future.exception(ex)
       }
-    }
   }
 
   // Checks the state after a dispatch and continues or shuts down the transport if necessary

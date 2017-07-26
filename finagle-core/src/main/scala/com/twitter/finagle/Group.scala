@@ -91,7 +91,7 @@ trait Group[T] { outer =>
   def named(n: String): Group[T] = LabelledGroup(this, n)
 
   def +(other: Group[T]): Group[T] = new Group[T] {
-    protected[finagle] val set = for { a <- outer.set; b <- other.set } yield a++b
+    protected[finagle] val set = for { a <- outer.set; b <- other.set } yield a ++ b
   }
 
   override def toString = "Group(%s)".format(this() mkString ", ")
@@ -103,13 +103,12 @@ trait Group[T] { outer =>
  * APIs. (And hopefully will be deprecated soon enough.)
  */
 @deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
-private[finagle] case class NameGroup(name: Name.Bound)
-  extends Group[SocketAddress] {
-    protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
-      case Addr.Bound(set, _) => set.collect { case Address.Inet(ia, _) => ia }
-      case _ => Set()
-    }
+private[finagle] case class NameGroup(name: Name.Bound) extends Group[SocketAddress] {
+  protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
+    case Addr.Bound(set, _) => set.collect { case Address.Inet(ia, _) => ia }
+    case _ => Set()
   }
+}
 
 @deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 trait MutableGroup[T] extends Group[T] {
@@ -126,6 +125,7 @@ case class LabelledGroup[T](underlying: Group[T], name: String) extends Group[T]
 }
 
 object Group {
+
   /**
    * Construct a `T`-typed static group from the given elements.
    *
@@ -133,11 +133,11 @@ object Group {
    */
   @deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "2014-11-21")
   def apply[T](staticMembers: T*): Group[T] = new Group[T] {
-    protected[finagle] val set = Var(Set(staticMembers:_*))
+    protected[finagle] val set = Var(Set(staticMembers: _*))
   }
 
   def fromVarAddr(va: Var[Addr]): Group[SocketAddress] = new Group[SocketAddress] {
-    protected[finagle] val set: Var[Set[SocketAddress]]  = va map {
+    protected[finagle] val set: Var[Set[SocketAddress]] = va map {
       case Addr.Bound(addrs, _) => addrs.collect { case Address.Inet(ia, _) => ia }
       case _ => Set[SocketAddress]()
     }
@@ -160,7 +160,7 @@ object Group {
    */
   @deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "2014-11-21")
   def mutable[T](initial: T*): MutableGroup[T] = new MutableGroup[T] {
-    protected[finagle] val set = Var(Set(initial:_*))
+    protected[finagle] val set = Var(Set(initial: _*))
     def update(newMembers: Set[T]) { set() = newMembers }
   }
 }

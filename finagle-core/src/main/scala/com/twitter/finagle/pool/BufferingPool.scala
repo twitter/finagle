@@ -13,13 +13,10 @@ import scala.annotation.tailrec
  *      for more details.
  */
 class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
-  extends ServiceFactoryProxy[Req, Rep](underlying)
-{
+    extends ServiceFactoryProxy[Req, Rep](underlying) {
   @volatile private[this] var draining = false
 
-  private[this] class Wrapped(self: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](self)
-  {
+  private[this] class Wrapped(self: Service[Req, Rep]) extends ServiceProxy[Req, Rep](self) {
     private[this] val wasReleased = new AtomicBoolean(false)
     def releaseSelf() = {
       if (wasReleased.compareAndSet(false, true))
@@ -44,7 +41,7 @@ class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
   private[this] def get(): Future[Service[Req, Rep]] =
     buffer.tryGet() match {
       case None =>
-        underlying() map(new Wrapped(_))
+        underlying() map (new Wrapped(_))
       case Some(service) if service.status != Status.Closed =>
         Future.value(service)
       case Some(service) =>

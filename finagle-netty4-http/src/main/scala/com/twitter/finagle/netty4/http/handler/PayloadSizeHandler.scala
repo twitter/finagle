@@ -20,7 +20,7 @@ private object PayloadSizeHandler {
  * returns a 413 response to fixed-length messages which exceed the size limit
  */
 private[http] class PayloadSizeHandler(limit: StorageUnit, log: Option[Logger])
-  extends ChannelInboundHandlerAdapter {
+    extends ChannelInboundHandlerAdapter {
 
   def this(limit: StorageUnit) = this(limit, None)
 
@@ -38,12 +38,16 @@ private[http] class PayloadSizeHandler(limit: StorageUnit, log: Option[Logger])
       if (http.isInstanceOf[ByteBufHolder]) {
         http.asInstanceOf[ByteBufHolder].release()
       }
-      ctx.writeAndFlush(mk413(http.protocolVersion))
+      ctx
+        .writeAndFlush(mk413(http.protocolVersion))
         .addListener(ChannelFutureListener.CLOSE)
 
       log match {
         case Some(l) if l.isLoggable(Level.FINE) =>
-          l.log(Level.FINE, s"rejected an oversize payload (${HttpUtil.getContentLength(http)} bytes) from ${ctx.channel.remoteAddress}")
+          l.log(
+            Level.FINE,
+            s"rejected an oversize payload (${HttpUtil.getContentLength(http)} bytes) from ${ctx.channel.remoteAddress}"
+          )
         case _ =>
       }
 

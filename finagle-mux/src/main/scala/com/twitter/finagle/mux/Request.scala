@@ -5,6 +5,7 @@ import com.twitter.finagle.Path
 
 /** A mux request. */
 sealed trait Request {
+
   /** The destination name specified by Tdispatch requests. Otherwise, Path.empty */
   def destination: Path
 

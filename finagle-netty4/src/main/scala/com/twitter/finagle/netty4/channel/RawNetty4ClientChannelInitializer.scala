@@ -11,8 +11,8 @@ import io.netty.channel.{Channel, ChannelPipeline}
  */
 private[netty4] class RawNetty4ClientChannelInitializer(
   pipelineInit: ChannelPipeline => Unit,
-  params: Stack.Params)
-  extends AbstractNetty4ClientChannelInitializer(params) {
+  params: Stack.Params
+) extends AbstractNetty4ClientChannelInitializer(params) {
 
   override def initChannel(ch: Channel): Unit = {
     super.initChannel(ch)

@@ -69,6 +69,7 @@ case class HighResTimer(timer: com.twitter.util.Timer) {
 }
 
 object HighResTimer {
+
   /**
    * The default Timer used for configuration.
    *
@@ -144,14 +145,13 @@ object Monitor {
  * [[com.twitter.finagle.service.ResponseClassifier.Default]]
  * which is a total function fully covering the input domain.
  */
-case class ResponseClassifier(
-    responseClassifier: com.twitter.finagle.service.ResponseClassifier) {
+case class ResponseClassifier(responseClassifier: com.twitter.finagle.service.ResponseClassifier) {
   def mk(): (ResponseClassifier, Stack.Param[ResponseClassifier]) =
     (this, ResponseClassifier.param)
 }
 object ResponseClassifier {
-  implicit val param: Stack.Param[ResponseClassifier] = Stack.Param(ResponseClassifier(
-    com.twitter.finagle.service.ResponseClassifier.Default))
+  implicit val param: Stack.Param[ResponseClassifier] =
+    Stack.Param(ResponseClassifier(com.twitter.finagle.service.ResponseClassifier.Default))
 }
 
 /**

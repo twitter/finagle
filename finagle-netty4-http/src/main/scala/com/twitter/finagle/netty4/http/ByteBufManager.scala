@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.channel._
 
 private[http] class ByteBufManager(usageTracker: ChannelBufferUsageTracker)
-  extends ChannelDuplexHandler {
+    extends ChannelDuplexHandler {
 
   private[this] var bufferUsage = 0L
 

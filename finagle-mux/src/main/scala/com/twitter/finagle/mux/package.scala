@@ -146,6 +146,7 @@ import com.twitter.finagle.toggle.{StandardToggleMap, ToggleMap}
  *
  */
 package object mux {
+
   /**
    * The name of the finagle-mux [[ToggleMap]].
    */

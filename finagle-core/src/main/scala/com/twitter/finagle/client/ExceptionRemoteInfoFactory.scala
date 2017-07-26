@@ -9,9 +9,7 @@ import java.net.SocketAddress
 private[finagle] object ExceptionRemoteInfoFactory {
   val role: Stack.Role = Stack.Role("ExceptionRemoteInfo")
 
-  private[this] case class UpstreamInfo(
-      addr: Option[SocketAddress],
-      id: Option[String])
+  private[this] case class UpstreamInfo(addr: Option[SocketAddress], id: Option[String])
 
   private[this] val UnknownUpstream = UpstreamInfo(None, None)
   private[this] val UnknownUpstreamFn: () => UpstreamInfo = () => UnknownUpstream
@@ -35,20 +33,29 @@ private[finagle] object ExceptionRemoteInfoFactory {
     downstreamLabel: String
   ): PartialFunction[Throwable, Future[T]] = {
     case e: HasRemoteInfo =>
-      e.setRemoteInfo(RemoteInfo.Available(
-        currentUpstream.addr,
-        currentUpstream.id,
-        Some(downstreamAddr),
-        Some(downstreamLabel),
-        Trace.id))
+      e.setRemoteInfo(
+        RemoteInfo.Available(
+          currentUpstream.addr,
+          currentUpstream.id,
+          Some(downstreamAddr),
+          Some(downstreamLabel),
+          Trace.id
+        )
+      )
       Future.exception(e)
     case f: Failure =>
-      Future.exception(f.withSource(Failure.Source.RemoteInfo, RemoteInfo.Available(
-        currentUpstream.addr,
-        currentUpstream.id,
-        Some(downstreamAddr),
-        Some(downstreamLabel),
-        Trace.id)))
+      Future.exception(
+        f.withSource(
+          Failure.Source.RemoteInfo,
+          RemoteInfo.Available(
+            currentUpstream.addr,
+            currentUpstream.id,
+            Some(downstreamAddr),
+            Some(downstreamLabel),
+            Trace.id
+          )
+        )
+      )
   }
 
   /**
@@ -83,15 +90,15 @@ private[finagle] object ExceptionRemoteInfoFactory {
  * and the `traceid` read from the local context, respectively.
  */
 private[finagle] class ExceptionRemoteInfoFactory[Req, Rep](
-    underlying: ServiceFactory[Req, Rep],
-    downstreamAddr: SocketAddress,
-    downstreamLabel: String)
-  extends ServiceFactoryProxy[Req, Rep](underlying) {
+  underlying: ServiceFactory[Req, Rep],
+  downstreamAddr: SocketAddress,
+  downstreamLabel: String
+) extends ServiceFactoryProxy[Req, Rep](underlying) {
 
   private[this] val requestAddRemoteInfo: PartialFunction[Throwable, Future[Rep]] =
     ExceptionRemoteInfoFactory.addRemoteInfo(downstreamAddr, downstreamLabel)
 
-  private[this] val connectionAddRemoteInfo: PartialFunction[Throwable, Future[Service[Req,Rep]]] =
+  private[this] val connectionAddRemoteInfo: PartialFunction[Throwable, Future[Service[Req, Rep]]] =
     ExceptionRemoteInfoFactory.addRemoteInfo(downstreamAddr, downstreamLabel)
 
   private[this] val filter = new SimpleFilter[Req, Rep] {
@@ -100,8 +107,10 @@ private[finagle] class ExceptionRemoteInfoFactory[Req, Rep](
   }
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
-    underlying(conn).map { service =>
-      filter.andThen(service)
-    }.rescue(connectionAddRemoteInfo)
+    underlying(conn)
+      .map { service =>
+        filter.andThen(service)
+      }
+      .rescue(connectionAddRemoteInfo)
 
 }

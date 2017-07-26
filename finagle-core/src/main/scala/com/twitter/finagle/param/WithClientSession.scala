@@ -8,6 +8,7 @@ import com.twitter.finagle.Stack
  * @see [[ClientSessionParams]]
  */
 trait WithClientSession[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =>
+
   /**
    * An entry point for configuring the client's session.
    */

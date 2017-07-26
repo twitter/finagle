@@ -46,10 +46,10 @@ private[netty4] trait ConnectPromiseDelayListeners {
     promise: ChannelPromise
   ): GenericFutureListener[NettyFuture[Any]] = new GenericFutureListener[NettyFuture[Any]] {
     override def operationComplete(f: NettyFuture[Any]): Unit =
-    // We filter cancellation here since we assume it was proxied from the old promise and
-    // is already being handled in `cancelPromiseWhenCancelled`.
-    if (!f.isSuccess && !f.isCancelled) {
-      promise.setFailure(f.cause)
-    }
+      // We filter cancellation here since we assume it was proxied from the old promise and
+      // is already being handled in `cancelPromiseWhenCancelled`.
+      if (!f.isSuccess && !f.isCancelled) {
+        promise.setFailure(f.cause)
+      }
   }
 }

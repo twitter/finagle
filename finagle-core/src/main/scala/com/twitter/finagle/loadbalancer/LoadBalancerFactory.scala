@@ -106,6 +106,7 @@ object LoadBalancerFactory {
   }
 
   object AddressOrdering {
+
     /**
      * An [[Ordering]] which orders [[Address Addresses]] based on a
      * deterministic hash of their IP.
@@ -117,11 +118,13 @@ object LoadBalancerFactory {
     private val defaultHashOrdering = new Ordering[Address] {
       def compare(a0: Address, a1: Address): Int = (a0, a1) match {
         case (Address.Inet(inet0, _), Address.Inet(inet1, _)) =>
-          if (inet0.isUnresolved || inet1.isUnresolved) 0 else {
+          if (inet0.isUnresolved || inet1.isUnresolved) 0
+          else {
             val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress)
             val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress)
             val ipCompare = Integer.compare(ipHash0, ipHash1)
-            if (ipCompare != 0) ipCompare else {
+            if (ipCompare != 0) ipCompare
+            else {
               Integer.compare(inet0.getPort, inet1.getPort)
             }
           }
@@ -175,7 +178,8 @@ object LoadBalancerFactory {
       implicitly[Stack.Param[param.Stats]],
       implicitly[Stack.Param[param.Logger]],
       implicitly[Stack.Param[param.Monitor]],
-      implicitly[Stack.Param[param.Reporter]])
+      implicitly[Stack.Param[param.Reporter]]
+    )
 
     def make(
       params: Stack.Params,
@@ -206,15 +210,17 @@ object LoadBalancerFactory {
       // Creates a ServiceFactory from the `next` in the stack and ensures
       // that `sockaddr` is an available param for `next`.
       def newEndpoint(addr: Address): ServiceFactory[Req, Rep] = {
-        val stats = if (hostStatsReceiver.isNull) statsReceiver else {
-          val scope = addr match {
-            case Address.Inet(ia, _) =>
-              "%s:%d".format(ia.getHostName, ia.getPort)
-            case other => other.toString
+        val stats =
+          if (hostStatsReceiver.isNull) statsReceiver
+          else {
+            val scope = addr match {
+              case Address.Inet(ia, _) =>
+                "%s:%d".format(ia.getHostName, ia.getPort)
+              case other => other.toString
+            }
+            val host = hostStatsReceiver.scope(label).scope(scope)
+            BroadcastStatsReceiver(Seq(host, statsReceiver))
           }
-          val host = hostStatsReceiver.scope(label).scope(scope)
-          BroadcastStatsReceiver(Seq(host, statsReceiver))
-        }
 
         val composite = {
           val ia = addr match {
@@ -228,10 +234,12 @@ object LoadBalancerFactory {
           reporter(label, ia).andThen(monitor.orElse(defaultMonitor))
         }
 
-        next.make(params +
-          Transporter.EndpointAddr(addr) +
-          param.Stats(stats) +
-          param.Monitor(composite))
+        next.make(
+          params +
+            Transporter.EndpointAddr(addr) +
+            param.Stats(stats) +
+            param.Monitor(composite)
+        )
       }
 
       val balancerStats = rawStatsReceiver.scope("loadbalancer")
@@ -242,7 +250,8 @@ object LoadBalancerFactory {
       ): ServiceFactory[Req, Rep] = {
         val ordering = params[AddressOrdering].ordering
         val orderedEndpoints = endpoints.map { set =>
-          try set.toVector.sortBy(_.address)(ordering) catch {
+          try set.toVector.sortBy(_.address)(ordering)
+          catch {
             case NonFatal(exc) =>
               log.log(Level.WARNING, "Unable to order endpoints via AddressOrdering", exc)
               set.toVector
@@ -250,7 +259,10 @@ object LoadBalancerFactory {
         }
 
         val underlying = loadBalancerFactory.newBalancer(
-          orderedEndpoints, balancerExc, params + param.Stats(balancerStats))
+          orderedEndpoints,
+          balancerExc,
+          params + param.Stats(balancerStats)
+        )
         params[WhenNoNodesOpenParam].whenNoNodesOpen match {
           case WhenNoNodesOpen.PickOne => underlying
           case WhenNoNodesOpen.FailFast => new NoNodesOpenServiceFactory(underlying)
@@ -275,13 +287,16 @@ object LoadBalancerFactory {
 
       // Instead of simply creating a newBalancer here, we defer to the
       // traffic distributor to interpret weighted `Addresses`.
-      Stack.Leaf(role, new TrafficDistributor[Req, Rep](
-        dest = destActivity,
-        newEndpoint = newEndpoint,
-        newBalancer = newBalancer,
-        eagerEviction = !probationEnabled,
-        statsReceiver = balancerStats
-      ))
+      Stack.Leaf(
+        role,
+        new TrafficDistributor[Req, Rep](
+          dest = destActivity,
+          newEndpoint = newEndpoint,
+          newBalancer = newBalancer,
+          eagerEviction = !probationEnabled,
+          statsReceiver = balancerStats
+        )
+      )
     }
   }
 
@@ -301,6 +316,7 @@ object LoadBalancerFactory {
  * for more details.
  */
 abstract class LoadBalancerFactory {
+
   /**
    * Returns a new balancer which is represented by a [[com.twitter.finagle.ServiceFactory]].
    *

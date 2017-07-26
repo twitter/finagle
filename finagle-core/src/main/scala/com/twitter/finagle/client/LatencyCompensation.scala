@@ -72,7 +72,6 @@ object LatencyCompensation {
       Stack.Param(Compensation(Duration.Zero))
   }
 
-
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module[ServiceFactory[Req, Rep]] {
       val role = Role

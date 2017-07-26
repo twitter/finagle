@@ -10,7 +10,6 @@ import com.twitter.util._
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
-
 private[http] object StreamTransports {
 
   /**
@@ -24,7 +23,7 @@ private[http] object StreamTransports {
   def copyToWriter[A](
     trans: Transport[_, A],
     writer: Writer
-   )(eos: A => Boolean)(chunkOfA: A => Buf): Future[Unit] =
+  )(eos: A => Boolean)(chunkOfA: A => Buf): Future[Unit] =
     trans.read().flatMap { a: A =>
       val chunk = chunkOfA(a)
       val writeF =
@@ -55,10 +54,10 @@ private[http] object StreamTransports {
     private[this] val writes = copyToWriter(trans, rw)(eos)(chunkOfA)
     forwardInterruptsTo(writes)
     writes.respond {
-      case ret@Throw(t) =>
+      case ret @ Throw(t) =>
         updateIfEmpty(ret)
         rw.fail(t)
-      case r@Return(_) =>
+      case r @ Return(_) =>
         updateIfEmpty(r)
         rw.close()
     }
@@ -104,9 +103,8 @@ private[http] object StreamTransports {
   val isLast: Any => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
 }
 
-private[finagle] class Netty4ServerStreamTransport(
-    rawTransport: Transport[Any, Any])
-  extends StreamTransportProxy[Response, Request](rawTransport){
+private[finagle] class Netty4ServerStreamTransport(rawTransport: Transport[Any, Any])
+    extends StreamTransportProxy[Response, Request](rawTransport) {
   import StreamTransports._
 
   private[this] val transport =
@@ -128,12 +126,10 @@ private[finagle] class Netty4ServerStreamTransport(
   def read(): Future[Multi[Request]] = {
     transport.read().flatMap {
       case req: NettyHttp.FullHttpRequest =>
-        val finagleReq = Bijections.netty.fullRequestToFinagle(req,
-          transport.remoteAddress match {
-            case ia: InetSocketAddress => ia
-            case _ => new InetSocketAddress(0)
-          }
-        )
+        val finagleReq = Bijections.netty.fullRequestToFinagle(req, transport.remoteAddress match {
+          case ia: InetSocketAddress => ia
+          case _ => new InetSocketAddress(0)
+        })
         Future.value(Multi(finagleReq, Future.Done))
 
       case req: NettyHttp.HttpRequest =>
@@ -157,9 +153,8 @@ private[finagle] class Netty4ServerStreamTransport(
   }
 }
 
-private[finagle] class Netty4ClientStreamTransport(
-    rawTransport: Transport[Any, Any])
-  extends StreamTransportProxy[Request, Response](rawTransport){
+private[finagle] class Netty4ClientStreamTransport(rawTransport: Transport[Any, Any])
+    extends StreamTransportProxy[Request, Response](rawTransport) {
   import StreamTransports._
 
   private[this] val transport =

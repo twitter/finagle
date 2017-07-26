@@ -8,13 +8,17 @@ import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.util._
 
 private[finagle] object NackAdmissionFilter {
-  private val OverloadFailure = Future.exception(Failure("Failed fast because service is overloaded", Failure.Rejected|Failure.NonRetryable))
+  private val OverloadFailure = Future.exception(
+    Failure("Failed fast because service is overloaded", Failure.Rejected | Failure.NonRetryable)
+  )
   val role = new Stack.Role("NackAdmissionFilter")
 
   /**
    * For feature roll out only.
    */
-  private val EnableNackAcToggle = CoreToggles("com.twitter.finagle.core.UseClientNackAdmissionFilter")
+  private val EnableNackAcToggle = CoreToggles(
+    "com.twitter.finagle.core.UseClientNackAdmissionFilter"
+  )
   private def enableNackAc(): Boolean = EnableNackAcToggle(ServerInfo().id.hashCode)
 
   /**
@@ -63,10 +67,7 @@ private[finagle] object NackAdmissionFilter {
   }
 
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[
-      NackAdmissionFilter.Param,
-      param.Stats,
-      ServiceFactory[Req, Rep]] {
+    new Stack.Module2[NackAdmissionFilter.Param, param.Stats, ServiceFactory[Req, Rep]] {
       val description = "Probabilistically drops requests to the underlying service."
       val role = NackAdmissionFilter.role
 
@@ -79,14 +80,17 @@ private[finagle] object NackAdmissionFilter {
 
         // Create the filter with the given window and nack rate threshold.
         val filter = new NackAdmissionFilter[Req, Rep](
-          _param.window, _param.nackRateThreshold, Rng.threadLocal,
-          stats.scope("nack_admission_control"))
+          _param.window,
+          _param.nackRateThreshold,
+          Rng.threadLocal,
+          stats.scope("nack_admission_control")
+        )
 
         // This creates a filter that is shared across all endpoints, which is
         // required for proper operation.
         filter.andThen(next)
       }
-  }
+    }
 }
 
 /**
@@ -122,12 +126,12 @@ private[finagle] object NackAdmissionFilter {
  * @param random Random number generator used in probability calculation.
  */
 private[finagle] class NackAdmissionFilter[Req, Rep](
-    window: Duration,
-    nackRateThreshold: Double,
-    random: Rng,
-    statsReceiver: StatsReceiver,
-    monoTime: Ema.Monotime = new Ema.Monotime)
-  extends SimpleFilter[Req, Rep] {
+  window: Duration,
+  nackRateThreshold: Double,
+  random: Rng,
+  statsReceiver: StatsReceiver,
+  monoTime: Ema.Monotime = new Ema.Monotime
+) extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
 
   require(window > Duration.Zero, s"window size must be positive: $window")
@@ -136,7 +140,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
 
   private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
   private[this] val acceptRateThreshold = 1.0 - nackRateThreshold
-  private[this] val multiplier = 1D/acceptRateThreshold
+  private[this] val multiplier = 1D / acceptRateThreshold
   private[this] val windowInNs = window.inNanoseconds
 
   // EMA representing the rate of responses that are not nacks. We update it
@@ -170,7 +174,7 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   private[this] def shouldDropRequest(): Boolean = {
     val acceptFraction = emaValue
     acceptFraction < acceptRateThreshold &&
-      random.nextDouble() < math.min(MaxDropProbability, 1.0 - multiplier * acceptFraction)
+    random.nextDouble() < math.min(MaxDropProbability, 1.0 - multiplier * acceptFraction)
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {

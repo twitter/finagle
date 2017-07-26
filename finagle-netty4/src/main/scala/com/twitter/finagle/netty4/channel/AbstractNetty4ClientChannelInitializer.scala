@@ -15,9 +15,8 @@ import java.util.logging.Level
 /**
  * Base initializer which installs read / write timeouts and a connection handler
  */
-private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
-  params: Stack.Params)
-  extends ChannelInitializer[Channel] {
+private[netty4] abstract class AbstractNetty4ClientChannelInitializer(params: Stack.Params)
+    extends ChannelInitializer[Channel] {
 
   import Netty4ClientChannelInitializer._
 
@@ -83,8 +82,10 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
         case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
       }
 
-        pipe.addFirst("socksProxyConnect",
-          new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = true))
+      pipe.addFirst(
+        "socksProxyConnect",
+        new Netty4ProxyConnectHandler(proxyHandler, bypassLocalhostConnections = true)
+      )
     }
 
     // HTTP proxy via `Netty4ProxyConnectHandler`.
@@ -101,8 +102,8 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
 
     // TCP tunneling via HTTP proxy (using `HttpProxyConnectHandler`).
     httpHostAndCredentials.foreach {
-      case (host, credentials) => pipe.addFirst("httpProxyConnect",
-        new HttpProxyConnectHandler(host, credentials))
+      case (host, credentials) =>
+        pipe.addFirst("httpProxyConnect", new HttpProxyConnectHandler(host, credentials))
     }
   }
 }

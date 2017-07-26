@@ -13,7 +13,7 @@ private[http2] object RichHttp2ServerDowngrader {
     headers.getAll("connection").asScala.foreach(headers.remove(_))
 
     // Clobber all values of "te" except for "trailers"
-    if (headers.containsValue("te", "trailers", true /* ignoreCase */))
+    if (headers.containsValue("te", "trailers", true /* ignoreCase */ ))
       headers.set("te", "trailers")
     else
       headers.remove("te")
@@ -29,8 +29,8 @@ private[http2] object RichHttp2ServerDowngrader {
  * See https://tools.ietf.org/html/rfc7540#section-8.1.2.2
  */
 private[http2] class RichHttp2ServerDowngrader(
-    validateHeaders: Boolean
-  ) extends Http2ServerDowngrader(validateHeaders) {
+  validateHeaders: Boolean
+) extends Http2ServerDowngrader(validateHeaders) {
   import RichHttp2ServerDowngrader._
 
   override def encode(ctx: ChannelHandlerContext, obj: HttpObject, out: JList[Object]): Unit = {

@@ -25,8 +25,7 @@ import com.twitter.finagle.serverset2.naming.{IdPrefixingNamer, ServersetNamer}
  * is the endpoint `http` of shard 0 of serverset `/twitter/service/cuckoo/prod/read` on
  * the ensemble `sdzookeeper.local.twitter.com:2181`.
  */
-class serverset(zk2: Zk2Resolver) extends IdPrefixingNamer(
-    Path.Utf8("$", "com.twitter.serverset"),
-    new ServersetNamer(zk2)) {
+class serverset(zk2: Zk2Resolver)
+    extends IdPrefixingNamer(Path.Utf8("$", "com.twitter.serverset"), new ServersetNamer(zk2)) {
   def this() = this(Resolver.get(classOf[Zk2Resolver]).get)
 }

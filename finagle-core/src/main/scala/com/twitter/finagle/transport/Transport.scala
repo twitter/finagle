@@ -19,6 +19,7 @@ import scala.util.control.NonFatal
  * encoding and decoding.
  */
 trait Transport[In, Out] extends Closable { self =>
+
   /**
    * Write `req` to this transport; the returned future
    * acknowledges write completion.
@@ -72,7 +73,8 @@ trait Transport[In, Out] extends Closable { self =>
         try self.write(f(in1))
         catch {
           case NonFatal(t) => Future.exception(t)
-          case nlrc: NonLocalReturnControl[_] => Future.exception(new FutureNonLocalReturnControl(nlrc))
+          case nlrc: NonLocalReturnControl[_] =>
+            Future.exception(new FutureNonLocalReturnControl(nlrc))
         }
 
       def read(): Future[Out1] = self.read().map(g)
@@ -259,10 +261,10 @@ object Transport {
     private[this] val writes = copyToWriter(trans, rw)(chunkOfA)
     forwardInterruptsTo(writes)
     writes.respond {
-      case ret@Throw(t) =>
+      case ret @ Throw(t) =>
         updateIfEmpty(ret)
         rw.fail(t)
-      case r@Return(_) =>
+      case r @ Return(_) =>
         updateIfEmpty(r)
         rw.close()
     }
@@ -283,11 +285,12 @@ object Transport {
    *
    * @see [[Transport.cast(Class[Out], transport)]] for Java users.
    */
-  def cast[In1, Out1](trans: Transport[Any, Any])(implicit m: Manifest[Out1]): Transport[In1, Out1] = {
+  def cast[In1, Out1](
+    trans: Transport[Any, Any]
+  )(implicit m: Manifest[Out1]): Transport[In1, Out1] = {
     val cls = m.runtimeClass.asInstanceOf[Class[Out1]]
     cast[In1, Out1](cls, trans)
   }
-
 
   /**
    * Casts an object transport to `Transport[In1, Out1]`. Note that this is
@@ -302,26 +305,27 @@ object Transport {
     if (cls.isAssignableFrom(classOf[Any])) {
       // No need to do any dynamic type checks on Any!
       trans.asInstanceOf[Transport[In1, Out1]]
-    } else new Transport[In1, Out1] {
-      def write(req: In1): Future[Unit] = trans.write(req)
-      def read(): Future[Out1] = trans.read().flatMap(readFn)
-      def status: Status = trans.status
-      def onClose: Future[Throwable] = trans.onClose
-      def localAddress: SocketAddress = trans.localAddress
-      def remoteAddress: SocketAddress = trans.remoteAddress
-      def peerCertificate: Option[Certificate] = trans.peerCertificate
-      def close(deadline: Time): Future[Unit] = trans.close(deadline)
-      override def toString: String = trans.toString
+    } else
+      new Transport[In1, Out1] {
+        def write(req: In1): Future[Unit] = trans.write(req)
+        def read(): Future[Out1] = trans.read().flatMap(readFn)
+        def status: Status = trans.status
+        def onClose: Future[Throwable] = trans.onClose
+        def localAddress: SocketAddress = trans.localAddress
+        def remoteAddress: SocketAddress = trans.remoteAddress
+        def peerCertificate: Option[Certificate] = trans.peerCertificate
+        def close(deadline: Time): Future[Unit] = trans.close(deadline)
+        override def toString: String = trans.toString
 
-      private val readFn: Any => Future[Out1] = {
-        case out1 if cls.isAssignableFrom(out1.getClass) => Future.value(out1.asInstanceOf[Out1])
-        case other =>
-          val msg = s"Transport.cast failed. Expected type ${cls.getName} " +
-            s"but found ${other.getClass.getName}"
-          val ex = new ClassCastException(msg)
-          Future.exception(ex)
+        private val readFn: Any => Future[Out1] = {
+          case out1 if cls.isAssignableFrom(out1.getClass) => Future.value(out1.asInstanceOf[Out1])
+          case other =>
+            val msg = s"Transport.cast failed. Expected type ${cls.getName} " +
+              s"but found ${other.getClass.getName}"
+            val ex = new ClassCastException(msg)
+            Future.exception(ex)
+        }
       }
-    }
   }
 
 }
@@ -353,10 +357,8 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
  * A `Transport` interface to a pair of queues (one for reading, one
  * for writing); useful for testing.
  */
-class QueueTransport[In, Out](
-    writeq: AsyncQueue[In],
-    readq: AsyncQueue[Out])
-  extends Transport[In, Out] {
+class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
+    extends Transport[In, Out] {
   private[this] val closep = new Promise[Throwable]
 
   def write(input: In): Future[Unit] = {
@@ -378,7 +380,7 @@ class QueueTransport[In, Out](
   }
 
   val onClose: Future[Throwable] = closep
-  val localAddress: SocketAddress = new SocketAddress{}
-  val remoteAddress: SocketAddress = new SocketAddress{}
+  val localAddress: SocketAddress = new SocketAddress {}
+  val remoteAddress: SocketAddress = new SocketAddress {}
   def peerCertificate: Option[Certificate] = None
 }

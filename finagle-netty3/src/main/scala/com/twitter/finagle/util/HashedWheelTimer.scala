@@ -59,6 +59,7 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
  * instance is [[HashedWheelTimer.Default]].
  */
 object HashedWheelTimer {
+
   /**
    * A wheel size of 512 and 10 millisecond ticks provides approximately 5100
    * milliseconds worth of scheduling. This should suffice for most usage
@@ -70,10 +71,8 @@ object HashedWheelTimer {
   /**
    * Create a default `HashedWheelTimer`.
    */
-  def apply(): Timer = HashedWheelTimer(
-    Executors.defaultThreadFactory(),
-    TickDuration,
-    TicksPerWheel)
+  def apply(): Timer =
+    HashedWheelTimer(Executors.defaultThreadFactory(), TickDuration, TicksPerWheel)
 
   /**
    * Create a `HashedWheelTimer` with custom [[ThreadFactory]], [[Duration]]
@@ -84,7 +83,8 @@ object HashedWheelTimer {
       threadFactory,
       tickDuration.inNanoseconds,
       TimeUnit.NANOSECONDS,
-      ticksPerWheel)
+      ticksPerWheel
+    )
     new HashedWheelTimer(hwt)
   }
 
@@ -116,9 +116,11 @@ object HashedWheelTimer {
   // ticks, which gives ~5100 milliseconds worth of scheduling. This should
   // suffice for most usage without having tasks scheduled for a later round.
   private[finagle] val nettyHwt = new netty.HashedWheelTimer(
-    new NamedPoolThreadFactory("Finagle Default Timer", /*daemons = */true),
-    TickDuration.inMilliseconds, TimeUnit.MILLISECONDS,
-    TicksPerWheel)
+    new NamedPoolThreadFactory("Finagle Default Timer", /*daemons = */ true),
+    TickDuration.inMilliseconds,
+    TimeUnit.MILLISECONDS,
+    TicksPerWheel
+  )
 
   private[this] val log = Logger.get()
 
@@ -132,7 +134,8 @@ object HashedWheelTimer {
         val stackTrace = Thread.currentThread.getStackTrace
         log.warning(
           s"Ignoring call to `Timer.stop()` on an unstoppable Timer: $timer." +
-            s"Current stack trace: ${stackTrace.mkString("\n")}")
+            s"Current stack trace: ${stackTrace.mkString("\n")}"
+        )
       }
 
       override def toString: String =
@@ -152,13 +155,11 @@ object HashedWheelTimer {
       }
     )
 
-  TimerStats.deviation(
-    nettyHwt,
-    10.milliseconds,
-    FinagleStatsReceiver.scope("timer"))
+  TimerStats.deviation(nettyHwt, 10.milliseconds, FinagleStatsReceiver.scope("timer"))
 
   TimerStats.hashedWheelTimerInternals(
     nettyHwt,
     () => 10.seconds,
-    FinagleStatsReceiver.scope("timer"))
+    FinagleStatsReceiver.scope("timer")
+  )
 }

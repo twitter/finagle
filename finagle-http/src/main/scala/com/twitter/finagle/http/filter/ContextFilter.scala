@@ -9,8 +9,7 @@ import com.twitter.util.Future
  * Sets the following Context values from the request headers:
  *     - request deadline
  */
-private[finagle] class ServerContextFilter[Req <: Request, Rep]
-  extends SimpleFilter[Req, Rep] {
+private[finagle] class ServerContextFilter[Req <: Request, Rep] extends SimpleFilter[Req, Rep] {
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
     HttpContext.read(req)(service(req))
@@ -41,8 +40,7 @@ private[finagle] object ServerContextFilter {
  * Sets the following header values for the request Context:
  *     - request deadline
  */
-private[finagle] class ClientContextFilter[Req <: Request, Rep]
-  extends SimpleFilter[Req, Rep] {
+private[finagle] class ClientContextFilter[Req <: Request, Rep] extends SimpleFilter[Req, Rep] {
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     HttpContext.write(req)

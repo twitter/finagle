@@ -15,12 +15,12 @@ private object RefCountingTransport {
  * a ChannelTransport which manages Bufs backed by direct buffers.
  */
 private[finagle] class RefCountingTransport(
-    ch: Channel,
-    /* exposed for testing*/ private[transport] val maxPendingOffers: Int = Int.MaxValue)
-  extends ChannelTransport(
-    ch,
-    new ResourceAwareQueue[Any](
-      maxPendingOffers = maxPendingOffers,
-      releaseFn = RefCountingTransport.copyAndReleaseFn
+  ch: Channel,
+  /* exposed for testing*/ private[transport] val maxPendingOffers: Int = Int.MaxValue
+) extends ChannelTransport(
+      ch,
+      new ResourceAwareQueue[Any](
+        maxPendingOffers = maxPendingOffers,
+        releaseFn = RefCountingTransport.copyAndReleaseFn
+      )
     )
-  )

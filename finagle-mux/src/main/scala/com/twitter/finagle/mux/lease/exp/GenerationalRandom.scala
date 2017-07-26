@@ -7,7 +7,7 @@ import scala.util.Random
  * However, if there has been an interstitial garbage collection since the last
  * time the generator was used, the random number will be recomputed.
  */
-private[lease] class GenerationalRandom private[lease](info: JvmInfo, rand: Random) {
+private[lease] class GenerationalRandom private[lease] (info: JvmInfo, rand: Random) {
   def this(info: JvmInfo) = this(info, new Random())
 
   private var last = rand.nextInt().abs

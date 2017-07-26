@@ -17,11 +17,13 @@ import com.twitter.app.GlobalFlag
  *
  * @see [[com.twitter.finagle.toggle.ToggleMap.flags]]
  */
-object overrides extends GlobalFlag[Map[String, Double]](
-    Map.empty,
-    """Source for the Flag-based ToggleMap.
+object overrides
+    extends GlobalFlag[Map[String, Double]](
+      Map.empty,
+      """Source for the Flag-based ToggleMap.
       |Format is `com.yourpackage.id1=fraction1,com.yourpackage.id2=fraction2,...`
-      |where fractions must be [0.0-1.0]""".stripMargin) {
+      |where fractions must be [0.0-1.0]""".stripMargin
+    ) {
 
   /**
    * Run `f` with the given `Toggles` set to `fraction`.

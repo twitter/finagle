@@ -17,8 +17,10 @@ private[netty4] object exportNetty4MetricsAndRegistryEntries {
 
   private[this] val gauges = mutable.Set.empty[Gauge]
 
-  private[this] def buildAccumulator(f: PoolArenaMetric => Long) =
-    { (acc: Float, pa: PoolArenaMetric) => acc + f(pa) }
+  private[this] def buildAccumulator(f: PoolArenaMetric => Long) = {
+    (acc: Float, pa: PoolArenaMetric) =>
+      acc + f(pa)
+  }
 
   private[this] val sumHugeAllocations = buildAccumulator(_.numHugeAllocations())
   private[this] val sumNormalAllocations = buildAccumulator(_.numNormalAllocations())
@@ -38,39 +40,55 @@ private[netty4] object exportNetty4MetricsAndRegistryEntries {
 
       // Allocations.
 
-      gauges.add(poolingStats.addGauge("allocations", "huge")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumHugeAllocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("allocations", "huge")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumHugeAllocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("allocations", "normal")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumNormalAllocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("allocations", "normal")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumNormalAllocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("allocations", "small")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumSmallAllocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("allocations", "small")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumSmallAllocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("allocations", "tiny")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumTinyAllocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("allocations", "tiny")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumTinyAllocations)
+        )
+      )
 
       // Deallocations.
 
-      gauges.add(poolingStats.addGauge("deallocations", "huge")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumHugeDeallocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("deallocations", "huge")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumHugeDeallocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("deallocations", "normal")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumNormalDellocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("deallocations", "normal")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumNormalDellocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("deallocations", "small")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumSmallDeallocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("deallocations", "small")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumSmallDeallocations)
+        )
+      )
 
-      gauges.add(poolingStats.addGauge("deallocations", "tiny")(
-        metric.directArenas().asScala.foldLeft(0.0f)(sumTinyDeallocations)
-      ))
+      gauges.add(
+        poolingStats.addGauge("deallocations", "tiny")(
+          metric.directArenas().asScala.foldLeft(0.0f)(sumTinyDeallocations)
+        )
+      )
     }
   }
 
@@ -79,20 +97,24 @@ private[netty4] object exportNetty4MetricsAndRegistryEntries {
       val metric = PooledByteBufAllocator.DEFAULT.metric()
 
       GlobalRegistry.get.put(
-        Seq("library", "netty4", "pooling", "chunkSize"), metric.chunkSize.toString
+        Seq("library", "netty4", "pooling", "chunkSize"),
+        metric.chunkSize.toString
       )
 
       GlobalRegistry.get.put(
-        Seq("library", "netty4", "pooling", "numDirectArenas"), metric.numDirectArenas.toString
+        Seq("library", "netty4", "pooling", "numDirectArenas"),
+        metric.numDirectArenas.toString
       )
 
       GlobalRegistry.get.put(
-        Seq("library", "netty4", "pooling", "numHeapArenas"), metric.numHeapArenas.toString
+        Seq("library", "netty4", "pooling", "numHeapArenas"),
+        metric.numHeapArenas.toString
       )
     }
 
     GlobalRegistry.get.put(
-      Seq("library", "netty4", "native epoll enabled"), nativeEpoll.enabled.toString
+      Seq("library", "netty4", "native epoll enabled"),
+      nativeEpoll.enabled.toString
     )
   }
 

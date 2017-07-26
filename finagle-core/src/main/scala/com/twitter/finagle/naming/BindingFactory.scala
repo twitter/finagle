@@ -43,68 +43,74 @@ import com.twitter.util._
  * @bug 'status' has a funny definition.
  */
 private[finagle] class BindingFactory[Req, Rep](
-    path: Path,
-    newFactory: Name.Bound => ServiceFactory[Req, Rep],
-    timer: Timer,
-    baseDtab: () => Dtab = BindingFactory.DefaultBaseDtab,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    maxNameCacheSize: Int = 8,
-    maxNameTreeCacheSize: Int = 8,
-    maxNamerCacheSize: Int = 4,
-    cacheTti: Duration = 10.minutes)
-  extends ServiceFactory[Req, Rep] {
+  path: Path,
+  newFactory: Name.Bound => ServiceFactory[Req, Rep],
+  timer: Timer,
+  baseDtab: () => Dtab = BindingFactory.DefaultBaseDtab,
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  maxNameCacheSize: Int = 8,
+  maxNameTreeCacheSize: Int = 8,
+  maxNamerCacheSize: Int = 4,
+  cacheTti: Duration = 10.minutes
+) extends ServiceFactory[Req, Rep] {
 
   private[this] val nameCache =
     new ServiceFactoryCache[Name.Bound, Req, Rep](
-      bound => new ServiceFactoryProxy(newFactory(bound)) {
-        private val boundShow = Showable.show(bound)
-        override def apply(conn: ClientConnection) = {
-          Trace.recordBinary("namer.name", boundShow)
-          super.apply(conn)
-        }
+      bound =>
+        new ServiceFactoryProxy(newFactory(bound)) {
+          private val boundShow = Showable.show(bound)
+          override def apply(conn: ClientConnection) = {
+            Trace.recordBinary("namer.name", boundShow)
+            super.apply(conn)
+          }
       },
       timer,
       statsReceiver.scope("namecache"),
       maxNameCacheSize,
-      cacheTti)
+      cacheTti
+    )
 
   private[this] val nameTreeCache =
     new ServiceFactoryCache[NameTree[Name.Bound], Req, Rep](
-      tree => new ServiceFactoryProxy(NameTreeFactory(path, tree, nameCache)) {
-        private val treeShow = tree.show
-        override def apply(conn: ClientConnection) = {
-          Trace.recordBinary("namer.tree", treeShow)
-          super.apply(conn)
-        }
+      tree =>
+        new ServiceFactoryProxy(NameTreeFactory(path, tree, nameCache)) {
+          private val treeShow = tree.show
+          override def apply(conn: ClientConnection) = {
+            Trace.recordBinary("namer.tree", treeShow)
+            super.apply(conn)
+          }
       },
       timer,
       statsReceiver.scope("nametreecache"),
       maxNameTreeCacheSize,
-      cacheTti)
+      cacheTti
+    )
 
   private[this] val dtabCache = {
-    val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
-      val factory = new DynNameFactory(
-        NameInterpreter.bind(baseDtab ++ localDtab, path),
-        nameTreeCache,
-        statsReceiver = statsReceiver)
+    val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = {
+      case (baseDtab, localDtab) =>
+        val factory = new DynNameFactory(
+          NameInterpreter.bind(baseDtab ++ localDtab, path),
+          nameTreeCache,
+          statsReceiver = statsReceiver
+        )
 
-      new ServiceFactoryProxy(factory) {
-        private val pathShow = path.show
-        private val baseDtabShow = baseDtab.show
-        override def apply(conn: ClientConnection) = {
-          Trace.recordBinary("namer.path", pathShow)
-          Trace.recordBinary("namer.dtab.base", baseDtabShow)
-          // dtab.local is annotated on the client & server tracers.
+        new ServiceFactoryProxy(factory) {
+          private val pathShow = path.show
+          private val baseDtabShow = baseDtab.show
+          override def apply(conn: ClientConnection) = {
+            Trace.recordBinary("namer.path", pathShow)
+            Trace.recordBinary("namer.dtab.base", baseDtabShow)
+            // dtab.local is annotated on the client & server tracers.
 
-          super.apply(conn) rescue {
-            // we don't have the dtabs handy at the point we throw
-            // the exception; fill them in on the way out
-            case e: NoBrokersAvailableException =>
-              Future.exception(new NoBrokersAvailableException(e.name, baseDtab, localDtab))
+            super.apply(conn) rescue {
+              // we don't have the dtabs handy at the point we throw
+              // the exception; fill them in on the way out
+              case e: NoBrokersAvailableException =>
+                Future.exception(new NoBrokersAvailableException(e.name, baseDtab, localDtab))
+            }
           }
         }
-      }
     }
 
     new ServiceFactoryCache[(Dtab, Dtab), Req, Rep](
@@ -112,7 +118,8 @@ private[finagle] class BindingFactory[Req, Rep](
       timer,
       statsReceiver.scope("dtabcache"),
       maxNamerCacheSize,
-      cacheTti)
+      cacheTti
+    )
   }
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
@@ -176,7 +183,8 @@ object BindingFactory {
       implicitly[Stack.Param[Dest]],
       implicitly[Stack.Param[param.Label]],
       implicitly[Stack.Param[param.Stats]],
-      implicitly[Stack.Param[param.Timer]])
+      implicitly[Stack.Param[param.Timer]]
+    )
 
     /**
      * A request filter that is aware of the bound residual path.
@@ -194,18 +202,19 @@ object BindingFactory {
       def newStack(errorLabel: String, bound: Name.Bound) = {
         val client = next.make(
           params +
-          // replace the possibly unbound Dest with the definitely bound
-          // Dest because (1) it's needed by AddrMetadataExtraction and
-          // (2) it seems disingenuous not to.
-          Dest(bound) +
-          LoadBalancerFactory.Dest(bound.addr) +
-          LoadBalancerFactory.ErrorLabel(errorLabel))
+            // replace the possibly unbound Dest with the definitely bound
+            // Dest because (1) it's needed by AddrMetadataExtraction and
+            // (2) it seems disingenuous not to.
+            Dest(bound) +
+            LoadBalancerFactory.Dest(bound.addr) +
+            LoadBalancerFactory.ErrorLabel(errorLabel)
+        )
 
         boundPathFilter(bound.path) andThen client
       }
 
       val factory = dest match {
-        case bound@Name.Bound(addr) => newStack(label, bound)
+        case bound @ Name.Bound(addr) => newStack(label, bound)
 
         case Name.Path(path) =>
           val BaseDtab(baseDtab) = params[BaseDtab]

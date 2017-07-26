@@ -16,7 +16,7 @@ case class Endpoint(ipv4: Int, port: Short) {
    * @return If this endpoint's ip is 0.0.0.0 or 127.0.0.1 we get the local host and return that.
    */
   def boundEndpoint: Endpoint = {
-    if (ipv4 == 0 || ipv4 == Endpoint.Loopback) this.copy(ipv4=Endpoint.getLocalHost) else this
+    if (ipv4 == 0 || ipv4 == Endpoint.Loopback) this.copy(ipv4 = Endpoint.getLocalHost) else this
   }
 
   def toThrift: thrift.Endpoint = {
@@ -30,14 +30,14 @@ case class Endpoint(ipv4: Int, port: Short) {
 object Endpoint {
   private[this] val log = Logger.getLogger(getClass.toString)
 
-  val Loopback = Endpoint.toIpv4(InetAddress.getByAddress(Array[Byte](127,0,0,1)))
+  val Loopback = Endpoint.toIpv4(InetAddress.getByAddress(Array[Byte](127, 0, 0, 1)))
 
   val Unknown = new Endpoint(0, 0)
 
   val Local = {
     try {
       val ipv4 = Endpoint.toIpv4(InetAddress.getLoopbackAddress)
-      Endpoint(ipv4,0)
+      Endpoint(ipv4, 0)
     } catch {
       case NonFatal(_) => Endpoint.Unknown
     }

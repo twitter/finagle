@@ -2,7 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{
-  GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher
+  GenSerialClientDispatcher,
+  SerialClientDispatcher,
+  SerialServerDispatcher
 }
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.netty3.transport.ChannelTransport
@@ -23,6 +25,7 @@ import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory
  * from this codec.
  */
 trait Codec[Req, Rep] {
+
   /**
    * The pipeline factory that implements the protocol.
    */
@@ -97,7 +100,8 @@ trait Codec[Req, Rep] {
    * A hack to allow for overriding the TraceInitializerFilter when using
    * Client/Server Builders rather than stacks.
    */
-  def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+  def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] =
+    TraceInitializerFilter.clientModule[Req, Rep]
 
   /**
    * A protocol library name to use for displaying which protocol library this client or server is using.
@@ -138,7 +142,6 @@ object Codec {
 /**
  * Codec factories create codecs given some configuration.
  */
-
 /**
  * Clients
  */
@@ -185,10 +188,10 @@ trait CodecFactory[Req, Rep] {
  * A [[StackClient]] based on a [[Codec]].
  */
 private case class CodecClient[Req, Rep](
-    codecFactory: CodecFactory[Req, Rep]#Client,
-    stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
-    params: Stack.Params = Stack.Params.empty)
-  extends StackClient[Req, Rep] {
+  codecFactory: CodecFactory[Req, Rep]#Client,
+  stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
+  params: Stack.Params = Stack.Params.empty
+) extends StackClient[Req, Rep] {
 
   import com.twitter.finagle.param._
 
@@ -220,8 +223,10 @@ private case class CodecClient[Req, Rep](
     val clientStack = {
       val stack0 = stack
         .replace(StackClient.Role.prepConn, prepConn)
-        .replace(StackClient.Role.prepFactory, (next: ServiceFactory[Req, Rep]) =>
-          codec.prepareServiceFactory(next))
+        .replace(
+          StackClient.Role.prepFactory,
+          (next: ServiceFactory[Req, Rep]) => codec.prepareServiceFactory(next)
+        )
         .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
       // disable failFast if the codec requests it
@@ -230,13 +235,14 @@ private case class CodecClient[Req, Rep](
     }
 
     case class Underlying(
-        stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
-        params: Stack.Params = params)
-      extends StdStackClient[Req, Rep, Underlying] {
+      stack: Stack[ServiceFactory[Req, Rep]] = clientStack,
+      params: Stack.Params = params
+    ) extends StdStackClient[Req, Rep, Underlying] {
 
       protected def copy1(
         stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
-        params: Stack.Params = this.params): Underlying = copy(stack, params)
+        params: Stack.Params = this.params
+      ): Underlying = copy(stack, params)
 
       protected type In = Any
       protected type Out = Any
@@ -244,8 +250,11 @@ private case class CodecClient[Req, Rep](
       protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
         val Stats(stats) = params[Stats]
         val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
-        Netty3Transporter[Any, Any](codec.pipelineFactory, addr,
-          params + Netty3Transporter.TransportFactory(newTransport))
+        Netty3Transporter[Any, Any](
+          codec.pipelineFactory,
+          addr,
+          params + Netty3Transporter.TransportFactory(newTransport)
+        )
       }
 
       protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep] =
@@ -269,26 +278,27 @@ private case class CodecClient[Req, Rep](
 }
 
 private case class CodecServer[Req, Rep](
-    codecFactory: CodecFactory[Req, Rep]#Server,
-    stack: Stack[ServiceFactory[Req, Rep]] = StackServer.newStack[Req, Rep],
-    params: Stack.Params = Stack.Params.empty)
-  extends StackServer[Req, Rep] {
+  codecFactory: CodecFactory[Req, Rep]#Server,
+  stack: Stack[ServiceFactory[Req, Rep]] = StackServer.newStack[Req, Rep],
+  params: Stack.Params = Stack.Params.empty
+) extends StackServer[Req, Rep] {
 
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackServer[Req, Rep] = copy(stack = stack)
   def withParams(ps: Stack.Params): StackServer[Req, Rep] = copy(params = ps)
 
-  def serve(
-    addr: SocketAddress,
-    service: ServiceFactory[Req, Rep]): ListeningServer = {
+  def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer = {
 
     val Label(label) = params[Label]
     val Stats(stats) = params[Stats]
     val codec = codecFactory(ServerCodecConfig(label, addr))
 
-    val serverStack = stack.replace(
-      StackServer.Role.preparer, (next: ServiceFactory[Req, Rep]) =>
-        codec.prepareConnFactory(next, params + Stats(stats.scope(label)))
-    ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
+    val serverStack = stack
+      .replace(
+        StackServer.Role.preparer,
+        (next: ServiceFactory[Req, Rep]) =>
+          codec.prepareConnFactory(next, params + Stats(stats.scope(label)))
+      )
+      .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
     val proto = params[ProtocolLibrary]
     val serverParams =
@@ -296,9 +306,9 @@ private case class CodecServer[Req, Rep](
       else params + ProtocolLibrary(codec.protocolLibraryName)
 
     case class Underlying(
-        stack: Stack[ServiceFactory[Req, Rep]] = serverStack,
-        params: Stack.Params = serverParams)
-      extends StdStackServer[Req, Rep, Underlying] {
+      stack: Stack[ServiceFactory[Req, Rep]] = serverStack,
+      params: Stack.Params = serverParams
+    ) extends StdStackServer[Req, Rep, Underlying] {
 
       protected type In = Any
       protected type Out = Any
@@ -312,7 +322,8 @@ private case class CodecServer[Req, Rep](
         Netty3Listener(codec.pipelineFactory, params)
 
       protected def newDispatcher(
-        transport: Transport[In, Out], service: Service[Req, Rep]
+        transport: Transport[In, Out],
+        service: Service[Req, Rep]
       ): Closable = codec.newServerDispatcher(transport, service)
     }
 

@@ -37,15 +37,14 @@ object JSSE {
   ): Option[Engine] = {
     def makeContext: SSLContext = {
       val context = SSLContext.getInstance(protocol)
-      val kms = PEMEncodedKeyManager(
-        certificatePath,
-        keyPath,
-        caCertPath)
+      val kms = PEMEncodedKeyManager(certificatePath, keyPath, caCertPath)
       context.init(kms, null, null)
 
-      log.finest("JSSE context instantiated for certificate '%s'".format(
-        certificatePath
-      ))
+      log.finest(
+        "JSSE context instantiated for certificate '%s'".format(
+          certificatePath
+        )
+      )
 
       context
     }

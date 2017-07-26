@@ -34,7 +34,7 @@ private[finagle] object SingletonPool {
    * 'close' on the underlying service multiple times.
    */
   class RefcountedService[Req, Rep](underlying: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](underlying) {
+      extends ServiceProxy[Req, Rep](underlying) {
     private[this] val count = new AtomicInteger(1)
     private[this] val future = Future.value(this)
 
@@ -68,10 +68,8 @@ private[finagle] object SingletonPool {
  * service. A new Service is established whenever the service factory
  * fails or the current service has become unavailable.
  */
-class SingletonPool[Req, Rep](
-    underlying: ServiceFactory[Req, Rep],
-    statsReceiver: StatsReceiver)
-  extends ServiceFactory[Req, Rep] {
+class SingletonPool[Req, Rep](underlying: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver)
+    extends ServiceFactory[Req, Rep] {
   import SingletonPool._
 
   private[this] val scoped = statsReceiver.scope("connects")
@@ -88,7 +86,7 @@ class SingletonPool[Req, Rep](
    */
   private[this] def connect(done: Promise[Unit], conn: ClientConnection) {
     def complete(newState: State[Req, Rep]) = state.get match {
-      case s@Awaiting(d) if d == done => state.compareAndSet(s, newState)
+      case s @ Awaiting(d) if d == done => state.compareAndSet(s, newState)
       case Idle | Closed | Awaiting(_) | Open(_) => false
     }
 
@@ -109,7 +107,8 @@ class SingletonPool[Req, Rep](
         svc.close()
         Future.exception(
           Failure("Returned unavailable service", Failure.Restartable)
-            .withSource(Failure.Source.Role, SingletonPool.role))
+            .withSource(Failure.Source.Role, SingletonPool.role)
+        )
 
       case Return(svc) =>
         if (!complete(Open(new RefcountedService(svc))))
@@ -133,7 +132,7 @@ class SingletonPool[Req, Rep](
       // with it.
       svc.open()
 
-    case s@Open(svc) => // service died; try to reconnect.
+    case s @ Open(svc) => // service died; try to reconnect.
       if (state.compareAndSet(s, Idle))
         svc.close()
       apply(conn)
@@ -157,7 +156,7 @@ class SingletonPool[Req, Rep](
   /**
    * @inheritdoc
    *
-   * The status of a [[SingletonPool]] is the worse of the 
+   * The status of a [[SingletonPool]] is the worse of the
    * the underlying status and the status of the currently
    * cached service, if any.
    */
@@ -188,22 +187,23 @@ class SingletonPool[Req, Rep](
     closeService(deadline) before underlying.close(deadline)
 
   @tailrec
-  private[this] def closeService(deadline: Time): Future[Unit] = 
+  private[this] def closeService(deadline: Time): Future[Unit] =
     state.get match {
       case Idle =>
         if (!state.compareAndSet(Idle, Closed)) closeService(deadline)
         else Future.Done
-  
-      case s@Open(svc) =>
+
+      case s @ Open(svc) =>
         if (!state.compareAndSet(s, Closed)) closeService(deadline)
         else svc.close(deadline)
-  
-      case s@Awaiting(done) =>
-        if (!state.compareAndSet(s, Closed)) closeService(deadline) else {
+
+      case s @ Awaiting(done) =>
+        if (!state.compareAndSet(s, Closed)) closeService(deadline)
+        else {
           done.raise(new ServiceClosedException)
           Future.Done
         }
-  
+
       case Closed =>
         Future.Done
     }

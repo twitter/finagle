@@ -13,10 +13,10 @@ import com.twitter.util.Future
  * 2. "response_payload_bytes" - a distribution of response payload sizes in bytes
  */
 private[finagle] class PayloadSizeFilter[Req, Rep](
-    statsReceiver: StatsReceiver,
-    reqSize: Req => Int,
-    repSize: Rep => Int)
-  extends SimpleFilter[Req, Rep] {
+  statsReceiver: StatsReceiver,
+  reqSize: Req => Int,
+  repSize: Rep => Int
+) extends SimpleFilter[Req, Rep] {
 
   private[this] val requestBytes = statsReceiver.stat("request_payload_bytes")
   private[this] val responseBytes = statsReceiver.stat("response_payload_bytes")

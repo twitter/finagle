@@ -17,14 +17,19 @@ private[finagle] class BufCodec extends SimpleChannelHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
     e.getMessage match {
       case b: Buf => Channels.write(ctx, e.getFuture, BufChannelBuffer(b))
-      case typ => e.getFuture.setFailure(Failure(
-        s"unexpected type ${typ.getClass.getSimpleName} when encoding to ChannelBuffer"))
+      case typ =>
+        e.getFuture.setFailure(
+          Failure(s"unexpected type ${typ.getClass.getSimpleName} when encoding to ChannelBuffer")
+        )
     }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
     e.getMessage match {
       case cb: ChannelBuffer => Channels.fireMessageReceived(ctx, ChannelBufferBuf.Owned(cb))
-      case typ => Channels.fireExceptionCaught(ctx, Failure(
-        s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf"))
+      case typ =>
+        Channels.fireExceptionCaught(
+          ctx,
+          Failure(s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf")
+        )
     }
 }

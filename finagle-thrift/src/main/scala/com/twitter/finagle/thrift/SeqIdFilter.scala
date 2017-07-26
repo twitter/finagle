@@ -35,16 +35,16 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
   private[this] val rng = new Random(Time.now.inMilliseconds)
 
   private[this] def get32(buf: Array[Byte], off: Int) =
-    ((buf(off+0) & 0xff) << 24) |
-    ((buf(off+1) & 0xff) << 16) |
-    ((buf(off+2) & 0xff) << 8) |
-    (buf(off+3) & 0xff)
+    ((buf(off + 0) & 0xff) << 24) |
+      ((buf(off + 1) & 0xff) << 16) |
+      ((buf(off + 2) & 0xff) << 8) |
+      (buf(off + 3) & 0xff)
 
   private[this] def put32(buf: Array[Byte], off: Int, x: Int) {
-    buf(off) = (x>>24 & 0xff).toByte
-    buf(off+1) = (x>>16 & 0xff).toByte
-    buf(off+2) = (x>>8 & 0xff).toByte
-    buf(off+3) = (x & 0xff).toByte
+    buf(off) = (x >> 24 & 0xff).toByte
+    buf(off + 1) = (x >> 16 & 0xff).toByte
+    buf(off + 2) = (x >> 8 & 0xff).toByte
+    buf(off + 3) = (x & 0xff).toByte
   }
 
   private[this] def badMsg(why: String) = Throw(new IllegalArgumentException(why))
@@ -57,27 +57,31 @@ class SeqIdFilter extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
       // [4]n
       // [n]string
       // [4]seqid
-      if ((header&VersionMask) != Version1)
-        return badMsg("bad version %d".format(header&VersionMask))
+      if ((header & VersionMask) != Version1)
+        return badMsg("bad version %d".format(header & VersionMask))
       if (buf.length < 8) return badMsg("short name size")
-      4+4+get32(buf, 4)
+      4 + 4 + get32(buf, 4)
     } else {
       // [4]n
       // [n]name
       // [1]type
       // [4]seqid
-      4+header+1
+      4 + header + 1
     }
 
-    if (buf.length < off+4) return badMsg("short buffer")
+    if (buf.length < off + 4) return badMsg("short buffer")
 
     val currentId = get32(buf, off)
     put32(buf, off, newId)
     Return(currentId)
   }
 
-  def apply(req: ThriftClientRequest, service: Service[ThriftClientRequest, Array[Byte]]): Future[Array[Byte]] =
-    if (req.oneway) service(req) else {
+  def apply(
+    req: ThriftClientRequest,
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Future[Array[Byte]] =
+    if (req.oneway) service(req)
+    else {
       val reqBuf = req.message.clone()
       val id = rng.nextInt()
       val givenId = getAndSetId(reqBuf, id) match {

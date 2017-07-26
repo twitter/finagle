@@ -10,6 +10,7 @@ import com.twitter.util.{Closable, Future, Time}
  * A closable async stream of projected rows from a CursoredStatement.
  */
 trait CursorResult[T] extends Closable {
+
   /**
    * Initiate the streaming result set.
    *
@@ -26,6 +27,7 @@ trait CursorResult[T] extends Closable {
  * a lazy stream of rows. Can be used concurrently.
  */
 trait CursoredStatement {
+
   /**
    * Executes the cursored statement with the given `params` and lazily maps `f`
    * over the rows as they are streamed from the database.
@@ -40,18 +42,17 @@ trait CursoredStatement {
 
 private object StdCursorResult {
   val logger = Logger(getClass.getName)
-  val CursorClosedException = new Exception(
-    "request attempted against already closed cursor")
+  val CursorClosedException = new Exception("request attempted against already closed cursor")
 }
 
 private class StdCursorResult[T](
-    stats: CursorStats,
-    svc: Service[Request, Result],
-    sql: String,
-    rowsPerFetch: Int,
-    params: Seq[Parameter],
-    f: (Row) => T)
-  extends CursorResult[T] { self =>
+  stats: CursorStats,
+  svc: Service[Request, Result],
+  sql: String,
+  rowsPerFetch: Int,
+  params: Seq[Parameter],
+  f: (Row) => T
+) extends CursorResult[T] { self =>
   import StdCursorResult._
 
   // We store the stream state outside of an AsyncStream instance to avoid storing the
@@ -86,7 +87,8 @@ private class StdCursorResult[T](
       stmtId = ok.id,
       params = params.toIndexedSeq,
       hasNewParams = true,
-      flags = ExecuteRequest.FLAG_CURSOR_READ_ONLY)
+      flags = ExecuteRequest.FLAG_CURSOR_READ_ONLY
+    )
     AsyncStream.fromFuture(invoke(execReq))
   }
 
@@ -107,7 +109,8 @@ private class StdCursorResult[T](
               new BinaryEncodedRow(p.body, columns, indexMap)
             }
             val asyncSeq = AsyncStream.fromSeq(rows.map(f))
-            if (!fetchResult.containsLastRow) asyncSeq ++ go() else {
+            if (!fetchResult.containsLastRow) asyncSeq ++ go()
+            else {
               AsyncStream.fromFuture(close()).flatMap(_ => asyncSeq)
             }
           case r => closeAndLog(s"unexpected reply $r when fetching an element.")

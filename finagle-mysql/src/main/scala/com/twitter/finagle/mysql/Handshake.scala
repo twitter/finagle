@@ -16,20 +16,21 @@ class IncompatibleServerError(msg: String) extends Exception(msg)
  * a version of MySQL that the client is incompatible with.
  */
 case object IncompatibleVersion
-  extends IncompatibleServerError(
-    "This client is only compatible with MySQL version 4.1 and later"
-  )
+    extends IncompatibleServerError(
+      "This client is only compatible with MySQL version 4.1 and later"
+    )
 
 /**
  * Indicates that the server to which the client is connected is configured to use
  * a charset that the client is incompatible with.
  */
 case object IncompatibleCharset
-  extends IncompatibleServerError(
-    "This client is only compatible with UTF-8 and Latin-1 charset encoding"
-  )
+    extends IncompatibleServerError(
+      "This client is only compatible with UTF-8 and Latin-1 charset encoding"
+    )
 
 object Handshake {
+
   /**
    * A class eligible for configuring a mysql client's credentials during
    * the Handshake phase.
@@ -124,15 +125,16 @@ case class Handshake(
     for {
       _ <- isCompatibleVersion(init)
       _ <- isCompatibleCharset(init)
-    } yield HandshakeResponse(
-      username,
-      password,
-      database,
-      newClientCap,
-      init.salt,
-      init.serverCap,
-      charset,
-      maxPacketSize.inBytes.toInt
-    )
+    } yield
+      HandshakeResponse(
+        username,
+        password,
+        database,
+        newClientCap,
+        init.salt,
+        init.serverCap,
+        charset,
+        maxPacketSize.inBytes.toInt
+      )
   }
 }

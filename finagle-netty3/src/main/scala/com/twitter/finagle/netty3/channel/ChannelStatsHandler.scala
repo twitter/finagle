@@ -6,8 +6,14 @@ import java.io.IOException
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
-  ExceptionEvent, MessageEvent, WriteCompletionEvent, SimpleChannelHandler}
+import org.jboss.netty.channel.{
+  ChannelHandlerContext,
+  ChannelStateEvent,
+  ExceptionEvent,
+  MessageEvent,
+  WriteCompletionEvent,
+  SimpleChannelHandler
+}
 
 /**
  * A [[org.jboss.netty.channel.ChannelHandler]] that tracks channel/connection
@@ -15,24 +21,22 @@ import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
  * [[org.jboss.netty.channel.Channel Channels]] within a Finagle client or
  * server in order to consolidate statistics across a number of channels.
  */
-class ChannelStatsHandler(statsReceiver: StatsReceiver)
-  extends SimpleChannelHandler
-{
+class ChannelStatsHandler(statsReceiver: StatsReceiver) extends SimpleChannelHandler {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val connectionCount: AtomicLong = new AtomicLong()
   private[this] var elapsed: () => Duration = null
 
-  private[this] val connects                = statsReceiver.counter("connects")
-  private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
+  private[this] val connects = statsReceiver.counter("connects")
+  private[this] val connectionDuration = statsReceiver.stat("connection_duration")
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
-  private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
-  private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
-  private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val writable                = statsReceiver.counter("socket_writable_ms")
-  private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
-  private[this] val exceptions              = statsReceiver.scope("exn")
-  private[this] val closesCount             = statsReceiver.counter("closes")
-  private[this] val connections             = statsReceiver.addGauge("connections") {
+  private[this] val connectionSentBytes = statsReceiver.stat("connection_sent_bytes")
+  private[this] val receivedBytes = statsReceiver.counter("received_bytes")
+  private[this] val sentBytes = statsReceiver.counter("sent_bytes")
+  private[this] val writable = statsReceiver.counter("socket_writable_ms")
+  private[this] val unwritable = statsReceiver.counter("socket_unwritable_ms")
+  private[this] val exceptions = statsReceiver.scope("exn")
+  private[this] val closesCount = statsReceiver.counter("closes")
+  private[this] val connections = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
 

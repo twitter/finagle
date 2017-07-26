@@ -19,7 +19,7 @@ private[serverset2] object ServiceDiscoverer {
    */
   def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] = {
     ents map { ent =>
-      val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
+      val w = vecs.foldLeft(1.0) { case (w, vec) => w * vec.weightOf(ent) }
       ent -> w
     }
   }
@@ -34,11 +34,12 @@ private[serverset2] object ServiceDiscoverer {
 
     def apply(sessionState: SessionState): ClientHealth = {
       sessionState match {
-        case SessionState.Expired | SessionState.NoSyncConnected
-             | SessionState.Unknown | SessionState.AuthFailed
-             | SessionState.Disconnected => Unhealthy
-        case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated
-            | SessionState.SyncConnected => Healthy
+        case SessionState.Expired | SessionState.NoSyncConnected | SessionState.Unknown |
+            SessionState.AuthFailed | SessionState.Disconnected =>
+          Unhealthy
+        case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated |
+            SessionState.SyncConnected =>
+          Healthy
       }
     }
   }
@@ -78,27 +79,26 @@ private[serverset2] class ServiceDiscoverer(
    * Monitor the session status of the ZkSession and expose to listeners whether
    * the connection is healthy or unhealthy. Exposed for testing
    */
-  private[serverset2] val rawHealth: Var[ClientHealth] = Var.async[ClientHealth](ClientHealth.Healthy) { u =>
-    @volatile var stateListener = Closable.nop
+  private[serverset2] val rawHealth: Var[ClientHealth] =
+    Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+      @volatile var stateListener = Closable.nop
 
-    val sessionChanges = varZkSession.changes.dedup.respond { zk =>
-      // When the zk session changes, we need to stop observing changes
-      // to the previous session.
-      synchronized {
-        stateListener.close()
-        stateListener = zk.state.changes.dedup.respond {
-          case WatchState.SessionState(state) =>
-            log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
-            u() = ClientHealth(state)
-          case _ => // don't need to update on non-sessionstate events
+      val sessionChanges = varZkSession.changes.dedup.respond { zk =>
+        // When the zk session changes, we need to stop observing changes
+        // to the previous session.
+        synchronized {
+          stateListener.close()
+          stateListener = zk.state.changes.dedup.respond {
+            case WatchState.SessionState(state) =>
+              log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
+              u() = ClientHealth(state)
+            case _ => // don't need to update on non-sessionstate events
+          }
         }
       }
-    }
 
-    Closable.all(sessionChanges,
-      Closable.make(t => stateListener.close(t))
-    )
-  }
+      Closable.all(sessionChanges, Closable.make(t => stateListener.close(t)))
+    }
 
   /**
    * Monitor the session state of the ZkSession within a HealthStabilizer
@@ -118,20 +118,21 @@ private[serverset2] class ServiceDiscoverer(
     readStat: Stat,
     glob: String
   ): Activity[Seq[Entity]] = {
-    actZkSession.flatMap { case zkSession =>
-      cache.setSession(zkSession)
-      zkSession.globOf(path + glob).flatMap { paths =>
-        // Remove any cached entries not surfaced by globOf from our cache
-        (cache.keys &~ paths).foreach(cache.remove)
-        bulkResolveMemberData(path, paths.toSeq, cache, readStat)
-      }
+    actZkSession.flatMap {
+      case zkSession =>
+        cache.setSession(zkSession)
+        zkSession.globOf(path + glob).flatMap { paths =>
+          // Remove any cached entries not surfaced by globOf from our cache
+          (cache.keys &~ paths).foreach(cache.remove)
+          bulkResolveMemberData(path, paths.toSeq, cache, readStat)
+        }
     }
   }
 
   /**
-    * Resolve all child paths of a watch. If all resolutions fail,
-    * schedule a retry for later.
-    */
+   * Resolve all child paths of a watch. If all resolutions fail,
+   * schedule a retry for later.
+   */
   private[this] def bulkResolveMemberData[Entity](
     parentPath: String,
     paths: Seq[String],
@@ -145,10 +146,13 @@ private[serverset2] class ServiceDiscoverer(
         if (!closed) {
           @volatile var seenFailures = false
           Stat.timeFuture(readStat) {
-            Future.collectToTry(paths.map { path =>
-              // note if any failed
-              cache.get(path).onFailure { _ => seenFailures = true }
-            })
+            Future
+              .collectToTry(paths.map { path =>
+                // note if any failed
+                cache.get(path).onFailure { _ =>
+                  seenFailures = true
+                }
+              })
               // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
               // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])
               .map(tries => tries.collect { case Return(e) => e }.flatten)
@@ -156,7 +160,8 @@ private[serverset2] class ServiceDiscoverer(
                 // if we have *any* results or no-failure, we consider it a success
                 if (seenFailures && seq.isEmpty) u() = Activity.Failed(EntryLookupFailureException)
                 else u() = Activity.Ok(seq)
-              }.ensure {
+              }
+              .ensure {
                 if (seenFailures) {
                   log.warning(s"Failed to read all data for $parentPath. Retrying in $retryJitter")
                   timer.doLater(retryJitter) { loop() }

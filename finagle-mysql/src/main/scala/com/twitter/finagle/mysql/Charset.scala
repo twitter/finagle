@@ -33,7 +33,7 @@ object Charset {
    * "SELECT id,collation_name FROM information_schema.collations
    * WHERE collation_name LIKE '%utf8' ORDER BY id"
    */
-  private[this] val Utf8Set = Set(192 to 254:_*) + 33 + 45 + 46 + 83
+  private[this] val Utf8Set = Set(192 to 254: _*) + 33 + 45 + 46 + 83
 
   /**
    * Some useful charset constants

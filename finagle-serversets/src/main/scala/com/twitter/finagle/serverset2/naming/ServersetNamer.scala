@@ -8,7 +8,7 @@ import com.twitter.util.{Activity, Var, Try, Return, Throw}
  * A namer for serverset paths of the form /zk-hosts/path... where
  * zk-hosts is a zk connect string like 'zk.foo.com:2181'.  Naming is
  * performed by way of a Resolver.
- * 
+ *
  * @param zk2 The underlying serverset resolver
  */
 class ServersetNamer(zk2: Zk2Resolver) extends Namer {
@@ -31,7 +31,7 @@ class ServersetNamer(zk2: Zk2Resolver) extends Namer {
         }
       case Throw(e) => Activity.exception(e)
     }
-  
+
   private[this] def bind(path: Path): Var[Addr] = ServersetPath.of(path) match {
     case Some(ServersetPath(zkHosts, zkPath, endpoint, shardId)) =>
       zk2.addrOf(zkHosts, zkPath.show, endpoint, shardId)

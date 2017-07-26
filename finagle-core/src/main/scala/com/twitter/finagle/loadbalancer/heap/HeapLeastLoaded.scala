@@ -2,8 +2,7 @@ package com.twitter.finagle.loadbalancer.heap
 
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.{
-  ClientConnection, Service, ServiceFactory, ServiceProxy, Status}
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceProxy, Status}
 import com.twitter.util._
 import scala.annotation.tailrec
 import scala.util.Random
@@ -18,11 +17,11 @@ private object HeapBalancer {
  * sort the heap.
  */
 private[loadbalancer] class HeapLeastLoaded[Req, Rep](
-    factories: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
-    statsReceiver: StatsReceiver,
-    emptyException: Throwable,
-    rng: Random)
-  extends ServiceFactory[Req, Rep] {
+  factories: Activity[IndexedSeq[ServiceFactory[Req, Rep]]],
+  statsReceiver: StatsReceiver,
+  emptyException: Throwable,
+  rng: Random
+) extends ServiceFactory[Req, Rep] {
 
   import HeapBalancer._
 
@@ -82,7 +81,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   private[this] val loadGauge = statsReceiver.addGauge("load") {
     val loads = synchronized {
       heap.drop(1).map { n =>
-        if (n.load < 0) n.load+Penalty
+        if (n.load < 0) n.load + Penalty
         else n.load
       }
     }
@@ -140,11 +139,11 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
     var n = downq
     var m = null: Node
     while (n != null) {
-      if (n.index < 0) {  // discarded node
+      if (n.index < 0) { // discarded node
         n = n.downq
         if (m == null) downq = n
         else m.downq = n
-      } else if (n.factory.status == Status.Open) {  // revived node
+      } else if (n.factory.status == Status.Open) { // revived node
         n.load -= Penalty
         fixUp(heap, n.index)
         val o = n.downq
@@ -152,14 +151,15 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
         n = o
         if (m == null) downq = n
         else m.downq = n
-      } else {  // unchanged
+      } else { // unchanged
         m = n
         n = n.downq
       }
     }
 
     n = heap(1)
-    if (n.factory.status == Status.Open || n.load >= 0) n else {
+    if (n.factory.status == Status.Open || n.load >= 0) n
+    else {
       // Mark as down.
       n.downq = downq
       downq = n
@@ -170,8 +170,7 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
   }
 
   private[this] class Wrapped(n: Node, underlying: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](underlying)
-  {
+      extends ServiceProxy[Req, Rep](underlying) {
     override def close(deadline: Time): Future[Unit] =
       super.close(deadline) ensure {
         put(n)
@@ -195,7 +194,9 @@ private[loadbalancer] class HeapLeastLoaded[Req, Rep](
       n
     }
 
-    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ => put(node) }
+    node.factory(conn) map { new Wrapped(node, _) } onFailure { _ =>
+      put(node)
+    }
   }
 
   def close(deadline: Time): Future[Unit] = {

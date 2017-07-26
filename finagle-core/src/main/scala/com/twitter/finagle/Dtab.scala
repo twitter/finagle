@@ -8,7 +8,6 @@ import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.Builder
 
-
 /**
  * A Dtab--short for delegation table--comprises a sequence of
  * delegation rules. Together, these describe how to bind a
@@ -19,8 +18,7 @@ import scala.collection.mutable.Builder
  * @see The [[https://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
  *      for further details.
  */
-case class Dtab(dentries0: IndexedSeq[Dentry])
-  extends IndexedSeq[Dentry] {
+case class Dtab(dentries0: IndexedSeq[Dentry]) extends IndexedSeq[Dentry] {
 
   private lazy val dentries = dentries0.reverse
 
@@ -35,13 +33,15 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
     val matches = dentries.collect {
       case Dentry(prefix, dst) if prefix.matches(path) =>
         val suff = path.drop(prefix.size)
-        dst.map { pfx => Name.Path(pfx ++ suff) }
+        dst.map { pfx =>
+          Name.Path(pfx ++ suff)
+        }
     }
 
     matches.size match {
       case 0 => NameTree.Neg
       case 1 => matches.head
-      case _ => NameTree.Alt(matches:_*)
+      case _ => NameTree.Alt(matches: _*)
     }
   }
 
@@ -97,9 +97,9 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
    * Print a pretty representation of this Dtab.
    */
   def print(printer: PrintWriter) {
-    printer.println("Dtab("+size+")")
+    printer.println("Dtab(" + size + ")")
     for (Dentry(prefix, dst) <- this)
-      printer.println("	"+prefix.show+" => "+dst.show)
+      printer.println("	" + prefix.show + " => " + dst.show)
   }
 
   /**
@@ -110,17 +110,18 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
    * @todo dedup equivalent entries so that only the last entry is retained
    * @todo collapse entries with common prefixes
    */
-  def simplified: Dtab = Dtab({
-    val simple = this map {
-      case Dentry(prefix, dst) => Dentry(prefix, dst.simplified)
-    }
+  def simplified: Dtab =
+    Dtab({
+      val simple = this map {
+        case Dentry(prefix, dst) => Dentry(prefix, dst.simplified)
+      }
 
-    // Negative destinations are no-ops
-    simple.filter(_.dst != NameTree.Neg)
-  })
+      // Negative destinations are no-ops
+      simple.filter(_.dst != NameTree.Neg)
+    })
 
   def show: String = dentries0 map (_.show) mkString ";"
-  override def toString: String = "Dtab("+show+")"
+  override def toString: String = "Dtab(" + show + ")"
 }
 
 /**
@@ -130,14 +131,14 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
  */
 case class Dentry(prefix: Dentry.Prefix, dst: NameTree[Path]) {
   def show: String = "%s=>%s".format(prefix.show, dst.show)
-  override def toString: String = "Dentry("+show+")"
+  override def toString: String = "Dentry(" + show + ")"
 }
 
 object Dentry {
 
   /** Build a [[Dentry]] with a [[Path]] prefix. */
   def apply(path: Path, dst: NameTree[Path]): Dentry =
-    Dentry(Prefix(path.elems.map(Prefix.Label(_)):_*), dst)
+    Dentry(Prefix(path.elems.map(Prefix.Label(_)): _*), dst)
 
   /**
    * Parse a Dentry from the string `s` with concrete syntax:
@@ -159,7 +160,7 @@ object Dentry {
   implicit val equiv: Equiv[Dentry] = new Equiv[Dentry] {
     def equiv(d1: Dentry, d2: Dentry): Boolean = (
       d1.prefix == d2.prefix &&
-      d1.dst.simplified == d2.dst.simplified
+        d1.dst.simplified == d2.dst.simplified
     )
   }
 
@@ -177,22 +178,21 @@ object Dentry {
       if (this.size > path.size)
         return false
       var i = 0
-      while (i != this.size)
-        elems(i) match {
-          case Prefix.Label(buf) if buf != path.elems(i) =>
-            return false
-          case _ => // matches
-            i += 1
-        }
+      while (i != this.size) elems(i) match {
+        case Prefix.Label(buf) if buf != path.elems(i) =>
+          return false
+        case _ => // matches
+          i += 1
+      }
       true
     }
 
     // A prefix acts somewhat like a Seq[Elem]
-    def take(n: Int): Prefix = Prefix(elems.take(n):_*)
-    def drop(n: Int): Prefix = Prefix(elems.drop(n):_*)
+    def take(n: Int): Prefix = Prefix(elems.take(n): _*)
+    def drop(n: Int): Prefix = Prefix(elems.drop(n): _*)
     def ++(that: Prefix): Prefix =
       if (that.isEmpty) this
-      else Prefix((elems ++ that.elems):_*)
+      else Prefix((elems ++ that.elems): _*)
     def size: Int = elems.size
     def isEmpty: Boolean = elems.isEmpty
 
@@ -208,7 +208,7 @@ object Dentry {
   object Prefix {
 
     def apply(path: Path): Prefix =
-      Prefix(path.elems.map(Label(_)):_*)
+      Prefix(path.elems.map(Label(_)): _*)
 
     /**
      * Parse `s` as a prefix matching expression with concrete syntax
@@ -279,7 +279,7 @@ object Dtab {
   implicit val equiv: Equiv[Dtab] = new Equiv[Dtab] {
     def equiv(d1: Dtab, d2: Dtab): Boolean = (
       d1.size == d2.size &&
-      d1.zip(d2).forall { case (de1, de2) => Equiv[Dentry].equiv(de1, de2) }
+        d1.zip(d2).forall { case (de1, de2) => Equiv[Dentry].equiv(de1, de2) }
     )
   }
 
@@ -338,7 +338,8 @@ object Dtab {
 
   def unwind[T](f: => T): T = {
     val save = l()
-    try f finally l.set(save)
+    try f
+    finally l.set(save)
   }
 
   /**

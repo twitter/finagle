@@ -39,10 +39,11 @@ private[finagle] class ClockedDrainer(
   lr: LogsReceiver = NullLogsReceiver,
   statsReceiver: StatsReceiver = NullStatsReceiver,
   verbose: Boolean = false
-) extends Thread("GcDrainer") with Lessor {
+) extends Thread("GcDrainer")
+    with Lessor {
 
-  private[this] val lessees = Collections.newSetFromMap(
-    new ConcurrentHashMap[Lessee, java.lang.Boolean])
+  private[this] val lessees =
+    Collections.newSetFromMap(new ConcurrentHashMap[Lessee, java.lang.Boolean])
 
   private[this] val requestCount = new AtomicInteger(0)
   private[this] val narrival = new AtomicInteger(0)
@@ -93,8 +94,7 @@ private[finagle] class ClockedDrainer(
   def npending() = {
     var s = 0
     val iter = lessees.iterator()
-    while (iter.hasNext)
-      s += iter.next().npending()
+    while (iter.hasNext) s += iter.next().npending()
     s
   }
 
@@ -141,18 +141,20 @@ private[finagle] class ClockedDrainer(
 
     upkeep("open", init)
 
-    coord.sleepUntilDiscountRemaining(space, { () =>
-      if (verbose) {
-        log.info("AWAIT-DISCOUNT: discount="+space.discount()+
-          "; clock="+coord.counter +
-          "; space="+space
+    coord.sleepUntilDiscountRemaining(
+      space, { () =>
+        if (verbose) {
+          log.info(
+            "AWAIT-DISCOUNT: discount=" + space.discount() +
+              "; clock=" + coord.counter +
+              "; space=" + space
+          )
+        }
 
-        )
+        // discount (bytes) / rate (bytes / second) == expiry (seconds)
+        issueAll((space.discount.inBytes / coord.counter.rate).toLong.seconds)
       }
-
-      // discount (bytes) / rate (bytes / second) == expiry (seconds)
-      issueAll((space.discount.inBytes / coord.counter.rate).toLong.seconds)
-    })
+    )
   }
 
   // DRAINING
@@ -175,19 +177,20 @@ private[finagle] class ClockedDrainer(
 
   private[this] def issueAll(duration: Duration) {
     val iter = lessees.iterator()
-    while (iter.hasNext)
-      iter.next().issue(duration)
+    while (iter.hasNext) iter.next().issue(duration)
   }
 
   private[this] def finishDraining() {
     val maxWait = calculateMaxWait
 
     if (verbose) {
-      log.info("AWAIT-DRAIN: n="+npending()+
-        "; clock="+coord.counter+
-        "; space="+space+
-        "; maxWaitMs="+maxWait.inMilliseconds+
-        "; minDiscount="+space.minDiscount)
+      log.info(
+        "AWAIT-DRAIN: n=" + npending() +
+          "; clock=" + coord.counter +
+          "; space=" + space +
+          "; maxWaitMs=" + maxWait.inMilliseconds +
+          "; minDiscount=" + space.minDiscount
+      )
     }
 
     coord.sleepUntilFinishedDraining(space, maxWait, npending, log)
@@ -201,7 +204,7 @@ private[finagle] class ClockedDrainer(
     forcedGc = 0
     if (coord.counter.info.generation() == generation) {
       val n = npending()
-      if (verbose) log.info("FORCE-GC: n="+n+"; clock="+coord.counter+"; space="+space)
+      if (verbose) log.info("FORCE-GC: n=" + n + "; clock=" + coord.counter + "; space=" + space)
 
       lr.record("byteLeft", coord.counter.info.remaining().inBytes.toString)
 
@@ -265,9 +268,7 @@ private[finagle] class ClockedDrainer(
   }
 }
 
-
-object drainerDiscountRange extends GlobalFlag(
-  (50.megabytes, 600.megabytes), "Range of discount")
+object drainerDiscountRange extends GlobalFlag((50.megabytes, 600.megabytes), "Range of discount")
 
 object drainerPercentile extends GlobalFlag(95, "GC drainer cutoff percentile")
 
@@ -283,8 +284,10 @@ private[finagle] object ClockedDrainer {
   lazy val flagged: Lessor = if (drainerEnabled()) {
     Coordinator.create() match {
       case None =>
-        log.warning("Failed to acquire a ParNew+CMS Coordinator; cannot "+
-          "construct drainer")
+        log.warning(
+          "Failed to acquire a ParNew+CMS Coordinator; cannot " +
+            "construct drainer"
+        )
         Lessor.nil
       case Some(coord) =>
         val rSnooper = new RequestSnooper(

@@ -15,8 +15,8 @@ import com.twitter.util.Future
  * }
  */
 class RoutingService[REQUEST <: Request](
-     val routes: PartialFunction[Request, Service[REQUEST, Response]])
-  extends Service[REQUEST, Response] {
+  val routes: PartialFunction[Request, Service[REQUEST, Response]]
+) extends Service[REQUEST, Response] {
 
   // Try routes, fall back to 404 Not Found
   protected[this] val notFoundService = new NotFoundService[REQUEST]
@@ -32,38 +32,37 @@ class RoutingService[REQUEST <: Request](
   }
 }
 
-
 object RoutingService {
   def byPath[REQUEST](routes: PartialFunction[String, Service[REQUEST, Response]]) =
-    new RoutingService(
-      new PartialFunction[Request, Service[REQUEST, Response]] {
-        def apply(request: Request): Service[REQUEST, Response] = routes(request.path)
-        def isDefinedAt(request: Request): Boolean = routes.isDefinedAt(request.path)
-      })
+    new RoutingService(new PartialFunction[Request, Service[REQUEST, Response]] {
+      def apply(request: Request): Service[REQUEST, Response] = routes(request.path)
+      def isDefinedAt(request: Request): Boolean = routes.isDefinedAt(request.path)
+    })
 
   def byPathObject[REQUEST](routes: PartialFunction[Path, Service[REQUEST, Response]]) =
-    new RoutingService(
-      new PartialFunction[Request, Service[REQUEST, Response]] {
-        def apply(request: Request): Service[REQUEST, Response] = routes(Path(request.path))
-        def isDefinedAt(request: Request): Boolean =
-          routes.isDefinedAt(Path(request.path))
-      })
+    new RoutingService(new PartialFunction[Request, Service[REQUEST, Response]] {
+      def apply(request: Request): Service[REQUEST, Response] = routes(Path(request.path))
+      def isDefinedAt(request: Request): Boolean =
+        routes.isDefinedAt(Path(request.path))
+    })
 
-  def byMethodAndPath[REQUEST](routes: PartialFunction[(Method, String), Service[REQUEST, Response]]) =
-    new RoutingService(
-      new PartialFunction[Request, Service[REQUEST, Response]] {
-        def apply(request: Request): Service[REQUEST, Response] =
-          routes((request.method, request.path))
-        def isDefinedAt(request: Request): Boolean =
-          routes.isDefinedAt((request.method, request.path))
-      })
+  def byMethodAndPath[REQUEST](
+    routes: PartialFunction[(Method, String), Service[REQUEST, Response]]
+  ) =
+    new RoutingService(new PartialFunction[Request, Service[REQUEST, Response]] {
+      def apply(request: Request): Service[REQUEST, Response] =
+        routes((request.method, request.path))
+      def isDefinedAt(request: Request): Boolean =
+        routes.isDefinedAt((request.method, request.path))
+    })
 
-  def byMethodAndPathObject[REQUEST](routes: PartialFunction[(Method, Path), Service[REQUEST, Response]]) =
-    new RoutingService(
-      new PartialFunction[Request, Service[REQUEST, Response]] {
-        def apply(request: Request): Service[REQUEST, Response] =
-          routes((request.method, Path(request.path)))
-        def isDefinedAt(request: Request): Boolean =
-          routes.isDefinedAt((request.method, Path(request.path)))
-      })
+  def byMethodAndPathObject[REQUEST](
+    routes: PartialFunction[(Method, Path), Service[REQUEST, Response]]
+  ) =
+    new RoutingService(new PartialFunction[Request, Service[REQUEST, Response]] {
+      def apply(request: Request): Service[REQUEST, Response] =
+        routes((request.method, Path(request.path)))
+      def isDefinedAt(request: Request): Boolean =
+        routes.isDefinedAt((request.method, Path(request.path)))
+    })
 }

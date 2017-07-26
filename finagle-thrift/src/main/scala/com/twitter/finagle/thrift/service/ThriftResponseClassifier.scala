@@ -105,15 +105,13 @@ object ThriftResponseClassifier {
       reqRep.response match {
         // we use the deserializer only if its a thrift response
         case Return(bytes: Array[Byte]) =>
-          try
-            classifier.isDefinedAt(deserialized(deserCtx, bytes))
+          try classifier.isDefinedAt(deserialized(deserCtx, bytes))
           catch {
             case _: Throwable => false
           }
         // otherwise, we see if the classifier can handle this as is
         case _ =>
-          try
-            classifier.isDefinedAt(reqRep)
+          try classifier.isDefinedAt(reqRep)
           catch {
             case _: Throwable => false
           }
@@ -134,8 +132,7 @@ object ThriftResponseClassifier {
           }
         // otherwise, we see if the classifier can handle this as is
         case _ =>
-          try
-            classifier(reqRep)
+          try classifier(reqRep)
           catch {
             case NonFatal(e) => throw new MatchError(e)
           }

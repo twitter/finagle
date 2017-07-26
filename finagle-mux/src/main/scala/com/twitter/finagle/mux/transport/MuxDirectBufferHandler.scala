@@ -33,29 +33,30 @@ private object MuxDirectBufferHandler extends ChannelDuplexHandler {
   }
 
   // efficiently decode a ByteBuf representing an rdispatch into a Buf
-  private def decodeRdispatch(ctx: ChannelHandlerContext, startIdx: Int, bb: ByteBuf): Buf = bb.readByte() match {
-    case ReplyStatus.Ok =>
-      // We want to index past contexts. In practice responses
-      // don't have headers so we expect `nCtxs` to be zero.
-      val nCtxs = bb.readShort()
-      var idx = 0
-      while (idx < nCtxs) {
-        val k = bb.readShort()
-        bb.readerIndex(bb.readerIndex() + k)
-        val v = bb.readShort()
-        bb.readerIndex(bb.readerIndex() + v)
-        idx += 1
-      }
+  private def decodeRdispatch(ctx: ChannelHandlerContext, startIdx: Int, bb: ByteBuf): Buf =
+    bb.readByte() match {
+      case ReplyStatus.Ok =>
+        // We want to index past contexts. In practice responses
+        // don't have headers so we expect `nCtxs` to be zero.
+        val nCtxs = bb.readShort()
+        var idx = 0
+        while (idx < nCtxs) {
+          val k = bb.readShort()
+          bb.readerIndex(bb.readerIndex() + k)
+          val v = bb.readShort()
+          bb.readerIndex(bb.readerIndex() + v)
+          idx += 1
+        }
 
-      // We copy these on heap in case they're backed by pooled or direct buffers.
-      val headers = copyRetain(bb.slice(startIdx, bb.readerIndex - startIdx))
-      // copying the payload separately gives us a free unwrapping to byte array later
-      // by producing a Buf.ByteArray with no offsets.
-      val payload = copyRelease(bb.slice(bb.readerIndex, bb.readableBytes))
-      headers.concat(payload)
-    case _ =>
-      new ByteBufAsBuf(bb.readerIndex(startIdx)) // non-okay status, this will decode to POJO
-  }
+        // We copy these on heap in case they're backed by pooled or direct buffers.
+        val headers = copyRetain(bb.slice(startIdx, bb.readerIndex - startIdx))
+        // copying the payload separately gives us a free unwrapping to byte array later
+        // by producing a Buf.ByteArray with no offsets.
+        val payload = copyRelease(bb.slice(bb.readerIndex, bb.readableBytes))
+        headers.concat(payload)
+      case _ =>
+        new ByteBufAsBuf(bb.readerIndex(startIdx)) // non-okay status, this will decode to POJO
+    }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     case bb: ByteBuf =>
@@ -73,7 +74,8 @@ private object MuxDirectBufferHandler extends ChannelDuplexHandler {
 
       val res: Buf =
         if (Tags.isFragment(tag)) copyRelease(bb.readerIndex(savedIdx))
-        else if (Types.isRefCounted(typ)) new ByteBufAsBuf(bb.readerIndex(savedIdx)) // messages that decode to POJO
+        else if (Types.isRefCounted(typ))
+          new ByteBufAsBuf(bb.readerIndex(savedIdx)) // messages that decode to POJO
         else if (typ == Types.Rdispatch)
           decodeRdispatch(ctx, savedIdx, bb)
         else {

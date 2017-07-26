@@ -12,20 +12,22 @@ import scala.collection.JavaConverters._
 // The ordering issue is that LoadService is run early in the startup
 // lifecycle, typically before Flags are loaded. By using a system
 // property you can avoid that brittleness.
-object debugLoggedStatNames extends GlobalFlag[Set[String]](
-  Set.empty,
-  "Comma separated stat names for logging observed values" +
-    " (set via a -D system property to avoid load ordering issues)"
-)
+object debugLoggedStatNames
+    extends GlobalFlag[Set[String]](
+      Set.empty,
+      "Comma separated stat names for logging observed values" +
+        " (set via a -D system property to avoid load ordering issues)"
+    )
 
 // It's possible to override the scope separator (the default value for `MetricsStatsReceiver` is
 // `"/"`), which is used to separate scopes defined by  `StatsReceiver`. This flag might be useful
 // while migrating from Commons Stats (i.e., `CommonsStatsReceiver`), which is configured to use
 // `"_"` as scope separator.
-object scopeSeparator extends GlobalFlag[String](
-  "/",
-  "Override the scope separator."
-)
+object scopeSeparator
+    extends GlobalFlag[String](
+      "/",
+      "Override the scope separator."
+    )
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
@@ -54,10 +56,9 @@ object MetricsStatsReceiver {
  * metrics on the first 60 seconds. It means that when you add a value, you need to wait at most
  * 20 seconds before this value will be aggregated in the exported metrics.
  */
-class MetricsStatsReceiver(
-    val registry: Metrics,
-    histogramFactory: String => HistogramInterface)
-  extends StatsReceiverWithCumulativeGauges with WithHistogramDetails {
+class MetricsStatsReceiver(val registry: Metrics, histogramFactory: String => HistogramInterface)
+    extends StatsReceiverWithCumulativeGauges
+    with WithHistogramDetails {
 
   import MetricsStatsReceiver._
 
@@ -197,17 +198,21 @@ class MetricsStatsReceiver(
 }
 
 class MetricsExporter(val registry: Metrics)
-  extends JsonExporter(registry)
-  with HttpMuxHandler
-  with MetricsRegistry
-{
+    extends JsonExporter(registry)
+    with HttpMuxHandler
+    with MetricsRegistry {
   def this() = this(MetricsStatsReceiver.defaultRegistry)
   val pattern = "/admin/metrics.json"
-  def route: Route = Route(
-    pattern = pattern,
-    handler = this,
-    index = Some(RouteIndex(
-      alias = "Metrics",
-      group = "Metrics",
-      path = Some("/admin/metrics.json?pretty=true"))))
+  def route: Route =
+    Route(
+      pattern = pattern,
+      handler = this,
+      index = Some(
+        RouteIndex(
+          alias = "Metrics",
+          group = "Metrics",
+          path = Some("/admin/metrics.json?pretty=true")
+        )
+      )
+    )
 }

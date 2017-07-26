@@ -4,6 +4,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Future}
 
 private[serverset2] trait ZooKeeperClient extends Closable {
+
   /**
    * The session id for this ZooKeeper client instance. The value returned is
    * not valid until the client connects to a server and may change after a
@@ -38,7 +39,7 @@ private[serverset2] trait ZooKeeperClient extends Closable {
    * @param auth the authentication credentials.
    * @return a Future[Unit]
    */
-   def addAuthInfo(scheme: String, auth: Buf): Future[Unit]
+  def addAuthInfo(scheme: String, auth: Buf): Future[Unit]
 
   /**
    * Get the existing ephemeral nodes created with the current session ID.
@@ -48,7 +49,6 @@ private[serverset2] trait ZooKeeperClient extends Closable {
    *
    * @return a Future[Seq[String]] of ephemeral node paths.
    */
-
   def getEphemerals(): Future[Seq[String]]
 
   /**
@@ -64,6 +64,7 @@ private[serverset2] trait ZooKeeperClient extends Closable {
 }
 
 private[serverset2] trait ZooKeeperReader extends ZooKeeperClient {
+
   /**
    * Check if a node exists.
    *
@@ -131,7 +132,7 @@ object ZooKeeperReader {
       throw new IllegalArgumentException("Invalid prefix")
 
     val path = if (slash == 0) "/" else pat.substring(0, slash)
-    val prefix = pat.substring(slash+1, pat.length)
+    val prefix = pat.substring(slash + 1, pat.length)
 
     (path, prefix)
   }
@@ -143,13 +144,14 @@ object ZooKeeperReader {
     while (iter.hasNext()) {
       val el = iter.next()
       if (el startsWith prefix)
-        seq += path+"/"+el
+        seq += path + "/" + el
     }
     seq.result
   }
 }
 
 private[serverset2] trait ZooKeeperWriter extends ZooKeeperClient {
+
   /**
    * Create a node of a given type with the given path. The node data will be the
    * given data, and node acl will be the given acl.
@@ -161,10 +163,11 @@ private[serverset2] trait ZooKeeperWriter extends ZooKeeperClient {
    * @return a Future[String] containing the actual path of the created node.
    */
   def create(
-      path: String,
-      data: Option[Buf],
-      acl: Seq[Data.ACL],
-      createMode: CreateMode): Future[String]
+    path: String,
+    data: Option[Buf],
+    acl: Seq[Data.ACL],
+    createMode: CreateMode
+  ): Future[String]
 
   /**
    * Delete the node with the given path. The call will succeed if such a node
@@ -210,6 +213,7 @@ private[serverset2] trait ZooKeeperWriter extends ZooKeeperClient {
 }
 
 private[serverset2] trait ZooKeeperMulti extends ZooKeeperClient {
+
   /**
    * Transactional operation. Execute all operations or none of them.
    *

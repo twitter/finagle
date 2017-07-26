@@ -39,7 +39,7 @@ private[finagle] class ConnectionManager {
     message match {
       case req: Request => observeRequest(req, onFinish)
       case rep: Response => observeResponse(rep, onFinish)
-      case _ => isKeepAlive = false  // conservative
+      case _ => isKeepAlive = false // conservative
     }
   }
 
@@ -96,8 +96,8 @@ private[finagle] class ConnectionManager {
   // Some status codes are not permitted to have a message body.
   private[this] def mayHaveContent(status: Status): Boolean = status match {
     case Status.Informational(_) => false // all 1xx status codes must not have a body
-    case Status.NoContent => false        // 204 No Content
-    case Status.NotModified => false      // 304 Not Modified
+    case Status.NoContent => false // 204 No Content
+    case Status.NotModified => false // 304 Not Modified
     case _ => true
   }
 }

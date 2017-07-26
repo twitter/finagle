@@ -2,7 +2,11 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.netty4.channel.{Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer, ServerBridge}
+import com.twitter.finagle.netty4.channel.{
+  Netty4FramedServerChannelInitializer,
+  Netty4RawServerChannelInitializer,
+  ServerBridge
+}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
@@ -46,12 +50,14 @@ private[finagle] object Netty4Listener {
  * @see [[com.twitter.finagle.param]]
  */
 private[finagle] case class Netty4Listener[In, Out](
-    pipelineInit: ChannelPipeline => Unit,
-    params: Stack.Params,
-    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) },
-    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out])
-  extends Listener[In, Out] {
+  pipelineInit: ChannelPipeline => Unit,
+  params: Stack.Params,
+  transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
+    new ChannelTransport(ch)
+  },
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity
+)(implicit mIn: Manifest[In], mOut: Manifest[Out])
+    extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
   // Exports N4-related metrics under `finagle/netty4`.
@@ -93,12 +99,12 @@ private[finagle] case class Netty4Listener[In, Out](
       private[this] val bossLoop: EventLoopGroup =
         if (nativeEpoll.enabled)
           new EpollEventLoopGroup(
-            1 /*nThreads*/ ,
+            1 /*nThreads*/,
             new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
           )
         else
           new NioEventLoopGroup(
-            1 /*nThreads*/ ,
+            1 /*nThreads*/,
             new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
           )
 
@@ -160,16 +166,19 @@ private[finagle] case class Netty4Listener[In, Out](
           // we use `setupMarshalling` to support protocols where the
           // connection is multiplexed over child channels in the
           // netty layer
-          ch.pipeline.addLast("marshalling", setupMarshalling(new ChannelInitializer[Channel] {
-            def initChannel(ch: Channel): Unit = {
-              ch.pipeline.addLast("framedInitializer", framedInitializer)
+          ch.pipeline.addLast(
+            "marshalling",
+            setupMarshalling(new ChannelInitializer[Channel] {
+              def initChannel(ch: Channel): Unit = {
+                ch.pipeline.addLast("framedInitializer", framedInitializer)
 
-              // The bridge handler must be last in the pipeline to ensure
-              // that the bridging code sees all encoding and transformations
-              // of inbound messages.
-              ch.pipeline.addLast("finagleBridge", bridge)
-            }
-          }))
+                // The bridge handler must be last in the pipeline to ensure
+                // that the bridging code sees all encoding and transformations
+                // of inbound messages.
+                ch.pipeline.addLast("finagleBridge", bridge)
+              }
+            })
+          )
         }
       })
 
@@ -179,7 +188,8 @@ private[finagle] case class Netty4Listener[In, Out](
       private[this] val bound = bootstrap.bind(addr).awaitUninterruptibly()
       if (!bound.isSuccess)
         throw new java.net.BindException(
-          s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}")
+          s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}"
+        )
 
       private[this] val ch = bound.channel()
 
@@ -202,7 +212,7 @@ private[finagle] case class Netty4Listener[In, Out](
         // The boss loop immediately starts refusing new work.
         // Existing tasks have ``timeoutMs`` time to finish executing.
         bossLoop
-          .shutdownGracefully(0 /* quietPeriod */ , timeoutMs.max(0), TimeUnit.MILLISECONDS)
+          .shutdownGracefully(0 /* quietPeriod */, timeoutMs.max(0), TimeUnit.MILLISECONDS)
           .addListener(new FutureListener[Any] {
             def operationComplete(future: NettyFuture[Any]): Unit = p.setDone()
           })
@@ -210,7 +220,9 @@ private[finagle] case class Netty4Listener[In, Out](
         // Don't rely on netty to satisfy the promise and transform all results to
         // success because we don't want the non-deterministic lifecycle of external
         // resources to affect application success.
-        p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
+        p.raiseWithin(timeout)(timer).transform { _ =>
+          Future.Done
+        }
       }
 
       def boundAddress: SocketAddress = ch.localAddress()

@@ -18,9 +18,8 @@ private[netty4] object Netty4RawServerChannelInitializer {
  *
  * @param params [[Stack.Params]] to configure the `Channel`.
  */
-private[netty4] class Netty4RawServerChannelInitializer(
-    params: Stack.Params)
-  extends ChannelInitializer[Channel] {
+private[netty4] class Netty4RawServerChannelInitializer(params: Stack.Params)
+    extends ChannelInitializer[Channel] {
 
   import Netty4RawServerChannelInitializer._
 

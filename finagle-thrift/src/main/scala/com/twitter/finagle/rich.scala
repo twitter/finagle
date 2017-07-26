@@ -14,7 +14,8 @@ private[twitter] object ThriftUtil {
   private type BinaryService = Service[Array[Byte], Array[Byte]]
 
   private def findClass1(name: String): Option[Class[_]] =
-    try Some(Class.forName(name)) catch {
+    try Some(Class.forName(name))
+    catch {
       case _: ClassNotFoundException => None
     }
 
@@ -56,8 +57,12 @@ private[twitter] object ThriftUtil {
       for {
         baseName <- findRootWithSuffix(clsName, "$ServiceIface")
         clientCls <- findClass[Iface](baseName + "$ServiceToClient")
-        cons <- findConstructor(clientCls,
-          classOf[Service[_, _]], classOf[TProtocolFactory], classOf[ResponseClassifier])
+        cons <- findConstructor(
+          clientCls,
+          classOf[Service[_, _]],
+          classOf[TProtocolFactory],
+          classOf[ResponseClassifier]
+        )
       } yield cons.newInstance(underlying, protocolFactory, responseClassifier)
 
     // This is used with Scrooge's Scala generated code.
@@ -69,8 +74,14 @@ private[twitter] object ThriftUtil {
         baseName <- findRootWithSuffix(clsName, "$FutureIface")
           .orElse(Some(clsName))
         clientCls <- findClass[Iface](baseName + "$FinagledClient")
-        cons <- findConstructor(clientCls,
-          classOf[Service[_, _]], classOf[TProtocolFactory], classOf[String], classOf[StatsReceiver], classOf[ResponseClassifier])
+        cons <- findConstructor(
+          clientCls,
+          classOf[Service[_, _]],
+          classOf[TProtocolFactory],
+          classOf[String],
+          classOf[StatsReceiver],
+          classOf[ResponseClassifier]
+        )
       } yield cons.newInstance(underlying, protocolFactory, "", sr, responseClassifier)
 
     val iface =
@@ -81,7 +92,8 @@ private[twitter] object ThriftUtil {
       throw new IllegalArgumentException(
         s"Iface $clsName is not a valid thrift iface. For Scala generated code, " +
           "try `YourServiceName$FutureIface` or `YourServiceName[Future]. " +
-          "For Java generated code, try `YourServiceName$ServiceIface`.")
+          "For Java generated code, try `YourServiceName$ServiceIface`."
+      )
     }
   }
 
@@ -113,14 +125,19 @@ private[twitter] object ThriftUtil {
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
       (for {
         baseName <- findRootWithSuffix(iface.getName, "$FutureIface")
-          // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
+        // handles ServiceB extends ServiceA, then using ServiceB$MethodIface
           .orElse(findRootWithSuffix(iface.getName, "$MethodIface"))
           .orElse(Some(iface.getName))
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService")
         baseClass <- findClass1(baseName)
       } yield {
-        findConstructor(serviceCls,
-          baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE, classOf[String]
+        findConstructor(
+          serviceCls,
+          baseClass,
+          classOf[TProtocolFactory],
+          classOf[StatsReceiver],
+          Integer.TYPE,
+          classOf[String]
         ).map { cons =>
           cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize), label)
         }
@@ -137,7 +154,8 @@ private[twitter] object ThriftUtil {
       throw new IllegalArgumentException(
         s"$impl implements no candidate ifaces. For Scala generated code, " +
           "try `YourServiceName$FutureIface`, `YourServiceName$MethodIface` or `YourServiceName`. " +
-          "For Java generated code, try `YourServiceName$ServiceIface`.")
+          "For Java generated code, try `YourServiceName$ServiceIface`."
+      )
     }
   }
 
@@ -152,8 +170,15 @@ private[twitter] object ThriftUtil {
     maxThriftBufferSize: Int,
     label: String
   ): BinaryService = {
-    val services = ifaces.map { case (serviceName, impl) =>
-      serviceName -> serverFromIface(impl, protocolFactory, stats, maxThriftBufferSize, serviceName)
+    val services = ifaces.map {
+      case (serviceName, impl) =>
+        serviceName -> serverFromIface(
+          impl,
+          protocolFactory,
+          stats,
+          maxThriftBufferSize,
+          serviceName
+        )
     }
     new MultiplexedFinagleService(services, defaultService, protocolFactory, maxThriftBufferSize)
   }
@@ -173,7 +198,8 @@ private[twitter] object ThriftUtil {
       protocolFactory,
       LoadedStatsReceiver,
       Thrift.Server.maxThriftBufferSize,
-      serviceName)
+      serviceName
+    )
 }
 
 /**
@@ -230,6 +256,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   import ThriftUtil._
 
   protected val protocolFactory: TProtocolFactory
+
   /** The client name used when group isn't named. */
   protected val defaultClientName: String
   protected lazy val stats: StatsReceiver = ClientStatsReceiver
@@ -397,7 +424,9 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
       ThriftRichClient.this.newIface(dest, label, cls, multiplexedProtocol, service)
     }
 
-    def newServiceIface[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]](serviceName: String)(
+    def newServiceIface[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]](
+      serviceName: String
+    )(
       implicit builder: ServiceIfaceBuilder[ServiceIface]
     ): ServiceIface = {
       val multiplexedProtocol = Protocols.multiplex(serviceName, protocolFactory)
@@ -485,29 +514,66 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
    * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+    serve(
+      addr,
+      serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
+    )
 
   /**
    * $serveIface
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+    serve(
+      addr,
+      serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
+    )
 
   /**
    * $serveIfaces
    */
-  def serveIfaces(addr: String, ifaces: Map[String, AnyRef], defaultService: Option[String] = None): ListeningServer =
-    serve(addr, serverFromIfaces(ifaces, defaultService, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+  def serveIfaces(
+    addr: String,
+    ifaces: Map[String, AnyRef],
+    defaultService: Option[String] = None
+  ): ListeningServer =
+    serve(
+      addr,
+      serverFromIfaces(
+        ifaces,
+        defaultService,
+        protocolFactory,
+        serverStats,
+        maxThriftBufferSize,
+        serverLabel
+      )
+    )
 
   /**
    * $serveIfaces
    */
   def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef]): ListeningServer =
-    serve(addr, serverFromIfaces(ifaces, None, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+    serve(
+      addr,
+      serverFromIfaces(ifaces, None, protocolFactory, serverStats, maxThriftBufferSize, serverLabel)
+    )
 
   /**
    * $serveIfaces
    */
-  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef], defaultService: Option[String]): ListeningServer =
-    serve(addr, serverFromIfaces(ifaces, defaultService, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+  def serveIfaces(
+    addr: SocketAddress,
+    ifaces: Map[String, AnyRef],
+    defaultService: Option[String]
+  ): ListeningServer =
+    serve(
+      addr,
+      serverFromIfaces(
+        ifaces,
+        defaultService,
+        protocolFactory,
+        serverStats,
+        maxThriftBufferSize,
+        serverLabel
+      )
+    )
 }

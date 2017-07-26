@@ -14,7 +14,7 @@ class LocalRateLimitingStrategy[Req](
   rate: Int
 ) extends (Req => Future[Boolean]) {
 
-  private[this] val rates = mutable.HashMap.empty[String, (Int,Time)]
+  private[this] val rates = mutable.HashMap.empty[String, (Int, Time)]
 
   def apply(req: Req) = synchronized {
     val now = Time.now
@@ -35,7 +35,6 @@ class LocalRateLimitingStrategy[Req](
     Future.value(accept)
   }
 }
-
 
 /**
  * A [[com.twitter.finagle.Filter]] that accepts or refuses requests based on a

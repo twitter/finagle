@@ -9,7 +9,6 @@ private[finagle] object LatencyHistogram {
 
 }
 
-
 /**
  * A concurrent histogram implementation.
  *
@@ -39,12 +38,12 @@ private[finagle] object LatencyHistogram {
  * @param now the current time. for testing.
  */
 private[finagle] class LatencyHistogram(
-    clipDuration: Long,
-    error: Double,
-    history: Long,
-    slices: Int,
-    now: () => Long)
-{
+  clipDuration: Long,
+  error: Double,
+  history: Long,
+  slices: Int,
+  now: () => Long
+) {
 
   require(clipDuration.toInt > 0)
   require(error >= 0.0 && error <= 1.0, s"error must be between [0.0, 1.0], was $error")
@@ -70,7 +69,7 @@ private[finagle] class LatencyHistogram(
     require(which < 100 && which >= 0)
 
     // The number of samples before the request quantile.
-    val target = n.sum()*which/100 + 1
+    val target = n.sum() * which / 100 + 1
     var i = 0
     var sum = 0L
     do {

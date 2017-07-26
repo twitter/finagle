@@ -12,10 +12,10 @@ import scala.collection.immutable
  * requests while it is pending.
  */
 private class DynNameFactory[Req, Rep](
-    name: Activity[NameTree[Name.Bound]],
-    cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep],
-    statsReceiver: StatsReceiver = NullStatsReceiver)
-  extends ServiceFactory[Req, Rep] {
+  name: Activity[NameTree[Name.Bound]],
+  cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep],
+  statsReceiver: StatsReceiver = NullStatsReceiver
+) extends ServiceFactory[Req, Rep] {
 
   val latencyStat = statsReceiver.stat("bind_latency_us")
 
@@ -36,35 +36,37 @@ private class DynNameFactory[Req, Rep](
   @volatile private[this] var state: State = Pending(immutable.Queue.empty)
 
   private[this] val sub = name.run.changes respond {
-    case Activity.Ok(name) => synchronized {
-      state match {
-        case Pending(q) =>
-          state = Named(name)
-          for ((conn, p, elapsed) <- q) {
-            latencyStat.add(elapsed().inMicroseconds)
-            p.become(apply(conn))
-          }
-        case Failed(_) | Named(_) =>
-          state = Named(name)
-        case Closed() =>
+    case Activity.Ok(name) =>
+      synchronized {
+        state match {
+          case Pending(q) =>
+            state = Named(name)
+            for ((conn, p, elapsed) <- q) {
+              latencyStat.add(elapsed().inMicroseconds)
+              p.become(apply(conn))
+            }
+          case Failed(_) | Named(_) =>
+            state = Named(name)
+          case Closed() =>
+        }
       }
-    }
 
-    case Activity.Failed(exc) => synchronized {
-      state match {
-        case Pending(q) =>
-          for ((_, p, elapsed) <- q) {
-            latencyStat.add(elapsed().inMicroseconds)
-            p.setException(Failure.adapt(exc, Failure.Naming))
-          }
-          state = Failed(exc)
-        case Failed(_) =>
-          // if already failed, just update the exception; the promises
-          // must already be satisfied.
-          state = Failed(exc)
-        case Named(_) | Closed() =>
+    case Activity.Failed(exc) =>
+      synchronized {
+        state match {
+          case Pending(q) =>
+            for ((_, p, elapsed) <- q) {
+              latencyStat.add(elapsed().inMicroseconds)
+              p.setException(Failure.adapt(exc, Failure.Naming))
+            }
+            state = Failed(exc)
+          case Failed(_) =>
+            // if already failed, just update the exception; the promises
+            // must already be satisfied.
+            state = Failed(exc)
+          case Named(_) | Closed() =>
+        }
       }
-    }
 
     case Activity.Pending =>
   }
@@ -95,16 +97,17 @@ private class DynNameFactory[Req, Rep](
         val p = new Promise[Service[Req, Rep]]
         val elapsed = Stopwatch.start()
         val el = (conn, p, elapsed)
-        p setInterruptHandler { case exc =>
-          synchronized {
-            state match {
-              case Pending(q) if q contains el =>
-                state = Pending(q filter (_ != el))
-                latencyStat.add(elapsed().inMicroseconds)
-                p.setException(new CancelledConnectionException(exc))
-              case _ =>
+        p setInterruptHandler {
+          case exc =>
+            synchronized {
+              state match {
+                case Pending(q) if q contains el =>
+                  state = Pending(q filter (_ != el))
+                  latencyStat.add(elapsed().inMicroseconds)
+                  p.setException(new CancelledConnectionException(exc))
+                case _ =>
+              }
             }
-          }
         }
         state = Pending(q enqueue el)
         p

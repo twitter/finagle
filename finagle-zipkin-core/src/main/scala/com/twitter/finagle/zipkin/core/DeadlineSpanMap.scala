@@ -14,11 +14,11 @@ import scala.collection.mutable.ArrayBuffer
  * and sent off to scribe despite being incomplete.
  */
 private class DeadlineSpanMap(
-    logSpans: Seq[Span] => Future[Unit],
-    ttl: Duration,
-    statsReceiver: StatsReceiver,
-    timer: Timer)
-{
+  logSpans: Seq[Span] => Future[Unit],
+  ttl: Duration,
+  statsReceiver: StatsReceiver,
+  timer: Timer
+) {
 
   private[this] val spanMap = new ConcurrentHashMap[TraceId, MutableSpan](64)
 
@@ -107,10 +107,10 @@ private final class MutableSpan(val traceId: TraceId, val started: Time) {
 
   def addAnnotation(ann: ZipkinAnnotation): MutableSpan = synchronized {
     if (!_isComplete && (
-      ann.value.equals(Constants.CLIENT_RECV) ||
-      ann.value.equals(Constants.SERVER_SEND) ||
-      ann.value.equals(TimeoutFilter.TimeoutAnnotation)
-    )) _isComplete = true
+        ann.value.equals(Constants.CLIENT_RECV) ||
+        ann.value.equals(Constants.SERVER_SEND) ||
+        ann.value.equals(TimeoutFilter.TimeoutAnnotation)
+      )) _isComplete = true
 
     annotations.append(ann)
     this

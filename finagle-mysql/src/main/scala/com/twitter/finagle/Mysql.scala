@@ -5,7 +5,13 @@ import com.twitter.finagle.decoder.LengthFieldFramer
 import com.twitter.finagle.mysql._
 import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.param.{
+  ExceptionStatsHandler => _,
+  Monitor => _,
+  ResponseClassifier => _,
+  Tracer => _,
+  _
+}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
@@ -27,7 +33,10 @@ trait MysqlRichClient { self: com.twitter.finagle.Client[Request, Result] =>
    * destination described by `dest` with the assigned
    * `label`. The `label` is used to scope client stats.
    */
-  def newRichClient(dest: Name, label: String): mysql.Client with mysql.Transactions with mysql.Cursors =
+  def newRichClient(
+    dest: Name,
+    label: String
+  ): mysql.Client with mysql.Transactions with mysql.Cursors =
     mysql.Client(newClient(dest, label), richClientStatsReceiver)
 
   /**
@@ -46,7 +55,10 @@ object MySqlClientTracingFilter {
       val param.Label(label) = _label
       // TODO(jeff): should be able to get this directly from ClientTracingFilter
       val annotations = new AnnotatingTracingFilter[Request, Result](
-        label, Annotation.ClientSend(), Annotation.ClientRecv())
+        label,
+        Annotation.ClientSend(),
+        Annotation.ClientRecv()
+      )
       annotations andThen TracingFilter andThen next
     }
   }
@@ -67,7 +79,6 @@ object MySqlClientTracingFilter {
   }
 }
 
-
 /**
  * @example {{{
  * val client = Mysql.client
@@ -79,6 +90,7 @@ object MySqlClientTracingFilter {
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
   object param {
+
     /**
      * A class eligible for configuring the maximum number of prepare
      * statements.  After creating `num` prepare statements, we'll start purging
@@ -101,7 +113,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("mysql") +
       DefaultPool.Param(
-        low = 0, high = 1, bufferSize = 0,
+        low = 0,
+        high = 1,
+        bufferSize = 0,
         idleTime = Duration.Top,
         maxWaiters = Int.MaxValue
       )
@@ -120,12 +134,12 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
    * client which exposes a rich mysql api.
    */
   case class Client(
-      stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
-      params: Stack.Params = Client.params)
-    extends StdStackClient[Request, Result, Client]
-    with WithSessionPool[Client]
-    with WithDefaultLoadBalancer[Client]
-    with MysqlRichClient {
+    stack: Stack[ServiceFactory[Request, Result]] = Client.stack,
+    params: Stack.Params = Client.params
+  ) extends StdStackClient[Request, Result, Client]
+      with WithSessionPool[Client]
+      with WithDefaultLoadBalancer[Client]
+      with MysqlRichClient {
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Result]] = this.stack,
@@ -148,7 +162,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
     }
 
-    protected def newDispatcher(transport: Transport[Buf, Buf]):  Service[Request, Result] = {
+    protected def newDispatcher(transport: Transport[Buf, Buf]): Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
       mysql.ClientDispatcher(
         transport.map(_.toBuf, Packet.fromBuf),
@@ -208,7 +222,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
-    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client =
+      super.withRetryBackoff(backoff)
 
     override def withStack(stack: Stack[ServiceFactory[Request, Result]]): Client =
       super.withStack(stack)

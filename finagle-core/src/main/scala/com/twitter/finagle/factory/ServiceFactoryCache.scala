@@ -14,9 +14,8 @@ import scala.collection.mutable.ListBuffer
  * A service factory that keeps track of idling times to implement
  * cache eviction.
  */
-private class IdlingFactory[Req, Rep](
-    self: ServiceFactory[Req, Rep])
-  extends ServiceFactoryProxy[Req, Rep](self) {
+private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
+    extends ServiceFactoryProxy[Req, Rep](self) {
   @volatile private[this] var watch = Stopwatch.start()
   private[this] val n = new AtomicInteger(0)
 
@@ -72,12 +71,12 @@ private class IdlingFactory[Req, Rep](
  * the last, least-idle entry.
  */
 class ServiceFactoryCache[Key, Req, Rep](
-    newFactory: Key => ServiceFactory[Req, Rep],
-    timer: Timer,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    maxCacheSize: Int = 8,
-    tti: Duration = 10.minutes)
-  extends Closable {
+  newFactory: Key => ServiceFactory[Req, Rep],
+  timer: Timer,
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  maxCacheSize: Int = 8,
+  tti: Duration = 10.minutes
+) extends Closable {
   assert(maxCacheSize > 0)
 
   private[this] val cache = new util.HashMap[Key, IdlingFactory[Req, Rep]]()
@@ -103,9 +102,10 @@ class ServiceFactoryCache[Key, Req, Rep](
         } else {
           expired
         }
-        evictees.foreach { case (key, _) =>
-          val removed = cache.remove(key)
-          removed.close()
+        evictees.foreach {
+          case (key, _) =>
+            val removed = cache.remove(key)
+            removed.close()
         }
         nexpires.incr(evictees.size)
       }

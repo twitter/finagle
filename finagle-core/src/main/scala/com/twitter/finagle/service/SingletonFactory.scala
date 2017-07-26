@@ -13,9 +13,7 @@ import com.twitter.util.{Future, Promise, Time}
  * differs from [[com.twitter.finagle.ServiceFactory#const]] in that `const`
  * proxies all requests to the same `service` rather than creating new objects.
  */
-class SingletonFactory[Req, Rep](service: Service[Req, Rep])
-  extends ServiceFactory[Req, Rep]
-{
+class SingletonFactory[Req, Rep](service: Service[Req, Rep]) extends ServiceFactory[Req, Rep] {
   private[this] var latch = new AsyncLatch
 
   def apply(conn: ClientConnection) = Future {

@@ -41,7 +41,8 @@ class ChannelBufferUsageTracker(
     if (state.currentUsage + size > state.usageLimit.inBytes) {
       throw new ChannelBufferUsageException(
         "Channel buffer usage exceeded limit ("
-        + currentUsage + ", " + size + " vs. " + usageLimit + ")")
+          + currentUsage + ", " + size + " vs. " + usageLimit + ")"
+      )
     } else {
       state.currentUsage += size
       if (currentUsage > maxUsage)
@@ -53,23 +54,22 @@ class ChannelBufferUsageTracker(
     if (state.currentUsage < size) {
       throw new ChannelBufferUsageException(
         "invalid ChannelBufferUsageTracker decrease operation ("
-        + size + " vs. " + currentUsage + ")")
+          + size + " vs. " + currentUsage + ")"
+      )
     } else {
       state.currentUsage -= size
     }
   }
 }
 
-private[http]
-class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
-  extends SimpleChannelHandler
-{
+private[http] class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
+    extends SimpleChannelHandler {
   private[this] var bufferUsage = 0L
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     e.getMessage match {
       case buffer: ChannelBuffer => increaseBufferUsage(buffer.capacity())
-      case _                     =>  ()
+      case _ => ()
     }
 
     super.messageReceived(ctx, e)
@@ -99,4 +99,3 @@ class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
     bufferUsage = 0
   }
 }
-

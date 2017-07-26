@@ -3,8 +3,12 @@ package com.twitter.finagle.thrift.transport.netty4
 import com.twitter.finagle.thrift.transport.ExceptionFactory
 import io.netty.buffer.Unpooled
 import io.netty.channel.{
-  ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter,
-  ChannelPromise, CombinedChannelDuplexHandler}
+  ChannelHandler,
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPromise,
+  CombinedChannelDuplexHandler
+}
 import io.netty.channel.ChannelHandler.Sharable
 
 /**

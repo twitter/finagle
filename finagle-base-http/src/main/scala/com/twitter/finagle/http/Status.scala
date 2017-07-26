@@ -29,7 +29,6 @@ case class Status(code: Int) {
     }
 }
 
-
 object Status {
 
   /**

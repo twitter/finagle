@@ -12,16 +12,14 @@ import com.twitter.util.Future
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMessage}
 
-
 private[finagle] class Netty3StreamTransport[
-    In <: Message,
-    Out <: Message,
-    NettyIn <: HttpMessage,
-    NettyOut <: HttpMessage: Manifest](
-    rawTransport: Transport[Any, Any],
-    mkMessage: (NettyOut, Reader) => Out)
-    (implicit injection: Injection[In, NettyIn])
-  extends StreamTransportProxy[In, Out](rawTransport) {
+  In <: Message,
+  Out <: Message,
+  NettyIn <: HttpMessage,
+  NettyOut <: HttpMessage: Manifest
+](rawTransport: Transport[Any, Any], mkMessage: (NettyOut, Reader) => Out)(
+  implicit injection: Injection[In, NettyIn]
+) extends StreamTransportProxy[In, Out](rawTransport) {
 
   private[this] val transport = Transport.cast[NettyIn, NettyOut](rawTransport)
   private[this] val readFn: NettyOut => Future[Multi[Out]] = {
@@ -42,25 +40,25 @@ private[finagle] class Netty3StreamTransport[
 }
 
 private[finagle] class Netty3ClientStreamTransport(transport: Transport[Any, Any])
-  extends Netty3StreamTransport[Request, Response, HttpRequest, HttpResponse](
-    transport,
-    { case (req: HttpResponse, reader: Reader) =>
-      Response(
-        req,
-        reader
-      )
+    extends Netty3StreamTransport[Request, Response, HttpRequest, HttpResponse](transport, {
+      case (req: HttpResponse, reader: Reader) =>
+        Response(
+          req,
+          reader
+        )
     })
 
 private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any])
-  extends Netty3StreamTransport[Response, Request, HttpResponse, HttpRequest](
-    transport,
-    { case (req: HttpRequest, reader: Reader) =>
-        Request(
-          req,
-          reader,
-          transport.remoteAddress match {
-            case ia: InetSocketAddress => ia
-            case _ => new InetSocketAddress(0)
-          }
-        )
-    })
+    extends Netty3StreamTransport[Response, Request, HttpResponse, HttpRequest](
+      transport, {
+        case (req: HttpRequest, reader: Reader) =>
+          Request(
+            req,
+            reader,
+            transport.remoteAddress match {
+              case ia: InetSocketAddress => ia
+              case _ => new InetSocketAddress(0)
+            }
+          )
+      }
+    )

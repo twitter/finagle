@@ -56,11 +56,12 @@ private[http] object HttpClientDispatcher {
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
 private[finagle] class HttpClientDispatcher(
-    trans: StreamTransport[Request, Response],
-    statsReceiver: StatsReceiver)
-  extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
-    trans,
-    statsReceiver) {
+  trans: StreamTransport[Request, Response],
+  statsReceiver: StatsReceiver
+) extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
+      trans,
+      statsReceiver
+    ) {
 
   import HttpClientDispatcher._
 
@@ -74,28 +75,32 @@ private[finagle] class HttpClientDispatcher(
     }
 
     // wait on these concurrently:
-    Future.join(Seq(
-      trans.write(req),
-      // Drain the Transport into Response body.
-      trans.read().flatMap {
-        case Multi(res, readFinished) if HttpNackFilter.isRetryableNack(res) =>
-          p.updateIfEmpty(Throw(Failure.RetryableNackFailure))
-          swallowNackBody(res).before(readFinished)
+    Future
+      .join(
+        Seq(
+          trans.write(req),
+          // Drain the Transport into Response body.
+          trans.read().flatMap {
+            case Multi(res, readFinished) if HttpNackFilter.isRetryableNack(res) =>
+              p.updateIfEmpty(Throw(Failure.RetryableNackFailure))
+              swallowNackBody(res).before(readFinished)
 
-        case Multi(res, readFinished) if HttpNackFilter.isNonRetryableNack(res) =>
-          p.updateIfEmpty(Throw(Failure.NonRetryableNackFailure))
-          swallowNackBody(res).before(readFinished)
+            case Multi(res, readFinished) if HttpNackFilter.isNonRetryableNack(res) =>
+              p.updateIfEmpty(Throw(Failure.NonRetryableNackFailure))
+              swallowNackBody(res).before(readFinished)
 
-        case Multi(res, readFinished) =>
-          p.updateIfEmpty(Return(res))
-          readFinished
-      } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
-    )).onFailure { _ =>
-      // This Future represents the totality of the exchange;
-      // thus failure represents *any* failure that can happen
-      // during the exchange.
-      req.reader.discard()
-      trans.close()
-    }
+            case Multi(res, readFinished) =>
+              p.updateIfEmpty(Return(res))
+              readFinished
+          } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
+        )
+      )
+      .onFailure { _ =>
+        // This Future represents the totality of the exchange;
+        // thus failure represents *any* failure that can happen
+        // during the exchange.
+        req.reader.discard()
+        trans.close()
+      }
   }
 }

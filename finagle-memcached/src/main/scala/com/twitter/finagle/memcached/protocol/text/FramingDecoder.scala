@@ -5,9 +5,8 @@ import com.twitter.finagle.decoder.{Decoder => FinagleDecoder}
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
-private[finagle] final class FramingDecoder[Result](
-    frameDecoder: FrameDecoder[Result])
-  extends FinagleDecoder[Result] {
+private[finagle] final class FramingDecoder[Result](frameDecoder: FrameDecoder[Result])
+    extends FinagleDecoder[Result] {
 
   private final val InitialBufferSize: Int = 4
   private final val MaxBufferSize: Int = 32

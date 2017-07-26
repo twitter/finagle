@@ -28,8 +28,7 @@ private[finagle] abstract class Netty4ClientFramer[T] extends (ChannelPipeline =
 
   def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("endec", BufCodec)
-    pipeline.addLast("framingDecoder",
-      new DecoderHandler(new FramingDecoder(newClientDecoder())))
+    pipeline.addLast("framingDecoder", new DecoderHandler(new FramingDecoder(newClientDecoder())))
   }
 }
 

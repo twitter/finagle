@@ -53,6 +53,7 @@ private class Netty4HeaderMap(private[http] val underlying: HttpHeaders) extends
 }
 
 private object Netty4HeaderMap {
-  val entryToTuple: (Entry[String, String]) => (String, String) =
-    { entry: Entry[String, String] => entry.getKey -> entry.getValue }
+  val entryToTuple: (Entry[String, String]) => (String, String) = { entry: Entry[String, String] =>
+    entry.getKey -> entry.getValue
+  }
 }

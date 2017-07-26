@@ -36,7 +36,7 @@ private[finagle] trait StreamTransport[In, Out] extends Transport[In, Multi[Out]
 }
 
 private[finagle] abstract class StreamTransportProxy[In, Out](self: Transport[_, _])
-  extends StreamTransport[In, Out] {
+    extends StreamTransport[In, Out] {
 
   def status: Status = self.status
   val onClose: Future[Throwable] = self.onClose

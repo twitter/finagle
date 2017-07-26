@@ -75,8 +75,12 @@ private[http2] object Http2ClientDowngrader extends Http2EventAdapter {
       val status = HttpConversionUtil.parseStatus(headers.status)
       val msg = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status, /*validateHeaders*/ false)
       HttpConversionUtil.addHttp2ToHttpHeaders(
-        streamId, headers, msg.headers, HttpVersion.HTTP_1_1,
-        /*isTrailer*/ false, /*isRequest*/ false)
+        streamId,
+        headers,
+        msg.headers,
+        HttpVersion.HTTP_1_1,
+        /*isTrailer*/ false, /*isRequest*/ false
+      )
       msg
     }
     ctx.fireChannelRead(Message(msg, streamId))

@@ -6,9 +6,9 @@ import scala.collection.mutable.ArrayBuffer
 private[finagle] object LengthFieldFramer {
 
   class FrameTooLargeException(size: Long, max: Long)
-    extends Exception(s"Frame of size $size exceeds max length of $max")
+      extends Exception(s"Frame of size $size exceeds max length of $max")
 
-  private val ValidLengthFieldLengths = Set(1,2,3,4,8)
+  private val ValidLengthFieldLengths = Set(1, 2, 3, 4, 8)
   private val NoFrames = IndexedSeq.empty[Buf]
 }
 
@@ -49,33 +49,38 @@ private[finagle] object LengthFieldFramer {
  *                  no effect on the rest of the frame.
  */
 private[finagle] class LengthFieldFramer(
-    lengthFieldBegin: Int,
-    lengthFieldLength: Int,
-    lengthAdjust: Int,
-    maxFrameLength: Int,
-    bigEndian: Boolean)
-  extends Framer {
+  lengthFieldBegin: Int,
+  lengthFieldLength: Int,
+  lengthAdjust: Int,
+  maxFrameLength: Int,
+  bigEndian: Boolean
+) extends Framer {
   import LengthFieldFramer._
 
   private[this] var accum = Buf.Empty
   private[this] val lengthFieldEnd = lengthFieldBegin + lengthFieldLength
 
-  require(ValidLengthFieldLengths.contains(lengthFieldLength),
+  require(
+    ValidLengthFieldLengths.contains(lengthFieldLength),
     s"InvalidLengthFieldLength: $lengthFieldLength." +
-    s"must be one of (${ValidLengthFieldLengths.mkString(", ")})")
+      s"must be one of (${ValidLengthFieldLengths.mkString(", ")})"
+  )
 
   require(lengthAdjust >= 0, s"Invalid lengthAdjust: $lengthAdjust. must be >= 0.")
 
   require(maxFrameLength > 0, s"Invalid lengthFieldlength: $maxFrameLength. must be > 0.")
 
-  require(lengthFieldBegin >= 0 && lengthFieldEnd <= maxFrameLength,
+  require(
+    lengthFieldBegin >= 0 && lengthFieldEnd <= maxFrameLength,
     "length field must be between 0 and maxFrameLength." +
-      s"begin=$lengthFieldBegin, end=$lengthFieldEnd, max=$maxFrameLength")
+      s"begin=$lengthFieldBegin, end=$lengthFieldEnd, max=$maxFrameLength"
+  )
 
-  require(lengthAdjust < maxFrameLength,
+  require(
+    lengthAdjust < maxFrameLength,
     s"Invalid lengthAdjust or maxFrameLength: $lengthAdjust , $maxFrameLength. " +
-    "lengthAdjust must be < maxFrameLength")
-
+      "lengthAdjust must be < maxFrameLength"
+  )
 
   /**
    * Read the next frame length out of `br` and advance `br` if the full frame
@@ -149,7 +154,6 @@ private[finagle] class LengthFieldFramer(
       } else {
         NoFrames
       }
-    }
-    finally br.close()
+    } finally br.close()
   }
 }

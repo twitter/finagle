@@ -29,6 +29,8 @@ class StateTracker(
     val now = Time.now
     val delta = now - lastSample
     lastSample = now
-    currCounter.foreach { counter => counter.incr(delta.inMilliseconds.toInt) }
+    currCounter.foreach { counter =>
+      counter.incr(delta.inMilliseconds.toInt)
+    }
   }
 }

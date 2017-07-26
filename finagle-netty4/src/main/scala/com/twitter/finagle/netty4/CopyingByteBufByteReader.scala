@@ -12,7 +12,8 @@ import io.netty.buffer.ByteBuf
  *       either directly or via generated values. It is up to the user to manage the
  *       resources of the underlying `ByteBuf`.
  */
-private[finagle] final class CopyingByteBufByteReader(bb: ByteBuf) extends AbstractByteBufByteReader(bb) {
+private[finagle] final class CopyingByteBufByteReader(bb: ByteBuf)
+    extends AbstractByteBufByteReader(bb) {
 
   /**
    * Returns a new buffer representing a slice of this buffer, delimited

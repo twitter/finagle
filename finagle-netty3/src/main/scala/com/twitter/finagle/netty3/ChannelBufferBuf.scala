@@ -64,7 +64,7 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
     else if (isSliceIdentity(i, j)) this
     else {
       val from = i + underlying.readerIndex
-      val until = math.min(j-i, length-i)
+      val until = math.min(j - i, length - i)
       new ChannelBufferBuf(underlying.slice(from, until))
     }
   }
@@ -137,6 +137,6 @@ object ChannelBufferBuf {
   object Shared {
     def apply(cb: ChannelBuffer): Buf = Owned(cb.copy)
     def unapply(cbb: ChannelBufferBuf): Option[ChannelBuffer] = Owned.unapply(cbb).map(_.copy)
-    def extract(buf: Buf): ChannelBuffer =  Owned.extract(buf).copy
+    def extract(buf: Buf): ChannelBuffer = Owned.extract(buf).copy
   }
 }

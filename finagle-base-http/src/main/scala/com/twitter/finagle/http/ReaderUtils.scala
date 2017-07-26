@@ -7,6 +7,7 @@ import com.twitter.util.{Future, Return}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 
 private[http] object ReaderUtils {
+
   /**
    * Serialize an HttpChunk into a Buf.
    */
@@ -18,8 +19,7 @@ private[http] object ReaderUtils {
       Future.value(Some(ChannelBufferBuf.Owned(chunk.getContent.duplicate)))
 
     case invalid =>
-      val exc = new IllegalArgumentException(
-        "invalid message \"%s\"".format(invalid))
+      val exc = new IllegalArgumentException("invalid message \"%s\"".format(invalid))
       Future.exception(exc)
   }
 

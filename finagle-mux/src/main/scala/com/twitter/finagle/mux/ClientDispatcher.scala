@@ -14,9 +14,7 @@ import scala.util.control.NoStackTrace
  * could mean that the client sent a [[com.twitter.finagle.mux]] message type
  * that the server is unable to process.
  */
-case class ServerError(what: String)
-  extends Exception(what)
-  with NoStackTrace
+case class ServerError(what: String) extends Exception(what) with NoStackTrace
 
 /**
  * Indicates that the server encountered an error whilst processing the client's
@@ -24,9 +22,7 @@ case class ServerError(what: String)
  * ServerApplicationError relates to server application failure rather than
  * failure to interpret the request.
  */
-case class ServerApplicationError(what: String)
-  extends Exception(what)
-  with NoStackTrace
+case class ServerApplicationError(what: String) extends Exception(what) with NoStackTrace
 
 /**
  * Implements a dispatcher for a mux client. The dispatcher implements the bookkeeping
@@ -34,7 +30,7 @@ case class ServerApplicationError(what: String)
  * tag assignment can be deferred (i.e. Int => Message).
  */
 private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
-  extends Service[Int => Message, Message] {
+    extends Service[Int => Message, Message] {
   import ClientDispatcher._
 
   // outstanding messages, each tagged with a unique int
@@ -55,15 +51,16 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
   private[this] def readLoop(): Future[Unit] =
     trans.read().flatMap(processAndRead)
 
-  readLoop().onFailure { case exc: Throwable =>
-    trans.close()
-    val result = Throw(exc)
-    for (tag <- tags) {
-      // unmap the `tag` here to prevent the associated promise from
-      // being fetched from the tag map again, and setting a value twice.
-      for (u <- messages.unmap(tag))
-        u() = result
-    }
+  readLoop().onFailure {
+    case exc: Throwable =>
+      trans.close()
+      val result = Throw(exc)
+      for (tag <- tags) {
+        // unmap the `tag` here to prevent the associated promise from
+        // being fetched from the tag map again, and setting a value twice.
+        for (u <- messages.unmap(tag))
+          u() = result
+      }
   }
 
   private[this] def process(msg: Message): Unit = msg match {
@@ -90,17 +87,18 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
         val msg = f(tag)
         trans.write(msg).transform {
           case Return(_) =>
-            p.setInterruptHandler { case cause =>
-              // We replace the current Updatable, if any, with a stand-in to reserve
-              // the tag of discarded requests until Tdiscarded is acknowledged by the
-              // peer.
-              for (u <- messages.maybeRemap(msg.tag, Empty)) {
-                trans.write(Message.Tdiscarded(msg.tag, cause.toString))
-                u() = Throw(cause)
-              }
+            p.setInterruptHandler {
+              case cause =>
+                // We replace the current Updatable, if any, with a stand-in to reserve
+                // the tag of discarded requests until Tdiscarded is acknowledged by the
+                // peer.
+                for (u <- messages.maybeRemap(msg.tag, Empty)) {
+                  trans.write(Message.Tdiscarded(msg.tag, cause.toString))
+                  u() = Throw(cause)
+                }
             }
             p
-          case t@Throw(_) =>
+          case t @ Throw(_) =>
             messages.unmap(tag)
             Future.const(t.cast[Message])
         }
@@ -112,8 +110,7 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
 }
 
 private[twitter] object ClientDispatcher {
-  val FutureExhaustedTagsException = Future.exception(
-    Failure.rejected("Exhausted tags"))
+  val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
 
   val Empty: Updatable[Try[Message]] = Updatable.empty()
 
@@ -137,35 +134,35 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
   @volatile private[this] var canDispatch: CanDispatch.State = CanDispatch.Unknown
 
   private[this] def reply(msg: Try[Message]): Future[Response] = msg match {
-      case Return(Message.RreqOk(_, rep)) =>
-        Future.value(Response(rep))
+    case Return(Message.RreqOk(_, rep)) =>
+      Future.value(Response(rep))
 
-      case Return(Message.RreqError(_, error)) =>
-        Future.exception(ServerApplicationError(error))
+    case Return(Message.RreqError(_, error)) =>
+      Future.exception(ServerApplicationError(error))
 
-      case Return(Message.RdispatchOk(_, _, rep)) =>
-        Future.value(Response(rep))
+    case Return(Message.RdispatchOk(_, _, rep)) =>
+      Future.value(Response(rep))
 
-      case Return(Message.RdispatchError(_, contexts, error)) =>
-        val appError = ServerApplicationError(error)
-        val exn = MuxFailure.fromContexts(contexts) match {
-          case Some(f) => Failure(appError, f.finagleFlags)
-          case None => appError
-        }
-        Future.exception(exn)
+    case Return(Message.RdispatchError(_, contexts, error)) =>
+      val appError = ServerApplicationError(error)
+      val exn = MuxFailure.fromContexts(contexts) match {
+        case Some(f) => Failure(appError, f.finagleFlags)
+        case None => appError
+      }
+      Future.exception(exn)
 
-      case Return(Message.RdispatchNack(_, contexts)) =>
-        val exn = MuxFailure.fromContexts(contexts) match {
-          case Some(f) => Failure(Failure.RetryableNackFailure.why, f.finagleFlags)
-          case None => Failure.RetryableNackFailure
-        }
-        Future.exception(exn)
+    case Return(Message.RdispatchNack(_, contexts)) =>
+      val exn = MuxFailure.fromContexts(contexts) match {
+        case Some(f) => Failure(Failure.RetryableNackFailure.why, f.finagleFlags)
+        case None => Failure.RetryableNackFailure
+      }
+      Future.exception(exn)
 
-      case Return(Message.RreqNack(_)) =>
-        Failure.FutureRetryableNackFailure
+    case Return(Message.RreqNack(_)) =>
+      Failure.FutureRetryableNackFailure
 
-      case t@Throw(_) => Future.const(t.cast[Response])
-      case Return(m) => Future.exception(Failure(s"unexpected response: $m"))
+    case t @ Throw(_) => Future.const(t.cast[Response])
+    case Return(m) => Future.exception(Failure(s"unexpected response: $m"))
   }
 
   def apply(req: Request, svc: Service[Int => Message, Message]): Future[Response] = {
@@ -183,19 +180,20 @@ private class ReqRepFilter extends Filter[Request, Response, Int => Message, Mes
     }
 
     if (couldDispatch != CanDispatch.Unknown) svc(msg).transform(reply)
-    else svc(msg).transform {
-      case Throw(ServerError(_)) =>
-        // We've determined that the server cannot handle Tdispatch messages,
-        // so we fall back to a Treq.
-        canDispatch = CanDispatch.No
-        apply(req, svc)
+    else
+      svc(msg).transform {
+        case Throw(ServerError(_)) =>
+          // We've determined that the server cannot handle Tdispatch messages,
+          // so we fall back to a Treq.
+          canDispatch = CanDispatch.No
+          apply(req, svc)
 
-      case r@Return(_) =>
-        canDispatch = CanDispatch.Yes
-        reply(r)
+        case r @ Return(_) =>
+          canDispatch = CanDispatch.Yes
+          reply(r)
 
-      case t@Throw(_) => reply(t)
-    }
+        case t @ Throw(_) => reply(t)
+      }
   }
 }
 

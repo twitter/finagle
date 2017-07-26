@@ -9,6 +9,7 @@ import com.twitter.util.Activity
  * [[com.twitter.finagle.Dtab Dtab]] can affect the resolution process.
  */
 trait NameInterpreter {
+
   /**
    * Bind `path` against the given `dtab`.
    */
@@ -16,6 +17,7 @@ trait NameInterpreter {
 }
 
 object NameInterpreter extends NameInterpreter {
+
   /**
    * The global interpreter that resolves all names in Finagle.
    *

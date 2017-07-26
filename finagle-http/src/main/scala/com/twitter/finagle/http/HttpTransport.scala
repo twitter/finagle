@@ -13,10 +13,10 @@ import scala.util.control.NonFatal
  *       irrespective of any pending requests in the dispatcher.
  */
 private[finagle] class HttpTransport[A <: Message, B <: Message](
-    self: StreamTransport[A, B],
-    manager: ConnectionManager)
-  extends StreamTransportProxy[A, B](self)
-  with (Try[Multi[B]] => Unit)  {
+  self: StreamTransport[A, B],
+  manager: ConnectionManager
+) extends StreamTransportProxy[A, B](self)
+    with (Try[Multi[B]] => Unit) {
 
   def this(self: StreamTransport[A, B]) =
     this(self, new ConnectionManager)
@@ -44,7 +44,6 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
     } catch {
       case NonFatal(e) => Future.exception(e)
     }
-
 
   override def status: CoreStatus = if (manager.shouldClose()) CoreStatus.Closed else self.status
 }

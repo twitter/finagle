@@ -36,8 +36,7 @@ private[finagle] class WriteOnce[T](uninitialized: T) {
       throw new IllegalArgumentException("value may not be null")
     val success = value.compareAndSet(null.asInstanceOf[T], v)
     if (!success)
-      throw new IllegalStateException(
-        s"value has already been initialized to: '${value.get}'")
+      throw new IllegalStateException(s"value has already been initialized to: '${value.get}'")
   }
 
 }

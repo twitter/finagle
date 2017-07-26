@@ -53,19 +53,24 @@ private[finagle] object BufCodec extends ChannelDuplexHandler {
 
         ctx.write(byteBuf, p)
 
-      case typ => p.setFailure(Failure(
-        s"unexpected type ${typ.getClass.getSimpleName} when encoding to ByteBuf"))
+      case typ =>
+        p.setFailure(
+          Failure(s"unexpected type ${typ.getClass.getSimpleName} when encoding to ByteBuf")
+        )
     }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit =
     msg match {
       case bb: ByteBuf =>
         val array = new Array[Byte](bb.readableBytes)
-        try bb.readBytes(array) finally bb.release()
+        try bb.readBytes(array)
+        finally bb.release()
 
         ctx.fireChannelRead(new Buf.ByteArray(array, 0, array.length))
 
-      case typ => ctx.fireExceptionCaught(Failure(
-          s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf"))
+      case typ =>
+        ctx.fireExceptionCaught(
+          Failure(s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf")
+        )
     }
 }

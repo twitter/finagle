@@ -33,19 +33,19 @@ object HttpDtab {
     Base64.encode(v.getBytes(Utf8))
 
   private def b64Decode(v: String): Try[String] =
-    Try { Base64.decode(v) } map(new String(_, Utf8))
+    Try { Base64.decode(v) } map (new String(_, Utf8))
 
   private val unmatchedFailure =
     Failure("Unmatched X-Dtab headers")
 
   private def decodingFailure(value: String) =
-    Failure("Value not b64-encoded: "+value)
+    Failure("Value not b64-encoded: " + value)
 
   private def prefixFailure(prefix: String, cause: IllegalArgumentException) =
-    Failure("Invalid prefix: "+prefix, cause)
+    Failure("Invalid prefix: " + prefix, cause)
 
   private def nameFailure(name: String, cause: IllegalArgumentException) =
-    Failure("Invalid name: "+name, cause)
+    Failure("Invalid name: " + name, cause)
 
   private def decodePrefix(b64pfx: String): Try[Dentry.Prefix] =
     b64Decode(b64pfx) match {
@@ -69,14 +69,13 @@ object HttpDtab {
 
   private def validHeaderPair(aKey: String, bKey: String): Boolean =
     aKey.length == bKey.length &&
-    aKey(aKey.length - 1) == 'a' &&
-    bKey(bKey.length - 1) == 'b' &&
-    aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
+      aKey(aKey.length - 1) == 'a' &&
+      bKey(bKey.length - 1) == 'b' &&
+      aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
 
-  private def isDtabHeader(hdr: (String,String)): Boolean =
+  private def isDtabHeader(hdr: (String, String)): Boolean =
     hdr._1.equalsIgnoreCase(Header) ||
-    hdr._1.regionMatches(true, 0, Prefix, 0, Prefix.length)
-
+      hdr._1.regionMatches(true, 0, Prefix, 0, Prefix.length)
 
   private val EmptyReturn = Return(Dtab.empty)
 
@@ -122,7 +121,8 @@ object HttpDtab {
 
     if (dtab.size >= Maxsize) {
       throw new IllegalArgumentException(
-        "Dtabs with length greater than 100 are not serializable with HTTP")
+        "Dtabs with length greater than 100 are not serializable with HTTP"
+      )
     }
 
     msg.headerMap.set(Header, dtab.show)
@@ -149,11 +149,13 @@ object HttpDtab {
    * N.B. Comma is not a showable character in Paths nor is it meaningful in Dtabs.
    */
   private def readDtabLocal(msg: Message): Try[Dtab] =
-    if(!msg.headerMap.contains(Header)) EmptyReturn else Try {
-      val headers = msg.headerMap.getAll(Header)
-      val dentries = headers.view.flatMap(_ split ',').flatMap(Dtab.read(_))
-      Dtab(dentries.toIndexedSeq)
-    }
+    if (!msg.headerMap.contains(Header)) EmptyReturn
+    else
+      Try {
+        val headers = msg.headerMap.getAll(Header)
+        val dentries = headers.view.flatMap(_ split ',').flatMap(Dtab.read(_))
+        Dtab(dentries.toIndexedSeq)
+      }
 
   /**
    * Parse header pairs into a Dtab:
@@ -179,14 +181,14 @@ object HttpDtab {
       return Throw(unmatchedFailure)
 
     keys = keys.sorted
-    val n = keys.size/2
+    val n = keys.size / 2
 
     val dentries = new Array[Dentry](n)
     var i = 0
     while (i < n) {
-      val j = i*2
+      val j = i * 2
       val prefix = keys(j)
-      val dest = keys(j+1)
+      val dest = keys(j + 1)
 
       if (!validHeaderPair(prefix, dest))
         return Throw(unmatchedFailure)
@@ -195,14 +197,13 @@ object HttpDtab {
         for {
           pfx <- decodePrefix(msg.headerMap(prefix))
           name <- decodeName(msg.headerMap(dest))
-        } yield Dentry(pfx,  name)
+        } yield Dentry(pfx, name)
 
-      dentries(i) =
-        tryDentry match {
-          case Return(dentry) => dentry
-          case Throw(e) =>
-            return Throw(e)
-        }
+      dentries(i) = tryDentry match {
+        case Return(dentry) => dentry
+        case Throw(e) =>
+          return Throw(e)
+      }
 
       i += 1
     }

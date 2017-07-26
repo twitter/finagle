@@ -23,7 +23,8 @@ private[finagle] class TTwitterServerFilter(
   private[this] lazy val successfulUpgradeReply = Future {
     val buffer = new OutputBuffer(protocolFactory)
     buffer().writeMessageBegin(
-      new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0))
+      new TMessage(ThriftTracing.CanTraceMethodName, TMessageType.REPLY, 0)
+    )
     val upgradeReply = new thrift.UpgradeReply
     upgradeReply.write(buffer())
     buffer().writeMessageEnd()
@@ -80,7 +81,8 @@ private[finagle] class TTwitterServerFilter(
                 val responseHeader = new thrift.ResponseHeader
                 ByteArrays.concat(
                   OutputBuffer.messageToArray(responseHeader, protocolFactory),
-                  response)
+                  response
+                )
             }
           }
         }
@@ -91,7 +93,7 @@ private[finagle] class TTwitterServerFilter(
 
       // TODO: only try once?
       if (msg.`type` == TMessageType.CALL &&
-          msg.name == ThriftTracing.CanTraceMethodName) {
+        msg.name == ThriftTracing.CanTraceMethodName) {
 
         val connectionOptions = new thrift.ConnectionOptions
         connectionOptions.read(buffer())

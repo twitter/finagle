@@ -8,27 +8,24 @@ sealed abstract class Command(val name: String)
 
 private[memcached] object StorageCommand {
   val StorageCommands = immutable.Set[Buf](
-    Buf.Utf8("set"), Buf.Utf8("add"), Buf.Utf8("replace"), Buf.Utf8("append"), Buf.Utf8("prepend"),
-    Buf.Utf8("cas"))
+    Buf.Utf8("set"),
+    Buf.Utf8("add"),
+    Buf.Utf8("replace"),
+    Buf.Utf8("append"),
+    Buf.Utf8("prepend"),
+    Buf.Utf8("cas")
+  )
 }
 
-sealed abstract class StorageCommand(
-    key: Buf,
-    flags: Int,
-    expiry: Time,
-    value: Buf,
-    name: String)
-  extends Command(name) {
+sealed abstract class StorageCommand(key: Buf, flags: Int, expiry: Time, value: Buf, name: String)
+    extends Command(name) {
   KeyValidation.checkKey(key)
 }
 
 sealed abstract class NonStorageCommand(name: String) extends Command(name)
 
-sealed abstract class ArithmeticCommand(
-    key: Buf,
-    delta: Long,
-    name: String)
-  extends NonStorageCommand(name) {
+sealed abstract class ArithmeticCommand(key: Buf, delta: Long, name: String)
+    extends NonStorageCommand(name) {
   KeyValidation.checkKey(key)
 }
 
@@ -39,17 +36,17 @@ sealed abstract class RetrievalCommand(name: String) extends NonStorageCommand(n
 
 // storage commands
 case class Set(key: Buf, flags: Int, expiry: Time, value: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Set")
+    extends StorageCommand(key, flags, expiry, value, "Set")
 case class Add(key: Buf, flags: Int, expiry: Time, value: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Add")
+    extends StorageCommand(key, flags, expiry, value, "Add")
 case class Replace(key: Buf, flags: Int, expiry: Time, value: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Replace")
+    extends StorageCommand(key, flags, expiry, value, "Replace")
 case class Append(key: Buf, flags: Int, expiry: Time, value: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Append")
+    extends StorageCommand(key, flags, expiry, value, "Append")
 case class Prepend(key: Buf, flags: Int, expiry: Time, value: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Prepend")
+    extends StorageCommand(key, flags, expiry, value, "Prepend")
 case class Cas(key: Buf, flags: Int, expiry: Time, value: Buf, casUnique: Buf)
-  extends StorageCommand(key, flags, expiry, value, "Cas")
+    extends StorageCommand(key, flags, expiry, value, "Cas")
 
 // retrieval commands
 case class Get(keys: Seq[Buf]) extends RetrievalCommand("Get")

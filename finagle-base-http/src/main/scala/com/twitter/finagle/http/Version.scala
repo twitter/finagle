@@ -5,7 +5,7 @@ package com.twitter.finagle.http
  *
  * For Java-friendly enums, see [[com.twitter.finagle.http.Versions]].
  */
-final case class Version private(major: Int, minor: Int) {
+final case class Version private (major: Int, minor: Int) {
 
   /** String representation of the HTTP version */
   val versionString: String = s"HTTP/${major}.${minor}"
@@ -14,6 +14,7 @@ final case class Version private(major: Int, minor: Int) {
 }
 
 object Version {
+
   /** HTTP 1.0 */
   val Http10: Version = Version(1, 0)
 

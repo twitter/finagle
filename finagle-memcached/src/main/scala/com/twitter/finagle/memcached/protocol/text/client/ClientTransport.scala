@@ -12,9 +12,9 @@ import java.security.cert.Certificate
  * A Transport that handles encoding Commands to Bufs and decoding framed Bufs to Responses.
  */
 private[finagle] class ClientTransport[Command, Response](
-    commandToBuf: AbstractCommandToBuf[Command],
-    underlying: Transport[Buf, Response])
-  extends Transport[Command, Response] {
+  commandToBuf: AbstractCommandToBuf[Command],
+  underlying: Transport[Buf, Response]
+) extends Transport[Command, Response] {
 
   def read(): Future[Response] = underlying.read()
 

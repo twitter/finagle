@@ -15,6 +15,7 @@ import com.twitter.util.Duration
  * @tparam A a [[Stack.Parameterized]] client to configure
  */
 class SessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
+
   /**
    * Configures the session max idle time `timeout` - the maximum amount of time
    * a given session is allowed to be idle before it is closed (default: unbounded).

@@ -12,18 +12,22 @@ import io.netty.handler.ssl.{OpenSsl, SslContextBuilder}
  * recommended path for using native SSL/TLS engines within Finagle.
  */
 class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
-  extends SslServerEngineFactory {
+    extends SslServerEngineFactory {
 
   private[this] def startWithKey(keyCredentials: KeyCredentials): SslContextBuilder =
     keyCredentials match {
       case KeyCredentials.Unspecified =>
         throw SslConfigurationException.notSupported(
-          "KeyCredentials.Unspecified", "Netty4ServerEngineFactory")
+          "KeyCredentials.Unspecified",
+          "Netty4ServerEngineFactory"
+        )
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
         SslContextBuilder.forServer(certFile, keyFile)
       case _: KeyCredentials.CertKeyAndChain =>
         throw SslConfigurationException.notSupported(
-          "KeyCredentials.CertKeyAndChain", "Netty4ServerEngineFactory")
+          "KeyCredentials.CertKeyAndChain",
+          "Netty4ServerEngineFactory"
+        )
     }
 
   /**
@@ -46,8 +50,8 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
 
     val withProvider = Netty4SslConfigurations.configureProvider(builder, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
-    val withAppProtocols = Netty4SslConfigurations.configureApplicationProtocols(
-      withTrust, config.applicationProtocols)
+    val withAppProtocols =
+      Netty4SslConfigurations.configureApplicationProtocols(withTrust, config.applicationProtocols)
     val context = withAppProtocols.build()
     val engine = new Engine(context.newEngine(allocator))
     SslServerEngineFactory.configureEngine(engine, config)

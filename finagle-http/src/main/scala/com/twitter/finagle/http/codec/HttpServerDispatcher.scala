@@ -18,10 +18,10 @@ private[http] object HttpServerDispatcher {
 }
 
 private[finagle] class HttpServerDispatcher(
-    trans: StreamTransport[Response, Request],
-    underlying: Service[Request, Response],
-    stats: StatsReceiver)
-  extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
+  trans: StreamTransport[Response, Request],
+  underlying: Service[Request, Response],
+  stats: StatsReceiver
+) extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
   import HttpServerDispatcher._
 
   private[this] val failureReceiver =
@@ -35,11 +35,11 @@ private[finagle] class HttpServerDispatcher(
   }
 
   protected def dispatch(req: Request): Future[Response] = {
-      val handleFn = req.version match {
-        case Version.Http10 => handleHttp10
-        case _ => handleHttp11
-      }
-      service(req).handle(handleFn)
+    val handleFn = req.version match {
+      case Version.Http10 => handleHttp10
+      case _ => handleHttp11
+    }
+    service(req).handle(handleFn)
   }
 
   protected def handle(rep: Response): Future[Unit] = {
@@ -53,13 +53,16 @@ private[finagle] class HttpServerDispatcher(
       // interrupted in the middle of a write, or when there otherwise isn’t
       // an outstanding read (e.g. read-write race).
       f.onFailure { t =>
-        Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
+        Logger
+          .get(this.getClass.getName)
+          .debug(t, "Failed mid-stream. Terminating stream, closing connection")
         failureReceiver.counter(Throwables.mkString(t): _*).incr()
         rep.reader.discard()
       }
-      p.setInterruptHandler { case intr =>
-        rep.reader.discard()
-        f.raise(intr)
+      p.setInterruptHandler {
+        case intr =>
+          rep.reader.discard()
+          f.raise(intr)
       }
       p
     } else {
@@ -76,15 +79,14 @@ private[finagle] class HttpServerDispatcher(
     if (connectionHeaders.isEmpty || !connectionHeaders.exists("close".equalsIgnoreCase(_))) {
       rep.version match {
         case Version.Http10 if keepAlive =>
-            rep.headerMap.set(Fields.Connection, "keep-alive")
+          rep.headerMap.set(Fields.Connection, "keep-alive")
 
         case Version.Http11 if (!keepAlive) =>
-            // The connection header may contain additional information, so add
-            // rather than set.
-            rep.headerMap.add(Fields.Connection, "close")
+          // The connection header may contain additional information, so add
+          // rather than set.
+          rep.headerMap.add(Fields.Connection, "close")
 
         case _ =>
-
       }
     }
   }

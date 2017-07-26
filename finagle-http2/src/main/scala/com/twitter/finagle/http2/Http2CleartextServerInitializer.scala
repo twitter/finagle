@@ -3,17 +3,25 @@ package com.twitter.finagle.http2
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http
 import com.twitter.finagle.http2.transport.{
-  Http2NackHandler, PriorKnowledgeHandler, RichHttp2ServerDowngrader
+  Http2NackHandler,
+  PriorKnowledgeHandler,
+  RichHttp2ServerDowngrader
 }
 import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, ChannelOption
+  Channel,
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelInitializer,
+  ChannelOption
 }
 import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
-  SourceCodec, UpgradeCodec, UpgradeCodecFactory
+  SourceCodec,
+  UpgradeCodec,
+  UpgradeCodecFactory
 }
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2._
@@ -24,9 +32,9 @@ import io.netty.util.AsciiString
  * This handler sets us up for a cleartext upgrade
  */
 private[http2] class Http2CleartextServerInitializer(
-    init: ChannelInitializer[Channel],
-    params: Stack.Params)
-  extends ChannelInitializer[SocketChannel] {
+  init: ChannelInitializer[Channel],
+  params: Stack.Params
+) extends ChannelInitializer[SocketChannel] {
 
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")
@@ -88,9 +96,16 @@ private[http2] class Http2CleartextServerInitializer(
         Logger.get(this.getClass).error(ex, msg)
         throw ex
     }
-    p.addBefore(HttpCodecName, "priorKnowledgeHandler", new PriorKnowledgeHandler(initializer, params))
-    p.addAfter(HttpCodecName, "upgradeHandler",
-      new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory(ch), maxRequestSize.inBytes.toInt))
+    p.addBefore(
+      HttpCodecName,
+      "priorKnowledgeHandler",
+      new PriorKnowledgeHandler(initializer, params)
+    )
+    p.addAfter(
+      HttpCodecName,
+      "upgradeHandler",
+      new HttpServerUpgradeHandler(httpCodec, upgradeCodecFactory(ch), maxRequestSize.inBytes.toInt)
+    )
 
     p.addLast(init)
   }

@@ -35,7 +35,6 @@ class HeadFilter[Req <: Request] extends SimpleFilter[Req, Response] {
     }
 }
 
-
 object HeadFilter extends HeadFilter[Request] {
   private def clearResponseBody(response: Response): Unit = {
     // We can't represent the chunked encoding for a HEAD request with our

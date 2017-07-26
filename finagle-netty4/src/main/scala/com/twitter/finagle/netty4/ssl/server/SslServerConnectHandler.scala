@@ -11,10 +11,10 @@ import scala.util.control.NonFatal
  * Delays `channelRegistered` event until the TLS handshake is successfully finished.
  */
 private[netty4] class SslServerConnectHandler(
-    sslHandler: SslHandler,
-    config: SslServerConfiguration,
-    sessionVerifier: SslServerSessionVerifier)
-  extends ChannelInboundHandlerAdapter { self =>
+  sslHandler: SslHandler,
+  config: SslServerConfiguration,
+  sessionVerifier: SslServerSessionVerifier
+) extends ChannelInboundHandlerAdapter { self =>
 
   private[this] def verifySession(ctx: ChannelHandlerContext, session: SSLSession): Unit = {
     val channel = ctx.channel()
@@ -32,14 +32,16 @@ private[netty4] class SslServerConnectHandler(
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     val channel = ctx.channel()
-    sslHandler.handshakeFuture().addListener(new GenericFutureListener[NettyFuture[Channel]] {
-      override def operationComplete(f: NettyFuture[Channel]): Unit = {
-        if (f.isSuccess) {
-          val session = sslHandler.engine().getSession
-          verifySession(ctx, session)
+    sslHandler
+      .handshakeFuture()
+      .addListener(new GenericFutureListener[NettyFuture[Channel]] {
+        override def operationComplete(f: NettyFuture[Channel]): Unit = {
+          if (f.isSuccess) {
+            val session = sslHandler.engine().getSession
+            verifySession(ctx, session)
+          }
         }
-      }
-    })
+      })
 
     if (!channel.config().isAutoRead) {
       channel.read()

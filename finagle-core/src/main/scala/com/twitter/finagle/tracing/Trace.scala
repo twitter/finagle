@@ -80,7 +80,8 @@ object Trace {
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
-        flags)
+        flags
+      )
 
       Return(traceId)
     }
@@ -247,7 +248,8 @@ object Trace {
         case None =>
       }
       Trace.record(Annotation.ServerRecv())
-      try f finally {
+      try f
+      finally {
         Trace.record(Annotation.ServerSend())
       }
     }
@@ -274,7 +276,9 @@ object Trace {
    * Record a raw record without checking if it's sampled/enabled/etc.
    */
   private[this] def uncheckedRecord(rec: Record): Unit = {
-    tracers.distinct.foreach { t: Tracer => t.record(rec) }
+    tracers.distinct.foreach { t: Tracer =>
+      t.record(rec)
+    }
   }
 
   /**
@@ -311,13 +315,13 @@ object Trace {
     f
   }
 
-   /*
-    * Convenience methods that construct records of different kinds.
-    */
+  /*
+   * Convenience methods that construct records of different kinds.
+   */
   def record(ann: Annotation): Unit = {
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, None))
-   }
+  }
 
   def record(ann: Annotation, duration: Duration): Unit = {
     if (isActivelyTracing)

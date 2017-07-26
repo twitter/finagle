@@ -134,9 +134,9 @@ class MysqlBufReader(buf: Buf) extends ProxyByteReader {
   }
 }
 
-
 class MysqlBufWriter(underlying: BufByteWriter)
-  extends ProxyByteWriter(underlying) with BufByteWriter {
+    extends ProxyByteWriter(underlying)
+    with BufByteWriter {
 
   /**
    * Writes `b` to the buffer `num` times
@@ -158,19 +158,19 @@ class MysqlBufWriter(underlying: BufByteWriter)
   def writeVariableLong(length: Long): MysqlBufWriter = {
     if (length < 0) throw new IllegalStateException(s"Negative length-encoded integer: $length")
     if (length < 251) {
-       writeByte(length.toInt)
-     } else if (length < 65536) {
-       writeByte(252)
-       writeShortLE(length.toInt)
-     } else if (length < 16777216) {
-       writeByte(253)
-       writeMediumLE(length.toInt)
-     } else {
-       writeByte(254)
-       writeLongLE(length)
-     }
-     this
-   }
+      writeByte(length.toInt)
+    } else if (length < 65536) {
+      writeByte(252)
+      writeShortLE(length.toInt)
+    } else if (length < 16777216) {
+      writeByte(253)
+      writeMediumLE(length.toInt)
+    } else {
+      writeByte(254)
+      writeLongLE(length)
+    }
+    this
+  }
 
   /**
    * Writes a null terminated string onto the buffer encoded as UTF-8

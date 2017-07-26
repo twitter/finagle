@@ -10,9 +10,9 @@ import com.twitter.util.Future
  * which is indicative of a response to a 'oneway' message.
  */
 private[finagle] class ThriftSerialServerDispatcher(
-    transport: Transport[Array[Byte], Array[Byte]],
-    service: Service[Array[Byte], Array[Byte]])
-  extends SerialServerDispatcher[Array[Byte], Array[Byte]](transport, service) {
+  transport: Transport[Array[Byte], Array[Byte]],
+  service: Service[Array[Byte], Array[Byte]]
+) extends SerialServerDispatcher[Array[Byte], Array[Byte]](transport, service) {
 
   override protected def handle(rep: Array[Byte]): Future[Unit] = {
     // Don't actually need to write an empty array, that is wasteful

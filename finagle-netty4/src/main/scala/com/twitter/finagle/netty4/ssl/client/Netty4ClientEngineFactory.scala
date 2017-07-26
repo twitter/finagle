@@ -19,7 +19,7 @@ import javax.net.ssl.SSLEngine
  * recommended path for using native SSL/TLS engines with Finagle.
  */
 class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
-  extends SslClientEngineFactory {
+    extends SslClientEngineFactory {
 
   private[this] def mkSslEngine(
     context: SslContext,
@@ -42,13 +42,15 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
       Try {
         KeyFactory.getInstance("RSA").generatePrivate(keySpec)
       }.handle {
-        case _: InvalidKeySpecException => KeyFactory.getInstance("DSA").generatePrivate(keySpec)
-      }.handle {
-        case _: InvalidKeySpecException => KeyFactory.getInstance("EC").generatePrivate(keySpec)
-      }.handle {
-        case ex: InvalidKeySpecException =>
-          throw new InvalidKeySpecException("Neither RSA, DSA nor EC worked", ex)
-      }
+          case _: InvalidKeySpecException => KeyFactory.getInstance("DSA").generatePrivate(keySpec)
+        }
+        .handle {
+          case _: InvalidKeySpecException => KeyFactory.getInstance("EC").generatePrivate(keySpec)
+        }
+        .handle {
+          case ex: InvalidKeySpecException =>
+            throw new InvalidKeySpecException("Neither RSA, DSA nor EC worked", ex)
+        }
     }
   }
 
@@ -59,9 +61,10 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     keyCredentials match {
       case KeyCredentials.Unspecified =>
         Return(builder) // Do Nothing
-      case KeyCredentials.CertAndKey(certFile, keyFile) => Try {
-        builder.keyManager(certFile, keyFile)
-      }
+      case KeyCredentials.CertAndKey(certFile, keyFile) =>
+        Try {
+          builder.keyManager(certFile, keyFile)
+        }
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
           key <- getPrivateKey(keyFile)
@@ -92,8 +95,8 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
     }
     val withProvider = Netty4SslConfigurations.configureProvider(withKey, forceJdk)
     val withTrust = Netty4SslConfigurations.configureTrust(withProvider, config.trustCredentials)
-    val withAppProtocols = Netty4SslConfigurations.configureApplicationProtocols(
-      withTrust, config.applicationProtocols)
+    val withAppProtocols =
+      Netty4SslConfigurations.configureApplicationProtocols(withTrust, config.applicationProtocols)
     val context = withAppProtocols.build()
     val engine = new Engine(mkSslEngine(context, address, config))
     SslClientEngineFactory.configureEngine(engine, config)

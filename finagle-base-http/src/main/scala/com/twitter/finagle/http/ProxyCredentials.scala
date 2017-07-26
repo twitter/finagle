@@ -24,4 +24,3 @@ case class ProxyCredentials(username: String, password: String) {
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 }
-

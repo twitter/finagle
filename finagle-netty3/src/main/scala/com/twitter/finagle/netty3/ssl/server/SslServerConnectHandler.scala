@@ -15,30 +15,32 @@ import scala.util.control.NonFatal
  * 2. invoking a shutdown callback on disconnect
  */
 private[netty3] class SslServerConnectHandler(
-    sslHandler: SslHandler,
-    config: SslServerConfiguration,
-    sessionVerifier: SslServerSessionVerifier,
-    onShutdown: () => Unit = () => Unit)
-  extends SimpleChannelUpstreamHandler {
+  sslHandler: SslHandler,
+  config: SslServerConfiguration,
+  sessionVerifier: SslServerSessionVerifier,
+  onShutdown: () => Unit = () => Unit
+) extends SimpleChannelUpstreamHandler {
 
   // delay propagating connection upstream until we've completed the handshake
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
-    sslHandler.handshake().addListener(new ChannelFutureListener {
-      override def operationComplete(f: ChannelFuture): Unit =
-        if (f.isSuccess) {
-          try {
-            if (sessionVerifier(config, sslHandler.getEngine.getSession)) {
-              SslServerConnectHandler.super.channelConnected(ctx, e)
-            } else {
-              Channels.close(ctx.getChannel)
+    sslHandler
+      .handshake()
+      .addListener(new ChannelFutureListener {
+        override def operationComplete(f: ChannelFuture): Unit =
+          if (f.isSuccess) {
+            try {
+              if (sessionVerifier(config, sslHandler.getEngine.getSession)) {
+                SslServerConnectHandler.super.channelConnected(ctx, e)
+              } else {
+                Channels.close(ctx.getChannel)
+              }
+            } catch {
+              case NonFatal(_) => Channels.close(ctx.getChannel)
             }
-          } catch {
-            case NonFatal(_) => Channels.close(ctx.getChannel)
+          } else {
+            Channels.close(ctx.getChannel)
           }
-        } else {
-          Channels.close(ctx.getChannel)
-        }
-    })
+      })
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {

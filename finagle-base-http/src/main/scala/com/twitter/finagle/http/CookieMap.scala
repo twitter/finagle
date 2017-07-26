@@ -18,8 +18,8 @@ import scala.collection.JavaConverters._
  * the ''message''
  */
 class CookieMap(message: Message)
-  extends mutable.Map[String, Cookie]
-  with mutable.MapLike[String, Cookie, CookieMap] {
+    extends mutable.Map[String, Cookie]
+    with mutable.MapLike[String, Cookie, CookieMap] {
 
   override def empty: CookieMap = new CookieMap(Request())
 
@@ -55,15 +55,17 @@ class CookieMap(message: Message)
     // Add cookies back again
     if (message.isRequest) {
       val encoder = new NettyCookieEncoder(false)
-      foreach { case (_, cookie) =>
-        encoder.addCookie(cookie.underlying)
+      foreach {
+        case (_, cookie) =>
+          encoder.addCookie(cookie.underlying)
       }
       message.headerMap.set(cookieHeaderName, encoder.encode())
     } else {
       val encoder = new NettyCookieEncoder(true)
-      foreach { case (_, cookie) =>
-        encoder.addCookie(cookie.underlying)
-        message.headerMap.add(cookieHeaderName, encoder.encode())
+      foreach {
+        case (_, cookie) =>
+          encoder.addCookie(cookie.underlying)
+          message.headerMap.add(cookieHeaderName, encoder.encode())
       }
     }
   }
@@ -71,10 +73,11 @@ class CookieMap(message: Message)
   /**
    * Returns an iterator that iterates over all cookies in this map.
    */
-  def iterator: Iterator[(String, Cookie)] = for {
-    (name, cookies) <- underlying.iterator
-    cookie <- cookies
-  } yield (name, cookie)
+  def iterator: Iterator[(String, Cookie)] =
+    for {
+      (name, cookies) <- underlying.iterator
+      cookie <- cookies
+    } yield (name, cookie)
 
   /**
    * Applies the given function ''f'' to each cookie in this map.

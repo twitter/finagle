@@ -13,15 +13,15 @@ import java.util.concurrent.ThreadFactory
  *  - [[Awaitable.disableBlockingTimeTracking()]]
  *  - https://finagle.github.io/blog/2016/09/01/block-party/
  */
-private[finagle] class BlockingTimeTrackingThreadFactory(
-    underlying: ThreadFactory)
-  extends ThreadFactory {
+private[finagle] class BlockingTimeTrackingThreadFactory(underlying: ThreadFactory)
+    extends ThreadFactory {
 
   def newThread(r: Runnable): Thread = {
     val wrapped = new Runnable {
       def run(): Unit = {
         Awaitable.enableBlockingTimeTracking()
-        try r.run() finally Awaitable.disableBlockingTimeTracking()
+        try r.run()
+        finally Awaitable.disableBlockingTimeTracking()
       }
     }
 

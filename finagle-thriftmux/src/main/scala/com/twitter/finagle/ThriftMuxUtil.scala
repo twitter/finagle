@@ -4,7 +4,8 @@ private object ThriftMuxUtil {
   val role: Stack.Role = Stack.Role("ProtocolRecorder")
 
   def classForName(name: String): Class[_] =
-    try Class.forName(name) catch {
+    try Class.forName(name)
+    catch {
       case cause: ClassNotFoundException =>
         throw new IllegalArgumentException("Iface is not a valid thrift iface", cause)
     }

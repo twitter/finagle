@@ -62,7 +62,6 @@ private[twitter] object BucketedHistogram {
 
 }
 
-
 /**
  * Allows for computing approximate percentiles from a stream of
  * data points.
@@ -101,10 +100,7 @@ private[twitter] object BucketedHistogram {
  *
  * @see [[BucketedHistogram.apply()]] for creation.
  */
-private[stats] class BucketedHistogram(
-    limits: Array[Int])
-  extends stats.Histogram
-{
+private[stats] class BucketedHistogram(limits: Array[Int]) extends stats.Histogram {
   BucketedHistogram.assertLimits(limits)
 
   private[this] def countsLength: Int = limits.length + 1
@@ -259,12 +255,12 @@ private[stats] class BucketedHistogram(
    * @return 0.0 if no values have been [[add added]].
    */
   def average: Double =
-    if (num == 0) 0.0 else total/num.toDouble
+    if (num == 0) 0.0 else total / num.toDouble
 
   /**
    * Returns a seq containing nonzero values of the histogram.
    * The sequence contains instances of BucketAndCount which are
-   * the bucket's upper and lower limits and a count of the number 
+   * the bucket's upper and lower limits and a count of the number
    * of times a value in range of the limits was added.
    */
   def bucketAndCounts: Seq[BucketAndCount] = {
@@ -276,7 +272,7 @@ private[stats] class BucketedHistogram(
         val upperLimit = if (idx != limits.length) {
           limits(idx)
         } else Int.MaxValue
-        val lowerLimit = if (idx != 0){
+        val lowerLimit = if (idx != 0) {
           limits(idx - 1)
         } else 0
         BucketAndCount(lowerLimit, upperLimit, count)

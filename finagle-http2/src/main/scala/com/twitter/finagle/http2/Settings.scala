@@ -14,12 +14,20 @@ private[http2] object Settings {
     val MaxHeaderListSize(maxHeaderListSize) = params[MaxHeaderListSize]
 
     val settings = new Http2Settings()
-    headerTableSize.foreach { s => settings.headerTableSize(s.inBytes) }
-    pushEnabled.foreach {settings.pushEnabled }
+    headerTableSize.foreach { s =>
+      settings.headerTableSize(s.inBytes)
+    }
+    pushEnabled.foreach { settings.pushEnabled }
     maxConcurrentStreams.foreach { settings.maxConcurrentStreams }
-    initialWindowSize.foreach { s => settings.initialWindowSize(s.inBytes.toInt) }
-    maxFrameSize.foreach { s => settings.maxFrameSize(s.inBytes.toInt) }
-    maxHeaderListSize.foreach { s => settings.maxHeaderListSize(s.inBytes) }
+    initialWindowSize.foreach { s =>
+      settings.initialWindowSize(s.inBytes.toInt)
+    }
+    maxFrameSize.foreach { s =>
+      settings.maxFrameSize(s.inBytes.toInt)
+    }
+    maxHeaderListSize.foreach { s =>
+      settings.maxHeaderListSize(s.inBytes)
+    }
     settings
   }
 }

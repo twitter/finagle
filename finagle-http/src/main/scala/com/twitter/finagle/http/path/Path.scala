@@ -2,7 +2,6 @@ package com.twitter.finagle.http.path
 
 import com.twitter.finagle.http.{ParamMap, Method}
 
-
 /** Base class for path extractors. */
 abstract class Path {
   def /(child: String): / = new /(this, child)
@@ -12,7 +11,6 @@ abstract class Path {
   def lastOption: Option[String]
   def startsWith(other: Path): Boolean
 }
-
 
 object Path {
   def apply(str: String): Path =
@@ -30,21 +28,20 @@ object Path {
     }
 
   def apply(first: String, rest: String*): Path =
-    rest.foldLeft(Root / first)( _ / _)
+    rest.foldLeft(Root / first)(_ / _)
 
   def apply(list: List[String]): Path = list.foldLeft(Root: Path)(_ / _)
 
   def unapplySeq(path: Path): Option[List[String]] = Some(path.toList)
 }
 
-
 case class :?(path: Path, params: ParamMap) {
   override def toString: String = params.toString
 }
 
-
 /** File extension extractor */
 object ~ {
+
   /**
    * File extension extractor for Path:
    *   Path("example.json") match {
@@ -75,6 +72,7 @@ object ~ {
 
 /** HttpMethod extractor */
 object -> {
+
   /**
    * HttpMethod extractor:
    *   (request.method, Path(request.path)) match {
@@ -82,7 +80,6 @@ object -> {
    */
   def unapply(x: (Method, Path)): Some[(Method, Path)] = Some(x)
 }
-
 
 /**
  * Path separator extractor:
@@ -100,7 +97,6 @@ case class /(parent: Path, child: String) extends Path {
   }
 }
 
-
 /**
  * Root extractor:
  *   Path("/") match {
@@ -114,7 +110,6 @@ case object Root extends Path {
   override def toString: String = ""
   def startsWith(other: Path): Boolean = other == Root
 }
-
 
 /**
  * Path separator extractor:
@@ -130,20 +125,17 @@ object /: {
   }
 }
 
-
 // Base class for Integer and Long extractors.
 protected class Numeric[A <: AnyVal](cast: String => A) {
   def unapply(str: String): Option[A] = {
     if (!str.isEmpty &&
-       (str.head == '-' || Character.isDigit(str.head)) &&
-       str.drop(1).forall(Character.isDigit)
-    ) try {
-        Some(cast(str))
-      } catch {
-        case _: NumberFormatException =>
-          None
-      }
-    else
+      (str.head == '-' || Character.isDigit(str.head)) &&
+      str.drop(1).forall(Character.isDigit)) try {
+      Some(cast(str))
+    } catch {
+      case _: NumberFormatException =>
+        None
+    } else
       None
   }
 }
@@ -162,8 +154,6 @@ object Integer extends Numeric(_.toInt)
  */
 object Long extends Numeric(_.toLong)
 
-
-
 /**
  * Multiple param extractor:
  *   object A extends ParamMatcher("a")
@@ -175,7 +165,6 @@ object :& {
   def unapply(params: ParamMap): Some[(ParamMap, ParamMap)] = Some((params, params))
 }
 
-
 /**
  * Param extractor:
  *   object ScreenName extends ParamMatcher("screen_name")
@@ -185,7 +174,6 @@ object :& {
 abstract class ParamMatcher(name: String) {
   def unapply(params: ParamMap): Option[String] = params.get(name)
 }
-
 
 /**
  * Int param extractor:
@@ -204,7 +192,6 @@ abstract class IntParamMatcher(name: String) {
       }
     }
 }
-
 
 /**
  * Long param extractor:

@@ -7,10 +7,19 @@ import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}
 import io.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter, ChannelInitializer, ChannelOption
+  Channel,
+  ChannelHandlerContext,
+  ChannelInboundHandlerAdapter,
+  ChannelInitializer,
+  ChannelOption
 }
 import io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf
-import io.netty.handler.codec.http2.{Http2Codec, Http2CodecBuilder, Http2FrameLogger, Http2StreamChannelBootstrap}
+import io.netty.handler.codec.http2.{
+  Http2Codec,
+  Http2CodecBuilder,
+  Http2FrameLogger,
+  Http2StreamChannelBootstrap
+}
 import io.netty.handler.logging.LogLevel
 
 /**
@@ -24,9 +33,9 @@ import io.netty.handler.logging.LogLevel
  * This handler is stateful and should not be shared!
  */
 private[http2] class PriorKnowledgeHandler(
-    initializer: ChannelInitializer[Channel],
-    params: Stack.Params)
-  extends ChannelInboundHandlerAdapter {
+  initializer: ChannelInitializer[Channel],
+  params: Stack.Params
+) extends ChannelInboundHandlerAdapter {
 
   val prefaceToRead: ByteBuf = connectionPrefaceBuf
   var bytesConsumed: Integer = 0
@@ -38,7 +47,6 @@ private[http2] class PriorKnowledgeHandler(
 
     msg match {
       case buf: ByteBuf =>
-
         val p = ctx.pipeline()
 
         // We compare bytes as long as they match the preface.
@@ -47,8 +55,13 @@ private[http2] class PriorKnowledgeHandler(
 
         // if what we have read does not match the preface, remove this handler
         // and make sure to send all bytes we have consumed so far downstream.
-        if (bytesRead == 0 || !ByteBufUtil.equals(buf, buf.readerIndex(),
-          prefaceToRead, prefaceToRead.readerIndex(), bytesRead)) {
+        if (bytesRead == 0 || !ByteBufUtil.equals(
+            buf,
+            buf.readerIndex(),
+            prefaceToRead,
+            prefaceToRead.readerIndex(),
+            bytesRead
+          )) {
           p.remove(this)
           buf.resetReaderIndex()
 
@@ -60,7 +73,6 @@ private[http2] class PriorKnowledgeHandler(
           ctx.fireChannelRead(msg)
           return
         }
-
 
         bytesConsumed += bytesRead
         buf.skipBytes(bytesRead)
@@ -78,7 +90,7 @@ private[http2] class PriorKnowledgeHandler(
             .option(ChannelOption.ALLOCATOR, ctx.alloc())
             .handler(initializer)
 
-          val codec = new Http2CodecBuilder(true /* server */ , bootstrap)
+          val codec = new Http2CodecBuilder(true /* server */, bootstrap)
             .frameLogger(logger)
             .initialSettings(initialSettings)
             .build()
@@ -104,8 +116,12 @@ private[http2] class PriorKnowledgeHandler(
       case _ =>
         // Not sure if there are valid cases for this. Allow it for now but log it.
 
-        Logger.get(this.getClass).warning(s"Unexpected non ByteBuf message read: " +
-          s"${msg.getClass.getName} - $msg")
+        Logger
+          .get(this.getClass)
+          .warning(
+            s"Unexpected non ByteBuf message read: " +
+              s"${msg.getClass.getName} - $msg"
+          )
         ctx.fireChannelRead(msg)
     }
   }

@@ -8,11 +8,12 @@ import com.twitter.jvm.numProcs
 import java.util.concurrent.{LinkedTransferQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
 import scala.collection.mutable
 
-object scheduler extends GlobalFlag[String](
-  "local",
-  "Which scheduler to use for futures "+
-  "<local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]"
-)
+object scheduler
+    extends GlobalFlag[String](
+      "local",
+      "Which scheduler to use for futures " +
+        "<local> | <lifo> | <bridged>[:<num workers>] | <forkjoin>[:<num workers>]"
+    )
 
 private[finagle] object FinagleScheduler {
   private val log = DefaultLogger
@@ -32,23 +33,27 @@ private[finagle] object FinagleScheduler {
   private def switchToBridged(numWorkers: Int): Unit = {
     val queue = new LinkedTransferQueue[Runnable]()
 
-    Scheduler.setUnsafe(new BridgedThreadPoolScheduler(
-      "bridged scheduler",
-      (threadFactory: ThreadFactory) => new ThreadPoolExecutor(
-        numWorkers,
-        numWorkers,
-        0L,
-        TimeUnit.MILLISECONDS,
-        queue,
-        threadFactory)))
+    Scheduler.setUnsafe(
+      new BridgedThreadPoolScheduler(
+        "bridged scheduler",
+        (threadFactory: ThreadFactory) =>
+          new ThreadPoolExecutor(
+            numWorkers,
+            numWorkers,
+            0L,
+            TimeUnit.MILLISECONDS,
+            queue,
+            threadFactory
+        )
+      )
+    )
 
     log.info("Using bridged scheduler with %d workers".format(numWorkers))
   }
 
   private def switchToForkJoin(numWorkers: Int): Unit = {
     log.info("Using forkjoin scheduler with %d workers".format(numWorkers))
-    Scheduler.setUnsafe(
-      new ForkJoinScheduler(numWorkers, DefaultStatsReceiver.scope("forkjoin")))
+    Scheduler.setUnsafe(new ForkJoinScheduler(numWorkers, DefaultStatsReceiver.scope("forkjoin")))
   }
 
   // exposed for testing

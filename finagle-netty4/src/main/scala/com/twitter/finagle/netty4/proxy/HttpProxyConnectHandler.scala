@@ -3,7 +3,10 @@ package com.twitter.finagle.netty4.proxy
 import com.twitter.finagle.{ChannelClosedException, ProxyConnectException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.netty4.channel.{BufferingChannelOutboundHandler, ConnectPromiseDelayListeners}
+import com.twitter.finagle.netty4.channel.{
+  BufferingChannelOutboundHandler,
+  ConnectPromiseDelayListeners
+}
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
 import io.netty.handler.codec.http._
@@ -38,12 +41,13 @@ import java.net.SocketAddress
  * @param credentialsOption optional credentials for a proxy server
  */
 private[netty4] class HttpProxyConnectHandler(
-    host: String,
-    credentialsOption: Option[Transporter.Credentials],
-    httpClientCodec: ChannelHandler = new HttpClientCodec()) // exposed for testing
-  extends ChannelDuplexHandler
-  with BufferingChannelOutboundHandler
-  with ConnectPromiseDelayListeners { self =>
+  host: String,
+  credentialsOption: Option[Transporter.Credentials],
+  httpClientCodec: ChannelHandler = new HttpClientCodec()
+) // exposed for testing
+    extends ChannelDuplexHandler
+    with BufferingChannelOutboundHandler
+    with ConnectPromiseDelayListeners { self =>
 
   private[this] final def httpCodecKey = "httpProxyClientCodec"
 
@@ -85,8 +89,8 @@ private[netty4] class HttpProxyConnectHandler(
           // Create new connect HTTP proxy connect request.
           val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.CONNECT, host)
           req.headers().set(HttpHeaderNames.HOST, host)
-          credentialsOption.foreach(c =>
-            req.headers().add(HttpHeaderNames.PROXY_AUTHORIZATION, proxyAuthorizationHeader(c))
+          credentialsOption.foreach(
+            c => req.headers().add(HttpHeaderNames.PROXY_AUTHORIZATION, proxyAuthorizationHeader(c))
           )
 
           ctx.writeAndFlush(req)
@@ -132,7 +136,7 @@ private[netty4] class HttpProxyConnectHandler(
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
     fail(ctx, cause)
     ctx.fireExceptionCaught(cause) // we don't call super.exceptionCaught since we've already filed
-                                   // both connect promise and pending writes in `fail`
+    // both connect promise and pending writes in `fail`
     ctx.close() // close a channel since we've failed to perform an HTTP proxy handshake
   }
 

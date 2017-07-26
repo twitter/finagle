@@ -4,7 +4,6 @@ import com.twitter.finagle.netty4.codec.BufCodec
 import io.netty.channel.{ChannelHandler, ChannelPipeline}
 import io.netty.handler.codec.{LengthFieldBasedFrameDecoder, LengthFieldPrepender}
 
-
 /**
  * An implementation of a mux framer using netty4 primitives.
  */
@@ -20,12 +19,16 @@ private[mux] abstract class Netty4Framer extends (ChannelPipeline => Unit) {
   def bufferManager: ChannelHandler
 
   def apply(pipeline: ChannelPipeline): Unit = {
-    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(
-      maxFrameLength,
-      lengthFieldOffset,
-      lengthFieldLength,
-      lengthAdjustment,
-      initialBytesToStrip))
+    pipeline.addLast(
+      "frameDecoder",
+      new LengthFieldBasedFrameDecoder(
+        maxFrameLength,
+        lengthFieldOffset,
+        lengthFieldLength,
+        lengthAdjustment,
+        initialBytesToStrip
+      )
+    )
     pipeline.addLast("frameEncoder", new LengthFieldPrepender(lengthFieldLength))
     pipeline.addLast(bufferManagerName, bufferManager)
   }

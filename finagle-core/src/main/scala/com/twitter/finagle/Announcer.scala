@@ -16,7 +16,7 @@ import scala.util.control.NoStackTrace
  * on the classpath that define an Announcer for the given scheme.
  */
 class AnnouncerNotFoundException(scheme: String)
-  extends Exception("Announcer not found for scheme \"%s\"".format(scheme))
+    extends Exception("Announcer not found for scheme \"%s\"".format(scheme))
 
 /**
  * Indicates that multiple [[com.twitter.finagle.Announcer Announcers]] were
@@ -27,12 +27,13 @@ class AnnouncerNotFoundException(scheme: String)
  * libraries on the classpath with conflicting scheme definitions.
  */
 class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer]])
-  extends Exception with NoStackTrace
-{
+    extends Exception
+    with NoStackTrace {
   override def getMessage = {
-    val msgs = announcers map { case (scheme, rs) =>
-      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
-    } mkString(" ")
+    val msgs = announcers map {
+      case (scheme, rs) =>
+        "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
+    } mkString (" ")
     "Multiple announcers defined: %s".format(msgs)
   }
 }
@@ -44,7 +45,7 @@ class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer
  * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class AnnouncerForumInvalid(forum: String)
-  extends Exception("Announcer forum \"%s\" is not valid".format(forum))
+    extends Exception("Announcer forum \"%s\" is not valid".format(forum))
 
 trait Announcement extends Closable {
   def close(deadline: Time) = unannounce()
@@ -65,7 +66,7 @@ object Announcer {
     val announcers = LoadService[Announcer]()
     val log = Logger.getLogger(getClass.getName)
 
-    val dups = announcers groupBy(_.scheme) filter { case (_, rs) => rs.size > 1 }
+    val dups = announcers groupBy (_.scheme) filter { case (_, rs) => rs.size > 1 }
     if (dups.size > 0) throw new MultipleAnnouncersPerSchemeException(dups)
 
     for (r <- announcers)

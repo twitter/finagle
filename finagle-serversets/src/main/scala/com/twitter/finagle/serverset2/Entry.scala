@@ -39,14 +39,13 @@ case class Endpoint(
   override def equals(that: Any) =
     that match {
       case that: Endpoint =>
-        java.util.Arrays.equals(
-          this.names.asInstanceOf[Array[Object]],
-          that.names.asInstanceOf[Array[Object]]) &&
-        this.host == that.host &&
-        this.port == that.port &&
-        this.shard == that.shard &&
-        this.status == that.status &&
-        this.memberId == that.memberId
+        java.util.Arrays
+          .equals(this.names.asInstanceOf[Array[Object]], that.names.asInstanceOf[Array[Object]]) &&
+          this.host == that.host &&
+          this.port == that.port &&
+          this.shard == that.shard &&
+          this.status == that.status &&
+          this.memberId == that.memberId
       case _ => super.equals(that)
     }
 }
@@ -61,16 +60,14 @@ object Entry {
     val basename = path.split("/").last
 
     if (basename startsWith EndpointPrefix)
-      Endpoint.parseJson(json) map(_.copy(memberId=basename))
+      Endpoint.parseJson(json) map (_.copy(memberId = basename))
     else
       Nil
   }
 }
 
 object Endpoint {
-  val Empty = Endpoint(
-    null, null, Int.MinValue,
-    Int.MinValue, Endpoint.Status.Unknown, "")
+  val Empty = Endpoint(null, null, Int.MinValue, Int.MinValue, Endpoint.Status.Unknown, "")
 
   object Status extends Enumeration {
     val Dead, Starting, Alive, Stopping, Stopped, Warning, Unknown = Value
@@ -82,7 +79,8 @@ object Endpoint {
       "STOPPING" -> Stopping,
       "STOPPED" -> Stopped,
       "WARNING" -> Warning,
-      "UNKNOWN" -> Unknown)
+      "UNKNOWN" -> Unknown
+    )
 
     def ofString(s: String): Option[Value] = map.get(s)
   }
@@ -114,11 +112,12 @@ object Endpoint {
         status <- Status.ofString(s)
       } yield status
     } getOrElse Endpoint.Status.Unknown
-    val tmpl = Endpoint.Empty.copy(shard=shard.getOrElse(Int.MinValue), status=status)
+    val tmpl = Endpoint.Empty.copy(shard = shard.getOrElse(Int.MinValue), status = status)
 
     val namesByHostPort =
-      Memoize.snappable[(String, Int), ArrayBuffer[String]] { case (host, port) =>
-        new ArrayBuffer[String]
+      Memoize.snappable[(String, Int), ArrayBuffer[String]] {
+        case (host, port) =>
+          new ArrayBuffer[String]
       }
     for (map <- d("serviceEndpoint"); hostport <- parseEndpoint(map))
       namesByHostPort(hostport) += null
@@ -132,6 +131,6 @@ object Endpoint {
     } namesByHostPort(hostport) += key
 
     for (((host, port), names) <- namesByHostPort.snap.toSeq)
-    yield tmpl.copy(names=names.toArray, host=host, port=port)
+      yield tmpl.copy(names = names.toArray, host = host, port = port)
   }
 }

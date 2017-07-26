@@ -45,12 +45,12 @@ object RemoteInfo {
    * trace id.
    */
   case class Available(
-      upstreamAddr: Option[SocketAddress],
-      upstreamId: Option[String],
-      downstreamAddr: Option[SocketAddress],
-      downstreamLabel: Option[String],
-      traceId: TraceId)
-    extends RemoteInfo {
+    upstreamAddr: Option[SocketAddress],
+    upstreamId: Option[String],
+    downstreamAddr: Option[SocketAddress],
+    downstreamLabel: Option[String],
+    traceId: TraceId
+  ) extends RemoteInfo {
     private[this] def addr(a: Option[SocketAddress]): String = a match {
       case Some(adr) => adr.toString
       case None => NotAvailableStr
@@ -62,7 +62,7 @@ object RemoteInfo {
 
     override def toString(): String =
       s"Upstream Address: ${addr(upstreamAddr)}, Upstream id: ${id(upstreamId)}, " +
-      s"Downstream Address: ${addr(downstreamAddr)}, Downstream label: ${id(downstreamLabel)}, " +
-      s"Trace Id: $traceId"
+        s"Downstream Address: ${addr(downstreamAddr)}, Downstream label: ${id(downstreamLabel)}, " +
+        s"Trace Id: $traceId"
   }
 }

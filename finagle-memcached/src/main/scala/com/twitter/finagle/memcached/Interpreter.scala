@@ -150,12 +150,15 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
     Values(
       keys.flatMap { key =>
         map.lock(key) { data =>
-          data.get(key).filter { entry =>
-            entry.valid
-          }.map { entry =>
-            val value = entry.value
-            Value(key, value, Some(generateCasUnique(value)))
-          }
+          data
+            .get(key)
+            .filter { entry =>
+              entry.valid
+            }
+            .map { entry =>
+              val value = entry.value
+              Value(key, value, Some(generateCasUnique(value)))
+            }
         }
       }
     )
@@ -165,16 +168,17 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
 
 private[memcached] object Interpreter {
   /*
-  * Using non-cryptographic goodFastHash Hashing Algorithm
-  * for we only care about speed for testing.
-  *
-  * The real memcached uses uint64_t for cas tokens,
-  * so we convert the hash to a String
-  * representation of an unsigned Long so it can be
-  * used as a cas token.
-  */
+   * Using non-cryptographic goodFastHash Hashing Algorithm
+   * for we only care about speed for testing.
+   *
+   * The real memcached uses uint64_t for cas tokens,
+   * so we convert the hash to a String
+   * representation of an unsigned Long so it can be
+   * used as a cas token.
+   */
   private[memcached] def generateCasUnique(value: Buf): Buf = {
-    val hashAsUnsignedLong = Hashing.goodFastHash(32)
+    val hashAsUnsignedLong = Hashing
+      .goodFastHash(32)
       .newHasher(value.length)
       .putBytes(Buf.ByteArray.Owned.extract(value))
       .hash()
@@ -185,6 +189,7 @@ private[memcached] object Interpreter {
 }
 
 case class Entry(value: Buf, expiry: Time) {
+
   /**
    * Whether or not the cache entry has expired
    */

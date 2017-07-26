@@ -2,7 +2,13 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{ClientRegistry, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.param.{ExceptionStatsHandler => _, Monitor => _, ResponseClassifier => _, Tracer => _, _}
+import com.twitter.finagle.param.{
+  ExceptionStatsHandler => _,
+  Monitor => _,
+  ResponseClassifier => _,
+  Tracer => _,
+  _
+}
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -111,8 +117,8 @@ import org.apache.thrift.protocol.TProtocolFactory
  * }}}
  */
 object Thrift
-  extends Client[ThriftClientRequest, Array[Byte]]
-  with Server[Array[Byte], Array[Byte]] {
+    extends Client[ThriftClientRequest, Array[Byte]]
+    with Server[Array[Byte], Array[Byte]] {
 
   /**
    * The vanilla Thrift `Transporter` and `Listener` factories deviate from other protocols in
@@ -124,7 +130,6 @@ object Thrift
    * pipeline that would be required to ensure that the bytes were on the heap before
    * entering the Finagle transport types.
    */
-
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
   // Planned deprecation. Use `Thrift.Server.maxThriftBufferSize` instead.
@@ -183,8 +188,9 @@ object Thrift
       }
 
     // We must do 'preparation' this way in order to let Finagle set up tracing & so on.
-    private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = StackClient.newStack
-      .replace(StackClient.Role.prepConn, preparer)
+    private val stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
+      StackClient.newStack
+        .replace(StackClient.Role.prepConn, preparer)
 
     private val params: Stack.Params = StackClient.defaultParams +
       ProtocolLibrary("thrift")
@@ -198,12 +204,12 @@ object Thrift
    * @see [[https://twitter.github.io/finagle/guide/Protocols.html#mux Mux]] documentation
    */
   case class Client(
-      stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-      params: Stack.Params = Client.params)
-    extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
-    with WithSessionPool[Client]
-    with WithDefaultLoadBalancer[Client]
-    with ThriftRichClient {
+    stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
+    params: Stack.Params = Client.params
+  ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
+      with WithSessionPool[Client]
+      with WithDefaultLoadBalancer[Client]
+      with ThriftRichClient {
 
     protected def copy1(
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = this.stack,
@@ -295,7 +301,8 @@ object Thrift
       new ClientAdmissionControlParams(this)
 
     override def withLabel(label: String): Client = super.withLabel(label)
-    override def withStatsReceiver(statsReceiver: StatsReceiver): Client = super.withStatsReceiver(statsReceiver)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Client =
+      super.withStatsReceiver(statsReceiver)
     override def withMonitor(monitor: Monitor): Client = super.withMonitor(monitor)
     override def withTracer(tracer: Tracer): Client = super.withTracer(tracer)
     override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Client =
@@ -304,12 +311,15 @@ object Thrift
     override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
       super.withResponseClassifier(responseClassifier)
     override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
-    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client =
+      super.withRetryBackoff(backoff)
 
     override def withStack(stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]]): Client =
       super.withStack(stack)
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
-    override def filtered(filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]): Client =
+    override def filtered(
+      filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]
+    ): Client =
       super.filtered(filter)
   }
 
@@ -350,11 +360,12 @@ object Thrift
           val preparer = ThriftServerPreparer(pf, label)
           preparer.prepare(next, params)
         }
-    }
+      }
 
     val maxThriftBufferSize: Int = 16 * 1024
 
     object param {
+
       /**
        * A `Param` to set the max size of a reusable buffer for the thrift response.
        * If the buffer size exceeds the specified value, the buffer is not reused,
@@ -384,7 +395,8 @@ object Thrift
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
     params: Stack.Params = Server.params
-  ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
+  ) extends StdStackServer[Array[Byte], Array[Byte], Server]
+      with ThriftRichServer {
     protected def copy1(
       stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = this.stack,
       params: Stack.Params = this.params
@@ -451,4 +463,3 @@ object Thrift
     service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = server.serve(addr, service)
 }
-

@@ -21,8 +21,8 @@ package object netty {
       .maxInitialLineLength(params[MaxInitialLineSize].size)
       .maxHeaderSize(params[MaxHeaderSize].size)
 
-
-  private[finagle] val Netty3HttpTransporter: Stack.Params => SocketAddress => Transporter[Any, Any] = { params =>
+  private[finagle] val Netty3HttpTransporter
+    : Stack.Params => SocketAddress => Transporter[Any, Any] = { params =>
     val Label(label) = params[Label]
     val codec = applyToCodec(params, Http())
       .client(ClientCodecConfig(label))
@@ -31,14 +31,15 @@ package object netty {
     Netty3Transporter(
       codec.pipelineFactory,
       _,
-      params + Netty3Transporter.TransportFactory(newTransport))
+      params + Netty3Transporter.TransportFactory(newTransport)
+    )
   }
 
   private[finagle] val Netty3HttpListener: Stack.Params => Listener[Any, Any] = { params =>
     val Label(label) = params[Label]
     val httpPipeline =
       applyToCodec(params, HttpCodec())
-        .server(ServerCodecConfig(label, new SocketAddress{}))
+        .server(ServerCodecConfig(label, new SocketAddress {}))
         .pipelineFactory
 
     Netty3Listener(httpPipeline, params)

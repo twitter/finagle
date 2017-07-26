@@ -4,7 +4,12 @@ import com.twitter.io.Buf
 import java.io.{InputStream, OutputStream}
 import java.nio.{ByteBuffer, ByteOrder, ReadOnlyBufferException}
 import java.nio.channels.{GatheringByteChannel, ScatteringByteChannel}
-import org.jboss.netty.buffer.{AbstractChannelBuffer, ChannelBuffer, ChannelBuffers, ChannelBufferFactory}
+import org.jboss.netty.buffer.{
+  AbstractChannelBuffer,
+  ChannelBuffer,
+  ChannelBuffers,
+  ChannelBufferFactory
+}
 
 /**
  * Class BufChannelBufferFactory is a Netty ChannelBufferFactory that
@@ -35,6 +40,7 @@ object BufChannelBufferFactory {
  * A ChannelBufferFactory which produces read-only ChannelBuffers.
  */
 private class BufChannelBufferFactory(defaultOrder: ByteOrder) extends ChannelBufferFactory {
+
   /**
    * Returns a read-only ChannelBuffer whose content is filled with
    * `capacity` zeros and ByteOrder.BIG_ENDIAN.
@@ -55,14 +61,12 @@ private class BufChannelBufferFactory(defaultOrder: ByteOrder) extends ChannelBu
   def getBuffer(array: Array[Byte], offset: Int, length: Int): ChannelBuffer =
     getBuffer(defaultOrder, array, offset, length)
 
-
   /**
    * Returns a read-only ChannelBuffer whose content is equal to the
    * sub-region of the specified array with `order` endianness.
    */
   def getBuffer(order: ByteOrder, array: Array[Byte], offset: Int, length: Int): ChannelBuffer = {
-    ChannelBuffers.unmodifiableBuffer(
-      ChannelBuffers.wrappedBuffer(order, array, offset, length))
+    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(order, array, offset, length))
   }
 
   /**
@@ -93,7 +97,7 @@ object BufChannelBuffer {
       cb
 
     case Buf.ByteArray.Owned(bytes, begin, end) =>
-      ChannelBuffers.wrappedBuffer(endianness, bytes, begin, end-begin)
+      ChannelBuffers.wrappedBuffer(endianness, bytes, begin, end - begin)
 
     case Buf.ByteBuffer.Owned(bb) =>
       ChannelBuffers.wrappedBuffer(bb)
@@ -278,7 +282,7 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
       case ByteOrder.BIG_ENDIAN =>
         (((bytes(0) & 0xff) << 8) | (bytes(1) & 0xff)).toShort
       case ByteOrder.LITTLE_ENDIAN =>
-        ((bytes(0) & 0xff) | ((bytes(1) & 0xff)  << 8)).toShort
+        ((bytes(0) & 0xff) | ((bytes(1) & 0xff) << 8)).toShort
     }
   }
 
@@ -294,12 +298,12 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
     endianness match {
       case ByteOrder.BIG_ENDIAN =>
         ((bytes(0) & 0xff) << 16) |
-        ((bytes(1) & 0xff) << 8) |
-         (bytes(2) & 0xff)
+          ((bytes(1) & 0xff) << 8) |
+          (bytes(2) & 0xff)
       case ByteOrder.LITTLE_ENDIAN =>
         (bytes(0) & 0xff) |
-        ((bytes(1) & 0xff) << 8) |
-        ((bytes(2) & 0xff) << 16)
+          ((bytes(1) & 0xff) << 8) |
+          ((bytes(2) & 0xff) << 16)
     }
   }
 
@@ -315,14 +319,14 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
     endianness match {
       case ByteOrder.BIG_ENDIAN =>
         ((bytes(0) & 0xff) << 24) |
-        ((bytes(1) & 0xff) << 16) |
-        ((bytes(2) & 0xff) << 8) |
-         (bytes(3) & 0xff)
+          ((bytes(1) & 0xff) << 16) |
+          ((bytes(2) & 0xff) << 8) |
+          (bytes(3) & 0xff)
       case ByteOrder.LITTLE_ENDIAN =>
         (bytes(0) & 0xff) |
-        ((bytes(1) & 0xff) << 8) |
-        ((bytes(2) & 0xff) << 16) |
-        ((bytes(3) & 0xff) << 24)
+          ((bytes(1) & 0xff) << 8) |
+          ((bytes(2) & 0xff) << 16) |
+          ((bytes(3) & 0xff) << 24)
     }
   }
 
@@ -338,22 +342,22 @@ private class BufChannelBuffer(val buf: Buf, endianness: ByteOrder) extends Abst
     endianness match {
       case ByteOrder.BIG_ENDIAN =>
         ((bytes(0) & 0xff).toLong << 56) |
-        ((bytes(1) & 0xff).toLong << 48) |
-        ((bytes(2) & 0xff).toLong << 40) |
-        ((bytes(3) & 0xff).toLong << 32) |
-        ((bytes(4) & 0xff).toLong << 24) |
-        ((bytes(5) & 0xff).toLong << 16) |
-        ((bytes(6) & 0xff).toLong << 8) |
-         (bytes(7) & 0xff).toLong
+          ((bytes(1) & 0xff).toLong << 48) |
+          ((bytes(2) & 0xff).toLong << 40) |
+          ((bytes(3) & 0xff).toLong << 32) |
+          ((bytes(4) & 0xff).toLong << 24) |
+          ((bytes(5) & 0xff).toLong << 16) |
+          ((bytes(6) & 0xff).toLong << 8) |
+          (bytes(7) & 0xff).toLong
       case ByteOrder.LITTLE_ENDIAN =>
         (bytes(0) & 0xff).toLong |
-        ((bytes(1) & 0xff).toLong << 8) |
-        ((bytes(2) & 0xff).toLong << 16) |
-        ((bytes(3) & 0xff).toLong << 24) |
-        ((bytes(4) & 0xff).toLong << 32) |
-        ((bytes(5) & 0xff).toLong << 40) |
-        ((bytes(6) & 0xff).toLong << 48) |
-        ((bytes(7) & 0xff).toLong << 56)
+          ((bytes(1) & 0xff).toLong << 8) |
+          ((bytes(2) & 0xff).toLong << 16) |
+          ((bytes(3) & 0xff).toLong << 24) |
+          ((bytes(4) & 0xff).toLong << 32) |
+          ((bytes(5) & 0xff).toLong << 40) |
+          ((bytes(6) & 0xff).toLong << 48) |
+          ((bytes(7) & 0xff).toLong << 56)
     }
   }
 

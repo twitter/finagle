@@ -19,24 +19,21 @@ import com.twitter.util.{JavaTimer, ProxyTimer, Timer}
  * @note Observation of a slow task in progress is performed when scheduling additional work
  *       and is thus susceptible to false negatives.
  */
-object defaultTimerProbeSlowTasks extends GlobalFlag(
-  false,
-  "Enable reporting of slow timer tasks executing in the default timer")
+object defaultTimerProbeSlowTasks
+    extends GlobalFlag(false, "Enable reporting of slow timer tasks executing in the default timer")
 
 /**
  * Configures the maximum allowed runtime for tasks executing in the default `Timer`.
  */
-object defaultTimerSlowTaskMaxRuntime extends GlobalFlag(
-  2.seconds,
-  "Maximum runtime allowed for tasks before they are reported")
+object defaultTimerSlowTaskMaxRuntime
+    extends GlobalFlag(2.seconds, "Maximum runtime allowed for tasks before they are reported")
 
 /**
  * Configures the minimum duration between logging stack traces when a slow task is
  * detected in the default `Timer`.
  */
-object defaultTimerSlowTaskLogMinInterval extends GlobalFlag(
-  20.seconds,
-  "Minimum interval between recording stack traces for slow tasks")
+object defaultTimerSlowTaskLogMinInterval
+    extends GlobalFlag(20.seconds, "Minimum interval between recording stack traces for slow tasks")
 
 /**
  * A Finagle's trusty timer that should satisfy a certain level of throughput/latency
@@ -95,8 +92,10 @@ object DefaultTimer extends ProxyTimer {
   def getInstance: Timer = this
 
   override def stop(): Unit =
-    log.warning(s"Ignoring call to `Timer.stop()` on an unstoppable DefaultTimer.\n" +
-      s"Current stack trace: ${ Thread.currentThread.getStackTrace.mkString("\n") }")
+    log.warning(
+      s"Ignoring call to `Timer.stop()` on an unstoppable DefaultTimer.\n" +
+        s"Current stack trace: ${Thread.currentThread.getStackTrace.mkString("\n")}"
+    )
 
   override def toString: String = s"DefaultTimer(${self.toString})"
 
@@ -108,7 +107,8 @@ object DefaultTimer extends ProxyTimer {
         underlying = timer,
         FinagleStatsReceiver,
         maxRuntime = defaultTimerSlowTaskMaxRuntime(),
-        maxLogFrequency = defaultTimerSlowTaskLogMinInterval())
+        maxLogFrequency = defaultTimerSlowTaskLogMinInterval()
+      )
     }
   }
 }

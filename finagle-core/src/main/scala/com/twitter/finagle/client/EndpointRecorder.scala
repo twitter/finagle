@@ -20,24 +20,28 @@ private[finagle] object EndpointRecorder {
       val parameters = Seq(
         implicitly[Stack.Param[Label]],
         implicitly[Stack.Param[BindingFactory.BaseDtab]],
-        implicitly[Stack.Param[BindingFactory.Dest]])
+        implicitly[Stack.Param[BindingFactory.Dest]]
+      )
 
       def make(params: Stack.Params, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
-         val BindingFactory.Dest(dest) =  params[BindingFactory.Dest]
-         dest match {
-           case bound: Name.Bound =>
-             val Label(client) = params[Label]
-             val BindingFactory.BaseDtab(baseDtab) = params[BindingFactory.BaseDtab]
-             new EndpointRecorder(
-                next,
-                EndpointRegistry.registry,
-                client, baseDtab() ++ Dtab.local,
-                bound.idStr, bound.addr)
-           case _ => next
-         }
+        val BindingFactory.Dest(dest) = params[BindingFactory.Dest]
+        dest match {
+          case bound: Name.Bound =>
+            val Label(client) = params[Label]
+            val BindingFactory.BaseDtab(baseDtab) = params[BindingFactory.BaseDtab]
+            new EndpointRecorder(
+              next,
+              EndpointRegistry.registry,
+              client,
+              baseDtab() ++ Dtab.local,
+              bound.idStr,
+              bound.addr
+            )
+          case _ => next
+        }
 
-       }
-     }
+      }
+    }
 }
 
 /**
@@ -52,15 +56,15 @@ private[finagle] object EndpointRecorder {
  * @param endpoints collection of addrs for this serverset
  */
 private[finagle] class EndpointRecorder[Req, Rep](
-    underlying: ServiceFactory[Req, Rep],
-    registry: EndpointRegistry,
-    client: String,
-    dtab: Dtab,
-    path: String,
-    endpoints: Var[Addr])
-  extends ServiceFactoryProxy[Req, Rep](underlying) {
+  underlying: ServiceFactory[Req, Rep],
+  registry: EndpointRegistry,
+  client: String,
+  dtab: Dtab,
+  path: String,
+  endpoints: Var[Addr]
+) extends ServiceFactoryProxy[Req, Rep](underlying) {
 
-    registry.addObservation(client, dtab, path, endpoints)
+  registry.addObservation(client, dtab, path, endpoints)
 
   override def close(deadline: Time): Future[Unit] = {
     registry.removeObservation(client, dtab, path)

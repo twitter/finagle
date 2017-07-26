@@ -4,6 +4,7 @@ import com.twitter.io.Buf
 
 /** A mux response. */
 sealed trait Response {
+
   /** The payload of the response. */
   def body: Buf
 }

@@ -54,7 +54,7 @@ private object NameTreeFactory {
         // it's an invariant of Namer.bind that it returns no Alts
         case NameTree.Alt(_*) => Failed(new IllegalArgumentException("NameTreeFactory"))
 
-        case NameTree.Union(weightedTrees@_*) =>
+        case NameTree.Union(weightedTrees @ _*) =>
           val (weights, trees) = weightedTrees.unzip { case NameTree.Weighted(w, t) => (w, t) }
           Weighted(Drv.fromWeights(weights), trees.map(factoryOfTree))
       }

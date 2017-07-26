@@ -16,9 +16,8 @@ import scala.collection.mutable
  *      us to use. `decoder` is expected to be greedy; that is, it decodes the `byteBuf` into as
  *      many protocol objects as possible.
  */
-private[memcached] class ByteReaderDecoderHandler[T](
-    decoder: ByteReaderDecoder[T])
-  extends ByteToMessageDecoder {
+private[memcached] class ByteReaderDecoderHandler[T](decoder: ByteReaderDecoder[T])
+    extends ByteToMessageDecoder {
 
   setSingleDecode(true) // `decoder` is greedy, so no need to call `decode` multiple times.
 

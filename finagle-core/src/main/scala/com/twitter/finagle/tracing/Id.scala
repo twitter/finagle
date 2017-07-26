@@ -11,7 +11,6 @@ import scala.util.control.NonFatal
  * span, while TraceIds contain a span ID as well as context (parentId
  * and traceId).
  */
-
 final class SpanId(val self: Long) extends Proxy {
   def toLong = self
 
@@ -29,18 +28,18 @@ object SpanId {
     }
   ).toArray
 
-  private def byteToChars(b: Byte): Array[Char] = lut(b+128)
+  private def byteToChars(b: Byte): Array[Char] = lut(b + 128)
 
   // This is invoked a lot, so they need to be fast.
   def toString(l: Long): String = {
     val b = new StringBuilder(16)
-    b.appendAll(byteToChars((l>>56 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>48 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>40 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>32 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>24 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>16 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>8 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 56 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 48 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 40 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 32 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 24 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 16 & 0xff).toByte))
+    b.appendAll(byteToChars((l >> 8 & 0xff).toByte))
     b.appendAll(byteToChars((l & 0xff).toByte))
     b.toString
   }
@@ -60,6 +59,7 @@ object SpanId {
 }
 
 object TraceId {
+
   /**
    * Creates a TraceId with no flags set. See case class for more info.
    */
@@ -114,7 +114,8 @@ object TraceId {
         if (parent64 == span64) None else Some(SpanId(parent64)),
         SpanId(span64),
         sampled,
-        flags)
+        flags
+      )
       Return(traceId)
     }
   }
@@ -166,8 +167,8 @@ final case class TraceId(
   _parentId: Option[SpanId],
   spanId: SpanId,
   _sampled: Option[Boolean],
-  flags: Flags)
-{
+  flags: Flags
+) {
   def traceId: SpanId = _traceId match {
     case None => parentId
     case Some(id) => id

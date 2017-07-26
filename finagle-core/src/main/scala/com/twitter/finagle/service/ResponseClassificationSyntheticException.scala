@@ -10,9 +10,9 @@ import scala.util.control.NoStackTrace
  * @see The [[https://twitter.github.io/finagle/guide/FAQ.html#what-is-a-com-twitter-finagle-service-responseclassificationsyntheticexception FAQ]]
  *      for more details.
  */
-class ResponseClassificationSyntheticException private[finagle]()
-  extends Exception
-  with NoStackTrace {
+class ResponseClassificationSyntheticException private[finagle] ()
+    extends Exception
+    with NoStackTrace {
   override def getMessage: String =
     "A synthetic ResponseClassification failure"
 }

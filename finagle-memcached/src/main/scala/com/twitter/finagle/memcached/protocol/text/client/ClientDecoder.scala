@@ -18,16 +18,18 @@ private object ClientDecoder {
 
   private def isStats(tokens: Seq[Buf]): Boolean = {
     if (tokens.isEmpty) false
-    else tokens.head match {
-      case Stat | Item => true
-      case _ => false
-    }
+    else
+      tokens.head match {
+        case Stat | Item => true
+        case _ => false
+      }
   }
 
   private def validateValueResponse(args: Seq[Buf]): Unit = {
     if (args.length < 4) throw new ServerError("Too few arguments")
     if (args.length > 5) throw new ServerError("Too many arguments")
-    if (args.length == 5 && !ParserUtils.isDigits(args(4))) throw new ServerError("CAS must be a number")
+    if (args.length == 5 && !ParserUtils.isDigits(args(4)))
+      throw new ServerError("CAS must be a number")
     if (!ParserUtils.isDigits(args(3))) throw new ServerError("Bytes must be number")
   }
 }
@@ -50,7 +52,8 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
   private case object AwaitingResponse extends State
   private case class AwaitingResponseOrEnd(valuesSoFar: Seq[Value]) extends State
   private case class AwaitingStatsOrEnd(valuesSoFar: Seq[Tokens]) extends State
-  private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int) extends State
+  private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int)
+      extends State
   private case class Failed(error: Throwable) extends State
 
   private[this] val log = Logger.get
@@ -80,7 +83,8 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
       if (buffer.length != bytesNeeded) {
         throw new IllegalArgumentException(
           s"Expected to receive a buffer of $bytesNeeded bytes but " +
-            s"only received ${buffer.length} bytes")
+            s"only received ${buffer.length} bytes"
+        )
       }
 
       state = AwaitingResponseOrEnd(valuesSoFar :+ parseValue(tokens, buffer))
@@ -129,7 +133,8 @@ private[finagle] abstract class ClientDecoder[R] extends FrameDecoder[R] {
             }
 
           val ex = new ServerError(
-            s"Server returned invalid response when values or END was expected: ${bufString}")
+            s"Server returned invalid response when values or END was expected: ${bufString}"
+          )
           state = Failed(ex)
           throw ex
         }

@@ -22,6 +22,7 @@ private[finagle] object Bufs {
   }
 
   private[this] val copyFn: Buf => Buf = copyAndReleaseDirect(_)
+
   /**
    * Releases direct byte buffers and returns an on-heap copy. Other byte buffers
    * arguments are returned without change.

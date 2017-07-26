@@ -13,6 +13,6 @@ abstract class TransformingNamer(underlying: Namer) extends Namer {
       }
     }
   }
-  
+
   protected def transform(bound: Name.Bound): Name.Bound
 }

@@ -18,8 +18,9 @@ import scala.collection.mutable
  * streaming HTTP requests.
  **/
 case class Multipart(
-    attributes: Map[String, Seq[String]],
-    files: Map[String, Seq[Multipart.FileUpload]])
+  attributes: Map[String, Seq[String]],
+  files: Map[String, Seq[Multipart.FileUpload]]
+)
 
 /**
  * An _experimental_ set ot utility classes and methods for decoding HTTP POST requests with
@@ -36,6 +37,7 @@ object Multipart {
    * A type representing a multipart _file upload_.
    */
   trait FileUpload {
+
     /**
      * The Content-Type of this file upload.
      */
@@ -57,19 +59,21 @@ object Multipart {
    * A variant of [[FileUpload]] that is already in memory and represented as [[Buf]].
    */
   final case class InMemoryFileUpload(
-      content: Buf,
-      contentType: String,
-      fileName: String,
-      contentTransferEncoding: String) extends FileUpload
+    content: Buf,
+    contentType: String,
+    fileName: String,
+    contentTransferEncoding: String
+  ) extends FileUpload
 
   /**
    * A variant of [[FileUpload]] that is stored on disk and represented as [[File]].
    */
   final case class OnDiskFileUpload(
-      content: File,
-      contentType: String,
-      fileName: String,
-      contentTransferEncoding: String) extends FileUpload
+    content: File,
+    contentType: String,
+    fileName: String,
+    contentTransferEncoding: String
+  ) extends FileUpload
 
   /**
    * Decodes the _non-chunked_ (a complete) HTTP `request` with `multipart/form-data`
@@ -86,7 +90,9 @@ object Multipart {
     require(request.method == Method.Post)
 
     val decoder = new multipart.HttpPostRequestDecoder(
-      new multipart.DefaultHttpDataFactory(MaxInMemoryFileSize.inBytes), request.httpRequest)
+      new multipart.DefaultHttpDataFactory(MaxInMemoryFileSize.inBytes),
+      request.httpRequest
+    )
     val attrs = new mutable.HashMap[String, mutable.ListBuffer[String]]()
     val files = new mutable.HashMap[String, mutable.ListBuffer[FileUpload]]()
 

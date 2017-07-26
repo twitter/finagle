@@ -28,10 +28,12 @@ import java.util.concurrent.atomic.AtomicReference
  * to true.
  */
 object DeterministicOrdering {
+
   /**
    * An ADT which represents the process coordinate.
    */
   sealed trait Coord {
+
     /**
      * Returns a double between the range [-1.0, 1.0] which represents this
      * process' coordinate on the coordinate space shared with its peers.
@@ -61,11 +63,7 @@ object DeterministicOrdering {
    * @param totalInstances The total number of instances in this process' peer
    * cluster.
    */
-  case class FromInstanceId(
-      offset: Int,
-      instanceId: Int,
-      totalInstances: Int)
-    extends Coord {
+  case class FromInstanceId(offset: Int, instanceId: Int, totalInstances: Int) extends Coord {
     require(totalInstances > 0, s"totalInstances expected to be > 0 but was $totalInstances")
     val value: Double = {
       val unit: Double = 1.0D / totalInstances

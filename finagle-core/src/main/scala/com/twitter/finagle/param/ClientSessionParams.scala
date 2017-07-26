@@ -17,7 +17,8 @@ import com.twitter.util.Duration
  * @see [[SessionPoolingParams]] for pooling related configuration.
  */
 class ClientSessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
-  extends SessionParams[A](self) {
+    extends SessionParams[A](self) {
+
   /**
    * Configures the session acquisition `timeout` of this client (default: unbounded).
    *

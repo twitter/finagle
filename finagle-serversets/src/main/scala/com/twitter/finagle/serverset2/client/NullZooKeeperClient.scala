@@ -49,7 +49,11 @@ trait NullZooKeeperMulti extends ZooKeeperMulti with NullZooKeeperClient {
 }
 
 trait NullZooKeeperRW extends ZooKeeperRW with NullZooKeeperReader with NullZooKeeperWriter
-trait NullZooKeeperRWMulti extends ZooKeeperRWMulti with NullZooKeeperReader with NullZooKeeperWriter with NullZooKeeperMulti
+trait NullZooKeeperRWMulti
+    extends ZooKeeperRWMulti
+    with NullZooKeeperReader
+    with NullZooKeeperWriter
+    with NullZooKeeperMulti
 
 object NullZooKeeperClient extends NullZooKeeperClient
 object NullZooKeeperReader extends NullZooKeeperReader

@@ -12,9 +12,8 @@ import com.twitter.util.{Future, Time}
  * this remains true, even though the details of how that connection behaves may
  * change when the underlying transport changes.
  */
-class RefTransport[In, Out](
-    underlying: Transport[In, Out])
-  extends TransportProxy[In, Out](underlying) {
+class RefTransport[In, Out](underlying: Transport[In, Out])
+    extends TransportProxy[In, Out](underlying) {
 
   @volatile private[this] var mapped = underlying
   private[this] var closing = false

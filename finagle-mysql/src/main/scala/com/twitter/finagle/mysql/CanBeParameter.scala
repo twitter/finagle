@@ -3,6 +3,7 @@ package com.twitter.finagle.mysql
 import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter}
 
 trait CanBeParameter[-A] { outer =>
+
   /**
    * Returns the size of the given parameter in its MySQL binary representation.
    */
@@ -104,42 +105,44 @@ object CanBeParameter {
     new CanBeParameter[Value] {
       def sizeOf(param: Value) = param match {
         case RawValue(_, _, true, b) => MysqlBuf.sizeOfLen(b.length) + b.length
-        case StringValue(s)          => val bytes = s.getBytes(Charset.defaultCharset); MysqlBuf.sizeOfLen(bytes.length) + bytes.length
-        case ByteValue(_)            => 1
-        case ShortValue(_)           => 2
-        case IntValue(_)             => 4
-        case LongValue(_)            => 8
-        case FloatValue(_)           => 4
-        case DoubleValue(_)          => 8
-        case NullValue               => 0
-        case _                       => 0
+        case StringValue(s) =>
+          val bytes = s.getBytes(Charset.defaultCharset);
+          MysqlBuf.sizeOfLen(bytes.length) + bytes.length
+        case ByteValue(_) => 1
+        case ShortValue(_) => 2
+        case IntValue(_) => 4
+        case LongValue(_) => 8
+        case FloatValue(_) => 4
+        case DoubleValue(_) => 8
+        case NullValue => 0
+        case _ => 0
       }
 
       def typeCode(param: Value) = param match {
         case RawValue(typ, _, _, _) => typ
-        case StringValue(_)         => Type.VarChar
-        case ByteValue(_)           => Type.Tiny
-        case ShortValue(_)          => Type.Short
-        case IntValue(_)            => Type.Long
-        case LongValue(_)           => Type.LongLong
-        case FloatValue(_)          => Type.Float
-        case DoubleValue(_)         => Type.Double
-        case EmptyValue             => -1
-        case NullValue              => Type.Null
+        case StringValue(_) => Type.VarChar
+        case ByteValue(_) => Type.Tiny
+        case ShortValue(_) => Type.Short
+        case IntValue(_) => Type.Long
+        case LongValue(_) => Type.LongLong
+        case FloatValue(_) => Type.Float
+        case DoubleValue(_) => Type.Double
+        case EmptyValue => -1
+        case NullValue => Type.Null
       }
 
       def write(writer: MysqlBufWriter, param: Value) = param match {
         // allows for generic binary values as params to a prepared statement.
         case RawValue(_, _, true, bytes) => writer.writeLengthCodedBytes(bytes)
         // allows for Value types as params to prepared statements
-        case ByteValue(b)                => writer.writeByte(b)
-        case ShortValue(s)               => writer.writeShortLE(s)
-        case IntValue(i)                 => writer.writeIntLE(i)
-        case LongValue(l)                => writer.writeLongLE(l)
-        case FloatValue(f)               => writer.writeFloatLE(f)
-        case DoubleValue(d)              => writer.writeDoubleLE(d)
-        case StringValue(s)              => writer.writeLengthCodedString(s, Charset.defaultCharset)
-        case _                           => ()
+        case ByteValue(b) => writer.writeByte(b)
+        case ShortValue(s) => writer.writeShortLE(s)
+        case IntValue(i) => writer.writeIntLE(i)
+        case LongValue(l) => writer.writeLongLE(l)
+        case FloatValue(f) => writer.writeFloatLE(f)
+        case DoubleValue(d) => writer.writeDoubleLE(d)
+        case StringValue(s) => writer.writeLengthCodedString(s, Charset.defaultCharset)
+        case _ => ()
       }
     }
   }

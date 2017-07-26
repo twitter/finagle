@@ -5,11 +5,9 @@ import com.twitter.bijection.Bijection
 import com.twitter.io.Buf
 import com.twitter.util.{Time, Future}
 
-class ClientAdaptor[T](
-    val self: Client,
-    bijection: Bijection[Buf, T])
-  extends BaseClient[T]
-  with Proxy {
+class ClientAdaptor[T](val self: Client, bijection: Bijection[Buf, T])
+    extends BaseClient[T]
+    with Proxy {
   def bufferToType(a: Buf): T = bijection(a)
 
   def set(key: String, flags: Int, expiry: Time, value: T): Future[Unit] =
@@ -22,7 +20,13 @@ class ClientAdaptor[T](
     self.prepend(key, flags, expiry, bijection.inverse(value))
   def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean] =
     self.replace(key, flags, expiry, bijection.inverse(value))
-  def checkAndSet(key: String, flags: Int, expiry: Time, value: T, casUnique: Buf): Future[CasResult] =
+  def checkAndSet(
+    key: String,
+    flags: Int,
+    expiry: Time,
+    value: T,
+    casUnique: Buf
+  ): Future[CasResult] =
     self.checkAndSet(key, flags, expiry, bijection.inverse(value), casUnique)
 
   def getResult(keys: Iterable[String]): Future[GetResult] = self.getResult(keys)

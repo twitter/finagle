@@ -35,9 +35,7 @@ object ZipkinTracer {
     statsReceiver: StatsReceiver = NullStatsReceiver,
     sampleRate: Float = core.Sampler.DefaultSampleRate
   ): Tracer =
-    new ZipkinTracer(
-      ScribeRawZipkinTracer(host, port, statsReceiver),
-      sampleRate)
+    new ZipkinTracer(ScribeRawZipkinTracer(host, port, statsReceiver), sampleRate)
 
   /**
    * Util method since named parameters can't be called from Java
@@ -59,12 +57,20 @@ object ZipkinTracer {
  * Receives the Finagle generated traces and sends a sample of them off to Zipkin via Scribe
  */
 class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
-  extends core.SamplingTracer(tracer, sampleRate) {
+    extends core.SamplingTracer(tracer, sampleRate) {
+
   /**
    * Default constructor for the service loader
    */
-  def this() = this(ScribeRawZipkinTracer(Host().getHostName, Host().getPort,
-    DefaultStatsReceiver.scope("zipkin")), sampleRateFlag())
+  def this() =
+    this(
+      ScribeRawZipkinTracer(
+        Host().getHostName,
+        Host().getPort,
+        DefaultStatsReceiver.scope("zipkin")
+      ),
+      sampleRateFlag()
+    )
 }
 
 /**
@@ -73,4 +79,4 @@ class ScribeZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
  * @param sampleRate ratio of requests to trace
  */
 class ZipkinTracer(tracer: ScribeRawZipkinTracer, sampleRate: Float)
-  extends core.SamplingTracer(tracer, sampleRate)
+    extends core.SamplingTracer(tracer, sampleRate)

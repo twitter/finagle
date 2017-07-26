@@ -58,9 +58,8 @@ private[finagle] object Http2Transporter {
    * Buffers until `channelActive` so we can ensure the connection preface is
    * the first message we send.
    */
-  class BufferingHandler
-    extends ChannelInboundHandlerAdapter
-    with BufferingChannelOutboundHandler { self =>
+  class BufferingHandler extends ChannelInboundHandlerAdapter with BufferingChannelOutboundHandler {
+    self =>
 
     override def channelActive(ctx: ChannelHandlerContext): Unit = {
       ctx.fireChannelActive()
@@ -94,9 +93,9 @@ private[finagle] object Http2Transporter {
   }
 
   // constructing an http2 cleartext transport
-  private[http2] def init(params: Stack.Params): ChannelPipeline => Unit =
-    { pipeline: ChannelPipeline =>
-      val connection = new DefaultHttp2Connection(false /*server*/)
+  private[http2] def init(params: Stack.Params): ChannelPipeline => Unit = {
+    pipeline: ChannelPipeline =>
+      val connection = new DefaultHttp2Connection(false /*server*/ )
 
       // decompresses data frames according to the content-encoding header
       val adapter = new DelegatingDecompressorFrameListener(
@@ -163,7 +162,7 @@ private[finagle] object Http2Transporter {
         pipeline.addLast(UpgradeRequestHandler.HandlerName, new UpgradeRequestHandler(params))
         initClient(params)(pipeline)
       }
-    }
+  }
 
   def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
     t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
@@ -189,12 +188,13 @@ private[finagle] object Http2Transporter {
  * doesn't attempt to upgrade.
  */
 private[finagle] class Http2Transporter(
-    underlying: Transporter[Any, Any],
-    underlyingHttp11: Transporter[Any, Any],
-    alpnUpgrade: Boolean,
-    params: Stack.Params,
-    implicit val timer: Timer)
-  extends Transporter[Any, Any] with Closable { self =>
+  underlying: Transporter[Any, Any],
+  underlyingHttp11: Transporter[Any, Any],
+  alpnUpgrade: Boolean,
+  params: Stack.Params,
+  implicit val timer: Timer
+) extends Transporter[Any, Any]
+    with Closable { self =>
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
     def read(): Future[Any] = Future.never
@@ -213,7 +213,8 @@ private[finagle] class Http2Transporter(
 
   import Http2Transporter._
 
-  protected[this] val cachedConnection = new AtomicReference[Future[Option[MultiplexedTransporter]]]()
+  protected[this] val cachedConnection =
+    new AtomicReference[Future[Option[MultiplexedTransporter]]]()
 
   private[this] def tryEvict(f: Future[Option[MultiplexedTransporter]]): Unit = {
     // kick us out of the cache so we can try to reestablish the connection
@@ -274,13 +275,14 @@ private[finagle] class Http2Transporter(
     val conn: Future[Transport[Any, Any]] = underlying()
     val p = Promise[Option[MultiplexedTransporter]]()
     if (cachedConnection.compareAndSet(null, p)) {
-      p.onFailure { case NonFatal(exn) =>
-        val level = exn match {
-          case HasLogLevel(level) => level
-          case _ => Level.WARNING
-        }
-        log.log(level, exn, s"An upgrade attempt to $remoteAddress failed.")
-        tryEvict(p)
+      p.onFailure {
+        case NonFatal(exn) =>
+          val level = exn match {
+            case HasLogLevel(level) => level
+            case _ => Level.WARNING
+          }
+          log.log(level, exn, s"An upgrade attempt to $remoteAddress failed.")
+          tryEvict(p)
       }
       conn.transform {
         case Return(trans) =>
@@ -343,7 +345,8 @@ private[finagle] class Http2Transporter(
 
     // Status.Open is a good default since this is just here to do liveness checks with Ping.
     // We assume all other failure detection is handled up the chain.
-    if (f == null) Status.Open else {
+    if (f == null) Status.Open
+    else {
       f.poll match {
         case Some(Return(Some(multi))) => multi.status
         case _ => Status.Open

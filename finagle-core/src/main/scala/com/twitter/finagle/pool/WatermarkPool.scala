@@ -27,17 +27,17 @@ object WatermarkPool {
  *      for more details.
  */
 class WatermarkPool[Req, Rep](
-    factory: ServiceFactory[Req, Rep],
-    lowWatermark: Int, highWatermark: Int = Int.MaxValue,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    maxWaiters: Int = Int.MaxValue)
-  extends ServiceFactory[Req, Rep]
-{ thePool => // note: avoids `self` as an alias because ServiceProxy has a `self`
+  factory: ServiceFactory[Req, Rep],
+  lowWatermark: Int,
+  highWatermark: Int = Int.MaxValue,
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  maxWaiters: Int = Int.MaxValue
+) extends ServiceFactory[Req, Rep] { thePool => // note: avoids `self` as an alias because ServiceProxy has a `self`
 
-  private[this] val queue       = new ArrayDeque[ServiceWrapper]()
-  private[this] val waiters     = new ArrayDeque[Promise[Service[Req, Rep]]]()
+  private[this] val queue = new ArrayDeque[ServiceWrapper]()
+  private[this] val waiters = new ArrayDeque[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
-  @volatile private[this] var isOpen      = true
+  @volatile private[this] var isOpen = true
 
   private[this] val numWaiters = statsReceiver.counter("pool_num_waited")
   private[this] val tooManyWaiters = statsReceiver.counter("pool_num_too_many_waiters")
@@ -60,8 +60,7 @@ class WatermarkPool[Req, Rep](
   }
 
   private[this] class ServiceWrapper(underlying: Service[Req, Rep])
-    extends ServiceProxy[Req, Rep](underlying)
-  {
+      extends ServiceProxy[Req, Rep](underlying) {
     override def close(deadline: Time) = {
       val releasable = thePool.synchronized {
         if (!isOpen) {
@@ -126,13 +125,15 @@ class WatermarkPool[Req, Rep](
           val p = new Promise[Service[Req, Rep]]
           numWaiters.incr()
           waiters.addLast(p)
-          p.setInterruptHandler { case _cause =>
-            if (thePool.synchronized(waiters.remove(p))) {
-              val failure = Failure.adapt(
-                new CancelledConnectionException(_cause),
-                Failure.Restartable|Failure.Interrupted)
-              p.setException(failure)
-            }
+          p.setInterruptHandler {
+            case _cause =>
+              if (thePool.synchronized(waiters.remove(p))) {
+                val failure = Failure.adapt(
+                  new CancelledConnectionException(_cause),
+                  Failure.Restartable | Failure.Interrupted
+                )
+                p.setException(failure)
+              }
           }
           return p
       }
@@ -149,10 +150,11 @@ class WatermarkPool[Req, Rep](
         flushWaiters()
       }
     }
-    p.setInterruptHandler { case e =>
-      val failure = Failure.adapt(e, Failure.Restartable|Failure.Interrupted)
-      if (p.updateIfEmpty(Throw(failure)))
-        underlying.onSuccess { _.close() }
+    p.setInterruptHandler {
+      case e =>
+        val failure = Failure.adapt(e, Failure.Restartable | Failure.Interrupted)
+        if (p.updateIfEmpty(Throw(failure)))
+          underlying.onSuccess { _.close() }
     }
     p
   }

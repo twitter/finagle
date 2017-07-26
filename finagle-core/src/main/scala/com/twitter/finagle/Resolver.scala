@@ -14,8 +14,10 @@ import scala.util.control.NoStackTrace
  * on the classpath that define a Resolver for the given scheme.
  */
 class ResolverNotFoundException(scheme: String)
-  extends Exception(
-    "Resolver not found for scheme \"%s\". Please add the jar containing this resolver to your classpath".format(scheme))
+    extends Exception(
+      "Resolver not found for scheme \"%s\". Please add the jar containing this resolver to your classpath"
+        .format(scheme)
+    )
 
 /**
  * Indicates that multiple [[com.twitter.finagle.Resolver Resolvers]] were
@@ -26,12 +28,13 @@ class ResolverNotFoundException(scheme: String)
  * libraries on the classpath with conflicting scheme definitions.
  */
 class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
-  extends Exception with NoStackTrace
-{
+    extends Exception
+    with NoStackTrace {
   override def getMessage = {
-    val msgs = resolvers map { case (scheme, rs) =>
-      "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
-    } mkString(" ")
+    val msgs = resolvers map {
+      case (scheme, rs) =>
+        "%s=(%s)".format(scheme, rs.map(_.getClass.getName).mkString(", "))
+    } mkString (" ")
     "Multiple resolvers defined: %s".format(msgs)
   }
 }
@@ -44,7 +47,7 @@ class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
  * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class ResolverAddressInvalid(addr: String)
-  extends Exception("Resolver address \"%s\" is not valid".format(addr))
+    extends Exception("Resolver address \"%s\" is not valid".format(addr))
 
 /**
  * A resolver binds a name, represented by a string, to a
@@ -126,8 +129,8 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
     s.foldLeft(List[Token]()) {
       case (ts, '=') => Eq :: ts
       case (ts, '!') => Bang :: ts
-      case (El(s) :: ts, c) => El(s+c) :: ts
-      case (ts, c) => El(""+c) :: ts
+      case (El(s) :: ts, c) => El(s + c) :: ts
+      case (ts, c) => El("" + c) :: ts
     }
   }.reverse
 
@@ -158,7 +161,7 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
 
         case El(scheme) :: Bang :: name =>
           resolvers.find(_.scheme == scheme) match {
-            case Some(resolver) =>  (resolver, delex(name))
+            case Some(resolver) => (resolver, delex(name))
             case None => throw new ResolverNotFoundException(scheme)
           }
 

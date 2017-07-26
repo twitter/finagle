@@ -4,7 +4,6 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Status, Request, Response}
 import com.twitter.util.Future
 
-
 /**
  * NotFoundService just returns 404 Not Found.
  */

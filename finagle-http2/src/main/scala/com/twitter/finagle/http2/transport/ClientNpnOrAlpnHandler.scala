@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.ssl.{ApplicationProtocolNames, ApplicationProtocolNegotiationHandler}
 
 private[http2] class ClientNpnOrAlpnHandler(connectionHandler: ChannelHandler, params: Stack.Params)
-  extends ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
+    extends ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
 
   private[this] val Stats(statsReceiver) = params[Stats]
   private[this] val upgradeCounter = statsReceiver.scope("upgrade").counter("success")

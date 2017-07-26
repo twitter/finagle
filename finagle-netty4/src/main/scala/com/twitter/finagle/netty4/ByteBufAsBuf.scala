@@ -52,7 +52,6 @@ private[finagle] object ByteBufAsBuf {
     }
   }
 
-
   /**
    * Construct a [[Buf]] wrapper for `ByteBuf`.
    *
@@ -67,7 +66,9 @@ private[finagle] object ByteBufAsBuf {
    */
   def apply(buf: ByteBuf): Buf =
     if (buf.readableBytes == 0) Buf.Empty
-    else if (buf.hasArray) try heapToBuf(buf) finally buf.release()
+    else if (buf.hasArray)
+      try heapToBuf(buf)
+      finally buf.release()
     else new ByteBufAsBuf(buf)
 
   /**
@@ -84,9 +85,7 @@ private[finagle] object ByteBufAsBuf {
 /**
  * a [[Buf]] wrapper for Netty `ByteBuf`s.
  */
-private[finagle] class ByteBufAsBuf(
-    private[finagle] val underlying: ByteBuf)
-  extends Buf {
+private[finagle] class ByteBufAsBuf(private[finagle] val underlying: ByteBuf) extends Buf {
   // nb: `underlying` is exposed for testing
 
   def get(index: Int): Byte =

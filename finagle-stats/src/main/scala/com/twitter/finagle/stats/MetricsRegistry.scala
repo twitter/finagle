@@ -5,8 +5,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 private object MetricsRegistry {
-  case class StatEntryImpl(delta: Double, value: Double)
-    extends StatEntry
+  case class StatEntryImpl(delta: Double, value: Double) extends StatEntry
 
   def instantaneous(value: Double): StatEntry =
     StatEntryImpl(value, value)

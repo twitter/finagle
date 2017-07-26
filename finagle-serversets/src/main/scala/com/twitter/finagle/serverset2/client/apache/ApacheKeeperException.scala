@@ -3,6 +3,7 @@ package com.twitter.finagle.serverset2.client.apache
 import com.twitter.finagle.serverset2.client.KeeperException
 
 private[serverset2] object ApacheKeeperException {
+
   /**
    * Transform ZooKeeper Error Codes to KeeperExceptions
    *

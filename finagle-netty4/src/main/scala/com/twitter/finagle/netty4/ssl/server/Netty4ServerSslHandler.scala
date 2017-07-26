@@ -3,7 +3,10 @@ package com.twitter.finagle.netty4.ssl.server
 import com.twitter.finagle.netty4.ssl.Alpn
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
 import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Stack
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
@@ -16,9 +19,8 @@ import io.netty.handler.ssl.SslHandler
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[netty4] class Netty4ServerSslHandler(
-    params: Stack.Params)
-  extends ChannelInitializer[Channel] {
+private[netty4] class Netty4ServerSslHandler(params: Stack.Params)
+    extends ChannelInitializer[Channel] {
 
   /**
    * Read the configured `SslServerEngineFactory` out of the stack param.
@@ -45,8 +47,9 @@ private[netty4] class Netty4ServerSslHandler(
   ): SslServerConfiguration = {
     val Alpn(protocols) = params[Alpn]
 
-    config.copy(applicationProtocols =
-      ApplicationProtocols.combine(protocols, config.applicationProtocols))
+    config.copy(
+      applicationProtocols = ApplicationProtocols.combine(protocols, config.applicationProtocols)
+    )
   }
 
   private[this] def createSslHandler(engine: Engine): SslHandler =

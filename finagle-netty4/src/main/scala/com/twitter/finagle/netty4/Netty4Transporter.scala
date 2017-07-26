@@ -7,7 +7,11 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{
-  CancelledConnectionException, ConnectionFailedException, Failure, ProxyConnectException, Stack
+  CancelledConnectionException,
+  ConnectionFailedException,
+  Failure,
+  ProxyConnectException,
+  Stack
 }
 import com.twitter.io.Buf
 import com.twitter.logging.Level
@@ -22,6 +26,7 @@ import java.nio.channels.UnresolvedAddressException
 import scala.util.control.NonFatal
 
 private[finagle] object Netty4Transporter {
+
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to
    * exert backpressure by only reading from the Channel when the [[Transport]] is
@@ -40,7 +45,9 @@ private[finagle] object Netty4Transporter {
     init: ChannelInitializer[Channel],
     addr: SocketAddress,
     params: Stack.Params,
-    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
+    transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
+      new ChannelTransport(ch)
+    }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = new Transporter[In, Out] {
     private[this] val Stats(statsReceiver) = params[Stats]
 
@@ -91,17 +98,22 @@ private[finagle] object Netty4Transporter {
 
       val transportP = Promise[Transport[In, Out]]()
       // try to cancel the connect attempt if the transporter's promise is interrupted.
-      transportP.setInterruptHandler { case _ => nettyConnectF.cancel(true /* mayInterruptIfRunning */) }
+      transportP.setInterruptHandler {
+        case _ => nettyConnectF.cancel(true /* mayInterruptIfRunning */ )
+      }
 
       nettyConnectF.addListener(new ChannelFutureListener {
         def operationComplete(channelF: ChannelFuture): Unit = {
           val latency = elapsed().inMilliseconds
           if (channelF.isCancelled()) {
             cancelledConnects.incr()
-            transportP.setException(Failure(
-              cause = new CancelledConnectionException,
-              flags = Failure.Interrupted | Failure.Restartable,
-              logLevel = Level.DEBUG))
+            transportP.setException(
+              Failure(
+                cause = new CancelledConnectionException,
+                flags = Failure.Interrupted | Failure.Restartable,
+                logLevel = Level.DEBUG
+              )
+            )
           } else if (channelF.cause != null) {
             failedConnectLatencyStat.add(latency)
             transportP.setException(channelF.cause match {
@@ -112,8 +124,7 @@ private[finagle] object Netty4Transporter {
               // the rest of failures could benefit from retries
               case NonFatal(e) => Failure.rejected(new ConnectionFailedException(e, addr))
             })
-          }
-          else {
+          } else {
             connectLatencyStat.add(latency)
             transportP.setValue(Transport.cast[In, Out](transportFactory(channelF.channel())))
           }
@@ -137,7 +148,9 @@ private[finagle] object Netty4Transporter {
     pipelineInit: ChannelPipeline => Unit,
     addr: SocketAddress,
     params: Stack.Params,
-    transportFactory: Channel => Transport[Any, Any] = { ch: Channel => new ChannelTransport(ch) }
+    transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
+      new ChannelTransport(ch)
+    }
   )(implicit mOut: Manifest[Out]): Transporter[In, Out] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 

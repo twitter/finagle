@@ -14,26 +14,32 @@ object StackRegistry {
    */
   case class Entry(addr: String, stack: Stack[_], params: Stack.Params) {
 
-    def modules: Seq[Module] = stack.tails.map { node =>
-      val raw = node.head.parameters
-      val reflected = raw.foldLeft(Seq.empty[(String, () => String)]) {
-        case (seq, s) if s.show(params(s)).nonEmpty =>
-          seq ++ s.show(params(s))
+    def modules: Seq[Module] =
+      stack.tails.map { node =>
+        val raw = node.head.parameters
+        val reflected = raw.foldLeft(Seq.empty[(String, () => String)]) {
+          case (seq, s) if s.show(params(s)).nonEmpty =>
+            seq ++ s.show(params(s))
 
-        // If Stack.Param.show() returns an empty Seq, and the parameter is a case class, obtain the names
-        // and values via reflection.
-        case (seq, s) => params(s) match {
-          case p: Product =>
-            // TODO: many case classes have a $outer field because they close over an outside scope.
-            // this is not very useful, and it might make sense to filter them out in the future.
-            val fields = p.getClass.getDeclaredFields.map(_.getName)(breakOut)
-            val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
-            seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
-          case _ => seq
+          // If Stack.Param.show() returns an empty Seq, and the parameter is a case class, obtain the names
+          // and values via reflection.
+          case (seq, s) =>
+            params(s) match {
+              case p: Product =>
+                // TODO: many case classes have a $outer field because they close over an outside scope.
+                // this is not very useful, and it might make sense to filter them out in the future.
+                val fields = p.getClass.getDeclaredFields.map(_.getName)(breakOut)
+                val valueFunctions = p.productIterator.map(v => () => v.toString).toSeq
+                seq ++ fields.zipAll(valueFunctions, "<unknown>", () => "<unknown>")
+              case _ => seq
+            }
         }
-      }
-      Module(node.head.role.name, node.head.description, reflected.map { case (n, v) => (n, v()) } )
-    }.toSeq
+        Module(
+          node.head.role.name,
+          node.head.description,
+          reflected.map { case (n, v) => (n, v()) }
+        )
+      }.toSeq
 
     val name: String = params[Label].label
     val protocolLibrary: String = params[ProtocolLibrary].name
@@ -117,11 +123,13 @@ trait StackRegistry {
 
   private[this] def addEntries(entry: Entry): Unit = {
     val prefix = registryPrefix(entry)
-    entry.modules.foreach { case Module(paramName, _, reflected) =>
-      reflected.foreach { case (field, value) =>
-        val key = prefix ++ Seq(paramName, field)
-        add(key, value)
-      }
+    entry.modules.foreach {
+      case Module(paramName, _, reflected) =>
+        reflected.foreach {
+          case (field, value) =>
+            val key = prefix ++ Seq(paramName, field)
+            add(key, value)
+        }
     }
   }
 
@@ -133,11 +141,13 @@ trait StackRegistry {
   private[this] def removeEntries(entry: Entry): Unit = {
     val prefix = registryPrefix(entry)
     val name = entry.name
-    entry.modules.foreach { case Module(paramName, _, reflected) =>
-      reflected.foreach { case (field, _) =>
-        val key = prefix ++ Seq(paramName, field)
-        remove(key)
-      }
+    entry.modules.foreach {
+      case Module(paramName, _, reflected) =>
+        reflected.foreach {
+          case (field, _) =>
+            val key = prefix ++ Seq(paramName, field)
+            remove(key)
+        }
     }
   }
 

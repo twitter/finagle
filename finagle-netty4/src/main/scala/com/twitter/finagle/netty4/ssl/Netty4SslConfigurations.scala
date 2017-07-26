@@ -3,7 +3,10 @@ package com.twitter.finagle.netty4.ssl
 import com.twitter.finagle.ssl.{ApplicationProtocols, TrustCredentials}
 import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContextBuilder, SslProvider}
 import io.netty.handler.ssl.ApplicationProtocolConfig.{
-  Protocol, SelectedListenerFailureBehavior, SelectorFailureBehavior}
+  Protocol,
+  SelectedListenerFailureBehavior,
+  SelectorFailureBehavior
+}
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import scala.collection.JavaConverters._
 
@@ -66,13 +69,15 @@ private[ssl] object Netty4SslConfigurations {
             // NO_ADVERTISE and ACCEPT are the only modes supported by both OpenSSL and JDK SSL.
             SelectorFailureBehavior.NO_ADVERTISE,
             SelectedListenerFailureBehavior.ACCEPT,
-            protos.asJava))
+            protos.asJava
+          )
+        )
     }
   }
 
   /**
    * Configures the SSL provider with the JDK SSL provider if `forceJDK` is true.
-   * 
+   *
    * @note This is necessary in environments where the native engine could fail to load.
    */
   def configureProvider(

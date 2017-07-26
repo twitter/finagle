@@ -7,9 +7,9 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Return, Throw}
 
 private[finagle] class ThriftSerialClientDispatcher(
-    transport: Transport[ThriftClientRequest, Array[Byte]],
-    statsReceiver: StatsReceiver)
-  extends SerialClientDispatcher[ThriftClientRequest, Array[Byte]](transport, statsReceiver) {
+  transport: Transport[ThriftClientRequest, Array[Byte]],
+  statsReceiver: StatsReceiver
+) extends SerialClientDispatcher[ThriftClientRequest, Array[Byte]](transport, statsReceiver) {
 
   /**
    * Thrift oneway calls are special in that they expect an empty `Array[Byte]` as a reply

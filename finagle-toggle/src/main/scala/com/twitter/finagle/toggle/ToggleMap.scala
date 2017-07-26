@@ -76,8 +76,7 @@ abstract class ToggleMap { self =>
         self.iterator.foreach { md =>
           val mdWithDesc = md.description match {
             case Some(_) => md
-            case None => md.copy(description =
-              byName.get(md.id).flatMap(ToggleMap.MdDescFn))
+            case None => md.copy(description = byName.get(md.id).flatMap(ToggleMap.MdDescFn))
           }
           byName.put(md.id, mdWithDesc)
         }
@@ -155,8 +154,8 @@ object ToggleMap {
           // convert the md's fraction to a Long and then feed each
           // byte into the crc
           val f = java.lang.Double.doubleToLongBits(md.fraction)
-          crc32.update((0xff &  f       ).toInt)
-          crc32.update((0xff & (f >> 8) ).toInt)
+          crc32.update((0xff & f).toInt)
+          crc32.update((0xff & (f >> 8)).toInt)
           crc32.update((0xff & (f >> 16)).toInt)
           crc32.update((0xff & (f >> 24)).toInt)
           crc32.update((0xff & (f >> 32)).toInt)
@@ -180,12 +179,11 @@ object ToggleMap {
       override def apply(id: String): Toggle[Int] = {
         val delegate = super.apply(id)
         new Toggle[Int](delegate.id) with Toggle.Captured {
-          private[this] val last = lastApplied.computeIfAbsent(id,
-            new juf.Function[String, AtomicReference[jl.Boolean]] {
+          private[this] val last =
+            lastApplied.computeIfAbsent(id, new juf.Function[String, AtomicReference[jl.Boolean]] {
               def apply(t: String): AtomicReference[jl.Boolean] =
                 new AtomicReference[jl.Boolean](null)
-            }
-          )
+            })
 
           override def toString: String = delegate.toString
 
@@ -311,7 +309,7 @@ object ToggleMap {
       hashedToggle(id, { case i => i >= start && i <= end }, fraction)
     } else {
       // the range overflows around Int.MaxValue
-      hashedToggle(id, { case i  => i >= start || i <= end }, fraction)
+      hashedToggle(id, { case i => i >= start || i <= end }, fraction)
     }
   }
 
@@ -323,17 +321,16 @@ object ToggleMap {
   @varargs
   def of(toggleMaps: ToggleMap*): ToggleMap = {
     val start: ToggleMap = NullToggleMap
-    toggleMaps.foldLeft(start) { case (acc, tm) =>
-      acc.orElse(tm)
+    toggleMaps.foldLeft(start) {
+      case (acc, tm) =>
+        acc.orElse(tm)
     }
   }
 
   /**
    * A [[ToggleMap]] implementation based on immutable [[Toggle.Metadata]].
    */
-  class Immutable(
-      metadata: immutable.Seq[Toggle.Metadata])
-    extends ToggleMap {
+  class Immutable(metadata: immutable.Seq[Toggle.Metadata]) extends ToggleMap {
 
     private[this] val toggles: immutable.Map[String, Toggle[Int]] =
       metadata.map { md =>
@@ -513,8 +510,9 @@ object ToggleMap {
 
     def iterator: Iterator[Toggle.Metadata] = {
       val source = toString
-      fractions.iterator.collect { case (id, f) if Toggle.isValidFraction(f) =>
-        Toggle.Metadata(id, f, None, source)
+      fractions.iterator.collect {
+        case (id, f) if Toggle.isValidFraction(f) =>
+          Toggle.Metadata(id, f, None, source)
       }
     }
   }

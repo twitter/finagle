@@ -14,7 +14,8 @@ object InetSocketAddressUtil {
   def toPublic(bound: SocketAddress): SocketAddress = {
     bound match {
       case addr: InetSocketAddress if addr.getAddress().isAnyLocalAddress() =>
-        val host = try InetAddress.getLocalHost() catch {
+        val host = try InetAddress.getLocalHost()
+        catch {
           case _: UnknownHostException => InetAddress.getLoopbackAddress
         }
         new InetSocketAddress(host, addr.getPort())
@@ -54,10 +55,13 @@ object InetSocketAddressUtil {
     resolveHostPortsSeq(hostPorts).flatten.toSet
 
   private[finagle] def resolveHostPortsSeq(hostPorts: Seq[HostPort]): Seq[Seq[SocketAddress]] =
-    hostPorts map { case (host, port) =>
-      InetAddress.getAllByName(host).map { addr =>
-        new InetSocketAddress(addr, port)
-      }(breakOut)
+    hostPorts map {
+      case (host, port) =>
+        InetAddress
+          .getAllByName(host)
+          .map { addr =>
+            new InetSocketAddress(addr, port)
+          }(breakOut)
     }
 
   /**
@@ -73,11 +77,12 @@ object InetSocketAddressUtil {
   def parseHosts(hosts: String): Seq[InetSocketAddress] = {
     if (hosts == ":*") return Seq(new InetSocketAddress(0))
 
-    parseHostPorts(hosts).map[InetSocketAddress, List[InetSocketAddress]] { case (host, port) =>
-      if (host == "")
-        new InetSocketAddress(port)
-      else
-        new InetSocketAddress(host, port)
+    parseHostPorts(hosts).map[InetSocketAddress, List[InetSocketAddress]] {
+      case (host, port) =>
+        if (host == "")
+          new InetSocketAddress(port)
+        else
+          new InetSocketAddress(host, port)
     }(breakOut)
   }
 }

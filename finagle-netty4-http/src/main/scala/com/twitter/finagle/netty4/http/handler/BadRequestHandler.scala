@@ -18,7 +18,7 @@ import io.netty.util.ReferenceCountUtil
  */
 @Sharable
 private[netty4] object BadRequestHandler
-  extends SimpleChannelInboundHandler[HttpMessage](false /* auto release */) {
+    extends SimpleChannelInboundHandler[HttpMessage](false /* auto release */ ) {
   def channelRead0(ctx: ChannelHandlerContext, msg: HttpMessage): Unit = {
     if (!msg.decoderResult().isFailure) ctx.fireChannelRead(msg)
     else {
@@ -33,7 +33,8 @@ private[netty4] object BadRequestHandler
 
     // We must close the connection on these types of failures since
     // the inbound TCP stream is in an undefined state
-    ctx.writeAndFlush(nettyResp)
+    ctx
+      .writeAndFlush(nettyResp)
       .addListener(ChannelFutureListener.CLOSE)
   }
 

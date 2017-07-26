@@ -13,29 +13,28 @@ import java.util.concurrent.TimeUnit
 /**
  * Configures `ticksPerWheel` on the singleton instance of `HashedWheelTimer`.
  */
-private object timerTicksPerWheel extends GlobalFlag[Int](
-    512,
-    "Netty 4 timer ticks per wheel")
+private object timerTicksPerWheel extends GlobalFlag[Int](512, "Netty 4 timer ticks per wheel")
 
 /**
  * Configures `tickDuration` on the singleton instance of `HashedWheelTimer`.
  */
-private object timerTickDuration extends GlobalFlag[Duration](
-    10.milliseconds,
-    "Netty 4 timer tick duration")
+private object timerTickDuration
+    extends GlobalFlag[Duration](10.milliseconds, "Netty 4 timer tick duration")
 
 /**
  * A Netty timer for use with [[Netty4HashedWheelTimer]].
  */
 private class HashedWheelTimer(
-    statsReceiver: StatsReceiver,
-    tickDuration: Duration,
-    ticksPerWheel: Int)
-  extends io.netty.util.HashedWheelTimer(
-    new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */true),
-    tickDuration.inMilliseconds, TimeUnit.MILLISECONDS,
-    ticksPerWheel,
-    /*leakDetection = */false) { self =>
+  statsReceiver: StatsReceiver,
+  tickDuration: Duration,
+  ticksPerWheel: Int
+) extends io.netty.util.HashedWheelTimer(
+      new NamedPoolThreadFactory("Netty 4 Timer", /*daemon = */ true),
+      tickDuration.inMilliseconds,
+      TimeUnit.MILLISECONDS,
+      ticksPerWheel,
+      /*leakDetection = */ false
+    ) { self =>
 
   private[this] val statsPollInterval = 10.seconds
 
@@ -69,6 +68,7 @@ private class HashedWheelTimer(
 }
 
 private object HashedWheelTimer {
+
   /**
    * A singleton instance of [[HashedWheelTimer]] that is used for the all service loaded
    * instances of [[Netty4HashedWheelTimer]]. Configuration is done via global flags.
@@ -105,13 +105,15 @@ private object HashedWheelTimer {
  * 2. `-com.twitter.finagle.netty4.timerTicksPerWheel=512`
  */
 private[netty4] class Netty4HashedWheelTimer
-  extends Netty4Timer(HashedWheelTimer.instance)
-  with ServiceLoadedTimer {
+    extends Netty4Timer(HashedWheelTimer.instance)
+    with ServiceLoadedTimer {
 
   private[this] val log = Logger.get()
 
   // This timer is "unstoppable".
   override def stop(): Unit =
-    log.warning(s"Ignoring call to `Timer.stop()` on an unstoppable Netty4Timer.\n" +
-      s"Current stack trace: ${Thread.currentThread.getStackTrace.mkString("\n")}")
+    log.warning(
+      s"Ignoring call to `Timer.stop()` on an unstoppable Netty4Timer.\n" +
+        s"Current stack trace: ${Thread.currentThread.getStackTrace.mkString("\n")}"
+    )
 }

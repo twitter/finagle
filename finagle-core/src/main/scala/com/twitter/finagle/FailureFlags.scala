@@ -65,11 +65,11 @@ object FailureFlags {
    */
   def flagsOf(flags: Long): Set[String] = {
     var names: Set[String] = Set.empty
-    if ((flags & Interrupted) > 0)  names += "interrupted"
-    if ((flags & Retryable) > 0)    names += "restartable" // See doc
-    if ((flags & Wrapped) > 0)      names += "wrapped"
-    if ((flags & Rejected) > 0)     names += "rejected"
-    if ((flags & Naming) > 0)       names += "naming"
+    if ((flags & Interrupted) > 0) names += "interrupted"
+    if ((flags & Retryable) > 0) names += "restartable" // See doc
+    if ((flags & Wrapped) > 0) names += "wrapped"
+    if ((flags & Rejected) > 0) names += "rejected"
+    if ((flags & Naming) > 0) names += "naming"
     if ((flags & NonRetryable) > 0) names += "nonretryable"
     names
   }

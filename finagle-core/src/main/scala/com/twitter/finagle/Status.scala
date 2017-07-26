@@ -28,9 +28,7 @@ sealed trait Status
 object Status {
   private implicit val timer = DefaultTimer
 
-  class ClosedException
-    extends Exception("Status was Closed; expected Open")
-    with NoStackTrace
+  class ClosedException extends Exception("Status was Closed; expected Open") with NoStackTrace
 
   implicit val StatusOrdering: Ordering[Status] = Ordering.by({
     case Open => 3
@@ -45,7 +43,7 @@ object Status {
     StatusOrdering.min(left, right)
 
   /**
-   * A composite status indicating the most healthy of the two.   
+   * A composite status indicating the most healthy of the two.
    */
   def best(left: Status, right: Status): Status =
     StatusOrdering.max(left, right)
@@ -60,8 +58,7 @@ object Status {
   def worstOf[T](ts: Iterable[T], status: T => Status): Status = {
     var worst: Status = Status.Open
     val itr = ts.iterator
-    while (itr.hasNext && worst != Status.Closed)
-      worst = Status.worst(worst, status(itr.next()))
+    while (itr.hasNext && worst != Status.Closed) worst = Status.worst(worst, status(itr.next()))
     worst
   }
 
@@ -75,8 +72,7 @@ object Status {
   def bestOf[T](ts: Iterable[T], status: T => Status): Status = {
     var best: Status = Status.Closed
     val itr = ts.iterator
-    while (itr.hasNext && best != Status.Open)
-      best = Status.best(best, status(itr.next()))
+    while (itr.hasNext && best != Status.Open) best = Status.best(best, status(itr.next()))
     best
   }
 
@@ -86,21 +82,21 @@ object Status {
    * an exceptional [[com.twitter.util.Future]] should it be
    * [[Closed]].
    *
-   * `whenOpen` polls the underlying status, using 
+   * `whenOpen` polls the underlying status, using
    * exponential backoffs from 1ms to around 1s.
    */
   def whenOpen(get: => Status): Future[Unit] = {
     def go(n: Int): Future[Unit] = get match {
       case Open => Future.Done
       case Closed => Future.exception(new ClosedException)
-      case Busy => Future.sleep((1<<n).milliseconds) before go(math.min(n+1, 10))
+      case Busy => Future.sleep((1 << n).milliseconds) before go(math.min(n + 1, 10))
     }
 
     go(0)
   }
-  
+
   /**
-   * A blocking version of [[whenOpen]]; this method returns 
+   * A blocking version of [[whenOpen]]; this method returns
    * when the status has become [[Open]]. This call
    * blocks and should only be used outside of Finagle
    * threads to halt progress until the status is [[Open]].
@@ -119,7 +115,7 @@ object Status {
   /**
    * A busy [[Service]] or [[ServiceFactory]] is transiently
    * unavailable. A Busy [[Service]] or [[ServiceFactory]] can be
-   * used, but may not provide service immediately. 
+   * used, but may not provide service immediately.
    */
   case object Busy extends Status
 

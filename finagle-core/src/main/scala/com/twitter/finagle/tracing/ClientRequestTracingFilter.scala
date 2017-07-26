@@ -19,8 +19,7 @@ trait ClientRequestTracingFilter[Req, Res] extends SimpleFilter[Req, Res] {
       service(request) onSuccess { _ =>
         Trace.record(Annotation.ClientRecv())
       }
-    }
-    else
+    } else
       service(request)
   }
 

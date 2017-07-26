@@ -26,17 +26,21 @@ object LegacyKeyServerEngineFactory extends SslServerEngineFactory {
     keyCredentials match {
       case KeyCredentials.Unspecified => None
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
-        val tryKms = Try(PEMEncodedKeyManager(
-          certFile.getAbsolutePath(), keyFile.getAbsolutePath(), None))
+        val tryKms = Try(
+          PEMEncodedKeyManager(certFile.getAbsolutePath(), keyFile.getAbsolutePath(), None)
+        )
         tryKms match {
           case Return(kms) => Some(kms)
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
         }
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
-        val tryKms = Try(PEMEncodedKeyManager(
-          certFile.getAbsolutePath(),
-          keyFile.getAbsolutePath(),
-          Some(chainFile.getAbsolutePath())))
+        val tryKms = Try(
+          PEMEncodedKeyManager(
+            certFile.getAbsolutePath(),
+            keyFile.getAbsolutePath(),
+            Some(chainFile.getAbsolutePath())
+          )
+        )
         tryKms match {
           case Return(kms) => Some(kms)
           case Throw(ex) => throw SslConfigurationException(ex.getMessage, ex)
@@ -57,7 +61,8 @@ object LegacyKeyServerEngineFactory extends SslServerEngineFactory {
     sslContext.init(
       getKeyManagers(keyCredentials).orNull,
       SslConfigurations.getTrustManagers(trustCredentials).orNull,
-      null)
+      null
+    )
     sslContext
   }
 
@@ -74,10 +79,11 @@ object LegacyKeyServerEngineFactory extends SslServerEngineFactory {
    */
   def apply(config: SslServerConfiguration): Engine = {
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "LegacyKeyServerEngineFactory", config.applicationProtocols)
+      "LegacyKeyServerEngineFactory",
+      config.applicationProtocols
+    )
 
-    val sslContext = initializeSslContext(
-      config.keyCredentials, config.trustCredentials)
+    val sslContext = initializeSslContext(config.keyCredentials, config.trustCredentials)
     val engine = SslServerEngineFactory.createEngine(sslContext)
     SslServerEngineFactory.configureEngine(engine, config)
     engine

@@ -19,7 +19,10 @@ private[http] object ClientExceptionMapper extends SimpleChannelUpstreamHandler 
     super.exceptionCaught(ctx, newEvent)
   }
 
-  private def translateExceptionEvent(remote: SocketAddress, event: ExceptionEvent): ExceptionEvent =
+  private def translateExceptionEvent(
+    remote: SocketAddress,
+    event: ExceptionEvent
+  ): ExceptionEvent =
     event.getCause match {
       case e: TooLongFrameException =>
         makeEvent(event, http.TooLongMessageException(e, remote))

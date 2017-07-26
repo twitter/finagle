@@ -4,11 +4,8 @@ package com.twitter.finagle.zipkin.core
  * The `Span` is the core datastructure in RPC tracing. It denotes the
  * issuance and handling of a single RPC request.
  */
-
-
 import com.twitter.finagle.thrift.thrift
 import com.twitter.finagle.tracing.TraceId
-
 
 /**
  * The span itself is an immutable datastructure. Mutations are done
@@ -23,13 +20,13 @@ import com.twitter.finagle.tracing.TraceId
  * @param endpoint     This is the local endpoint the span was created on.
  */
 case class Span(
-  traceId      : TraceId,
-  _serviceName : Option[String],
-  _name        : Option[String],
-  annotations  : Seq[ZipkinAnnotation],
-  bAnnotations : Seq[BinaryAnnotation],
-  endpoint     : Endpoint)
-{
+  traceId: TraceId,
+  _serviceName: Option[String],
+  _name: Option[String],
+  annotations: Seq[ZipkinAnnotation],
+  bAnnotations: Seq[BinaryAnnotation],
+  endpoint: Endpoint
+) {
   val serviceName = _serviceName getOrElse "Unknown"
   val name = _name getOrElse "Unknown"
 

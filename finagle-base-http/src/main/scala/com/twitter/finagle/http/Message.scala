@@ -11,7 +11,11 @@ import java.util.{Date, Locale, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
 import org.jboss.netty.buffer.{
-  ChannelBuffer, ChannelBufferInputStream, ChannelBufferOutputStream, ChannelBuffers}
+  ChannelBuffer,
+  ChannelBufferInputStream,
+  ChannelBufferOutputStream,
+  ChannelBuffers
+}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage}
 import scala.collection.JavaConverters._
 import Bijections._
@@ -118,10 +122,12 @@ abstract class Message {
   def accept: Seq[String] =
     headerMap.get(Fields.Accept) match {
       case Some(s) => s.split(",").map(_.trim).filter(_.nonEmpty)
-      case None    => Seq()
+      case None => Seq()
     }
+
   /** Set Accept header */
   def accept_=(value: String): Unit = headerMap.set(Fields.Accept, value)
+
   /** Set Accept header with list of values */
   def accept_=(values: Iterable[String]): Unit = accept = values.mkString(", ")
 
@@ -129,14 +135,16 @@ abstract class Message {
   def acceptMediaTypes: Seq[String] =
     accept.map {
       _.split(";", 2).headOption
-         .map(_.trim.toLowerCase) // media types are case-insensitive
-         .filter(_.nonEmpty)      // skip blanks
+        .map(_.trim.toLowerCase) // media types are case-insensitive
+        .filter(_.nonEmpty) // skip blanks
     }.flatten
 
   /** Allow header */
   def allow: Option[String] = headerMap.get(Fields.Allow)
+
   /** Set Authorization header */
   def allow_=(value: String): Unit = headerMap.set(Fields.Allow, value)
+
   /** Set Authorization header */
   def allow_=(values: Iterable[Method]): Unit = {
     allow = values.mkString(",").toUpperCase
@@ -144,13 +152,16 @@ abstract class Message {
 
   /** Get Authorization header */
   def authorization: Option[String] = headerMap.get(Fields.Authorization)
+
   /** Set Authorization header */
   def authorization_=(value: String): Unit = headerMap.set(Fields.Authorization, value)
 
   /** Get Cache-Control header */
   def cacheControl: Option[String] = headerMap.get(Fields.CacheControl)
+
   /** Set Cache-Control header */
   def cacheControl_=(value: String): Unit = headerMap.set(Fields.CacheControl, value)
+
   /** Set Cache-Control header with a max-age (and must-revalidate). */
   def cacheControl_=(maxAge: Duration): Unit =
     cacheControl = "max-age=" + maxAge.inSeconds.toString + ", must-revalidate"
@@ -170,6 +181,7 @@ abstract class Message {
     }
     None
   }
+
   /** Set charset in Content-Type header.  This does not change the content. */
   def charset_=(value: String): Unit = {
     val contentType = this.contentType.getOrElse("")
@@ -185,13 +197,13 @@ abstract class Message {
       builder.append(";charset=")
       builder.append(value)
       // Copy other parameters
-      1.to(parts.length - 1) foreach {  i =>
+      1.to(parts.length - 1) foreach { i =>
         builder.append(";")
         builder.append(parts(i))
       }
     } else {
       // Replace charset= parameter(s)
-      1.to(parts.length - 1) foreach {  i =>
+      1.to(parts.length - 1) foreach { i =>
         val part = parts(i)
         if (part.trim.startsWith("charset=")) {
           builder.append(";charset=")
@@ -224,7 +236,7 @@ abstract class Message {
       case None => default
     }
   }
-  
+
   /**
    * Set Content-Length header.  Normally, this is automatically set by the
    * Codec, but this method allows you to override that.
@@ -239,7 +251,7 @@ abstract class Message {
    * Codec, but this method allows you to override that.
    *
    * @see [[contentLength_=(Long)]] for Scala users.
-    */
+   */
   final def contentLength(value: Long): this.type = {
     this.contentLength = value
     this
@@ -247,18 +259,23 @@ abstract class Message {
 
   /** Get Content-Type header */
   def contentType: Option[String] = headerMap.get(Fields.ContentType)
+
   /** Set Content-Type header */
   def contentType_=(value: String): Unit = headerMap.set(Fields.ContentType, value)
+
   /** Set Content-Type header by media-type and charset */
   def setContentType(mediaType: String, charset: String = "utf-8"): Unit =
     headerMap.set(Fields.ContentType, mediaType + ";charset=" + charset)
+
   /** Set Content-Type header to application/json;charset=utf-8 */
   def setContentTypeJson(): Unit = headerMap.set(Fields.ContentType, Message.ContentTypeJson)
 
   /** Get Date header */
   def date: Option[String] = headerMap.get(Fields.Date)
+
   /** Set Date header */
   def date_=(value: String): Unit = headerMap.set(Fields.Date, value)
+
   /** Set Date header by Date */
   def date_=(value: Date): Unit = {
     date = Message.httpDateFormat(value)
@@ -266,8 +283,10 @@ abstract class Message {
 
   /** Get Expires header */
   def expires: Option[String] = headerMap.get(Fields.Expires)
+
   /** Set Expires header */
   def expires_=(value: String): Unit = headerMap.set(Fields.Expires, value)
+
   /** Set Expires header by Date */
   def expires_=(value: Date): Unit = {
     expires = Message.httpDateFormat(value)
@@ -275,13 +294,16 @@ abstract class Message {
 
   /** Get Host header */
   def host: Option[String] = headerMap.get(Fields.Host)
+
   /** Set Host header */
   def host_=(value: String): Unit = headerMap.set(Fields.Host, value)
 
   /** Get Last-Modified header */
   def lastModified: Option[String] = headerMap.get(Fields.LastModified)
+
   /** Set Last-Modified header */
   def lastModified_=(value: String): Unit = headerMap.set(Fields.LastModified, value)
+
   /** Set Last-Modified header by Date */
   def lastModified_=(value: Date): Unit = {
     lastModified = Message.httpDateFormat(value)
@@ -289,6 +311,7 @@ abstract class Message {
 
   /** Get Location header */
   def location: Option[String] = headerMap.get(Fields.Location)
+
   /** Set Location header */
   def location_=(value: String): Unit = headerMap.set(Fields.Location, value)
 
@@ -298,7 +321,7 @@ abstract class Message {
       val beforeSemi =
         contentType.indexOf(";") match {
           case -1 => contentType
-          case n  => contentType.substring(0, n)
+          case n => contentType.substring(0, n)
         }
       val mediaType = beforeSemi.trim
       if (mediaType.nonEmpty)
@@ -306,6 +329,7 @@ abstract class Message {
       else
         None
     }
+
   /**
    * Set media-type in Content-Type header.  Charset and parameter values are
    * preserved, though may not be appropriate for the new media type.
@@ -326,13 +350,16 @@ abstract class Message {
 
   /** Get Referer [sic] header */
   def referer: Option[String] = headerMap.get(Fields.Referer)
+
   /** Set Referer [sic] header */
   def referer_=(value: String): Unit = headerMap.set(Fields.Referer, value)
 
   /** Get Retry-After header */
   def retryAfter: Option[String] = headerMap.get(Fields.RetryAfter)
+
   /** Set Retry-After header */
   def retryAfter_=(value: String): Unit = headerMap.set(Fields.RetryAfter, value)
+
   /** Set Retry-After header by seconds */
   def retryAfter_=(value: Long): Unit = {
     retryAfter = value.toString
@@ -340,21 +367,25 @@ abstract class Message {
 
   /** Get Server header */
   def server: Option[String] = headerMap.get(Fields.Server)
+
   /** Set Server header */
   def server_=(value: String): Unit = headerMap.set(Fields.Server, value)
 
   /** Get User-Agent header */
   def userAgent: Option[String] = headerMap.get(Fields.UserAgent)
+
   /** Set User-Agent header */
   def userAgent_=(value: String): Unit = headerMap.set(Fields.UserAgent, value)
 
   /** Get WWW-Authenticate header */
   def wwwAuthenticate: Option[String] = headerMap.get(Fields.WwwAuthenticate)
+
   /** Set WWW-Authenticate header */
   def wwwAuthenticate_=(value: String): Unit = headerMap.set(Fields.WwwAuthenticate, value)
 
   /** Get X-Forwarded-For header */
   def xForwardedFor: Option[String] = headerMap.get("X-Forwarded-For")
+
   /** Set X-Forwarded-For header */
   def xForwardedFor_=(value: String): Unit = headerMap.set("X-Forwarded-For", value)
 
@@ -529,18 +560,19 @@ abstract class Message {
     httpMessage.setChunked(chunked)
 }
 
-
 object Message {
-  private[http] val Utf8          = Charset.forName("UTF-8")
-  val CharsetUtf8           = "charset=utf-8"
-  val ContentTypeJson       = MediaType.Json + ";" + CharsetUtf8
-  val ContentTypeJsonPatch  = MediaType.JsonPatch + ";" + CharsetUtf8
+  private[http] val Utf8 = Charset.forName("UTF-8")
+  val CharsetUtf8 = "charset=utf-8"
+  val ContentTypeJson = MediaType.Json + ";" + CharsetUtf8
+  val ContentTypeJsonPatch = MediaType.JsonPatch + ";" + CharsetUtf8
   val ContentTypeJavascript = MediaType.Javascript + ";" + CharsetUtf8
-  val ContentTypeWwwForm    = MediaType.WwwForm + ";" + CharsetUtf8
+  val ContentTypeWwwForm = MediaType.WwwForm + ";" + CharsetUtf8
 
-  private val HttpDateFormat = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss",
-                                                          TimeZone.getTimeZone("GMT"),
-                                                          Locale.ENGLISH)
+  private val HttpDateFormat = FastDateFormat.getInstance(
+    "EEE, dd MMM yyyy HH:mm:ss",
+    TimeZone.getTimeZone("GMT"),
+    Locale.ENGLISH
+  )
   def httpDateFormat(date: Date): String =
     HttpDateFormat.format(date) + " GMT"
 }

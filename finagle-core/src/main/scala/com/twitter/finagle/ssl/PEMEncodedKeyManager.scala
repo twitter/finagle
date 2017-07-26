@@ -28,7 +28,7 @@ object PEMEncodedKeyManager {
     asStream(keyPath) { keyStream =>
       // if the chain is present, use it instead of the cert (chain contains cert)
       asStream(caCertPath.getOrElse(certificatePath)) { certificateStream =>
-         makeKeystore(certificateStream, keyStream)
+        makeKeystore(certificateStream, keyStream)
       }
     }
 
@@ -54,7 +54,7 @@ object PEMEncodedKeyManager {
   private[this] def makeKeystore(
     certificateStream: InputStream,
     keyStream: InputStream
-  ) : Array[KeyManager] = {
+  ): Array[KeyManager] = {
 
     // Create a secure directory for the conversion
     val path = TempDirectory.create()
@@ -78,11 +78,15 @@ object PEMEncodedKeyManager {
     // Import the PEM-encoded certificate and key to a PKCS12 file
     Shell.run(
       Array(
-        "openssl",   "pkcs12",
+        "openssl",
+        "pkcs12",
         "-export",
-        "-password", "pass:%s".format(passwordStr),
-        "-in",       pemPath,
-        "-out",      p12Path
+        "-password",
+        "pass:%s".format(passwordStr),
+        "-in",
+        pemPath,
+        "-out",
+        p12Path
       )
     )
 

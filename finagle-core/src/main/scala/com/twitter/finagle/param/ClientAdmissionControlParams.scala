@@ -4,10 +4,10 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.service.PendingRequestFilter
 
 /**
-  * A collection of methods for configuring the admission control modules of Finagle clients.
-  *
-  * @tparam A a [[Stack.Parameterized]] client to configure
-  */
+ * A collection of methods for configuring the admission control modules of Finagle clients.
+ *
+ * @tparam A a [[Stack.Parameterized]] client to configure
+ */
 class ClientAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
   /**

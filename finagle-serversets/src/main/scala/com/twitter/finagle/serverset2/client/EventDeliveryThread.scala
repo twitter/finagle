@@ -16,7 +16,7 @@ private[client] object EventDeliveryThread
       val (u, s) = q.take()
       try {
         u() = s
-      } catch  {
+      } catch {
         case exc: Throwable => Monitor.handle(exc)
       }
     }

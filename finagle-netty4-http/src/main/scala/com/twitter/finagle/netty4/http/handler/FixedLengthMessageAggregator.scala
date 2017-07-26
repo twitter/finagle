@@ -10,7 +10,7 @@ import io.netty.handler.codec.http._
  * still require accessing `reader`.
  */
 private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
-  extends HttpObjectAggregator(maxContentLength.inBytes.toInt) {
+    extends HttpObjectAggregator(maxContentLength.inBytes.toInt) {
   require(maxContentLength.bytes >= 0)
 
   private[this] var decoding = false
@@ -30,7 +30,6 @@ private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
       false
   }
 
-
   override def finishAggregation(aggregated: FullHttpMessage): Unit = {
     decoding = false
     super.finishAggregation(aggregated)
@@ -46,7 +45,7 @@ private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
       val contentLength = HttpUtil.getContentLength(msg, -1L)
 
       if (contentLength != -1L) contentLength <= maxContentLength.bytes
-      else {  // No content-length header.
+      else { // No content-length header.
 
         // Requests without a transfer-encoding or content-length header cannot have a body
         // (see https://tools.ietf.org/html/rfc7230#section-3.3.3). Netty 4 will signal

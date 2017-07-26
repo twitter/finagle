@@ -4,7 +4,12 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.Thrift
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.exception.thriftscala.{LogEntry, ResultCode, Scribe, Scribe$FinagleClient}
+import com.twitter.finagle.exception.thriftscala.{
+  LogEntry,
+  ResultCode,
+  Scribe,
+  Scribe$FinagleClient
+}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing.Trace
@@ -47,7 +52,7 @@ object Reporter {
   def defaultReporter(scribeHost: String, scribePort: Int, serviceName: String): Reporter = {
     new Reporter(makeClient(scribeHost, scribePort), serviceName)
   }
-  
+
   /**
    * Create a reporter factory that can produce either a client or server reporter based
    * on the signature.
@@ -61,14 +66,15 @@ object Reporter {
       new Reporter(scribeClient, serviceName).withSource(address)
   }
 
-
   private[exception] def makeClient(scribeHost: String, scribePort: Int) = {
     val service = ClientBuilder() // these are from the zipkin tracer
       .name("exception_reporter")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .stack(Thrift.client
+      .stack(
+        Thrift.client
         // somewhat arbitrary, but bounded timeouts
-        .withSessionPool.maxWaiters(250))
+        .withSessionPool.maxWaiters(250)
+      )
       .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
       .timeout(1.second)
@@ -91,12 +97,12 @@ object Reporter {
  * is very wrong!
  */
 sealed case class Reporter(
-    client: Scribe[Future],
-    serviceName: String,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    private val sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),
-    private val clientAddress: Option[String] = None)
-  extends Monitor {
+  client: Scribe[Future],
+  serviceName: String,
+  statsReceiver: StatsReceiver = NullStatsReceiver,
+  private val sourceAddress: Option[String] = Some(InetAddress.getLoopbackAddress.getHostName),
+  private val clientAddress: Option[String] = None
+) extends Monitor {
 
   private[this] val okCounter = statsReceiver.counter("report_exception_ok")
   private[this] val tryLaterCounter = statsReceiver.counter("report_exception_ok")
@@ -129,8 +135,12 @@ sealed case class Reporter(
   def createEntry(e: Throwable): LogEntry = {
     var se = new ServiceException(serviceName, e, Time.now, Trace.id.traceId.toLong)
 
-    sourceAddress.foreach { sa => se = se.withSource(sa) }
-    clientAddress.foreach { ca => se = se.withClient(ca) }
+    sourceAddress.foreach { sa =>
+      se = se.withSource(sa)
+    }
+    clientAddress.foreach { ca =>
+      se = se.withClient(ca)
+    }
 
     LogEntry(Reporter.scribeCategory, GZIPStringEncoder.encodeString(se.toJson))
   }
@@ -142,21 +152,26 @@ sealed case class Reporter(
    * implications.
    */
   def handle(t: Throwable): Boolean = {
-    client.log(createEntry(t) :: Nil).onSuccess {
-      case ResultCode.Ok => okCounter.incr()
-      case ResultCode.TryLater => tryLaterCounter.incr()
-      case ResultCode.EnumUnknownResultCode(_) => // ignored
-    }.onFailure {
-      e => statsReceiver.counter("report_exception_" + e.toString).incr()
-    }
+    client
+      .log(createEntry(t) :: Nil)
+      .onSuccess {
+        case ResultCode.Ok => okCounter.incr()
+        case ResultCode.TryLater => tryLaterCounter.incr()
+        case ResultCode.EnumUnknownResultCode(_) => // ignored
+      }
+      .onFailure { e =>
+        statsReceiver.counter("report_exception_" + e.toString).incr()
+      }
 
-    false  // did not actually handle
+    false // did not actually handle
   }
 }
 
-object host extends GlobalFlag[InetSocketAddress](
-  new InetSocketAddress("localhost", 1463),
-  "Host to scribe exception messages")
+object host
+    extends GlobalFlag[InetSocketAddress](
+      new InetSocketAddress("localhost", 1463),
+      "Host to scribe exception messages"
+    )
 
 class ExceptionReporter extends ReporterFactory {
   private[this] val client = Reporter.makeClient(host().getHostName, host().getPort)

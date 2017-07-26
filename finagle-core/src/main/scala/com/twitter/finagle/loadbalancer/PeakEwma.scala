@@ -33,9 +33,9 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     require(Tau > 0)
 
     // these are all guarded by synchronization on `this`
-    private[this] var stamp: Long = epoch   // last timestamp in nanos we observed an rtt
-    private[this] var pending: Int = 0      // instantaneous rate
-    private[this] var cost: Double = 0.0    // ewma of rtt, sensitive to peaks.
+    private[this] var stamp: Long = epoch // last timestamp in nanos we observed an rtt
+    private[this] var pending: Int = 0 // instantaneous rate
+    private[this] var cost: Double = 0.0 // ewma of rtt, sensitive to peaks.
 
     def rate(): Int = synchronized { pending }
 
@@ -48,10 +48,10 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     // [1] http://www.eckner.com/papers/ts_alg.pdf
     private[this] def observe(rtt: Double): Unit = {
       val t = nanoTime()
-      val td = math.max(t-stamp, 0)
-      val w = math.exp(-td/Tau)
+      val td = math.max(t - stamp, 0)
+      val w = math.exp(-td / Tau)
       if (rtt > cost) cost = rtt
-      else cost = cost*w + rtt*(1.0-w)
+      else cost = cost * w + rtt * (1.0 - w)
       stamp = t
     }
 
@@ -62,8 +62,8 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
       // If we don't have any latency history, we penalize the host on
       // the first probe. Otherwise, we factor in our current rate
       // assuming we were to schedule an additional request.
-      if (cost == 0.0 && pending != 0) Penalty+pending
-      else cost*(pending+1)
+      if (cost == 0.0 && pending != 0) Penalty + pending
+      else cost * (pending + 1)
     }
 
     def start(): Long = synchronized {
@@ -72,7 +72,7 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
     }
 
     def end(ts: Long): Unit = synchronized {
-      val rtt = math.max(nanoTime()-ts, 0)
+      val rtt = math.max(nanoTime() - ts, 0)
       pending -= 1
       observe(rtt)
     }
@@ -95,7 +95,7 @@ private trait PeakEwma[Req, Rep] extends BalancerNode[Req, Rep] { self: Balancer
               }
           })
 
-        case t@Throw(_) =>
+        case t @ Throw(_) =>
           metric.end(ts)
           Future.const(t)
       }

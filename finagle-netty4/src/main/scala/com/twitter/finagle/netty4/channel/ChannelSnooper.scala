@@ -72,7 +72,9 @@ private[netty4] class ByteBufSnooper(val name: String) extends ChannelSnooper {
   def dump(printer: (Channel, String) => Unit, ch: Channel, buf: ByteBuf): Unit = {
     val rawStr = buf.toString(buf.readerIndex, buf.readableBytes, Charset.forName("UTF-8"))
     val str = rawStr.replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n")
-    val asciiStr = str.map { c => if (c >= 32 && c < 128) c else '?' }
+    val asciiStr = str.map { c =>
+      if (c >= 32 && c < 128) c else '?'
+    }
 
     for (i <- 0 until asciiStr.length by 60)
       printer(ch, asciiStr.slice(i, i + 60).lines.mkString("\\n"))
@@ -123,7 +125,11 @@ private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnoo
     super.connect(ctx, remoteAddress, localAddress, future)
   }
 
-  override def bind(ctx: ChannelHandlerContext, localAddress: SocketAddress, future: ChannelPromise): Unit = {
+  override def bind(
+    ctx: ChannelHandlerContext,
+    localAddress: SocketAddress,
+    future: ChannelPromise
+  ): Unit = {
     printEvent(ctx.channel, "bound to " + localAddress)
     super.bind(ctx, localAddress, future)
   }
@@ -169,7 +175,6 @@ private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnoo
     super.exceptionCaught(ctx, cause)
   }
 
-
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
     printInbound(ctx.channel, s"READ ${msg.toString} from ${ctx.channel.remoteAddress}")
     super.channelRead(ctx, msg)
@@ -177,6 +182,7 @@ private[netty4] class SimpleChannelSnooper(val name: String) extends ChannelSnoo
 }
 
 private[netty4] object ChannelSnooper {
+
   /**
    * Makes a ChannelSnooper that will log however you want, printing out the
    * objects.

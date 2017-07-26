@@ -54,14 +54,14 @@ object SpnegoAuthenticator {
     case class Http(request: Request, context: GSSContext) extends Authenticated[Request]
   }
 
-  case class Negotiated(
-    established: Option[GSSContext],
-    wwwAuthenticate: Option[String])
+  case class Negotiated(established: Option[GSSContext], wwwAuthenticate: Option[String])
 
   object Credentials {
     trait ServerSource {
+
       /** Loads a GSSContext (for previously specified identifiers).  */
       def load(): Future[GSSContext]
+
       /**
        * Called by a server to decide whether to accept the given token to create a context.
        * Returns a Negotitated representing the response.
@@ -70,8 +70,10 @@ object SpnegoAuthenticator {
     }
 
     trait ClientSource {
+
       /** Loads a GSSContext (for previously specified identifiers).  */
       def load(): Future[GSSContext]
+
       /**
        * Called by a client to initialize the security context and return the next Token
        * to send to the server. ChallengeToken may be empty if we haven't been challenged.
@@ -88,6 +90,7 @@ object SpnegoAuthenticator {
      * blocking calls are wrapped in a FuturePool.
      */
     object JAAS {
+
       /**
        * Oid for the KRB5 mechanism  These come from
        * http://www.oid-info.com/get/1.2.840.113554.1.2.2
@@ -95,12 +98,14 @@ object SpnegoAuthenticator {
        */
       val Krb5Mechanism = new Oid("1.2.840.113554.1.2.2")
       val Krb5PrincipalType = new Oid("1.2.840.113554.1.2.2.1")
+
       /**
        * Oid for the Spnego mechanism  These come from
        * http://www.oid-info.com/get/1.3.6.1.5.5.2
        *
        */
       val SpnegoMechanism = new Oid("1.3.6.1.5.5.2")
+
       /**
        * The amount of time before the TGT in a LoginContext expires in which the user should begin
        * to renew the TGT.
@@ -110,6 +115,7 @@ object SpnegoAuthenticator {
     }
 
     trait JAAS {
+
       /** 'portal' is synchronized using 'lock'. */
       private[this] var portalOption: Option[LoginContext] = None
       private val lock = new StampedLock()
@@ -130,6 +136,7 @@ object SpnegoAuthenticator {
         var stamp = lock.readLock()
         var hasLoggedIn = false
         try {
+
           /**
            * 'portalOption' is volatile so you must have a read lock from 'lock' before calling
            * 'isLoginValid' (or passing it to any method).
@@ -143,6 +150,7 @@ object SpnegoAuthenticator {
               portalOption.get.login()
               hasLoggedIn = true
             } else {
+
               /**
                * At this point, we know 'stamp' is always a read stamp because
                * 'tryConvertToWriteLock' cannot fail if it is provided a write stamp.
@@ -190,8 +198,8 @@ object SpnegoAuthenticator {
       /** Gets the ticket granting ticket from a portal's private credentials. */
       private def getTicketGrantingTicket(portal: LoginContext): Option[KerberosTicket] =
         Option(portal.getSubject) flatMap { subject =>
-          subject.getPrivateCredentials(classOf[KerberosTicket]).asScala.toSet.find {
-            ticket => ticket.getServer.getName.startsWith("krbtgt/")
+          subject.getPrivateCredentials(classOf[KerberosTicket]).asScala.toSet.find { ticket =>
+            ticket.getServer.getName.startsWith("krbtgt/")
           }
         }
 
@@ -230,7 +238,8 @@ object SpnegoAuthenticator {
       val loginContext: String,
       _serverPrincipal: String,
       _serverPrincipalType: Oid = JAAS.Krb5PrincipalType
-    ) extends ClientSource with JAAS {
+    ) extends ClientSource
+        with JAAS {
       val serverPrincipal = manager.createName(_serverPrincipal, _serverPrincipalType)
 
       def init(context: GSSContext, challengeToken: Option[Token]): Future[Token] = pool {
@@ -293,12 +302,16 @@ object SpnegoAuthenticator {
    * TODO: Remove after http and http are merged
    */
   sealed trait RspSupport[Rsp] {
+
     /** Get the status for the Rsp. */
     def status(rsp: Rsp): Status
+
     /** Get the WWW-Authenticate: Negotiate <token> header. */
     def wwwAuthenticateHeader(rsp: Rsp): Option[String]
+
     /** Sets the WWW-Authenticate: Negotiate <token> header. */
     def wwwAuthenticateHeader(rsp: Rsp, auth: String): Unit
+
     /** Create an Unauthorized response with the given protocolVersion. */
     def unauthorized(version: Version): Rsp
   }
@@ -308,12 +321,16 @@ object SpnegoAuthenticator {
    * TODO: Remove after http and http are merged
    */
   sealed trait ReqSupport[Req] {
+
     /** Returns the AUTHORIZATION header for the given Req. */
     def authorizationHeader(req: Req): Option[String]
+
     /** Sets the AUTHORIZATION header for the given Req. */
     def authorizationHeader(req: Req, token: Token): Unit
+
     /** Get the protocol version for a request. */
     def protocolVersion(req: Req): Version
+
     /** Wrap a Req with authentication information. */
     def authenticated(req: Req, context: GSSContext): Authenticated[Req]
   }
@@ -324,7 +341,7 @@ object SpnegoAuthenticator {
       rsp.headerMap.get(Fields.WwwAuthenticate)
     def wwwAuthenticateHeader(rsp: Response, auth: String): Unit =
       rsp.headerMap.set(Fields.WwwAuthenticate, auth)
-    def unauthorized(version: Version) =  Response(version, Status.Unauthorized)
+    def unauthorized(version: Version) = Response(version, Status.Unauthorized)
   }
 
   implicit val httpRequestSupport = new ReqSupport[Request] {
@@ -355,7 +372,7 @@ object SpnegoAuthenticator {
     /** Repeats the challenge/response loop until GSS Tokens are accepted by the server. */
     private def challengeResponseLoop(
       req: Req,
-      backend: Service[Req,Rsp],
+      backend: Service[Req, Rsp],
       credentialOption: Option[Future[GSSContext]]
     ): Future[Rsp] =
       backend(req).transform {
@@ -420,10 +437,8 @@ object SpnegoAuthenticator {
       }
   }
 
-  case class ClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[Request, Response]
+  case class ClientFilter(credSrc: Credentials.ClientSource) extends Client[Request, Response]
 
-  case class ServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[Request,  Response]
+  case class ServerFilter(credSrc: Credentials.ServerSource) extends Server[Request, Response]
 
 }

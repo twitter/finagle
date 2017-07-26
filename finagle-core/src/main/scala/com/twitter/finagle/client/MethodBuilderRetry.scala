@@ -8,8 +8,7 @@ import com.twitter.util.{Throw, Try}
 /**
  * @see [[MethodBuilderScaladoc]]
  */
-private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
-    mb: MethodBuilder[Req, Rep]) {
+private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (mb: MethodBuilder[Req, Rep]) {
 
   import MethodBuilderRetry._
 
@@ -43,7 +42,8 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
             withoutRequeues,
             mb.params[param.HighResTimer].timer,
             scopedStats,
-            mb.params[Retries.Budget].retryBudget)
+            mb.params[Retries.Budget].retryBudget
+          )
         }
       }
     }
@@ -54,7 +54,8 @@ private[finagle] class MethodBuilderRetry[Req, Rep] private[client] (
       new BlacklistStatsReceiver(stats.scope(LogicalScope), LogicalStatsBlacklistFn),
       mb.config.retry.responseClassifier,
       ExceptionStatsHandler.Null,
-      mb.params[StatsFilter.Param].unit)
+      mb.params[StatsFilter.Param].unit
+    )
 
   private[client] def registryEntries: Iterable[(Seq[String], String)] = {
     Seq(
@@ -88,7 +89,8 @@ private[client] object MethodBuilderRetry {
   ): RetryPolicy[(Req, Try[Rep])] =
     RetryPolicy.tries(
       MethodBuilderRetry.MaxRetries + 1, // add 1 for the initial request
-      shouldRetry)
+      shouldRetry
+    )
 
   private def isDefined(retryPolicy: RetryPolicy[_]): Boolean =
     retryPolicy != RetryPolicy.none

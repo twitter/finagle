@@ -50,11 +50,11 @@ object TimeoutFactory {
  *      for more details.
  */
 class TimeoutFactory[Req, Rep](
-    self: ServiceFactory[Req, Rep],
-    timeout: Duration,
-    exception: ServiceTimeoutException,
-    timer: Timer)
-  extends ServiceFactoryProxy[Req, Rep](self) {
+  self: ServiceFactory[Req, Rep],
+  timeout: Duration,
+  exception: ServiceTimeoutException,
+  timer: Timer
+) extends ServiceFactoryProxy[Req, Rep](self) {
   private[this] val failure = Future.exception(Failure.adapt(exception, Failure.Restartable))
 
   override def apply(conn: ClientConnection) = {

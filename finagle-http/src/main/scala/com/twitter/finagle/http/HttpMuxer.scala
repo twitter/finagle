@@ -22,8 +22,7 @@ import java.util.logging.Logger
  *
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
-class HttpMuxer(_routes: Seq[Route])
-  extends Service[Request, Response] {
+class HttpMuxer(_routes: Seq[Route]) extends Service[Request, Response] {
 
   def this() = this(Seq.empty[Route])
 
@@ -44,11 +43,10 @@ class HttpMuxer(_routes: Seq[Route])
 
   def withHandler(route: Route): HttpMuxer = {
     val norm = normalize(route.pattern)
-    val newRoute = Route(
-      pattern = norm,
-      handler = route.handler,
-      index = route.index)
-    new HttpMuxer(routes.filterNot { route => route.pattern == norm} :+ newRoute)
+    val newRoute = Route(pattern = norm, handler = route.handler, index = route.index)
+    new HttpMuxer(routes.filterNot { route =>
+      route.pattern == norm
+    } :+ newRoute)
   }
 
   /**
@@ -69,7 +67,6 @@ class HttpMuxer(_routes: Seq[Route])
         path == pattern // exact match
     }
   }
-
 
   /**
    * Extract path from Request; look for a matching pattern; if found, dispatch the
@@ -121,7 +118,9 @@ object HttpMuxer extends HttpMuxer {
   private[this] val log = Logger.getLogger(getClass.getName)
 
   for (handler <- LoadService[HttpMuxHandler]()) {
-    log.info("HttpMuxer[%s] = %s(%s)".format(handler.route.pattern, handler.getClass.getName, handler))
+    log.info(
+      "HttpMuxer[%s] = %s(%s)".format(handler.route.pattern, handler.getClass.getName, handler)
+    )
     addHandler(handler.route)
   }
 

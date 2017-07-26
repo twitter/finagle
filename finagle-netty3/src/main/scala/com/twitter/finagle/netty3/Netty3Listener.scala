@@ -9,7 +9,10 @@ import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.{Label, Logger, Stats, Timer}
 import com.twitter.finagle.server.{Listener, ServerRegistry}
 import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.HasLogLevel
@@ -73,8 +76,7 @@ object Netty3Listener {
       // At this point, no new channels may be created; drain existing
       // ones.
       val snap = activeChannels.asScala
-      val closing = new DefaultChannelGroupFuture(
-        activeChannels, snap.map(_.getCloseFuture).asJava)
+      val closing = new DefaultChannelGroupFuture(activeChannels, snap.map(_.getCloseFuture).asJava)
 
       val p = new Promise[Unit]
       closing.addListener(new ChannelGroupFutureListener {
@@ -131,12 +133,13 @@ object Netty3Listener {
 
     pipeline.addFirst(
       "sslConnect",
-      new SslServerConnectHandler(handler, config, sessionVerifier, onShutdown))
+      new SslServerConnectHandler(handler, config, sessionVerifier, onShutdown)
+    )
   }
 
   val channelFactory: ServerChannelFactory =
     new NioServerSocketChannelFactory(Executor, WorkerPool) {
-      override def releaseExternalResources() = ()  // no-op
+      override def releaseExternalResources() = () // no-op
     }
 
   /**
@@ -181,10 +184,8 @@ object Netty3Listener {
  * @param params A collection of `Stack.Param` values used to
  * configure the listener.
  */
-class Netty3Listener[In, Out](
-    pipelineFactory: ChannelPipelineFactory,
-    params: Stack.Params)
-  extends Listener[In, Out] {
+class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: Stack.Params)
+    extends Listener[In, Out] {
   import Netty3Listener._
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
@@ -265,15 +266,14 @@ class Netty3Listener[In, Out](
     // bytes to our (accumulating) codec.
     if (channelReadTimeout < Duration.Top) {
       val (timeoutValue, timeoutUnit) = channelReadTimeout.inTimeUnit
-      pipeline.addLast(
-        "readTimeout",
-        new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
+      pipeline.addLast("readTimeout", new ReadTimeoutHandler(nettyTimer, timeoutValue, timeoutUnit))
     }
 
     if (channelWriteCompletionTimeout < Duration.Top) {
       pipeline.addLast(
         "writeCompletionTimeout",
-        new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout))
+        new WriteCompletionTimeoutHandler(timer, channelWriteCompletionTimeout)
+      )
     }
   }
 
@@ -293,9 +293,7 @@ class Netty3Listener[In, Out](
     statsReceiver: StatsReceiver
   ): Unit = {
     if (!statsReceiver.isNull) {
-      pipeline.addLast(
-        "channelRequestStatsHandler",
-        new ChannelRequestStatsHandler(statsReceiver))
+      pipeline.addLast("channelRequestStatsHandler", new ChannelRequestStatsHandler(statsReceiver))
     }
   }
 
@@ -338,16 +336,16 @@ class Netty3Listener[In, Out](
 
       val closer = new Closer(timer)
 
-      val newBridge = () => new ServerBridge(
-        serveTransport,
-        logger,
-        scopedStatsReceiver,
-        closer.activeChannels
+      val newBridge = () =>
+        new ServerBridge(
+          serveTransport,
+          logger,
+          scopedStatsReceiver,
+          closer.activeChannels
       )
       val bootstrap = new ServerBootstrap(channelFactory)
       bootstrap.setOptions(bootstrapOptions.asJava)
-      bootstrap.setPipelineFactory(
-        newServerPipelineFactory(scopedStatsReceiver, newBridge))
+      bootstrap.setPipelineFactory(newServerPipelineFactory(scopedStatsReceiver, newBridge))
       val ch = bootstrap.bind(addr)
 
       def closeServer(deadline: Time) = closeAwaitably {
@@ -364,23 +362,20 @@ class Netty3Listener[In, Out](
  * installed as the last handler.
  */
 private[netty3] class ServerBridge[In, Out](
-    serveTransport: Transport[In, Out] => Unit,
-    log: java.util.logging.Logger,
-    statsReceiver: StatsReceiver,
-    channels: ChannelGroup)
-  extends SimpleChannelHandler {
+  serveTransport: Transport[In, Out] => Unit,
+  log: java.util.logging.Logger,
+  statsReceiver: StatsReceiver,
+  channels: ChannelGroup
+) extends SimpleChannelHandler {
 
   private[this] val readTimeoutCounter = statsReceiver.counter("read_timeout")
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")
 
   private[this] def severity(exc: Throwable): Level = exc match {
     case e: HasLogLevel => e.logLevel
-    case
-        _: java.nio.channels.ClosedChannelException
-      | _: javax.net.ssl.SSLException
-      | _: ReadTimeoutException
-      | _: WriteTimedOutException
-      | _: javax.net.ssl.SSLException => Level.FINEST
+    case _: java.nio.channels.ClosedChannelException | _: javax.net.ssl.SSLException |
+        _: ReadTimeoutException | _: WriteTimedOutException | _: javax.net.ssl.SSLException =>
+      Level.FINEST
     case e: java.io.IOException if FinestIOExceptionMessages.contains(e.getMessage) =>
       Level.FINEST
     case _ => Level.WARNING
@@ -390,7 +385,10 @@ private[netty3] class ServerBridge[In, Out](
     val channel = e.getChannel
     channels.add(channel)
 
-    val transport = Transport.cast[In, Out](classOf[Any].asInstanceOf[Class[Out]], new ChannelTransport[Any, Any](channel))  // We are lying about this type
+    val transport = Transport.cast[In, Out](
+      classOf[Any].asInstanceOf[Class[Out]],
+      new ChannelTransport[Any, Any](channel)
+    ) // We are lying about this type
     serveTransport(transport)
     super.channelOpen(ctx, e)
   }

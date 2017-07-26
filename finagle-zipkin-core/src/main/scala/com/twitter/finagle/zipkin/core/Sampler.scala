@@ -32,7 +32,9 @@ class Sampler {
    */
   def setSampleRate(sampleRate: Float): Unit = {
     if (!validSampleRate(sampleRate)) {
-      throw new IllegalArgumentException("Sample rate not within the valid range of 0-1, was " + sampleRate)
+      throw new IllegalArgumentException(
+        "Sample rate not within the valid range of 0-1, was " + sampleRate
+      )
     }
     sr = sampleRate
   }
@@ -65,7 +67,7 @@ class Sampler {
   def sampleTrace(traceId: TraceId, sampleRate: Float): Option[Boolean] = {
     traceId.sampled match {
       case None =>
-        if (math.abs(traceId.traceId.toLong^Sampler.salt)%10000 < sampleRate*10000)
+        if (math.abs(traceId.traceId.toLong ^ Sampler.salt) % 10000 < sampleRate * 10000)
           Sampler.SomeTrue
         else
           Sampler.SomeFalse
@@ -83,7 +85,7 @@ class Sampler {
   def sampleRecord(record: Record): Boolean = {
     sampleTrace(record.traceId) match {
       case Some(sampled) => sampled
-      case None          => false
+      case None => false
     }
   }
 }

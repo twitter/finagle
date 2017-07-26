@@ -82,7 +82,8 @@ object StandardToggleMap {
       statsReceiver,
       ToggleMap.newMutable(s"Mutable($libraryName)"),
       ServerInfo(),
-      libs)
+      libs
+    )
 
   /** exposed for testing */
   private[toggle] def apply(
@@ -94,10 +95,9 @@ object StandardToggleMap {
   ): ToggleMap = {
     Toggle.validateId(libraryName)
 
-    val svcsJson = loadJsonConfig(
-      s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
-    val libsJson = loadJsonConfig(
-      libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
+    val svcsJson =
+      loadJsonConfig(s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
+    val libsJson = loadJsonConfig(libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -143,14 +143,14 @@ object StandardToggleMap {
     }
     val d = md.digest()
     // use the first 8 bytes which should be unique enough for our purposes.
-    ( d(0) & 0xffL)        |
-    ((d(1) & 0xffL) << 8)  |
-    ((d(2) & 0xffL) << 16) |
-    ((d(3) & 0xffL) << 24) |
-    ((d(4) & 0xffL) << 32) |
-    ((d(5) & 0xffL) << 40) |
-    ((d(6) & 0xffL) << 48) |
-    ((d(7) & 0xffL) << 56)
+    (d(0) & 0xffL) |
+      ((d(1) & 0xffL) << 8) |
+      ((d(2) & 0xffL) << 16) |
+      ((d(3) & 0xffL) << 24) |
+      ((d(4) & 0xffL) << 32) |
+      ((d(5) & 0xffL) << 40) |
+      ((d(6) & 0xffL) << 48) |
+      ((d(7) & 0xffL) << 56)
   }
 
   // exposed for testing
@@ -160,7 +160,8 @@ object StandardToggleMap {
     // if they are different, we can't be sure which was intended to be used, and fail fast.
     if (urls.size > 1 && urls.map(checksum).distinct.size > 1) {
       throw new IllegalArgumentException(
-        s"Multiple differing Toggle config resources found for $configName, ${urls.mkString(", ")}")
+        s"Multiple differing Toggle config resources found for $configName, ${urls.mkString(", ")}"
+      )
     }
     urls.head
   }
@@ -181,7 +182,9 @@ object StandardToggleMap {
       JsonToggleMap.parse(rsc, descriptionMode) match {
         case Throw(t) =>
           throw new IllegalArgumentException(
-            s"Failure parsing Toggle config resources for $configName, from $rsc", t)
+            s"Failure parsing Toggle config resources for $configName, from $rsc",
+            t
+          )
         case Return(toggleMap) =>
           toggleMap
       }

@@ -3,11 +3,11 @@ package com.twitter.finagle.serverset2.client
 import com.twitter.io.Buf
 
 private[serverset2] object Perms {
-  val Read: Int   = 1 << 0
-  val Write: Int  = 1 << 1
+  val Read: Int = 1 << 0
+  val Write: Int = 1 << 1
   val Create: Int = 1 << 2
   val Delete: Int = 1 << 3
-  val Admin:Int   = 1 << 4
+  val Admin: Int = 1 << 4
   val All = Read | Write | Create | Delete | Admin
 }
 
@@ -26,16 +26,15 @@ private[serverset2] sealed trait Node {
 
 private[serverset2] object Node {
   case class ACL(
-      acl: Seq[com.twitter.finagle.serverset2.client.Data.ACL],
-      stat: com.twitter.finagle.serverset2.client.Data.Stat)
-    extends Node
+    acl: Seq[com.twitter.finagle.serverset2.client.Data.ACL],
+    stat: com.twitter.finagle.serverset2.client.Data.Stat
+  ) extends Node
 
-  case class Children(
-      children: Seq[String],
-      stat: com.twitter.finagle.serverset2.client.Data.Stat)
-    extends Node
+  case class Children(children: Seq[String], stat: com.twitter.finagle.serverset2.client.Data.Stat)
+      extends Node
 
-  case class Data(data: Option[Buf], stat: com.twitter.finagle.serverset2.client.Data.Stat) extends Node
+  case class Data(data: Option[Buf], stat: com.twitter.finagle.serverset2.client.Data.Stat)
+      extends Node
 }
 
 private[serverset2] sealed abstract class NodeEvent(val name: String)
@@ -52,8 +51,8 @@ private[serverset2] object NodeEvent {
 private[serverset2] sealed trait Op
 
 private[serverset2] object Op {
-  case class Create(
-      path: String, data: Option[Buf], acl: Seq[Data.ACL], createMode: CreateMode) extends Op
+  case class Create(path: String, data: Option[Buf], acl: Seq[Data.ACL], createMode: CreateMode)
+      extends Op
   case class SetData(path: String, data: Option[Buf], version: Option[Int]) extends Op
   case class Delete(path: String, version: Option[Int]) extends Op
   case class Check(path: String, version: Int) extends Op
@@ -87,5 +86,6 @@ private[serverset2] sealed trait WatchState
 private[serverset2] object WatchState {
   object Pending extends WatchState
   case class Determined(event: NodeEvent) extends WatchState
-  case class SessionState(state: com.twitter.finagle.serverset2.client.SessionState) extends WatchState
+  case class SessionState(state: com.twitter.finagle.serverset2.client.SessionState)
+      extends WatchState
 }

@@ -64,11 +64,10 @@ private[mysql] trait Extractable[A] {
  * @param extractionTimeZone The timezone in which TIMESTAMP and DATETIME
  * rows are extracted from database rows into [[java.sql.Timestamp Timestamps]].
  */
-class TimestampValue(
-    val injectionTimeZone: TimeZone,
-    val extractionTimeZone: TimeZone)
-  extends Injectable[Timestamp] with Extractable[Timestamp]
-{
+class TimestampValue(val injectionTimeZone: TimeZone, val extractionTimeZone: TimeZone)
+    extends Injectable[Timestamp]
+    with Extractable[Timestamp] {
+
   /**
    * Injects a [[java.sql.Timestamp]] into a
    * [[com.twitter.finagle.mysql.RawValue]] in a given `injectionTimeZone`
@@ -144,12 +143,12 @@ class TimestampValue(
      * SimpleDateFormat wrongly does.)
      */
     object Nanos {
-      def unapply(str: String) : Option[Int] = {
+      def unapply(str: String): Option[Int] = {
         str match {
           case "" => Some(0)
-          case s : String if !s.startsWith(".") => None
-          case s : String if s.length() > 10 => None
-          case s : String => Some(s.stripPrefix(".").padTo(9,'0').toInt)
+          case s: String if !s.startsWith(".") => None
+          case s: String if s.length() > 10 => None
+          case s: String => Some(s.stripPrefix(".").padTo(9, '0').toInt)
           case _ => None
         }
       }
@@ -208,14 +207,13 @@ class TimestampValue(
       }
 
       val cal = Calendar.getInstance(timeZone)
-      cal.set(year, month-1, day, hour, min, sec)
+      cal.set(year, month - 1, day, hour, min, sec)
 
       val ts = new Timestamp(0)
       ts.setTime(cal.getTimeInMillis)
       ts.setNanos(micro * 1000)
       ts
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 
@@ -223,14 +221,17 @@ class TimestampValue(
  * Extracts a value in UTC. To use a different time zone, create an instance of
  * [[com.twitter.finagle.mysql.TimestampValue]].
  */
-@deprecated("Injects `java.sql.Timestamp`s in local time and extracts them in UTC." +
-  "To use a different time zone, create an instance of " +
-  "TimestampValue(InjectionTimeZone, ExtractionTimeZone)",
-  "6.20.2")
-object TimestampValue extends TimestampValue(
-  TimeZone.getDefault(),
-  TimeZone.getTimeZone("UTC")
-) {
+@deprecated(
+  "Injects `java.sql.Timestamp`s in local time and extracts them in UTC." +
+    "To use a different time zone, create an instance of " +
+    "TimestampValue(InjectionTimeZone, ExtractionTimeZone)",
+  "6.20.2"
+)
+object TimestampValue
+    extends TimestampValue(
+      TimeZone.getDefault(),
+      TimeZone.getTimeZone("UTC")
+    ) {
   private[this] val log = Logger.getLogger("finagle-mysql")
 
   override def apply(ts: Timestamp): Value = {
@@ -251,6 +252,7 @@ object TimestampValue extends TimestampValue(
 }
 
 object DateValue extends Injectable[Date] with Extractable[Date] {
+
   /**
    * Creates a RawValue from a java.sql.Date
    */
@@ -313,11 +315,10 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
       }
 
       val cal = Calendar.getInstance
-      cal.set(year, month-1, day)
+      cal.set(year, month - 1, day)
 
       new Date(cal.getTimeInMillis)
-    }
-    finally br.close()
+    } finally br.close()
   }
 }
 

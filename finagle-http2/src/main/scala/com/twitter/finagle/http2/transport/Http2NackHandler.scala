@@ -1,7 +1,12 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.http.filter.HttpNackFilter.{RetryableNackHeader, NonRetryableNackHeader}
-import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandlerContext, ChannelPromise, ChannelPromiseNotifier}
+import io.netty.channel.{
+  ChannelOutboundHandlerAdapter,
+  ChannelHandlerContext,
+  ChannelPromise,
+  ChannelPromiseNotifier
+}
 import io.netty.handler.codec.http2.{
   DefaultHttp2ResetFrame,
   Http2Error,
@@ -29,25 +34,26 @@ private[http2] class Http2NackHandler extends ChannelOutboundHandlerAdapter {
     ctx: ChannelHandlerContext,
     msg: Object,
     p: ChannelPromise
-  ): Unit = if (continue == null) {
-    msg match {
-      case headersFrame: Http2HeadersFrame =>
-        val headers = headersFrame.headers
-        if (headers.contains(RetryableNackHeader)) {
-          continue = p
-          super.write(ctx, Http2NackHandler.retryableNack, p)
-        } else if (headers.contains(NonRetryableNackHeader)) {
-          continue = p
-          super.write(ctx, Http2NackHandler.nonRetryableNack, p)
-        } else {
-          super.write(ctx, msg, p)
-        }
-      case _ => super.write(ctx, msg, p)
+  ): Unit =
+    if (continue == null) {
+      msg match {
+        case headersFrame: Http2HeadersFrame =>
+          val headers = headersFrame.headers
+          if (headers.contains(RetryableNackHeader)) {
+            continue = p
+            super.write(ctx, Http2NackHandler.retryableNack, p)
+          } else if (headers.contains(NonRetryableNackHeader)) {
+            continue = p
+            super.write(ctx, Http2NackHandler.nonRetryableNack, p)
+          } else {
+            super.write(ctx, msg, p)
+          }
+        case _ => super.write(ctx, msg, p)
+      }
+    } else {
+      val listener = new ChannelPromiseNotifier(p)
+      continue.addListener(listener)
     }
-  } else {
-    val listener = new ChannelPromiseNotifier(p)
-    continue.addListener(listener)
-  }
 }
 
 private[transport] object Http2NackHandler {

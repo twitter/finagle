@@ -4,6 +4,7 @@ package com.twitter.finagle.context
  * [[com.twitter.finagle.context.Context]]s that are managed by Finagle.
  */
 object Contexts {
+
   /**
    * Local contexts have lifetimes bound by Finagle server requests.
    * They are local to the process.

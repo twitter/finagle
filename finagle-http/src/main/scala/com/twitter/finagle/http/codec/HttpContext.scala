@@ -9,8 +9,8 @@ import scala.util.control.NonFatal
 object HttpContext {
 
   private[this] val Prefix = "Finagle-Ctx-"
-  private[this] val DeadlineHeaderKey = Prefix+Deadline.id
-  private[this] val RetriesHeaderKey = Prefix+Retries.id
+  private[this] val DeadlineHeaderKey = Prefix + Deadline.id
+  private[this] val RetriesHeaderKey = Prefix + Retries.id
 
   private val log = Logger(getClass.getName)
 
@@ -27,7 +27,6 @@ object HttpContext {
 
   private[this] def marshalRetries(retries: Retries): String =
     retries.retries.toString
-
 
   private[this] val unmarshalDeadline: String => Option[Deadline] = header => {
     try {
@@ -64,12 +63,14 @@ object HttpContext {
     var ctxValues: List[Contexts.broadcast.KeyValuePair[_]] = Nil
 
     msg.headerMap.get(DeadlineHeaderKey).flatMap(unmarshalDeadline) match {
-      case Some(deadline) => ctxValues = Contexts.broadcast.KeyValuePair(Deadline, deadline)::ctxValues
+      case Some(deadline) =>
+        ctxValues = Contexts.broadcast.KeyValuePair(Deadline, deadline) :: ctxValues
       case None =>
     }
 
     msg.headerMap.get(RetriesHeaderKey).flatMap(unmarshalRetries) match {
-      case Some(retries) => ctxValues = Contexts.broadcast.KeyValuePair(Retries, retries)::ctxValues
+      case Some(retries) =>
+        ctxValues = Contexts.broadcast.KeyValuePair(Retries, retries) :: ctxValues
       case None =>
     }
 

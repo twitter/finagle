@@ -19,6 +19,7 @@ import com.twitter.util.registry.GlobalRegistry
 import java.net.{SocketAddress, InetSocketAddress}
 
 object StackClient {
+
   /**
    * Canonical Roles for each Client-related Stack modules.
    */
@@ -26,6 +27,7 @@ object StackClient {
     val pool = Stack.Role("Pool")
     val requestDraining = Stack.Role("RequestDraining")
     val prepFactory = Stack.Role("PrepFactory")
+
     /** PrepConn is special in that it's the first role before the `Endpoint` role */
     val prepConn = Stack.Role("PrepConn")
     val protoTracing = Stack.Role("protoTracing")
@@ -187,7 +189,6 @@ object StackClient {
      */
     stk.push(LatencyCompensation.module)
 
-
     stk.result
   }
 
@@ -284,8 +285,7 @@ object StackClient {
      */
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
-    stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) =>
-      new RefcountedFactory(fac))
+    stk.push(Role.requestDraining, (fac: ServiceFactory[Req, Rep]) => new RefcountedFactory(fac))
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(NackAdmissionFilter.module)
@@ -390,22 +390,26 @@ object StackClient {
  * A `StackBasedClient` is weaker than a `StackClient` in that the
  * specific `Req`, `Rep` types of its stack are not exposed.
  */
-trait StackBasedClient[Req, Rep] extends Client[Req, Rep]
-  with Stack.Parameterized[StackBasedClient[Req, Rep]]
-  with Stack.Transformable[StackBasedClient[Req, Rep]]
+trait StackBasedClient[Req, Rep]
+    extends Client[Req, Rep]
+    with Stack.Parameterized[StackBasedClient[Req, Rep]]
+    with Stack.Transformable[StackBasedClient[Req, Rep]]
 
 /**
  * A [[com.twitter.finagle.Client Client]] that composes a
  * [[com.twitter.finagle.Stack Stack]].
  */
-trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
-  with Stack.Parameterized[StackClient[Req, Rep]]
-  with Stack.Transformable[StackClient[Req, Rep]] {
+trait StackClient[Req, Rep]
+    extends StackBasedClient[Req, Rep]
+    with Stack.Parameterized[StackClient[Req, Rep]]
+    with Stack.Transformable[StackClient[Req, Rep]] {
 
   /** The current stack. */
   def stack: Stack[ServiceFactory[Req, Rep]]
+
   /** The current parameter map. */
   def params: Stack.Params
+
   /** A new StackClient with the provided stack. */
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): StackClient[Req, Rep]
 
@@ -429,14 +433,14 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
  *      clients.
  */
 trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, This]]
-  extends StackClient[Req, Rep]
-  with Stack.Parameterized[This]
-  with CommonParams[This]
-  with ClientParams[This]
-  with WithClientAdmissionControl[This]
-  with WithClientTransport[This]
-  with WithClientSession[This]
-  with WithSessionQualifier[This] {
+    extends StackClient[Req, Rep]
+    with Stack.Parameterized[This]
+    with CommonParams[This]
+    with ClientParams[This]
+    with WithClientAdmissionControl[This]
+    with WithClientTransport[This]
+    with WithClientSession[This]
+    with WithSessionQualifier[This] {
 
   /**
    * Defines the service factory, which establishes connections to a remote
@@ -504,7 +508,8 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
    */
   protected def copy1(
     stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
-    params: Stack.Params = this.params): This
+    params: Stack.Params = this.params
+  ): This
 
   /**
    * @inheritdoc
@@ -543,7 +548,7 @@ trait EndpointerStackClient[Req, Rep, This <: EndpointerStackClient[Req, Rep, Th
 }
 
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
-  extends EndpointerStackClient[Req, Rep, This] { self =>
+    extends EndpointerStackClient[Req, Rep, This] { self =>
 
   /**
    * The type we write into the transport.
@@ -577,7 +582,8 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    */
   override protected def copy1(
     stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
-    params: Stack.Params = this.params): This { type In = self.In; type Out = self.Out }
+    params: Stack.Params = this.params
+  ): This { type In = self.In; type Out = self.Out }
 
   /**
    * A stackable module that creates new `Transports` (via transporter)
@@ -585,30 +591,31 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    */
   protected final def endpointer: Stackable[ServiceFactory[Req, Rep]] =
     new EndpointerModule[Req, Rep](
-      Seq(implicitly[Stack.Param[ProtocolLibrary]], implicitly[Stack.Param[Label]]),
-      { (prms: Stack.Params, ia: InetSocketAddress) =>
-        val endpointClient = self.copy1(params=prms)
-        val transporter = endpointClient.newTransporter(ia)
-        // Export info about the transporter type so that we can query info
-        // about its implementation at runtime. This assumes that the `toString`
-        // of the implementation is sufficiently descriptive.
-        val transporterImplKey = Seq(
-          ClientRegistry.registryName,
-          endpointClient.params[ProtocolLibrary].name,
-          endpointClient.params[Label].label,
-          "Transporter")
-        GlobalRegistry.get.put(transporterImplKey, transporter.toString)
-        // Note, this ensures that session establishment is lazy (i.e.,
-        // on the service acquisition path).
-        ServiceFactory.apply[Req, Rep] { () =>
-          // we do not want to capture and request specific Locals
-          // that would live for the life of the session.
-          Contexts.letClearAll {
-            transporter().map { trans =>
-              endpointClient.newDispatcher(trans)
+      Seq(implicitly[Stack.Param[ProtocolLibrary]], implicitly[Stack.Param[Label]]), {
+        (prms: Stack.Params, ia: InetSocketAddress) =>
+          val endpointClient = self.copy1(params = prms)
+          val transporter = endpointClient.newTransporter(ia)
+          // Export info about the transporter type so that we can query info
+          // about its implementation at runtime. This assumes that the `toString`
+          // of the implementation is sufficiently descriptive.
+          val transporterImplKey = Seq(
+            ClientRegistry.registryName,
+            endpointClient.params[ProtocolLibrary].name,
+            endpointClient.params[Label].label,
+            "Transporter"
+          )
+          GlobalRegistry.get.put(transporterImplKey, transporter.toString)
+          // Note, this ensures that session establishment is lazy (i.e.,
+          // on the service acquisition path).
+          ServiceFactory.apply[Req, Rep] { () =>
+            // we do not want to capture and request specific Locals
+            // that would live for the life of the session.
+            Contexts.letClearAll {
+              transporter().map { trans =>
+                endpointClient.newDispatcher(trans)
+              }
             }
           }
-        }
       }
     )
 }

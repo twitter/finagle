@@ -25,8 +25,9 @@ private[finagle] object DefaultMonitor {
   )
 
   private def logLevelFor(t: Throwable): Option[Level] =
-    ExceptionLogLevels.find { case (cls, _) =>
-      cls.isAssignableFrom(t.getClass)
+    ExceptionLogLevels.find {
+      case (cls, _) =>
+        cls.isAssignableFrom(t.getClass)
     } match {
       case Some((_, lvl)) => Some(lvl)
       case None => None
@@ -57,11 +58,8 @@ private[finagle] object DefaultMonitor {
  *
  * @note This monitor does not handle (i.e., returns `false`) [[NonFatal fatal exceptions]].
  */
-private[util] class DefaultMonitor(
-    log: Logger,
-    label: String,
-    downstreamAddr: String)
-  extends Monitor {
+private[util] class DefaultMonitor(log: Logger, label: String, downstreamAddr: String)
+    extends Monitor {
   import DefaultMonitor._
 
   private[this] def upstreamAddr: String =
@@ -117,7 +115,9 @@ object LoadedReporterFactory extends ReporterFactory {
   private[this] val factories = LoadService[ReporterFactory]()
 
   def apply(name: String, addr: Option[SocketAddress]): Monitor =
-    factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) => a andThen m }
+    factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) =>
+      a andThen m
+    }
 
   val get: ReporterFactory = this
 

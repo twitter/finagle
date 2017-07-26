@@ -28,11 +28,11 @@ private[stats] class CounterDeltas {
    */
   def deltas: Map[String, Number] = {
     val prevs = synchronized(lasts)
-    prevs.asScala.map { case (key, pd) =>
-      key -> Long.box(pd.delta)
+    prevs.asScala.map {
+      case (key, pd) =>
+        key -> Long.box(pd.delta)
     }.toMap
   }
-
 
   /**
    * Updates the values to be used for future calls
@@ -42,13 +42,16 @@ private[stats] class CounterDeltas {
    */
   def update(newCounters: JMap[String, Number]): Unit = synchronized {
     val next = new JHashMap[String, Last](newCounters.size)
-    newCounters.asScala.foreach { case (k, v) =>
-      val last = lasts.get(k)
-      val current = v.longValue
-      val delta = if (last == null) current else {
-        current - last.abs
-      }
-      next.put(k, new Last(current, delta))
+    newCounters.asScala.foreach {
+      case (k, v) =>
+        val last = lasts.get(k)
+        val current = v.longValue
+        val delta =
+          if (last == null) current
+          else {
+            current - last.abs
+          }
+        next.put(k, new Last(current, delta))
     }
     lasts = next
   }

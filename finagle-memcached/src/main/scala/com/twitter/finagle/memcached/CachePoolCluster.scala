@@ -22,7 +22,8 @@ object CacheNode {
 }
 
 // Type definition representing a cache node
-case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None) extends SocketAddress {
+case class CacheNode(host: String, port: Int, weight: Int, key: Option[String] = None)
+    extends SocketAddress {
   // Use overloads to keep the same ABI
   def this(host: String, port: Int, weight: Int) = this(host, port, weight, None)
 }
@@ -50,16 +51,19 @@ class TwitterCacheResolver extends Resolver {
       case Array(zkHosts, path) =>
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
         val group = CacheNodeGroup.newZkCacheNodeGroup(
-          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path))
+          path,
+          zkClient,
+          ClientStatsReceiver.scope(scheme).scope(path)
+        )
 
-        val underlyingSizeGauge = ClientStatsReceiver.scope(scheme).scope(path).addGauge("underlyingPoolSize") {
-          group.members.size
-        }
+        val underlyingSizeGauge =
+          ClientStatsReceiver.scope(scheme).scope(path).addGauge("underlyingPoolSize") {
+            group.members.size
+          }
         group.set.map(toUnresolvedAddr)
 
       case _ =>
-        throw new TwitterCacheResolverException(
-          "Invalid twcache format \"%s\"".format(arg))
+        throw new TwitterCacheResolverException("Invalid twcache format \"%s\"".format(arg))
     }
   }
 
@@ -78,13 +82,14 @@ class TwitterCacheResolver extends Resolver {
 object CacheNodeGroup {
   // <host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
   def apply(hosts: String) = {
-    val hostSeq = hosts.split(Array(' ', ','))
+    val hostSeq = hosts
+      .split(Array(' ', ','))
       .filter((_ != ""))
       .map(_.split(":"))
       .map {
-        case Array(host)                    => (host, 11211, 1, None)
-        case Array(host, port)              => (host, port.toInt, 1, None)
-        case Array(host, port, weight)      => (host, port.toInt, weight.toInt, None)
+        case Array(host) => (host, 11211, 1, None)
+        case Array(host, port) => (host, port.toInt, 1, None)
+        case Array(host, port, weight) => (host, port.toInt, weight.toInt, None)
         case Array(host, port, weight, key) => (host, port.toInt, weight.toInt, Some(key))
       }
 
@@ -105,10 +110,12 @@ object CacheNodeGroup {
       new CacheNode(ia.getHostName, ia.getPort, 1, None)
   }
 
-  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet.toSeq:_*)
+  def newStaticGroup(cacheNodeSet: Set[CacheNode]) = Group(cacheNodeSet.toSeq: _*)
 
   def newZkCacheNodeGroup(
-    path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver
+    path: String,
+    zkClient: ZooKeeperClient,
+    statsReceiver: StatsReceiver = NullStatsReceiver
   ): Group[CacheNode] = {
     new ZkGroup(new ServerSetImpl(zkClient, path), path) collect {
       case inst if inst.getStatus == ALIVE =>
@@ -118,19 +125,20 @@ object CacheNodeGroup {
     }
   }
 
-  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) = new Group[CacheNode] {
-    protected[finagle] val set: Var[Set[CacheNode]] = va map {
-      case Addr.Bound(addrs, _) =>
-        addrs.collect {
-          case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
-            CacheNode(ia.getHostName, ia.getPort, weight, key)
-          case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
-            val key = ia.getAddress.getHostAddress + ":" + ia.getPort
-            CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
-          case Address.Inet(ia, _) if !useOnlyResolvedAddress=>
-            CacheNode(ia.getHostName, ia.getPort, 1, None)
-        }
-      case _ => Set[CacheNode]()
+  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) =
+    new Group[CacheNode] {
+      protected[finagle] val set: Var[Set[CacheNode]] = va map {
+        case Addr.Bound(addrs, _) =>
+          addrs.collect {
+            case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
+              CacheNode(ia.getHostName, ia.getPort, weight, key)
+            case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
+              val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+              CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+            case Address.Inet(ia, _) if !useOnlyResolvedAddress =>
+              CacheNode(ia.getHostName, ia.getPort, 1, None)
+          }
+        case _ => Set[CacheNode]()
+      }
     }
-  }
 }

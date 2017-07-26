@@ -7,9 +7,7 @@ import com.twitter.finagle.ssl.{Engine, SslConfigurations}
  * which use a () => Engine interface. It should only be used for legacy
  * purposes.
  */
-class ConstServerEngineFactory(
-    newEngine: () => Engine)
-  extends SslServerEngineFactory {
+class ConstServerEngineFactory(newEngine: () => Engine) extends SslServerEngineFactory {
 
   /**
    * Creates a new [[Engine]] based on an [[SslServerConfiguration]].
@@ -23,11 +21,17 @@ class ConstServerEngineFactory(
    */
   def apply(config: SslServerConfiguration): Engine = {
     SslConfigurations.checkKeyCredentialsNotSupported(
-      "ConstServerEngineFactory", config.keyCredentials)
+      "ConstServerEngineFactory",
+      config.keyCredentials
+    )
     SslConfigurations.checkTrustCredentialsNotSupported(
-      "ConstServerEngineFactory", config.trustCredentials)
+      "ConstServerEngineFactory",
+      config.trustCredentials
+    )
     SslConfigurations.checkApplicationProtocolsNotSupported(
-      "ConstServerEngineFactory", config.applicationProtocols)
+      "ConstServerEngineFactory",
+      config.applicationProtocols
+    )
 
     val engine = newEngine()
     SslServerEngineFactory.configureEngine(engine, config)

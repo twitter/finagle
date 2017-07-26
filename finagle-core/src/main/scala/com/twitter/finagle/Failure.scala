@@ -11,17 +11,16 @@ import scala.util.control.NoStackTrace
  * describe the origins of the failure to aid in debugging and flags
  * mark attributes of the Failure (e.g. Restartable).
  */
-final class Failure private[finagle](
-    private[finagle] val why: String,
-    val cause: Option[Throwable] = None,
-    val flags: Long = FailureFlags.Empty,
-    protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
-    val logLevel: Level = Level.WARNING)
-  extends Exception(why, cause.orNull)
-  with NoStackTrace
-  with HasLogLevel
-  with FailureFlags[Failure]
-{
+final class Failure private[finagle] (
+  private[finagle] val why: String,
+  val cause: Option[Throwable] = None,
+  val flags: Long = FailureFlags.Empty,
+  protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
+  val logLevel: Level = Level.WARNING
+) extends Exception(why, cause.orNull)
+    with NoStackTrace
+    with HasLogLevel
+    with FailureFlags[Failure] {
   import Failure._
 
   require(!isFlagged(Wrapped) || cause.isDefined)
@@ -40,7 +39,7 @@ final class Failure private[finagle](
   /**
    * A new failure with the current [[Failure]] as cause.
    */
-  def chained: Failure = copy(cause=Some(this))
+  def chained: Failure = copy(cause = Some(this))
 
   /**
    * Creates a new Failure with the given logging Level.
@@ -60,25 +59,28 @@ final class Failure private[finagle](
   def show: Throwable = Failure.show(this)
 
   override def toString: String =
-    "Failure(%s, flags=0x%02x) with %s".format(why, flags,
-      if (sources.isEmpty) "NoSources" else sources.mkString(" with "))
+    "Failure(%s, flags=0x%02x) with %s".format(
+      why,
+      flags,
+      if (sources.isEmpty) "NoSources" else sources.mkString(" with ")
+    )
 
   override def equals(a: Any): Boolean = {
     a match {
       case that: Failure =>
         this.why.equals(that.why) &&
-        this.cause.equals(that.cause) &&
-        this.flags.equals(that.flags) &&
-        this.sources.equals(that.sources)
+          this.cause.equals(that.cause) &&
+          this.flags.equals(that.flags) &&
+          this.sources.equals(that.sources)
       case _ => false
     }
   }
 
   override def hashCode: Int =
     why.hashCode ^
-    cause.hashCode ^
-    flags.hashCode ^
-    sources.hashCode
+      cause.hashCode ^
+      flags.hashCode ^
+      sources.hashCode
 
   private[this] def copy(
     why: String = why,
@@ -94,30 +96,23 @@ final class Failure private[finagle](
 object Failure {
   object Source extends Enumeration {
     val
-      /**
-       * Represents the name of the service.
-       * See [[com.twitter.finagle.filter.ExceptionSourceFilter]]
-       */
-      Service,
-
-      /**
-       * Represents a [[Stack.Role Stack module's role]].
-       */
-      Role,
-
-      /**
-       * Represents the remote info of the upstream caller and/or
-       * downstream backend.
-       * See [[com.twitter.finagle.client.ExceptionRemoteInfoFactory]]
-       */
-      RemoteInfo,
-
-      /**
-       * Represents the name of the method.
-       * See [[com.twitter.finagle.client.MethodBuilder]].
-       */
-      Method
-    = Value
+    /**
+     * Represents the name of the service.
+     * See [[com.twitter.finagle.filter.ExceptionSourceFilter]]
+     */
+    Service, /**
+     * Represents a [[Stack.Role Stack module's role]].
+     */
+    Role, /**
+     * Represents the remote info of the upstream caller and/or
+     * downstream backend.
+     * See [[com.twitter.finagle.client.ExceptionRemoteInfoFactory]]
+     */
+    RemoteInfo, /**
+     * Represents the name of the method.
+     * See [[com.twitter.finagle.client.MethodBuilder]].
+     */
+    Method = Value
   }
 
   /**
@@ -166,7 +161,10 @@ object Failure {
    * Representation of a nack response that is non-retryable
    */
   val NonRetryableNackFailure: Failure =
-    Failure("The request was Nacked by the server and should not be retried", Failure.Rejected|Failure.NonRetryable)
+    Failure(
+      "The request was Nacked by the server and should not be retried",
+      Failure.Rejected | Failure.NonRetryable
+    )
 
   /**
    * Flag naming indicates a naming failure. This is Finagle-internal.
@@ -257,8 +255,8 @@ object Failure {
   def wrap(exc: Throwable, flags: Long): Failure = {
     require(exc != null)
     exc match {
-      case f: Failure => f.flagged(flags|Failure.Wrapped)
-      case _ => Failure(exc, flags|Failure.Wrapped, computeLogLevel(exc))
+      case f: Failure => f.flagged(flags | Failure.Wrapped)
+      case _ => Failure(exc, flags | Failure.Wrapped, computeLogLevel(exc))
     }
   }
 
@@ -286,7 +284,12 @@ object Failure {
    * message and cause.
    */
   def rejected(why: String, cause: Throwable): Failure =
-    new Failure(why, Option(cause), FailureFlags.Retryable | FailureFlags.Rejected, logLevel = Level.DEBUG)
+    new Failure(
+      why,
+      Option(cause),
+      FailureFlags.Retryable | FailureFlags.Rejected,
+      logLevel = Level.DEBUG
+    )
 
   /**
    * A default [[Restartable]] failure.
@@ -296,12 +299,13 @@ object Failure {
   @tailrec
   private def show(f: Failure): Throwable = {
     if (!f.isFlagged(FailureFlags.Wrapped)) f.masked(ShowMask)
-    else f.cause match {
-      case Some(inner: Failure) => show(inner)
-      case Some(inner: Throwable) => inner
-      case None =>
-        throw new IllegalArgumentException("Wrapped failure without a cause")
-    }
+    else
+      f.cause match {
+        case Some(inner: Failure) => show(inner)
+        case Some(inner: Throwable) => inner
+        case None =>
+          throw new IllegalArgumentException("Wrapped failure without a cause")
+      }
   }
 
   /**

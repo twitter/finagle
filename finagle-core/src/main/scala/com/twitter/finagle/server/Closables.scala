@@ -62,6 +62,6 @@ private final class Closables extends Closable with CloseAwaitably {
       allClosables
     }
 
-    Closable.all(toClose:_*).close(deadline)
+    Closable.all(toClose: _*).close(deadline)
   }
 }

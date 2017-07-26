@@ -7,9 +7,8 @@ import com.twitter.util.Future
  * Used by [[LoadBalancerFactory]] when configured with
  * [[WhenNoNodesOpen.FailFast]].
  */
-private class NoNodesOpenServiceFactory[Req, Rep](
-    underlying: ServiceFactory[Req, Rep])
-  extends ServiceFactoryProxy[Req, Rep](underlying) {
+private class NoNodesOpenServiceFactory[Req, Rep](underlying: ServiceFactory[Req, Rep])
+    extends ServiceFactoryProxy[Req, Rep](underlying) {
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (underlying.status != Status.Open)

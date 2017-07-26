@@ -26,13 +26,11 @@ import com.twitter.util.{Duration, Future, Promise, Time, Timer, Try}
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
 abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
-    trans: Transport[In, Out],
-    statsReceiver: StatsReceiver,
-    stallTimeout: Duration,
-    timer: Timer)
-  extends GenSerialClientDispatcher[Req, Rep, In, Out](
-    trans,
-    statsReceiver) { self =>
+  trans: Transport[In, Out],
+  statsReceiver: StatsReceiver,
+  stallTimeout: Duration,
+  timer: Timer
+) extends GenSerialClientDispatcher[Req, Rep, In, Out](trans, statsReceiver) { self =>
   import GenPipeliningDispatcher._
 
   // thread-safety provided by synchronization on this
@@ -49,7 +47,7 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
       trans.read().respond { out =>
         try respond(p.value, p.promise, out)
         finally loop()
-      }
+    }
 
   private[this] def loop(): Unit =
     q.poll().onSuccess(transRead)
@@ -57,32 +55,34 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
   loop()
 
   /**
-    * Handle the server response `out` given the corresponding element `value`
-    * enqueued during dispatch.
-    *
-    * This typically involves fulfilling `p` with a function of `(T, Try[Out]) => Rep`
-    *
-    * @param value the corresponding element returned by `pipeline` during dispatch
-    * @param p the promise to fulfill the rpc
-    * @param out the server response
-    */
+   * Handle the server response `out` given the corresponding element `value`
+   * enqueued during dispatch.
+   *
+   * This typically involves fulfilling `p` with a function of `(T, Try[Out]) => Rep`
+   *
+   * @param value the corresponding element returned by `pipeline` during dispatch
+   * @param p the promise to fulfill the rpc
+   * @param out the server response
+   */
   protected def respond(value: T, p: Promise[Rep], out: Try[Out]): Unit
 
   /**
-    * Send a request `req` to the server and provide a value `T` to insert into the
-    * pipeline queue. The value is provided back to `respond` to handle the corresponding
-    * request.
-    *
-    * @param req the request to send
-    * @param p the promise to fulfill when the request is handled.
-    * @return a value associated with `req` that is handed back during response handling.
-    */
+   * Send a request `req` to the server and provide a value `T` to insert into the
+   * pipeline queue. The value is provided back to `respond` to handle the corresponding
+   * request.
+   *
+   * @param req the request to send
+   * @param p the promise to fulfill when the request is handled.
+   * @return a value associated with `req` that is handed back during response handling.
+   */
   protected def pipeline(req: Req, p: Promise[Rep]): Future[T]
 
   // Dispatch serialization is guaranteed by GenSerialClientDispatcher so we
   // leverage that property to sequence `q` offers.
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    pipeline(req, p).flatMap { toQueue => q.offer(Pending(toQueue, p)); Future.Done }
+    pipeline(req, p).flatMap { toQueue =>
+      q.offer(Pending(toQueue, p)); Future.Done
+    }
 
   override def apply(req: Req): Future[Rep] = {
     val f = super.apply(req)
@@ -100,7 +100,8 @@ abstract class GenPipeliningDispatcher[Req, Rep, In, Out, T](
                 stalled = true
                 val addr = trans.remoteAddress
                 GenPipeliningDispatcher.log.warning(
-                  s"pipelined connection stalled with ${q.size} items, talking to $addr")
+                  s"pipelined connection stalled with ${q.size} items, talking to $addr"
+                )
               }
             }
           }
@@ -116,9 +117,7 @@ object GenPipeliningDispatcher {
   private case class Pending[T, Rep](value: T, promise: Promise[Rep])
 
   private def stalledPipelineException(timeout: Duration) =
-    Failure(
-      s"The connection pipeline could not make progress in $timeout",
-      Failure.Interrupted)
+    Failure(s"The connection pipeline could not make progress in $timeout", Failure.Interrupted)
 
   object Timeout {
     def unapply(t: Throwable): Option[Throwable] = t match {
@@ -130,10 +129,10 @@ object GenPipeliningDispatcher {
 }
 
 /**
-  * A class eligible for configuring a timeout
-  * [[com.twitter.util.Duration]] to consider a pipeline to have stalled
-  * (stopped making progress after an initial interruption).
-  */
+ * A class eligible for configuring a timeout
+ * [[com.twitter.util.Duration]] to consider a pipeline to have stalled
+ * (stopped making progress after an initial interruption).
+ */
 case class StalledPipelineTimeout(timeout: Duration) {
   def mk(): (StalledPipelineTimeout, Stack.Param[StalledPipelineTimeout]) =
     (this, StalledPipelineTimeout.param)
@@ -146,7 +145,13 @@ class PipeliningDispatcher[Req, Rep](
   trans: Transport[Req, Rep],
   statsReceiver: StatsReceiver,
   stallTimeout: Duration,
-  timer: Timer) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](trans, statsReceiver, stallTimeout, timer) {
+  timer: Timer
+) extends GenPipeliningDispatcher[Req, Rep, Req, Rep, Unit](
+      trans,
+      statsReceiver,
+      stallTimeout,
+      timer
+    ) {
 
   final override protected def respond(value: Unit, p: Promise[Rep], out: Try[Rep]): Unit =
     p.updateIfEmpty(out)

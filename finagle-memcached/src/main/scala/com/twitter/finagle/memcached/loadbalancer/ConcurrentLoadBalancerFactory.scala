@@ -26,8 +26,7 @@ object ConcurrentLoadBalancerFactory {
   // package private for testing
   private[finagle] def replicate(num: Int): Address => Set[Address] = {
     case Address.Inet(ia, metadata) =>
-      for (i: Int <- (0 until num).toSet) yield
-        Address.Inet(ia, metadata + (ReplicaKey -> i))
+      for (i: Int <- (0 until num).toSet) yield Address.Inet(ia, metadata + (ReplicaKey -> i))
     case addr => Set(addr)
   }
 
@@ -51,7 +50,7 @@ object ConcurrentLoadBalancerFactory {
         val Param(numConnections) = params[Param]
         val LoadBalancerFactory.Dest(dest) = params[LoadBalancerFactory.Dest]
         val newDest = dest.map {
-          case bound@Addr.Bound(set, _) =>
+          case bound @ Addr.Bound(set, _) =>
             bound.copy(addrs = set.flatMap(replicate(numConnections)))
           case addr => addr
         }

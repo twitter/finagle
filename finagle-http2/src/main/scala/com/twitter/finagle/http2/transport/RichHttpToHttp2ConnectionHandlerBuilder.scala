@@ -6,10 +6,10 @@ import io.netty.handler.codec.http2.Http2HeadersEncoder.SensitivityDetector
 // we need to supply no-op overrides for all of the methods to ensure the return
 // types are correct.
 private[http2] class RichHttpToHttp2ConnectionHandlerBuilder
-  extends AbstractHttp2ConnectionHandlerBuilder[
-    RichHttpToHttp2ConnectionHandler,
-    RichHttpToHttp2ConnectionHandlerBuilder
-  ] {
+    extends AbstractHttp2ConnectionHandlerBuilder[
+      RichHttpToHttp2ConnectionHandler,
+      RichHttpToHttp2ConnectionHandlerBuilder
+    ] {
 
   private[this] var onActiveFn: Option[() => Unit] = None
 

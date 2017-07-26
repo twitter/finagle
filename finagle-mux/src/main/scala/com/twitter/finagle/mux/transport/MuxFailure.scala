@@ -23,7 +23,6 @@ private[mux] object MuxFailure {
    */
   val NonRetryable: Long = 1L << 2
 
-
   /**
    * A MuxFailure that contains no additional information
    */

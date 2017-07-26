@@ -26,8 +26,7 @@ object DtabStatsFilter {
  * Adds a Stat, dtab/local/size, that tracks the size of Dtab.local for all
  * requests with a non-empty Dtab.
  */
-class DtabStatsFilter[Req, Rep](statsReceiver: StatsReceiver)
-    extends SimpleFilter[Req, Rep] {
+class DtabStatsFilter[Req, Rep](statsReceiver: StatsReceiver) extends SimpleFilter[Req, Rep] {
 
   private[this] val dtabSizes = statsReceiver.stat("dtab", "size")
 

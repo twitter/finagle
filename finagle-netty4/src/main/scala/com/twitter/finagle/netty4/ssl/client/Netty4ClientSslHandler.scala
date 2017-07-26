@@ -4,7 +4,10 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.ssl.Alpn
 import com.twitter.finagle.ssl.{ApplicationProtocols, Engine}
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Address, Stack}
 import io.netty.channel.{Channel, ChannelInitializer, ChannelPipeline}
@@ -18,9 +21,8 @@ import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[netty4] class Netty4ClientSslHandler(
-    params: Stack.Params)
-  extends ChannelInitializer[Channel] {
+private[netty4] class Netty4ClientSslHandler(params: Stack.Params)
+    extends ChannelInitializer[Channel] {
 
   // The reason we can't close the channel immediately is because we're in process of decoding an
   // inbound message that is represented by a bunch of TLS records. We need to finish decoding
@@ -33,9 +35,11 @@ private[netty4] class Netty4ClientSslHandler(
       def operationComplete(f: NettyFuture[Channel]): Unit = {
         val channel = f.getNow
         if (channel != null && f.isSuccess) {
-          channel.eventLoop().execute(new Runnable {
-            def run(): Unit = channel.close()
-          })
+          channel
+            .eventLoop()
+            .execute(new Runnable {
+              def run(): Unit = channel.close()
+            })
         }
       }
     }
@@ -65,8 +69,9 @@ private[netty4] class Netty4ClientSslHandler(
   ): SslClientConfiguration = {
     val Alpn(protocols) = params[Alpn]
 
-    config.copy(applicationProtocols =
-      ApplicationProtocols.combine(protocols, config.applicationProtocols))
+    config.copy(
+      applicationProtocols = ApplicationProtocols.combine(protocols, config.applicationProtocols)
+    )
   }
 
   private[this] def createSslHandler(engine: Engine): SslHandler = {

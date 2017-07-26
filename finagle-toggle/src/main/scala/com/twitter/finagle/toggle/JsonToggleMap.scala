@@ -105,13 +105,13 @@ object JsonToggleMap {
   object DescriptionIgnored extends DescriptionMode
 
   private[this] case class JsonToggle(
-      @JsonProperty(required = true) id: String,
-      @JsonProperty(required = true) fraction: Double,
-      description: Option[String],
-      comment: Option[String])
+    @JsonProperty(required = true) id: String,
+    @JsonProperty(required = true) fraction: Double,
+    description: Option[String],
+    comment: Option[String]
+  )
 
-  private[this] case class JsonToggles(
-      @JsonProperty(required = true) toggles: Seq[JsonToggle]) {
+  private[this] case class JsonToggles(@JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
     def toToggleMap(
       source: String,
@@ -135,18 +135,13 @@ object JsonToggleMap {
             case DescriptionRequired => jsonToggle.description
             case DescriptionIgnored => None
           }
-          Toggle.Metadata(
-            jsonToggle.id,
-            jsonToggle.fraction,
-            description,
-            source)
+          Toggle.Metadata(jsonToggle.id, jsonToggle.fraction, description, source)
         }(breakOut)
 
       val ids = metadata.map(_.id)
       val uniqueIds = ids.distinct
       if (ids.size != uniqueIds.size) {
-        throw new IllegalArgumentException(
-          s"Duplicate Toggle ids found: ${ids.mkString(",")}")
+        throw new IllegalArgumentException(s"Duplicate Toggle ids found: ${ids.mkString(",")}")
       }
       new ToggleMap.Immutable(metadata)
     }
@@ -190,7 +185,8 @@ object JsonToggleMap {
     id: String,
     fraction: Double,
     lastValue: Option[Boolean],
-    description: Option[String])
+    description: Option[String]
+  )
 
   private val factory = new MappingJsonFactory()
   factory.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
@@ -200,7 +196,9 @@ object JsonToggleMap {
 
   private[this] def toLibraryToggles(toggleMap: ToggleMap): Seq[LibraryToggle] = {
     // create a map of id to metadata for faster lookups
-    val idToMetadata = toggleMap.iterator.map { md => md.id -> md }.toMap
+    val idToMetadata = toggleMap.iterator.map { md =>
+      md.id -> md
+    }.toMap
 
     // create a mapping of id to a seq of its components.
     val idToComponents = mutable.Map.empty[String, mutable.ArrayBuffer[Component]]
@@ -212,16 +210,16 @@ object JsonToggleMap {
       }
     }
 
-    idToComponents.map { case (id, details) =>
-      val md = idToMetadata(id)
-      val lastApply = toggleMap(id) match {
-        case captured: Toggle.Captured => captured.lastApply
-        case _ => None
-      }
-      LibraryToggle(Current(id, md.fraction, lastApply, md.description), details)
+    idToComponents.map {
+      case (id, details) =>
+        val md = idToMetadata(id)
+        val lastApply = toggleMap(id) match {
+          case captured: Toggle.Captured => captured.lastApply
+          case _ => None
+        }
+        LibraryToggle(Current(id, md.fraction, lastApply, md.description), details)
     }.toSeq
   }
-
 
   /**
    * Serialize a [[ToggleMap]] to JSON format

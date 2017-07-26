@@ -1,7 +1,15 @@
 package com.twitter.finagle.netty3.socks
 
-import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
-import com.twitter.finagle.socks.{AuthenticationSetting, Unauthenticated, UsernamePassAuthenticationSetting}
+import com.twitter.finagle.{
+  ChannelClosedException,
+  ConnectionFailedException,
+  InconsistentStateException
+}
+import com.twitter.finagle.socks.{
+  AuthenticationSetting,
+  Unauthenticated,
+  UsernamePassAuthenticationSetting
+}
 import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
 import java.nio.charset.StandardCharsets.{US_ASCII, UTF_8}
 import java.util.concurrent.atomic.AtomicReference
@@ -11,11 +19,15 @@ import scala.collection.breakOut
 
 object SocksConnectHandler {
   // Throwables used as `cause` fields for ConnectionFailedExceptions.
-  private[socks] val InvalidInit = new Throwable("unexpected SOCKS version or authentication " +
-    "level specified in connect response from proxy")
+  private[socks] val InvalidInit = new Throwable(
+    "unexpected SOCKS version or authentication " +
+      "level specified in connect response from proxy"
+  )
 
-  private[socks] val InvalidResponse = new Throwable("unexpected SOCKS version or response " +
-    "status specified in connect response from proxy")
+  private[socks] val InvalidResponse = new Throwable(
+    "unexpected SOCKS version or response " +
+      "status specified in connect response from proxy"
+  )
 
   // Socks Version constants
   private val Version1: Byte = 0x01
@@ -56,8 +68,8 @@ object SocksConnectHandler {
 class SocksConnectHandler(
   proxyAddr: SocketAddress,
   addr: InetSocketAddress,
-  authenticationSettings: Seq[AuthenticationSetting] = Seq(Unauthenticated))
-    extends SimpleChannelHandler {
+  authenticationSettings: Seq[AuthenticationSetting] = Seq(Unauthenticated)
+) extends SimpleChannelHandler {
 
   import SocksConnectHandler._
 
@@ -72,7 +84,9 @@ class SocksConnectHandler(
   private[this] val bytes = new Array[Byte](4)
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
   private[this] val authenticationMap: Map[Byte, AuthenticationSetting] =
-    authenticationSettings.map { setting => setting.typeByte -> setting }(breakOut)
+    authenticationSettings.map { setting =>
+      setting.typeByte -> setting
+    }(breakOut)
   private[this] val supportedTypes = authenticationMap.keys.toArray.sorted
 
   // following Netty's ReplayingDecoderBuffer, we throw this when we run out of bytes
@@ -129,8 +143,11 @@ class SocksConnectHandler(
     write(ctx, buf)
   }
 
-  private[this]
-  def writeUserNameAndPass(ctx: ChannelHandlerContext, username: String, pass: String) {
+  private[this] def writeUserNameAndPass(
+    ctx: ChannelHandlerContext,
+    username: String,
+    pass: String
+  ) {
     val buf = ChannelBuffers.buffer(1024)
     buf.writeByte(Version1)
 
@@ -215,8 +232,11 @@ class SocksConnectHandler(
         })
 
         val wrappedEvent = new DownstreamChannelStateEvent(
-          de.getChannel, wrappedConnectFuture,
-          de.getState, proxyAddr)
+          de.getChannel,
+          wrappedConnectFuture,
+          de.getState,
+          proxyAddr
+        )
 
         super.connectRequested(ctx, wrappedEvent)
 
@@ -262,7 +282,7 @@ class SocksConnectHandler(
             case Some(Unauthenticated) =>
               state = Requested
               writeRequest(ctx)
-            case Some(UsernamePassAuthenticationSetting(username,pass)) =>
+            case Some(UsernamePassAuthenticationSetting(username, pass)) =>
               state = Authenticating
               writeUserNameAndPass(ctx, username, pass)
             case None =>

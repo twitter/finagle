@@ -12,14 +12,16 @@ import java.io.IOException
 import java.util.concurrent.atomic.LongAdder
 import java.util.logging.{Level, Logger}
 
-
 private[channel] case class ChannelStats(bytesRead: LongAdder, bytesWritten: LongAdder)
 
 private[netty4] object ChannelStatsHandler {
   private[channel] val ConnectionStatsKey = AttributeKey.valueOf[ChannelStats]("channel_stats")
-  private[channel] val ConnectionDurationKey = AttributeKey.valueOf[Stopwatch.Elapsed]("connection_duration")
-  private[channel] val ChannelWasWritableKey = AttributeKey.valueOf[Boolean]("channel_has_been_writable")
-  private[channel] val ChannelWritableDurationKey = AttributeKey.valueOf[Stopwatch.Elapsed]("channel_writable_duration")
+  private[channel] val ConnectionDurationKey =
+    AttributeKey.valueOf[Stopwatch.Elapsed]("connection_duration")
+  private[channel] val ChannelWasWritableKey =
+    AttributeKey.valueOf[Boolean]("channel_has_been_writable")
+  private[channel] val ChannelWritableDurationKey =
+    AttributeKey.valueOf[Stopwatch.Elapsed]("channel_writable_duration")
 }
 
 /**
@@ -30,23 +32,23 @@ private[netty4] object ChannelStatsHandler {
  */
 @Sharable
 private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
-  extends ChannelDuplexHandler {
+    extends ChannelDuplexHandler {
   import ChannelStatsHandler._
 
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val connectionCount = new LongAdder()
 
-  private[this] val connects                = statsReceiver.counter("connects")
-  private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
+  private[this] val connects = statsReceiver.counter("connects")
+  private[this] val connectionDuration = statsReceiver.stat("connection_duration")
   private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
-  private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
-  private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
-  private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val writable                = statsReceiver.counter("socket_writable_ms")
-  private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
-  private[this] val exceptions              = statsReceiver.scope("exn")
-  private[this] val closesCount             = statsReceiver.counter("closes")
-  private[this] val connections             = statsReceiver.addGauge("connections") {
+  private[this] val connectionSentBytes = statsReceiver.stat("connection_sent_bytes")
+  private[this] val receivedBytes = statsReceiver.counter("received_bytes")
+  private[this] val sentBytes = statsReceiver.counter("sent_bytes")
+  private[this] val writable = statsReceiver.counter("socket_writable_ms")
+  private[this] val unwritable = statsReceiver.counter("socket_unwritable_ms")
+  private[this] val exceptions = statsReceiver.scope("exn")
+  private[this] val closesCount = statsReceiver.counter("closes")
+  private[this] val connections = statsReceiver.addGauge("connections") {
     connectionCount.sum()
   }
 
@@ -136,7 +138,6 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     }
     super.exceptionCaught(ctx, cause)
   }
-
 
   override def channelWritabilityChanged(ctx: ChannelHandlerContext): Unit = {
     val isWritable = ctx.channel.isWritable()

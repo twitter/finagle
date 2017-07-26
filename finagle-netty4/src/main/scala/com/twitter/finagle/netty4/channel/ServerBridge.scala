@@ -9,9 +9,9 @@ import io.netty.channel.ChannelHandler.Sharable
  */
 @Sharable
 private[netty4] class ServerBridge[In, Out](
-    transportFac: Channel => Transport[In, Out],
-    serveTransport: Transport[In, Out] => Unit)
-  extends ChannelInboundHandlerAdapter {
+  transportFac: Channel => Transport[In, Out],
+  serveTransport: Transport[In, Out] => Unit
+) extends ChannelInboundHandlerAdapter {
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     val transport: Transport[In, Out] = transportFac(ctx.channel())

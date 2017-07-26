@@ -48,7 +48,8 @@ object ServiceLoadedToggleMap {
     else {
       throw new IllegalStateException(
         s"Must have at most 1 `ServiceLoadedToggleMap` for libraryName=$libraryName, " +
-        s"found ${toggleMaps.size}: ${toggleMaps.mkString(", ")}")
+          s"found ${toggleMaps.size}: ${toggleMaps.mkString(", ")}"
+      )
     }
   }
 

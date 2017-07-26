@@ -56,4 +56,3 @@ package object thrift {
   private[finagle] val Toggles: ToggleMap =
     StandardToggleMap(LibraryName, DefaultStatsReceiver)
 }
-

@@ -22,9 +22,8 @@ private[memcached] object ServerDecoder {
  *
  * @note Class contains mutable state. Not thread-safe.
  */
-private[finagle] abstract class ServerDecoder[R >: Null](
-    storageCommands: immutable.Set[Buf])
-  extends Decoder[R] {
+private[finagle] abstract class ServerDecoder[R >: Null](storageCommands: immutable.Set[Buf])
+    extends Decoder[R] {
   import ServerDecoder._
 
   /** Type that represents a complete cache value */
@@ -32,7 +31,8 @@ private[finagle] abstract class ServerDecoder[R >: Null](
 
   private sealed trait State
   private case object AwaitingCommand extends State
-  private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int) extends State
+  private case class AwaitingData(valuesSoFar: Seq[Value], tokens: Seq[Buf], bytesNeeded: Int)
+      extends State
 
   private[this] val byteArrayForBuf2Int = ParserUtils.newByteArrayForBuf2Int()
   private[this] var state: State = AwaitingCommand

@@ -14,8 +14,10 @@ object StatsFilter {
       val role = StatsFilter.role
       val description = StatsFilter.description
 
-      def make(statsParam: param.Stats,
-               next: ServiceFactory[Request, Response]): ServiceFactory[Request, Response] = {
+      def make(
+        statsParam: param.Stats,
+        next: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] = {
         if (statsParam.statsReceiver.isNull)
           next
         else
@@ -37,7 +39,7 @@ object StatsFilter {
  *    time.[class]
  */
 class StatsFilter[REQUEST <: Request](stats: StatsReceiver)
-  extends SimpleFilter[REQUEST, Response] {
+    extends SimpleFilter[REQUEST, Response] {
 
   private[this] val statusReceiver = stats.scope("status")
   private[this] val timeReceiver = stats.scope("time")

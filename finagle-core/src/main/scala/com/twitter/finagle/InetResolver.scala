@@ -11,7 +11,7 @@ import com.twitter.util.{Await, Closable, Var, _}
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
 
 private[finagle] class DnsResolver(statsReceiver: StatsReceiver, resolvePool: FuturePool)
-  extends (String => Future[Seq[InetAddress]]) {
+    extends (String => Future[Seq[InetAddress]]) {
 
   private[this] val dnsLookupFailures = statsReceiver.counter("dns_lookup_failures")
   private[this] val dnsLookups = statsReceiver.counter("dns_lookups")
@@ -57,7 +57,12 @@ object InetResolver {
 
   def apply(unscopedStatsReceiver: StatsReceiver, resolvePool: FuturePool): Resolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new InetResolver(new DnsResolver(statsReceiver, resolvePool), statsReceiver, Some(5.seconds), resolvePool)
+    new InetResolver(
+      new DnsResolver(statsReceiver, resolvePool),
+      statsReceiver,
+      Some(5.seconds),
+      resolvePool
+    )
   }
 }
 
@@ -65,8 +70,8 @@ private[finagle] class InetResolver(
   resolveHost: String => Future[Seq[InetAddress]],
   statsReceiver: StatsReceiver,
   pollIntervalOpt: Option[Duration],
-  resolvePool: FuturePool)
-  extends Resolver {
+  resolvePool: FuturePool
+) extends Resolver {
   import InetSocketAddressUtil._
 
   type HostPortMetadata = (String, Int, Addr.Metadata)
@@ -87,40 +92,42 @@ private[finagle] class InetResolver(
    */
   def toAddr(hp: Seq[HostPortMetadata]): Future[Addr] = {
     val elapsed = Stopwatch.start()
-    Future.collectToTry(hp.map {
-      case (host, port, meta) =>
-        resolveHost(host).map { inetAddrs =>
-          inetAddrs.map { inetAddr =>
-            Address.Inet(new InetSocketAddress(inetAddr, port), meta)
+    Future
+      .collectToTry(hp.map {
+        case (host, port, meta) =>
+          resolveHost(host).map { inetAddrs =>
+            inetAddrs.map { inetAddr =>
+              Address.Inet(new InetSocketAddress(inetAddr, port), meta)
+            }
+          }
+      })
+      .flatMap { seq: Seq[Try[Seq[Address]]] =>
+        // Filter out all successes. If there was at least 1 success, consider
+        // the entire operation a success
+        val results = seq.collect {
+          case Return(subset) => subset
+        }.flatten
+
+        // Consider any result a success. Ignore partial failures.
+        if (results.nonEmpty) {
+          successes.incr()
+          latencyStat.add(elapsed().inMilliseconds)
+          Future.value(Addr.Bound(results.toSet))
+        } else {
+          // Either no hosts or resolution failed for every host
+          failures.incr()
+          latencyStat.add(elapsed().inMilliseconds)
+          log.debug(s"Resolution failed for all hosts in $hp")
+
+          seq.collectFirst {
+            case Throw(e) => e
+          } match {
+            case Some(_: UnknownHostException) => Future.value(Addr.Neg)
+            case Some(e) => Future.value(Addr.Failed(e))
+            case None => Future.value(Addr.Bound(Set[Address]()))
           }
         }
-    }).flatMap { seq: Seq[Try[Seq[Address]]] =>
-      // Filter out all successes. If there was at least 1 success, consider
-      // the entire operation a success
-      val results = seq.collect {
-        case Return(subset) => subset
-      }.flatten
-
-      // Consider any result a success. Ignore partial failures.
-      if (results.nonEmpty) {
-        successes.incr()
-        latencyStat.add(elapsed().inMilliseconds)
-        Future.value(Addr.Bound(results.toSet))
-      } else {
-        // Either no hosts or resolution failed for every host
-        failures.incr()
-        latencyStat.add(elapsed().inMilliseconds)
-        log.debug(s"Resolution failed for all hosts in $hp")
-
-        seq.collectFirst {
-          case Throw(e) => e
-        } match {
-          case Some(_: UnknownHostException) => Future.value(Addr.Neg)
-          case Some(e) => Future.value(Addr.Failed(e))
-          case None => Future.value(Addr.Bound(Set[Address]()))
-        }
       }
-    }
   }
 
   def bindHostPortsToAddr(hosts: Seq[HostPortMetadata]): Var[Addr] = {
@@ -151,8 +158,9 @@ private[finagle] class InetResolver(
    */
   def bind(hosts: String): Var[Addr] = Try(parseHostPorts(hosts)) match {
     case Return(hp) =>
-      bindHostPortsToAddr(hp.map { case (host, port) =>
-        (host, port, Addr.Metadata.empty)
+      bindHostPortsToAddr(hp.map {
+        case (host, port) =>
+          (host, port, Addr.Metadata.empty)
       })
     case Throw(exc) =>
       Var.value(Addr.Failed(exc))
@@ -195,8 +203,15 @@ object FixedInetResolver {
     timer: Timer
   ): InetResolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new FixedInetResolver(cache(
-      new DnsResolver(statsReceiver, FuturePool.unboundedPool), maxCacheSize, backoffs, timer), statsReceiver)
+    new FixedInetResolver(
+      cache(
+        new DnsResolver(statsReceiver, FuturePool.unboundedPool),
+        maxCacheSize,
+        backoffs,
+        timer
+      ),
+      statsReceiver
+    )
   }
 
   // A size-bounded FutureCache backed by a LoaderCache
@@ -211,14 +226,17 @@ object FixedInetResolver {
       def load(host: String): Future[Seq[InetAddress]] = {
         // Optionally retry failed DNS resolutions with specified backoff.
         def retryingLoad(nextBackoffs: Stream[Duration]): Future[Seq[InetAddress]] = {
-          resolveHost(host).rescue { case exc: UnknownHostException =>
-            nextBackoffs match {
-              case nextBackoff #:: restBackoffs =>
-                log.debug(s"Caught UnknownHostException resolving host '$host'. Retrying in $nextBackoff...")
-                Future.sleep(nextBackoff)(timer).before(retryingLoad(restBackoffs))
-              case Stream.Empty =>
-                Future.exception(exc)
-            }
+          resolveHost(host).rescue {
+            case exc: UnknownHostException =>
+              nextBackoffs match {
+                case nextBackoff #:: restBackoffs =>
+                  log.debug(
+                    s"Caught UnknownHostException resolving host '$host'. Retrying in $nextBackoff..."
+                  )
+                  Future.sleep(nextBackoff)(timer).before(retryingLoad(restBackoffs))
+                case Stream.Empty =>
+                  Future.exception(exc)
+              }
           }
         }
         retryingLoad(backoffs)
@@ -243,8 +261,13 @@ object FixedInetResolver {
  */
 private[finagle] class FixedInetResolver(
   cache: LoadingCache[String, Future[Seq[InetAddress]]],
-  statsReceiver: StatsReceiver)
-  extends InetResolver(CaffeineCache.fromLoadingCache(cache), statsReceiver, None, FuturePool.unboundedPool) {
+  statsReceiver: StatsReceiver
+) extends InetResolver(
+      CaffeineCache.fromLoadingCache(cache),
+      statsReceiver,
+      None,
+      FuturePool.unboundedPool
+    ) {
 
   override val scheme = FixedInetResolver.scheme
 
@@ -252,5 +275,6 @@ private[finagle] class FixedInetResolver(
   private[this] val cacheGauges = Seq(
     cacheStatsReceiver.addGauge("size") { cache.estimatedSize },
     cacheStatsReceiver.addGauge("evicts") { cache.stats().evictionCount },
-    cacheStatsReceiver.addGauge("hit_rate") { cache.stats().hitRate.toFloat })
+    cacheStatsReceiver.addGauge("hit_rate") { cache.stats().hitRate.toFloat }
+  )
 }

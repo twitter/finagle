@@ -8,6 +8,7 @@ import com.twitter.util.Future
  * with varying parameters.
  */
 trait PreparedStatement {
+
   /**
    * Executes the prepared statement with the
    * given `params`.

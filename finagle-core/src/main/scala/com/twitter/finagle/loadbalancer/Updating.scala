@@ -10,6 +10,7 @@ import scala.util.control.NonFatal
  * by observing `endpoints`.
  */
 private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
+
   /**
    * An activity representing the active set of EndpointFactories.
    */
@@ -25,7 +26,8 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] {
     case Activity.Ok(newList) =>
       // We log here for completeness. Since this happens out-of-band
       // of requests, the failures are not easily exposed.
-      try update(newList) catch {
+      try update(newList)
+      catch {
         case NonFatal(exc) =>
           DefaultLogger.log(Level.WARNING, "Failed to update balancer", exc)
       }

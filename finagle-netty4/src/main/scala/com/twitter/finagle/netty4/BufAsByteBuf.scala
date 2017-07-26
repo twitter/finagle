@@ -4,6 +4,7 @@ import com.twitter.io.Buf
 import io.netty.buffer._
 
 private[finagle] object BufAsByteBuf {
+
   /**
    * A read-only and potentially non-copying `ByteBuf` wrapper for [[Buf]].
    */

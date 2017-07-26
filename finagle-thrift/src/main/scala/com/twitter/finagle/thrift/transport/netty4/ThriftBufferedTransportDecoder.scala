@@ -12,7 +12,7 @@ import org.apache.thrift.transport.{TTransport, TTransportException}
  * and measuring the number of bytes that composed the message
  */
 private[netty4] class ThriftBufferedTransportDecoder(
-    protocolFactory: TProtocolFactory
+  protocolFactory: TProtocolFactory
 ) extends ReplayingDecoder[java.lang.Void] {
 
   /**

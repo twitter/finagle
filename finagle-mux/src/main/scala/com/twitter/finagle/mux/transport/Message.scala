@@ -18,6 +18,7 @@ case class BadMessageException(why: String) extends Exception(why)
  * Documentation details are in the [[com.twitter.finagle.mux]] package object.
  */
 private[twitter] sealed trait Message {
+
   /**
    * Values should correspond to the constants defined in
    * [[com.twitter.finagle.mux.Message.Types]]
@@ -34,7 +35,6 @@ private[twitter] sealed trait Message {
 }
 
 private[twitter] object Message {
-
 
   object Types {
 
@@ -78,7 +78,7 @@ private[twitter] object Message {
     // can cache a full ping message and avoid encoding it
     // every time.
     val PingTag = 1
-    val MinTag = PingTag+1
+    val MinTag = PingTag + 1
     val MaxTag = (1 << 23) - 1
     val TagMSB = (1 << 23)
 
@@ -122,11 +122,12 @@ private[twitter] object Message {
       bw.writeShortBE(version)
       iter = headers.iterator
       while (iter.hasNext) {
-        iter.next() match { case (k, v) =>
-          bw.writeIntBE(k.length)
-          bw.writeBytes(k)
-          bw.writeIntBE(v.length)
-          bw.writeBytes(v)
+        iter.next() match {
+          case (k, v) =>
+            bw.writeIntBE(k.length)
+            bw.writeBytes(k)
+            bw.writeIntBE(v.length)
+            bw.writeBytes(v)
         }
       }
       bw.owned()
@@ -144,20 +145,12 @@ private[twitter] object Message {
     }
   }
 
-  case class Tinit(
-      tag: Int,
-      version: Short,
-      headers: Seq[(Buf, Buf)])
-    extends Message {
+  case class Tinit(tag: Int, version: Short, headers: Seq[(Buf, Buf)]) extends Message {
     def typ: Byte = Types.Tinit
     lazy val buf: Buf = Init.encode(version, headers)
   }
 
-  case class Rinit(
-      tag: Int,
-      version: Short,
-      headers: Seq[(Buf, Buf)])
-    extends Message {
+  case class Rinit(tag: Int, version: Short, headers: Seq[(Buf, Buf)]) extends Message {
     def typ: Byte = Types.Rinit
     lazy val buf: Buf = Init.encode(version, headers)
   }
@@ -176,7 +169,7 @@ private[twitter] object Message {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = BufByteWriter.fixed(1+1+1+24+1+1+1)
+          val hd = BufByteWriter.fixed(1 + 1 + 1 + 24 + 1 + 1 + 1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)
@@ -223,13 +216,8 @@ private[twitter] object Message {
 
   private[this] val noBytes = Array.empty[Byte]
 
-  case class Tdispatch(
-      tag: Int,
-      contexts: Seq[(Buf, Buf)],
-      dst: Path,
-      dtab: Dtab,
-      req: Buf)
-    extends Message {
+  case class Tdispatch(tag: Int, contexts: Seq[(Buf, Buf)], dst: Path, dtab: Dtab, req: Buf)
+      extends Message {
     def typ = Types.Tdispatch
     lazy val buf: Buf = {
       // first, compute how large the message header is (in 'n')
@@ -238,8 +226,9 @@ private[twitter] object Message {
       while (iter.hasNext) {
         // Note: here and below we don't use the scala dereferencing sugar of
         // `val (k, v) = seq.head` as that caused unnecessary Tuple2 allocations.
-        iter.next() match { case (k, v) =>
-          n += 2 + k.length + 2 + v.length
+        iter.next() match {
+          case (k, v) =>
+            n += 2 + k.length + 2 + v.length
         }
       }
 
@@ -269,11 +258,12 @@ private[twitter] object Message {
       while (iter.hasNext) {
         // TODO: it may or may not make sense
         // to do zero-copy here.
-        iter.next() match { case (k, v) =>
-          hd.writeShortBE(k.length)
-          hd.writeBytes(k)
-          hd.writeShortBE(v.length)
-          hd.writeBytes(v)
+        iter.next() match {
+          case (k, v) =>
+            hd.writeShortBE(k.length)
+            hd.writeBytes(k)
+            hd.writeShortBE(v.length)
+            hd.writeBytes(v)
         }
       }
 
@@ -283,11 +273,12 @@ private[twitter] object Message {
       hd.writeShortBE(dtab.size)
       dtabidx = 0
       while (dtabidx != dtabbytes.length) {
-        dtabbytes(dtabidx) match { case (srcbytes, treebytes) =>
-          hd.writeShortBE(srcbytes.length)
-          hd.writeBytes(srcbytes)
-          hd.writeShortBE(treebytes.length)
-          hd.writeBytes(treebytes)
+        dtabbytes(dtabidx) match {
+          case (srcbytes, treebytes) =>
+            hd.writeShortBE(srcbytes.length)
+            hd.writeBytes(srcbytes)
+            hd.writeShortBE(treebytes.length)
+            hd.writeBytes(treebytes)
         }
         dtabidx += 1
       }
@@ -297,18 +288,15 @@ private[twitter] object Message {
   }
 
   /** A reply to a `Tdispatch` message */
-  abstract class Rdispatch(
-      status: Byte,
-      contexts: Seq[(Buf, Buf)],
-      body: Buf)
-    extends Message {
+  abstract class Rdispatch(status: Byte, contexts: Seq[(Buf, Buf)], body: Buf) extends Message {
     def typ = Types.Rdispatch
     lazy val buf: Buf = {
-      var n = 1+2
+      var n = 1 + 2
       var iter = contexts.iterator
       while (iter.hasNext) {
-        iter.next() match { case (k, v) =>
-          n += 2+k.length+2+v.length
+        iter.next() match {
+          case (k, v) =>
+            n += 2 + k.length + 2 + v.length
         }
       }
 
@@ -317,11 +305,12 @@ private[twitter] object Message {
       hd.writeShortBE(contexts.length)
       iter = contexts.iterator
       while (iter.hasNext) {
-        iter.next() match { case (k, v) =>
-          hd.writeShortBE(k.length)
-          hd.writeBytes(k)
-          hd.writeShortBE(v.length)
-          hd.writeBytes(v)
+        iter.next() match {
+          case (k, v) =>
+            hd.writeShortBE(k.length)
+            hd.writeBytes(k)
+            hd.writeShortBE(v.length)
+            hd.writeBytes(v)
         }
       }
 
@@ -329,22 +318,14 @@ private[twitter] object Message {
     }
   }
 
-  case class RdispatchOk(
-      tag: Int,
-      contexts: Seq[(Buf, Buf)],
-      reply: Buf)
-    extends Rdispatch(ReplyStatus.Ok, contexts, reply)
+  case class RdispatchOk(tag: Int, contexts: Seq[(Buf, Buf)], reply: Buf)
+      extends Rdispatch(ReplyStatus.Ok, contexts, reply)
 
-  case class RdispatchError(
-      tag: Int,
-      contexts: Seq[(Buf, Buf)],
-      error: String)
-    extends Rdispatch(ReplyStatus.Error, contexts, encodeString(error))
+  case class RdispatchError(tag: Int, contexts: Seq[(Buf, Buf)], error: String)
+      extends Rdispatch(ReplyStatus.Error, contexts, encodeString(error))
 
-  case class RdispatchNack(
-      tag: Int,
-      contexts: Seq[(Buf, Buf)])
-    extends Rdispatch(ReplyStatus.Nack, contexts, Buf.Empty)
+  case class RdispatchNack(tag: Int, contexts: Seq[(Buf, Buf)])
+      extends Rdispatch(ReplyStatus.Nack, contexts, Buf.Empty)
 
   /**
    * A fragment, as defined by the mux spec, is a message with its tag MSB
@@ -390,16 +371,14 @@ private[twitter] object Message {
    * by the client.
    */
   case class Tdiscarded(which: Int, why: String)
-      // Use the old Tdiscarded type in a transition period so that we
-      // can be reasonably sure we remain backwards compatible with
-      // old servers.
+  // Use the old Tdiscarded type in a transition period so that we
+  // can be reasonably sure we remain backwards compatible with
+  // old servers.
       extends MarkerMessage {
     def typ = Types.BAD_Tdiscarded
     lazy val buf: Buf = {
-      val arr = Array[Byte](
-        (which >> 16 & 0xff).toByte,
-        (which >> 8 & 0xff).toByte,
-        (which & 0xff).toByte)
+      val arr =
+        Array[Byte]((which >> 16 & 0xff).toByte, (which >> 8 & 0xff).toByte, (which & 0xff).toByte)
       Buf.ByteArray.Owned(arr).concat(encodeString(why))
     }
   }
@@ -462,7 +441,7 @@ private[twitter] object Message {
 
   def encodeString(str: String): Buf = Buf.Utf8(str)
 
-  private def decodeTreq(tag: Int, br: ByteReader):Treq = {
+  private def decodeTreq(tag: Int, br: ByteReader): Treq = {
     if (br.remaining < 1)
       throwBadMessageException("short Treq")
 
@@ -492,17 +471,19 @@ private[twitter] object Message {
         case Treq.Keys.TraceId =>
           if (vsize != 24)
             throwBadMessageException(s"bad traceid size $vsize")
-          trace3 = Some((
-            SpanId(br.readLongBE()),  // spanId
-            SpanId(br.readLongBE()),  // parentId
-            SpanId(br.readLongBE()))  // traceId
+          trace3 = Some(
+            (
+              SpanId(br.readLongBE()), // spanId
+              SpanId(br.readLongBE()), // parentId
+              SpanId(br.readLongBE())
+            ) // traceId
           )
 
         case Treq.Keys.TraceFlag =>
           // We only know about bit=0, so discard
           // everything but the last byte
           if (vsize > 1)
-            br.readBytes(vsize-1)
+            br.readBytes(vsize - 1)
           if (vsize > 0)
             traceFlags = br.readByte().toLong
 
@@ -555,17 +536,19 @@ private[twitter] object Message {
       else Path.read(decodeUtf8(br.readBytes(ndst)))
 
     val nd = br.readShortBE()
-    val dtab = if (nd == 0) Dtab.empty else {
-      var i = 0
-      val delegations = new Array[Dentry](nd)
-      while (i < nd) {
-        val src = decodeUtf8(br.readBytes(br.readShortBE()))
-        val dst = decodeUtf8(br.readBytes(br.readShortBE()))
-        delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
-        i += 1
+    val dtab =
+      if (nd == 0) Dtab.empty
+      else {
+        var i = 0
+        val delegations = new Array[Dentry](nd)
+        while (i < nd) {
+          val src = decodeUtf8(br.readBytes(br.readShortBE()))
+          val dst = decodeUtf8(br.readBytes(br.readShortBE()))
+          delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
+          i += 1
+        }
+        Dtab(delegations)
       }
-      Dtab(delegations)
-    }
 
     Tdispatch(tag, contexts, dst, dtab, br.readAll())
   }
@@ -584,7 +567,7 @@ private[twitter] object Message {
 
   private def decodeRreq(tag: Int, br: ByteReader) = {
     if (br.remaining < 1)
-    throwBadMessageException("short Rreq")
+      throwBadMessageException("short Rreq")
     val status = br.readByte()
     val rest = br.readAll()
     status match {
@@ -612,7 +595,6 @@ private[twitter] object Message {
     Tlease(unit, howMuch)
   }
 
-
   /**
    * Try to decode a `buf` to [[Message]]. If [[Buf]] is backed
    * by a direct buffer then that buffer will be released after decode.
@@ -638,8 +620,8 @@ private[twitter] object Message {
    * @note may throw a [[Failure]] wrapped [[BadMessageException]]
    */
   def decode(byteReader: ByteReader): Message = {
-    if (byteReader.remaining < 4) throwBadMessageException(
-      "short message: " + Buf.slowHexString(byteReader.readAll()))
+    if (byteReader.remaining < 4)
+      throwBadMessageException("short message: " + Buf.slowHexString(byteReader.readAll()))
     val head = byteReader.readIntBE()
     val typ = Tags.extractType(head)
     val tag = Tags.extractTag(head)
@@ -659,27 +641,29 @@ private[twitter] object Message {
    */
   def decodeMessageBody(typ: Byte, tag: Int, byteReader: ByteReader): Message = {
     if (Tags.isFragment(tag)) Fragment(typ, tag, byteReader.readAll())
-    else typ match {
-      case Types.Tinit =>
-        val (version, ctx) = Init.decode(byteReader)
-        Tinit(tag, version, ctx)
-      case Types.Rinit =>
-        val (version, ctx) = Init.decode(byteReader)
-        Rinit(tag, version, ctx)
-      case Types.Treq => decodeTreq(tag, byteReader)
-      case Types.Rreq => decodeRreq(tag, byteReader)
-      case Types.Tdispatch => decodeTdispatch(tag, byteReader)
-      case Types.Rdispatch => decodeRdispatch(tag, byteReader)
-      case Types.Tdrain => Tdrain(tag)
-      case Types.Rdrain => Rdrain(tag)
-      case Types.Tping => Tping(tag)
-      case Types.Rping => Rping(tag)
-      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(byteReader.readAll()))
-      case Types.Rdiscarded => Rdiscarded(tag)
-      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(byteReader)
-      case Types.Tlease => decodeTlease(byteReader)
-      case unknown => throwBadMessageException(unknownMessageDescription(unknown, tag, byteReader))
-    }
+    else
+      typ match {
+        case Types.Tinit =>
+          val (version, ctx) = Init.decode(byteReader)
+          Tinit(tag, version, ctx)
+        case Types.Rinit =>
+          val (version, ctx) = Init.decode(byteReader)
+          Rinit(tag, version, ctx)
+        case Types.Treq => decodeTreq(tag, byteReader)
+        case Types.Rreq => decodeRreq(tag, byteReader)
+        case Types.Tdispatch => decodeTdispatch(tag, byteReader)
+        case Types.Rdispatch => decodeRdispatch(tag, byteReader)
+        case Types.Tdrain => Tdrain(tag)
+        case Types.Rdrain => Rdrain(tag)
+        case Types.Tping => Tping(tag)
+        case Types.Rping => Rping(tag)
+        case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(byteReader.readAll()))
+        case Types.Rdiscarded => Rdiscarded(tag)
+        case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(byteReader)
+        case Types.Tlease => decodeTlease(byteReader)
+        case unknown =>
+          throwBadMessageException(unknownMessageDescription(unknown, tag, byteReader))
+      }
   }
 
   def encode(msg: Message): Buf = msg match {
@@ -709,8 +693,6 @@ private[twitter] object Message {
     s"unknown message type: $tpe [tag=$tag]. Payload bytes: $remaining. " +
       s"First ${toWrite.length} bytes of the payload: '$bytesStr'"
   }
-
-
 
   /**
    * Safely coerce the Buf to a representation that doesn't hold a reference to unused data.

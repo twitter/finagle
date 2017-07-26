@@ -19,14 +19,14 @@ private[serverset2] trait ClientFactory[T <: ZooKeeperClient] {
 }
 
 private[client] case class ClientConfig(
-    val hosts: String,
-    val sessionTimeout: Duration,
-    val statsReceiver: StatsReceiver,
-    val readOnlyOK: Boolean,
-    val sessionId: Option[Long],
-    val password: Option[Buf],
-    val timer: Timer)
-{
+  val hosts: String,
+  val sessionTimeout: Duration,
+  val statsReceiver: StatsReceiver,
+  val readOnlyOK: Boolean,
+  val sessionId: Option[Long],
+  val password: Option[Buf],
+  val timer: Timer
+) {
   def toMap: Map[String, Any] = Map(
     "hosts" -> hosts,
     "sessionTimeout" -> sessionTimeout,
@@ -38,13 +38,12 @@ private[client] case class ClientConfig(
   )
 
   override def toString = {
-    "ClientConfig(%s)".format(
-      toMap flatMap {
-        case (k, Some(v)) =>
-          Some("%s=%s".format(k, v))
-        case _ =>
-          None
-      } mkString(", "))
+    "ClientConfig(%s)".format(toMap flatMap {
+      case (k, Some(v)) =>
+        Some("%s=%s".format(k, v))
+      case _ =>
+        None
+    } mkString (", "))
   }
 }
 
@@ -87,12 +86,13 @@ private[serverset2] object ClientBuilder {
 }
 
 private[client] class ClientBuilder(config: ClientConfig) {
-  private def resolve[T <: ZooKeeperClient](cap: Capability) = LoadService[ClientFactory[T]]()
+  private def resolve[T <: ZooKeeperClient](cap: Capability) =
+    LoadService[ClientFactory[T]]()
       .filter(_.capabilities.contains(cap))
       .sortBy(_.priority) match {
-    case Seq() => throw new RuntimeException("No ZooKeeper ClientFactory Found")
-    case Seq(f, _*) => f
-  }
+      case Seq() => throw new RuntimeException("No ZooKeeper ClientFactory Found")
+      case Seq(f, _*) => f
+    }
 
   override def toString() = "ClientBuilder(%s)".format(config.toString)
 
@@ -142,7 +142,9 @@ private[client] class ClientBuilder(config: ClientConfig) {
    * @return configured ClientBuilder
    */
   def hosts(zkHosts: Seq[InetSocketAddress]): ClientBuilder =
-    hosts(zkHosts.map { h => "%s:%d,".format(h.getHostName, h.getPort) }.mkString)
+    hosts(zkHosts.map { h =>
+      "%s:%d,".format(h.getHostName, h.getPort)
+    }.mkString)
 
   /**
    * Configure builder with a session timeout.
@@ -200,6 +202,6 @@ private[client] class ClientBuilder(config: ClientConfig) {
    * @param timer Timer to use.
    * @return configured ClientBuilder
    */
-  def timer(timer:Timer): ClientBuilder =
+  def timer(timer: Timer): ClientBuilder =
     withConfig(_.copy(timer = timer))
 }

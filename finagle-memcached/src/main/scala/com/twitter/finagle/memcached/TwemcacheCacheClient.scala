@@ -11,6 +11,7 @@ import scala.collection.breakOut
 
 // Client interface supporting twemcache commands
 trait TwemcacheClient extends Client {
+
   /**
    * Get a set of keys from the server, together with a "version"
    * token.
@@ -57,29 +58,32 @@ trait TwemcacheClient extends Client {
 trait TwemcacheConnectedClient extends TwemcacheClient { self: ConnectedClient =>
   def getvResult(keys: Iterable[String]): Future[GetsResult] = {
     try {
-      if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
-      val bufs =  keys.map { Buf.Utf8(_) }(breakOut)
+      if (keys == null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
+      val bufs = keys.map { Buf.Utf8(_) }(breakOut)
       rawGet(Getv(bufs)).map { GetsResult(_) } // map to GetsResult as the response format are the same
-    }  catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For keys: " + keys))
+    } catch {
+      case t: IllegalArgumentException =>
+        Future.exception(new ClientError(t.getMessage + " For keys: " + keys))
     }
   }
 
   def upsert(key: String, flags: Int, expiry: Time, value: Buf, version: Buf): Future[JBoolean] = {
     try {
       service(Upsert(Buf.Utf8(key), flags, expiry, value, version)).map {
-        case Stored   => true
-        case Exists   => false
+        case Stored => true
+        case Exists => false
         case Error(e) => throw e
-        case _        => throw new IllegalStateException
+        case _ => throw new IllegalStateException
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
+      case t: IllegalArgumentException =>
+        Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 }
 
 object TwemcacheClient {
+
   /**
    * Construct a twemcache client from a single Service, which supports both memcache and twemcache command
    */

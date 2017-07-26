@@ -2,7 +2,12 @@ package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.StatsReceiver
 import java.util.concurrent.atomic.AtomicInteger
-import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent, MessageEvent, SimpleChannelHandler}
+import org.jboss.netty.channel.{
+  ChannelHandlerContext,
+  ChannelStateEvent,
+  MessageEvent,
+  SimpleChannelHandler
+}
 
 /**
  * A channel stats handler that keeps per-connection request
@@ -10,8 +15,7 @@ import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent, Messag
  * stack as it assumes messages are POJOs with request/responses.
  */
 private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
-  extends SimpleChannelHandler
-{
+    extends SimpleChannelHandler {
   private[this] val requestCount = statsReceiver.stat("connection_requests")
 
   override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
@@ -21,7 +25,7 @@ private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     val attachment = ctx.getAttachment()
-    if (attachment != null ) requestCount.add(attachment.asInstanceOf[AtomicInteger].get)
+    if (attachment != null) requestCount.add(attachment.asInstanceOf[AtomicInteger].get)
 
     super.channelClosed(ctx, e)
   }

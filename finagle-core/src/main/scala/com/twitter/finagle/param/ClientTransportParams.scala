@@ -4,8 +4,11 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.ssl.TrustCredentials
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory,
-  SslClientSessionVerifier, SslContextClientEngineFactory}
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier,
+  SslContextClientEngineFactory
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import javax.net.ssl.SSLContext
@@ -18,7 +21,7 @@ import javax.net.ssl.SSLContext
  * @see [[com.twitter.finagle.param.TransportParams]]
  */
 class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
-  extends TransportParams(self) {
+    extends TransportParams(self) {
 
   /**
    * Configures the TCP connection `timeout` of this client (default: 1 second).
@@ -80,8 +83,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
   def tls(hostname: String): A =
     self
-      .configured(Transport.ClientSsl(
-        Some(SslClientConfiguration(hostname = Some(hostname)))))
+      .configured(Transport.ClientSsl(Some(SslClientConfiguration(hostname = Some(hostname)))))
 
   /**
    * Enables SSL/TLS support (connection encrypting) with no hostname validation
@@ -92,8 +94,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
   def tls(context: SSLContext): A =
     self
-      .configured(SslClientEngineFactory.Param(
-        new SslContextClientEngineFactory(context)))
+      .configured(SslClientEngineFactory.Param(new SslContextClientEngineFactory(context)))
       .configured(Transport.ClientSsl(Some(SslClientConfiguration())))
 
   /**
@@ -102,10 +103,8 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
   def tls(context: SSLContext, hostname: String): A =
     self
-      .configured(SslClientEngineFactory.Param(
-        new SslContextClientEngineFactory(context)))
-      .configured(Transport.ClientSsl(
-        Some(SslClientConfiguration(hostname = Some(hostname)))))
+      .configured(SslClientEngineFactory.Param(new SslContextClientEngineFactory(context)))
+      .configured(Transport.ClientSsl(Some(SslClientConfiguration(hostname = Some(hostname)))))
 
   /**
    * Enables the TLS/SSL support (connection encrypting) with no certificate validation
@@ -116,8 +115,10 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
   def tlsWithoutValidation: A = {
     self
-      .configured(Transport.ClientSsl(
-        Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))))
+      .configured(
+        Transport
+          .ClientSsl(Some(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)))
+      )
   }
 
   /**

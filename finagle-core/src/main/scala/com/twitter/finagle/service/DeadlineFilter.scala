@@ -7,7 +7,6 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Future, Duration, Stopwatch, Time, TokenBucket}
 
-
 /**
  * DeadlineFilter provides an admission control module that can be pushed onto the stack to
  * reject requests with expired deadlines (deadlines are set in the TimeoutFilter).
@@ -40,15 +39,17 @@ object DeadlineFilter {
    *        rejected over `rejectPeriod`. Must be between 0.0 and 1.0.
    */
   case class Param(maxRejectFraction: Double) {
-    require(maxRejectFraction >= 0.0 && maxRejectFraction <= 1.0,
-      s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction")
+    require(
+      maxRejectFraction >= 0.0 && maxRejectFraction <= 1.0,
+      s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction"
+    )
 
     def mk(): (Param, Stack.Param[Param]) =
       (this, Param.param)
   }
   object Param {
-    implicit val param: Stack.Param[DeadlineFilter.Param] = Stack.Param(
-      Param(DefaultMaxRejectFraction))
+    implicit val param: Stack.Param[DeadlineFilter.Param] =
+      Stack.Param(Param(DefaultMaxRejectFraction))
   }
 
   /**
@@ -67,17 +68,16 @@ object DeadlineFilter {
       ) = {
         val Param(maxRejectFraction) = _param
 
-        if (maxRejectFraction <= 0.0) next else {
+        if (maxRejectFraction <= 0.0) next
+        else {
           val param.Stats(statsReceiver) = _stats
           val scopedStatsReceiver = statsReceiver.scope("admission_control", "deadline")
 
           new ServiceFactoryProxy[Req, Rep](next) {
 
             private[this] val newDeadlineFilter: Service[Req, Rep] => Service[Req, Rep] = service =>
-              new DeadlineFilter(
-                DefaultRejectPeriod,
-                maxRejectFraction,
-                scopedStatsReceiver).andThen(service)
+              new DeadlineFilter(DefaultRejectPeriod, maxRejectFraction, scopedStatsReceiver)
+                .andThen(service)
 
             override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
               // Create a DeadlineFilter per connection, so we don't share the state of the token
@@ -88,16 +88,18 @@ object DeadlineFilter {
       }
     }
 
-  class DeadlineExceededException private[DeadlineFilter](
-      timestamp: Time,
-      deadline: Time,
-      elapsed: Duration,
-      now: Time,
-      private[finagle] val flags: Long = Failure.NonRetryable | Failure.Rejected)
-    extends Exception(s"exceeded request deadline of ${deadline - timestamp} "
-      + s"by $elapsed. Deadline expired at $deadline and now it is $now.")
-    with FailureFlags[DeadlineExceededException]
-    with HasLogLevel {
+  class DeadlineExceededException private[DeadlineFilter] (
+    timestamp: Time,
+    deadline: Time,
+    elapsed: Duration,
+    now: Time,
+    private[finagle] val flags: Long = Failure.NonRetryable | Failure.Rejected
+  ) extends Exception(
+        s"exceeded request deadline of ${deadline - timestamp} "
+          + s"by $elapsed. Deadline expired at $deadline and now it is $now."
+      )
+      with FailureFlags[DeadlineExceededException]
+      with HasLogLevel {
     def logLevel: Level = Level.DEBUG
     protected def copyWithFlags(flags: Long): DeadlineExceededException =
       new DeadlineExceededException(timestamp, deadline, elapsed, now, flags)
@@ -119,17 +121,21 @@ object DeadlineFilter {
  *      for more details.
  */
 private[finagle] class DeadlineFilter[Req, Rep](
-    rejectPeriod: Duration,
-    maxRejectFraction: Double,
-    statsReceiver: StatsReceiver,
-    nowMillis: () => Long = Stopwatch.systemMillis)
-  extends SimpleFilter[Req, Rep] {
+  rejectPeriod: Duration,
+  maxRejectFraction: Double,
+  statsReceiver: StatsReceiver,
+  nowMillis: () => Long = Stopwatch.systemMillis
+) extends SimpleFilter[Req, Rep] {
   import DeadlineFilter.DeadlineExceededException
 
-  require(rejectPeriod.inSeconds >= 1 && rejectPeriod.inSeconds <= 60,
-    s"rejectPeriod must be [1 second, 60 seconds]: $rejectPeriod")
-  require(maxRejectFraction <= 1.0,
-    s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction")
+  require(
+    rejectPeriod.inSeconds >= 1 && rejectPeriod.inSeconds <= 60,
+    s"rejectPeriod must be [1 second, 60 seconds]: $rejectPeriod"
+  )
+  require(
+    maxRejectFraction <= 1.0,
+    s"maxRejectFraction must be between 0.0 and 1.0: $maxRejectFraction"
+  )
 
   private[this] val exceededStat = statsReceiver.counter("exceeded")
   private[this] val rejectedStat = statsReceiver.counter("rejected")
@@ -140,8 +146,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
   private[this] val rejectWithdrawal =
     (DeadlineFilter.RejectBucketScaleFactor / maxRejectFraction).toInt
 
-  private[this] val rejectBucket = TokenBucket.newLeakyBucket(
-    rejectPeriod, 0, nowMillis)
+  private[this] val rejectBucket = TokenBucket.newLeakyBucket(rejectPeriod, 0, nowMillis)
 
   // The request is rejected if the set deadline has expired and there are at least
   // `rejectWithdrawal` tokens in `rejectBucket`. Otherwise, the request is

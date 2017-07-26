@@ -91,8 +91,7 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      newScopedBal(sr, "p2c_least_loaded",
-        new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc))
+      newScopedBal(sr, "p2c_least_loaded", new P2CLeastLoaded(endpoints, maxEffort, rng, sr, exc))
     }
   }
 
@@ -134,8 +133,11 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      newScopedBal(sr, "p2c_peak_ewma",
-        new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, maxEffort, rng, sr, exc))
+      newScopedBal(
+        sr,
+        "p2c_peak_ewma",
+        new P2CPeakEwma(endpoints, decayTime, Stopwatch.systemNanos, maxEffort, rng, sr, exc)
+      )
     }
   }
 
@@ -155,8 +157,7 @@ object Balancers {
         params: Stack.Params
       ): ServiceFactory[Req, Rep] = {
         val sr = params[param.Stats].statsReceiver
-        newScopedBal(sr, "heap_least_loaded",
-          new HeapLeastLoaded(endpoints, sr, exc, rng))
+        newScopedBal(sr, "heap_least_loaded", new HeapLeastLoaded(endpoints, sr, exc, rng))
       }
     }
 
@@ -236,9 +237,24 @@ object Balancers {
       val sr = params[param.Stats].statsReceiver
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
-      newScopedBal(sr, "aperture_least_loaded",
-        new ApertureLeastLoaded(endpoints, smoothWin, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, label, timer, exc, useDeterministicOrdering))
+      newScopedBal(
+        sr,
+        "aperture_least_loaded",
+        new ApertureLeastLoaded(
+          endpoints,
+          smoothWin,
+          lowLoad,
+          highLoad,
+          minAperture,
+          maxEffort,
+          rng,
+          sr,
+          label,
+          timer,
+          exc,
+          useDeterministicOrdering
+        )
+      )
     }
   }
 
@@ -311,9 +327,26 @@ object Balancers {
       val sr = params[param.Stats].statsReceiver
       val timer = params[param.Timer].timer
       val label = params[param.Label].label
-      newScopedBal(sr, "aperture_peak_ewma",
-        new AperturePeakEwma(endpoints, smoothWin, smoothWin, Stopwatch.systemNanos, lowLoad,
-          highLoad, minAperture, maxEffort, rng, sr, label, timer, exc, useDeterministicOrdering))
+      newScopedBal(
+        sr,
+        "aperture_peak_ewma",
+        new AperturePeakEwma(
+          endpoints,
+          smoothWin,
+          smoothWin,
+          Stopwatch.systemNanos,
+          lowLoad,
+          highLoad,
+          minAperture,
+          maxEffort,
+          rng,
+          sr,
+          label,
+          timer,
+          exc,
+          useDeterministicOrdering
+        )
+      )
     }
   }
 
@@ -340,8 +373,7 @@ object Balancers {
       params: Stack.Params
     ): ServiceFactory[Req, Rep] = {
       val sr = params[param.Stats].statsReceiver
-      newScopedBal(sr, "round_robin",
-        new RoundRobinBalancer(endpoints, sr, exc, maxEffort))
+      newScopedBal(sr, "round_robin", new RoundRobinBalancer(endpoints, sr, exc, maxEffort))
     }
   }
 }

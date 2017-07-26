@@ -24,7 +24,6 @@ object Flags {
    *
    *  Finagle will never mutate extension flags, so it's safe to set your own extension flags.
    */
-
   /*
    * The debug flag is used to ensure this the current trace passes
    * all of the sampling stages.

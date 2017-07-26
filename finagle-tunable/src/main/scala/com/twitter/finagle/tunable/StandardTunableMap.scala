@@ -1,6 +1,11 @@
 package com.twitter.finagle.tunable
 
-import com.twitter.util.tunable.{NullTunableMap, JsonTunableMapper, ServiceLoadedTunableMap, TunableMap}
+import com.twitter.util.tunable.{
+  NullTunableMap,
+  JsonTunableMapper,
+  ServiceLoadedTunableMap,
+  TunableMap
+}
 import com.twitter.finagle.server.ServerInfo
 
 import java.util.concurrent.ConcurrentHashMap
@@ -68,11 +73,12 @@ private[twitter] object StandardTunableMap {
     val environmentOpt = serverInfo.environment
     val instanceIdOpt = serverInfo.instanceId
 
-    val paths = JsonTunableMapper.pathsByPriority(
-      s"com/twitter/tunables/$id/", environmentOpt, instanceIdOpt)
+    val paths =
+      JsonTunableMapper.pathsByPriority(s"com/twitter/tunables/$id/", environmentOpt, instanceIdOpt)
 
-    paths.foldLeft(NullTunableMap: TunableMap) { case (map, path) =>
-      map.orElse(JsonTunableMapper().loadJsonTunables(id, path))
+    paths.foldLeft(NullTunableMap: TunableMap) {
+      case (map, path) =>
+        map.orElse(JsonTunableMapper().loadJsonTunables(id, path))
     }
   }
 }

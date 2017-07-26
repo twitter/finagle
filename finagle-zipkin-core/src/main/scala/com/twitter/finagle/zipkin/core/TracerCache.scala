@@ -23,7 +23,7 @@ private[zipkin] class TracerCache[T <: RawZipkinTracer] {
     setName("RawZipkinTracer-ShutdownHook")
     override def run() {
       val tracers = synchronized(map.values.toSeq)
-      val joined = Future.join(tracers map(_.flush()))
+      val joined = Future.join(tracers map (_.flush()))
       try {
         Await.result(joined, 100.milliseconds)
       } catch {

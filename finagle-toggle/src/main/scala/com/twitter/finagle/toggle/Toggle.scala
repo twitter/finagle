@@ -12,9 +12,8 @@ package com.twitter.finagle.toggle
  *      for detailed discussion on the topic.
  * @see [[ToggleMap]]
  */
-abstract class Toggle[-T](
-    private[toggle] val id: String)
-  extends PartialFunction[T, Boolean] { self =>
+abstract class Toggle[-T](private[toggle] val id: String) extends PartialFunction[T, Boolean] {
+  self =>
 
   Toggle.validateId(id)
 
@@ -55,11 +54,7 @@ object Toggle {
    * @param source the origin of this [[Toggle]] which is often given by
    *               `toString` of the [[ToggleMap]] that created it.
    */
-  case class Metadata(
-      id: String,
-      fraction: Double,
-      description: Option[String],
-      source: String) {
+  case class Metadata(id: String, fraction: Double, description: Option[String], source: String) {
     validateId(id)
     validateFraction(id, fraction)
     validateDescription(id, description)
@@ -74,6 +69,7 @@ object Toggle {
    * @see [[ToggleMap.observed]]
    */
   trait Captured {
+
     /**
      * `None` if no calls to [[Toggle.apply]] have been made.
      */
@@ -84,6 +80,7 @@ object Toggle {
    * Namespace for methods that operate on `Toggle.Fractional`
    */
   object Fractional {
+
     /**
      * A [[Toggle]] whose fraction is the minimum of that of `a` and `b`.
      *
@@ -93,8 +90,10 @@ object Toggle {
       a: Toggle.Fractional[T],
       b: Toggle.Fractional[T]
     ): Toggle.Fractional[T] =
-      if (a.id != b.id) throw new IllegalArgumentException(
-        s"Cannot combine Toggles using Toggle.minOf when ids do not match: ${a.id}, ${b.id}")
+      if (a.id != b.id)
+        throw new IllegalArgumentException(
+          s"Cannot combine Toggles using Toggle.minOf when ids do not match: ${a.id}, ${b.id}"
+        )
       else
         new Toggle.Fractional[T](a.id) {
 
@@ -142,7 +141,8 @@ object Toggle {
   private[toggle] def validateFraction(id: String, f: Double): Unit = {
     if (!isValidFraction(f))
       throw new IllegalArgumentException(
-        s"fraction for $id must be between 0.0 and 1.0 inclusive: $f")
+        s"fraction for $id must be between 0.0 and 1.0 inclusive: $f"
+      )
   }
 
   private[this] def validateDescription(id: String, desc: Option[String]): Unit = {
@@ -150,8 +150,7 @@ object Toggle {
       case None =>
       case Some(d) =>
         if (d.trim.isEmpty)
-          throw new IllegalArgumentException(
-            s"description for $id must not be empty: '$d'")
+          throw new IllegalArgumentException(s"description for $id must not be empty: '$d'")
     }
   }
 
@@ -216,8 +215,7 @@ object Toggle {
     def currentFraction: Double = fraction
   }
 
-  private[this] val AlwaysTrue: PartialFunction[Any, Boolean] =
-    { case _ => true }
+  private[this] val AlwaysTrue: PartialFunction[Any, Boolean] = { case _ => true }
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `true`.
@@ -225,8 +223,7 @@ object Toggle {
   def on[T](id: String): Toggle.Fractional[T] =
     apply(id, AlwaysTrue, 1.0)
 
-  private[this] val AlwaysFalse: PartialFunction[Any, Boolean] =
-    { case _ => false }
+  private[this] val AlwaysFalse: PartialFunction[Any, Boolean] = { case _ => false }
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `false`.

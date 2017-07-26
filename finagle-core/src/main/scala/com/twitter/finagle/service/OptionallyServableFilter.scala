@@ -9,9 +9,7 @@ import com.twitter.util.Future
  * cases where the function returns false, a the filter fails with a
  * [[com.twitter.finagle.NotServableException]].
  */
-class OptionallyServableFilter[Req, Rep](f: Req => Future[Boolean])
-  extends SimpleFilter[Req, Rep]
-{
+class OptionallyServableFilter[Req, Rep](f: Req => Future[Boolean]) extends SimpleFilter[Req, Rep] {
   private[this] val notServableException = new NotServableException
 
   def apply(req: Req, service: Service[Req, Rep]) = {

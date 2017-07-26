@@ -102,7 +102,6 @@ private[memcached] trait Framer extends FinagleFramer {
           frameBuf
         }
       case AwaitingDataFrame(bytesNeeded) =>
-
         // A data frame ends with `\r\n', so we must wait for `bytesNeeded + 2` bytes.
         if (accum.length >= bytesNeeded + 2) {
 
@@ -110,7 +109,7 @@ private[memcached] trait Framer extends FinagleFramer {
           val frameBuf: Buf = accum.slice(0, bytesNeeded)
 
           // Remove the extracted frame from the accumulator, stripping the newline (2 chars)
-          accum = accum.slice(bytesNeeded + 2 , accum.length)
+          accum = accum.slice(bytesNeeded + 2, accum.length)
           state = AwaitingTextFrame
           frameBuf
         } else {

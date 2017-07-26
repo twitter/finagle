@@ -18,6 +18,7 @@ import com.twitter.util.{Duration, Stopwatch, TokenBucket}
  * [[com.twitter.finagle.Filter Filters]].
  */
 trait RetryBudget {
+
   /**
    * Indicates a deposit, or credit, which will typically
    * permit future withdrawals.
@@ -65,8 +66,8 @@ object RetryBudget {
     def balance: Long = 100L
   }
 
-
   private object TokenRetryBudget {
+
     /**
      * This scaling factor allows for `percentCanRetry` > 1 without
      * having to use floating points (as the underlying mechanism
@@ -76,11 +77,10 @@ object RetryBudget {
   }
 
   private class TokenRetryBudget(
-      tokenBucket: TokenBucket,
-      depositAmount: Int,
-      withdrawalAmount: Int)
-    extends RetryBudget
-  {
+    tokenBucket: TokenBucket,
+    depositAmount: Int,
+    withdrawalAmount: Int
+  ) extends RetryBudget {
     def deposit(): Unit =
       tokenBucket.put(depositAmount)
 
@@ -141,14 +141,13 @@ object RetryBudget {
     percentCanRetry: Double,
     nowMillis: () => Long = Stopwatch.systemMillis
   ): RetryBudget = {
-    require(ttl.inSeconds >= 1 && ttl.inSeconds <= 60,
-      s"ttl must be [1 second, 60 seconds]: $ttl")
-    require(minRetriesPerSec >= 0,
-      s"minRetriesPerSec must be non-negative: $minRetriesPerSec")
-    require(percentCanRetry >= 0.0,
-      s"percentCanRetry must be non-negative: $percentCanRetry")
-    require(percentCanRetry <= TokenRetryBudget.ScaleFactor,
-      s"percentCanRetry must not be greater than ${TokenRetryBudget.ScaleFactor}: $percentCanRetry")
+    require(ttl.inSeconds >= 1 && ttl.inSeconds <= 60, s"ttl must be [1 second, 60 seconds]: $ttl")
+    require(minRetriesPerSec >= 0, s"minRetriesPerSec must be non-negative: $minRetriesPerSec")
+    require(percentCanRetry >= 0.0, s"percentCanRetry must be non-negative: $percentCanRetry")
+    require(
+      percentCanRetry <= TokenRetryBudget.ScaleFactor,
+      s"percentCanRetry must not be greater than ${TokenRetryBudget.ScaleFactor}: $percentCanRetry"
+    )
 
     if (minRetriesPerSec == 0 && percentCanRetry == 0.0)
       return Empty

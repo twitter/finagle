@@ -21,10 +21,11 @@ class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
       case _ => Level.SEVERE
     }
     val unrolled = unrollCauses(exc)
-    val msg = if (unrolled.isEmpty)
-      s"The '$which' service threw an exception"
-    else
-      s"The '$which' service ${unrolled.mkString(" on behalf of ")} threw an exception"
+    val msg =
+      if (unrolled.isEmpty)
+        s"The '$which' service threw an exception"
+      else
+        s"The '$which' service ${unrolled.mkString(" on behalf of ")} threw an exception"
 
     logger.log(level, msg, exc)
     false
@@ -34,10 +35,11 @@ class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
   private[this] def unrollCauses(exc: Throwable, res: Seq[String] = Nil): Seq[String] = exc match {
     case null => res.reverse
     case se: SourcedException => unrollCauses(se.getCause, se.serviceName +: res)
-    case fail: Failure => fail.getSource(Failure.Source.Service) match {
-      case Some(name) => unrollCauses(fail.getCause, name.toString +: res)
-      case _ => unrollCauses(fail.getCause, res)
-    }
+    case fail: Failure =>
+      fail.getSource(Failure.Source.Service) match {
+        case Some(name) => unrollCauses(fail.getCause, name.toString +: res)
+        case _ => unrollCauses(fail.getCause, res)
+      }
     case _ => unrollCauses(exc.getCause, res)
   }
 }

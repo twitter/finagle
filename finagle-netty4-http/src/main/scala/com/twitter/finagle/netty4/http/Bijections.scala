@@ -25,7 +25,6 @@ private[finagle] object Bijections {
     def statusToFinagle(s: NettyHttp.HttpResponseStatus): FinagleHttp.Status =
       FinagleHttp.Status.fromCode(s.code)
 
-
     def chunkedRequestToFinagle(
       in: NettyHttp.HttpRequest,
       r: Reader,
@@ -68,7 +67,10 @@ private[finagle] object Bijections {
       result
     }
 
-    private[http] def writeNettyHeadersToFinagle(head: NettyHttp.HttpHeaders, out: HeaderMap): Unit = {
+    private[http] def writeNettyHeadersToFinagle(
+      head: NettyHttp.HttpHeaders,
+      out: HeaderMap
+    ): Unit = {
       val itr = head.iteratorAsString()
       while (itr.hasNext) {
         val entry = itr.next()
@@ -114,9 +116,10 @@ private[finagle] object Bijections {
         // We don't want to validate headers here since they are already validated
         // by Netty 3 DefaultHttpHeaders. This not only allows us to be efficient
         // but also preserves the behavior of Netty 3.
-        val result = new NettyHttp.DefaultHttpHeaders(false/*validate headers*/)
-        h.foreach { case (k,v) =>
-          result.add(k, v)
+        val result = new NettyHttp.DefaultHttpHeaders(false /*validate headers*/ )
+        h.foreach {
+          case (k, v) =>
+            result.add(k, v)
         }
         result
     }
@@ -161,12 +164,11 @@ private[finagle] object Bijections {
         // Content-Length set. This mimics Netty 3 behavior, wherein a request can be "chunked"
         // and not have a "Transfer-Encoding: chunked" header (instead, it has a Content-Length).
         if (!r.headerMap.contains(Fields.ContentLength)) {
-          result.headers.add(
-            NettyHttp.HttpHeaderNames.TRANSFER_ENCODING, NettyHttp.HttpHeaderValues.CHUNKED)
+          result.headers
+            .add(NettyHttp.HttpHeaderNames.TRANSFER_ENCODING, NettyHttp.HttpHeaderValues.CHUNKED)
         }
         result
-      }
-      else {
+      } else {
         new NettyHttp.DefaultFullHttpRequest(
           versionToNetty(r.version),
           methodToNetty(r.method),

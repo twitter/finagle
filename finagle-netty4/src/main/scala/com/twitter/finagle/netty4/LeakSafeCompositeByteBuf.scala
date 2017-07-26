@@ -8,13 +8,17 @@ private[netty4] object LeakSafeCompositeByteBuf {
   // PooledByteBuf is protected so we have to reflect
   val pooledClass = Class.forName("io.netty.buffer.PooledByteBuf")
 }
+
 /**
  * A `CompositeByteBuf` instance which only accepts on-heap and unpooled ByteBuf components. For
  * use in conjunction with [[LeakDetectingAllocator]] strictly for correctness testing. No attempt
  * for performance optimization has been made so use in production at your own risk.
  */
-private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: Boolean, maxNumComponents: Int)
-  extends CompositeByteBuf(alloc, direct, maxNumComponents) {
+private[netty4] class LeakSafeCompositeByteBuf(
+  alloc: ByteBufAllocator,
+  direct: Boolean,
+  maxNumComponents: Int
+) extends CompositeByteBuf(alloc, direct, maxNumComponents) {
   import LeakSafeCompositeByteBuf.pooledClass
 
   val isDirectOrPooled: ByteBuf => Boolean = { buf =>
@@ -22,12 +26,14 @@ private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: 
   }
 
   override def addComponents(buffers: ByteBuf*): CompositeByteBuf = {
-    if (buffers.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(buffers: _*)
   }
 
   override def addComponents(buffers: Iterable[ByteBuf]): CompositeByteBuf = {
-    if (buffers.asScala.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.asScala.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(buffers)
   }
 
@@ -35,7 +41,8 @@ private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: 
     increaseWriterIndex: Boolean,
     buffers: ByteBuf*
   ): CompositeByteBuf = {
-    if (buffers.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(increaseWriterIndex, buffers: _*)
   }
 
@@ -43,7 +50,8 @@ private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: 
     increaseWriterIndex: Boolean,
     buffers: Iterable[ByteBuf]
   ): CompositeByteBuf = {
-    if (buffers.asScala.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.asScala.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(increaseWriterIndex, buffers)
   }
 
@@ -51,7 +59,8 @@ private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: 
     cIndex: Int,
     buffers: ByteBuf*
   ): CompositeByteBuf = {
-    if (buffers.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(cIndex, buffers: _*)
   }
 
@@ -59,7 +68,8 @@ private[netty4] class LeakSafeCompositeByteBuf(alloc: ByteBufAllocator, direct: 
     cIndex: Int,
     buffers: Iterable[ByteBuf]
   ): CompositeByteBuf = {
-    if (buffers.asScala.exists(isDirectOrPooled)) throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
+    if (buffers.asScala.exists(isDirectOrPooled))
+      throw new IllegalArgumentException("no direct or pooled byte buffers permitted")
     super.addComponents(cIndex, buffers)
   }
 }

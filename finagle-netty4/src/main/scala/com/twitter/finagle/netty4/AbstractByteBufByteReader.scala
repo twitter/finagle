@@ -185,7 +185,6 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
 
   final def readAll(): Buf = readBytes(remaining)
 
-
   final def close(): Unit = {
     if (!closed) {
       closed = true
@@ -196,6 +195,7 @@ private[netty4] abstract class AbstractByteBufByteReader(bb: ByteBuf) extends By
   final protected def checkRemaining(needed: Int): Unit =
     if (remaining < needed) {
       throw new UnderflowException(
-        s"tried to read $needed byte(s) when remaining bytes was $remaining")
+        s"tried to read $needed byte(s) when remaining bytes was $remaining"
+      )
     }
 }

@@ -15,8 +15,8 @@ import scala.collection.JavaConverters._
  * Use `getAll()` to get all values for a key.
  */
 abstract class ParamMap
-  extends immutable.Map[String, String]
-  with immutable.MapLike[String, String, ParamMap] {
+    extends immutable.Map[String, String]
+    with immutable.MapLike[String, String, ParamMap] {
 
   /**
    * Add a key/value pair to the map, returning a new map.
@@ -113,19 +113,17 @@ abstract class ParamMap
 
   override def toString: String = {
     val encoder = new QueryStringEncoder("", Charset.forName("utf-8"))
-    iterator.foreach { case (k, v) =>
-      encoder.addParam(k, v)
+    iterator.foreach {
+      case (k, v) =>
+        encoder.addParam(k, v)
     }
     encoder.toString
   }
 }
 
-
 /** Map-backed ParamMap. */
-class MapParamMap(
-    underlying: Map[String, Seq[String]],
-    val isValid: Boolean = true)
-  extends ParamMap {
+class MapParamMap(underlying: Map[String, Seq[String]], val isValid: Boolean = true)
+    extends ParamMap {
 
   def get(name: String): Option[String] =
     underlying.get(name) match {
@@ -137,8 +135,7 @@ class MapParamMap(
     underlying.getOrElse(name, Nil)
 
   def iterator: Iterator[(String, String)] = {
-    for ((k, vs) <- underlying.iterator; v <- vs) yield
-      (k, v)
+    for ((k, vs) <- underlying.iterator; v <- vs) yield (k, v)
   }
 
   override def keySet: Set[String] =
@@ -148,23 +145,25 @@ class MapParamMap(
     underlying.keysIterator
 }
 
-
 object MapParamMap {
   def apply(params: Tuple2[String, String]*): MapParamMap =
     new MapParamMap(MapParamMap.tuplesToMultiMap(params))
 
   def apply(map: Map[String, String]): MapParamMap =
-    new MapParamMap(map.mapValues { value => Seq(value) })
+    new MapParamMap(map.mapValues { value =>
+      Seq(value)
+    })
 
   private[http] def tuplesToMultiMap(
     tuples: Seq[Tuple2[String, String]]
   ): Map[String, Seq[String]] = {
     tuples
       .groupBy { case (k, v) => k }
-      .mapValues { values => values.map { _._2 } }
+      .mapValues { values =>
+        values.map { _._2 }
+      }
   }
 }
-
 
 /** Empty ParamMap */
 object EmptyParamMap extends ParamMap {
@@ -191,8 +190,8 @@ class RequestParamMap(val request: Request) extends ParamMap {
 
   private[this] val postParams: JMap[String, JList[String]] = {
     if (request.method != Method.Trace &&
-        request.mediaType.contains(MediaType.WwwForm) &&
-        request.length > 0) {
+      request.mediaType.contains(MediaType.WwwForm) &&
+      request.length > 0) {
       parseParams("?" + request.contentString)
     } else {
       ParamMap.EmptyJMap
@@ -219,7 +218,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
   /** Get value */
   def get(name: String): Option[String] =
     jget(postParams, name) match {
-      case None  => jget(getParams, name)
+      case None => jget(getParams, name)
       case value => value
     }
 
@@ -261,8 +260,8 @@ class RequestParamMap(val request: Request) extends ParamMap {
     }.toIterator
 }
 
-
 object ParamMap {
+
   /** Create ParamMap from parameter list. */
   def apply(params: Tuple2[String, String]*): ParamMap =
     MapParamMap(params: _*)
@@ -273,8 +272,16 @@ object ParamMap {
 
   private[http] val EmptyJMap = new java.util.HashMap[String, JList[String]]
 
-  private val ToShort = { s: String => StringUtil.toSomeShort(s) }
-  private val ToInt = { s: String => StringUtil.toSomeInt(s) }
-  private val ToLong = { s: String => StringUtil.toSomeLong(s) }
-  private val ToBoolean = { s: String => StringUtil.toBoolean(s) }
+  private val ToShort = { s: String =>
+    StringUtil.toSomeShort(s)
+  }
+  private val ToInt = { s: String =>
+    StringUtil.toSomeInt(s)
+  }
+  private val ToLong = { s: String =>
+    StringUtil.toSomeLong(s)
+  }
+  private val ToBoolean = { s: String =>
+    StringUtil.toBoolean(s)
+  }
 }

@@ -13,16 +13,18 @@ import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 
-object maxReusableBufferSize extends GlobalFlag[StorageUnit](
-  16.kilobytes,
-  "Max size (bytes) for ThriftServiceIface reusable transport buffer"
-)
+object maxReusableBufferSize
+    extends GlobalFlag[StorageUnit](
+      16.kilobytes,
+      "Max size (bytes) for ThriftServiceIface reusable transport buffer"
+    )
 
 /**
  * Typeclass ServiceIfaceBuilder[T] creates T-typed interfaces from thrift clients.
  * Scrooge generates implementations of this builder.
  */
 trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceIface]] {
+
   /**
    * Build a client ServiceIface wrapping a binary thrift service.
    *
@@ -52,6 +54,7 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
  * Scrooge generates implementations of this builder.
  */
 trait MethodIfaceBuilder[ServiceIface, MethodIface] {
+
   /**
    * Build a FutureIface wrapping a ServiceIface.
    */
@@ -64,14 +67,16 @@ object ThriftMethodStats {
       stats.counter("requests"),
       stats.counter("success"),
       stats.counter("failures"),
-      stats.scope("failures"))
+      stats.scope("failures")
+    )
 }
 
 case class ThriftMethodStats(
   requestsCounter: Counter,
   successCounter: Counter,
   failuresCounter: Counter,
-  failuresScope: StatsReceiver)
+  failuresScope: StatsReceiver
+)
 
 /**
  * Construct Service interface for a Thrift method.
@@ -139,6 +144,7 @@ object ThriftServiceIface {
    * of a `ServiceIface`.
    */
   trait Filterable[T] {
+
     /**
      * Prepend the given type-agnostic [[Filter]].
      */
@@ -162,9 +168,8 @@ object ThriftServiceIface {
       ): Future[method.SuccessType] = {
         methodStats.requestsCounter.incr()
         service(args).respond { response =>
-          val responseClass = responseClassifier.applyOrElse(
-            ReqRep(args, response),
-            ResponseClassifier.Default)
+          val responseClass =
+            responseClassifier.applyOrElse(ReqRep(args, response), ResponseClassifier.Default)
           responseClass match {
             case ResponseClass.Successful(_) =>
               methodStats.successCounter.incr()
@@ -194,13 +199,17 @@ object ThriftServiceIface {
         val result: method.Result = decodeResponse(bytes, method.responseCodec, pf)
         result.successField match {
           case Some(v) => Return(v)
-          case None => result.firstException() match {
-            case Some(ex) => Throw(ex)
-            case None =>
-              Throw(new TApplicationException(
-                TApplicationException.MISSING_RESULT,
-                s"Thrift method '${method.name}' failed: missing result"))
-          }
+          case None =>
+            result.firstException() match {
+              case Some(ex) => Throw(ex)
+              case None =>
+                Throw(
+                  new TApplicationException(
+                    TApplicationException.MISSING_RESULT,
+                    s"Thrift method '${method.name}' failed: missing result"
+                  )
+                )
+            }
         }
       }
 
@@ -232,10 +241,12 @@ object ThriftServiceIface {
               case Some(result) =>
                 Future.value(result)
               case None =>
-                Future.exception(new TApplicationException(
-                  TApplicationException.MISSING_RESULT,
-                  s"Thrift method '${method.name}' failed: missing result"
-                ))
+                Future.exception(
+                  new TApplicationException(
+                    TApplicationException.MISSING_RESULT,
+                    s"Thrift method '${method.name}' failed: missing result"
+                  )
+                )
             }
         }
       }

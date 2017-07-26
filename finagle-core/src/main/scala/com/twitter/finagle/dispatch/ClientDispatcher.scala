@@ -14,9 +14,9 @@ import java.net.InetSocketAddress
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
 abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
-    trans: Transport[In, Out],
-    statsReceiver: StatsReceiver)
-  extends Service[Req, Rep] {
+  trans: Transport[In, Out],
+  statsReceiver: StatsReceiver
+) extends Service[Req, Rep] {
 
   def this(trans: Transport[In, Out]) =
     this(trans, NullStatsReceiver)
@@ -32,7 +32,6 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
     case ia: InetSocketAddress => ia
     case _ => new InetSocketAddress(0)
   }
-
 
   // satisfy pending requests on transport close
   trans.onClose.respond { res =>
@@ -66,9 +65,10 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
       case None =>
         Trace.recordClientAddr(localAddress)
 
-        p.setInterruptHandler { case intr =>
-          if (p.updateIfEmpty(Throw(intr)))
-            trans.close()
+        p.setInterruptHandler {
+          case intr =>
+            if (p.updateIfEmpty(Throw(intr)))
+              trans.close()
         }
 
         dispatch(req, p)
@@ -80,13 +80,13 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
     semaphore.acquire().respond {
       case Return(permit) =>
         tryDispatch(req, p).respond {
-          case t@Throw(_) =>
+          case t @ Throw(_) =>
             p.updateIfEmpty(t.cast[Rep])
             permit.release()
           case Return(_) =>
             permit.release()
         }
-      case t@Throw(_) =>
+      case t @ Throw(_) =>
         p.update(t.cast[Rep])
     }
 
@@ -110,12 +110,8 @@ object GenSerialClientDispatcher {
 /**
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-class SerialClientDispatcher[Req, Rep](
-    trans: Transport[Req, Rep],
-    statsReceiver: StatsReceiver)
-  extends GenSerialClientDispatcher[Req, Rep, Req, Rep](
-    trans,
-    statsReceiver) {
+class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep], statsReceiver: StatsReceiver)
+    extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans, statsReceiver) {
 
   import GenSerialClientDispatcher.wrapWriteException
 
@@ -125,7 +121,8 @@ class SerialClientDispatcher[Req, Rep](
   private[this] val readTheTransport: Unit => Future[Rep] = _ => trans.read()
 
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    trans.write(req)
+    trans
+      .write(req)
       .rescue(wrapWriteException)
       .flatMap(readTheTransport)
       .respond(rep => p.updateIfEmpty(rep))

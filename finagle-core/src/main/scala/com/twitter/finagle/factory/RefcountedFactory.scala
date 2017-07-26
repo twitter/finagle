@@ -13,9 +13,8 @@ import com.twitter.util.Future
  * In essence, this factory is used to guarantee that services delay closure
  * until all outstanding requests have been completed.
  */
-private[finagle] class RefcountedFactory[Req, Rep](
-    underlying: ServiceFactory[Req, Rep])
-  extends ServiceFactoryProxy(underlying) {
+private[finagle] class RefcountedFactory[Req, Rep](underlying: ServiceFactory[Req, Rep])
+    extends ServiceFactoryProxy(underlying) {
 
   private[this] val refCountedSvc: Service[Req, Rep] => Service[Req, Rep] =
     svc => new RefcountedService(svc)

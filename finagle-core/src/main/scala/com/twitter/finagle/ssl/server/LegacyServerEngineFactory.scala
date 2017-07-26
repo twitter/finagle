@@ -50,11 +50,11 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
    */
   def apply(config: SslServerConfiguration): Engine = {
     SslConfigurations.checkTrustCredentialsNotSupported(
-      "LegacyServerEngineFactory", config.trustCredentials)
-    SslConfigurations.checkProtocolsNotSupported(
-      "LegacyServerEngineFactory", config.protocols)
-    SslConfigurations.checkClientAuthNotSupported(
-      "LegacyServerEngineFactory", config.clientAuth)
+      "LegacyServerEngineFactory",
+      config.trustCredentials
+    )
+    SslConfigurations.checkProtocolsNotSupported("LegacyServerEngineFactory", config.protocols)
+    SslConfigurations.checkClientAuthNotSupported("LegacyServerEngineFactory", config.clientAuth)
 
     val cipherSuites: Option[String] = cipherSuitesToString(config.cipherSuites)
     val appProtos: Option[String] = applicationProtocolsToString(config.applicationProtocols)
@@ -62,13 +62,25 @@ object LegacyServerEngineFactory extends SslServerEngineFactory {
     val engine = config.keyCredentials match {
       case KeyCredentials.Unspecified =>
         throw SslConfigurationException.notSupported(
-          "KeyCredentials.Unspecified", "LegacyServerEngineFactory")
+          "KeyCredentials.Unspecified",
+          "LegacyServerEngineFactory"
+        )
       case KeyCredentials.CertAndKey(certFile, keyFile) =>
-        Ssl.server(certFile.getAbsolutePath(), keyFile.getAbsolutePath(),
-          null, cipherSuites.orNull, appProtos.orNull)
+        Ssl.server(
+          certFile.getAbsolutePath(),
+          keyFile.getAbsolutePath(),
+          null,
+          cipherSuites.orNull,
+          appProtos.orNull
+        )
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
-        Ssl.server(certFile.getAbsolutePath(), keyFile.getAbsolutePath(),
-          chainFile.getAbsolutePath(), cipherSuites.orNull, appProtos.orNull)
+        Ssl.server(
+          certFile.getAbsolutePath(),
+          keyFile.getAbsolutePath(),
+          chainFile.getAbsolutePath(),
+          cipherSuites.orNull,
+          appProtos.orNull
+        )
     }
 
     // Explicitly set this to server mode, since calls to Ssl.server do not.

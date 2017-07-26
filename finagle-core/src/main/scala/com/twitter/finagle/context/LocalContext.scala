@@ -36,7 +36,9 @@ final class LocalContext private[context] extends Context {
   def letClear[R](key: Key[_])(fn: => R): R = letLocal(env - key)(fn)
 
   def letClear[R](keys: Iterable[Key[_]])(fn: => R): R = {
-    val next = keys.foldLeft(env) { (e, k) => e - k }
+    val next = keys.foldLeft(env) { (e, k) =>
+      e - k
+    }
     letLocal(next)(fn)
   }
 

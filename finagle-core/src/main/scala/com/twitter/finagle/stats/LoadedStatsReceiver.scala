@@ -7,6 +7,7 @@ import com.twitter.finagle.util.LoadService
  * all service-loadable receivers and broadcasts stats to them.
  */
 object LoadedStatsReceiver extends {
+
   /**
    * Mutating this value at runtime after it has been initialized should be done
    * with great care. If metrics have been created using the prior

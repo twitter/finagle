@@ -13,11 +13,11 @@ import scala.collection.JavaConverters._
  * @note The counter is exported under `timer/slow` in the provided `StatsReceiver`.
  */
 private final class LoggingSlowProbeProxyTimer(
-    underlying: Timer,
-    statsReceiver: StatsReceiver,
-    maxRuntime: Duration,
-    maxLogFrequency: Duration)
-  extends SlowProbeProxyTimer(maxRuntime) {
+  underlying: Timer,
+  statsReceiver: StatsReceiver,
+  maxRuntime: Duration,
+  maxLogFrequency: Duration
+) extends SlowProbeProxyTimer(maxRuntime) {
 
   private[this] val log = Logger.get
   private[this] val slow = statsReceiver.counter("timer", "slow")
@@ -34,9 +34,10 @@ private final class LoggingSlowProbeProxyTimer(
       val initialLine = s"Timer task has been running for more than $maxRuntime ($elapsed), " +
         "current stacktraces follow.\n"
 
-      val traces = Thread.getAllStackTraces.asScala.map { case (thread, stack) =>
-        "Slow Timer task thread dump. Thread id=" +
-          s"${thread.getId} '${thread.getName}': ${stack.mkString("\n\t", "\n\t", "")}"
+      val traces = Thread.getAllStackTraces.asScala.map {
+        case (thread, stack) =>
+          "Slow Timer task thread dump. Thread id=" +
+            s"${thread.getId} '${thread.getName}': ${stack.mkString("\n\t", "\n\t", "")}"
       }
 
       log.warning(traces.mkString(initialLine, "\n", ""))

@@ -24,18 +24,19 @@ import scala.annotation.tailrec
  *  location: it exists but is uninhabited at this time.
  */
 sealed trait NameTree[+T] {
+
   /**
    * Use `f` to map a T-typed NameTree to a U-typed one.
    */
   def map[U](f: T => U): NameTree[U] =
     NameTree.map(f)(this)
 
-   /**
-    * A parseable representation of the name tree; a
-    * [[com.twitter.finagle.NameTree NameTree]] is recovered
-    * from this string by
-    * [[com.twitter.finagle.NameTree.read NameTree.read]].
-    */
+  /**
+   * A parseable representation of the name tree; a
+   * [[com.twitter.finagle.NameTree NameTree]] is recovered
+   * from this string by
+   * [[com.twitter.finagle.NameTree.read NameTree.read]].
+   */
   def show(implicit showable: Showable[T]): String = NameTree.show(this)
 
   /**
@@ -54,7 +55,7 @@ sealed trait NameTree[+T] {
    * tree is evaluated recursively, Alt nodes are evaluated by
    * selecting its first nonnegative child.
    */
-  def eval[U>:T]: Option[Set[U]] = NameTree.eval[U](this) match {
+  def eval[U >: T]: Option[Set[U]] = NameTree.eval[U](this) match {
     case NameTree.Fail => None
     case NameTree.Neg => None
     case NameTree.Leaf(value) => Some(value)
@@ -68,6 +69,7 @@ sealed trait NameTree[+T] {
  * as binding and evaluation routines.
  */
 object NameTree {
+
   /**
    * A [[com.twitter.finagle.NameTree NameTree]] representing
    * fallback; it is evaluated by picking the first nonnegative
@@ -77,7 +79,7 @@ object NameTree {
     override def toString = "Alt(%s)".format(trees mkString ",")
   }
   object Alt {
-    private[finagle] def fromSeq[T](trees: Seq[NameTree[T]]): Alt[T] = Alt(trees:_*)
+    private[finagle] def fromSeq[T](trees: Seq[NameTree[T]]): Alt[T] = Alt(trees: _*)
   }
 
   case class Weighted[+T](weight: Double, tree: NameTree[T])
@@ -101,14 +103,14 @@ object NameTree {
     override def toString = "Union(%s)".format(trees mkString ",")
   }
   object Union {
-    private[finagle] def fromSeq[T](trees: Seq[Weighted[T]]): Union[T] = Union(trees:_*)
+    private[finagle] def fromSeq[T](trees: Seq[Weighted[T]]): Union[T] = Union(trees: _*)
   }
 
   case class Leaf[+T](value: T) extends NameTree[T]
 
   /**
-    * A failing [[com.twitter.finagle.NameTree NameTree]].
-    */
+   * A failing [[com.twitter.finagle.NameTree NameTree]].
+   */
   object Fail extends NameTree[Nothing] {
     override def toString = "Fail"
   }
@@ -133,13 +135,13 @@ object NameTree {
    */
   def map[T, U](f: T => U)(tree: NameTree[T]): NameTree[U] =
     tree match {
-      case Union(trees@_*) =>
+      case Union(trees @ _*) =>
         val trees1 = trees map { case Weighted(w, t) => Weighted(w, t.map(f)) }
-        Union(trees1:_*)
+        Union(trees1: _*)
 
-      case Alt(trees@_*) =>
+      case Alt(trees @ _*) =>
         val trees1 = trees map map(f)
-        Alt(trees1:_*)
+        Alt(trees1: _*)
 
       case Leaf(t) => Leaf(f(t))
 
@@ -158,11 +160,11 @@ object NameTree {
   def simplify[T](tree: NameTree[T]): NameTree[T] = tree match {
     case Alt() => Neg
     case Alt(tree) => simplify(tree)
-    case Alt(trees@_*) =>
+    case Alt(trees @ _*) =>
       @tailrec def loop(trees: Seq[NameTree[T]], accum: Seq[NameTree[T]]): Seq[NameTree[T]] =
         trees match {
           case Nil => accum
-          case Seq(head, tail@_*) =>
+          case Seq(head, tail @ _*) =>
             simplify(head) match {
               case Fail => accum :+ Fail
               case Neg => loop(tail, accum)
@@ -177,11 +179,11 @@ object NameTree {
 
     case Union() => Neg
     case Union(Weighted(_, tree)) => simplify(tree)
-    case Union(trees@_*) =>
+    case Union(trees @ _*) =>
       @tailrec def loop(trees: Seq[Weighted[T]], accum: Seq[Weighted[T]]): Seq[Weighted[T]] =
         trees match {
           case Nil => accum
-          case Seq(Weighted(w, tree), tail@_*) =>
+          case Seq(Weighted(w, tree), tail @ _*) =>
             simplify(tree) match {
               case Fail => unionFail
               case Neg => loop(tail, accum)
@@ -205,7 +207,7 @@ object NameTree {
     case Union(Weighted(_, tree)) => show(tree)
     case Alt(tree) => show(tree)
 
-    case Alt(trees@_*) =>
+    case Alt(trees @ _*) =>
       val trees1 = trees.map(show1(_))
       trees1 mkString " | "
 
@@ -217,7 +219,7 @@ object NameTree {
     case Union(Weighted(_, tree)) => show1(tree)
     case Alt(tree) => show1(tree)
 
-    case Union(trees@_*) =>
+    case Union(trees @ _*) =>
       val trees1 = trees map {
         case Weighted(Weighted.defaultWeight, t) => showSimple(t)
         case Weighted(w, t) => f"${w}%.2f*${showSimple(t)}"
@@ -257,7 +259,7 @@ object NameTree {
     case Empty => Leaf(Set.empty)
     case Leaf(t) => Leaf(Set(t))
 
-    case Union(trees@_*) =>
+    case Union(trees @ _*) =>
       @tailrec def loop(trees: Seq[Weighted[T]], accum: Seq[Set[T]]): NameTree[Set[T]] =
         trees match {
           case Nil =>
@@ -265,7 +267,7 @@ object NameTree {
               case Nil => Neg
               case _ => Leaf(accum.flatten.toSet)
             }
-          case Seq(Weighted(_, head), tail@_*) =>
+          case Seq(Weighted(_, head), tail @ _*) =>
             eval(head) match {
               case Fail => Fail
               case Neg => loop(tail, accum)
@@ -275,15 +277,15 @@ object NameTree {
         }
       loop(trees, Nil)
 
-    case Alt(trees@_*) =>
+    case Alt(trees @ _*) =>
       @tailrec def loop(trees: Seq[NameTree[T]]): NameTree[Set[T]] =
         trees match {
           case Nil => Neg
-          case Seq(head, tail@_*) =>
+          case Seq(head, tail @ _*) =>
             eval(head) match {
               case Fail => Fail
               case Neg => loop(tail)
-              case head@Leaf(_) => head
+              case head @ Leaf(_) => head
               case _ => scala.sys.error("bug")
             }
         }

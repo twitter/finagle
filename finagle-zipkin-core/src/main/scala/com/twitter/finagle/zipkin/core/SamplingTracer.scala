@@ -8,10 +8,7 @@ import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
  *          to the collector.
  * @param initialSampleRate Start off with this sample rate. Can be changed later.
  */
-class SamplingTracer(
-    underlyingTracer: Tracer,
-    initialSampleRate: Float)
-  extends Tracer {
+class SamplingTracer(underlyingTracer: Tracer, initialSampleRate: Float) extends Tracer {
 
   private[this] val sampler = new Sampler
   setSampleRate(initialSampleRate)

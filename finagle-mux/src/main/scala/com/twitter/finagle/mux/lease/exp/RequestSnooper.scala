@@ -14,10 +14,11 @@ import com.twitter.util.{Duration, Time, StorageUnit, Stopwatch}
  * at minimum "handle bytes" for the outstanding requests to finish up.
  */
 private[lease] class RequestSnooper(
-    counter: ByteCounter,
-    percentile: Int,
-    lr: LogsReceiver = NullLogsReceiver,
-    now: () => Long = Stopwatch.systemMillis) {
+  counter: ByteCounter,
+  percentile: Int,
+  lr: LogsReceiver = NullLogsReceiver,
+  now: () => Long = Stopwatch.systemMillis
+) {
 
   private[this] val histo = new LatencyHistogram(
     clipDuration = 10.seconds.inMilliseconds,

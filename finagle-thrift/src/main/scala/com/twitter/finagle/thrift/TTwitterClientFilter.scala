@@ -22,13 +22,14 @@ import org.apache.thrift.protocol.TProtocolFactory
  * has been upgraded to TTwitter
  */
 private[thrift] class TTwitterClientFilter(
-    serviceName: String,
-    isUpgraded: Boolean,
-    clientId: Option[ClientId],
-    protocolFactory: TProtocolFactory)
-  extends SimpleFilter[ThriftClientRequest, Array[Byte]]
-{
-  private[this] val clientIdBuf = clientId map { id => Buf.Utf8(id.name) }
+  serviceName: String,
+  isUpgraded: Boolean,
+  clientId: Option[ClientId],
+  protocolFactory: TProtocolFactory
+) extends SimpleFilter[ThriftClientRequest, Array[Byte]] {
+  private[this] val clientIdBuf = clientId map { id =>
+    Buf.Utf8(id.name)
+  }
 
   /**
    * Produces an upgraded TTwitter ThriftClientRequest based on Trace,
@@ -45,7 +46,9 @@ private[thrift] class TTwitterClientFilter(
 
     val traceId = Trace.id
     header.setSpan_id(traceId.spanId.toLong)
-    traceId._parentId.foreach { id => header.setParent_span_id(id.toLong) }
+    traceId._parentId.foreach { id =>
+      header.setParent_span_id(id.toLong)
+    }
     header.setTrace_id(traceId.traceId.toLong)
     header.setFlags(traceId.flags.toLong)
 
@@ -67,7 +70,9 @@ private[thrift] class TTwitterClientFilter(
         // some reason, a pass-through context would be used instead.
         if (k != ClientId.clientIdCtx.marshalId) {
           val c = new thrift.RequestContext(
-            Buf.ByteBuffer.Owned.extract(k), Buf.ByteBuffer.Owned.extract(buf))
+            Buf.ByteBuffer.Owned.extract(k),
+            Buf.ByteBuffer.Owned.extract(buf)
+          )
           ctxs.add(c)
         }
       }
@@ -76,7 +81,8 @@ private[thrift] class TTwitterClientFilter(
       case Some(buf) =>
         val ctx = new thrift.RequestContext(
           Buf.ByteBuffer.Owned.extract(ClientId.clientIdCtx.marshalId),
-          Buf.ByteBuffer.Owned.extract(buf))
+          Buf.ByteBuffer.Owned.extract(buf)
+        )
         ctxs.add(ctx)
       case None => // skip
     }
@@ -102,7 +108,8 @@ private[thrift] class TTwitterClientFilter(
     )
   }
 
-  def apply(request: ThriftClientRequest,
+  def apply(
+    request: ThriftClientRequest,
     service: Service[ThriftClientRequest, Array[Byte]]
   ): Future[Array[Byte]] = {
     // Create a new span identifier for this request.
@@ -131,4 +138,3 @@ private[thrift] class TTwitterClientFilter(
     }
   }
 }
-

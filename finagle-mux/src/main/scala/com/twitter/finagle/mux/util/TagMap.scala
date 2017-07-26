@@ -6,6 +6,7 @@ import io.netty.util.collection.IntObjectHashMap
  * TagMaps maintains a mapping between tags and elements of type `T`.
  */
 private[mux] trait TagMap[T] {
+
   /**
    * If a tag is available, an unused tag is returned and `el` is
    * associated with it. Otherwise, None is returned.
@@ -46,7 +47,7 @@ private[mux] object TagMap {
 
     def map(el: T): Option[Int] = self.synchronized {
       set.acquire() match {
-        case t@Some(tag) =>
+        case t @ Some(tag) =>
           values.put(tag, el)
           t
         case None =>
