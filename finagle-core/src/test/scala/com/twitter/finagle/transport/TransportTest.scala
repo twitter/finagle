@@ -95,7 +95,8 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     private[this] var next = seq
     def write(in: Any) = Future.exception(new Exception)
     def read() = synchronized {
-      if (next.isEmpty) Future.None else {
+      if (next.isEmpty) Future.None
+      else {
         val head = next.head
         next = next.tail
         Future.value(Some(head))
@@ -212,7 +213,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
   }
 
-  test("Transport.collate: read through") (new Collate {
+  test("Transport.collate: read through")(new Collate {
     // Long read
     val r1 = coll.read(10)
     assert(!r1.isDefined)
@@ -242,7 +243,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(awaitResult(coll.read(10)) == None)
   })
 
-  test("Transport.collate: discard while reading") (new Collate {
+  test("Transport.collate: discard while reading")(new Collate {
     val trans1 = new Transport[String, String] {
       val p = new Promise[String]
       var theIntr: Throwable = null
@@ -277,7 +278,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assertDiscarded(coll1)
   })
 
-  test("Transport.collate: discard while writing") (new Collate {
+  test("Transport.collate: discard while writing")(new Collate {
     readq.offer("hello")
 
     coll.discard()
@@ -285,7 +286,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assertDiscarded(coll.read(10))
   })
 
-  test("Transport.collate: discard while buffering") (new Collate {
+  test("Transport.collate: discard while buffering")(new Collate {
     readq.offer("hello")
     val r1 = coll.read(1)
     assert(awaitResult(r1) == Some(Buf.Utf8("h")))
@@ -295,7 +296,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assertDiscarded(coll.read(10))
   })
 
-  test("Transport.collate: conversion failure") (new Collate {
+  test("Transport.collate: conversion failure")(new Collate {
     readq.offer("hello")
     val r1 = coll.read(10)
     assert(awaitResult(r1) == Some(Buf.Utf8("hello")))

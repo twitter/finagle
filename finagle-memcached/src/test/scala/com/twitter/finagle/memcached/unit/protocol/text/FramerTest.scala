@@ -37,8 +37,10 @@ class FramerTest extends FunSuite {
 
   test("Frame multiple frames") {
     val framer = new TestFramer
-    assert(framer(Buf.Utf8("STORED\r\nNOT_STORED\r\n")) ==
-      Seq(Buf.Utf8("STORED"), Buf.Utf8("NOT_STORED")))
+    assert(
+      framer(Buf.Utf8("STORED\r\nNOT_STORED\r\n")) ==
+        Seq(Buf.Utf8("STORED"), Buf.Utf8("NOT_STORED"))
+    )
   }
 
   test("Frame data frame") {
@@ -57,8 +59,10 @@ class FramerTest extends FunSuite {
 
   test("accumulate response after framing data frame") {
     val framer = new TestFramer
-    assert(framer(Buf.Utf8("set foo 0 0 3\r\nabc\r\nSTO")) ==
-      Seq(Buf.Utf8("set foo 0 0 3"), Buf.Utf8("abc")))
+    assert(
+      framer(Buf.Utf8("set foo 0 0 3\r\nabc\r\nSTO")) ==
+        Seq(Buf.Utf8("set foo 0 0 3"), Buf.Utf8("abc"))
+    )
     assert(framer(Buf.Utf8("RED\r\n")) == Seq(Buf.Utf8("STORED")))
   }
 

@@ -68,6 +68,7 @@ class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {
 
   test("just id for Addr.Failed")(new Ctx {
     Await.result(
-      verify(Var(Addr.Failed(new RuntimeException)), bound, Addr.Metadata("id" -> "/baz")))
+      verify(Var(Addr.Failed(new RuntimeException)), bound, Addr.Metadata("id" -> "/baz"))
+    )
   })
 }

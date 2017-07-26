@@ -12,7 +12,7 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
     var sum = 0
     var count = 0
 
-    def meanLoad: Double = if (count == 0) 0 else sum.toDouble/count.toDouble
+    def meanLoad: Double = if (count == 0) 0 else sum.toDouble / count.toDouble
 
     def apply(conn: ClientConnection): Future[Service[Unit, Int]] = {
       load += 1
@@ -36,7 +36,9 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
   }
 
   test("Balances evenly") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -57,7 +59,9 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
   }
 
   test("Closing a node removes it from load balancing") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) {
@@ -81,7 +85,9 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
   }
 
   test("Changing a node from Closed to Open re-adds it to load balancing") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var(init))
 
     // checkpoint for seeing how much traffic init(0) has seen
@@ -111,7 +117,9 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
   }
 
   test("Closes") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
     // Give it some traffic.
     for (_ <- 0 until R) bal()

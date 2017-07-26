@@ -12,20 +12,20 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 
 @RunWith(classOf[JUnitRunner])
-class DynamicTimeoutTest extends FunSuite
-  with Matchers
-  with Eventually
-  with IntegrationPatience {
+class DynamicTimeoutTest extends FunSuite with Matchers with Eventually with IntegrationPatience {
 
   private[this] val timer = new MockTimer()
 
   private def mkSvc(): Service[Int, Int] =
-    Service.mk { _ => Future.never }
+    Service.mk { _ =>
+      Future.never
+    }
 
   private val perReqStack: Stack[ServiceFactory[Int, Int]] = {
     val svc = mkSvc()
     val svcFactory = ServiceFactory.const(svc)
-    DynamicTimeout.perRequestModule[Int, Int]
+    DynamicTimeout
+      .perRequestModule[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
   }
 
@@ -68,7 +68,8 @@ class DynamicTimeoutTest extends FunSuite
     timer.tick()
     assert(result.isDefined)
 
-    try Await.result(result, 1.second) catch {
+    try Await.result(result, 1.second)
+    catch {
       case ex: RequestTimeoutException =>
         assert(expectedException == ex.getClass)
         ex.getMessage should include(timeout.toString)
@@ -180,12 +181,14 @@ class DynamicTimeoutTest extends FunSuite
 
     val params =
       totalParams(1500.millis) ++
-      perReqParams(1000.millis, Duration.Undefined) +
-      HighResTimer(timer) +
-      Retries.Policy(retryOnTimeout) +
-      param.Stats(stats)
+        perReqParams(1000.millis, Duration.Undefined) +
+        HighResTimer(timer) +
+        Retries.Policy(retryOnTimeout) +
+        param.Stats(stats)
 
-    val svrSvc = Service.mk { _: Int => new Promise[Int]() }
+    val svrSvc = Service.mk { _: Int =>
+      new Promise[Int]()
+    }
     val svcFactory = ServiceFactory.const(svrSvc)
 
     // build a stack with requests flowing top to bottom (though StackBuilder.push
@@ -194,12 +197,12 @@ class DynamicTimeoutTest extends FunSuite
     //   - Retries
     //   - PerRequestTimeout
     //   - Service
-    val stackBuilder = new StackBuilder[ServiceFactory[Int, Int]](
-      Stack.Leaf(Stack.Role("test"), svcFactory))
+    val stackBuilder =
+      new StackBuilder[ServiceFactory[Int, Int]](Stack.Leaf(Stack.Role("test"), svcFactory))
     stackBuilder.push(DynamicTimeout.perRequestModule)
     stackBuilder.push(Retries.moduleWithRetryPolicy)
-    val stackSvc = Await.result(
-      stackBuilder.result.make(params).apply(ClientConnection.nil), 5.seconds)
+    val stackSvc =
+      Await.result(stackBuilder.result.make(params).apply(ClientConnection.nil), 5.seconds)
     val svc = DynamicTimeout.totalFilter(params).andThen(stackSvc)
 
     Time.withCurrentTimeFrozen { tc =>

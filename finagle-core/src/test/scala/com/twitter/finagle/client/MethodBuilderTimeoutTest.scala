@@ -4,16 +4,23 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.client.MethodBuilderTest._
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.{GlobalRequestTimeoutException, IndividualRequestTimeoutException, RequestTimeoutException, ServiceFactory, Stack, param}
+import com.twitter.finagle.{
+  GlobalRequestTimeoutException,
+  IndividualRequestTimeoutException,
+  RequestTimeoutException,
+  ServiceFactory,
+  Stack,
+  param
+}
 import com.twitter.util.{Await, Duration, Future, MockTimer, Time, TimeControl}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{FunSuite, Matchers}
 
 class MethodBuilderTimeoutTest
-  extends FunSuite
-  with Matchers
-  with Eventually
-  with IntegrationPatience {
+    extends FunSuite
+    with Matchers
+    with Eventually
+    with IntegrationPatience {
 
   private[this] val timer = new MockTimer()
 
@@ -50,7 +57,8 @@ class MethodBuilderTimeoutTest
     timer.tick()
     assert(result.isDefined)
 
-    try Await.result(result, 1.second) catch {
+    try Await.result(result, 1.second)
+    catch {
       case ex: RequestTimeoutException =>
         assert(expectedException == ex.getClass)
         ex.getMessage should include(timeout.toString)
@@ -89,8 +97,8 @@ class MethodBuilderTimeoutTest
 
     // verify that the timeout can be disabled
     // and the total timeout set on the StackClient has been removed
-    val noTimeout = methodBuilder
-      .withTimeout.total(Duration.Top)
+    val noTimeout = methodBuilder.withTimeout
+      .total(Duration.Top)
       .newService("no_timeout")
     Time.withCurrentTimeFrozen { tc =>
       val result = noTimeout(1)
@@ -140,8 +148,8 @@ class MethodBuilderTimeoutTest
 
     // verify that the timeout can be disabled
     // and the per-request timeout set on the StackClient has been removed
-    val noTimeout = methodBuilder
-      .withTimeout.perRequest(Duration.Top)
+    val noTimeout = methodBuilder.withTimeout
+      .perRequest(Duration.Top)
       .newService("no_timeout")
     Time.withCurrentTimeFrozen { tc =>
       val result = noTimeout(1)

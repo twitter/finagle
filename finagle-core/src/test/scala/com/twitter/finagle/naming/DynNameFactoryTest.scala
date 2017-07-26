@@ -10,7 +10,7 @@ import org.scalatest.mock.MockitoSugar
 
 class DynNameFactoryTest extends FunSuite with MockitoSugar {
   private trait Ctx {
-    val cache = mock[ServiceFactoryCache[NameTree[Name.Bound], String,String]]
+    val cache = mock[ServiceFactoryCache[NameTree[Name.Bound], String, String]]
     val svc = mock[Service[String, String]]
     val (name, namew) = Activity[NameTree[Name.Bound]]()
     val dyn = new DynNameFactory[String, String](name, cache)
@@ -34,11 +34,13 @@ class DynNameFactoryTest extends FunSuite with MockitoSugar {
   })
 
   test("DynNameFactory reflects status of underlying cached service factory")(
-    for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) { new Ctx {
-      when(cache.status(any[NameTree[Name.Bound]])).thenReturn(status)
-      namew.notify(Return(NameTree.Leaf(Name.empty)))
-      assert(dyn.status == status)
-    }}
+    for (status <- Seq(Status.Closed, Status.Busy, Status.Open)) {
+      new Ctx {
+        when(cache.status(any[NameTree[Name.Bound]])).thenReturn(status)
+        namew.notify(Return(NameTree.Leaf(Name.empty)))
+        assert(dyn.status == status)
+      }
+    }
   )
 
   test("queue requests until name is nonpending (ok)")(new Ctx {

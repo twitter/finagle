@@ -2,8 +2,14 @@ package com.twitter.finagle.ssl.client
 
 import com.twitter.finagle.Address
 import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, Engine, KeyCredentials,
-  Protocols, SslConfigurationException, TrustCredentials}
+  ApplicationProtocols,
+  CipherSuites,
+  Engine,
+  KeyCredentials,
+  Protocols,
+  SslConfigurationException,
+  TrustCredentials
+}
 import com.twitter.io.TempFile
 import java.net.{InetSocketAddress, SocketAddress}
 import javax.net.ssl.SSLContext
@@ -79,7 +85,8 @@ class ConstClientEngineFactoryTest extends FunSuite {
     val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
     // deleteOnExit is handled by TempFile
 
-    val config = SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
+    val config =
+      SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(tempCertFile))
 
     intercept[SslConfigurationException] {
       val engine = factory(address, config)

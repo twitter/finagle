@@ -17,8 +17,8 @@ class CacheTest extends FunSuite with MockitoSugar {
     val timer = new MockTimer
     val evictor = mock[Object => Unit]
     val cache = Mockito.spy(new Cache[Object](5, 5.seconds, timer, Some(evictor)))
-    val objects = 0 until 10 map {
-      _ => mock[Object]
+    val objects = 0 until 10 map { _ =>
+      mock[Object]
     }
   }
 
@@ -38,7 +38,9 @@ class CacheTest extends FunSuite with MockitoSugar {
     import h._
 
     objects take 5 foreach { cache.put(_) }
-    (objects take 5).reverse foreach { x => assert(cache.get() == Some(x)) }
+    (objects take 5).reverse foreach { x =>
+      assert(cache.get() == Some(x))
+    }
   }
 
   test("Cache(5, 5.seconds) should return None when empty") {

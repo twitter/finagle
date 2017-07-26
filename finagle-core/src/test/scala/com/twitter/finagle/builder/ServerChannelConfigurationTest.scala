@@ -12,12 +12,11 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ServerChannelConfigurationTest
-  extends FunSuite
-  with StringClient
-  with StringServer {
+class ServerChannelConfigurationTest extends FunSuite with StringClient with StringServer {
 
-  val identityService = Service.mk[String, String] { req => Future.value(req) }
+  val identityService = Service.mk[String, String] { req =>
+    Future.value(req)
+  }
 
   test("close connection after max life time duration") {
     val lifeTime = 100.millis
@@ -45,9 +44,7 @@ class ServerChannelConfigurationTest
     val idleTime = 100.millis
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(Server()
-        .withSession.maxIdleTime(idleTime)
-      )
+      .stack(Server().withSession.maxIdleTime(idleTime))
       .bindTo(address)
       .name("FinagleServer")
       .build(identityService)

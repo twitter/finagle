@@ -9,7 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
+class ParserUtilsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private def isDigitsBB(str: String): Boolean = {
     val bb = UTF_8.encode(str)
@@ -24,27 +24,29 @@ class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
   val strings =
     Seq(
       "123" -> true,
-      "1"   -> true,
-      ""    -> false,
-      " "   -> false,
-      "x"   -> false,
-      " 9"  -> false,
-      "9 "  -> false
+      "1" -> true,
+      "" -> false,
+      " " -> false,
+      "x" -> false,
+      " 9" -> false,
+      "9 " -> false
     )
 
   test("isDigits: Buf.ByteBuffer") {
-    strings.foreach { case (str, expected) =>
-      withClue(str) {
-        assert(isDigitsBB(str) == expected)
-      }
+    strings.foreach {
+      case (str, expected) =>
+        withClue(str) {
+          assert(isDigitsBB(str) == expected)
+        }
     }
   }
 
   test("isDigits: Buf.ByteArray") {
-    strings.foreach { case (str, expected) =>
-      withClue(str) {
-        assert(isDigitsBA(str) == expected)
-      }
+    strings.foreach {
+      case (str, expected) =>
+        withClue(str) {
+          assert(isDigitsBA(str) == expected)
+        }
     }
   }
 
@@ -67,9 +69,10 @@ class ParserUtilsTest extends FunSuite  with GeneratorDrivenPropertyChecks {
         ("99999999999", 11) // Max length of Int as String is 10
       )
 
-    stringsAndLengths.foreach { case (str, length) =>
-      val bytes = str.getBytes(UTF_8)
-      assert(ParserUtils.byteArrayStringToInt(bytes, length) == -1)
+    stringsAndLengths.foreach {
+      case (str, length) =>
+        val bytes = str.getBytes(UTF_8)
+        assert(ParserUtils.byteArrayStringToInt(bytes, length) == -1)
     }
   }
 }

@@ -7,7 +7,10 @@ import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier
+}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
@@ -23,17 +26,19 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ClientBuilderTest extends FunSuite
-  with Eventually
-  with IntegrationPatience
-  with MockitoSugar
-  with StringClient {
+class ClientBuilderTest
+    extends FunSuite
+    with Eventually
+    with IntegrationPatience
+    with MockitoSugar
+    with StringClient {
 
   private class MyException extends Exception
 
   private val retryMyExceptionOnce = RetryPolicy.tries[Try[Nothing]](
     2, // 2 tries == 1 attempt + 1 retry
-    { case Throw(_: MyException) => true })
+    { case Throw(_: MyException) => true }
+  )
 
   test("ClientBuilder should collect stats on 'tries' for retrypolicy") {
     val service = mock[Service[String, String]]
@@ -67,7 +72,7 @@ class ClientBuilderTest extends FunSuite
     when(service.close(any[Time])) thenReturn Future.Done
 
     val inMemory = new InMemoryStatsReceiver
-    val numFailures = 21  // There will be 20 requeues by default
+    val numFailures = 21 // There will be 20 requeues by default
     val builder = ClientBuilder()
       .stack(stringClient.withEndpoint(service))
       .failFast(false)

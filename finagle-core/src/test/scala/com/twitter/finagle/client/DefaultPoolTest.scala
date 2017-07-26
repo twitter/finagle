@@ -27,7 +27,7 @@ class DefaultPoolTest extends FunSuite {
       Future.Done
     }
 
-    override def status: Status = 
+    override def status: Status =
       if (closed) Status.Closed else Status.Open
   }
 
@@ -37,8 +37,10 @@ class DefaultPoolTest extends FunSuite {
     val factory = DefaultPool[Unit, Unit](2, 3)(sr)(underlying)
   }
 
-  test("DefaultPool should be able to maintain high - low connections in the " +
-    "pool, and low connection in watermark") {
+  test(
+    "DefaultPool should be able to maintain high - low connections in the " +
+      "pool, and low connection in watermark"
+  ) {
 
     new DefaultPoolHelper {
       val c1 = Await.result(factory())
@@ -62,8 +64,10 @@ class DefaultPoolTest extends FunSuite {
     }
   }
 
-  test("DefaultPool should be able to reuse connections after they have been " +
-    "released.") {
+  test(
+    "DefaultPool should be able to reuse connections after they have been " +
+      "released."
+  ) {
     new DefaultPoolHelper {
       val c1 = Await.result(factory())
       val c2 = Await.result(factory())

@@ -35,7 +35,6 @@ class NotFoundTest extends FunSuite {
     val n = NotFound.cutoff * set.size + 1
     val elems = set.take(n.toInt)
 
-
     assert(removeAll(set, elems) == Set(8, 9, 10))
     assert(removeAll(seq, elems) == Set(8, 9, 10))
     assert(removeAll(map, elems) == Map(8 -> 8, 9 -> 9, 10 -> 10))

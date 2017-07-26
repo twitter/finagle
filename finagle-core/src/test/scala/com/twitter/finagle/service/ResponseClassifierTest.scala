@@ -13,14 +13,20 @@ class ResponseClassifierTest extends FunSuite {
 
   test("Default classification") {
     assert("DefaultResponseClassifier" == ResponseClassifier.Default.toString)
-    assert(Success ==
-      ResponseClassifier.Default(ReqRep(null, Return("hi"))))
+    assert(
+      Success ==
+        ResponseClassifier.Default(ReqRep(null, Return("hi")))
+    )
 
-    assert(RetryableFailure ==
-      ResponseClassifier.Default(ReqRep(null, Throw(Failure.rejected))))
+    assert(
+      RetryableFailure ==
+        ResponseClassifier.Default(ReqRep(null, Throw(Failure.rejected)))
+    )
 
-    assert(NonRetryableFailure ==
-      ResponseClassifier.Default(ReqRep(null, Throw(Failure("nope")))))
+    assert(
+      NonRetryableFailure ==
+        ResponseClassifier.Default(ReqRep(null, Throw(Failure("nope"))))
+    )
   }
 
   test("composition") {
@@ -45,14 +51,18 @@ class ResponseClassifierTest extends FunSuite {
   test("Retry on all throws") {
     assert("RetryOnThrowsResponseClassifier" == ResponseClassifier.RetryOnThrows.toString)
 
-    assert(RetryableFailure ==
-      ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(Failure.rejected))))
+    assert(
+      RetryableFailure ==
+        ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(Failure.rejected)))
+    )
 
-    assert(RetryableFailure ==
-      ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(new TimeoutException {
-        protected val timeout = 0.seconds
-        protected val explanation = "timeout"
-      }))))
+    assert(
+      RetryableFailure ==
+        ResponseClassifier.RetryOnThrows(ReqRep(null, Throw(new TimeoutException {
+          protected val timeout = 0.seconds
+          protected val explanation = "timeout"
+        })))
+    )
   }
 
 }

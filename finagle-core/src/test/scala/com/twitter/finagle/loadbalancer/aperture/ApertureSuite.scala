@@ -25,7 +25,7 @@ private[loadbalancer] trait ApertureSuite {
 
     def applyn(n: Int): Unit = {
       val factories = Await.result(Future.collect(Seq.fill(n)(apply())))
-      Await.result(Closable.all(factories:_*).close())
+      Await.result(Closable.all(factories: _*).close())
     }
 
     // Expose some protected methods for testing
@@ -108,15 +108,20 @@ private[loadbalancer] trait ApertureSuite {
      * of requests sent through the balancer, the size of this collection
      * should be bound by the aperture size.
      */
-    def nonzero: Set[Int] = factories.filter({
-      case (_, f) => f.total > 0
-    }).keys.toSet
-
+    def nonzero: Set[Int] =
+      factories
+        .filter({
+          case (_, f) => f.total > 0
+        })
+        .keys
+        .toSet
 
     def apply(i: Int) = factories.getOrElseUpdate(i, Factory(i))
 
     def range(n: Int): IndexedSeq[EndpointFactory[Unit, Unit]] =
-      Vector.tabulate(n) { i => apply(i) }
+      Vector.tabulate(n) { i =>
+        apply(i)
+      }
   }
 
 }

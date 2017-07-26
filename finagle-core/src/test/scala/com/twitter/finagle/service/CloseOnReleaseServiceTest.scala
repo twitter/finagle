@@ -24,7 +24,7 @@ class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar {
   test("only call release on the underlying service once") {
     val h = new Helper
     import h._
-    
+
     assert(wrapper.isAvailable)
     verify(service, times(1)).status
 
@@ -32,7 +32,7 @@ class CloseOnReleaseServiceTest extends FunSuite with MockitoSugar {
     verify(service, times(1)).close(any)
     wrapper.close()
     verify(service, times(1)).close(any)
-    
+
     assert(!wrapper.isAvailable)
     verify(service, times(1)).status
   }

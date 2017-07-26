@@ -1,7 +1,11 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{
+  CategorizingExceptionStatsHandler,
+  ExceptionStatsHandler,
+  InMemoryStatsReceiver
+}
 import com.twitter.finagle._
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
@@ -44,8 +48,8 @@ class StatsFilterTest extends FunSuite {
 
   test("latency stat in microseconds") {
     val sr = new InMemoryStatsReceiver()
-    val filter = new StatsFilter[String, String](
-      sr, StatsFilter.DefaultExceptions, TimeUnit.MICROSECONDS)
+    val filter =
+      new StatsFilter[String, String](sr, StatsFilter.DefaultExceptions, TimeUnit.MICROSECONDS)
     val promise = new Promise[String]
     val svc = filter andThen new Service[String, String] {
       def apply(request: String) = promise
@@ -77,13 +81,20 @@ class StatsFilterTest extends FunSuite {
     val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
     assert(unsourced.size == 2)
     assert(unsourced(Seq("failures")) == 1)
-    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(),
-      classOf[RequestException].getName(), classOf[Exception].getName())) == 1)
+    assert(
+      unsourced(
+        Seq(
+          "failures",
+          classOf[ChannelWriteException].getName(),
+          classOf[RequestException].getName(),
+          classOf[Exception].getName()
+        )
+      ) == 1
+    )
   }
 
   test("source failures") {
-    val esh = new CategorizingExceptionStatsHandler(
-      sourceFunction = _ => Some("bogus"))
+    val esh = new CategorizingExceptionStatsHandler(sourceFunction = _ => Some("bogus"))
 
     val (promise, receiver, statsService) = getService(esh)
     val e = new Failure("e").withSource(Failure.Source.Service, "bogus")
@@ -161,10 +172,10 @@ class StatsFilterTest extends FunSuite {
 
     // not chaining using andThen here because that wraps any raw Exception inside a Future.exception
     val chain = new Service[String, String] {
-      def apply(request: String): Future[String] = statsFilter.apply(
-        request, new Service[String, String] {
+      def apply(request: String): Future[String] =
+        statsFilter.apply(request, new Service[String, String] {
           def apply(req: String) = verifyingFilter.apply(req, service)
-      })
+        })
     }
 
     assert(receiver.gauges(Seq("pending"))() == 0.0)
@@ -224,7 +235,11 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced.size == 3)
     assert(unsourced(Seq("failures")) == 1)
     assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName())) == 1)
-    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())) == 1)
+    assert(
+      unsourced(
+        Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())
+      ) == 1
+    )
   }
 
   test("respects ResponseClassifier") {
@@ -238,7 +253,11 @@ class StatsFilterTest extends FunSuite {
       case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
     }
     val statsFilter = new StatsFilter[Int, Int](
-      sr, aClassifier, StatsFilter.DefaultExceptions, TimeUnit.MILLISECONDS)
+      sr,
+      aClassifier,
+      StatsFilter.DefaultExceptions,
+      TimeUnit.MILLISECONDS
+    )
 
     val service = statsFilter.andThen(svc)
 
@@ -247,9 +266,8 @@ class StatsFilterTest extends FunSuite {
     assert(1 == sr.counter("requests")())
     assert(0 == sr.counter("success")())
     assert(1 == sr.counter("failures")())
-    val failure = sr.counter(
-      "failures",
-      "com.twitter.finagle.service.ResponseClassificationSyntheticException")
+    val failure =
+      sr.counter("failures", "com.twitter.finagle.service.ResponseClassificationSyntheticException")
     assert(1 == failure())
 
     // able to categorize Throws as success

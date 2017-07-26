@@ -20,7 +20,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     var count = 0
 
     // This isn't quite the right notion of mean load, but it's good enough.
-    def meanLoad: Double = if (count == 0) 0.0 else sum.toDouble/count.toDouble
+    def meanLoad: Double = if (count == 0) 0.0 else sum.toDouble / count.toDouble
 
     def apply(conn: ClientConnection): Future[Service[Unit, Int]] = {
       load += 1
@@ -54,7 +54,9 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balances evenly") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -62,12 +64,14 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
 
   test("Balance evenly when load varies") {
     val rng = Rng(12345L)
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     var pending = Set[Service[Unit, Int]]()
     val bal = newBal(Var.value(init))
 
     for (i <- 0 until R) {
-      i%3 match {
+      i % 3 match {
         case 0 =>
           pending += Await.result(bal())
         case 1 if rng.nextInt(2) == 0 =>
@@ -84,14 +88,16 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Dynamically incorporates updates") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val vec = Var(init)
     val bal = newBal(vec)
 
     for (_ <- 0 until R) bal()
     assertEven(vec())
 
-    val fN1 = LoadedFactory(N+1)
+    val fN1 = LoadedFactory(N + 1)
     vec() :+= fN1
 
     for (_ <- 0 until R) bal()
@@ -108,11 +114,13 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Skip downed nodes; revive them") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
 
     val byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
-      with mutable.MultiMap[Int, Closable]
+    with mutable.MultiMap[Int, Closable]
 
     def run(n: Int): Unit = {
       for (_ <- 0 until n) {
@@ -131,7 +139,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     assert(init0Load == init(0).load)
     assertEven(init drop 1)
 
-    Closable.all(byIndex(0).toSeq:_*).close()
+    Closable.all(byIndex(0).toSeq: _*).close()
     for (_ <- 0 until R) bal()
     assert(init(0).load == 0)
     assertEven(init drop 1)
@@ -144,7 +152,7 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     // twice our normal load assignments in a period of R.
     // (This demonstrates nicely why and how P2C converges
     // slower than a heap-based balancer.)
-    assert(math.abs(init(0).load - 2*R/N) < ε*6)
+    assert(math.abs(init(0).load - 2 * R / N) < ε * 6)
   }
 
   test("Handle empty vectors") {
@@ -162,7 +170,9 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balance all-downed nodes.") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) bal()
@@ -174,9 +184,9 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
 
     assertEven(init)
     val init0Load2 = init(0).load
-    assert(math.abs(init0Load*2 - init0Load2) < ε)
+    assert(math.abs(init0Load * 2 - init0Load2) < ε)
 
-    for (f <- init drop N/2) f.stat = Status.Open
+    for (f <- init drop N / 2) f.stat = Status.Open
     for (_ <- 0 until R) bal()
 
     // The probability of picking two dead nodes when 1/2 of the cluster
@@ -188,8 +198,8 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     // In this check we make sure it's less than 100.
 
     assert(math.abs(init0Load2 - init(0).load) <= R * 0.001)
-    assertEven(init drop N/2)
-    assertEven(init take N/2)
+    assertEven(init drop N / 2)
+    assertEven(init take N / 2)
   }
 
   test("Stats") {
@@ -227,13 +237,15 @@ class P2CLeastLoadedTest extends FunSuite with App with P2CSuite {
     assert(stats.load == R)
     assert(vec()(0).load == 0)
     assert(vec()(1).load == R)
-    Closable.all(svcs:_*).close()
+    Closable.all(svcs: _*).close()
     assert(vec()(1).load == 0)
     assert(stats.load == 0)
   }
 
   test("Closes") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
+    val init = Vector.tabulate(N) { i =>
+      LoadedFactory(i)
+    }
     val bal = newBal(Var.value(init))
     // Give it some traffic.
     for (_ <- 0 until R) bal()

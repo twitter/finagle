@@ -86,7 +86,7 @@ class ConcurrentRingBufferTest extends FunSuite {
     assert(b.tryGet() == None)
     assert(b.size == 0)
 
-    for (i <- N/2 until N) b.tryGet() // fully drain
+    for (i <- N / 2 until N) b.tryGet() // fully drain
 
     assert(b.tryPeek == None)
   }

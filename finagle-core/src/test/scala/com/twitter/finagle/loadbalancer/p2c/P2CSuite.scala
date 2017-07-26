@@ -12,7 +12,7 @@ trait P2CSuite {
   // number of reqs
   val R: Int = 100000
   // tolerated variance
-  val ε: Double = 0.0001*R
+  val ε: Double = 0.0001 * R
 
   class Clock extends (() => Long) {
     var time: Long = 0L
@@ -43,8 +43,7 @@ trait P2CSuite {
   def assertEven(fs: Vector[P2CServiceFactory]) {
     val ml = fs.head.meanLoad
     for (f <- fs) {
-      assert(math.abs(f.meanLoad - ml) < ε,
-        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))
+      assert(math.abs(f.meanLoad - ml) < ε, "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))
     }
   }
 }

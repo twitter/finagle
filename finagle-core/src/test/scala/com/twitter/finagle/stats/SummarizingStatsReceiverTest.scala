@@ -12,7 +12,8 @@ class SummarizingStatsReceiverTest extends FunSuite {
 
     val stats = receiver.stat("toto")
     stats.add(1)
-    val expected = """# counters
+    val expected =
+      """# counters
       |
       |# gauges
       |
@@ -21,7 +22,8 @@ class SummarizingStatsReceiverTest extends FunSuite {
     assert(receiver.summary() == expected)
 
     (2 to 10) foreach { stats.add(_) }
-    val expected2 = """# counters
+    val expected2 =
+      """# counters
       |
       |# gauges
       |

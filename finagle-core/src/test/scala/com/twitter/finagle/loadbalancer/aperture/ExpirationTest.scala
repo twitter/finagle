@@ -9,17 +9,18 @@ import com.twitter.util._
 import org.scalatest.fixture.FunSuite
 
 class ExpirationTest extends FunSuite with ApertureSuite {
+
   /**
    * An aperture load balancer which mixes in expiration but no
    * controller or load metric. We manually have to adjust the
    * aperture to test for nodes falling in and out of the window.
    */
   private class ExpiryBal(
-      val idleTime: Duration = 1.minute,
-      val mockTimer: MockTimer = new MockTimer,
-      val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver)
-    extends TestBal
-    with Expiration[Unit, Unit] {
+    val idleTime: Duration = 1.minute,
+    val mockTimer: MockTimer = new MockTimer,
+    val stats: InMemoryStatsReceiver = new InMemoryStatsReceiver
+  ) extends TestBal
+      with Expiration[Unit, Unit] {
 
     def expired: Long = stats.counters(Seq("expired"))
     def noExpired: Boolean = stats.counters.get(Seq("expired")).isEmpty
@@ -30,9 +31,9 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     private[this] val expiryTask = newExpiryTask(mockTimer)
 
     case class Node(factory: EndpointFactory[Unit, Unit])
-      extends ServiceFactoryProxy[Unit, Unit](factory)
-      with ExpiringNode
-      with ApertureNode {
+        extends ServiceFactoryProxy[Unit, Unit](factory)
+        with ExpiringNode
+        with ApertureNode {
       def load: Double = 0
       def pending: Int = 0
       override val token: Int = 0
@@ -52,7 +53,9 @@ class ExpirationTest extends FunSuite with ApertureSuite {
 
   case class FixtureParam(tc: TimeControl)
   def withFixture(test: OneArgTest) =
-    Time.withCurrentTimeFrozen { tc => test(FixtureParam(tc)) }
+    Time.withCurrentTimeFrozen { tc =>
+      test(FixtureParam(tc))
+    }
 
   test("does not expire uninitialized nodes") { f =>
     val bal = new ExpiryBal
@@ -72,7 +75,9 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     bal.adjustx(1)
     assert(bal.aperturex == 2)
 
-    (0 to 10).foreach { _ => Await.result(bal()).close() }
+    (0 to 10).foreach { _ =>
+      Await.result(bal()).close()
+    }
     bal.adjustx(-1)
     assert(bal.aperturex == 1)
 
@@ -95,7 +100,9 @@ class ExpirationTest extends FunSuite with ApertureSuite {
   test("expires nodes outside of aperture") { f =>
     val bal = new ExpiryBal
 
-    val eps = Vector.tabulate(10) { i => Factory(i) }
+    val eps = Vector.tabulate(10) { i =>
+      Factory(i)
+    }
     bal.update(eps.map(newLazyEndpointFactory))
     bal.adjustx(eps.size)
     assert(bal.aperturex == eps.size)

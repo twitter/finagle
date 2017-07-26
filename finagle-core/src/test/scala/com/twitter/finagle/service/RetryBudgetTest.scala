@@ -7,9 +7,7 @@ import org.scalatest.{Matchers, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class RetryBudgetTest extends FunSuite
-  with Matchers
-{
+class RetryBudgetTest extends FunSuite with Matchers {
 
   test("Empty") {
     val rb = RetryBudget.Empty
@@ -69,7 +67,7 @@ class RetryBudgetTest extends FunSuite
       // because TokenRetryBudget.ScaleFactor doesn't give us
       // perfect precision, we give ourselves a small error margin.
       val expectedRetries = (nReqs * percentCanRetry).toInt + minRetries
-      expectedRetries should be (retried +- 1)
+      expectedRetries should be(retried +- 1)
     }
   }
 

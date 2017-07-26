@@ -15,10 +15,11 @@ import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
-class FailFastFactoryTest extends FunSuite
-  with MockitoSugar
-  with Conductors
-  with IntegrationPatience {
+class FailFastFactoryTest
+    extends FunSuite
+    with MockitoSugar
+    with Conductors
+    with IntegrationPatience {
 
   def newCtx() = new {
     val timer = new MockTimer

@@ -24,7 +24,8 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer)
+      DefaultTimer
+    )
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -53,7 +54,8 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer)
+      DefaultTimer
+    )
 
     val svc = filter.andThen(Service.mk(Future.exception))
 
@@ -81,7 +83,8 @@ class RequeueFilterTest extends FunSuite {
       stats,
       () => true,
       percentRequeues,
-      DefaultTimer)
+      DefaultTimer
+    )
 
     var numNos = 0
     val svc = filter.andThen(Service.mk { s: String =>
@@ -126,7 +129,8 @@ class RequeueFilterTest extends FunSuite {
         stats,
         () => true,
         1.0,
-        timer)
+        timer
+      )
 
       val svc = filter.andThen(Service.mk(Future.exception))
       val response = svc(new FailedFastException("12345"))
@@ -163,7 +167,8 @@ class RequeueFilterTest extends FunSuite {
       NullStatsReceiver,
       () => true,
       percentRequeues,
-      DefaultTimer)
+      DefaultTimer
+    )
 
     val stats = new InMemoryStatsReceiver()
 
@@ -171,7 +176,9 @@ class RequeueFilterTest extends FunSuite {
 
     val svcFactory = ServiceFactory.const(
       filter.andThen(Service.mk[Throwable, Int] { req =>
-        context.Retries.current.foreach { retries => retriesStat.add(retries.retries) }
+        context.Retries.current.foreach { retries =>
+          retriesStat.add(retries.retries)
+        }
         Future.exception(req)
       })
     )

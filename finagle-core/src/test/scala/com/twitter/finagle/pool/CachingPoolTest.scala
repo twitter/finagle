@@ -23,7 +23,6 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
   when(underlyingService(any[Any])).thenReturn(Future.value(obj))
   when(underlying()).thenReturn(Future.value(underlyingService))
 
-
   test("reflect the underlying factory availability") {
     val pool = new CachingPool[Any, Any](underlying, Int.MaxValue, 5.seconds, timer)
     when(underlying.status).thenReturn(Status.Closed)
@@ -136,7 +135,9 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
       verify(underlying, times(3))()
 
-      ss foreach { s => when(s.status).thenReturn(Status.Open) }
+      ss foreach { s =>
+        when(s.status).thenReturn(Status.Open)
+      }
 
       fs foreach { f =>
         timeControl.advance(5.second)
@@ -144,7 +145,9 @@ class CachingPoolTest extends FunSuite with MockitoSugar with OneInstancePerTest
       }
 
       assert(timer.tasks.size == 1)
-      ss foreach { s => verify(s, never()).close(any[Time]) }
+      ss foreach { s =>
+        verify(s, never()).close(any[Time])
+      }
 
       timer.tick()
 

@@ -29,35 +29,39 @@ class MarshalledContextTest extends AbstractContextTest {
     ctx.let(b, 333) {
       ctx.letUnmarshal(Seq(Buf.Utf8("bleep") -> Buf.Utf8("bloop"))) {
         assert(ctx.contains(b))
-        assert(ctx.marshal().toMap ==  Map(
-          Buf.Utf8("b.key") -> Buf.U32BE(333),
-          Buf.Utf8("bleep") -> Buf.Utf8("bloop")))
+        assert(
+          ctx.marshal().toMap == Map(
+            Buf.Utf8("b.key") -> Buf.U32BE(333),
+            Buf.Utf8("bleep") -> Buf.Utf8("bloop")
+          )
+        )
       }
 
       ctx.letUnmarshal(Seq(Buf.Utf8("bleep") -> Buf.Utf8("NOPE"))) {
-        assert(ctx.marshal().toMap ==  Map(
-          Buf.Utf8("b.key") -> Buf.U32BE(333),
-          Buf.Utf8("bleep") -> Buf.Utf8("NOPE")))
+        assert(
+          ctx.marshal().toMap == Map(
+            Buf.Utf8("b.key") -> Buf.U32BE(333),
+            Buf.Utf8("bleep") -> Buf.Utf8("NOPE")
+          )
+        )
       }
     }
   }
-
-
 
   test("Only marshal the most recent binding for a given key") {
 
     ctx.letUnmarshal(Seq(a.marshalId -> Buf.Utf8("bloop"))) {
       assert(ctx.get(a) == Some("bloop"))
-      assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("bloop")))
+      assert(ctx.marshal().toMap == Map(a.marshalId -> Buf.Utf8("bloop")))
 
       ctx.letUnmarshal(Seq(a.marshalId -> Buf.Utf8("ok"))) {
         assert(ctx.get(a) == Some("ok"))
-        assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("ok")))
+        assert(ctx.marshal().toMap == Map(a.marshalId -> Buf.Utf8("ok")))
       }
 
       ctx.let(a, "ok") {
         assert(ctx.get(a) == Some("ok"))
-        assert(ctx.marshal().toMap ==  Map(a.marshalId -> Buf.Utf8("ok")))
+        assert(ctx.marshal().toMap == Map(a.marshalId -> Buf.Utf8("ok")))
       }
     }
   }
@@ -68,8 +72,7 @@ class MarshalledContextTest extends AbstractContextTest {
       assert(ctx.contains(b))
       assert(ctx.get(b) == Some(number))
 
-      assert(ctx.marshal().toMap == Map(
-        Buf.Utf8("b.key") -> Buf.U32BE(30301952)))
+      assert(ctx.marshal().toMap == Map(Buf.Utf8("b.key") -> Buf.U32BE(30301952)))
     }
   }
 
@@ -79,8 +82,7 @@ class MarshalledContextTest extends AbstractContextTest {
     // the unmarshal logic requires strictly 4 bytes.
     ctx.letUnmarshal(Seq(Buf.Utf8("b.key") -> Buf.U64BE(number))) {
       assert(!ctx.contains(b))
-      assert(ctx.marshal().toMap == Map(
-        Buf.Utf8("b.key") -> Buf.U64BE(number)))
+      assert(ctx.marshal().toMap == Map(Buf.Utf8("b.key") -> Buf.U64BE(number)))
     }
   }
 

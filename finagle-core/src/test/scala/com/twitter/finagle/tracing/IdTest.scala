@@ -17,13 +17,17 @@ class IdTest extends FunSuite {
   }
 
   test("compare synthesized parentId") {
-    assert(TraceId(None, Some(SpanId(1L)), SpanId(1L), None) ==
-      TraceId(None, None, SpanId(1L), None))
+    assert(
+      TraceId(None, Some(SpanId(1L)), SpanId(1L), None) ==
+        TraceId(None, None, SpanId(1L), None)
+    )
   }
 
   test("compare synthesized traceId") {
-    assert(TraceId(Some(SpanId(1L)), Some(SpanId(1L)), SpanId(1L), None) ==
-      TraceId(None, Some(SpanId(1L)), SpanId(1L), None))
+    assert(
+      TraceId(Some(SpanId(1L)), Some(SpanId(1L)), SpanId(1L), None) ==
+        TraceId(None, Some(SpanId(1L)), SpanId(1L), None)
+    )
   }
 
   test("serialize and deserialize") {
@@ -46,7 +50,7 @@ class IdTest extends FunSuite {
 
   test("SpanId.toString: each bit must be correct") {
     for (b <- 0 until 64)
-      assert(hex(1<<b) == SpanId(1<<b).toString)
+      assert(hex(1 << b) == SpanId(1 << b).toString)
   }
 
   test("SpanId.toString: random") {
@@ -60,6 +64,7 @@ class IdTest extends FunSuite {
   test("hashCode only accounts for id fields") {
     assert(
       TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(true)).hashCode ==
-      TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(false)).hashCode)
+        TraceId(Some(SpanId(1L)), Some(SpanId(2L)), SpanId(3L), Some(false)).hashCode
+    )
   }
 }

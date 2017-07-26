@@ -10,13 +10,11 @@ import org.scalatest.concurrent.Conductors
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.language.reflectiveCalls
 
-class BalancerTest extends FunSuite
-  with Conductors
-  with GeneratorDrivenPropertyChecks {
+class BalancerTest extends FunSuite with Conductors with GeneratorDrivenPropertyChecks {
 
   private class TestBalancer(
-      protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
-    extends Balancer[Unit, Unit] {
+    protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver
+  ) extends Balancer[Unit, Unit] {
 
     def maxEffort: Int = 5
     def emptyException: Throwable = ???
@@ -34,17 +32,16 @@ class BalancerTest extends FunSuite
 
     def rebuildDistributor() {}
 
-    case class Distributor(vec: Vector[Node], gen: Int = 1)
-      extends DistributorT[Node](vec) {
+    case class Distributor(vec: Vector[Node], gen: Int = 1) extends DistributorT[Node](vec) {
       type This = Distributor
       def pick(): Node = vector.head
       def rebuild(): This = {
         rebuildDistributor()
-        copy(gen=gen+1)
+        copy(gen = gen + 1)
       }
       def rebuild(vector: Vector[Node]): This = {
         rebuildDistributor()
-        copy(vector, gen=gen+1)
+        copy(vector, gen = gen + 1)
       }
       def needsRebuild: Boolean = false
     }
@@ -56,7 +53,7 @@ class BalancerTest extends FunSuite
         factory.close()
         Future.Done
       }
-      def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = Future.never
+      def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.never
     }
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]): Node = new Node(factory)
@@ -82,8 +79,8 @@ class BalancerTest extends FunSuite
 
   val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val genSvcFac = genStatus.map(newFac)
-  val genLoadedNode = for(fac  <- genSvcFac) yield fac
-  val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit,Unit]](genLoadedNode)
+  val genLoadedNode = for (fac <- genSvcFac) yield fac
+  val genNodes = Gen.containerOf[Vector, EndpointFactory[Unit, Unit]](genLoadedNode)
 
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer
@@ -95,7 +92,7 @@ class BalancerTest extends FunSuite
     forAll(genNodes) { loadedNodes =>
       val bal = new TestBalancer
       bal.update(loadedNodes)
-      val best = Status.bestOf[ServiceFactory[Unit,Unit]](loadedNodes, _.status)
+      val best = Status.bestOf[ServiceFactory[Unit, Unit]](loadedNodes, _.status)
       assert(bal.status == best)
     }
   }
@@ -192,46 +189,46 @@ class BalancerTest extends FunSuite
   }
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1685
-  test("Coalesces updates") {
-    val conductor = new Conductor
-    import conductor._
+    test("Coalesces updates") {
+      val conductor = new Conductor
+      import conductor._
 
-    val bal = new TestBalancer {
-      val beat = new AtomicInteger(1)
-      @volatile var updateThreads: Set[Long] = Set.empty
+      val bal = new TestBalancer {
+        val beat = new AtomicInteger(1)
+        @volatile var updateThreads: Set[Long] = Set.empty
 
-      override def rebuildDistributor() {
-        synchronized { updateThreads += Thread.currentThread.getId() }
-        waitForBeat(beat.getAndIncrement())
-        waitForBeat(beat.getAndIncrement())
+        override def rebuildDistributor() {
+          synchronized { updateThreads += Thread.currentThread.getId() }
+          waitForBeat(beat.getAndIncrement())
+          waitForBeat(beat.getAndIncrement())
+        }
+      }
+      val f1, f2, f3 = newFac()
+
+      @volatile var thread1Id: Long = -1
+
+      thread("updater1") {
+        thread1Id = Thread.currentThread.getId()
+        bal.update(Vector.empty) // waits for 1, 2
+        // (then waits for 3, 4, in this thread)
+      }
+
+      thread("updater2") {
+        waitForBeat(1)
+        bal._rebuild()
+        bal.update(Vector(f1))
+        bal.update(Vector(f2))
+        bal._rebuild()
+        bal.update(Vector(f3))
+        bal._rebuild()
+        assert(beat == 1)
+        waitForBeat(2)
+      }
+
+      whenFinished {
+        assert(bal.factories == Set(f3))
+        assert(bal._dist().gen == 3)
+        assert(bal.updateThreads == Set(thread1Id))
       }
     }
-    val f1, f2, f3 = newFac()
-
-    @volatile var thread1Id: Long = -1
-
-    thread("updater1") {
-      thread1Id = Thread.currentThread.getId()
-      bal.update(Vector.empty) // waits for 1, 2
-      // (then waits for 3, 4, in this thread)
-    }
-
-    thread("updater2") {
-      waitForBeat(1)
-      bal._rebuild()
-      bal.update(Vector(f1))
-      bal.update(Vector(f2))
-      bal._rebuild()
-      bal.update(Vector(f3))
-      bal._rebuild()
-      assert(beat == 1)
-      waitForBeat(2)
-    }
-
-    whenFinished {
-      assert(bal.factories == Set(f3))
-      assert(bal._dist().gen == 3)
-      assert(bal.updateThreads == Set(thread1Id))
-    }
-  }
 }

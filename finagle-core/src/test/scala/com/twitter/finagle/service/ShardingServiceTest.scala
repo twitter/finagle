@@ -21,12 +21,11 @@ class ShardingServiceTest extends FunSuite with MockitoSugar {
 
   class ShardingServiceHelper {
     val distributor = mock[Distributor[Service[MockRequest, String]]]
-    val service = new ShardingService(distributor, {
-      request: MockRequest =>
-        request match {
-          case req: ShardingRequest => Some(req.shardingKey)
-          case _ => None
-        }
+    val service = new ShardingService(distributor, { request: MockRequest =>
+      request match {
+        case req: ShardingRequest => Some(req.shardingKey)
+        case _ => None
+      }
     })
 
     val reqA = new ShardingRequest(1L)

@@ -13,10 +13,7 @@ import org.scalatest.{BeforeAndAfter, FunSpec}
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
-class RetryFilterTest extends FunSpec
-  with MockitoSugar
-  with BeforeAndAfter
-{
+class RetryFilterTest extends FunSpec with MockitoSugar with BeforeAndAfter {
   var timer: JavaTimer = _
   val backoffs = Stream(1.second, 2.seconds, 3.seconds)
   val shouldRetryException: PartialFunction[Try[Nothing], Boolean] = {
@@ -54,25 +51,35 @@ class RetryFilterTest extends FunSpec
 
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject[Time])) thenReturn Future.Done
-    val filter = if (retryExceptionsOnly)
-        new RetryExceptionsFilter[Int, Int](RetryPolicy.tries(3, shouldRetryException), timer, stats)
+    val filter =
+      if (retryExceptionsOnly)
+        new RetryExceptionsFilter[Int, Int](
+          RetryPolicy.tries(3, shouldRetryException),
+          timer,
+          stats
+        )
       else
         new RetryFilter[Int, Int](RetryPolicy.tries(3, shouldRetryResponse), timer, stats)
     val retryingService = filter andThen service
   }
 
-  class PolicyFixture(
-      policy: RetryPolicy[_],
-      retryExceptionsOnly: Boolean,
-      theTimer: Timer)
-  {
+  class PolicyFixture(policy: RetryPolicy[_], retryExceptionsOnly: Boolean, theTimer: Timer) {
     val stats = new InMemoryStatsReceiver()
     def retriesStat: Seq[Int] = stats.stat("retries")().map(_.toInt)
 
-    val filter = if (retryExceptionsOnly)
-        new RetryExceptionsFilter[Int, Int](policy.asInstanceOf[RetryPolicy[Try[Nothing]]], theTimer, stats)
+    val filter =
+      if (retryExceptionsOnly)
+        new RetryExceptionsFilter[Int, Int](
+          policy.asInstanceOf[RetryPolicy[Try[Nothing]]],
+          theTimer,
+          stats
+        )
       else
-        new RetryFilter[Int, Int](policy.asInstanceOf[RetryPolicy[(Int, Try[Int])]], theTimer, stats)
+        new RetryFilter[Int, Int](
+          policy.asInstanceOf[RetryPolicy[(Int, Try[Int])]],
+          theTimer,
+          stats
+        )
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject[Time])) thenReturn Future.Done
     val retryingService = filter andThen service
@@ -89,7 +96,6 @@ class RetryFilterTest extends FunSpec
 
       // have a policy that allows for way more retries than the budgets allows for
       val policy = RetryPolicy.tries(10, RetryPolicy.WriteExceptionsOnly)
-
 
       val filter = new RetryExceptionsFilter[Throwable, Int](policy, Timer.Nil, stats, budget)
       val service: Service[Throwable, Int] = Service.mk(Future.exception)
@@ -118,7 +124,7 @@ class RetryFilterTest extends FunSpec
         }
 
         it("when failing with WriteExceptions, retry n-1 times") {
-          new TriesFixture(retryExceptionsOnly){
+          new TriesFixture(retryExceptionsOnly) {
             when(service(123)) thenReturn Future.exception(WriteException(new Exception))
             val f = retryingService(123)
             intercept[WriteException] {
@@ -169,11 +175,13 @@ class RetryFilterTest extends FunSpec
       }
 
       describe("using RetryPolicy[(Req, Try[Rep])]") {
-        runWithTries(retryExceptionsOnly=false)
+        runWithTries(retryExceptionsOnly = false)
 
         it("when failing with WriteExceptions and non-idempotent request, don't retry") {
-          new TriesFixture(retryExceptionsOnly=false){
-            when(service(nonIdempotentRequest)) thenReturn Future.exception(WriteException(new Exception))
+          new TriesFixture(retryExceptionsOnly = false) {
+            when(service(nonIdempotentRequest)) thenReturn Future.exception(
+              WriteException(new Exception)
+            )
             val f = retryingService(nonIdempotentRequest)
             intercept[WriteException] {
               Await.result(f, 5.seconds)
@@ -183,7 +191,7 @@ class RetryFilterTest extends FunSpec
         }
 
         it("when succeeds with bad response and idempotent request, retry n-1 times") {
-          new TriesFixture(retryExceptionsOnly=false) {
+          new TriesFixture(retryExceptionsOnly = false) {
             when(service(idempotentRequest)) thenReturn Future(badResponse)
             val f = retryingService(idempotentRequest)
             Await.result(f, 5.seconds)
@@ -192,7 +200,7 @@ class RetryFilterTest extends FunSpec
         }
 
         it("when succeeds with bad response and non-idempotent request, don't retry") {
-          new TriesFixture(retryExceptionsOnly=false) {
+          new TriesFixture(retryExceptionsOnly = false) {
             when(service(nonIdempotentRequest)) thenReturn Future(badResponse)
             val f = retryingService(nonIdempotentRequest)
             Await.result(f, 5.seconds)
@@ -202,25 +210,37 @@ class RetryFilterTest extends FunSpec
       }
 
       describe("using RetryPolicy[Try[Nothing]]") {
-        runWithTries(retryExceptionsOnly=true)
+        runWithTries(retryExceptionsOnly = true)
       }
     }
 
     describe("with RetryPolicy.backoff: Exception cases") {
       describe("using RetryPolicy[(Req, Try[Rep])]") {
-        testExceptionPolicy(RetryPolicy.backoff(backoffs)(shouldRetryResponse), retryExceptionsOnly=false)
+        testExceptionPolicy(
+          RetryPolicy.backoff(backoffs)(shouldRetryResponse),
+          retryExceptionsOnly = false
+        )
       }
       describe("using RetryPolicy[Try[Nothing]]") {
-        testExceptionPolicy(RetryPolicy.backoff(backoffs)(shouldRetryException), retryExceptionsOnly=true)
+        testExceptionPolicy(
+          RetryPolicy.backoff(backoffs)(shouldRetryException),
+          retryExceptionsOnly = true
+        )
       }
     }
 
     describe("with RetryPolicy.backoffJava: Exception cases") {
       describe("using RetryPolicy[(Req, Try[Rep])]") {
-        testExceptionPolicy(RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetryResponse), retryExceptionsOnly=false)
+        testExceptionPolicy(
+          RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetryResponse),
+          retryExceptionsOnly = false
+        )
       }
       describe("using RetryPolicy[Try[Nothing]]") {
-        testExceptionPolicy(RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetryException), retryExceptionsOnly=true)
+        testExceptionPolicy(
+          RetryPolicy.backoffJava(Backoff.toJava(backoffs), shouldRetryException),
+          retryExceptionsOnly = true
+        )
       }
     }
 
@@ -240,16 +260,14 @@ class RetryFilterTest extends FunSpec
         when(svc.apply(1)).thenReturn(
           Future.exception(Failure.rejected("nack")),
           Future.exception(Failure("not retryable", Failure.NonRetryable)),
-          Future.exception(new RuntimeException("never gonna be seen")))
+          Future.exception(new RuntimeException("never gonna be seen"))
+        )
 
         val policy = RetryPolicy.tries[Try[Nothing]](3, {
           case Throw(_) => true
         })
-        val retryFilter = new RetryExceptionsFilter[Int, Int](
-          policy,
-          timer,
-          stats,
-          RetryBudget.Infinite)
+        val retryFilter =
+          new RetryExceptionsFilter[Int, Int](policy, timer, stats, RetryBudget.Infinite)
         val retryingSvc = retryFilter.andThen(svc)
 
         Time.withCurrentTimeFrozen { tc =>
@@ -307,7 +325,9 @@ class RetryFilterTest extends FunSpec
         val timer = new MockTimer()
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
           Time.withCurrentTimeFrozen { tc =>
-            when(service(123)) thenReturn Future.exception(WriteException(new Exception("i'm exhausted")))
+            when(service(123)) thenReturn Future.exception(
+              WriteException(new Exception("i'm exhausted"))
+            )
             val f = retryingService(123)
             1 to 3 foreach { i =>
               assert(!f.isDefined)
@@ -387,7 +407,7 @@ class RetryFilterTest extends FunSpec
 
       it("when it succeeds with a bad response, consult the retry strategy") {
         val timer = new MockTimer()
-        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
+        new PolicyFixture(policy, retryExceptionsOnly = false, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
@@ -407,7 +427,7 @@ class RetryFilterTest extends FunSpec
 
       it("return result when the retry strategy is exhausted") {
         val timer = new MockTimer()
-        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
+        new PolicyFixture(policy, retryExceptionsOnly = false, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
@@ -427,7 +447,7 @@ class RetryFilterTest extends FunSpec
 
       it("when it succeeds, return the result immediately") {
         val timer = new MockTimer()
-        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
+        new PolicyFixture(policy, retryExceptionsOnly = false, timer) {
           when(service(123)) thenReturn Future(goodResponse)
           val f = retryingService(123)
           verify(service)(123)
@@ -437,7 +457,7 @@ class RetryFilterTest extends FunSpec
       }
 
       it("when no retry occurs, no stat update") {
-        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
+        new PolicyFixture(policy, retryExceptionsOnly = false, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123), 5.seconds) == 321)
           assert(retriesStat == Seq(0))

@@ -50,11 +50,14 @@ class MemcachedClientDecoderTest extends FunSuite {
     assert(context.decoder.nextFrameBytes() == -1)
     context.decodeString("END") match {
       case Seq(Values(Seq(v))) =>
-        assert(v == Value(
-          key = Buf.Utf8("key"),
-          value = Buf.Empty,
-          casUnique = None,
-          flags = Some(Buf.Utf8("0"))))
+        assert(
+          v == Value(
+            key = Buf.Utf8("key"),
+            value = Buf.Empty,
+            casUnique = None,
+            flags = Some(Buf.Utf8("0"))
+          )
+        )
 
       case other => fail(s"Unexpected output: $other")
     }
@@ -69,7 +72,7 @@ class MemcachedClientDecoderTest extends FunSuite {
     val end = "END"
 
     val lines = Seq(line1, line2, line3)
-    val tokens = lines.map( str => ParserUtils.splitOnWhitespace(Buf.Utf8(str)))
+    val tokens = lines.map(str => ParserUtils.splitOnWhitespace(Buf.Utf8(str)))
 
     assert(context.decodeString(line1) == Seq.empty)
     assert(context.decoder.nextFrameBytes() == -1)
@@ -81,14 +84,16 @@ class MemcachedClientDecoderTest extends FunSuite {
     context.decodeString(end) match {
       case Seq(InfoLines(ilines)) =>
         assert(ilines.size == 3)
-        ilines.zipWithIndex.foreach { case(line, idx) =>
-          val key = tokens(idx).head
-          val values = tokens(idx).drop(1)
-          assert(line.key == key)
-          assert(line.values.size == values.size)
-          line.values.zipWithIndex.foreach { case(token, tokIdx) =>
-            assert(token == values(tokIdx))
-          }
+        ilines.zipWithIndex.foreach {
+          case (line, idx) =>
+            val key = tokens(idx).head
+            val values = tokens(idx).drop(1)
+            assert(line.key == key)
+            assert(line.values.size == values.size)
+            line.values.zipWithIndex.foreach {
+              case (token, tokIdx) =>
+                assert(token == values(tokIdx))
+            }
         }
 
       case other => fail(s"Unexpected value: $other")
@@ -113,4 +118,3 @@ class MemcachedClientDecoderTest extends FunSuite {
     }
   }
 }
-

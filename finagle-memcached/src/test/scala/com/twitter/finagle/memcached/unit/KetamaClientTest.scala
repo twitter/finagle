@@ -36,7 +36,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
         expected += segments
       }
     } while (line != null)
-      assert(expected.size == 99)
+    assert(expected.size == 99)
 
     // Build Ketama client
     def newMock() = {
@@ -45,14 +45,14 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       s
     }
     val clients = Map(
-      CacheNode("10.0.1.1", 11211, 600)  -> newMock(),
-      CacheNode("10.0.1.2", 11211, 300)  -> newMock(),
-      CacheNode("10.0.1.3", 11211, 200)  -> newMock(),
-      CacheNode("10.0.1.4", 11211, 350)  -> newMock(),
+      CacheNode("10.0.1.1", 11211, 600) -> newMock(),
+      CacheNode("10.0.1.2", 11211, 300) -> newMock(),
+      CacheNode("10.0.1.3", 11211, 200) -> newMock(),
+      CacheNode("10.0.1.4", 11211, 350) -> newMock(),
       CacheNode("10.0.1.5", 11211, 1000) -> newMock(),
-      CacheNode("10.0.1.6", 11211, 800)  -> newMock(),
-      CacheNode("10.0.1.7", 11211, 950)  -> newMock(),
-      CacheNode("10.0.1.8", 11211, 100)  -> newMock()
+      CacheNode("10.0.1.6", 11211, 800) -> newMock(),
+      CacheNode("10.0.1.7", 11211, 950) -> newMock(),
+      CacheNode("10.0.1.8", 11211, 100) -> newMock()
     )
 
     def newService(node: CacheNode) = clients.get(node).get
@@ -87,7 +87,6 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
     val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
 
-
     // simulate a cancelled request
     val r = ketamaClient.getResult(Seq("key"))
     assert(r.poll == None)
@@ -112,8 +111,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
 
   test("ejects dead clients") {
     trait KetamaClientBuilder {
-      val serviceA = mock[Service[Command,Response]](RETURNS_SMART_NULLS)
-      val serviceB = mock[Service[Command,Response]](RETURNS_SMART_NULLS)
+      val serviceA = mock[Service[Command, Response]](RETURNS_SMART_NULLS)
+      val serviceB = mock[Service[Command, Response]](RETURNS_SMART_NULLS)
       val nodeA = CacheNode("10.0.1.1", 11211, 100)
       val nodeB = CacheNode("10.0.1.2", 11211, 100)
       val nodeKeyA = KetamaClientKey(nodeA.host, nodeA.port, nodeA.weight)
@@ -122,8 +121,8 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
         nodeA -> serviceA,
         nodeB -> serviceB
       )
-      val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(
-        Addr.Bound(services.keys.toSeq.map(CacheNode.toAddress): _*))
+      val mutableAddrs: ReadWriteVar[Addr] =
+        new ReadWriteVar(Addr.Bound(services.keys.toSeq.map(CacheNode.toAddress): _*))
 
       val key = Buf.Utf8("foo")
       val value = mock[Value](RETURNS_SMART_NULLS)

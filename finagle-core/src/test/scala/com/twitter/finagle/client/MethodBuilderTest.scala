@@ -15,26 +15,31 @@ import org.scalatest.{FunSuite, Matchers}
 
 private object MethodBuilderTest {
   private val neverSvc: Service[Int, Int] =
-    Service.mk { _ => Future.never }
+    Service.mk { _ =>
+      Future.never
+    }
 
   val totalTimeoutStack: Stack[ServiceFactory[Int, Int]] = {
     val svcFactory = ServiceFactory.const(neverSvc)
     // use a no-op module to verify it will get swapped out
     val totalModule = new NoOpModule[ServiceFactory[Int, Int]](
-      TimeoutFilter.totalTimeoutRole, "testing total timeout")
+      TimeoutFilter.totalTimeoutRole,
+      "testing total timeout"
+    )
     totalModule.toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
   }
 
   val stack: Stack[ServiceFactory[Int, Int]] = {
     val svcFactory = ServiceFactory.const(neverSvc)
-    TimeoutFilter.clientModule[Int, Int]
+    TimeoutFilter
+      .clientModule[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
   }
 
   case class TestStackClient(
-      override val stack: Stack[ServiceFactory[Int, Int]],
-      override val params: Params)
-    extends StackClient[Int, Int] { self =>
+    override val stack: Stack[ServiceFactory[Int, Int]],
+    override val params: Params
+  ) extends StackClient[Int, Int] { self =>
 
     def withStack(stack: Stack[ServiceFactory[Int, Int]]): StackClient[Int, Int] =
       TestStackClient(stack, self.params)
@@ -51,11 +56,7 @@ private object MethodBuilderTest {
 }
 
 @RunWith(classOf[JUnitRunner])
-class MethodBuilderTest
-  extends FunSuite
-  with Matchers
-  with Eventually
-  with IntegrationPatience {
+class MethodBuilderTest extends FunSuite with Matchers with Eventually with IntegrationPatience {
 
   import MethodBuilderTest._
 
@@ -68,9 +69,10 @@ class MethodBuilderTest
     val stackClient = TestStackClient(totalTimeoutStack, params)
     val methodBuilder = MethodBuilder.from("retry_it", stackClient)
 
-    val client = methodBuilder
-      .withTimeout.total(10.milliseconds)
-      .withRetry.forClassifier {
+    val client = methodBuilder.withTimeout
+      .total(10.milliseconds)
+      .withRetry
+      .forClassifier {
         case ReqRep(_, Throw(_: GlobalRequestTimeoutException)) =>
           ResponseClass.RetryableFailure
       }
@@ -99,7 +101,8 @@ class MethodBuilderTest
       Future.sleep(perReqTimeout + 1.millis)(timer).map(_ => i)
     }
 
-    val stack = TimeoutFilter.clientModule[Int, Int]
+    val stack = TimeoutFilter
+      .clientModule[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("together", stackClient)
@@ -107,10 +110,12 @@ class MethodBuilderTest
     // the first 2 attempts will hit the per-request timeout, with each
     // being retried. then the the 3 attempt (2nd retry) should run into
     // the total timeout.
-    val client = methodBuilder
-      .withTimeout.perRequest(perReqTimeout)
-      .withTimeout.total(totalTimeout)
-      .withRetry.forClassifier {
+    val client = methodBuilder.withTimeout
+      .perRequest(perReqTimeout)
+      .withTimeout
+      .total(totalTimeout)
+      .withRetry
+      .forClassifier {
         case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
           ResponseClass.RetryableFailure
       }
@@ -168,7 +173,8 @@ class MethodBuilderTest
         Future.value(i)
     }
 
-    val stack = TimeoutFilter.clientModule[Int, Int]
+    val stack = TimeoutFilter
+      .clientModule[Int, Int]
       .toStack(Stack.Leaf(Stack.Role("test"), ServiceFactory.const(svc)))
     val stackClient = TestStackClient(stack, params)
     val methodBuilder = MethodBuilder.from("destination", stackClient)
@@ -176,9 +182,10 @@ class MethodBuilderTest
     // the first attempts will hit the per-request timeout and will be
     // retried. then the retry should succeed.
     val methodName = "a_method"
-    val client = methodBuilder
-      .withTimeout.perRequest(perReqTimeout)
-      .withRetry.forClassifier {
+    val client = methodBuilder.withTimeout
+      .perRequest(perReqTimeout)
+      .withRetry
+      .forClassifier {
         case ReqRep(_, Throw(_: IndividualRequestTimeoutException)) =>
           ResponseClass.RetryableFailure
       }
@@ -260,10 +267,12 @@ class MethodBuilderTest
       assert(filteredRegistry == vanillaEntries)
 
       // test with retries disabled and timeouts
-      val sundaeSvc = methodBuilder
-        .withTimeout.total(10.seconds)
-        .withTimeout.perRequest(1.second)
-        .withRetry.disabled
+      val sundaeSvc = methodBuilder.withTimeout
+        .total(10.seconds)
+        .withTimeout
+        .perRequest(1.second)
+        .withRetry
+        .disabled
         .newService("sundae")
       val sundaeEntries = Set(
         Entry(key("sundae", "statsReceiver"), s"InMemoryStatsReceiver/$clientName/sundae"),
@@ -313,9 +322,10 @@ class MethodBuilderTest
     // verify the metrics are getting filtered down
     assert(!stats.gauges.contains(Seq(clientLabel, methodName, "logical", "pending")))
 
-    val failureCounters = stats.counters.exists { case (names, _) =>
-      names.containsSlice(Seq(clientLabel, methodName, "logical", "failures")) ||
-        names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
+    val failureCounters = stats.counters.exists {
+      case (names, _) =>
+        names.containsSlice(Seq(clientLabel, methodName, "logical", "failures")) ||
+          names.containsSlice(Seq(clientLabel, methodName, "logical", "sourcedfailures"))
     }
     assert(!failureCounters)
   }

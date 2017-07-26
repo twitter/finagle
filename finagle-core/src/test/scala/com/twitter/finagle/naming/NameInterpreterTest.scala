@@ -17,8 +17,10 @@ class NameInterpreterTest extends FunSuite with BeforeAndAfter {
   }
 
   test("NameInterpreter uses dtab when interpreter is not set") {
-    assert(NameInterpreter.bind(dtab, name).sample() ==
-      NameTree.Leaf(Path.read("/$/inet/localhost/1234")))
+    assert(
+      NameInterpreter.bind(dtab, name).sample() ==
+        NameTree.Leaf(Path.read("/$/inet/localhost/1234"))
+    )
   }
 
   test("NameInterpreter uses it when interpreter is set") {

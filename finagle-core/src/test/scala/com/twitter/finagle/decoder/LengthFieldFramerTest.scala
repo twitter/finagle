@@ -5,8 +5,7 @@ import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.util.Random
 
-
-class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
+class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   val MaxTestFrameSize = 32
   val MaxTestFrames = 30
@@ -21,7 +20,8 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
 
   // Make a simple frame consisting of a one-byte size followed by data
   def mkTestFrame(dataSize: Int): Buf = {
-    Buf.ByteArray.Owned(Array[Byte]((dataSize & 0xff).toByte))
+    Buf.ByteArray
+      .Owned(Array[Byte]((dataSize & 0xff).toByte))
       .concat(Buf.ByteArray.Owned(Array.fill[Byte](dataSize)(mkByte())))
   }
 
@@ -48,9 +48,11 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
   def dataStream(rand: Random): (Seq[Int], Buf) = {
     val frames = rand.nextInt(MaxTestFrames) + 1
     val frameSizes = (1 to frames).map(_ => rand.nextInt(MaxTestFrameSize))
-    val stream = frameSizes.map { size =>
-      mkTestFrame(size)
-    }.foldLeft(Buf.Empty)(_.concat(_))
+    val stream = frameSizes
+      .map { size =>
+        mkTestFrame(size)
+      }
+      .foldLeft(Buf.Empty)(_.concat(_))
     (frameSizes, stream)
   }
 
@@ -65,15 +67,17 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
       lengthFieldLength = 1,
       lengthAdjust = 1,
       maxFrameLength = 64,
-      bigEndian = true)
+      bigEndian = true
+    )
 
     val decodedStream = partitionStream(stream, rand).flatMap(decoder)
 
     assert(decodedStream.length == sizes.length)
 
     // Make sure the frames are all there and have the correct length
-    decodedStream.zip(sizes).foreach { case (frame: Buf, size: Int) =>
-      validateFrame(frame, size)
+    decodedStream.zip(sizes).foreach {
+      case (frame: Buf, size: Int) =>
+        validateFrame(frame, size)
     }
 
     // Make sure frames are delivered in order
@@ -89,7 +93,7 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
       lengthFieldBegin = 1,
       lengthFieldLength = 2,
       lengthAdjust = 3,
-      maxFrameLength= 64,
+      maxFrameLength = 64,
       bigEndian = true
     )
 
@@ -99,7 +103,9 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
     assert(decoder(packetSizeOne) == IndexedSeq(packetSizeOne))
   }
 
-  test("behave properly if the length field is in the middle and the given length counts the header") {
+  test(
+    "behave properly if the length field is in the middle and the given length counts the header"
+  ) {
     //               { header     len  header}{ data                     }
     val frame = mkBuf(0x0A, 0x0A, 0x09, 0x0A, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D)
     val decoder = new LengthFieldFramer(
@@ -168,7 +174,7 @@ class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
     val f4BE = mkBuf(0x00, 0x00, 0x00, 0x02, 0x11, 0x11)
     val f8BE = mkBuf(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x11, 0x11)
 
-    assert(decode(f2BE, 2)  == f2BE)
+    assert(decode(f2BE, 2) == f2BE)
     assert(decode(f3BE, 3) == f3BE)
     assert(decode(f4BE, 4) == f4BE)
     assert(decode(f8BE, 8) == f8BE)

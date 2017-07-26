@@ -14,17 +14,22 @@ import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class TracingFilterTest
-  extends FunSuite with MockitoSugar with BeforeAndAfter with AssertionsForJUnit {
+    extends FunSuite
+    with MockitoSugar
+    with BeforeAndAfter
+    with AssertionsForJUnit {
 
   val serviceName = "bird"
   val service = Service.mk[Int, Int](Future.value)
-  val exceptingService = Service.mk[Int, Int]({ x => Future.exception(new Exception("bummer"))})
+  val exceptingService = Service.mk[Int, Int]({ x =>
+    Future.exception(new Exception("bummer"))
+  })
 
   var tracer: Tracer = _
   var captor: ArgumentCaptor[Record] = _
 
   override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position) {
-    super.test(testName, testTags:_*) {
+    super.test(testName, testTags: _*) {
       tracer = spy(new NullTracer)
       when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
       captor = ArgumentCaptor.forClass(classOf[Record])
@@ -60,7 +65,8 @@ class TracingFilterTest
     test(s"$prefix: should trace Finagle version") {
       val versions = record(mkFilter("1.2.3")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
-          if key == s"$prefix/finagle.version" => ver
+            if key == s"$prefix/finagle.version" =>
+          ver
       }
       assert(versions == Seq("1.2.3"))
     }
@@ -68,7 +74,8 @@ class TracingFilterTest
     test(s"$prefix: should trace unknown Finagle version") {
       val versions = record(mkFilter("?")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
-          if key == s"$prefix/finagle.version" => ver
+            if key == s"$prefix/finagle.version" =>
+          ver
       }
       assert(versions == Seq("?"))
     }
@@ -84,7 +91,8 @@ class TracingFilterTest
       val dtab = Dtab.read("/fox=>/spooky;/dana=>/starbuck")
       val dtabs = record(withDtab(dtab) andThen mkFilter("")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
-          if key == s"$prefix/dtab.local" => dtab
+            if key == s"$prefix/dtab.local" =>
+          dtab
       }
       assert(dtabs == Seq(dtab.show))
     }
@@ -92,7 +100,8 @@ class TracingFilterTest
     test(s"$prefix: should not trace empty Dtab.local") {
       val dtabs = record(withDtab(Dtab.empty) andThen mkFilter("")) collect {
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
-          if key == s"$prefix/dtab.local" => dtab
+            if key == s"$prefix/dtab.local" =>
+          dtab
       }
       assert(dtabs.isEmpty)
     }
@@ -108,22 +117,25 @@ class TracingFilterTest
 
   test("clnt: send and then recv") {
     val annotations = record(mkClient()) collect {
-      case Record(_, _, a@Annotation.ClientSend(), _) => a
-      case Record(_, _, a@Annotation.ClientRecv(), _) => a
+      case Record(_, _, a @ Annotation.ClientSend(), _) => a
+      case Record(_, _, a @ Annotation.ClientRecv(), _) => a
     }
     assert(annotations == Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
   }
 
   test("clnt: recv error") {
     val annotations = recordException(mkClient()) collect {
-      case Record(_, _, a@Annotation.ClientSend(), _) => a
-      case Record(_, _, a@Annotation.ClientRecv(), _) => a
-      case Record(_, _, a@Annotation.ClientRecvError(_), _) => a
+      case Record(_, _, a @ Annotation.ClientSend(), _) => a
+      case Record(_, _, a @ Annotation.ClientRecv(), _) => a
+      case Record(_, _, a @ Annotation.ClientRecvError(_), _) => a
     }
-    assert(annotations == Seq(
-      Annotation.ClientSend(),
-      Annotation.ClientRecvError("java.lang.Exception: bummer"),
-      Annotation.ClientRecv()))
+    assert(
+      annotations == Seq(
+        Annotation.ClientSend(),
+        Annotation.ClientRecvError("java.lang.Exception: bummer"),
+        Annotation.ClientRecv()
+      )
+    )
   }
 
   /*
@@ -136,8 +148,8 @@ class TracingFilterTest
 
   test("srv: recv and then send") {
     val annotations = record(mkServer()) collect {
-      case Record(_, _, a@Annotation.ServerRecv(), _) => a
-      case Record(_, _, a@Annotation.ServerSend(), _) => a
+      case Record(_, _, a @ Annotation.ServerRecv(), _) => a
+      case Record(_, _, a @ Annotation.ServerSend(), _) => a
     }
     assert(annotations == Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
   }

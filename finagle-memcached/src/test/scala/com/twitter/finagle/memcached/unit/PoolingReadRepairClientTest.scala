@@ -31,9 +31,9 @@ class PoolingReadRepairClientTest extends FunSuite {
     val context = new Context
     import context._
 
-    assert(partial.map.size                            == 1)
+    assert(partial.map.size == 1)
     assert(awaitResult(pooled.withStrings.get("foo")) == Some("bar"))
-    assert(partial.map.size                            == 2)
+    assert(partial.map.size == 2)
   }
 
 }

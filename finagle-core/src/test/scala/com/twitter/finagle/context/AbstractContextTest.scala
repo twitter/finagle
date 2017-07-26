@@ -31,7 +31,7 @@ abstract class AbstractContextTest extends FunSuite with AssertionsForJUnit {
       assert(ctx(a) == "ok")
     }
 
-    assert(ran == 1)  // Make sure it was only run once
+    assert(ran == 1) // Make sure it was only run once
   }
 
   test("Context.let(Iterable(pair1, pair2, ..)) binds multiple keys") {
@@ -200,17 +200,17 @@ abstract class AbstractContextTest extends FunSuite with AssertionsForJUnit {
   test("Recursive binds don't result in StackOverflowError") {
     def loop(i: Int): Future[Unit] = {
       if (i <= 0) {
-        assert(ctx.get(b) == None)  // Forces evaluation of the whole context
+        assert(ctx.get(b) == None) // Forces evaluation of the whole context
         Future.value(())
-      } else ctx.let(a, "value") {
-        // We propagate the current context for use in the `before` block, but trampoline it
-        // by using a Future so we don't get a SOE from trying to build the computation itself.
-        Future.value(()).before(loop(i - 1))
-      }
+      } else
+        ctx.let(a, "value") {
+          // We propagate the current context for use in the `before` block, but trampoline it
+          // by using a Future so we don't get a SOE from trying to build the computation itself.
+          Future.value(()).before(loop(i - 1))
+        }
     }
 
-
-    val f = loop(20*1024).liftToTry // should be enough to cause a SOE, if its going to happen
+    val f = loop(20 * 1024).liftToTry // should be enough to cause a SOE, if its going to happen
     val r = Await.result(f, 10.seconds)
     assert(r.isReturn)
   }

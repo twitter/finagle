@@ -23,7 +23,7 @@ class InetSocketAddressUtilTest extends FunSuite {
       val ipv6loopback = InetAddress.getByName("::1")
       val ipv6LoSockAddr = new InetSocketAddress(ipv6loopback, port1)
       val ipv6any = InetAddress.getByName("::0")
-      val ipv6AnySockAddr= new InetSocketAddress(ipv6any, port1)
+      val ipv6AnySockAddr = new InetSocketAddress(ipv6any, port1)
 
       assert(InetSocketAddressUtil.toPublic(mySockAddr) == mySockAddr)
       assert(InetSocketAddressUtil.toPublic(sock) == mySockAddr)
@@ -33,8 +33,7 @@ class InetSocketAddressUtilTest extends FunSuite {
       // to whoever re-implements toPublic in case they change the behavior
       assert(InetSocketAddressUtil.toPublic(loopbackSockAddr) == loopbackSockAddr)
       assert(InetSocketAddressUtil.toPublic(ipv6LoSockAddr) == ipv6LoSockAddr)
-    }
-    catch {
+    } catch {
       // this could happen if you don't have a resolvable hostname or a public ip
       case e: UnknownHostException => info("Skipping tests because your network is misconfigured")
     }
@@ -43,11 +42,19 @@ class InetSocketAddressUtilTest extends FunSuite {
   test("resolveHostPorts") {
     assert(InetSocketAddressUtil.resolveHostPorts(Seq()).isEmpty)
 
-    intercept[IllegalArgumentException] { InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", -1))) }
+    intercept[IllegalArgumentException] {
+      InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", -1)))
+    }
 
-    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1))) == Set(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1), ("127.0.0.1", port2))) ==
-      Set(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
+    assert(
+      InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1))) == Set(
+        new InetSocketAddress("127.0.0.1", port1)
+      )
+    )
+    assert(
+      InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1), ("127.0.0.1", port2))) ==
+        Set(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2))
+    )
   }
 
   test("parseHosts") {
@@ -55,17 +62,41 @@ class InetSocketAddressUtilTest extends FunSuite {
     assert(InetSocketAddressUtil.parseHosts(",").isEmpty)
     intercept[IllegalArgumentException] { InetSocketAddressUtil.parseHosts("gobble-d-gook") }
 
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts(",127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts(" 127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",127.0.0.1:" + port2) ==
-      Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " 127.0.0.1:" + port2) ==
-      Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
+    assert(
+      InetSocketAddressUtil
+        .parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil
+        .parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil
+        .parseHosts("127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil
+        .parseHosts(",127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil
+        .parseHosts("127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil
+        .parseHosts(" 127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1))
+    )
+    assert(
+      InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",127.0.0.1:" + port2) ==
+        Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2))
+    )
+    assert(
+      InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " 127.0.0.1:" + port2) ==
+        Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2))
+    )
 
-    assert(InetSocketAddressUtil.parseHosts(":" + port1) == Seq(new InetSocketAddress("0.0.0.0", port1)))
+    assert(
+      InetSocketAddressUtil.parseHosts(":" + port1) == Seq(new InetSocketAddress("0.0.0.0", port1))
+    )
   }
 }

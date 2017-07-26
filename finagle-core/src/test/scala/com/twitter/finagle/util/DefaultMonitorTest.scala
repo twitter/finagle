@@ -15,10 +15,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 
 @RunWith(classOf[JUnitRunner])
-class DefaultMonitorTest extends FunSuite
-  with Matchers
-  with MockitoSugar
-  with BeforeAndAfterEach {
+class DefaultMonitorTest extends FunSuite with Matchers with MockitoSugar with BeforeAndAfterEach {
 
   private var handler: Handler = _
 
@@ -48,9 +45,9 @@ class DefaultMonitorTest extends FunSuite
   }
 
   private[this] class MyTimeoutException(
-      protected val timeout: Duration,
-      protected val explanation: String)
-    extends TimeoutException
+    protected val timeout: Duration,
+    protected val explanation: String
+  ) extends TimeoutException
 
   test("Failures with low log levels are handled") {
     val f = Failure("debug handled").withLogLevel(Level.DEBUG)
@@ -71,7 +68,8 @@ class DefaultMonitorTest extends FunSuite
   }
 
   test("HasLogLevel wrapped c.t.util.TimeoutExceptions are handled") {
-    val f = Failure.wrap(new UtilTimeoutException("6 minute abs"))
+    val f = Failure
+      .wrap(new UtilTimeoutException("6 minute abs"))
       .withLogLevel(Level.DEBUG)
     assert(monitor.handle(f))
     verifyPublished(Level.TRACE, f)

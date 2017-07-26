@@ -53,7 +53,8 @@ class Context {
     healthStatus.pulse.recv,
     grace,
     statsRecv.scope("testGroup"),
-    timer)
+    timer
+  )
 
   @volatile var stabilized: Addr = Addr.Pending
   for (addr <- stabilizedAddr)

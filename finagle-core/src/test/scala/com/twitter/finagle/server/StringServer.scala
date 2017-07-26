@@ -28,9 +28,9 @@ trait StringServer {
   import StringServer._
 
   case class Server(
-      stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
-      params: Stack.Params = StackServer.defaultParams + param.ProtocolLibrary(protocolLibrary))
-    extends StdStackServer[String, String, Server] {
+    stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
+    params: Stack.Params = StackServer.defaultParams + param.ProtocolLibrary(protocolLibrary)
+  ) extends StdStackServer[String, String, Server] {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params

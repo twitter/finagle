@@ -3,16 +3,16 @@ package com.twitter.finagle.param
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
-class ServerTransportParamsTest
-  extends FunSuite
-  with MockitoSugar
-  with StringServer {
+class ServerTransportParamsTest extends FunSuite with MockitoSugar with StringServer {
 
   private val config = SslServerConfiguration()
   private val engine = mock[Engine]

@@ -55,10 +55,16 @@ class JvmFilterTest extends FunSuite with MockitoSugar {
         p.setValue("ko")
       }
 
-      assert(trace == Seq(
-        Record(
-          Trace.id, 1.second.ago,
-          Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString), Some(1.second))))
+      assert(
+        trace == Seq(
+          Record(
+            Trace.id,
+            1.second.ago,
+            Annotation.Message(Gc(1, "pcopy", 1.second.ago, 1.second).toString),
+            Some(1.second)
+          )
+        )
+      )
     }
   }
 
@@ -76,10 +82,16 @@ class JvmFilterTest extends FunSuite with MockitoSugar {
         p.setValue("ko")
       }
 
-      assert(trace == Seq(
-        Record(
-          Trace.id, Time.now,
-          Annotation.Message(Gc(2, "pcopy", Time.now, 1.second).toString), Some(1.second))))
+      assert(
+        trace == Seq(
+          Record(
+            Trace.id,
+            Time.now,
+            Annotation.Message(Gc(2, "pcopy", Time.now, 1.second).toString),
+            Some(1.second)
+          )
+        )
+      )
     }
   }
 }

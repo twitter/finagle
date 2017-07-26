@@ -157,4 +157,3 @@ class SslContextServerEngineFactoryTest extends FunSuite {
     assert(sslEngine.getNeedClientAuth())
   }
 }
-

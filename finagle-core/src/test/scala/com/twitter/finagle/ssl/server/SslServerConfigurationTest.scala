@@ -1,7 +1,13 @@
 package com.twitter.finagle.ssl.server
 
 import com.twitter.finagle.ssl.{
-  ApplicationProtocols, CipherSuites, ClientAuth, KeyCredentials, Protocols, TrustCredentials}
+  ApplicationProtocols,
+  CipherSuites,
+  ClientAuth,
+  KeyCredentials,
+  Protocols,
+  TrustCredentials
+}
 import java.io.File
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -28,7 +34,8 @@ class SslServerConfigurationTest extends FunSuite {
     val keyFile: File = File.createTempFile("test", "key")
     keyFile.deleteOnExit()
 
-    val config = SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile))
+    val config =
+      SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile))
 
     config.keyCredentials match {
       case KeyCredentials.CertAndKey(testCertFile, testKeyFile) =>

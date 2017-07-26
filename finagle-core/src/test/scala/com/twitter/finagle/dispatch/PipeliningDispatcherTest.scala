@@ -16,22 +16,25 @@ import org.scalatest.mock.MockitoSugar
 class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
   val exns = Seq(
     ("util", new UtilTimeoutException("boom!"), never()),
-    ("finagle", new FinagleTimeoutException(1.second), never()))
+    ("finagle", new FinagleTimeoutException(1.second), never())
+  )
 
-  exns.foreach { case (kind, exc, numClosed) =>
-    test(s"PipeliningDispatcher: should ignore $kind timeout interrupts immediately") {
-      val timer = new MockTimer
-      Time.withCurrentTimeFrozen { _ =>
-        val trans = mock[Transport[Unit, Unit]]
-        when(trans.write(())).thenReturn(Future.Done)
-        when(trans.read()).thenReturn(Future.never)
-        when(trans.onClose).thenReturn(Future.never)
-        val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
-        val f = dispatch(())
-        f.raise(exc)
-        verify(trans, numClosed).close()
+  exns.foreach {
+    case (kind, exc, numClosed) =>
+      test(s"PipeliningDispatcher: should ignore $kind timeout interrupts immediately") {
+        val timer = new MockTimer
+        Time.withCurrentTimeFrozen { _ =>
+          val trans = mock[Transport[Unit, Unit]]
+          when(trans.write(())).thenReturn(Future.Done)
+          when(trans.read()).thenReturn(Future.never)
+          when(trans.onClose).thenReturn(Future.never)
+          val dispatch =
+            new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
+          val f = dispatch(())
+          f.raise(exc)
+          verify(trans, numClosed).close()
+        }
       }
-    }
   }
 
   test("PipeliningDispatcher: should not fail the request on an interrupt") {
@@ -41,7 +44,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
+      val dispatch =
+        new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, 10.seconds, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       assert(!f.isDefined)
@@ -56,7 +60,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(Future.never)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
+      val dispatch =
+        new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       verify(trans, never()).close()
@@ -76,7 +81,8 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       when(trans.write(())).thenReturn(Future.Done)
       when(trans.read()).thenReturn(readP)
       when(trans.onClose).thenReturn(Future.never)
-      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
+      val dispatch =
+        new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, stallTimeout, timer)
       val f = dispatch(())
       f.raise(new UtilTimeoutException("boom!"))
       verify(trans, never()).close()

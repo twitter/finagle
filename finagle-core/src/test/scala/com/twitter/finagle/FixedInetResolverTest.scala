@@ -38,19 +38,22 @@ class FixedInetResolverTest extends FunSuite {
 
     def resolve(host: String): Future[Seq[InetAddress]] = {
       numLookups += 1
-      if (shouldFailTimes+1 > numLookups) Future.exception(new UnknownHostException())
+      if (shouldFailTimes + 1 > numLookups) Future.exception(new UnknownHostException())
       else Future.value(Seq[InetAddress](InetAddress.getLoopbackAddress))
     }
 
-    val resolver = new FixedInetResolver(FixedInetResolver.cache(resolve, Long.MaxValue), statsReceiver)
+    val resolver =
+      new FixedInetResolver(FixedInetResolver.cache(resolve, Long.MaxValue), statsReceiver)
   }
 
   test("Caching resolver caches successes") {
     new Ctx {
       // make the same request n-times
-      val hostnames = (1 to 5).map { i => s"1.2.3.$i:100" }
+      val hostnames = (1 to 5).map { i =>
+        s"1.2.3.$i:100"
+      }
       val iterations = 10
-      for(i <- 1 to iterations; hostname <- hostnames) {
+      for (i <- 1 to iterations; hostname <- hostnames) {
         val request = resolver.bind(hostname).changes.filter(_ != Addr.Pending)
 
         Await.result(request.toFuture()) match {
@@ -65,7 +68,6 @@ class FixedInetResolverTest extends FunSuite {
       assert(statsReceiver.gauges(Seq("cache", "size"))() == 5)
     }
   }
-
 
   test("Caching resolver respects cache size parameter") {
     new Ctx {
@@ -85,7 +87,7 @@ class FixedInetResolverTest extends FunSuite {
       }
 
       val iterations = 10
-      for(i <- 1 to iterations) {
+      for (i <- 1 to iterations) {
         assertBound("1.2.3.4:100")
       }
       assert(numLookups == 1)
@@ -115,7 +117,7 @@ class FixedInetResolverTest extends FunSuite {
       val hostname = "1.2.3.4:100"
       val iterations = 10
       shouldFailTimes = iterations
-      for(i <- 1 to iterations) {
+      for (i <- 1 to iterations) {
         val request = resolver.bind(hostname).changes.filter(_ != Addr.Pending)
 
         Await.result(request.toFuture()) match {
@@ -134,7 +136,8 @@ class FixedInetResolverTest extends FunSuite {
     new Ctx {
       val maxCacheSize = 1
       shouldFailTimes = 10
-      val nBackoffs = Backoff.exponentialJittered(1.milliseconds, 100.milliseconds).take(shouldFailTimes)
+      val nBackoffs =
+        Backoff.exponentialJittered(1.milliseconds, 100.milliseconds).take(shouldFailTimes)
       val mockTimer = new MockTimer
       val cache = FixedInetResolver.cache(resolve, maxCacheSize, nBackoffs, mockTimer)
       val resolver2 = new FixedInetResolver(cache, statsReceiver)

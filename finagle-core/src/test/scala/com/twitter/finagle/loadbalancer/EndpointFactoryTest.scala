@@ -7,25 +7,26 @@ import java.net.InetSocketAddress
 import org.scalatest.{FunSuite, OneInstancePerTest}
 
 class EndpointFactoryTest extends FunSuite with OneInstancePerTest {
-  private[this] val address = Address(
-    InetSocketAddress.createUnresolved("nop", 0))
+  private[this] val address = Address(InetSocketAddress.createUnresolved("nop", 0))
 
   private[this] var makeCount = 0
-  private[this] val make = () => new ServiceFactory[Int, Int] {
-    makeCount += 1
-    var closed = false
+  private[this] val make = () =>
+    new ServiceFactory[Int, Int] {
+      makeCount += 1
+      var closed = false
 
-    def apply(conn: ClientConnection) = Future.value(new Service[Int, Int] {
-      def apply(req: Int) = Future.value(req)
+      def apply(conn: ClientConnection) =
+        Future.value(new Service[Int, Int] {
+          def apply(req: Int) = Future.value(req)
+          override def status = if (closed) Status.Closed else Status.Open
+        })
+
+      def close(when: Time) = {
+        closed = true
+        Future.Done
+      }
+
       override def status = if (closed) Status.Closed else Status.Open
-    })
-
-    def close(when: Time) = {
-      closed = true
-      Future.Done
-    }
-
-    override def status = if (closed) Status.Closed else Status.Open
   }
 
   private[this] val ef = new LazyEndpointFactory(make, address)

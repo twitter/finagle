@@ -81,7 +81,6 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       val pool = new WatermarkPool(factory, 1, 1)
     }
 
-
     it("should enqueue requests when we have already allocated one item") {
       new WatermarkPoolLowOneHighOne {
         val f0 = pool()
@@ -270,17 +269,20 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         when(service.status).thenReturn(Status.Open)
       }
 
-      mocks zip services foreach { case (mock, service) =>
-        service.close()
-        verify(mock).status
-        verify(mock, never()).close(any[Time])
+      mocks zip services foreach {
+        case (mock, service) =>
+          service.close()
+          verify(mock).status
+          verify(mock, never()).close(any[Time])
       }
     }
 
     it("should return the cached connections for the next 100 apply calls") {
       // We can now fetch them again, incurring no additional object
       // creation.
-      0 until 100 foreach { _ => Await.result(pool()) }
+      0 until 100 foreach { _ =>
+        Await.result(pool())
+      }
       mocks foreach { service =>
         verify(service, times(2)).status
       }
@@ -331,7 +333,6 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         verify(factory)()
         assert(f.isDefined)
         assert(Await.result(f).status == Status.Open)
-
 
         Await.result(f).close()
         verify(service, never()).close(any[Time])
@@ -393,7 +394,9 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         when(factory()).thenReturn(s)
         pool()
       }
-      0 until maxWaiters map { _ => pool() }
+      0 until maxWaiters map { _ =>
+        pool()
+      }
       val f = pool()
       assert(f.isDefined)
       intercept[TooManyWaitersException] { Await.result(f) }

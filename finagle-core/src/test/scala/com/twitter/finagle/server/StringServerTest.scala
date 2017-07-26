@@ -13,17 +13,19 @@ import org.scalatest.junit.JUnitRunner
 import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
-class StringServerTest extends FunSuite
-  with StringServer
-  with StringClient
-  with Eventually
-  with IntegrationPatience {
+class StringServerTest
+    extends FunSuite
+    with StringServer
+    with StringClient
+    with Eventually
+    with IntegrationPatience {
 
   test("StringServer notices when the client cuts the connection") {
     val p = Promise[String]()
     @volatile var interrupted = false
-    p.setInterruptHandler { case NonFatal(t) =>
-      interrupted = true
+    p.setInterruptHandler {
+      case NonFatal(t) =>
+        interrupted = true
     }
     @volatile var observedRequest: Option[String] = None
 
@@ -34,9 +36,8 @@ class StringServerTest extends FunSuite
       }
     }
 
-    val server = stringServer.serve(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      service)
+    val server =
+      stringServer.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), service)
 
     val client = new Socket()
     eventually { client.connect(server.boundAddress) }
@@ -56,13 +57,15 @@ class StringServerTest extends FunSuite
     val label = "stringServer"
 
     val listeningServer = GlobalRegistry.withRegistry(registry) {
-      stringServer.withLabel(label)
+      stringServer
+        .withLabel(label)
         .serve(":*", Service.mk[String, String](Future.value(_)))
     }
 
     val expectedEntry = Entry(
       key = Seq("server", StringServer.protocolLibrary, label, "Listener"),
-      value = "Netty3Listener")
+      value = "Netty3Listener"
+    )
 
     assert(registry.iterator.contains(expectedEntry))
 
@@ -118,16 +121,14 @@ class StringServerTest extends FunSuite
       val initialState = registry.iterator.toArray
 
       assert(Await.result(client1("hello"), 1.second) == "hello")
-      val remoteAddr1 = registry
-        .iterator
+      val remoteAddr1 = registry.iterator
         .find(!initialState.contains(_))
         .get
 
       assert(Await.result(client2("foo"), 1.second) == "foo")
-      val remoteAddr2 = registry
-        .iterator
-        .find { a => !initialState.contains(a) && a != remoteAddr1}
-        .get
+      val remoteAddr2 = registry.iterator.find { a =>
+        !initialState.contains(a) && a != remoteAddr1
+      }.get
 
       Await.result(client2.close(), 5.seconds)
       eventually {

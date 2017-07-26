@@ -26,11 +26,15 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
 
     val sr = new InMemoryStatsReceiver
     val clientStack =
-      StackClient.newStack.replace(
-        LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
-    val client = stringClient.withStack(clientStack)
+      StackClient.newStack
+        .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
+    val client = stringClient
+      .withStack(clientStack)
       .withStatsReceiver(sr)
-      .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+      .newService(
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 4)
     assert(Await.result(client("hello\n"), 15.seconds) == "hello")
@@ -45,14 +49,16 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
 
     val sr = new InMemoryStatsReceiver
     val clientStack =
-      StackClient.newStack.replace(
-        LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
+      StackClient.newStack
+        .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
 
     val dest = Name.bound(
       Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
-      Address(server2.boundAddress.asInstanceOf[InetSocketAddress]))
+      Address(server2.boundAddress.asInstanceOf[InetSocketAddress])
+    )
 
-    val client = stringClient.withStack(clientStack)
+    val client = stringClient
+      .withStack(clientStack)
       .withStatsReceiver(sr)
       .configured(ConcurrentLoadBalancerFactory.Param(3))
       .newService(dest, "client")

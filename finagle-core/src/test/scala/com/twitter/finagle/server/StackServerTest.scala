@@ -23,7 +23,8 @@ class StackServerTest extends FunSuite with StringServer {
     })
     val stack = StackServer.newStack[Unit, Deadline] ++ Stack.Leaf(Endpoint, echo)
     val statsReceiver = new InMemoryStatsReceiver
-    val factory = stack.make(StackServer.defaultParams + TimeoutFilter.Param(1.second) + Stats(statsReceiver))
+    val factory =
+      stack.make(StackServer.defaultParams + TimeoutFilter.Param(1.second) + Stats(statsReceiver))
     val svc = Await.result(factory(), 5.seconds)
     Time.withCurrentTimeFrozen { ctl =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.seconds)) {
@@ -42,7 +43,9 @@ class StackServerTest extends FunSuite with StringServer {
   test("StackServer uses ExpiringService") {
     @volatile var closed = false
     val connSF = new ServiceFactory[Int, Int] {
-      val svc = Service.mk[Int, Int] { i => Future.value(i) }
+      val svc = Service.mk[Int, Int] { i =>
+        Future.value(i)
+      }
       def apply(conn: ClientConnection) = {
         conn.onClose.ensure { closed = true }
         Future.value(svc)
@@ -55,9 +58,10 @@ class StackServerTest extends FunSuite with StringServer {
     val lifeTime = 1.second
     val factory = stack.make(
       StackServer.defaultParams +
-      ExpiringService.Param(idleTime = Duration.Top, lifeTime = lifeTime) +
-      Timer(timer) +
-      Stats(sr))
+        ExpiringService.Param(idleTime = Duration.Top, lifeTime = lifeTime) +
+        Timer(timer) +
+        Stats(sr)
+    )
 
     val conn = new ClientConnection {
       val closed = new Promise[Unit]
@@ -124,7 +128,9 @@ class StackServerTest extends FunSuite with StringServer {
       def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
         service(req)
       }
-      onServerClose.onSuccess { _ => wasPromiseSatisfied.setDone() }
+      onServerClose.onSuccess { _ =>
+        wasPromiseSatisfied.setDone()
+      }
     }
 
     object ClosingFilter2 {

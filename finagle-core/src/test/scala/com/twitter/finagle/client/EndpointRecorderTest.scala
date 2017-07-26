@@ -25,7 +25,12 @@ final class EndpointRecorderTest extends FunSuite {
     def apply(req: Int) = Future.never
   })
 
-  def getEndpoints(registry: EndpointRegistry, name: String, dtab: Dtab, path: String): Option[Addr] = {
+  def getEndpoints(
+    registry: EndpointRegistry,
+    name: String,
+    dtab: Dtab,
+    path: String
+  ): Option[Addr] = {
     registry.endpoints(name).get(dtab).flatMap(_.get(path))
   }
 

@@ -164,7 +164,7 @@ class DelayedFactoryTest extends FunSuite {
 
       test(
         "%s: a factory that's completed with an exception should finish with an exception"
-        .format(name)
+          .format(name)
       ) {
         val ctx = helpFn()
         import ctx._
@@ -226,7 +226,10 @@ class DelayedFactoryTest extends FunSuite {
         assert(!underlying.isAvailable)
       }
 
-      test("%s: a factory that's closed prematurely should close the underlying on satisfaction".format(name)) {
+      test(
+        "%s: a factory that's closed prematurely should close the underlying on satisfaction"
+          .format(name)
+      ) {
         val ctx = helpFn()
         import ctx._
 
@@ -239,13 +242,17 @@ class DelayedFactoryTest extends FunSuite {
     }
   }
 
-  testDelayedHelpers(Map(
-    "Normal" -> (() => new BareDelayedHelper{}),
-    "Swapping" -> (() => new SwapOnBareHelper{})
-  ))
-  testClosingDelayedHelpers(Map(
-    "Normal" -> (() => new DefaultClosingHelper{}),
-    "Swapping" -> (() => new SwapOnCloseHelper{})
-  ))
+  testDelayedHelpers(
+    Map(
+      "Normal" -> (() => new BareDelayedHelper {}),
+      "Swapping" -> (() => new SwapOnBareHelper {})
+    )
+  )
+  testClosingDelayedHelpers(
+    Map(
+      "Normal" -> (() => new DefaultClosingHelper {}),
+      "Swapping" -> (() => new SwapOnCloseHelper {})
+    )
+  )
 
 }

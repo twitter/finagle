@@ -15,10 +15,14 @@ class StatsTransportTest extends FunSuite {
     val q = new AsyncQueue[Int]
     val sr = new InMemoryStatsReceiver
     val handler = new CategorizingExceptionStatsHandler
-    val trans = new StatsTransport(new QueueTransport[Int, Int](q, q) {
-      override def read(): Future[Int] = Future.exception(exc)
-      override def write(i: Int): Future[Unit] = Future.exception(exc)
-    }, handler, sr)
+    val trans = new StatsTransport(
+      new QueueTransport[Int, Int](q, q) {
+        override def read(): Future[Int] = Future.exception(exc)
+        override def write(i: Int): Future[Unit] = Future.exception(exc)
+      },
+      handler,
+      sr
+    )
 
     val exc0 = intercept[Exception] { Await.result(trans.read()) }
     val exc1 = intercept[Exception] { Await.result(trans.write(10)) }

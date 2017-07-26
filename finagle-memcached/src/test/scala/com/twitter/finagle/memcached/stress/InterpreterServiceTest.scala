@@ -37,15 +37,19 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
   }
 
   test("set & get") {
-    val _key  = "key"
+    val _key = "key"
     val value = Buf.Utf8("value")
-    val zero  = Buf.Utf8("0")
+    val zero = Buf.Utf8("0")
     val start = System.currentTimeMillis
     (0 until 100) map { i =>
       val key = _key + i
       awaitResult(client(Delete(Buf.Utf8(key))))
       awaitResult(client(Set(Buf.Utf8(key), 0, Time.epoch, value)))
-      assert(awaitResult(client(Get(Seq(Buf.Utf8(key))))) == Values(Seq(Value(Buf.Utf8(key), value, None, Some(zero)))))
+      assert(
+        awaitResult(client(Get(Seq(Buf.Utf8(key))))) == Values(
+          Seq(Value(Buf.Utf8(key), value, None, Some(zero)))
+        )
+      )
     }
     val end = System.currentTimeMillis
     // println("%d ms".format(end - start))

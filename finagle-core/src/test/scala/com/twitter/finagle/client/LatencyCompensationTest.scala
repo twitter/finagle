@@ -17,18 +17,16 @@ import org.scalatest.{BeforeAndAfterEach, FunSuite}
  */
 @RunWith(classOf[JUnitRunner])
 class LatencyCompensationTest
-  extends FunSuite
-  with AssertionsForJUnit
-  with Eventually
-  with BeforeAndAfterEach
-  with IntegrationPatience
-{
+    extends FunSuite
+    with AssertionsForJUnit
+    with Eventually
+    with BeforeAndAfterEach
+    with IntegrationPatience {
   def verifyCompensationModule(expected: Duration) =
     new Stack.Module[ServiceFactory[String, String]] {
       val role = Stack.Role("verify")
       val description = "Verify stack behavior"
-      val parameters = Seq(
-        implicitly[Stack.Param[LatencyCompensation.Compensator]])
+      val parameters = Seq(implicitly[Stack.Param[LatencyCompensation.Compensator]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[String, String]]) = {
         val LatencyCompensation.Compensation(compensation) = prms[LatencyCompensation.Compensation]
         assert(expected == compensation)
@@ -66,8 +64,9 @@ class LatencyCompensationTest
 
     class TestPromise[T] extends Promise[T] {
       @volatile var interrupted: Option[Throwable] = None
-      setInterruptHandler { case exc =>
-        interrupted = Some(exc)
+      setInterruptHandler {
+        case exc =>
+          interrupted = Some(exc)
       }
     }
     val receive, respond = new TestPromise[String]
@@ -75,7 +74,6 @@ class LatencyCompensationTest
     def awaitReceipt(): Unit =
       // Spin on this so we don't Await into a new thread, which breaks the clock.
       while (receive.poll == None) {}
-
 
     val service = Service.mk[String, String] { in =>
       receive.setValue(in)
@@ -92,11 +90,11 @@ class LatencyCompensationTest
     }
 
     lazy val baseEchoClient = Echo.stringClient
-          .configured(TimeoutFilter.Param(baseTimeout))
-          .configured(param.Timer(timer))
+      .configured(TimeoutFilter.Param(baseTimeout))
+      .configured(param.Timer(timer))
 
     lazy val compensatedEchoClient = baseEchoClient
-          .configured(LatencyCompensation.Compensator(compensator))
+      .configured(LatencyCompensation.Compensator(compensator))
 
     /*
      * N.B. connection timeout compensation is not tested
@@ -112,7 +110,6 @@ class LatencyCompensationTest
       finally Await.result(client.close() join server.close(), 10.seconds)
     }
   }
-
 
   test("TimeoutFilter.module accomodates latency compensation") {
     new Ctx {
@@ -139,7 +136,9 @@ class LatencyCompensationTest
     }
   }
 
-  test("TimeoutFilter.module accomodates configured latency compensation even when default override is set") {
+  test(
+    "TimeoutFilter.module accomodates configured latency compensation even when default override is set"
+  ) {
     new Ctx {
       // set a compensation to 0 which should cause a failure if the caller does not
       // explicitly .configure the client with a compensation parameter.
@@ -148,7 +147,6 @@ class LatencyCompensationTest
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
-
         // use the client which is configured with a compensation parameter
         whileConnected(compensatedEchoClient) { client =>
           val yo = client("yo")
@@ -198,62 +196,62 @@ class LatencyCompensationTest
   }
 
   if (!sys.props.contains("SKIP_FLAKY")) // TRFC-325
-  test("TimeoutFilter.module still times out requests when compensating") {
-    new Ctx {
-      metadata = Addr.Metadata("compensation" -> 2.seconds)
+    test("TimeoutFilter.module still times out requests when compensating") {
+      new Ctx {
+        metadata = Addr.Metadata("compensation" -> 2.seconds)
 
-      Time.withCurrentTimeFrozen { clock =>
-        whileConnected(compensatedEchoClient) { client =>
-          val sup = client("sup")
-          assert(!sup.isDefined)
-          assert(respond.interrupted == None)
+        Time.withCurrentTimeFrozen { clock =>
+          whileConnected(compensatedEchoClient) { client =>
+            val sup = client("sup")
+            assert(!sup.isDefined)
+            assert(respond.interrupted == None)
 
-          awaitReceipt()
-          assert(!sup.isDefined)
-          assert(respond.interrupted == None)
+            awaitReceipt()
+            assert(!sup.isDefined)
+            assert(respond.interrupted == None)
 
-          clock.advance(4.seconds)
-          timer.tick() // triggers the timeout
+            clock.advance(4.seconds)
+            timer.tick() // triggers the timeout
 
-          eventually {
-            assert(sup.isDefined)
-          }
-          assert(respond.interrupted.isDefined)
-          intercept[IndividualRequestTimeoutException] {
-            Await.result(sup, 10.seconds)
+            eventually {
+              assert(sup.isDefined)
+            }
+            assert(respond.interrupted.isDefined)
+            intercept[IndividualRequestTimeoutException] {
+              Await.result(sup, 10.seconds)
+            }
           }
         }
       }
     }
-  }
 
   if (!sys.props.contains("SKIP_FLAKY")) // TRFC-325
-  test("Latency compensator doesn't always add compensation") {
-    new Ctx {
-      Time.withCurrentTimeFrozen { clock =>
-        whileConnected(compensatedEchoClient) { client =>
-          val nm = client("nm")
-          assert(!nm.isDefined)
-          assert(respond.interrupted == None)
+    test("Latency compensator doesn't always add compensation") {
+      new Ctx {
+        Time.withCurrentTimeFrozen { clock =>
+          whileConnected(compensatedEchoClient) { client =>
+            val nm = client("nm")
+            assert(!nm.isDefined)
+            assert(respond.interrupted == None)
 
-          awaitReceipt()
-          assert(!nm.isDefined)
-          assert(respond.interrupted == None)
+            awaitReceipt()
+            assert(!nm.isDefined)
+            assert(respond.interrupted == None)
 
-          clock.advance(2.seconds)
-          timer.tick() // triggers the timeout
+            clock.advance(2.seconds)
+            timer.tick() // triggers the timeout
 
-          eventually {
-            assert(nm.isDefined)
-          }
-          assert(respond.interrupted.isDefined)
-          intercept[IndividualRequestTimeoutException] {
-            Await.result(nm, 10.seconds)
+            eventually {
+              assert(nm.isDefined)
+            }
+            assert(respond.interrupted.isDefined)
+            intercept[IndividualRequestTimeoutException] {
+              Await.result(nm, 10.seconds)
+            }
           }
         }
       }
     }
-  }
 
   test("Latency compensator doesn't apply if there's no base timeout") {
     new Ctx {

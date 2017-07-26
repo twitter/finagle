@@ -25,12 +25,16 @@ class ExceptionsTest extends FunSuite {
     assert(ex.getMessage.contains("foo"))
   }
 
-  test("ChannelException should generate message with underlying exception info when exception is provided") {
+  test(
+    "ChannelException should generate message with underlying exception info when exception is provided"
+  ) {
     val ex = new ChannelException(underlying, null)
     assert(!(ex.getMessage == null))
   }
 
-  test("ChannelException should generate message with correct info when all parameters are provided") {
+  test(
+    "ChannelException should generate message with correct info when all parameters are provided"
+  ) {
     val ex = new ChannelException(underlying, address)
     assert(ex.getMessage.contains("foo"))
     assert(ex.getMessage.contains("bar"))
@@ -100,10 +104,21 @@ class ExceptionsTest extends FunSuite {
     val upstreamAddr = new InetSocketAddress("2.3.4.5", 100)
     val upstreamId = "upstream"
 
-    exc.setRemoteInfo(RemoteInfo.Available(Some(upstreamAddr), Some(upstreamId), Some(downstreamAddr), Some(downstreamId), traceId))
-    assert(exc.getMessage() == "foo. Remote Info: Upstream Address: /2.3.4.5:100, Upstream id: upstream, " +
-      "Downstream Address: /1.2.3.4:100, Downstream label: downstream, " +
-      s"Trace Id: $traceId")
+    exc.setRemoteInfo(
+      RemoteInfo.Available(
+        Some(upstreamAddr),
+        Some(upstreamId),
+        Some(downstreamAddr),
+        Some(downstreamId),
+        traceId
+      )
+    )
+    assert(
+      exc
+        .getMessage() == "foo. Remote Info: Upstream Address: /2.3.4.5:100, Upstream id: upstream, " +
+        "Downstream Address: /1.2.3.4:100, Downstream label: downstream, " +
+        s"Trace Id: $traceId"
+    )
   }
 
   test("NoBrokersAvailableException includes dtabs in error message") {
@@ -113,11 +128,12 @@ class ExceptionsTest extends FunSuite {
       Dtab.read("/foo=>/$/com.twitter.butt")
     )
 
-    assert(ex.getMessage ==
-      "No hosts are available for /s/cool/story, " +
-      s"Dtab.base=[${Dtab.base.show}], " +
-      "Dtab.local=[/foo=>/$/com.twitter.butt]. " +
-      "Remote Info: Not Available"
+    assert(
+      ex.getMessage ==
+        "No hosts are available for /s/cool/story, " +
+          s"Dtab.base=[${Dtab.base.show}], " +
+          "Dtab.local=[/foo=>/$/com.twitter.butt]. " +
+          "Remote Info: Not Available"
     )
   }
 }

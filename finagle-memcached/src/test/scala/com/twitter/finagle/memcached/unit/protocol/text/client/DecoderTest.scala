@@ -1,7 +1,13 @@
 package com.twitter.finagle.memcached.unit.protocol.text.client
 
 import com.twitter.finagle.memcached.protocol.text.client.ClientDecoder
-import com.twitter.finagle.memcached.protocol.text.{Decoding, StatLines, Tokens, TokensWithData, ValueLines}
+import com.twitter.finagle.memcached.protocol.text.{
+  Decoding,
+  StatLines,
+  Tokens,
+  TokensWithData,
+  ValueLines
+}
 import com.twitter.io.Buf
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
@@ -16,7 +22,8 @@ class DecoderTest extends FunSuite with MockitoSugar {
       TokensWithData(tokens, data, None)
 
     protected def parseResponse(tokens: Seq[Buf]): Decoding = Tokens(tokens)
-    protected def parseResponseValues(valueLines: Seq[TokensWithData]): Decoding = ValueLines(valueLines)
+    protected def parseResponseValues(valueLines: Seq[TokensWithData]): Decoding =
+      ValueLines(valueLines)
     protected def parseStatLines(lines: Seq[Tokens]): Decoding = StatLines(lines.map(Tokens(_)))
   }
 
@@ -42,9 +49,16 @@ class DecoderTest extends FunSuite with MockitoSugar {
     assert(context.decodeString("1").isEmpty)
     assert(context.decodeString("VALUE bar 0 2").isEmpty)
     assert(context.decodeString("12").isEmpty)
-    assert(context.decodeString("END") == Seq(ValueLines(Seq(
-      TokensWithData(Seq("VALUE", "foo", "0", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
-      TokensWithData(Seq("VALUE", "bar", "0", "2") map { Buf.Utf8(_) }, Buf.Utf8("12"))))))
+    assert(
+      context.decodeString("END") == Seq(
+        ValueLines(
+          Seq(
+            TokensWithData(Seq("VALUE", "foo", "0", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
+            TokensWithData(Seq("VALUE", "bar", "0", "2") map { Buf.Utf8(_) }, Buf.Utf8("12"))
+          )
+        )
+      )
+    )
   }
 
   test("decode data with flag") {
@@ -54,9 +68,16 @@ class DecoderTest extends FunSuite with MockitoSugar {
     assert(context.decodeString("1").isEmpty)
     assert(context.decodeString("VALUE bar 10 2").isEmpty)
     assert(context.decodeString("12").isEmpty)
-    assert(context.decodeString("END") == Seq(ValueLines(Seq(
-      TokensWithData(Seq("VALUE", "foo", "20", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
-      TokensWithData(Seq("VALUE", "bar", "10", "2") map { Buf.Utf8(_) }, Buf.Utf8("12"))))))
+    assert(
+      context.decodeString("END") == Seq(
+        ValueLines(
+          Seq(
+            TokensWithData(Seq("VALUE", "foo", "20", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
+            TokensWithData(Seq("VALUE", "bar", "10", "2") map { Buf.Utf8(_) }, Buf.Utf8("12"))
+          )
+        )
+      )
+    )
   }
 
   test("decode end") {
@@ -72,11 +93,17 @@ class DecoderTest extends FunSuite with MockitoSugar {
     assert(context.decodeString("STAT items:1:age 1468").isEmpty)
     assert(context.decodeString("ITEM foo [5 b; 1322514067 s]").isEmpty)
     val lines = context.decodeString("END")
-    assert(lines == Seq(StatLines(Seq(
-      Tokens(Seq("STAT", "items:1:number", "1") map { Buf.Utf8(_) }),
-      Tokens(Seq("STAT", "items:1:age", "1468") map { Buf.Utf8(_) }),
-      Tokens(Seq("ITEM", "foo", "[5", "b;", "1322514067", "s]") map { Buf.Utf8(_) })
-    ))))
+    assert(
+      lines == Seq(
+        StatLines(
+          Seq(
+            Tokens(Seq("STAT", "items:1:number", "1") map { Buf.Utf8(_) }),
+            Tokens(Seq("STAT", "items:1:age", "1468") map { Buf.Utf8(_) }),
+            Tokens(Seq("ITEM", "foo", "[5", "b;", "1322514067", "s]") map { Buf.Utf8(_) })
+          )
+        )
+      )
+    )
   }
 
 }

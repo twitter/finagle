@@ -36,12 +36,13 @@ class crtnamer extends Namer {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ClientRegistryTest extends FunSuite
-  with StringClient
-  with Eventually
-  with IntegrationPatience
-  with BeforeAndAfter
-  with MockitoSugar {
+class ClientRegistryTest
+    extends FunSuite
+    with StringClient
+    with Eventually
+    with IntegrationPatience
+    with BeforeAndAfter
+    with MockitoSugar {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
@@ -141,7 +142,8 @@ class ClientRegistryTest extends FunSuite
     val simple = new SimpleRegistry
     GlobalRegistry.withRegistry(simple) {
       val c = stackClient.newClient(Name.Path(path), "foo")
-      val prefix = Seq("client", "fancy", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
+      val prefix =
+        Seq("client", "fancy", "foo", "/$/com.twitter.finagle.client.crtnamer/foo", "Pool")
       val filtered = GlobalRegistry.get.toSet.filter { e =>
         e.key.startsWith(prefix)
       }
@@ -164,7 +166,6 @@ class ClientRegistryTest extends FunSuite
 
   val param1 = TestParam(999)
 
-
   def newStack(): Stack[ServiceFactory[Int, Int]] = {
     val mockSvc = mock[Service[Int, Int]]
     when(mockSvc.apply(anyObject[Int])).thenReturn(Future.value(10))
@@ -176,12 +177,15 @@ class ClientRegistryTest extends FunSuite
       def description: String = "the head!!"
       def parameters: Seq[Stack.Param[_]] = Seq(TestParam2.param)
     }, factory))
-    val stackable: Stackable[ServiceFactory[Int, Int]] = new Stack.Module1[TestParam, ServiceFactory[Int, Int]] {
-      def make(p: TestParam, l: ServiceFactory[Int, Int]): ServiceFactory[Int, Int] = l.map { _.map { _ + p.p1 }}
+    val stackable: Stackable[ServiceFactory[Int, Int]] =
+      new Stack.Module1[TestParam, ServiceFactory[Int, Int]] {
+        def make(p: TestParam, l: ServiceFactory[Int, Int]): ServiceFactory[Int, Int] = l.map {
+          _.map { _ + p.p1 }
+        }
 
-      val description: String = "description"
-      val role: Stack.Role = nameRole
-    }
+        val description: String = "description"
+        val role: Stack.Role = nameRole
+      }
     stack.push(stackable)
 
     stack.result
@@ -219,7 +223,6 @@ class ClientRegistryTest extends FunSuite
     assert(ClientRegistry.registeredDuplicates(0).addr == "second")
     assert(ClientRegistry.registeredDuplicates(1).name == "foo")
     assert(ClientRegistry.registeredDuplicates(1).addr == "/$/fail")
-
 
     factory.close()
 

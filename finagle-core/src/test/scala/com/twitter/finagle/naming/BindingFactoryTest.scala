@@ -15,7 +15,9 @@ import scala.collection.JavaConverters._
 
 object BindingFactoryTest {
   object TestNamer {
-    var f: Path => Activity[NameTree[Name]] = { _ => Activity.value(NameTree.Neg) }
+    var f: Path => Activity[NameTree[Name]] = { _ =>
+      Activity.value(NameTree.Neg)
+    }
   }
   class TestNamer extends Namer {
     def lookup(path: Path): Activity[NameTree[Name]] = TestNamer.f(path)
@@ -37,7 +39,9 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   after {
     Dtab.base = saveBase
     NameInterpreter.global = DefaultInterpreter
-    TestNamer.f = { _ => Activity.value(NameTree.Neg) }
+    TestNamer.f = { _ =>
+      Activity.value(NameTree.Neg)
+    }
   }
 
   trait Ctx {
@@ -64,17 +68,20 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val tcOpt: Option[TimeControl] = None
 
     lazy val newFactory: Name.Bound => ServiceFactory[Unit, Var[Addr]] =
-      bound => new ServiceFactory[Unit, Var[Addr]] {
-        news += 1
-        def apply(conn: ClientConnection) = {
-          tcOpt.foreach(_.advance(1234.microseconds))
-          Future.value(Service.mk { _ => Future.value(bound.addr) })
-        }
+      bound =>
+        new ServiceFactory[Unit, Var[Addr]] {
+          news += 1
+          def apply(conn: ClientConnection) = {
+            tcOpt.foreach(_.advance(1234.microseconds))
+            Future.value(Service.mk { _ =>
+              Future.value(bound.addr)
+            })
+          }
 
-        def close(deadline: Time) = {
-          closes += 1
-          Future.Done
-        }
+          def close(deadline: Time) = {
+            closes += 1
+            Future.Done
+          }
       }
 
     lazy val factory = new BindingFactory(
@@ -83,7 +90,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       Timer.Nil,
       statsReceiver = imsr,
       maxNamerCacheSize = 2,
-      maxNameCacheSize = 2)
+      maxNameCacheSize = 2
+    )
 
     def newWith(localDtab: Dtab): Service[Unit, Var[Addr]] = {
       Dtab.unwind {
@@ -94,15 +102,18 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   }
 
   def mkFactory(st: Status) =
-    (bound: Name.Bound) => new ServiceFactory[Unit, Var[Addr]] {
-      def apply(conn: ClientConnection) =
-        Future.value(Service.mk { _ => Future.exception(new Exception("nup")) })
-      def close(deadline: Time) = Future.Done
-      override def status = st
+    (bound: Name.Bound) =>
+      new ServiceFactory[Unit, Var[Addr]] {
+        def apply(conn: ClientConnection) =
+          Future.value(Service.mk { _ =>
+            Future.exception(new Exception("nup"))
+          })
+        def close(deadline: Time) = Future.Done
+        override def status = st
     }
 
-  test("BindingFactory reflects status of underlying cached service factory") (
-    for(status <- Seq(Status.Busy, Status.Open, Status.Closed)) {
+  test("BindingFactory reflects status of underlying cached service factory")(
+    for (status <- Seq(Status.Busy, Status.Open, Status.Closed)) {
       new Ctx {
         override lazy val newFactory = mkFactory(status)
 
@@ -117,12 +128,14 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     }
   )
 
-  test("stats") (Time.withCurrentTimeFrozen { tc =>
+  test("stats")(Time.withCurrentTimeFrozen { tc =>
     new Ctx {
       override val tcOpt = Some(tc)
 
       val v = Var[Activity.State[NameTree[Name]]](Activity.Pending)
-      TestNamer.f = { _ => Activity(v) }
+      TestNamer.f = { _ =>
+        Activity(v)
+      }
       val f =
         Dtab.unwind {
           Dtab.local =
@@ -141,7 +154,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     }
   })
 
-  test("Uses Dtab.base") (new Ctx {
+  test("Uses Dtab.base")(new Ctx {
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
     val v1 = Await.result(s1(()))
@@ -150,7 +163,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     s1.close()
   })
 
-  test("Respects Dtab.base changes after service factory creation") (new Ctx {
+  test("Respects Dtab.base changes after service factory creation")(new Ctx {
     // factory is already created here
     Dtab.base ++= Dtab.read("/test1010=>/$/inet/1011")
     val n1 = Dtab.read("/foo/bar=>/test1010")
@@ -161,7 +174,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     s1.close()
   })
 
-  test("Includes path in NoBrokersAvailableException") (new Ctx {
+  test("Includes path in NoBrokersAvailableException")(new Ctx {
     val noBrokers = intercept[NoBrokersAvailableException] {
       Await.result(factory())
     }
@@ -170,7 +183,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.localDtab == Dtab.empty)
   })
 
-  test("Includes path and Dtab.local in NoBrokersAvailableException from name resolution") (new Ctx {
+  test("Includes path and Dtab.local in NoBrokersAvailableException from name resolution")(new Ctx {
     val localDtab = Dtab.read("/baz=>/quux")
 
     val noBrokers = intercept[NoBrokersAvailableException] {
@@ -194,7 +207,8 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
           def close(deadline: Time) = Future.Done
         }
       },
-      Timer.Nil)
+      Timer.Nil
+    )
 
     val noBrokers = intercept[NoBrokersAvailableException] {
       Dtab.unwind {
@@ -207,86 +221,95 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(noBrokers.localDtab == localDtab)
   }
 
-  test("Trace on success") (new Ctx {
-    withExpectedTrace({
-      val n1 = Dtab.read("/foo/bar=>/test1010")
-      val s1 = newWith(n1)
-      val v1 = Await.result(s1(()))
-      s1.close()
-    },
+  test("Trace on success")(new Ctx {
+    withExpectedTrace(
+      {
+        val n1 = Dtab.read("/foo/bar=>/test1010")
+        val s1 = newWith(n1)
+        val v1 = Await.result(s1(()))
+        s1.close()
+      },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
         Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
         Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
         Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
-      ))
+      )
+    )
   })
 
-  test("Trace on exception") (new Ctx {
-    withExpectedTrace({
-      val exc = new RuntimeException
+  test("Trace on exception")(new Ctx {
+    withExpectedTrace(
+      {
+        val exc = new RuntimeException
 
-      NameInterpreter.global = new NameInterpreter {
-        override def bind(dtab: Dtab, path: Path) = Activity.exception(exc)
-      }
+        NameInterpreter.global = new NameInterpreter {
+          override def bind(dtab: Dtab, path: Path) = Activity.exception(exc)
+        }
 
-      assert(intercept[Failure](Await.result(factory())).isFlagged(Failure.Naming))
-    },
+        assert(intercept[Failure](Await.result(factory())).isFlagged(Failure.Naming))
+      },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
         Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.BinaryAnnotation("namer.failure", "java.lang.RuntimeException")
-      ))
+      )
+    )
   })
 
-  test("Trace on negative resolution") (new Ctx {
-    withExpectedTrace({
-      intercept[NoBrokersAvailableException] {
-        Await.result(factory())
-      }
-    },
+  test("Trace on negative resolution")(new Ctx {
+    withExpectedTrace(
+      {
+        intercept[NoBrokersAvailableException] {
+          Await.result(factory())
+        }
+      },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
         Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
         Annotation.BinaryAnnotation("namer.tree", "~")
-      ))
+      )
+    )
   })
 
-  test("Trace on service creation failure") (new Ctx {
-    withExpectedTrace({
-      val localDtab = Dtab.read("/foo/bar=>/test1010")
+  test("Trace on service creation failure")(new Ctx {
+    withExpectedTrace(
+      {
+        val localDtab = Dtab.read("/foo/bar=>/test1010")
 
-      val f = new BindingFactory(
-        Path.read("/foo/bar"),
-        newFactory = { addr =>
-          new ServiceFactory[Unit, Unit] {
-            def apply(conn: ClientConnection) =
-              Future.exception(new NoBrokersAvailableException("/foo/bar"))
+        val f = new BindingFactory(
+          Path.read("/foo/bar"),
+          newFactory = { addr =>
+            new ServiceFactory[Unit, Unit] {
+              def apply(conn: ClientConnection) =
+                Future.exception(new NoBrokersAvailableException("/foo/bar"))
 
-            def close(deadline: Time) = Future.Done
+              def close(deadline: Time) = Future.Done
+            }
+          },
+          Timer.Nil
+        )
+
+        intercept[NoBrokersAvailableException] {
+          Dtab.unwind {
+            Dtab.local = localDtab
+            Await.result(f())
           }
-        },
-        Timer.Nil)
-
-      intercept[NoBrokersAvailableException] {
-        Dtab.unwind {
-          Dtab.local = localDtab
-          Await.result(f())
         }
-      }
-    },
+      },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
         Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
         Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
         Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
-      ))
+      )
+    )
   })
 
-  test("Caches namers") (new Ctx {
+  test("Caches namers")(new Ctx {
     val n1 = Dtab.read("/foo/bar=>/$/inet/1")
     val n2 = Dtab.read("/foo/bar=>/$/inet/2")
     val n3 = Dtab.read("/foo/bar=>/$/inet/3")
@@ -320,7 +343,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     assert(closes == 2)
   })
 
-  test("Caches names") (new Ctx {
+  test("Caches names")(new Ctx {
     val n1 = Dtab.read("/foo/bar=>/$/inet/1; /bar/baz=>/$/nil")
     val n2 = Dtab.read("/foo/bar=>/$/inet/1")
     val n3 = Dtab.read("/foo/bar=>/$/inet/2")
@@ -359,13 +382,17 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   test("BindingFactory.Module: filters with bound residual paths") {
     val module = new BindingFactory.Module[Path, Path] {
       protected[this] def boundPathFilter(path: Path) =
-        Filter.mk { (in, service) => service(path ++ in) }
+        Filter.mk { (in, service) =>
+          service(path ++ in)
+        }
     }
 
     val name = Name.Bound(Var(Addr.Pending), "id", Path.read("/alpha"))
 
-    val end = Stack.Leaf(Stack.Role("end"),
-      ServiceFactory(() => Future.value(Service.mk[Path, Path](Future.value))))
+    val end = Stack.Leaf(
+      Stack.Role("end"),
+      ServiceFactory(() => Future.value(Service.mk[Path, Path](Future.value)))
+    )
 
     val params = Stack.Params.empty + BindingFactory.Dest(name)
     val factory = module.toStack(end).make(params)

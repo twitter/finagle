@@ -51,25 +51,31 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   test("Consecutive failures policy: markDeadOnFailure() iterates over markDeadFor") {
     val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoff)
 
-    for(i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    for (i <- 0 until expBackoffList.length)
+      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
   }
 
-  test("Consecutive failures policy: markDeadOnFailure() returns Some(300.seconds) when stream runs out") {
+  test(
+    "Consecutive failures policy: markDeadOnFailure() returns Some(300.seconds) when stream runs out"
+  ) {
     val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoffList)
 
-    for(i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    for (i <- 0 until expBackoffList.length)
+      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
-    for(i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
+    for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
   }
 
   test("Consecutive failures policy: markDeadFor resets on revived()") {
     val policy = FailureAccrualPolicy.consecutiveFailures(1, expBackoff)
 
-    for(i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    for (i <- 0 until expBackoffList.length)
+      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
     policy.revived()
 
-    for(i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+    for (i <- 0 until expBackoffList.length)
+      assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
   }
 
   test("Success rate policy markDeadOnFailure() doesn't return Some(Duration) until min requests") {
@@ -86,11 +92,11 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   test("Success rate policy markDeadOnFailure() returns Some(Duration) when succes rate not met") {
     val policy = FailureAccrualPolicy.successRate(0.5, 100, constantBackoff)
 
-    for(i <- 0 until 100) policy.recordSuccess()
+    for (i <- 0 until 100) policy.recordSuccess()
 
     // With a window of 100, it will take 100*ln(2)+1 = 70 failures for the success
     // rate to drop below 0.5 (half-life)
-    for(i <- 0 until 69) assert(policy.markDeadOnFailure() == None)
+    for (i <- 0 until 69) assert(policy.markDeadOnFailure() == None)
 
     // 70th failure should trigger markDeadOnFailure to return Some(_)
     assert(policy.markDeadOnFailure() == Some(5.seconds))
@@ -99,17 +105,17 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   test("Success rate policy: markDeadOnFailure() iterates over markDeadFor") {
     val policy = FailureAccrualPolicy.successRate(1, 1, expBackoff)
 
-    for(i <- 0 until expBackoffList.length)
+    for (i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
   }
 
   test("Success rate policy: markDeadOnFailure() returns 300 when stream runs out") {
     val policy = FailureAccrualPolicy.successRate(1, 1, expBackoffList)
 
-    for(i <- 0 until expBackoffList.length)
+    for (i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
-    for(i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
+    for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
   }
 
   test("Sucess rate policy: markDeadFor resets on revived()") {
@@ -117,7 +123,7 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
 
     // At least 2 requests need to fail before markDeadOnFailure() returns Some(_)
     assert(policy.markDeadOnFailure() == None)
-    for(i <- 0 until expBackoffList.length)
+    for (i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
     policy.revived()
@@ -125,15 +131,17 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
     // The failures should've been reset. markDeadOnFailure() should return None
     // on the first failed request.
     assert(policy.markDeadOnFailure() == None)
-    for(i <- 0 until expBackoffList.length)
+    for (i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
   }
 
-  test("Success rate within duration policy: markDeadOnFailure() returns Some(Duration) when success rate not met") {
+  test(
+    "Success rate within duration policy: markDeadOnFailure() returns Some(Duration) when success rate not met"
+  ) {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
-      val policy = FailureAccrualPolicy.successRateWithinDuration(
-        1, successRateDuration, expBackoffList)
+      val policy =
+        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList)
 
       assert(policy.markDeadOnFailure() == None)
 
@@ -141,7 +149,8 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
       // All markDeadOnFailure() calls should now return Some(Duration),
       // and should iterate over expBackoffList.
       timeControl.advance(successRateDuration)
-      for (i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+      for (i <- 0 until expBackoffList.length)
+        assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
       // Stream 'expBackoffList' ran out of values.
       // All markDeadOnFailure() calls should return Some(300.seconds).
@@ -152,11 +161,12 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   test("Success rate within duration policy: revived() resets failures") {
     val successRateDuration = 30.seconds
     Time.withCurrentTimeFrozen { timeControl =>
-      val policy = FailureAccrualPolicy.successRateWithinDuration(
-        1, successRateDuration, expBackoffList)
+      val policy =
+        FailureAccrualPolicy.successRateWithinDuration(1, successRateDuration, expBackoffList)
 
       timeControl.advance(successRateDuration)
-      for (i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+      for (i <- 0 until expBackoffList.length)
+        assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
       policy.revived()
 
@@ -173,8 +183,8 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   test("Success rate within duration policy: fractional success rate") {
     val successRateDuration = 100.seconds
     Time.withCurrentTimeFrozen { timeControl =>
-      val policy = FailureAccrualPolicy.successRateWithinDuration(
-        0.5, successRateDuration, constantBackoff)
+      val policy =
+        FailureAccrualPolicy.successRateWithinDuration(0.5, successRateDuration, constantBackoff)
 
       for (i <- 0 until 100) {
         timeControl.advance(1.second)

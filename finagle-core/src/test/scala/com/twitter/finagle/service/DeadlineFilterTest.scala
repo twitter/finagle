@@ -23,7 +23,8 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     rejectPeriod = 10.seconds,
     maxRejectFraction = 0.2,
     statsReceiver = statsReceiver,
-    nowMillis = Stopwatch.timeMillis)
+    nowMillis = Stopwatch.timeMillis
+  )
 
   val deadlineService = deadlineFilter.andThen(service)
   promise.setValue("polo")
@@ -56,8 +57,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     }
   }
 
-  test("When the deadline is exceeded but the reject token bucket contains too few tokens, " +
-    "DeadlineFilter should service the request and increment the exceeded stat") {
+  test(
+    "When the deadline is exceeded but the reject token bucket contains too few tokens, " +
+      "DeadlineFilter should service the request and increment the exceeded stat"
+  ) {
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 3) Await.result(deadlineService("marco"), 1.second)
@@ -70,8 +73,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     }
   }
 
-  test("When the deadline is exceeded and the reject token bucket contains sufficient tokens," +
-    "DeadlineFilter should not service the request and increment the exceeded and rejected stats") {
+  test(
+    "When the deadline is exceeded and the reject token bucket contains sufficient tokens," +
+      "DeadlineFilter should not service the request and increment the exceeded and rejected stats"
+  ) {
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
@@ -105,8 +110,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
     }
   }
 
-  test("tokens are added to bucket on request with expired deadline " +
-    "when there are too few tokens to reject it") {
+  test(
+    "tokens are added to bucket on request with expired deadline " +
+      "when there are too few tokens to reject it"
+  ) {
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         tc.advance(2.seconds)
@@ -166,6 +173,6 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar with OneInstancePerT
 
     val ps: Stack.Params = Stack.Params.empty + p
     assert(ps.contains[Param])
-    assert((ps[Param] match { case Param(d) => (d)}) == 0.5)
+    assert((ps[Param] match { case Param(d) => (d) }) == 0.5)
   }
 }

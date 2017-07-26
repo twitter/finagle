@@ -70,8 +70,10 @@ class StackRegistryTest extends FunSuite {
         param.ProtocolLibrary("a_protocol_lib")
       private val entry = StackRegistry.Entry("an_addr", stack.nilStack, params)
       private val prefix = registryPrefix(entry)
-      assert(prefix ==
-        Seq("reg_name", "a_protocol_lib", "a_label", "an_addr"))
+      assert(
+        prefix ==
+          Seq("reg_name", "a_protocol_lib", "a_label", "an_addr")
+      )
     }
   }
 
@@ -96,11 +98,16 @@ class StackRegistryTest extends FunSuite {
     val reg = new StackRegistry {
       def registryName: String = "test"
     }
-    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
-      def role: Stack.Role = headRole
-      def description: String = "the head!!"
-      def parameters: Seq[Stack.Param[_]] = Seq(NotCaseClassParam.param)
-    }, List(1, 2, 3, 4))).result
+    val stack = new StackBuilder(
+      Stack.Leaf(
+        new Stack.Head {
+          def role: Stack.Role = headRole
+          def description: String = "the head!!"
+          def parameters: Seq[Stack.Param[_]] = Seq(NotCaseClassParam.param)
+        },
+        List(1, 2, 3, 4)
+      )
+    ).result
     val params = (Stack.Params.empty
       + new NotCaseClassParam(Var(50))
       + param.Label("foo")
@@ -117,11 +124,16 @@ class StackRegistryTest extends FunSuite {
     val reg = new StackRegistry {
       def registryName: String = "test"
     }
-    val stack = new StackBuilder(Stack.Leaf(new Stack.Head {
-      def role: Stack.Role = headRole
-      def description: String = "the head!!"
-      def parameters: Seq[Stack.Param[_]] = Seq(NotCaseClassParam.param)
-    }, List(1, 2, 3, 4))).result
+    val stack = new StackBuilder(
+      Stack.Leaf(
+        new Stack.Head {
+          def role: Stack.Role = headRole
+          def description: String = "the head!!"
+          def parameters: Seq[Stack.Param[_]] = Seq(NotCaseClassParam.param)
+        },
+        List(1, 2, 3, 4)
+      )
+    ).result
 
     val mutableParam = Var(50)
 

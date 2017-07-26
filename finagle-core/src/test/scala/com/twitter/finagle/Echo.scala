@@ -5,8 +5,10 @@ import com.twitter.finagle.server.StringServer
 import java.net.SocketAddress
 
 private[finagle] object Echo
-  extends Client[String, String] with StringClient
-  with Server[String, String] with StringServer {
+    extends Client[String, String]
+    with StringClient
+    with Server[String, String]
+    with StringServer {
 
   def serve(addr: SocketAddress, service: ServiceFactory[String, String]) =
     stringServer.serve(addr, service)

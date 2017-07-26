@@ -97,8 +97,8 @@ class InetResolverTest extends FunSuite {
     }
 
     val pollInterval = 100.millis
-    val inetResolverWithPool = new InetResolver(
-      resolveLoopback, DefaultStatsReceiver, Some(pollInterval), resolvePool)
+    val inetResolverWithPool =
+      new InetResolver(resolveLoopback, DefaultStatsReceiver, Some(pollInterval), resolvePool)
 
     val maxWaitTimeout = 10.seconds
     val addr = inetResolverWithPool.bind("127.0.0.1:80")

@@ -30,7 +30,9 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
     if (serversOpt.forall(_.isDefined)) {
       servers = serversOpt.flatten
-      val n = Name.bound(servers.map { s => (Address(s.address)) }: _*)
+      val n = Name.bound(servers.map { s =>
+        (Address(s.address))
+      }: _*)
       client = Memcached.client.newRichClient(n, clientName)
     }
   }
@@ -40,7 +42,8 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   }
 
   override def withFixture(test: NoArgTest): Outcome = {
-    if (servers.length == NumServers) test() else {
+    if (servers.length == NumServers) test()
+    else {
       info("Cannot start memcached. Skipping test...")
       cancel()
     }
@@ -57,8 +60,11 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     awaitResult(client.delete("bob"))
     assert(awaitResult(client.get("bob")) == None)
     awaitResult(client.set("bob", Buf.Utf8("hello there \r\n nice to meet \r\n you")))
-    assert(awaitResult(client.get("bob")).get ==
-      Buf.Utf8("hello there \r\n nice to meet \r\n you"), 3.seconds)
+    assert(
+      awaitResult(client.get("bob")).get ==
+        Buf.Utf8("hello there \r\n nice to meet \r\n you"),
+      3.seconds
+    )
   }
 
   test("get") {
@@ -67,8 +73,9 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     val result =
       awaitResult(
         client.get(Seq("foo", "baz", "notthere"))
-      ).map { case (key, Buf.Utf8(value)) =>
-        (key, value)
+      ).map {
+        case (key, Buf.Utf8(value)) =>
+          (key, value)
       }
     assert(result == Map("foo" -> "bar", "baz" -> "boing"))
   }
@@ -78,17 +85,18 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     awaitResult(client.set("baz", Buf.Utf8("boing")))
     val result = awaitResult(client.getWithFlag(Seq("foo", "baz", "notthere")))
       .map { case (key, ((Buf.Utf8(value), Buf.Utf8(flag)))) => (key, (value, flag)) }
-    assert(result == Map(
-      "foo" -> (("bar", "0")),
-      "baz" -> (("boing", "0"))
-    ))
+    assert(
+      result == Map(
+        "foo" -> (("bar", "0")),
+        "baz" -> (("boing", "0"))
+      )
+    )
   }
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("gets") {
       // create a client that connects to only one server so we can predict CAS tokens
-      val client = Memcached.client.newRichClient(
-        Name.bound(Address(servers(0).address)), "client")
+      val client = Memcached.client.newRichClient(Name.bound(Address(servers(0).address)), "client")
 
       awaitResult(client.set("foos", Buf.Utf8("xyz"))) // CAS: 1
       awaitResult(client.set("bazs", Buf.Utf8("xyz"))) // CAS: 2
@@ -99,8 +107,9 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       val result =
         awaitResult(
           client.gets(Seq("foos", "bazs", "bars", "somethingelse"))
-        ).map { case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
-          (key, (value, casUnique))
+        ).map {
+          case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
+            (key, (value, casUnique))
         }
       val expected =
         Map(
@@ -118,14 +127,17 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       awaitResult(client.set("bazs1", Buf.Utf8("xyz")))
       awaitResult(client.set("bazs1", Buf.Utf8("zyx")))
       val result = awaitResult(client.getsWithFlag(Seq("foos1", "bazs1", "somethingelse")))
-        .map { case (key, (Buf.Utf8(value), Buf.Utf8(flag), Buf.Utf8(casUnique))) =>
-          (key, (value, flag, casUnique))
+        .map {
+          case (key, (Buf.Utf8(value), Buf.Utf8(flag), Buf.Utf8(casUnique))) =>
+            (key, (value, flag, casUnique))
         }
 
-      assert(result == Map(
-        "foos1" -> (("xyz", "0", "1")),  // the "cas unique" values are predictable from a fresh memcached
-        "bazs1" -> (("zyx", "0", "2"))
-      ))
+      assert(
+        result == Map(
+          "foos1" -> (("xyz", "0", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "bazs1" -> (("zyx", "0", "2"))
+        )
+      )
     }
   }
 
@@ -137,7 +149,9 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       assert(casUnique == Buf.Utf8("1"))
 
       assert(!awaitResult(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
-      assert(awaitResult(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue)
+      assert(
+        awaitResult(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue
+      )
       val res = awaitResult(client.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))
@@ -155,15 +169,15 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   test("incr & decr") {
     // As of memcached 1.4.8 (issue 221), empty values are no longer treated as integers
     awaitResult(client.set("foo", Buf.Utf8("0")))
-    assert(awaitResult(client.incr("foo"))    == Some(1L))
+    assert(awaitResult(client.incr("foo")) == Some(1L))
     assert(awaitResult(client.incr("foo", 2)) == Some(3L))
-    assert(awaitResult(client.decr("foo"))    == Some(2L))
+    assert(awaitResult(client.decr("foo")) == Some(2L))
 
     awaitResult(client.set("foo", Buf.Utf8("0")))
-    assert(awaitResult(client.incr("foo"))    == Some(1L))
+    assert(awaitResult(client.incr("foo")) == Some(1L))
     val l = 1L << 50
     assert(awaitResult(client.incr("foo", l)) == Some(l + 1L))
-    assert(awaitResult(client.decr("foo"))    == Some(l))
+    assert(awaitResult(client.decr("foo")) == Some(l))
     assert(awaitResult(client.decr("foo", l)) == Some(0L))
   }
 
@@ -200,18 +214,21 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.set("\n", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("\u0000", Buf.Utf8("bar"))) }
 
-    val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+    val veryLongKey =
+      "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
     intercept[ClientError] { awaitResult(client.get(veryLongKey)) }
     intercept[ClientError] { awaitResult(client.set(veryLongKey, Buf.Utf8("bar"))) }
 
     // test other keyed command validation
-    val nullSeq:Seq[String] = null
+    val nullSeq: Seq[String] = null
     intercept[NullPointerException] { awaitResult(client.get(nullSeq)) }
     intercept[ClientError] { awaitResult(client.append("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { awaitResult(client.prepend("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { awaitResult(client.replace("bad key", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.add("bad key", Buf.Utf8("2"))) }
-    intercept[ClientError] { awaitResult(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
+    intercept[ClientError] {
+      awaitResult(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2")))
+    }
     intercept[ClientError] { awaitResult(client.incr("bad key")) }
     intercept[ClientError] { awaitResult(client.decr("bad key")) }
     intercept[ClientError] { awaitResult(client.delete("bad key")) }
@@ -221,15 +238,19 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     client = Memcached.client
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
       .configured(Memcached.param.EjectFailedHost(true))
-      .newRichClient(Name.bound(servers.map { s => (Address(s.address)) }: _*), "test_client")
+      .newRichClient(Name.bound(servers.map { s =>
+        (Address(s.address))
+      }: _*), "test_client")
     val partitionedClient = client.asInstanceOf[PartitionedClient]
 
     // set values
-    awaitResult(Future.collect(
-      (0 to 20).map { i =>
-        client.set(s"foo$i", Buf.Utf8(s"bar$i"))
-      }
-    ))
+    awaitResult(
+      Future.collect(
+        (0 to 20).map { i =>
+          client.set(s"foo$i", Buf.Utf8(s"bar$i"))
+        }
+      )
+    )
 
     // We can't control the Distributor to make sure that for the set of servers, there is at least
     // one client in the partition talking to it. Therefore, we rely on the fact that for 5
@@ -243,9 +264,10 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     }
 
     val clientSet =
-      (0 to 20).foldLeft(Set[Client]()){ case (s, i) =>
-        val c = partitionedClient.clientOf(s"foo$i")
-        s + c
+      (0 to 20).foldLeft(Set[Client]()) {
+        case (s, i) =>
+          val c = partitionedClient.clientOf(s"foo$i")
+          s + c
       }
     assert(clientSet.size == 1)
 
@@ -270,7 +292,8 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
     val cacheServer = Memcached.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      new MockedMemcacheServer)
+      new MockedMemcacheServer
+    )
 
     val timer = new MockTimer
     val statsReceiver = new InMemoryStatsReceiver
@@ -280,10 +303,12 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       .configured(Memcached.param.EjectFailedHost(true))
       .configured(param.Timer(timer))
       .configured(param.Stats(statsReceiver))
-      .newRichClient(Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])), "cacheClient")
+      .newRichClient(
+        Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
+        "cacheClient"
+      )
 
     Time.withCurrentTimeFrozen { timeControl =>
-
       // Send a bad request
       intercept[Exception] { awaitResult(client.set("foo", Buf.Utf8("bar"))) }
 
@@ -308,7 +333,9 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   }
 
   test("Add and remove nodes") {
-    val addrs = servers.map { s => (Address(s.address)) }
+    val addrs = servers.map { s =>
+      (Address(s.address))
+    }
 
     // Start with 3 backends
     val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound(addrs.toSet.drop(2)))

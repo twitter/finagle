@@ -20,10 +20,11 @@ class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
     FailureFlags.Interrupted,
     FailureFlags.Wrapped,
     FailureFlags.Rejected,
-    FailureFlags.Naming)
-    // FailureFlags.NonRetryable - Conflicts with Restartable, so omitted here.
+    FailureFlags.Naming
+  )
+  // FailureFlags.NonRetryable - Conflicts with Restartable, so omitted here.
 
-  private val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
+  private val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1 | f2
 
   test("flagged, isFlagged, unflagged, masked") {
     for (flags <- Seq(flag, flag2)) {
@@ -39,7 +40,7 @@ class FailureFlagsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("FailureFlags.flagsOf") {
     val failures = Seq(
-      FlagCheck(Interrupted|Retryable|Naming|Rejected|Wrapped),
+      FlagCheck(Interrupted | Retryable | Naming | Rejected | Wrapped),
       FlagCheck(NonRetryable),
       FlagCheck(Empty)
     )

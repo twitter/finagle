@@ -13,7 +13,7 @@ class TestAsyncInetResolver extends Resolver {
   private[this] object Port {
     val range = 1 to 65535
     def unapply(str: String): Option[Int] = {
-      try Some(Integer.parseInt(str)) filter(range contains _)
+      try Some(Integer.parseInt(str)) filter (range contains _)
       catch { case _: NumberFormatException => None }
     }
   }
@@ -37,7 +37,7 @@ class TestAsyncInetResolver extends Resolver {
         Closable.nop
       }
 
-    case _ => Var.value(Addr.Failed(spec +" is not a host:port"))
+    case _ => Var.value(Addr.Failed(spec + " is not a host:port"))
   }
 
 }

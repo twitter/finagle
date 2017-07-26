@@ -11,10 +11,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
 class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
-  private val exc = Gen.oneOf[Throwable](
-    null,
-    new Exception("first"),
-    new Exception("second"))
+  private val exc = Gen.oneOf[Throwable](null, new Exception("first"), new Exception("second"))
 
   private val flag = Gen.oneOf(
     0L,
@@ -22,10 +19,11 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     FailureFlags.Interrupted,
     FailureFlags.Wrapped,
     FailureFlags.Rejected,
-    FailureFlags.Naming)
-    // FailureFlags.NonRetryable - Conflicts with Restartable, so omitted here.
+    FailureFlags.Naming
+  )
+  // FailureFlags.NonRetryable - Conflicts with Restartable, so omitted here.
 
-  private val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
+  private val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1 | f2
 
   test("simple failures with a cause") {
     val why = "boom!"
@@ -63,7 +61,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     val parent = Failure("sadface", FailureFlags.Retryable)
 
     val f = Failure.adapt(parent, FailureFlags.Interrupted)
-    assert(f.flags == (FailureFlags.Retryable|FailureFlags.Interrupted))
+    assert(f.flags == (FailureFlags.Retryable | FailureFlags.Interrupted))
     assert(f.getCause == parent)
     assert(f.getMessage == "sadface")
     assert(f != parent)
@@ -81,7 +79,12 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
   }
 
   test("Failure.show") {
-    assert(Failure("ok", FailureFlags.Rejected|FailureFlags.Retryable|FailureFlags.Interrupted).show == Failure("ok", FailureFlags.Interrupted|FailureFlags.Rejected))
+    assert(
+      Failure("ok", FailureFlags.Rejected | FailureFlags.Retryable | FailureFlags.Interrupted).show == Failure(
+        "ok",
+        FailureFlags.Interrupted | FailureFlags.Rejected
+      )
+    )
     val inner = new Exception
     assert(Failure.wrap(inner).show == inner)
     assert(Failure.wrap(Failure.wrap(inner)).show == inner)
@@ -95,7 +98,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Invalid flag combinations") {
     intercept[IllegalArgumentException] {
-      Failure("eh", Failure.NonRetryable|FailureFlags.Retryable)
+      Failure("eh", Failure.NonRetryable | FailureFlags.Retryable)
     }
   }
 
@@ -135,8 +138,14 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     assertFail(Failure("ok", FailureFlags.Retryable), Failure("ok"))
     assertFail(Failure("ok"), Failure("ok"))
     assertFail(Failure("ok", FailureFlags.Interrupted), Failure("ok", FailureFlags.Interrupted))
-    assertFail(Failure("ok", FailureFlags.Interrupted|FailureFlags.Retryable), Failure("ok", FailureFlags.Interrupted))
-    assertFail(Failure("ok", FailureFlags.Rejected|Failure.NonRetryable), Failure("ok", FailureFlags.Rejected|Failure.NonRetryable))
+    assertFail(
+      Failure("ok", FailureFlags.Interrupted | FailureFlags.Retryable),
+      Failure("ok", FailureFlags.Interrupted)
+    )
+    assertFail(
+      Failure("ok", FailureFlags.Rejected | Failure.NonRetryable),
+      Failure("ok", FailureFlags.Rejected | Failure.NonRetryable)
+    )
 
     val inner = new Exception
     assertFail(Failure.wrap(inner), inner)
@@ -144,7 +153,11 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Failure.flagsOf") {
     val failures = Seq(
-      Failure("abc", new Exception, FailureFlags.Interrupted|FailureFlags.Retryable|FailureFlags.Naming|FailureFlags.Rejected|FailureFlags.Wrapped),
+      Failure(
+        "abc",
+        new Exception,
+        FailureFlags.Interrupted | FailureFlags.Retryable | FailureFlags.Naming | FailureFlags.Rejected | FailureFlags.Wrapped
+      ),
       Failure("abc", Failure.NonRetryable),
       Failure("abc"),
       new Exception
@@ -160,4 +173,3 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     }
   }
 }
-

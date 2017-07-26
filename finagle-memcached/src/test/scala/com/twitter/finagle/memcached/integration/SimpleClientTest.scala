@@ -17,14 +17,15 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 @RunWith(classOf[JUnitRunner])
 class SimpleClientTest extends FunSuite with BeforeAndAfter {
+
   /**
-    * Note: This integration test requires a real Memcached server to run.
-    */
+   * Note: This integration test requires a real Memcached server to run.
+   */
   var client: Client = null
   var testServer: Option[TestMemcachedServer] = None
 
   val stats = new SummarizingStatsReceiver
-  
+
   private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, 5.seconds)
 
   before {
@@ -64,10 +65,12 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
     awaitResult(client.set("baz", Buf.Utf8("boing")))
     val result = awaitResult(client.get(Seq("foo", "baz", "notthere")))
       .map { case (key, Buf.Utf8(value)) => (key, value) }
-    assert(result == Map(
-      "foo" -> "bar",
-      "baz" -> "boing"
-    ))
+    assert(
+      result == Map(
+        "foo" -> "bar",
+        "baz" -> "boing"
+      )
+    )
   }
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
@@ -76,14 +79,17 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       awaitResult(client.set("bazs", Buf.Utf8("xyz")))
       awaitResult(client.set("bazs", Buf.Utf8("zyx")))
       val result = awaitResult(client.gets(Seq("foos", "bazs", "somethingelse")))
-        .map { case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
-          (key, (value, casUnique))
-      }
+        .map {
+          case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
+            (key, (value, casUnique))
+        }
 
-      assert(result == Map(
-        "foos" -> (("xyz", "1")),  // the "cas unique" values are predictable from a fresh memcached
-        "bazs" -> (("zyx", "3"))
-      ))
+      assert(
+        result == Map(
+          "foos" -> (("xyz", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "bazs" -> (("zyx", "3"))
+        )
+      )
     }
   }
 
@@ -95,8 +101,9 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       assert(casUnique == Buf.Utf8("1"))
 
       assert(!awaitResult(client.checkAndSet("x", Buf.Utf8("z"), Buf.Utf8("2")).map(_.replaced)))
-      assert(awaitResult(
-        client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue)
+      assert(
+        awaitResult(client.checkAndSet("x", Buf.Utf8("z"), casUnique).map(_.replaced)).booleanValue
+      )
       val res = awaitResult(client.get("x"))
       assert(res.isDefined)
       assert(res.get == Buf.Utf8("z"))
@@ -116,15 +123,15 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
   test("incr & decr") {
     // As of memcached 1.4.8 (issue 221), empty values are no longer treated as integers
     awaitResult(client.set("foo", Buf.Utf8("0")))
-    assert(awaitResult(client.incr("foo"))    == Some(1L))
+    assert(awaitResult(client.incr("foo")) == Some(1L))
     assert(awaitResult(client.incr("foo", 2)) == Some(3L))
-    assert(awaitResult(client.decr("foo"))    == Some(2L))
+    assert(awaitResult(client.decr("foo")) == Some(2L))
 
     awaitResult(client.set("foo", Buf.Utf8("0")))
-    assert(awaitResult(client.incr("foo"))    == Some(1L))
+    assert(awaitResult(client.incr("foo")) == Some(1L))
     val l = 1L << 50
     assert(awaitResult(client.incr("foo", l)) == Some(l + 1L))
-    assert(awaitResult(client.decr("foo"))    == Some(l))
+    assert(awaitResult(client.decr("foo")) == Some(l))
     assert(awaitResult(client.decr("foo", l)) == Some(0L))
   }
 
@@ -150,31 +157,34 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.set(null: String, Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("    ", Buf.Utf8("bar"))) }
 
-    try { awaitResult(client.set("\t", Buf.Utf8("bar"))) }
-    catch { case _: ClientError => fail("\t is allowed") }
+    try { awaitResult(client.set("\t", Buf.Utf8("bar"))) } catch {
+      case _: ClientError => fail("\t is allowed")
+    }
 
     intercept[ClientError] { awaitResult(client.set("\r", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("\n", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("\u0000", Buf.Utf8("bar"))) }
 
-    val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+    val veryLongKey =
+      "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
     intercept[ClientError] { awaitResult(client.get(veryLongKey)) }
     intercept[ClientError] { awaitResult(client.set(veryLongKey, Buf.Utf8("bar"))) }
 
     // test other keyed command validation
-   intercept[ClientError] { awaitResult(client.get(null: Seq[String])) }
-   intercept[ClientError] { awaitResult(client.gets(null: Seq[String])) }
-   intercept[ClientError] { awaitResult(client.gets(Seq(null))) }
-   intercept[ClientError] { awaitResult(client.gets(Seq(""))) }
-   intercept[ClientError] { awaitResult(client.gets(Seq("foos", "bad key", "somethingelse"))) }
-   intercept[ClientError] { awaitResult(client.append("bad key", Buf.Utf8("rab"))) }
-   intercept[ClientError] { awaitResult(client.prepend("bad key", Buf.Utf8("rab"))) }
-   intercept[ClientError] { awaitResult(client.replace("bad key", Buf.Utf8("bar"))) }
-   intercept[ClientError] { awaitResult(client.add("bad key", Buf.Utf8("2"))) }
-   intercept[ClientError] { awaitResult(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2"))) }
-   intercept[ClientError] { awaitResult(client.incr("bad key")) }
-   intercept[ClientError] { awaitResult(client.decr("bad key")) }
-   intercept[ClientError] { awaitResult(client.delete("bad key")) }
+    intercept[ClientError] { awaitResult(client.get(null: Seq[String])) }
+    intercept[ClientError] { awaitResult(client.gets(null: Seq[String])) }
+    intercept[ClientError] { awaitResult(client.gets(Seq(null))) }
+    intercept[ClientError] { awaitResult(client.gets(Seq(""))) }
+    intercept[ClientError] { awaitResult(client.gets(Seq("foos", "bad key", "somethingelse"))) }
+    intercept[ClientError] { awaitResult(client.append("bad key", Buf.Utf8("rab"))) }
+    intercept[ClientError] { awaitResult(client.prepend("bad key", Buf.Utf8("rab"))) }
+    intercept[ClientError] { awaitResult(client.replace("bad key", Buf.Utf8("bar"))) }
+    intercept[ClientError] { awaitResult(client.add("bad key", Buf.Utf8("2"))) }
+    intercept[ClientError] {
+      awaitResult(client.checkAndSet("bad key", Buf.Utf8("z"), Buf.Utf8("2")))
+    }
+    intercept[ClientError] { awaitResult(client.incr("bad key")) }
+    intercept[ClientError] { awaitResult(client.decr("bad key")) }
+    intercept[ClientError] { awaitResult(client.delete("bad key")) }
   }
 }
-

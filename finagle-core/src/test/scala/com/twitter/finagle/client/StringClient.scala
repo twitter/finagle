@@ -8,7 +8,13 @@ import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
 import com.twitter.util.Future
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
-import org.jboss.netty.channel.{ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent, SimpleChannelHandler}
+import org.jboss.netty.channel.{
+  ChannelHandlerContext,
+  ChannelPipelineFactory,
+  Channels,
+  MessageEvent,
+  SimpleChannelHandler
+}
 import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
 
 private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
@@ -58,11 +64,11 @@ trait StringClient {
   }
 
   case class Client(
-      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
-      appendDelimeter: Boolean = true)
-    extends StdStackClient[String, String, Client]
-    with StringRichClient {
+    stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
+    params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
+    appendDelimeter: Boolean = true
+  ) extends StdStackClient[String, String, Client]
+      with StringRichClient {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params
@@ -81,9 +87,11 @@ trait StringClient {
       new SerialClientDispatcher(transport)
 
     def withEndpoint(s: Service[String, String]): Client =
-      withStack(stack.replace(
-        StackClient.Role.prepConn,
-        (_: ServiceFactory[String, String]) => ServiceFactory.const(s))
+      withStack(
+        stack.replace(
+          StackClient.Role.prepConn,
+          (_: ServiceFactory[String, String]) => ServiceFactory.const(s)
+        )
       )
   }
 

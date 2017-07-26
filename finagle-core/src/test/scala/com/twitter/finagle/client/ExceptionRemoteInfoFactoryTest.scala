@@ -11,7 +11,9 @@ import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
 class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
-  test("ExceptionRemoteInfoFactory should add remote info to HasRemoteInfo service acquisition exceptions") {
+  test(
+    "ExceptionRemoteInfoFactory should add remote info to HasRemoteInfo service acquisition exceptions"
+  ) {
     val failingFactory = new ServiceFactory[String, String] {
       def apply(conn: ClientConnection): Future[Nothing] = Future.exception(new HasRemoteInfo {})
       def close(deadline: Time): Future[Unit] = Future.Done
@@ -30,8 +32,15 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
         }
       }
     }
-    assert(actual.remoteInfo == RemoteInfo.Available(
-      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId))
+    assert(
+      actual.remoteInfo == RemoteInfo.Available(
+        Some(upstreamAddr),
+        Some("upstream"),
+        Some(downstreamAddr),
+        Some("downstream"),
+        traceId
+      )
+    )
   }
 
   test("ExceptionRemoteInfoFactory should add remote info to request exceptions") {
@@ -53,8 +62,15 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
         }
       }
     }
-    assert(actual.remoteInfo == RemoteInfo.Available(
-      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId))
+    assert(
+      actual.remoteInfo == RemoteInfo.Available(
+        Some(upstreamAddr),
+        Some("upstream"),
+        Some(downstreamAddr),
+        Some("downstream"),
+        traceId
+      )
+    )
   }
 
   test("ExceptionRemoteInfoFactory should add remote info to Failures") {
@@ -75,7 +91,18 @@ class ExceptionRemoteInfoFactoryTest extends FunSuite with MockitoSugar {
         }
       }
     }
-    assert(actual.getSource(Failure.Source.RemoteInfo).contains(RemoteInfo.Available(
-      Some(upstreamAddr), Some("upstream"), Some(downstreamAddr), Some("downstream"), traceId)))
+    assert(
+      actual
+        .getSource(Failure.Source.RemoteInfo)
+        .contains(
+          RemoteInfo.Available(
+            Some(upstreamAddr),
+            Some("upstream"),
+            Some(downstreamAddr),
+            Some("downstream"),
+            traceId
+          )
+        )
+    )
   }
 }

@@ -1,7 +1,6 @@
 package com.twitter.finagle.ssl.server
 
-import com.twitter.finagle.ssl.{
-  CipherSuites, ClientAuth, Engine, Protocols}
+import com.twitter.finagle.ssl.{CipherSuites, ClientAuth, Engine, Protocols}
 import javax.net.ssl.{SSLContext, SSLEngine}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

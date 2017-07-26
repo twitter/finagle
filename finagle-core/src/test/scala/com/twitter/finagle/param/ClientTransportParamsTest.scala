@@ -4,16 +4,16 @@ import com.twitter.finagle.Address
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.ssl.client.{
-  SslClientConfiguration, SslClientEngineFactory, SslClientSessionVerifier}
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslClientSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import javax.net.ssl.SSLSession
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
-class ClientTransportParamsTest
-  extends FunSuite
-  with MockitoSugar
-  with StringClient {
+class ClientTransportParamsTest extends FunSuite with MockitoSugar with StringClient {
 
   private val config = SslClientConfiguration()
   private val engine = mock[Engine]
@@ -49,4 +49,3 @@ class ClientTransportParamsTest
   }
 
 }
-

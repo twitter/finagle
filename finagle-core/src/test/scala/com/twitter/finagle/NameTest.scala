@@ -21,7 +21,7 @@ class NameTest extends FunSuite {
     val Addr.Bound(s2, r) = addr
     assert(s2.collect { case Address.Inet(ia, _) => ia } == set)
     assert(r.isEmpty)
-    
+
     g() = Set(new SocketAddress {})
     val Addr.Failed(e) = addr
     assert(e.isInstanceOf[IllegalArgumentException])

@@ -12,11 +12,12 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
-class LoadBalancerFactoryTest extends FunSuite
-  with StringClient
-  with StringServer
-  with Eventually
-  with IntegrationPatience {
+class LoadBalancerFactoryTest
+    extends FunSuite
+    with StringClient
+    with StringServer
+    with Eventually
+    with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
 
   trait PerHostFlagCtx extends App {
@@ -32,13 +33,15 @@ class LoadBalancerFactoryTest extends FunSuite
       val sr1 = new InMemoryStatsReceiver
 
       perHostStats.let(true) {
-        client.configured(LoadBalancerFactory.HostStats(sr))
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
           .newService(port)
         eventually {
           assert(sr.self.gauges(perHostStatKey).apply == 1.0)
         }
 
-        client.configured(LoadBalancerFactory.HostStats(sr1))
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
           .newService(port)
         eventually {
           assert(sr1.gauges(perHostStatKey).apply == 1.0)
@@ -53,11 +56,13 @@ class LoadBalancerFactoryTest extends FunSuite
       val sr1 = new InMemoryStatsReceiver
 
       perHostStats.let(false) {
-        client.configured(LoadBalancerFactory.HostStats(sr))
+        client
+          .configured(LoadBalancerFactory.HostStats(sr))
           .newService(port)
         assert(sr.self.gauges.contains(perHostStatKey) == false)
 
-        client.configured(LoadBalancerFactory.HostStats(sr1))
+        client
+          .configured(LoadBalancerFactory.HostStats(sr1))
           .newService(port)
         assert(sr1.gauges.contains(perHostStatKey) == false)
       }
@@ -90,8 +95,10 @@ class LoadBalancerFactoryTest extends FunSuite
 
   test("throws NoBrokersAvailableException with negative addresses") {
     val next: Stack[ServiceFactory[String, String]] =
-      Stack.Leaf(Stack.Role("mock"), ServiceFactory.const[String, String](
-        Service.mk[String, String](req => Future.value(req))))
+      Stack.Leaf(
+        Stack.Role("mock"),
+        ServiceFactory.const[String, String](Service.mk[String, String](req => Future.value(req)))
+      )
 
     val stack = new LoadBalancerFactory.StackModule[String, String] {
       val description = "mock"
@@ -106,7 +113,9 @@ class LoadBalancerFactoryTest extends FunSuite
     val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
       override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String => Future.value("closed after this") }
+        val svc = Service.mk { _: String =>
+          Future.value("closed after this")
+        }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
@@ -118,7 +127,8 @@ class LoadBalancerFactoryTest extends FunSuite
     val factory = stack.make(
       Stack.Params.empty +
         LoadBalancerFactory.Dest(Var(Addr.Bound(address))) +
-        LoadBalancerFactory.WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast))
+        LoadBalancerFactory.WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast)
+    )
 
     // Services are lazily established and are considered "Open"
     // until we have "primed" the pump.
@@ -135,7 +145,9 @@ class LoadBalancerFactoryTest extends FunSuite
     val busySvcFac: ServiceFactory[String, String] = new ServiceFactory[String, String] {
       override def status: Status = Status.Busy
       def apply(clientConnection: ClientConnection): Future[Service[String, String]] = {
-        val svc = Service.mk { _: String => Future.value("closed after this") }
+        val svc = Service.mk { _: String =>
+          Future.value("closed after this")
+        }
         Future.value(svc)
       }
       def close(deadline: Time): Future[Unit] = ???
@@ -145,7 +157,8 @@ class LoadBalancerFactoryTest extends FunSuite
     val address = Address(InetSocketAddress.createUnresolved("inet-address", 0))
     val factory = stack.make(
       Stack.Params.empty +
-        LoadBalancerFactory.Dest(Var(Addr.Bound(address))))
+        LoadBalancerFactory.Dest(Var(Addr.Bound(address)))
+    )
 
     // as `factory.status == Open` until we have "primed" the pump.
     // services are lazily established and are considered "Open" until that point.
@@ -177,14 +190,18 @@ class LoadBalancerFactoryTest extends FunSuite
     assert(Vector(addr1, addr0).sorted(ordering).last == addr1)
 
     val sorted = addresses.sorted(ordering)
-    assert(sorted.indices.exists { i => sorted(i) != addresses(i) })
+    assert(sorted.indices.exists { i =>
+      sorted(i) != addresses(i)
+    })
 
     val failed = Address.Failed(new Exception)
     val withFailed = failed +: addresses
     assert(withFailed.sorted(ordering).last == failed)
 
     val sf = finagle.exp.Address.ServiceFactory(ServiceFactory.const[Int, Int] {
-      Service.mk[Int, Int] { _ => ??? }
+      Service.mk[Int, Int] { _ =>
+        ???
+      }
     }, Addr.Metadata.empty)
     val withSf = sf +: addresses
     assert(withSf.sorted(ordering).last == sf)
@@ -200,8 +217,10 @@ class LoadBalancerFactoryTest extends FunSuite
 
   test("Respects the AddressOrdering") {
     val endpoint: Stack[ServiceFactory[String, String]] =
-      Stack.Leaf(Stack.Role("endpoint"), ServiceFactory.const[String, String](
-        Service.mk[String, String](req => ???)))
+      Stack.Leaf(
+        Stack.Role("endpoint"),
+        ServiceFactory.const[String, String](Service.mk[String, String](req => ???))
+      )
 
     val stack = LoadBalancerFactory.module[String, String].toStack(endpoint)
 
@@ -229,13 +248,17 @@ class LoadBalancerFactoryTest extends FunSuite
       }
     }
 
-    stack.make(Stack.Params.empty +
-      LoadBalancerFactory.Param(mockBalancer) +
-      LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet))) +
-      LoadBalancerFactory.AddressOrdering(order))
+    stack.make(
+      Stack.Params.empty +
+        LoadBalancerFactory.Param(mockBalancer) +
+        LoadBalancerFactory.Dest(Var(Addr.Bound(addresses.toSet))) +
+        LoadBalancerFactory.AddressOrdering(order)
+    )
 
     assert(orderCalled)
     val sortedAddresses: Seq[String] = addresses.sortBy(_.toString).map(_.toString)
-    eps.indices.foreach { i => assert(eps(i) == sortedAddresses(i)) }
+    eps.indices.foreach { i =>
+      assert(eps(i) == sortedAddresses(i))
+    }
   }
 }

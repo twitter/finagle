@@ -29,7 +29,9 @@ class FilterTest extends FunSuite {
   }
 
   test("Filter.andThen(Filter): lifts synchronous exceptions into Future.exception") {
-    val fail = Filter.mk[Int, Int, Int, Int] { (_, _) => throw new Exception }
+    val fail = Filter.mk[Int, Int, Int, Int] { (_, _) =>
+      throw new Exception
+    }
     val svc = (new PassThruFilter).andThen(fail).andThen(constSvc)
     val result = Await.result(svc(4).liftToTry)
     assert(result.isThrow)
@@ -71,9 +73,11 @@ class FilterTest extends FunSuite {
 
   test("Filter.choose: apply the underlying filter to certain requests") {
     val spied = spy(new PassThruFilter)
-    val svc = Filter.choose[Int, Int] {
-      case req if req > 0 => spied
-    }.andThen(constSvc)
+    val svc = Filter
+      .choose[Int, Int] {
+        case req if req > 0 => spied
+      }
+      .andThen(constSvc)
 
     assert(Await.result(svc(100)) == 2)
     verify(spied, times(1)).apply(any[Int], any[Service[Int, Int]])

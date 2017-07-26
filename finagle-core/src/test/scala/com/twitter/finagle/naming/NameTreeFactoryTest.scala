@@ -11,23 +11,30 @@ class NameTreeFactoryTest extends FunSuite {
   test("distributes requests according to weight") {
     val tree =
       NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf("foo")),
-          NameTree.Weighted(1D, NameTree.Leaf("bar")))),
-        NameTree.Weighted(1D, NameTree.Leaf("baz")))
+        NameTree.Weighted(
+          1D,
+          NameTree.Union(
+            NameTree.Weighted(1D, NameTree.Leaf("foo")),
+            NameTree.Weighted(1D, NameTree.Leaf("bar"))
+          )
+        ),
+        NameTree.Weighted(1D, NameTree.Leaf("baz"))
+      )
 
     val counts = mutable.HashMap[String, Int]()
 
     val factoryCache = new ServiceFactoryCache[String, Unit, Unit](
-      key => new ServiceFactory[Unit, Unit] {
-        def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = {
-          val count = counts.getOrElse(key, 0)
-          counts.put(key, count + 1)
-          Future.value(null)
-        }
-        def close(deadline: Time) = Future.Done
+      key =>
+        new ServiceFactory[Unit, Unit] {
+          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = {
+            val count = counts.getOrElse(key, 0)
+            counts.put(key, count + 1)
+            Future.value(null)
+          }
+          def close(deadline: Time) = Future.Done
       },
-      Timer.Nil)
+      Timer.Nil
+    )
 
     // not the world's greatest test since it depends on the
     // implementation of Drv
@@ -50,11 +57,7 @@ class NameTreeFactoryTest extends FunSuite {
       }
     }
 
-    val factory = NameTreeFactory(
-      Path.empty,
-      tree,
-      factoryCache,
-      rng)
+    val factory = NameTreeFactory(Path.empty, tree, factoryCache, rng)
 
     factory.apply(ClientConnection.nil)
     factory.apply(ClientConnection.nil)
@@ -71,33 +74,59 @@ class NameTreeFactoryTest extends FunSuite {
         Path.empty,
         tree,
         new ServiceFactoryCache[Status, Unit, Unit](
-          key => new ServiceFactory[Unit, Unit] {
-            def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
-            def close(deadline: Time) = Future.Done
-            override def status = key
+          key =>
+            new ServiceFactory[Unit, Unit] {
+              def apply(conn: ClientConnection): Future[Service[Unit, Unit]] = Future.value(null)
+              def close(deadline: Time) = Future.Done
+              override def status = key
           },
-          Timer.Nil)
-        ).isAvailable
+          Timer.Nil
+        )
+      ).isAvailable
 
-    assert(isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
-        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
+    assert(
+      isAvailable(
+        NameTree.Union(
+          NameTree.Weighted(
+            1D,
+            NameTree.Union(
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+            )
+          ),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+        )
+      )
+    )
 
-    assert(!isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Closed)))),
-        NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))))
+    assert(
+      !isAvailable(
+        NameTree.Union(
+          NameTree.Weighted(
+            1D,
+            NameTree.Union(
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Closed))
+            )
+          ),
+          NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+        )
+      )
+    )
 
-    assert(!isAvailable(
-      NameTree.Union(
-        NameTree.Weighted(1D, NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
-          NameTree.Weighted(1D, NameTree.Leaf(Status.Open)))),
-        NameTree.Weighted(1D, NameTree.Empty))))
+    assert(
+      !isAvailable(
+        NameTree.Union(
+          NameTree.Weighted(
+            1D,
+            NameTree.Union(
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Open)),
+              NameTree.Weighted(1D, NameTree.Leaf(Status.Open))
+            )
+          ),
+          NameTree.Weighted(1D, NameTree.Empty)
+        )
+      )
+    )
   }
 }

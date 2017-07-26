@@ -78,5 +78,4 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
     assert(newRetrievedValue == Values(Seq(Value(key, newValue, None, Some(Buf.Utf8(zero))))))
   }
 
-
 }

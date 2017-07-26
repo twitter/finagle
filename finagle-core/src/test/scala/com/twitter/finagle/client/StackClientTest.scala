@@ -28,10 +28,10 @@ import org.scalatest.junit.JUnitRunner
 
 private object StackClientTest {
   case class LocalCheckingStringClient(
-      localKey: Contexts.local.Key[String],
-      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = Stack.Params.empty)
-    extends StdStackClient[String, String, LocalCheckingStringClient] {
+    localKey: Contexts.local.Key[String],
+    stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
+    params: Stack.Params = Stack.Params.empty
+  ) extends StdStackClient[String, String, LocalCheckingStringClient] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
@@ -50,8 +50,8 @@ private object StackClientTest {
       Contexts.local.get(localKey) match {
         case Some(s) =>
           Service.constant(
-            Future.exception(
-              new IllegalStateException("should not have a local context: " + s)))
+            Future.exception(new IllegalStateException("should not have a local context: " + s))
+          )
         case None =>
           new SerialClientDispatcher(transport)
       }
@@ -60,12 +60,13 @@ private object StackClientTest {
 }
 
 @RunWith(classOf[JUnitRunner])
-class StackClientTest extends FunSuite
-  with StringClient
-  with StringServer
-  with BeforeAndAfter
-  with Eventually
-  with IntegrationPatience {
+class StackClientTest
+    extends FunSuite
+    with StringClient
+    with StringServer
+    with BeforeAndAfter
+    with Eventually
+    with IntegrationPatience {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
@@ -82,7 +83,10 @@ class StackClientTest extends FunSuite
     client.newService("inet!127.0.0.1:8080")
     eventually {
       val counter = sr.counters(Seq("inet!127.0.0.1:8080", "loadbalancer", "adds"))
-      assert(counter == 1, s"The instance should be to the loadbalancer once instead of $counter times.")
+      assert(
+        counter == 1,
+        s"The instance should be to the loadbalancer once instead of $counter times."
+      )
     }
 
     // use param.Label when set
@@ -112,7 +116,7 @@ class StackClientTest extends FunSuite
   })
 
   test("FailFast is respected") {
-    val ctx = new Ctx { }
+    val ctx = new Ctx {}
 
     val ex = new RuntimeException("lol")
     val alwaysFail = new Module0[ServiceFactory[String, String]] {
@@ -168,28 +172,32 @@ class StackClientTest extends FunSuite
     var closed = false
 
     val underlyingFactory = new ServiceFactory[Unit, Unit] {
-      def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
-        def apply(request: Unit): Future[Unit] = Future.Unit
+      def apply(conn: ClientConnection) =
+        Future.value(new Service[Unit, Unit] {
+          def apply(request: Unit): Future[Unit] = Future.Unit
 
-        override def close(deadline: Time) = {
-          closed = true
-          Future.Done
-        }
-      })
+          override def close(deadline: Time) = {
+            closed = true
+            Future.Done
+          }
+        })
 
       def close(deadline: Time) = Future.Done
     }
 
-    val stack = StackClient.newStack[Unit, Unit]
+    val stack = StackClient
+      .newStack[Unit, Unit]
       .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
 
-    val factory = stack.make(Stack.Params.empty +
-      FactoryToService.Enabled(true) +
+    val factory = stack.make(
+      Stack.Params.empty +
+        FactoryToService.Enabled(true) +
 
-      // default Dest is /$/fail
-      BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
+        // default Dest is /$/fail
+        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+    )
 
     val service = new FactoryToService(factory)
     Await.result(service(()))
@@ -208,36 +216,41 @@ class StackClientTest extends FunSuite
     var closed = false
 
     val underlyingFactory = new ServiceFactory[Unit, Unit] {
-      def apply(conn: ClientConnection) = Future.value(new Service[Unit, Unit] {
-        def apply(request: Unit): Future[Unit] = Future.Unit
+      def apply(conn: ClientConnection) =
+        Future.value(new Service[Unit, Unit] {
+          def apply(request: Unit): Future[Unit] = Future.Unit
 
-        override def close(deadline: Time) = {
-          closed = true
-          Future.Done
-        }
-      })
+          override def close(deadline: Time) = {
+            closed = true
+            Future.Done
+          }
+        })
 
       def close(deadline: Time) = Future.Done
     }
 
-    val stack = StackClient.newStack[Unit, Unit]
+    val stack = StackClient
+      .newStack[Unit, Unit]
       .concat(Stack.Leaf(Stack.Role("role"), underlyingFactory))
       // don't pool or else we don't see underlying close until service is ejected from pool
       .remove(DefaultPool.Role)
-
-      .replace(StackClient.Role.prepFactory, { next: ServiceFactory[Unit, Unit] =>
-        next map { service: Service[Unit, Unit] =>
-          new ServiceProxy[Unit, Unit](service) {
-            override def close(deadline: Time) = Future.never
+      .replace(
+        StackClient.Role.prepFactory, { next: ServiceFactory[Unit, Unit] =>
+          next map { service: Service[Unit, Unit] =>
+            new ServiceProxy[Unit, Unit](service) {
+              override def close(deadline: Time) = Future.never
+            }
           }
         }
-      })
+      )
 
-    val factory = stack.make(Stack.Params.empty +
-      FactoryToService.Enabled(true) +
+    val factory = stack.make(
+      Stack.Params.empty +
+        FactoryToService.Enabled(true) +
 
-      // default Dest is /$/fail
-      BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0"))))
+        // default Dest is /$/fail
+        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+    )
 
     val service = new FactoryToService(factory)
     Await.result(service(()))
@@ -253,15 +266,16 @@ class StackClientTest extends FunSuite
     var sideEffect = () => ()
 
     val stubLB = new ServiceFactory[String, String] {
-      def apply(conn: ClientConnection) = Future.value(new Service[String, String] {
-        def apply(request: String): Future[String] = {
-          count += 1
-          if (runSideEffect(count)) sideEffect()
-          Future.exception(WriteException(new Exception("boom")))
-        }
+      def apply(conn: ClientConnection) =
+        Future.value(new Service[String, String] {
+          def apply(request: String): Future[String] = {
+            count += 1
+            if (runSideEffect(count)) sideEffect()
+            Future.exception(WriteException(new Exception("boom")))
+          }
 
-        override def close(deadline: Time) = Future.Done
-      })
+          override def close(deadline: Time) = Future.Done
+        })
 
       def close(deadline: Time) = Future.Done
 
@@ -349,7 +363,6 @@ class StackClientTest extends FunSuite
     assert(budget > 0)
   })
 
-
   test("Requeues all go to the same cluster in a Union") {
     /*
      * Once we have distributed a request to a particular cluster (in
@@ -383,17 +396,22 @@ class StackClientTest extends FunSuite
     NameInterpreter.global = new NameInterpreter {
       override def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] = {
         assert(dtab == baseDtab)
-        Activity.value(NameTree.Union(
-          NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
-          NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))))
+        Activity.value(
+          NameTree.Union(
+            NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
+            NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))
+          )
+        )
       }
     }
 
-    val stack = StackClient.newStack[Unit, Unit]
+    val stack = StackClient
+      .newStack[Unit, Unit]
 
       // direct the two addresses to the two service factories instead
       // of trying to connect to them
-      .replace(LoadBalancerFactory.role,
+      .replace(
+        LoadBalancerFactory.role,
         new Stack.Module1[LoadBalancerFactory.Dest, ServiceFactory[Unit, Unit]] {
           val role = new Stack.Role("role")
           val description = "description"
@@ -405,15 +423,20 @@ class StackClientTest extends FunSuite
               case _ => throw new IllegalArgumentException("wat")
             }
           }
-        })
+        }
+      )
 
     val sr = new InMemoryStatsReceiver
 
     val service =
-      new FactoryToService(stack.make(Stack.Params.empty +
-        FactoryToService.Enabled(true) +
-        param.Stats(sr) +
-        BindingFactory.BaseDtab(() => baseDtab)))
+      new FactoryToService(
+        stack.make(
+          Stack.Params.empty +
+            FactoryToService.Enabled(true) +
+            param.Stats(sr) +
+            BindingFactory.BaseDtab(() => baseDtab)
+        )
+      )
 
     intercept[Failure] {
       Await.result(service(()), 5.seconds)
@@ -423,8 +446,9 @@ class StackClientTest extends FunSuite
 
     // all retries go to one service
     assert(
-      (fac1.count == requeues+1 && fac2.count == 0) ||
-        (fac2.count == requeues+1 && fac1.count == 0))
+      (fac1.count == requeues + 1 && fac2.count == 0) ||
+        (fac2.count == requeues + 1 && fac1.count == 0)
+    )
   }
 
   test("StackBasedClient.configured is a StackClient") {
@@ -446,7 +470,9 @@ class StackClientTest extends FunSuite
   }
 
   test("StackClient binds to a local service via exp.Address.ServiceFactory") {
-    val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
+    val reverser = Service.mk[String, String] { in =>
+      Future.value(in.reverse)
+    }
     val sf = ServiceFactory(() => Future.value(reverser))
     val addr = exp.Address(sf)
     val name = Name.bound(addr)
@@ -457,7 +483,9 @@ class StackClientTest extends FunSuite
   }
 
   test("filtered composes filters atop the stack") {
-    val echoServer = Service.mk[String, String] { in => Future.value(in) }
+    val echoServer = Service.mk[String, String] { in =>
+      Future.value(in)
+    }
     val sf = ServiceFactory(() => Future.value(echoServer))
     val addr = exp.Address(sf)
     val name = Name.bound(addr)
@@ -476,10 +504,9 @@ class StackClientTest extends FunSuite
 
     val key = new Contexts.local.Key[String]
     Contexts.local.let(key, "SomeCoolContext") {
-      val echoSvc = Service.mk[String, String]{ Future.value }
-      val server = stringServer.serve(
-        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        echoSvc)
+      val echoSvc = Service.mk[String, String] { Future.value }
+      val server =
+        stringServer.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), echoSvc)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
 
       val client = new LocalCheckingStringClient(key)
@@ -505,21 +532,24 @@ class StackClientTest extends FunSuite
     val (endpoint1, endpoint2) = (new CountingService(p1), new CountingService(p2))
     var first = true
 
-    val stack = StackClient.newStack[Unit, Unit]
-      .concat(Stack.Leaf(Stack.Role("role"),
-        new ServiceFactory[Unit, Unit] {
-          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
-            if (first) {
-              first = false
-              Future.value(endpoint1)
-            }
-            else {
-              Future.value(endpoint2)
-            }
+    val stack = StackClient
+      .newStack[Unit, Unit]
+      .concat(
+        Stack.Leaf(
+          Stack.Role("role"),
+          new ServiceFactory[Unit, Unit] {
+            def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
+              if (first) {
+                first = false
+                Future.value(endpoint1)
+              } else {
+                Future.value(endpoint2)
+              }
 
-          def close(deadline: Time): Future[Unit] = Future.Done
-        }
-      ))
+            def close(deadline: Time): Future[Unit] = Future.Done
+          }
+        )
+      )
       .remove(DefaultPool.Role)
 
     val sr = new InMemoryStatsReceiver
@@ -531,7 +561,8 @@ class StackClientTest extends FunSuite
           high = 2,
           bufferSize = 0,
           idleTime = Duration.Zero,
-          maxWaiters = 0) +
+          maxWaiters = 0
+        ) +
         FactoryToService.Enabled(false) +
         PendingRequestFilter.Param(Some(2)) +
         BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
@@ -569,7 +600,6 @@ class StackClientTest extends FunSuite
     intercept[RejectedExecutionException] { throw e1rejected.cause.get }
     intercept[RejectedExecutionException] { throw e2rejected.cause.get }
 
-
     // pending requests are satisfied
     p1.setDone()
     p2.setDone()
@@ -603,7 +633,8 @@ class StackClientTest extends FunSuite
 
     val expectedEntry = Entry(
       key = Seq("client", StringClient.protocolLibrary, label, "Transporter"),
-      value = "Netty3Transporter")
+      value = "Netty3Transporter"
+    )
 
     assert(registry.iterator.contains(expectedEntry))
 

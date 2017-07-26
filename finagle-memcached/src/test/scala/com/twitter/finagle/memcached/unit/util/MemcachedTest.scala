@@ -18,11 +18,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class MemcachedTest extends FunSuite
-  with MockitoSugar
-  with Eventually
-  with IntegrationPatience
-{
+class MemcachedTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
   test("Memcached.Client has expected stack and params") {
     val markDeadFor = Backoff.const(1.second)
     val failureAccrualPolicy = FailureAccrualPolicy.consecutiveFailures(20, markDeadFor)
@@ -41,7 +37,9 @@ class MemcachedTest extends FunSuite
 
     val FailureAccrualFactory.Param.Configured(policy) = params[FailureAccrualFactory.Param]
     assert(policy() == failureAccrualPolicy)
-    assert(markDeadFor.take(10).force.toSeq === (0 until 10 map { _ => 1.second }))
+    assert(markDeadFor.take(10).force.toSeq === (0 until 10 map { _ =>
+      1.second
+    }))
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[Memcached.param.EjectFailedHost] == Memcached.param.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))
@@ -50,8 +48,10 @@ class MemcachedTest extends FunSuite
   test("Memcache.newPartitionedClient enables FactoryToService") {
     val st = new InMemoryStatsReceiver
     val client = Memcached.client
-      .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.consecutiveFailures(
-        100, Backoff.const(1.seconds))))
+      .configured(
+        FailureAccrualFactory
+          .Param(() => FailureAccrualPolicy.consecutiveFailures(100, Backoff.const(1.seconds)))
+      )
       .configured(Stats(st))
       .newRichClient("memcache=127.0.0.1:12345")
 

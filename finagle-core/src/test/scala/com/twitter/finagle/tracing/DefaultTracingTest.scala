@@ -55,13 +55,17 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     assert(serverTracer.map(_.traceId).toSet.size == 1)
     assert(clientTracer.map(_.traceId).toSet.size == 1)
 
-    assertAnnotationsInOrder(combinedTracer.toSeq, Seq(
-      Annotation.ServiceName("theClient"),
-      Annotation.ClientSend(),
-      Annotation.ServiceName("theServer"),
-      Annotation.ServerRecv(),
-      Annotation.ServerSend(),
-      Annotation.ClientRecv()))
+    assertAnnotationsInOrder(
+      combinedTracer.toSeq,
+      Seq(
+        Annotation.ServiceName("theClient"),
+        Annotation.ClientSend(),
+        Annotation.ServiceName("theServer"),
+        Annotation.ServerRecv(),
+        Annotation.ServerSend(),
+        Annotation.ClientRecv()
+      )
+    )
 
     // need to call finalizer to properly close the client and the server
     Await.ready(finalizer.close(), 1.second)
@@ -77,7 +81,9 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       val client = stringClient
         .configured(fparam.Tracer(clientTracer))
         .newService(
-          Name.bound(Address(svc.boundAddress.asInstanceOf[InetSocketAddress])), "theClient")
+          Name.bound(Address(svc.boundAddress.asInstanceOf[InetSocketAddress])),
+          "theClient"
+        )
 
       val finalizer = new Closable {
         override def close(deadline: Time): Future[Unit] =

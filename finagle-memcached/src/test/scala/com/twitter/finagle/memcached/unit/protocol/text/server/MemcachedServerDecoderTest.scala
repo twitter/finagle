@@ -32,7 +32,8 @@ class MemcachedServerDecoderTest extends FunSuite with OneInstancePerTest {
       forAll(expireTimeTableData) { (expectedTime: ExpectedTimeTable, allowedDelta: Duration) =>
         // first frame; decoding should return null because expecting data frame to follow
         assert(
-          decoder.decode(Buf.Utf8(s"set $key $flags ${expectedTime.expireTime} $dataSize"))== null)
+          decoder.decode(Buf.Utf8(s"set $key $flags ${expectedTime.expireTime} $dataSize")) == null
+        )
         val command = decoder.decode(Buf.Utf8(data))
         assert(command.getClass == classOf[Set])
         val set = command.asInstanceOf[Set]

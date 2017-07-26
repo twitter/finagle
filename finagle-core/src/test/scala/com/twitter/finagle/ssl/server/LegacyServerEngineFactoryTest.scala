@@ -67,7 +67,7 @@ class LegacyServerEngineFactoryTest extends FunSuite {
   test("config with client auth Off fails") {
     val clientAuth = ClientAuth.Off
     val config = SslServerConfiguration(clientAuth = clientAuth)
-    
+
     intercept[SslConfigurationException] {
       val engine = LegacyServerEngineFactory(config)
     }
@@ -76,7 +76,7 @@ class LegacyServerEngineFactoryTest extends FunSuite {
   test("config with client auth Wanted fails") {
     val clientAuth = ClientAuth.Wanted
     val config = SslServerConfiguration(clientAuth = clientAuth)
-    
+
     intercept[SslConfigurationException] {
       val engine = LegacyServerEngineFactory(config)
     }
@@ -85,7 +85,7 @@ class LegacyServerEngineFactoryTest extends FunSuite {
   test("config with client auth Needed fails") {
     val clientAuth = ClientAuth.Needed
     val config = SslServerConfiguration(clientAuth = clientAuth)
-    
+
     intercept[SslConfigurationException] {
       val engine = LegacyServerEngineFactory(config)
     }

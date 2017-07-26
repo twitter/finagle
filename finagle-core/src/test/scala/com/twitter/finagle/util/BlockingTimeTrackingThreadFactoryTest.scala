@@ -9,9 +9,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class BlockingTimeTrackingThreadFactoryTest
-  extends FunSuite
-  with MockitoSugar {
+class BlockingTimeTrackingThreadFactoryTest extends FunSuite with MockitoSugar {
 
   private class RunnableCount extends Runnable {
     var runs = 0

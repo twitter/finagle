@@ -20,6 +20,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
   private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
 
   type MemcacheService = Service[Command, Response]
+
   /**
    * Note: This integration test requires a real Memcached server to run.
    */
@@ -37,7 +38,9 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       proxyClient = Memcached.client
         .connectionsPerEndpoint(1)
         .newService(
-          Name.bound(Address(testServer.get.address.asInstanceOf[InetSocketAddress])), "memcached")
+          Name.bound(Address(testServer.get.address.asInstanceOf[InetSocketAddress])),
+          "memcached"
+        )
 
       proxyService = new MemcacheService {
         def apply(request: Command) = proxyClient(request)
@@ -48,8 +51,10 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
         .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), proxyService)
 
       serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
-      externalClient = Client(Memcached.client.newService(
-        "%s:%d".format(serverAddress.getHostName, serverAddress.getPort)))
+      externalClient = Client(
+        Memcached.client
+          .newService("%s:%d".format(serverAddress.getHostName, serverAddress.getPort))
+      )
     }
   }
 
@@ -68,8 +73,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     if (testServer == None) {
       info("Cannot start memcached. skipping test...")
       cancel()
-    }
-    else test()
+    } else test()
   }
 
   test("Proxied Memcached Servers should handle a basic get/set operation") {
@@ -115,7 +119,9 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       stats.foreach { stat =>
         assert(stat.startsWith("ITEM"))
       }
-      assert(stats.find { stat => stat.contains("foo") }.isDefined)
+      assert(stats.find { stat =>
+        stat.contains("foo")
+      }.isDefined)
       externalClient.release()
     }
   }

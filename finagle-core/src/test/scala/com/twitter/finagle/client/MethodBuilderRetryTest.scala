@@ -56,7 +56,8 @@ class MethodBuilderRetryTest extends FunSuite {
     val methodBuilder = retryMethodBuilder(
       retrySvc.svc,
       stats,
-      Stack.Params.empty + param.ResponseClassifier(retryIllegalArgClassifier))
+      Stack.Params.empty + param.ResponseClassifier(retryIllegalArgClassifier)
+    )
     val defaults = methodBuilder.newService("defaults")
 
     // the client will use the stack's ResponseClassifier, which
@@ -71,8 +72,7 @@ class MethodBuilderRetryTest extends FunSuite {
     val stats = new InMemoryStatsReceiver()
     val retrySvc = new RetrySvc()
     val methodBuilder = retryMethodBuilder(retrySvc.svc, stats)
-    val noRetries = methodBuilder
-      .withRetry.disabled
+    val noRetries = methodBuilder.withRetry.disabled
       .newService("no_retries")
 
     // the client will not retry anything, let alone have a retry filter,
@@ -91,8 +91,8 @@ class MethodBuilderRetryTest extends FunSuite {
       case ReqRep(_, Throw(_: IllegalArgumentException)) =>
         ResponseClass.RetryableFailure
     }
-    val client = methodBuilder
-      .withRetry.forClassifier(classifier)
+    val client = methodBuilder.withRetry
+      .forClassifier(classifier)
       .newService("client")
 
     // the client will retry once
@@ -108,10 +108,12 @@ class MethodBuilderRetryTest extends FunSuite {
       Future.exception(Failure.rejected("nuh uh"))
     }
     val methodBuilder = retryMethodBuilder(svc, stats)
-    val client = methodBuilder.withRetry.forClassifier {
-      case ReqRep(_, Throw(f: Failure)) if f.isFlagged(Failure.Restartable) =>
-        ResponseClass.RetryableFailure
-    }.newService("client")
+    val client = methodBuilder.withRetry
+      .forClassifier {
+        case ReqRep(_, Throw(f: Failure)) if f.isFlagged(Failure.Restartable) =>
+          ResponseClass.RetryableFailure
+      }
+      .newService("client")
 
     val ex = intercept[Failure] {
       Await.result(client(1), 5.seconds)

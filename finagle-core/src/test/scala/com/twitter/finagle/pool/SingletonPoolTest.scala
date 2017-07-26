@@ -209,16 +209,16 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     Await.result(f).close()
 
     verify(underlying, never).close(any[Time])
-    
+
     val close = pool.close()
     assert(!close.isDefined)
-    
+
     // The pool is closed for business, even if it isn't done
     // *closing* yet.
     assertClosed()
 
     verify(underlying, times(1)).close(any[Time])
-    
+
     closeP.setDone()
     assert(close.isDefined)
   }
@@ -244,7 +244,7 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
   test("composes pool and service status") {
     val ctx = new Ctx
     import ctx._
-    
+
     // Not yet initialized.
     assert(pool.status == Status.Open)
     verify(underlying, times(1)).status
@@ -261,12 +261,12 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
     when(underlying.status).thenReturn(Status.Closed)
     assert(pool.status == Status.Closed)
     when(underlying.status).thenReturn(Status.Busy)
-    
+
     when(service.status).thenReturn(Status.Open)
     assert(pool.status == Status.Busy)
     when(pool.status).thenReturn(Status.Open)
     assert(pool.status == Status.Open)
-    
+
     // After close, we're forever Closed.
     pool.close()
     assert(pool.status == Status.Closed)
@@ -275,14 +275,14 @@ class SingletonPoolTest extends FunSuite with MockitoSugar {
   test("ignore cached but Closed service status") {
     val ctx = new Ctx
     import ctx._
-    
+
     underlyingP.setValue(service)
     val s = Await.result(pool())
-    
+
     // We're checked out; reflect the service status
     when(service.status).thenReturn(Status.Busy)
     assert(pool.status == Status.Busy)
-    
+
     when(service.status).thenReturn(Status.Closed)
     assert(pool.status == Status.Open)
     when(underlying.status).thenReturn(Status.Closed)

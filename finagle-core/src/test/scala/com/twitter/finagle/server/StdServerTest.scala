@@ -16,15 +16,17 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
 
   val mockCert = mock[X509Certificate]
   private case class Server(
-      stack: Stack[ServiceFactory[Unit, Unit]] = StackServer.newStack,
-      params: Params = StackServer.defaultParams
-    ) extends StdStackServer[Unit, Unit, Server] {
+    stack: Stack[ServiceFactory[Unit, Unit]] = StackServer.newStack,
+    params: Params = StackServer.defaultParams
+  ) extends StdStackServer[Unit, Unit, Server] {
 
     override protected type In = Unit
     override protected type Out = Unit
 
     override protected def newListener(): Listener[In, Out] = new Listener[Unit, Unit] {
-      override def listen(addr: SocketAddress)(serveTransport: (Transport[Unit, Unit]) => Unit): ListeningServer = {
+      override def listen(
+        addr: SocketAddress
+      )(serveTransport: (Transport[Unit, Unit]) => Unit): ListeningServer = {
         import org.mockito.Mockito.{when}
         val trans = mock[Transport[Unit, Unit]]
         when(trans.remoteAddress).thenReturn(mock[SocketAddress])
@@ -35,7 +37,10 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
       }
     }
 
-    override protected def newDispatcher(transport: Transport[In, Out], service: Service[Unit, Unit]): Closable = Closable.nop
+    override protected def newDispatcher(
+      transport: Transport[In, Out],
+      service: Service[Unit, Unit]
+    ): Closable = Closable.nop
 
     override protected def copy1(s: Stack[ServiceFactory[Unit, Unit]], p: Params) = this.copy(s, p)
   }
@@ -53,11 +58,11 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
 
   test("peer certificate is available to service factory") {
     val factory = new Factory
-    val server = new Server().serve( new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory )
+    val server =
+      new Server().serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), factory)
 
     assert(factory.cert == Some(mockCert))
     Await.ready(server.close())
   }
 
 }
-

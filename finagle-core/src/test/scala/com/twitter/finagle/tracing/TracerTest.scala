@@ -7,8 +7,7 @@ import org.scalatest.FunSuite
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class TracerTest extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+class TracerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   case class TestTracer(res: Option[Boolean]) extends Tracer {
     def record(record: Record): Unit = ()
@@ -17,13 +16,13 @@ class TracerTest extends FunSuite
   }
 
   private val genNone: Gen[TestTracer] =
-     Gen.const(TestTracer(None))
+    Gen.const(TestTracer(None))
 
   private val genSomeTrue: Gen[TestTracer] =
-     Gen.const(TestTracer(Some(true)))
+    Gen.const(TestTracer(Some(true)))
 
   private val genSomeFalse: Gen[TestTracer] =
-     Gen.const(TestTracer(Some(false)))
+    Gen.const(TestTracer(Some(false)))
 
   private val genTracers: Gen[List[Tracer]] =
     Gen.listOf(Gen.oneOf(genNone, genSomeTrue, genSomeFalse))

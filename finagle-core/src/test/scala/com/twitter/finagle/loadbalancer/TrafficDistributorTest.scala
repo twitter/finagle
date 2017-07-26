@@ -28,8 +28,9 @@ private object TrafficDistributorTest {
   }
 
   val weightClass: (Double, Int) => Set[Address] =
-    (w, size) => (0 until size).toSet.map { i: Int =>
-      WeightedAddress(WeightedTestAddr(i, w), w)
+    (w, size) =>
+      (0 until size).toSet.map { i: Int =>
+        WeightedAddress(WeightedTestAddr(i, w), w)
     }
 
   val busyWeight = 2.0
@@ -45,30 +46,30 @@ private object TrafficDistributorTest {
   }
 
   private case class Balancer(endpoints: Activity[Traversable[AddressFactory]])
-    extends ServiceFactory[Int, Int] {
-      var offeredLoad = 0
-      def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
-        offeredLoad += 1
-        // new hotness in load balancing
-        val nodes = endpoints.sample().toSeq
-        if (nodes.isEmpty) Future.exception(new NoBrokersAvailableException)
-        else nodes((math.random * nodes.size).toInt)(conn)
-      }
-      def close(deadline:Time): Future[Unit] = Future.Done
-      override def toString: String = s"Balancer($endpoints)"
+      extends ServiceFactory[Int, Int] {
+    var offeredLoad = 0
+    def apply(conn: ClientConnection): Future[Service[Int, Int]] = {
+      offeredLoad += 1
+      // new hotness in load balancing
+      val nodes = endpoints.sample().toSeq
+      if (nodes.isEmpty) Future.exception(new NoBrokersAvailableException)
+      else nodes((math.random * nodes.size).toInt)(conn)
     }
+    def close(deadline: Time): Future[Unit] = Future.Done
+    override def toString: String = s"Balancer($endpoints)"
+  }
 
-    // Return the distribution for the the given `balancer` as a tuple
-    // of (weight, size, offer load).
-    def distribution(balancers: Set[Balancer]): Set[(Double, Int, Int)] = {
-      balancers.flatMap { b =>
-        val endpoints = b.endpoints.sample()
-        endpoints.map {
-          case AddressFactory(WeightedTestAddr(_, w)) =>
-            (w*endpoints.size, endpoints.size, b.offeredLoad)
-        }
+  // Return the distribution for the the given `balancer` as a tuple
+  // of (weight, size, offer load).
+  def distribution(balancers: Set[Balancer]): Set[(Double, Int, Int)] = {
+    balancers.flatMap { b =>
+      val endpoints = b.endpoints.sample()
+      endpoints.map {
+        case AddressFactory(WeightedTestAddr(_, w)) =>
+          (w * endpoints.size, endpoints.size, b.offeredLoad)
       }
     }
+  }
 
   private class Ctx {
     var newEndpointCalls = 0
@@ -88,8 +89,7 @@ private object TrafficDistributorTest {
       val addressFactories = eps.map { set =>
         set.map { epsf =>
           Await.result(epsf())
-          epsf.asInstanceOf[LazyEndpointFactory[Int, Int]]
-            .self.get.asInstanceOf[AddressFactory]
+          epsf.asInstanceOf[LazyEndpointFactory[Int, Int]].self.get.asInstanceOf[AddressFactory]
         }
       }
       val b = Balancer(addressFactories)
@@ -118,7 +118,9 @@ private object TrafficDistributorTest {
         // since this is a circular dependency. Instead, we can rely
         // on the fact that we are serialized since the same thread
         // that updates `dest` will call this closure as well.
-        dest.changes.respond { _ => for (_ <- 0 to 100) { dist() } }
+        dest.changes.respond { _ =>
+          for (_ <- 0 to 100) { dist() }
+        }
       }
 
       dist
@@ -130,9 +132,7 @@ private object TrafficDistributorTest {
     }
   }
 
-  private class CumulativeGaugeInMemoryStatsReceiver
-    extends StatsReceiverWithCumulativeGauges
-  {
+  private class CumulativeGaugeInMemoryStatsReceiver extends StatsReceiverWithCumulativeGauges {
     private[this] val underlying = new InMemoryStatsReceiver()
     override val repr: AnyRef = this
     override def counter(verbosity: Verbosity, name: String*): ReadableCounter =
@@ -158,7 +158,7 @@ private object TrafficDistributorTest {
 class TrafficDistributorTest extends FunSuite {
   import TrafficDistributorTest._
 
-  test("distributes when weights are uniform") (new Ctx {
+  test("distributes when weights are uniform")(new Ctx {
     val init: Set[Address] = weightClass(5.0, 100)
     val dest = Var(Activity.Ok(init))
     val sr = new InMemoryStatsReceiver
@@ -171,15 +171,16 @@ class TrafficDistributorTest extends FunSuite {
     assert(sr.gauges(Seq("meanweight"))() == 5.0)
   })
 
-  test("distributes according to non-uniform weights") (new Ctx {
+  test("distributes according to non-uniform weights")(new Ctx {
     locally {
       val R = 1000
       val ε: Double = 0.01
       val weightClasses = Seq((1.0, 1000), (2.0, 5), (10.0, 150))
       val classes = weightClasses.flatMap(weightClass.tupled).toSet
-      val weightSum = weightClasses.foldLeft(0.0) { case (sum, tup) =>
-        val (w, t) = tup
-        sum + (w*t)
+      val weightSum = weightClasses.foldLeft(0.0) {
+        case (sum, tup) =>
+          val (w, t) = tup
+          sum + (w * t)
       }
 
       val dest = Var(Activity.Ok(classes))
@@ -187,7 +188,7 @@ class TrafficDistributorTest extends FunSuite {
       for (_ <- 0 until R) dist()
 
       distribution(balancers).foreach {
-        case ((w, _, l)) => assert(math.abs(w/weightSum - l/R.toDouble) < ε)
+        case ((w, _, l)) => assert(math.abs(w / weightSum - l / R.toDouble) < ε)
       }
     }
 
@@ -211,16 +212,16 @@ class TrafficDistributorTest extends FunSuite {
       val result = distribution(balancers)
 
       val baseline = result.collect {
-        case ((w, s, l)) if s/w == 1.0 => l/w
+        case ((w, s, l)) if s / w == 1.0 => l / w
       }.head
 
       result.foreach {
-        case ((w, _, l)) => assert(math.abs(l/w - baseline) <= baseline*ε)
+        case ((w, _, l)) => assert(math.abs(l / w - baseline) <= baseline * ε)
       }
     }
   })
 
-  test("memoize calls to newEndpoint and newBalancer") (new Ctx {
+  test("memoize calls to newEndpoint and newBalancer")(new Ctx {
     val init: Set[Address] = (1 to 5).map(Address(_)).toSet
     val dest = Var(Activity.Ok(init))
 
@@ -239,7 +240,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.head.endpoints.sample() == update.map(AddressFactory))
   })
 
-  test("partition endpoints into weight classes") (new Ctx {
+  test("partition endpoints into weight classes")(new Ctx {
     val init: Set[Address] = (1 to 5).map { i =>
       WeightedAddress(Address(i), i)
     }.toSet
@@ -281,7 +282,7 @@ class TrafficDistributorTest extends FunSuite {
     } == 1)
   })
 
-  test("respect lazy eviction") (new Ctx {
+  test("respect lazy eviction")(new Ctx {
     val init: Set[Address] = (1 to 5).map(Address(_)).toSet
     val dest = Var(Activity.Ok(init))
 
@@ -298,7 +299,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(newEndpointCalls == init.size)
     assert(newBalancerCalls == 1)
 
-    val update: Set[Address] = Set(6,7,8).map(Address(_))
+    val update: Set[Address] = Set(6, 7, 8).map(Address(_))
 
     resetCounters()
     dest() = Activity.Ok(update)
@@ -323,7 +324,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.head.endpoints.sample() == update.map(AddressFactory))
   })
 
-  test("transitions between activity states") (new Ctx {
+  test("transitions between activity states")(new Ctx {
     val init: Activity.State[Set[Address]] = Activity.Pending
     val dest = Var(init)
     val dist = newDist(dest)
@@ -334,11 +335,13 @@ class TrafficDistributorTest extends FunSuite {
     dest() = Activity.Ok(Set(1).map(Address(_)))
     val (first, _) = Await.result(q, 1.second)
     assert(first.isReturn)
-    assert(balancers.head.endpoints.sample() ==
-      Set(1).map(Address(_)).map(AddressFactory))
+    assert(
+      balancers.head.endpoints.sample() ==
+        Set(1).map(Address(_)).map(AddressFactory)
+    )
 
     // initial resolution
-    val resolved: Set[Address] = Set(1,2,3).map(Address(_))
+    val resolved: Set[Address] = Set(1, 2, 3).map(Address(_))
     dest() = Activity.Ok(resolved)
     val bal0 = Await.result(dist())
     assert(Await.result(bal0(10)) == 10)
@@ -358,14 +361,14 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.head.endpoints.sample() == resolved.map(AddressFactory))
   })
 
-  test("transitions to failure if failure comes first") (new Ctx {
+  test("transitions to failure if failure comes first")(new Ctx {
     val init: Activity.State[Set[Address]] = Activity.Pending
     val dest = Var(init)
     val dist = newDist(dest)
 
     // Failure is only allowed as an initial state
     dest() = Activity.Failed(new Exception)
-    intercept[Exception] { Await.result(dist())}
+    intercept[Exception] { Await.result(dist()) }
 
     // now give it a good value and then make sure that
     // failed never comes back.
@@ -376,7 +379,7 @@ class TrafficDistributorTest extends FunSuite {
     Await.result(dist())
   })
 
-  test("status is bestOf all weight classes") (new Ctx {
+  test("status is bestOf all weight classes")(new Ctx {
     val weightClasses = Seq((1.0, 1), (busyWeight, 2))
     val classes = weightClasses.flatMap(weightClass.tupled).toSet
     val dest = Var(Activity.Ok(classes))
@@ -387,7 +390,8 @@ class TrafficDistributorTest extends FunSuite {
       DefaultBalancerFactory.newBalancer(
         set.map(_.toVector),
         new NoBrokersAvailableException("test"),
-        Stack.Params.empty)
+        Stack.Params.empty
+      )
     }
 
     val dist = new TrafficDistributor[Int, Int](
@@ -402,7 +406,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(dist.status == Status.Open)
   })
 
-  test("increment weights on a shard") (new StringClient with StringServer {
+  test("increment weights on a shard")(new StringClient with StringServer {
     val server = stringServer.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
     })
@@ -419,8 +423,8 @@ class TrafficDistributorTest extends FunSuite {
     // redline a shard.
     val N = 5
     for (i <- 1 to N) withClue(s"for i=$i:") {
-      val addr = WeightedAddress(
-        Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
+      val addr =
+        WeightedAddress(Address(server.boundAddress.asInstanceOf[InetSocketAddress]), i.toDouble)
       va() = Addr.Bound(addr)
       assert(Await.result(client("hello")) == "hello".reverse)
       assert(sr.counters(Seq("test", "requests")) == i)
@@ -449,7 +453,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(sr.numGauges(Seq("test", "loadbalancer", "size")) <= 1)
   })
 
-  test("close a client") (new StringClient with StringServer {
+  test("close a client")(new StringClient with StringServer {
     val server = stringServer.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
     })

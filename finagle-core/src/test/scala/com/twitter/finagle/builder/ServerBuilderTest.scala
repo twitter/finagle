@@ -5,7 +5,10 @@ import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration, SslServerEngineFactory, SslServerSessionVerifier}
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslServerSessionVerifier
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}
@@ -18,11 +21,12 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class ServerBuilderTest extends FunSuite
-  with Eventually
-  with IntegrationPatience
-  with MockitoSugar
-  with StringServer {
+class ServerBuilderTest
+    extends FunSuite
+    with Eventually
+    with IntegrationPatience
+    with MockitoSugar
+    with StringServer {
 
   test(s"registers server with bound address") {
     val simple = new SimpleRegistry()

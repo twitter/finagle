@@ -9,10 +9,11 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.AssertionsForJUnit
 
-class ThresholdFailureDetectorTest extends FunSuite
-  with AssertionsForJUnit
-  with Eventually
-  with IntegrationPatience {
+class ThresholdFailureDetectorTest
+    extends FunSuite
+    with AssertionsForJUnit
+    with Eventually
+    with IntegrationPatience {
   def testt(desc: String)(f: TimeControl => Unit): Unit =
     test(desc) {
       Time.withCurrentTimeFrozen(f)

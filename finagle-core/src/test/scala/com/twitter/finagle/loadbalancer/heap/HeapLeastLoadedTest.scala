@@ -37,7 +37,9 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
   class Ctx {
     val N = 10
     val statsReceiver = new InMemoryStatsReceiver
-    val half1, half2 = 0 until N/2 map { i => new LoadedFactory(i.toString) }
+    val half1, half2 = 0 until N / 2 map { i =>
+      new LoadedFactory(i.toString)
+    }
     val factories = half1 ++ half2
     val mutableFactories = new ReadWriteVar(factories)
     val nonRng = new Random {
@@ -51,7 +53,8 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
       Activity(mutableFactories.map(set => Activity.Ok(set.toVector))),
       statsReceiver,
       exc,
-      nonRng)
+      nonRng
+    )
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
@@ -71,7 +74,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     assert(b.status == Status.Closed)
   }
 
-  for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) {
+  for (status <- Seq(Status.Closed, Status.Busy, Status.Open)) {
     test(s"balancer with entirely $status cluster has $status status") {
       val node = new LoadedFactory("1")
       node._status = status
@@ -116,7 +119,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     factories(0).setStatus(Status.Closed)
     factories(1).setStatus(Status.Closed)
 
-    for (_ <- 0 until 2*(N-2)) b()
+    for (_ <- 0 until 2 * (N - 2)) b()
 
     assert(factories(0).load == 1)
     assert(factories(1).load == 1)
@@ -129,7 +132,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     import ctx._
 
     // initially N factories, load them twice
-    val made = Seq.fill(N*2) { Await.result(b()) }
+    val made = Seq.fill(N * 2) { Await.result(b()) }
     for (f <- factories) assert(f.load == 2)
 
     // add newFactory to the heap balancer. Initially it has
@@ -227,7 +230,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     for (_ <- 0 until N) b()
     for (f <- factories)
       f.setStatus(Status.Closed)
-    for (_ <- 0 until 100*N) b()
+    for (_ <- 0 until 100 * N) b()
     for (f <- factories)
       assert(f.load == 101)
   }
@@ -241,11 +244,12 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     // Sequentially issue requests to the 2 nodes.
     // Requests should end up getting serviced by more than just one
     // of the nodes.
-    val results = (0 until N).foldLeft(Map.empty[LoadedFactory, Int]) { case (map, i) =>
-      val sequentialRequest = Await.result(b())
-      val chosenNode = factories.filter(_.load == 1).head
-      sequentialRequest.close()
-      map + (chosenNode -> (map.getOrElse(chosenNode, 0) + 1))
+    val results = (0 until N).foldLeft(Map.empty[LoadedFactory, Int]) {
+      case (map, i) =>
+        val sequentialRequest = Await.result(b())
+        val chosenNode = factories.filter(_.load == 1).head
+        sequentialRequest.close()
+        map + (chosenNode -> (map.getOrElse(chosenNode, 0) + 1))
     }
 
     // Assert that all two nodes were chosen
@@ -263,7 +267,7 @@ class HeapLeastLoadedTest extends FunSuite with MockitoSugar with AssertionsForJ
     for (_ <- 0 until N) b()
     for (f <- factories)
       f.setStatus(Status.Closed)
-    for (_ <- 0 until 100*N) b()
+    for (_ <- 0 until 100 * N) b()
     val f0 = factories(0)
     f0.setStatus(Status.Open)
     for (_ <- 0 until 100) assert(Await.result(Await.result(b()).apply(())) == f0)

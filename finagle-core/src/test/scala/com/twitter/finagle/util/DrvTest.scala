@@ -17,15 +17,15 @@ class DrvTest extends FunSuite {
       histo(drv(rng)) += 1
 
     for (i <- 1 to 9) {
-      val a = histo(i-1)/i
-      val b = histo(i)/(i+1)
-      assert(math.abs(a-b).toDouble/histo(i) < 0.005)
+      val a = histo(i - 1) / i
+      val b = histo(i) / (i + 1)
+      assert(math.abs(a - b).toDouble / histo(i) < 0.005)
     }
   }
 
   test("Drv.newVose(equal distribution)") {
     val Drv.Aliased(aliased, prob) = Drv.newVose(Seq.fill(10) { 0.1 })
-    assert(prob forall (_==1.0))
+    assert(prob forall (_ == 1.0))
   }
 
   test("Drv.newVose(zero probs)") {
@@ -37,6 +37,6 @@ class DrvTest extends FunSuite {
 
   test("Drv.newVose(all zeros)") {
     val Drv.Aliased(_, prob) = Drv.newVose(Seq(0, 0, 0))
-    assert(prob forall(_ == 1))
+    assert(prob forall (_ == 1))
   }
 }

@@ -26,7 +26,9 @@ class KeyValidationTest extends FunSuite {
     val x = intercept[IllegalArgumentException] {
       KeyValidation.checkKey(tooLongKey)
     }
-    assert(x.getMessage == s"Invalid keys: key cannot be longer than 250 bytes (${tooLongKey.length})")
+    assert(
+      x.getMessage == s"Invalid keys: key cannot be longer than 250 bytes (${tooLongKey.length})"
+    )
   }
 
   test("reject invalid key with whitespace or control chars") {

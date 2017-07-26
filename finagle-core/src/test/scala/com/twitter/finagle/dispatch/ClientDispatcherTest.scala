@@ -136,7 +136,6 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     val h = new DispatchHelper
     import h._
 
-
     assertGaugeSize(stats, 0)
 
     val p = new Promise[String]()

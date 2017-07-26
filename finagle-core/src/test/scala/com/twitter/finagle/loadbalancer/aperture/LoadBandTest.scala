@@ -10,21 +10,19 @@ import org.scalatest.FunSuite
 class LoadBandTest extends FunSuite with ApertureSuite {
   private val rng = Rng()
 
-  private class Bal(
-      protected val lowLoad: Double,
-      protected val highLoad: Double)
-    extends TestBal
-    with LeastLoaded[Unit, Unit]
-    with LoadBand[Unit, Unit] {
+  private class Bal(protected val lowLoad: Double, protected val highLoad: Double)
+      extends TestBal
+      with LeastLoaded[Unit, Unit]
+      with LoadBand[Unit, Unit] {
 
     protected def statsReceiver = NullStatsReceiver
     protected def smoothWin: Duration = Duration.Zero
 
     case class Node(factory: EndpointFactory[Unit, Unit])
-      extends ServiceFactoryProxy[Unit, Unit](factory)
-      with LeastLoadedNode
-      with LoadBandNode
-      with ApertureNode
+        extends ServiceFactoryProxy[Unit, Unit](factory)
+        with LeastLoadedNode
+        with LoadBandNode
+        with ApertureNode
 
     protected def newNode(factory: EndpointFactory[Unit, Unit]) = Node(factory)
     protected def failingNode(cause: Throwable) = ???
@@ -39,7 +37,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
       sum += v
     }
 
-    def apply(): Double = sum.toDouble/n
+    def apply(): Double = sum.toDouble / n
   }
 
   test("Aperture tracks concurrency") {
@@ -51,8 +49,8 @@ class LoadBandTest extends FunSuite with ApertureSuite {
     val numNodes = rng.nextInt(100)
     bal.update(counts.range(numNodes))
 
-    val start = (high+1).toInt
-    val concurrency = (start to numNodes) ++ ((numNodes-1) to start by -1)
+    val start = (high + 1).toInt
+    val concurrency = (start to numNodes) ++ ((numNodes - 1) to start by -1)
 
     for (c <- concurrency) {
       var ap = 0
@@ -69,7 +67,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
         for (f <- counts if f.total > 0) { avgLoad.update(f.outstanding) }
         // no need to avg ap, it's independent of the load distribution
         ap = bal.aperturex
-        Await.result(Closable.all(factories:_*).close())
+        Await.result(Closable.all(factories: _*).close())
       }
 
       // The controller tracks the avg concurrency over
@@ -77,7 +75,7 @@ class LoadBandTest extends FunSuite with ApertureSuite {
       // the aperture.
       // TODO: We should test this with a smoothWin to get a more
       // accurate picture of the lag in our adjustments.
-      assert(math.abs(c/high - ap) <= 1)
+      assert(math.abs(c / high - ap) <= 1)
 
       // The changes to the aperture should correlate to
       // the avg load per node but note that the distributor

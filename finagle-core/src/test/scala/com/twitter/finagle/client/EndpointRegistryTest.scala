@@ -25,7 +25,12 @@ final class EndpointRegistryTest extends FunSuite {
   val dtab = Dtab.read("/foo => /bar")
   val dtab2 = Dtab.read("/foo => /baz")
 
-  def getEndpoints(registry: EndpointRegistry, name: String, dtab: Dtab, path: String): Option[Addr] = {
+  def getEndpoints(
+    registry: EndpointRegistry,
+    name: String,
+    dtab: Dtab,
+    path: String
+  ): Option[Addr] = {
     registry.endpoints(name).get(dtab).flatMap(_.get(path))
   }
 
@@ -61,7 +66,9 @@ final class EndpointRegistryTest extends FunSuite {
     assert(getEndpoints(registry, name, dtab, path2) == Some(bound2))
   }
 
-  test("removing a path for a dtab for a client with only one dtab removes the client from the registry") {
+  test(
+    "removing a path for a dtab for a client with only one dtab removes the client from the registry"
+  ) {
     val registry = new EndpointRegistry()
 
     registry.addObservation(name, dtab, path, endpoints)
@@ -88,4 +95,3 @@ final class EndpointRegistryTest extends FunSuite {
 
   }
 }
-

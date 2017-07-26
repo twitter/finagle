@@ -16,7 +16,9 @@ class SslConfigurationsTest extends FunSuite {
 
   test("initializeSslContext succeeds for defaults") {
     val sslContext = SslConfigurations.initializeSslContext(
-      KeyCredentials.Unspecified, TrustCredentials.Unspecified)
+      KeyCredentials.Unspecified,
+      TrustCredentials.Unspecified
+    )
     assert(sslContext != null)
     assert(sslContext.getProtocol == "TLSv1.2")
   }
@@ -69,8 +71,10 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkKeyCredentialsNotSupported("TestFactory", keyCredentials)
     }
-    assert("KeyCredentials.CertAndKey is not supported at this time for TestFactory" ==
-      ex.getMessage)
+    assert(
+      "KeyCredentials.CertAndKey is not supported at this time for TestFactory" ==
+        ex.getMessage
+    )
   }
 
   test("checkKeyCredentialsNotSupported throws for CertKeyAndChain") {
@@ -78,8 +82,10 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkKeyCredentialsNotSupported("TestFactory", keyCredentials)
     }
-    assert("KeyCredentials.CertKeyAndChain is not supported at this time for TestFactory" ==
-      ex.getMessage)
+    assert(
+      "KeyCredentials.CertKeyAndChain is not supported at this time for TestFactory" ==
+        ex.getMessage
+    )
   }
 
   test("checkTrustCredentialsNotSupported does nothing for Unspecified") {
@@ -92,8 +98,10 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkTrustCredentialsNotSupported("TestFactory", trustCredentials)
     }
-    assert("TrustCredentials.Insecure is not supported at this time for TestFactory" ==
-      ex.getMessage)
+    assert(
+      "TrustCredentials.Insecure is not supported at this time for TestFactory" ==
+        ex.getMessage
+    )
   }
 
   test("checkTrustCredentialsNotSupported throws for CertCollection") {
@@ -101,8 +109,10 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkTrustCredentialsNotSupported("TestFactory", trustCredentials)
     }
-    assert("TrustCredentials.CertCollection is not supported at this time for TestFactory" ==
-      ex.getMessage)
+    assert(
+      "TrustCredentials.CertCollection is not supported at this time for TestFactory" ==
+        ex.getMessage
+    )
   }
 
   test("checkApplicationProtocolsNotSupported does nothing for Unspecified") {
@@ -115,8 +125,10 @@ class SslConfigurationsTest extends FunSuite {
     val ex = intercept[SslConfigurationException] {
       SslConfigurations.checkApplicationProtocolsNotSupported("TestFactory", appProtocols)
     }
-    assert("ApplicationProtocols.Supported is not supported at this time for TestFactory" ==
-      ex.getMessage)
+    assert(
+      "ApplicationProtocols.Supported is not supported at this time for TestFactory" ==
+        ex.getMessage
+    )
   }
 
   test("checkProtocolsNotSupported throws for Enabled") {

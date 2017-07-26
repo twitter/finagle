@@ -60,13 +60,11 @@ class RingTest extends FunSuite {
   }
 
   test("traversals iterate entire index space") {
-    val orders = Seq(
-      ring.alternatingIter(rng.nextDouble).toList,
-      ring.iter(rng.nextDouble).toList)
+    val orders = Seq(ring.alternatingIter(rng.nextDouble).toList, ring.iter(rng.nextDouble).toList)
 
     for (order <- orders) {
       assert(order.toSet.size == ring.size)
-      assert(order.toSet == Set(0 until ring.size:_*))
+      assert(order.toSet == Set(0 until ring.size: _*))
     }
   }
 
