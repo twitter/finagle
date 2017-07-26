@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.transport.{Message, MuxFailure}
-import com.twitter.finagle.mux.util.{TagMap, TagSet}
+import com.twitter.finagle.mux.util.TagMap
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Dtab, Filter, Failure, Service, Status}
@@ -35,8 +35,7 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
 
   // outstanding messages, each tagged with a unique int
   // between `MinTag` and `MaxTag`.
-  private[this] val tags = TagSet(Message.Tags.MinTag to Message.Tags.MaxTag)
-  private[this] val messages = TagMap[Updatable[Try[Message]]](tags)
+  private[this] val messages = TagMap[Updatable[Try[Message]]](TagRange, InitialTagMapSize)
 
   private[this] val processAndRead: Message => Future[Unit] =
     msg => {
@@ -55,11 +54,8 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
     case exc: Throwable =>
       trans.close()
       val result = Throw(exc)
-      for (tag <- tags) {
-        // unmap the `tag` here to prevent the associated promise from
-        // being fetched from the tag map again, and setting a value twice.
-        for (u <- messages.unmap(tag))
-          u() = result
+      for (u <- messages.unmapAll()) {
+        u() = result
       }
   }
 
@@ -110,6 +106,11 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
 }
 
 private[twitter] object ClientDispatcher {
+
+  val TagRange: Range = Message.Tags.MinTag to Message.Tags.MaxTag
+
+  val InitialTagMapSize: Int = 256
+
   val FutureExhaustedTagsException = Future.exception(Failure.rejected("Exhausted tags"))
 
   val Empty: Updatable[Try[Message]] = Updatable.empty()

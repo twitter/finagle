@@ -1,14 +1,11 @@
 package com.twitter.finagle.mux.util
 
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class TagSetTest extends FunSuite {
   val range = 0 until 10
   test("assign contiguous, small tags in the range") {
-    val set = TagSet(range)
+    val set = new TagMap.TagSet(range)
     for (i <- range)
       assert(set.acquire() == Some(i))
 
@@ -28,7 +25,7 @@ class TagSetTest extends FunSuite {
   }
 
   test("iterate over current tags") {
-    val set = TagSet(range)
+    val set = new TagMap.TagSet(range)
 
     for (i <- range)
       assert(set.acquire() == Some(i))
@@ -36,8 +33,8 @@ class TagSetTest extends FunSuite {
     assert(set.toSeq == range.toSeq)
 
     set.release(2)
-    assert(set.sameElements(range filter (_ != 2)))
+    assert(set.toSeq.sameElements(range filter (_ != 2)))
     set.release(8)
-    assert(set.sameElements(range filter (e => e != 2 && e != 8)))
+    assert(set.toSeq.sameElements(range filter (e => e != 2 && e != 8)))
   }
 }
