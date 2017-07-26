@@ -22,7 +22,8 @@ case class BCard(key: Buf) extends StrictKeyCommand {
   def name: Buf = Command.BCARD
 }
 
-case class BRange(key: Buf, count: Buf, startField: Option[Buf], endField: Option[Buf]) extends StrictKeyCommand {
+case class BRange(key: Buf, count: Buf, startField: Option[Buf], endField: Option[Buf])
+    extends StrictKeyCommand {
   def name: Buf = Command.BRANGE
 
   override def body: Seq[Buf] = (startField, endField) match {
@@ -34,13 +35,13 @@ case class BRange(key: Buf, count: Buf, startField: Option[Buf], endField: Optio
 }
 
 case class BMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
-    def name: Buf = Command.BMERGEEX
-    override def body: Seq[Buf] = {
-      val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
+  def name: Buf = Command.BMERGEEX
+  override def body: Seq[Buf] = {
+    val fvList: Seq[Buf] = fv.flatMap {
+      case (f, v) =>
         f :: v :: Nil
-      }(collection.breakOut)
+    }(collection.breakOut)
 
-      key +: ( Buf.Utf8(milliseconds.toString) +: fvList)
-    }
+    key +: (Buf.Utf8(milliseconds.toString) +: fvList)
   }
-
+}

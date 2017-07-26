@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis
 
-import java.lang.{Long => JLong,Boolean => JBoolean}
+import java.lang.{Long => JLong, Boolean => JBoolean}
 import com.twitter.finagle.redis.protocol.{IntegerReply, PFMerge, PFCount, PFAdd, StatusReply}
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -19,7 +19,6 @@ private[redis] trait HyperLogLogCommands { self: BaseClient =>
       case IntegerReply(n) => Future.value(n == 1)
     }
 
-
   /**
    * Gets the approximated cardinality (number of unique elements) of sets
    * observed by the HyperLogLog at `keys`.
@@ -30,7 +29,6 @@ private[redis] trait HyperLogLogCommands { self: BaseClient =>
     doRequest(PFCount(keys)) {
       case IntegerReply(n) => Future.value(n)
     }
-
 
   /**
    * Merges HyperLogLogs at `srcKeys` to create a new HyperLogLog at `destKey`.

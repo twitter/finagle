@@ -93,14 +93,21 @@ trait SubscribeCommands {
    * subscribed to successfully, or the subscription is cancelled by calling the unsubscribed
    * method.
    */
-  def subscribe(channels: Seq[Buf])(handler: subManager.typ.MessageHandler)
-    : Future[Map[Buf, Throwable]] = {
+  def subscribe(
+    channels: Seq[Buf]
+  )(handler: subManager.typ.MessageHandler): Future[Map[Buf, Throwable]] = {
     val notSubscribed = subManager.uniquify(channels, handler)
     val subscriptions = notSubscribed.map(subManager.subscribe)
-    Futures.collectToTry(subscriptions.asJava)
-      .map(_.asScala.zip(notSubscribed).collect {
-        case (Throw(ex), channel) => (channel, ex)
-      }.toMap)
+    Futures
+      .collectToTry(subscriptions.asJava)
+      .map(
+        _.asScala
+          .zip(notSubscribed)
+          .collect {
+            case (Throw(ex), channel) => (channel, ex)
+          }
+          .toMap
+      )
   }
 
   /**
@@ -120,14 +127,21 @@ trait SubscribeCommands {
    * subscribed to successfully, or the subscription is cancelled by calling the pUnsubscribed
    * method.
    */
-  def pSubscribe(patterns: Seq[Buf])(handler: pSubManager.typ.MessageHandler)
-    : Future[Map[Buf, Throwable]] = {
+  def pSubscribe(
+    patterns: Seq[Buf]
+  )(handler: pSubManager.typ.MessageHandler): Future[Map[Buf, Throwable]] = {
     val notSubscribed = pSubManager.uniquify(patterns, handler)
     val subscriptions = notSubscribed.map(pSubManager.subscribe)
-    Futures.collectToTry(subscriptions.asJava)
-      .map(_.asScala.zip(notSubscribed).collect {
-        case (Throw(ex), pattern) => (pattern, ex)
-      }.toMap)
+    Futures
+      .collectToTry(subscriptions.asJava)
+      .map(
+        _.asScala
+          .zip(notSubscribed)
+          .collect {
+            case (Throw(ex), pattern) => (pattern, ex)
+          }
+          .toMap
+      )
   }
 
   /**
@@ -137,10 +151,16 @@ trait SubscribeCommands {
    * exception object.
    */
   def unsubscribe(channels: Seq[Buf]): Future[Map[Buf, Throwable]] = {
-    Futures.collectToTry(channels.map(subManager.unsubscribe).asJava)
-      .map(_.asScala.zip(channels).collect {
-        case (Throw(ex), channel) => (channel, ex)
-      }.toMap)
+    Futures
+      .collectToTry(channels.map(subManager.unsubscribe).asJava)
+      .map(
+        _.asScala
+          .zip(channels)
+          .collect {
+            case (Throw(ex), channel) => (channel, ex)
+          }
+          .toMap
+      )
   }
 
   /**
@@ -150,10 +170,16 @@ trait SubscribeCommands {
    * exception object.
    */
   def pUnsubscribe(patterns: Seq[Buf]): Future[Map[Buf, Throwable]] = {
-    Futures.collectToTry(patterns.map(pSubManager.unsubscribe).asJava)
-      .map(_.asScala.zip(patterns).collect {
-        case (Throw(ex), pattern) => (pattern, ex)
-      }.toMap)
+    Futures
+      .collectToTry(patterns.map(pSubManager.unsubscribe).asJava)
+      .map(
+        _.asScala
+          .zip(patterns)
+          .collect {
+            case (Throw(ex), pattern) => (pattern, ex)
+          }
+          .toMap
+      )
   }
 
   private[this] def doRequest(cmd: SubscribeCommand) = {
@@ -190,25 +216,31 @@ trait SubscribeCommands {
 
     def onMessage(message: Reply): Unit = {
       message match {
-        case MBulkReply(BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
+        case MBulkReply(
+            BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil
+            ) =>
           subManager.handleMessage(channel, (channel, message))
-        case MBulkReply(BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
+        case MBulkReply(
+            BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(
+              message
+            ) :: Nil
+            ) =>
           pSubManager.handleMessage(pattern, (pattern, channel, message))
         case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>
           tpe match {
-            case MessageBytes.PSUBSCRIBE
-              | MessageBytes.PUNSUBSCRIBE
-              | MessageBytes.SUBSCRIBE
-              | MessageBytes.UNSUBSCRIBE =>
-              // The acknowledgement messages may come after a subscribed channel message.
-              // So we register the message handler right after the subscription request
-              // is sent. Nothing is going to be done here. We match against them just to
-              // detect something unexpected.
+            case MessageBytes.PSUBSCRIBE | MessageBytes.PUNSUBSCRIBE | MessageBytes.SUBSCRIBE |
+                MessageBytes.UNSUBSCRIBE =>
+            // The acknowledgement messages may come after a subscribed channel message.
+            // So we register the message handler right after the subscription request
+            // is sent. Nothing is going to be done here. We match against them just to
+            // detect something unexpected.
             case _ =>
               throw new IllegalArgumentException(s"Unsupported message type: ${BufToString(tpe)}")
           }
         case _ =>
-          throw new IllegalArgumentException(s"Unexpected reply type: ${message.getClass.getSimpleName}")
+          throw new IllegalArgumentException(
+            s"Unexpected reply type: ${message.getClass.getSimpleName}"
+          )
       }
     }
 
@@ -242,12 +274,13 @@ trait SubscribeCommands {
       // It is possible that the channel is unsubscribed, so we always check it before making
       // another attempt.
       if (subscriptions.get(channel).isEmpty) Future.value(NoReply)
-      else retry(channel).onFailure {
-        case sce: ServiceClosedException =>
-          subscriptions.remove(channel)
-        case _ =>
-          timer.doLater(1.second)(subscribe(channel))
-      }
+      else
+        retry(channel).onFailure {
+          case sce: ServiceClosedException =>
+            subscriptions.remove(channel)
+          case _ =>
+            timer.doLater(1.second)(subscribe(channel))
+        }
     }
 
     def unsubscribe(channel: Buf): Future[Reply] = {

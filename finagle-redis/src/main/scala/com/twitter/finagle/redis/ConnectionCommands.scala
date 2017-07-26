@@ -7,8 +7,8 @@ import com.twitter.util.Future
 private[redis] trait BasicConnectionCommands { self: BaseClient =>
 
   /**
-    * Sends a PING to Redis instance
-    */
+   * Sends a PING to Redis instance
+   */
   def ping(): Future[Unit] =
     doRequest(Ping) {
       case StatusReply("PONG") => Future.Unit

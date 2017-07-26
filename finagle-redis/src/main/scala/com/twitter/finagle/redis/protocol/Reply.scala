@@ -30,7 +30,9 @@ case object EmptyBulkReply extends MultiLineReply
 
 case class MBulkReply(messages: List[Reply]) extends MultiLineReply {
   RequireServerProtocol(
-    messages != null && messages.nonEmpty, "Multi-BulkReply had empty message list")
+    messages != null && messages.nonEmpty,
+    "Multi-BulkReply had empty message list"
+  )
 }
 
 case object EmptyMBulkReply extends MultiLineReply
@@ -38,12 +40,12 @@ case object NilMBulkReply extends MultiLineReply
 
 object Reply {
 
-  val EOL                 = Buf.Utf8("\r\n")
-  val STATUS_REPLY        = Buf.Utf8("+")
-  val ERROR_REPLY         = Buf.Utf8("-")
-  val INTEGER_REPLY       = Buf.Utf8(":")
-  val BULK_REPLY          = Buf.Utf8("$")
-  val MBULK_REPLY         = Buf.Utf8("*")
+  val EOL = Buf.Utf8("\r\n")
+  val STATUS_REPLY = Buf.Utf8("+")
+  val ERROR_REPLY = Buf.Utf8("-")
+  val INTEGER_REPLY = Buf.Utf8(":")
+  val BULK_REPLY = Buf.Utf8("$")
+  val MBULK_REPLY = Buf.Utf8("*")
 
   import Stage.NextStep
 
@@ -54,21 +56,20 @@ object Reply {
     Stage.readLine(line => NextStep.Emit(ErrorReply(line)))
 
   private[this] val decodeInteger =
-    Stage.readLine(line =>
-      RequireServerProtocol.safe(NextStep.Emit(IntegerReply(line.toLong)))
-    )
+    Stage.readLine(line => RequireServerProtocol.safe(NextStep.Emit(IntegerReply(line.toLong))))
 
   private[this] val decodeBulk =
     Stage.readLine { line =>
       val num = RequireServerProtocol.safe(line.toInt)
 
       if (num < 0) NextStep.Emit(EmptyBulkReply)
-      else NextStep.Goto(Stage.readBytes(num) { bytes =>
-        NextStep.Goto(Stage.readBytes(2) {
-          case EOL => NextStep.Emit(BulkReply(bytes))
-          case _ => throw ServerError("Expected EOL after line data and didn't find it")
+      else
+        NextStep.Goto(Stage.readBytes(num) { bytes =>
+          NextStep.Goto(Stage.readBytes(2) {
+            case EOL => NextStep.Emit(BulkReply(bytes))
+            case _ => throw ServerError("Expected EOL after line data and didn't find it")
+          })
         })
-      })
     }
 
   private[this] val decodeMBulk =

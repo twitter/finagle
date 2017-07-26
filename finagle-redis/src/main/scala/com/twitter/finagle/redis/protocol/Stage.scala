@@ -33,9 +33,7 @@ private[redis] object Stage {
     case object Incomplete extends NextStep
     case class Goto(stage: Stage) extends NextStep
     case class Emit(a: Reply) extends NextStep
-    case class Accumulate(
-        n: Long,
-        finish: List[Reply] => Reply) extends NextStep
+    case class Accumulate(n: Long, finish: List[Reply] => Reply) extends NextStep
   }
 
   /**

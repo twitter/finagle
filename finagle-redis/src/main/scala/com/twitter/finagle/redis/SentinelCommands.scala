@@ -11,9 +11,12 @@ private[redis] trait SentinelCommands { self: BaseClient =>
 
   private[redis] def returnMap(messages: Seq[String]): Map[String, String] = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).collect {
-      case Seq(a, b) => (a, b)
-    }.toMap
+    messages
+      .grouped(2)
+      .collect {
+        case Seq(a, b) => (a, b)
+      }
+      .toMap
   }
 
   /**
@@ -21,10 +24,9 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    */
   def masters(): Future[Seq[MasterNode]] =
     doRequest(SentinelMasters) {
-      case MBulkReply(masters) => Future.value(
-        masters.map {
-          case MBulkReply(messages) => new MasterNode(
-            returnMap(ReplyFormat.toString(messages)))
+      case MBulkReply(masters) =>
+        Future.value(masters.map {
+          case MBulkReply(messages) => new MasterNode(returnMap(ReplyFormat.toString(messages)))
         })
       case EmptyMBulkReply => Future.Nil
     }
@@ -34,8 +36,8 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    */
   def master(name: String): Future[MasterNode] =
     doRequest(SentinelMaster(name)) {
-      case MBulkReply(messages) => Future.value(
-        new MasterNode(returnMap(ReplyFormat.toString(messages))))
+      case MBulkReply(messages) =>
+        Future.value(new MasterNode(returnMap(ReplyFormat.toString(messages))))
     }
 
   /**
@@ -43,8 +45,8 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    */
   def slaves(name: String): Future[List[SlaveNode]] =
     doRequest(SentinelSlaves(name)) {
-      case MBulkReply(names) => Future.value(
-        names.map {
+      case MBulkReply(names) =>
+        Future.value(names.map {
           case MBulkReply(messages) =>
             new SlaveNode(returnMap(ReplyFormat.toString(messages)))
         })
@@ -56,8 +58,8 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    */
   def sentinels(name: String): Future[List[SentinelNode]] =
     doRequest(SentinelSentinels(name)) {
-      case MBulkReply(names) => Future.value(
-        names.map {
+      case MBulkReply(names) =>
+        Future.value(names.map {
           case MBulkReply(messages) =>
             new SentinelNode(returnMap(ReplyFormat.toString(messages)))
         })
@@ -72,11 +74,10 @@ private[redis] trait SentinelCommands { self: BaseClient =>
   def getMasterAddrByName(name: String): Future[Option[InetSocketAddress]] =
     doRequest(SentinelGetMasterAddrByName(name)) {
       case NilMBulkReply => Future.None
-      case MBulkReply(messages) => Future.value(
-        ReplyFormat.toBuf(messages) match {
+      case MBulkReply(messages) =>
+        Future.value(ReplyFormat.toBuf(messages) match {
           case host :: port :: Nil =>
-            Some(InetSocketAddress.createUnresolved(
-              BufToString(host), BufToString(port).toInt))
+            Some(InetSocketAddress.createUnresolved(BufToString(host), BufToString(port).toInt))
         })
     }
 

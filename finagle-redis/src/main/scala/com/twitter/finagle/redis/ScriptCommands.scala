@@ -33,7 +33,6 @@ private[redis] trait ScriptCommands { self: BaseClient =>
   def eval(script: Buf, keys: Seq[Buf], argv: Seq[Buf]): Future[Reply] =
     doRequest(Eval(script, keys, argv))(filterReply)
 
-
   /**
    * Executes EVALSHA command and returns the raw redis-server [[Reply]].
    *
@@ -79,10 +78,11 @@ private[redis] trait ScriptCommands { self: BaseClient =>
    */
   def scriptExists(digests: Buf*): Future[Seq[Boolean]] = {
     doRequest(ScriptExists(digests)) {
-      case MBulkReply(message) => Future.value(message.map {
-        case IntegerReply(n) => n != 0
-        case _ => false
-      })
+      case MBulkReply(message) =>
+        Future.value(message.map {
+          case IntegerReply(n) => n != 0
+          case _ => false
+        })
     }
   }
 

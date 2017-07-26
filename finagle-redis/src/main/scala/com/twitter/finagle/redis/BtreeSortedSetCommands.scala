@@ -30,8 +30,8 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
    */
   def bGet(key: Buf, field: Buf): Future[Option[Buf]] =
     doRequest(BGet(key, field)) {
-      case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply       => Future.None
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -52,6 +52,7 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
     doRequest(BCard(key)) {
       case IntegerReply(n) => Future.value(n)
     }
+
   /**
    * Gets all field value pairs for the given btree sorted order `key`
    * from `startField` to `endField`.
@@ -63,9 +64,8 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
     endField: Option[Buf]
   ): Future[Seq[(Buf, Buf)]] = {
     doRequest(BRange(key, Buf.Utf8(count.toString), startField, endField)) {
-      case MBulkReply(messages) => Future.value(
-        returnPairs(ReplyFormat.toBuf(messages)))
-      case EmptyMBulkReply      => Future.Nil
+      case MBulkReply(messages) => Future.value(returnPairs(ReplyFormat.toBuf(messages)))
+      case EmptyMBulkReply => Future.Nil
     }
   }
 

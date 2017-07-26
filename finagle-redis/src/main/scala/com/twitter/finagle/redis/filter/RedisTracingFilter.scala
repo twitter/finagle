@@ -19,4 +19,3 @@ private[redis] class RedisTracingFilter extends SimpleFilter[Command, Reply] {
     } else service(command)
   }
 }
-

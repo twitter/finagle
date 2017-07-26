@@ -23,7 +23,7 @@ case class HGetAll(key: Buf) extends StrictKeyCommand {
 }
 
 case class HIncrBy(key: Buf, field: Buf, amount: Long) extends StrictKeyCommand {
-  def name: Buf  = Command.HINCRBY
+  def name: Buf = Command.HINCRBY
   override def body: Seq[Buf] = Seq(key, field, Buf.Utf8(amount.toString))
 }
 
@@ -43,8 +43,9 @@ case class HMGet(key: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
 case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
   def name: Buf = Command.HMSET
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
-      f :: v :: Nil
+    val fvList: Seq[Buf] = fv.flatMap {
+      case (f, v) =>
+        f :: v :: Nil
     }(collection.breakOut)
 
     key +: fvList
@@ -54,22 +55,24 @@ case class HMSet(key: Buf, fv: Map[Buf, Buf]) extends StrictKeyCommand {
 case class HMSetEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
   def name: Buf = Command.HMSETEX
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
-      f :: v :: Nil
+    val fvList: Seq[Buf] = fv.flatMap {
+      case (f, v) =>
+        f :: v :: Nil
     }(collection.breakOut)
 
-    key +: ( Buf.Utf8(milliseconds.toString) +: fvList)
+    key +: (Buf.Utf8(milliseconds.toString) +: fvList)
   }
 }
 
 case class HMergeEx(key: Buf, fv: Map[Buf, Buf], milliseconds: Long) extends StrictKeyCommand {
   def name: Buf = Command.HMADDEX
   override def body: Seq[Buf] = {
-    val fvList: Seq[Buf] = fv.flatMap { case (f, v) =>
-      f :: v :: Nil
+    val fvList: Seq[Buf] = fv.flatMap {
+      case (f, v) =>
+        f :: v :: Nil
     }(collection.breakOut)
 
-    key +: ( Buf.Utf8(milliseconds.toString) +: fvList)
+    key +: (Buf.Utf8(milliseconds.toString) +: fvList)
   }
 }
 
@@ -85,12 +88,12 @@ case class HScan(
 
     val withCount = count match {
       case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
-      case None        => bufs
+      case None => bufs
     }
 
     pattern match {
       case Some(pattern) => withCount ++ Seq(Command.MATCH, pattern)
-      case None          => withCount
+      case None => withCount
     }
   }
 }
@@ -102,7 +105,8 @@ case class HSet(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
 
 case class HSetNx(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
   def name: Buf = Command.HSETNX
-  override def body: Seq[Buf] = Seq(key, field, value)}
+  override def body: Seq[Buf] = Seq(key, field, value)
+}
 
 case class HVals(key: Buf) extends StrictKeyCommand {
   def name: Buf = Command.HVALS

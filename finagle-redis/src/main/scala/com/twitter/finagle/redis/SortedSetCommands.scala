@@ -45,10 +45,13 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
    * @return The number of elements added to sorted set.
    */
   def zAddMulti(key: Buf, members: Seq[(JDouble, Buf)]): Future[JLong] = {
-    doRequest(ZAdd(key, members.map { m => ZMember(m._1, m._2) })) {
+    doRequest(ZAdd(key, members.map { m =>
+      ZMember(m._1, m._2)
+    })) {
       case IntegerReply(n) => Future.value(n)
     }
   }
+
   /**
    * Returns cardinality of the sorted set under the `key`, or 0
    * if `key` does not exist.
@@ -80,7 +83,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   ): Future[Either[ZRangeResults, Seq[Buf]]] =
     doRequest(
       ZRangeByScore(key, min, max, if (withScores) Some(WithScores) else None, limit)
-    ) (parseMBulkReply(withScores))
+    )(parseMBulkReply(withScores))
 
   /**
    * Removes specified `members` from sorted set at `key`.
@@ -126,9 +129,9 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
    */
   def zScore(key: Buf, member: Buf): Future[Option[JDouble]] =
     doRequest(ZScore(key, member)) {
-      case BulkReply(message)   =>
+      case BulkReply(message) =>
         Future.value(Some(BufToString(message).toDouble))
-      case EmptyBulkReply       => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -138,7 +141,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   def zRevRank(key: Buf, member: Buf): Future[Option[JLong]] =
     doRequest(ZRevRank(key, member)) {
       case IntegerReply(n) => Future.value(Some(n))
-      case EmptyBulkReply  => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -151,7 +154,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
     doRequest(ZIncrBy(key, amount, member)) {
       case BulkReply(message) =>
         Future.value(Some(BufToString(message).toDouble))
-      case EmptyBulkReply     => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -161,7 +164,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   def zRank(key: Buf, member: Buf): Future[Option[JLong]] =
     doRequest(ZRank(key, member)) {
       case IntegerReply(n) => Future.value(Some(n))
-      case EmptyBulkReply  => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -202,13 +205,16 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
     }
 
   /**
-    * Returns keys in given set `key`, starting at `cursor`.
-    */
+   * Returns keys in given set `key`, starting at `cursor`.
+   */
   def zScan(
-    key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]
+    key: Buf,
+    cursor: JLong,
+    count: Option[JLong],
+    pattern: Option[Buf]
   ): Future[Seq[Buf]] =
     doRequest(ZScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply      => Future.Nil
+      case EmptyMBulkReply => Future.Nil
     }
 }

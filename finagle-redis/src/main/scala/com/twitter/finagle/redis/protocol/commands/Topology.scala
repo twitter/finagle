@@ -2,9 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
 
-case class TopologyAdd(key: Buf, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class TopologyAdd(key: Buf, value: Buf) extends StrictKeyCommand with StrictValueCommand {
 
   def name: Buf = Command.TOPOLOGYADD
   override def body: Seq[Buf] = Seq(key, value)

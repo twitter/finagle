@@ -77,7 +77,7 @@ case class RenameNx(key: Buf, newkey: Buf) extends StrictKeyCommand {
 }
 
 case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] = None)
-  extends Command {
+    extends Command {
 
   def name: Buf = Command.SCAN
   override def body: Seq[Buf] = {
@@ -85,12 +85,12 @@ case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] 
 
     val withCount = count match {
       case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
-      case None        => bufs
+      case None => bufs
     }
 
     pattern match {
       case Some(pattern) => withCount ++ Seq(Command.MATCH, pattern)
-      case None          => withCount
+      case None => withCount
     }
   }
 }

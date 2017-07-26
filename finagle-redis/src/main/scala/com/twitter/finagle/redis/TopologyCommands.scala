@@ -25,7 +25,7 @@ private[redis] trait TopologyCommands { self: BaseClient =>
   def topologyGet(key: Buf): Future[Option[Buf]] =
     doRequest(TopologyGet(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply     => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**

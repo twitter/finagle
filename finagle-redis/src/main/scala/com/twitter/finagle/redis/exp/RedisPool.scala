@@ -27,10 +27,11 @@ object RedisPool {
   def newDispatcher[T](
     transport: Transport[Command, Reply],
     statsReceiver: StatsReceiver,
-    stallTimeout: Duration): Service[Command, Reply] =
+    stallTimeout: Duration
+  ): Service[Command, Reply] =
     useFor() match {
       case Some(Subscription) => new SubscribeDispatcher(transport)
-      case _                  => new PipeliningDispatcher(transport, statsReceiver, stallTimeout, DefaultTimer)
+      case _ => new PipeliningDispatcher(transport, statsReceiver, stallTimeout, DefaultTimer)
     }
 
   def module: Stackable[ServiceFactory[Command, Reply]] =
@@ -44,9 +45,7 @@ object RedisPool {
     }
 }
 
-class RedisPool(
-  underlying: ServiceFactory[Command, Reply],
-  statsReceiver: StatsReceiver)
+class RedisPool(underlying: ServiceFactory[Command, Reply], statsReceiver: StatsReceiver)
     extends ServiceFactory[Command, Reply] {
 
   private[this] val singletonPool =

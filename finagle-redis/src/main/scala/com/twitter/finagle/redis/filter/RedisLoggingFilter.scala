@@ -9,19 +9,15 @@ import com.twitter.util.Future
 private[redis] class RedisLoggingFilter(stats: StatsReceiver) extends SimpleFilter[Command, Reply] {
 
   private[this] val error = stats.scope("error")
-  private[this] val succ  = stats.scope("success")
+  private[this] val succ = stats.scope("success")
 
   override def apply(command: Command, service: Service[Command, Reply]): Future[Reply] = {
     service(command).onSuccess {
-      case StatusReply(_)
-           | IntegerReply(_)
-           | BulkReply(_)
-           | EmptyBulkReply
-           | MBulkReply(_)
-           | NilMBulkReply
-           | EmptyMBulkReply   => succ.counter(BufToString(command.name)).incr()
+      case StatusReply(_) | IntegerReply(_) | BulkReply(_) | EmptyBulkReply | MBulkReply(_) |
+          NilMBulkReply | EmptyMBulkReply =>
+        succ.counter(BufToString(command.name)).incr()
       case ErrorReply(message) => error.counter(BufToString(command.name)).incr()
-      case _                   => error.counter(BufToString(command.name)).incr()
+      case _ => error.counter(BufToString(command.name)).incr()
     }
   }
 }

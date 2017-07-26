@@ -14,9 +14,7 @@ case class SMembers(key: Buf) extends StrictKeyCommand {
   def name: Buf = Command.SMEMBERS
 }
 
-case class SIsMember(key: Buf, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class SIsMember(key: Buf, value: Buf) extends StrictKeyCommand with StrictValueCommand {
 
   def name: Buf = Command.SISMEMBER
   override def body: Seq[Buf] = Seq(key, value)
@@ -43,22 +41,18 @@ case class SInter(keys: Seq[Buf]) extends StrictKeysCommand {
   def name: Buf = Command.SINTER
 }
 
-case class SScan(
-    key: Buf,
-    cursor: Long,
-    count: Option[JLong] = None,
-    pattern: Option[Buf] = None)
-  extends Command {
-  def name: Buf  = Command.SSCAN
+case class SScan(key: Buf, cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] = None)
+    extends Command {
+  def name: Buf = Command.SSCAN
   override def body: Seq[Buf] = {
     val bufs = Seq(key, Buf.Utf8(cursor.toString))
     val withCount = count match {
       case Some(count) => bufs ++ Seq(Command.COUNT, Buf.Utf8(count.toString))
-      case None        => bufs
+      case None => bufs
     }
     pattern match {
       case Some(pattern) => withCount ++ Seq(Command.MATCH, pattern)
-      case None          => withCount
+      case None => withCount
     }
   }
 }

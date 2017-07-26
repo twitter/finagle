@@ -33,10 +33,7 @@ case object Quit extends Command {
   def name: Buf = Command.QUIT
 }
 
-case class ConfigSet(
-    param: Buf,
-    value: Buf)
-  extends Config(Buf.Utf8("SET"), Seq(param, value))
+case class ConfigSet(param: Buf, value: Buf) extends Config(Buf.Utf8("SET"), Seq(param, value))
 
 case class ConfigGet(param: Buf) extends Config(Buf.Utf8("GET"), Seq(param))
 

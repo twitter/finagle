@@ -2,22 +2,20 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
 
-case class Append(key: Buf, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class Append(key: Buf, value: Buf) extends StrictKeyCommand with StrictValueCommand {
 
   def name: Buf = Command.APPEND
   override def body: Seq[Buf] = Seq(key, value)
 }
 
-case class BitCount(
-    key: Buf,
-    start: Option[Int] = None,
-    end: Option[Int] = None)
-  extends StrictKeyCommand {
+case class BitCount(key: Buf, start: Option[Int] = None, end: Option[Int] = None)
+    extends StrictKeyCommand {
 
-  RequireClientProtocol(start.isEmpty && end.isEmpty ||
-    start.isDefined && end.isDefined, "Both start and end must be specified")
+  RequireClientProtocol(
+    start.isEmpty && end.isEmpty ||
+      start.isDefined && end.isDefined,
+    "Both start and end must be specified"
+  )
 
   def name: Buf = Command.BITCOUNT
   override def body: Seq[Buf] = {
@@ -26,19 +24,23 @@ case class BitCount(
         case Some(i) => Seq(Buf.Utf8(i.toString))
         case None => Seq.empty
       }) ++ (end match {
-        case Some(i) => Seq(Buf.Utf8(i.toString))
-        case None => Seq.empty
-      })
+      case Some(i) => Seq(Buf.Utf8(i.toString))
+      case None => Seq.empty
+    })
   }
 }
 
 case class BitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf]) extends Command {
-  RequireClientProtocol((op equals BitOp.And) || (op equals BitOp.Or) ||
-    (op equals BitOp.Xor) || (op equals BitOp.Not),
-    "BITOP supports only AND/OR/XOR/NOT")
+  RequireClientProtocol(
+    (op equals BitOp.And) || (op equals BitOp.Or) ||
+      (op equals BitOp.Xor) || (op equals BitOp.Not),
+    "BITOP supports only AND/OR/XOR/NOT"
+  )
   RequireClientProtocol(srcKeys.nonEmpty, "srcKeys must not be empty")
-  RequireClientProtocol(!op.equals(BitOp.Not) || srcKeys.size == 1,
-    "NOT operation takes only 1 input key")
+  RequireClientProtocol(
+    !op.equals(BitOp.Not) || srcKeys.size == 1,
+    "NOT operation takes only 1 input key"
+  )
 
   def name: Buf = Command.BITOP
   override def body: Seq[Buf] = Seq(op, dstKey) ++ srcKeys
@@ -86,9 +88,7 @@ case class GetRange(key: Buf, start: Long, end: Long) extends StrictKeyCommand {
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(start.toString), Buf.Utf8(end.toString))
 }
 
-case class GetSet(key: Buf, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class GetSet(key: Buf, value: Buf) extends StrictKeyCommand with StrictValueCommand {
 
   def name: Buf = Command.GETSET
   override def body: Seq[Buf] = Seq(key, value)
@@ -131,8 +131,8 @@ case class MSetNx(kv: Map[Buf, Buf]) extends MultiSet {
 }
 
 case class PSetEx(key: Buf, millis: Long, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+    extends StrictKeyCommand
+    with StrictValueCommand {
 
   RequireClientProtocol(millis > 0, "Milliseconds must be greater than 0")
 
@@ -145,13 +145,13 @@ case class InSeconds(seconds: Long) extends TimeToLive
 case class InMilliseconds(millis: Long) extends TimeToLive
 
 case class Set(
-    key: Buf,
-    value: Buf,
-    ttl: Option[TimeToLive] = None,
-    nx: Boolean = false,
-    xx: Boolean = false)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+  key: Buf,
+  value: Buf,
+  ttl: Option[TimeToLive] = None,
+  nx: Boolean = false,
+  xx: Boolean = false
+) extends StrictKeyCommand
+    with StrictValueCommand {
 
   def name: Buf = Command.SET
   override def body: Seq[Buf] = {
@@ -163,7 +163,7 @@ case class Set(
       case Some(InMilliseconds(millis)) =>
         Seq(Set.PxBytes, Buf.Utf8(millis.toString))
       case _ => Nil
-      }
+    }
 
     val nxAndXx = (if (nx) Seq(Set.NxBytes) else Nil) ++ (if (xx) Seq(Set.XxBytes) else Nil)
 
@@ -188,25 +188,23 @@ case class SetBit(key: Buf, offset: Int, value: Int) extends StrictKeyCommand {
 }
 
 case class SetEx(key: Buf, seconds: Long, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+    extends StrictKeyCommand
+    with StrictValueCommand {
   RequireClientProtocol(seconds > 0, "Seconds must be greater than 0")
 
   def name: Buf = Command.SETEX
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(seconds.toString), value)
 }
 
-case class SetNx(key: Buf, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class SetNx(key: Buf, value: Buf) extends StrictKeyCommand with StrictValueCommand {
 
   def name: Buf = Command.SETNX
   override def body: Seq[Buf] = Seq(key, value)
 }
 
 case class SetRange(key: Buf, offset: Int, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+    extends StrictKeyCommand
+    with StrictValueCommand {
 
   def name: Buf = Command.SETRANGE
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(offset.toString), value)

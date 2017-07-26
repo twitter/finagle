@@ -10,8 +10,8 @@ import java.security.cert.Certificate
 /**
  * A [[Transport]] implementation that uses [[StageDecoder]] to decode replies.
  */
-private[finagle] final class StageTransport(
-    underlying: Transport[Buf, Buf]) extends Transport[Command, Reply] {
+private[finagle] final class StageTransport(underlying: Transport[Buf, Buf])
+    extends Transport[Command, Reply] {
 
   // StageDecoder is thread-safe so we don't have to worry about synchronizing calls to it.
   private[this] val decoder = new StageDecoder(Reply.decode)

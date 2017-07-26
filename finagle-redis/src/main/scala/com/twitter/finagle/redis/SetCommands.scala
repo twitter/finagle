@@ -4,10 +4,11 @@ import com.twitter.io.Buf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
-import java.lang.{Long => JLong,Boolean => JBoolean}
+import java.lang.{Long => JLong, Boolean => JBoolean}
 import scala.collection.immutable.{Set => ImmutableSet}
 
 private[redis] trait SetCommands { self: BaseClient =>
+
   /**
    * Adds `members` to the set stored under the `key`. Throws an exception
    * if the `key` does not refer to a set.
@@ -106,14 +107,17 @@ private[redis] trait SetCommands { self: BaseClient =>
     }
 
   /**
-    * Returns keys in given set `key`, starting at `cursor`.
-    */
+   * Returns keys in given set `key`, starting at `cursor`.
+   */
   def sScan(
-    key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]
+    key: Buf,
+    cursor: JLong,
+    count: Option[JLong],
+    pattern: Option[Buf]
   ): Future[Seq[Buf]] =
     doRequest(SScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply      => Future.Nil
+      case EmptyMBulkReply => Future.Nil
     }
 
 }

@@ -24,11 +24,15 @@ private[redis] trait PubSubCommands { self: BaseClient =>
    */
   def pubSubNumSub(channels: Seq[Buf]): Future[Map[Buf, Long]] =
     doRequest(PubSubNumSub(channels)) {
-      case MBulkReply(messages) => Future.value(
-        messages.grouped(2).toSeq.map({
-          case List(BulkReply(channel), IntegerReply(num)) => channel -> num
-        })(breakOut)
-      )
+      case MBulkReply(messages) =>
+        Future.value(
+          messages
+            .grouped(2)
+            .toSeq
+            .map({
+              case List(BulkReply(channel), IntegerReply(num)) => channel -> num
+            })(breakOut)
+        )
       case EmptyMBulkReply => Future.value(Map.empty)
     }
 

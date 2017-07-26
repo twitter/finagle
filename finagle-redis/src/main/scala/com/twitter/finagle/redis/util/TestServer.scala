@@ -15,14 +15,20 @@ object RedisCluster { self =>
 
   def address: Option[InetSocketAddress] = instanceStack.head.address
   def address(i: Int) = instanceStack(i).address
-  def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i => i.address }
+  def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i =>
+    i.address
+  }
 
   def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
     require(instanceStack.nonEmpty)
-    addresses.slice(from, until).map { address =>
-      val addy = address.get
-      "%s:%d".format("127.0.0.1", addy.getPort())
-    }.sorted.mkString(",")
+    addresses
+      .slice(from, until)
+      .map { address =>
+        val addy = address.get
+        "%s:%d".format("127.0.0.1", addy.getPort())
+      }
+      .sorted
+      .mkString(",")
   }
 
   def start(count: Int = 1, mode: RedisMode = RedisMode.Standalone): Seq[ExternalRedis] = {
@@ -44,16 +50,22 @@ object RedisCluster { self =>
   }
 
   def stopAll() {
-    instanceStack.foreach { i => i.stop() }
+    instanceStack.foreach { i =>
+      i.stop()
+    }
     instanceStack.clear
   }
 
   // Make sure the process is always killed eventually
-  Runtime.getRuntime().addShutdownHook(new Thread {
-    override def run() {
-      self.instanceStack.foreach { instance => instance.stop() }
-    }
-  })
+  Runtime
+    .getRuntime()
+    .addShutdownHook(new Thread {
+      override def run() {
+        self.instanceStack.foreach { instance =>
+          instance.stop()
+        }
+      }
+    })
 }
 
 sealed trait RedisMode
@@ -89,7 +101,7 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   }
 
   protected def createConfigFile(port: Int): File = {
-    val f = File.createTempFile("redis-"+rand.nextInt(1000), ".tmp")
+    val f = File.createTempFile("redis-" + rand.nextInt(1000), ".tmp")
     f.deleteOnExit()
     val out = new PrintWriter(new BufferedWriter(new FileWriter(f)))
     val conf = "port %s".format(port)
@@ -128,7 +140,8 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
 
   def withClient[T](f: Client => T): T = {
     val client = newClient
-    try f(client) finally client.close()
+    try f(client)
+    finally client.close()
   }
 
   assertRedisBinaryPresent()

@@ -7,37 +7,25 @@ abstract class SubscribeCommand extends Command {
   def handler: SubscribeHandler
 }
 
-case class PSubscribe(
-    patterns: Seq[Buf],
-    handler: SubscribeHandler)
-  extends SubscribeCommand {
+case class PSubscribe(patterns: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
 
   def name: Buf = Command.PSUBSCRIBE
   override def body: Seq[Buf] = patterns
 }
 
-case class PUnsubscribe(
-    patterns: Seq[Buf],
-    handler: SubscribeHandler)
-  extends SubscribeCommand {
+case class PUnsubscribe(patterns: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
 
   def name: Buf = Command.PUNSUBSCRIBE
   override def body: Seq[Buf] = patterns
 }
 
-case class Subscribe(
-    channels: Seq[Buf],
-    handler: SubscribeHandler)
-  extends SubscribeCommand {
+case class Subscribe(channels: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
 
   def name: Buf = Command.SUBSCRIBE
   override def body: Seq[Buf] = channels
 }
 
-case class Unsubscribe(
-    channels: Seq[Buf],
-    handler: SubscribeHandler)
-  extends SubscribeCommand {
+case class Unsubscribe(channels: Seq[Buf], handler: SubscribeHandler) extends SubscribeCommand {
 
   def name: Buf = Command.UNSUBSCRIBE
   override def body: Seq[Buf] = channels

@@ -28,8 +28,10 @@ object SentinelClient {
     val flags: Seq[String] = props("flags").split(",")
     // In Redis 3.2 and newer, the property was renamed to link-pending-commands
     // preserve compatibility with older releases.
-    val linkPendingCommands: Int = props.get("link-pending-commands")
-      .getOrElse(props("pending-commands")).toInt
+    val linkPendingCommands: Int = props
+      .get("link-pending-commands")
+      .getOrElse(props("pending-commands"))
+      .toInt
     val lastPingSent: Int = props("last-ping-sent").toInt
     val lastPingReply: Int = props("last-ping-reply").toInt
     val downAfterMilliseconds: Int = props("down-after-milliseconds").toInt

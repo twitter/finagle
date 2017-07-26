@@ -10,9 +10,10 @@ import scala.collection.mutable.ListBuffer
 private[redis] final class StageDecoder(init: Stage) {
 
   private[this] final class Acc(
-      var n: Long,
-      val replies: ListBuffer[Reply],
-      val finish: List[Reply] => Reply)
+    var n: Long,
+    val replies: ListBuffer[Reply],
+    val finish: List[Reply] => Reply
+  )
 
   import Stage._
 
@@ -36,8 +37,7 @@ private[redis] final class StageDecoder(init: Stage) {
       // preserve any unconsumed data
       remaining = reader.readAll()
       result
-    }
-    finally reader.close()
+    } finally reader.close()
   }
 
   // Tries its best to decode the next _full_ reply or returns `null` if

@@ -11,13 +11,9 @@ case class LIndex(key: Buf, index: Long) extends StrictKeyCommand {
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString))
 }
 
-case class LInsert(
-    key: Buf,
-    relativePosition: String,
-    pivot: Buf,
-    value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+case class LInsert(key: Buf, relativePosition: String, pivot: Buf, value: Buf)
+    extends StrictKeyCommand
+    with StrictValueCommand {
 
   def name: Buf = Command.LINSERT
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(relativePosition), pivot, value)
@@ -34,16 +30,16 @@ case class LPush(key: Buf, values: Seq[Buf]) extends StrictKeyCommand {
 }
 
 case class LRem(key: Buf, count: Long, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+    extends StrictKeyCommand
+    with StrictValueCommand {
 
   def name: Buf = Command.LREM
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(count.toString), value)
 }
 
 case class LSet(key: Buf, index: Long, value: Buf)
-  extends StrictKeyCommand
-  with StrictValueCommand {
+    extends StrictKeyCommand
+    with StrictValueCommand {
 
   def name: Buf = Command.LSET
   override def body: Seq[Buf] = Seq(key, Buf.Utf8(index.toString), value)

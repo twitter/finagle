@@ -71,9 +71,9 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def get(key: Buf): Future[Option[Buf]] =
     doRequest(Get(key)) {
-      case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply       => Future.None
-  }
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply => Future.None
+    }
 
   /**
    * Returns the bit value at offset in the string value stored at key.
@@ -97,9 +97,9 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def getRange(key: Buf, start: Long, end: Long): Future[Option[Buf]] =
     doRequest(GetRange(key, start, end)) {
-      case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply       => Future.None
-  }
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply => Future.None
+    }
 
   /**
    * Atomically sets key to value and returns the old value stored at key.
@@ -112,9 +112,9 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def getSet(key: Buf, value: Buf): Future[Option[Buf]] =
     doRequest(GetSet(key, value)) {
-      case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply       => Future.value(None)
-  }
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply => Future.value(None)
+    }
 
   /**
    * Increments the number stored at key by one.
@@ -149,15 +149,16 @@ private[redis] trait StringCommands { self: BaseClient =>
    */
   def mGet(keys: Seq[Buf]): Future[Seq[Option[Buf]]] =
     doRequest(MGet(keys)) {
-      case MBulkReply(messages) => Future {
-        messages.map {
-        case BulkReply(message) => Some(message)
-        case EmptyBulkReply     => None
-        case _ => throw new IllegalStateException()
-      }.toSeq
+      case MBulkReply(messages) =>
+        Future {
+          messages.map {
+            case BulkReply(message) => Some(message)
+            case EmptyBulkReply => None
+            case _ => throw new IllegalStateException()
+          }.toSeq
+        }
+      case EmptyMBulkReply => Future.Nil
     }
-    case EmptyMBulkReply       => Future.Nil
-  }
 
   /**
    * Sets the given keys to their respective values. MSET replaces existing
@@ -244,7 +245,7 @@ private[redis] trait StringCommands { self: BaseClient =>
     doRequest(Set(key, value, Some(InSeconds(seconds)), true, false)) {
       case StatusReply(_) => FutureTrue
       case EmptyBulkReply => FutureFalse
-  }
+    }
 
   /**
    * Set key to hold the string value with the specified expire time in seconds
@@ -258,7 +259,7 @@ private[redis] trait StringCommands { self: BaseClient =>
     doRequest(Set(key, value, Some(InSeconds(seconds)), false, true)) {
       case StatusReply(_) => FutureTrue
       case EmptyBulkReply => FutureFalse
-  }
+    }
 
   /**
    * Set key to hold string value if key does not exist. In that case, it is
@@ -296,7 +297,7 @@ private[redis] trait StringCommands { self: BaseClient =>
     doRequest(Set(key, value, Some(InMilliseconds(millis)), true, false)) {
       case StatusReply(_) => FutureTrue
       case EmptyBulkReply => FutureFalse
-  }
+    }
 
   /**
    * Set key to hold the string value with the specified expire time in milliseconds
@@ -310,7 +311,7 @@ private[redis] trait StringCommands { self: BaseClient =>
     doRequest(Set(key, value, Some(InMilliseconds(millis)), false, true)) {
       case StatusReply(_) => FutureTrue
       case EmptyBulkReply => FutureFalse
-  }
+    }
 
   /**
    * Set key to hold the string value only if the key already exist.
@@ -323,7 +324,7 @@ private[redis] trait StringCommands { self: BaseClient =>
     doRequest(Set(key, value, None, false, true)) {
       case StatusReply(_) => FutureTrue
       case EmptyBulkReply => FutureFalse
-  }
+    }
 
   /**
    * Overwrites part of the string stored at key, starting at the specified

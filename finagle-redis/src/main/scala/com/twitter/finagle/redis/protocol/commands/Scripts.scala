@@ -3,16 +3,16 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.io.Buf
 
 case class Eval(script: Buf, keys: Seq[Buf], argv: Seq[Buf])
-  extends ScriptCommand
-  with KeysCommand {
+    extends ScriptCommand
+    with KeysCommand {
 
   def name: Buf = Command.EVAL
   override def body: Seq[Buf] = Seq(script, Buf.Utf8(keys.length.toString)) ++ keys ++ argv
 }
 
 case class EvalSha(sha: Buf, keys: Seq[Buf], argv: Seq[Buf])
-  extends ScriptDigestCommand
-  with KeysCommand {
+    extends ScriptDigestCommand
+    with KeysCommand {
 
   def name: Buf = Command.EVALSHA
   override def body: Seq[Buf] = Seq(sha, Buf.Utf8(keys.length.toString)) ++ keys ++ argv

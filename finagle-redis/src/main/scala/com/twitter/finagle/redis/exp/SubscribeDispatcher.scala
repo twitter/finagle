@@ -15,17 +15,23 @@ class SubscribeDispatcher(trans: Transport[Command, Reply])
   loop()
 
   private[this] def loop(): Unit =
-    trans.read().onSuccess { reply =>
-      handler.get().onMessage(reply)
-      loop()
-    }.onFailure {
-      case NonFatal(ex) =>
-        Option(handler.get()).foreach(_.onException(this, ex))
-    }
+    trans
+      .read()
+      .onSuccess { reply =>
+        handler.get().onMessage(reply)
+        loop()
+      }
+      .onFailure {
+        case NonFatal(ex) =>
+          Option(handler.get()).foreach(_.onException(this, ex))
+      }
 
   protected def dispatch(req: Command, p: Promise[Reply]): Future[Unit] = {
-    trans.write(req)
-      .onSuccess { _ => p.setValue(NoReply) }
+    trans
+      .write(req)
+      .onSuccess { _ =>
+        p.setValue(NoReply)
+      }
       .onFailure { case NonFatal(ex) => p.setException(ex) }
   }
 

@@ -33,16 +33,14 @@ trait ValueCommand extends Command {
   def value: Buf
 }
 trait StrictValueCommand extends ValueCommand {
-  RequireClientProtocol(value != null && value.length > 0,
-    "Found unexpected empty value")
+  RequireClientProtocol(value != null && value.length > 0, "Found unexpected empty value")
 }
 
 trait MemberCommand extends Command {
   def member: Buf
 }
 trait StrictMemberCommand extends MemberCommand {
-  RequireClientProtocol(member != null && member.length > 0,
-    "Found unexpected empty set member")
+  RequireClientProtocol(member != null && member.length > 0, "Found unexpected empty set member")
 }
 
 // Command that takes a script as a parameter, i.e. EVAL, SCRIPT LOAD
