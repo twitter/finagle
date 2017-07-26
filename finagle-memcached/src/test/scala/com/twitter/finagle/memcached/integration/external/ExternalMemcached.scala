@@ -11,7 +11,8 @@ object TestMemcachedServer {
   def start(): Option[TestMemcachedServer] = start(None)
 
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
-    if (!Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) InternalMemcached.start(address)
+    if (!Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined)
+      InternalMemcached.start(address)
     else ExternalMemcached.start(address)
   }
 }
@@ -45,22 +46,24 @@ private[memcached] object ExternalMemcached { self =>
   // prevent us from taking a port that is anything close to a real memcached port.
 
   private[this] def findAddress() = {
-    var address : Option[InetSocketAddress] = None
+    var address: Option[InetSocketAddress] = None
     var tries = 100
     while (address == None && tries >= 0) {
       address = Some(RandomSocket.nextAddress())
       if (forbiddenPorts.contains(address.get.getPort) ||
-            takenPorts.contains(address.get.getPort)) {
+        takenPorts.contains(address.get.getPort)) {
         address = None
         tries -= 1
         Thread.sleep(5)
       }
     }
-    if (address==None) sys.error("Couldn't get an address for the external memcached")
+    if (address == None) sys.error("Couldn't get an address for the external memcached")
 
-    takenPorts += address.getOrElse(
-      new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    ).getPort
+    takenPorts += address
+      .getOrElse(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+      )
+      .getPort
     address
   }
 
@@ -70,8 +73,7 @@ private[memcached] object ExternalMemcached { self =>
 
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
     def exec(address: InetSocketAddress): Process = {
-      val cmd = Seq("memcached", "-l", address.getHostName,
-        "-p", address.getPort.toString)
+      val cmd = Seq("memcached", "-l", address.getHostName, "-p", address.getPort.toString)
       val builder = new ProcessBuilder(cmd.toList)
       builder.start()
     }
@@ -100,7 +102,7 @@ private[memcached] object ExternalMemcached { self =>
   def waitForPort(port: Int, timeout: Duration = 5.seconds): Boolean = {
     val elapsed = Stopwatch.start()
     def loop(): Boolean = {
-      if (! isPortAvailable(port))
+      if (!isPortAvailable(port))
         true
       else if (timeout < elapsed())
         false
@@ -119,8 +121,9 @@ private[memcached] object ExternalMemcached { self =>
       ss = new ServerSocket(port)
       ss.setReuseAddress(true)
       result = true
-    } catch { case ex: BindException =>
-      result = (ex.getMessage != "Address already in use")
+    } catch {
+      case ex: BindException =>
+        result = (ex.getMessage != "Address already in use")
     } finally {
       if (ss != null)
         ss.close()
@@ -130,12 +133,14 @@ private[memcached] object ExternalMemcached { self =>
   }
 
   // Make sure the process is always killed eventually
-  Runtime.getRuntime().addShutdownHook(new Thread {
-    override def run() {
-      processes foreach { p =>
-        p.destroy()
-        p.waitFor()
+  Runtime
+    .getRuntime()
+    .addShutdownHook(new Thread {
+      override def run() {
+        processes foreach { p =>
+          p.destroy()
+          p.waitFor()
+        }
       }
-    }
-  })
+    })
 }
