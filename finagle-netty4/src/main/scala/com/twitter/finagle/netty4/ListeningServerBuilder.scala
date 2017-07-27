@@ -24,11 +24,10 @@ import java.util.concurrent.TimeUnit
  * @see [[com.twitter.finagle.server.Listener]]
  * @see [[com.twitter.finagle.param]]
  */
-private class ListeningServerBuilder[In, Out](
+private class ListeningServerBuilder(
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
-    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]) {
+    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler){
   import Netty4Listener.BackPressure
 
   // Exports N4-related metrics under `finagle/netty4`.

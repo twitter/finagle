@@ -46,7 +46,7 @@ private[finagle] case class Netty4Listener[In, Out](
 )(implicit mIn: Manifest[In], mOut: Manifest[Out])
     extends Listener[In, Out] {
 
-  private[this] val listeningServerBuilder = new ListeningServerBuilder[In, Out](
+  private[this] val listeningServerBuilder = new ListeningServerBuilder(
     pipelineInit, params, setupMarshalling)
 
   /**
