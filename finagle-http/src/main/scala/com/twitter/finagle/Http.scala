@@ -55,7 +55,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
   // Toggles transport implementation to Http/2.
   private[this] object useHttp2 {
-    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2")
+    private[this] val underlying: Toggle[Int] = Toggles("com.twitter.finagle.http.UseHttp2v2")
     def apply(): Boolean = underlying(ServerInfo().id.hashCode)
   }
 
