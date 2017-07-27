@@ -37,6 +37,8 @@ New Features
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
+  * finagle-netty4: Netty 4 transports now use pooled allocators by default. ``PHAB_ID=D75014``
+
   * finagle-mysql: `IsolationLevel` support was added with
     `Transactions.transactionWithIsolation` method, so the default level can be overridden
     at the transaction level. ``PHAB_ID=D68944``
