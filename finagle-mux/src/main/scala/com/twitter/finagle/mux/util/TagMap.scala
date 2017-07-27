@@ -13,6 +13,11 @@ import scala.collection.mutable.ListBuffer
 private[mux] trait TagMap[T] {
 
   /**
+   * Number of tags mapped by this `TagMap`.
+   */
+  def size: Int
+
+  /**
    * If a tag is available, an unused tag is returned and `el` is
    * associated with it. Otherwise, None is returned.
    */
@@ -49,6 +54,8 @@ private[mux] object TagMap {
   private[this] class TagMapImpl[T](set: TagSet, initialSize: Int) extends TagMap[T] { self =>
     require(initialSize >= 0)
     require(set.range.start >= 0)
+
+    def size: Int = self.synchronized { values.size }
 
     // while this a dependency on Netty 4, it is internal to this implementation
     // and not publicly exposed.
