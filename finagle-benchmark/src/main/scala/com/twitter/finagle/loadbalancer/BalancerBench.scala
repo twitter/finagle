@@ -25,19 +25,21 @@ object BalancerBench {
 
   def newActivity(num: Int): Activity[Vector[EndpointFactory[Unit, Unit]]] = {
     val underlying = Var((0 until num).map(_ => newFactory()).toVector)
-    Activity(underlying.map { facs => Activity.Ok(facs) })
+    Activity(underlying.map { facs =>
+      Activity.Ok(facs)
+    })
   }
 
   private case class NullNode(factory: EndpointFactory[Unit, Unit])
-    extends ServiceFactoryProxy[Unit, Unit](factory) with NodeT[Unit, Unit] {
+      extends ServiceFactoryProxy[Unit, Unit](factory)
+      with NodeT[Unit, Unit] {
 
     override def load: Double = 0.0
     override def pending: Int = 0
     override def close(deadline: Time): Future[Unit] = Future.Done
   }
 
-  private case class NullDistributor(vec: Vector[NullNode])
-    extends DistributorT[NullNode](vec) {
+  private case class NullDistributor(vec: Vector[NullNode]) extends DistributorT[NullNode](vec) {
     override type This = NullDistributor
     override def pick(): NullNode = vector.head
     override def needsRebuild: Boolean = false
@@ -105,8 +107,6 @@ class BalancerBench extends StdBenchAnnotations {
     noBalancer.update(state.next())
   }
 }
-
-
 @State(Scope.Benchmark)
 @Threads(Threads.MAX)
 class HeapBalancerBench extends StdBenchAnnotations {
@@ -119,9 +119,13 @@ class HeapBalancerBench extends StdBenchAnnotations {
 
   @Setup
   def setup() {
-    heap = Balancers.heap().newBalancer(
-      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
-    )
+    heap = Balancers
+      .heap()
+      .newBalancer(
+        newActivity(numNodes),
+        NoBrokersExc,
+        Stack.Params.empty
+      )
   }
 
   @Benchmark
@@ -141,12 +145,20 @@ class P2CBalancerBench extends StdBenchAnnotations {
 
   @Setup
   def setup() {
-    p2c = Balancers.p2c().newBalancer(
-      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
-    )
-    p2cEwma = Balancers.p2cPeakEwma().newBalancer(
-      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
-    )
+    p2c = Balancers
+      .p2c()
+      .newBalancer(
+        newActivity(numNodes),
+        NoBrokersExc,
+        Stack.Params.empty
+      )
+    p2cEwma = Balancers
+      .p2cPeakEwma()
+      .newBalancer(
+        newActivity(numNodes),
+        NoBrokersExc,
+        Stack.Params.empty
+      )
   }
 
   @Benchmark
@@ -168,9 +180,13 @@ class ApertureBalancerBench extends StdBenchAnnotations {
 
   @Setup
   def setup() {
-    aperture = Balancers.aperture().newBalancer(
-      newActivity(numNodes), NoBrokersExc, Stack.Params.empty
-    )
+    aperture = Balancers
+      .aperture()
+      .newBalancer(
+        newActivity(numNodes),
+        NoBrokersExc,
+        Stack.Params.empty
+      )
   }
 
   @Benchmark

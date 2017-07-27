@@ -14,7 +14,7 @@ class RequestBuilderTest extends FunSuite {
   val URL3 = new URL("https://foo_bar_prod.www.address.com")
 
   val BODY0 = Buf.Utf8("blah")
-  val FORM0 = Seq (
+  val FORM0 = Seq(
     "k1" -> "v1",
     "k2" -> "v2",
     "k3" -> "v3"
@@ -263,7 +263,7 @@ v3
     val builder3 = builder2
       .setHeader(A, Seq(B, C))
 
-    val pair = Seq(B,C)
+    val pair = Seq(B, C)
     assert(builder3.buildGet.headerMap.getAll(A) == pair)
     assert(builder3.buildHead.headerMap.getAll(A) == pair)
     assert(builder3.buildDelete.headerMap.getAll(A) == pair)
@@ -273,7 +273,7 @@ v3
     val builder4 = builder3
       .addHeader(A, D)
 
-    val triple = Seq(B,C, D)
+    val triple = Seq(B, C, D)
     assert(builder4.buildGet.headerMap.getAll(A) == triple)
     assert(builder4.buildHead.headerMap.getAll(A) == triple)
     assert(builder4.buildDelete.headerMap.getAll(A) == triple)
@@ -284,7 +284,7 @@ v3
   test("build form") {
     val builder0 = RequestBuilder()
       .url(URL0)
-      .addFormElement(FORM0:_*)
+      .addFormElement(FORM0: _*)
 
     val req0 = builder0.buildFormPost(false)
     val content = req0.contentString.replace("\r\n", "\n")
@@ -294,10 +294,11 @@ v3
   test("build multipart form") {
     val builder0 = RequestBuilder()
       .url(URL0)
-      .addFormElement(FORM0:_*)
+      .addFormElement(FORM0: _*)
 
     val req0 = builder0.buildFormPost(true)
-    val content = "--[^-\r\n]+".r.replaceAllIn(req0.contentString, "--Boundary")
+    val content = "--[^-\r\n]+".r
+      .replaceAllIn(req0.contentString, "--Boundary")
       .replace("\r\n", "\n")
     assert(content == MULTIPART0)
   }

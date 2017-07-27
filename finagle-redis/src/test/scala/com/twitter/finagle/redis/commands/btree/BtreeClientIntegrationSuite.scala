@@ -103,11 +103,10 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     Await.result(client.bMergeEx(bufFoo, Map(bufBaz -> bufBoo, bufMoo -> bufBoo), 90000), TIMEOUT)
     result = Await.result(client.bRange(bufFoo, 10, None, None), TIMEOUT).toList
     ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
-    assert(result.map( t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
+    assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) //baz's value is unchanged
     assert(ttl > 10000 && ttl <= 90000) // ttl is updated only if a field was added
     Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
-
 
   test("Correctly merge lkeys with destination without expiry") {
     val bufFoo = Buf.Utf8("foo")
@@ -158,7 +157,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
     assert(result.map(t => t._2).map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // values not updated
     assert(ttl > 10000 && ttl <= 30000) // ttl was not updated updated.
-    Await.result(client.flushAll(), TIMEOUT)  //clear the keys
+    Await.result(client.flushAll(), TIMEOUT) //clear the keys
   }
 
   def defaultTest(client: Client) {
@@ -210,20 +209,24 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBcard(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       val target = client.bCard(Buf.Utf8(outerKey))
-      assert(inner.size == Await.result(target),
-        "BCARD failed for " + outerKey + " expected " + inner.size + " got " + Await.result(target))
-      }
-
-      println("Test BCARD succeeded")
+      assert(
+        inner.size == Await.result(target),
+        "BCARD failed for " + outerKey + " expected " + inner.size + " got " + Await.result(target)
+      )
     }
+
+    println("Test BCARD succeeded")
+  }
 
   def testBget(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       for ((innerKey, value) <- inner) {
         val target = client.bGet(Buf.Utf8(outerKey), Buf.Utf8(innerKey))
         val targetVal = BufToString(Await.result(target).get)
-        assert(value == targetVal,
-          "BGET failed for " + outerKey + " expected " + value + " got " + targetVal)
+        assert(
+          value == targetVal,
+          "BGET failed for " + outerKey + " expected " + value + " got " + targetVal
+        )
       }
     }
 
@@ -261,8 +264,11 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val start = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.drop(start)
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size,
-        Option(Buf.Utf8(innerKeys.head._1)), None), TIMEOUT)
+      val target = Await.result(
+        client
+          .bRange(Buf.Utf8(outerKey), innerKeys.size, Option(Buf.Utf8(innerKeys.head._1)), None),
+        TIMEOUT
+      )
       validate(outerKey, innerKeys, target)
     }
 
@@ -278,8 +284,11 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val end = rand.nextInt(innerKeys.size)
       innerKeys = innerKeys.dropRight(end)
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None,
-        Option(Buf.Utf8(innerKeys.last._1))), TIMEOUT)
+      val target = Await.result(
+        client
+          .bRange(Buf.Utf8(outerKey), innerKeys.size, None, Option(Buf.Utf8(innerKeys.last._1))),
+        TIMEOUT
+      )
       validate(outerKey, innerKeys, target)
     }
 
@@ -303,10 +312,11 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       )
 
       if (start > end) {
-        assert(Await.ready(target).poll.get.isThrow,
-          "BRANGE failed for " + outerKey + " return should be a throw")
-      }
-      else {
+        assert(
+          Await.ready(target).poll.get.isThrow,
+          "BRANGE failed for " + outerKey + " return should be a throw"
+        )
+      } else {
         innerKeys = innerKeys.slice(start, end + 1)
         validate(outerKey, innerKeys, Await.result(target))
       }
@@ -323,8 +333,9 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val start = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (start <= p._1))
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size,
-        Option(Buf.Utf8(start)), None))
+      val target = Await.result(
+        client.bRange(Buf.Utf8(outerKey), innerKeys.size, Option(Buf.Utf8(start)), None)
+      )
       validate(outerKey, innerKeys, target)
     }
 
@@ -339,8 +350,8 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       var innerKeys = inner.toList.sortBy(_._1)
       val end = UUID.randomUUID().toString
       innerKeys = innerKeys.filter(p => (p._1 <= end))
-      val target = Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None,
-        Option(Buf.Utf8(end))))
+      val target =
+        Await.result(client.bRange(Buf.Utf8(outerKey), innerKeys.size, None, Option(Buf.Utf8(end))))
       validate(outerKey, innerKeys, target)
     }
 
@@ -360,13 +371,15 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
         Buf.Utf8(outerKey),
         innerKeys.size,
         Option(Buf.Utf8(start)),
-        Option(Buf.Utf8(end)))
+        Option(Buf.Utf8(end))
+      )
 
       if (start > end) {
-        assert(Await.ready(target).poll.get.isThrow,
-          "BRANGE failed for " + outerKey + " return should be a throw")
-      }
-      else {
+        assert(
+          Await.ready(target).poll.get.isThrow,
+          "BRANGE failed for " + outerKey + " return should be a throw"
+        )
+      } else {
         validate(outerKey, innerKeys, Await.result(target))
       }
     }
@@ -379,18 +392,24 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     exp: List[(String, String)],
     got: Seq[(Buf, Buf)]
   ) {
-    assert(got.size == exp.size,
-      "BRANGE failed for " + outerKey + " expected size " + exp.size + " got size " + got.size)
+    assert(
+      got.size == exp.size,
+      "BRANGE failed for " + outerKey + " expected size " + exp.size + " got size " + got.size
+    )
 
     for (i <- 0 until exp.size) {
       val expKey = exp(i)._1
       val gotKey = BufToString(got(i)._1)
       val expVal = exp(i)._2
       val gotVal = BufToString(got(i)._2)
-      assert(exp(i)._1 == BufToString(got(i)._1),
-        "Key mismatch for outerKey " + outerKey + " expected " + expKey + "got " + gotKey)
-      assert(exp(i)._2 == BufToString(got(i)._2),
-        "Value mismatch for outerKey " + outerKey + " expected " + expVal + "got " + gotVal)
+      assert(
+        exp(i)._1 == BufToString(got(i)._1),
+        "Key mismatch for outerKey " + outerKey + " expected " + expKey + "got " + gotKey
+      )
+      assert(
+        exp(i)._2 == BufToString(got(i)._2),
+        "Value mismatch for outerKey " + outerKey + " expected " + expVal + "got " + gotVal
+      )
     }
   }
 }

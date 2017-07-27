@@ -32,7 +32,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
         def query(x: String) =
           (Contexts.broadcast.get(testContext), Dtab.local) match {
             case (None, Dtab.empty) =>
-              Future.value(x+x)
+              Future.value(x + x)
 
             case (Some(TestContext(buf)), _) =>
               val Buf.Utf8(str) = buf
@@ -41,13 +41,16 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
             case (_, dtab) =>
               Future.value(dtab.show)
           }
-      })
+      }
+    )
   }
 
   test("thriftmux server + thriftmux client: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = ThriftMux.client.newIface[TestService.FutureIface](
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
 
       assert(Await.result(client.query("ok"), 5.second) == "okok")
 
@@ -63,7 +66,9 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     new ThriftMuxTestServer {
       val client =
         Thrift.client.newIface[TestService.FutureIface](
-          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
 
       assert(Await.result(client.query("ok"), 5.second) == "okok")
 
@@ -75,11 +80,13 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     }
   }
 
-
   test("thriftmux server + Finagle thrift client: propagate Dtab.local") {
     new ThriftMuxTestServer {
       val client =
-        Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Thrift.client.newIface[TestService.FutureIface](
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "client"
+        )
 
       assert(Await.result(client.query("ok"), 5.second) == "okok")
 
@@ -98,8 +105,12 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     }
 
     val service = ThriftUtil.serverFromIface(
-      iface, Protocols.binaryFactory(), NullStatsReceiver, Int.MaxValue, "server")
-
+      iface,
+      Protocols.binaryFactory(),
+      NullStatsReceiver,
+      Int.MaxValue,
+      "server"
+    )
 
     val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
       def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
@@ -110,17 +121,22 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     val server = ThriftMux.server.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-      assertRetriesFilter.andThen(service))
+      assertRetriesFilter.andThen(service)
+    )
 
     val client = Thrift.client
       .newIface[TestService.FutureIface](
-      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
 
     assert(Await.result(client.query("ok"), 5.seconds) == "ok")
   }
 
-  test("thriftmux server + thriftmux client: server does not see Retries " +
-    "set by another client if client removed RequeueFilter") {
+  test(
+    "thriftmux server + thriftmux client: server does not see Retries " +
+      "set by another client if client removed RequeueFilter"
+  ) {
     val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {
       def apply(request: Array[Byte], service: Service[Array[Byte], Array[Byte]]) = {
         assert(context.Retries.current == None)
@@ -136,31 +152,46 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
     }
 
     val serviceB = ThriftUtil.serverFromIface(
-      ifaceB, Protocols.binaryFactory(), NullStatsReceiver, Int.MaxValue, "serverB")
+      ifaceB,
+      Protocols.binaryFactory(),
+      NullStatsReceiver,
+      Int.MaxValue,
+      "serverB"
+    )
 
     val serverB = ThriftMux.server
       .serve(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        assertRetriesFilter.andThen(serviceB))
+        assertRetriesFilter.andThen(serviceB)
+      )
 
     val clientB = Thrift.client
       .withStack(Thrift.client.stack.remove(Retries.Role))
       .newIface[TestService.FutureIface](
-      Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])), "clientB")
+        Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])),
+        "clientB"
+      )
 
     val ifaceA = new TestService.FutureIface {
       def query(x: String) = clientB.query(x)
     }
 
     val serviceA = ThriftUtil.serverFromIface(
-      ifaceA, Protocols.binaryFactory(), NullStatsReceiver, Int.MaxValue, "serverA")
+      ifaceA,
+      Protocols.binaryFactory(),
+      NullStatsReceiver,
+      Int.MaxValue,
+      "serverA"
+    )
 
     val serverA = ThriftMux.server
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), serviceA)
 
     val clientA = Thrift.client
       .newIface[TestService.FutureIface](
-      Name.bound(Address(serverA.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Name.bound(Address(serverA.boundAddress.asInstanceOf[InetSocketAddress])),
+        "client"
+      )
 
     assert(Await.result(clientA.query("ok")) == "ok")
   }

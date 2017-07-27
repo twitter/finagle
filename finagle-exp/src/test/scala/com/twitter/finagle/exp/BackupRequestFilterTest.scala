@@ -13,9 +13,7 @@ import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class BackupRequestFilterTest extends FunSuite
-  with MockitoSugar
-  with Matchers {
+class BackupRequestFilterTest extends FunSuite with MockitoSugar with Matchers {
   def quantile(ds: Seq[Duration], which: Int) = {
     val sorted = ds.sorted
     sorted(which * sorted.size / 100)
@@ -28,7 +26,15 @@ class BackupRequestFilterTest extends FunSuite
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())).thenReturn(Future.Done)
     val filter = new BackupRequestFilter[String, String](
-      95, maxDuration, timer, statsReceiver, Duration.Top, Stopwatch.timeMillis, 1, 0.05)
+      95,
+      maxDuration,
+      timer,
+      statsReceiver,
+      Duration.Top,
+      Stopwatch.timeMillis,
+      1,
+      0.05
+    )
     val service = filter andThen underlying
 
     def cutoff() =

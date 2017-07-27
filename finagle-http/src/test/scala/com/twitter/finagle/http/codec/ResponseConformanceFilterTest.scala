@@ -79,8 +79,9 @@ class ResponseConformanceFilterTest extends FunSuite {
   }
 
   List(Continue, SwitchingProtocols, Processing, NoContent, NotModified).foreach { status =>
-    test(s"response with status code ${status.code} must not have a message body nor " +
-      "Content-Length header field"
+    test(
+      s"response with status code ${status.code} must not have a message body nor " +
+        "Content-Length header field"
     ) {
       val res = Response(Version.Http11, status)
       val response = fetchResponse(res)
@@ -93,8 +94,9 @@ class ResponseConformanceFilterTest extends FunSuite {
   }
 
   List(Continue, SwitchingProtocols, Processing, NoContent, NotModified).foreach { status =>
-    test(s"response with status code ${status.code} must not have a message body nor " +
-      "Content-Length header field when non-empty body is returned"
+    test(
+      s"response with status code ${status.code} must not have a message body nor " +
+        "Content-Length header field when non-empty body is returned"
     ) {
       val body = Buf.Utf8("some data")
       val res = Response(Version.Http11, status)
@@ -110,8 +112,9 @@ class ResponseConformanceFilterTest extends FunSuite {
   }
 
   List(Continue, SwitchingProtocols, Processing, NoContent).foreach { status =>
-    test(s"response with status code ${status.code} must not have a message body nor " +
-      "Content-Length header field when non-empty body with explicit Content-Length is returned"
+    test(
+      s"response with status code ${status.code} must not have a message body nor " +
+        "Content-Length header field when non-empty body with explicit Content-Length is returned"
     ) {
       val body = Buf.Utf8("some data")
       val res = Response(Version.Http11, status)
@@ -127,8 +130,10 @@ class ResponseConformanceFilterTest extends FunSuite {
     }
   }
 
-  test("response with status code 304 must not have a message body *BUT* Content-Length " +
-    "header field when non-empty body with explicit Content-Length is returned") {
+  test(
+    "response with status code 304 must not have a message body *BUT* Content-Length " +
+      "header field when non-empty body with explicit Content-Length is returned"
+  ) {
     val body = Buf.Utf8("some data")
     val res = Response(Version.Http11, Status.NotModified)
     res.content = body
@@ -154,7 +159,9 @@ class ResponseConformanceFilterTest extends FunSuite {
   }
 
   def runFilter(req: Request, res: Response): Response = {
-    val service = ResponseConformanceFilter andThen Service.mk { _: Request => Future.value(res) }
+    val service = ResponseConformanceFilter andThen Service.mk { _: Request =>
+      Future.value(res)
+    }
     Await.result(service(req), 5.seconds)
   }
 

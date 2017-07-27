@@ -44,9 +44,8 @@ class DynamicTimeoutTest extends FunSuite {
     val clientWithTimeout = stackClient
       .configured(TimeoutFilter.Param(10.millis))
 
-    val modifiedStack = clientWithTimeout.stack.replace(
-      TimeoutFilter.role,
-      DynamicTimeout.perRequestModule[Req, Rep])
+    val modifiedStack =
+      clientWithTimeout.stack.replace(TimeoutFilter.role, DynamicTimeout.perRequestModule[Req, Rep])
 
     val server = stackServer.serve("localhost:*", mkService(rep))
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]

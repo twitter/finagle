@@ -122,7 +122,8 @@ private[mux] object TagMap {
     /** Acquire a tag, if available */
     def acquire(): Option[Int] = {
       val tag = bits.nextClearBit(start)
-      if (!range.contains(tag)) None else {
+      if (!range.contains(tag)) None
+      else {
         bits.set(tag)
         Some(tag)
       }

@@ -18,13 +18,21 @@ import org.apache.zookeeper.CreateMode
  */
 private[serverset2] object LocalServerSetService extends App {
 
-  private val initialMembers = flag("members.init", 500, "Number of members to start with in the serverset")
-  private val additionsPerCycle = flag("members.add", 100, "Number of members to add each churn cycle")
-  private val removalsPerCycle = flag("members.remove", 25, "Number of members to remove each churn cycle")
+  private val initialMembers =
+    flag("members.init", 500, "Number of members to start with in the serverset")
+  private val additionsPerCycle =
+    flag("members.add", 100, "Number of members to add each churn cycle")
+  private val removalsPerCycle =
+    flag("members.remove", 25, "Number of members to remove each churn cycle")
   private val maxMembers = flag("members.max", 1000, "Max members to keep in the serverset")
-  private val churnFrequency = flag("churn.frequency", 200.milliseconds, "How often to add/remove members to a single serverset")
+  private val churnFrequency = flag(
+    "churn.frequency",
+    200.milliseconds,
+    "How often to add/remove members to a single serverset"
+  )
   private val numberOfServersets = flag("serversets.count", 25, "Number of serversets to churn")
-  private val zkListenPort = flag("zk.listenport", 2181, "port that the localhost zookeeper will listen on")
+  private val zkListenPort =
+    flag("zk.listenport", 2181, "port that the localhost zookeeper will listen on")
 
   private val timer = DefaultTimer
   private val logger = Logger(getClass)
@@ -35,7 +43,9 @@ private[serverset2] object LocalServerSetService extends App {
   @volatile private var nextMemberId = 0
 
   def createServerSetPaths(num: Int): Seq[String] =
-    (1 to num).map{ id => s"/twitter/service/testset_$id/staging/job" }
+    (1 to num).map { id =>
+      s"/twitter/service/testset_$id/staging/job"
+    }
 
   def main(): Unit = {
     logger.info(s"Starting zookeeper on localhost:${zkListenPort()}")
@@ -44,19 +54,19 @@ private[serverset2] object LocalServerSetService extends App {
     // listening port specified by our flags
     val zkServer = new TestingServer(zkListenPort())
 
-    zkClient = CuratorFrameworkFactory.builder()
-        .connectString(zkServer.getConnectString)
-        .retryPolicy(new RetryOneTime(1000))
-        .build()
+    zkClient = CuratorFrameworkFactory
+      .builder()
+      .connectString(zkServer.getConnectString)
+      .retryPolicy(new RetryOneTime(1000))
+      .build()
 
     logger.info(s"Connecting on localhost")
     zkClient.start()
 
     // initialize each serverset to `initialMembers` members
-    (0 until numberOfServersets()).foreach {
-      id =>
-        membersets(id) = Seq.empty[String]
-        addMembers(id, initialMembers())
+    (0 until numberOfServersets()).foreach { id =>
+      membersets(id) = Seq.empty[String]
+      addMembers(id, initialMembers())
     }
 
     scheduleUpdate()
@@ -97,10 +107,11 @@ private[serverset2] object LocalServerSetService extends App {
 
   private def addMembers(serversetIndex: Int, toAdd: Int): Unit = {
     (1 to toAdd).foreach { _ =>
-      membersets(serversetIndex) :+= zkClient.create()
-          .creatingParentsIfNeeded()
-          .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
-          .forPath(serversets(serversetIndex) + "/member_", nextJsonMember())
+      membersets(serversetIndex) :+= zkClient
+        .create()
+        .creatingParentsIfNeeded()
+        .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+        .forPath(serversets(serversetIndex) + "/member_", nextJsonMember())
     }
   }
 

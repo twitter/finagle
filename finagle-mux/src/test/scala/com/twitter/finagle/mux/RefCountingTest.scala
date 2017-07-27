@@ -69,7 +69,8 @@ class RefCountingTest extends FunSuite with Eventually {
     // we create a single direct byte buffer which encodes all message types so that we
     // test the more interesting decoding path which includes derived + retained buffer
     // slices.
-    val bytesWithLenHdr = allMessageTypes.map(msg => Buf.ByteArray.Owned.extract(Buf.U32BE(msg.length).concat(msg)))
+    val bytesWithLenHdr =
+      allMessageTypes.map(msg => Buf.ByteArray.Owned.extract(Buf.U32BE(msg.length).concat(msg)))
     val direct = Unpooled.directBuffer(bytesWithLenHdr.map(_.length).sum)
     val msgOuts = collection.mutable.ListBuffer.empty[mux.Message]
     bytesWithLenHdr.foreach(direct.writeBytes(_))
@@ -83,8 +84,9 @@ class RefCountingTest extends FunSuite with Eventually {
       msgOuts.append(mux.Message.decode(framed))
     }
 
-
-    msgOuts.foreach { msg => assert(directRefCount(msg.buf) == 0) }
+    msgOuts.foreach { msg =>
+      assert(directRefCount(msg.buf) == 0)
+    }
     // after the constituent slices have been decoded the original direct buffer is finally released.
     assert(direct.refCnt() == 0)
   }

@@ -49,7 +49,9 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("writes things through") {
-    val handler = new AdapterProxyChannelHandler({ pipeline => () })
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
     channel.writeOutbound(messageReq)
@@ -57,7 +59,9 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("reads things through") {
-    val handler = new AdapterProxyChannelHandler({ pipeline => () })
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
     channel.writeInbound(messageReq)
@@ -121,7 +125,9 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("streams are torn down eventually") {
-    val handler = new AdapterProxyChannelHandler({ pipeline => () })
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
@@ -132,7 +138,9 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 
   test("streams aren't torn down until we actually get a last item") {
-    val handler = new AdapterProxyChannelHandler({ pipeline => () })
+    val handler = new AdapterProxyChannelHandler({ pipeline =>
+      ()
+    })
     val channel = new EmbeddedChannel()
     channel.pipeline.addLast(handler)
 
@@ -151,7 +159,6 @@ class AdapterProxyChannelHandlerTest extends FunSuite {
   }
 }
 
-
 class Aggregator extends ChannelDuplexHandler {
   var curWrite: Option[(HttpRequest, ChannelPromise)] = None
   var curRead: Option[HttpRequest] = None
@@ -160,12 +167,15 @@ class Aggregator extends ChannelDuplexHandler {
     (curWrite, msg) match {
       case (Some((x, oldP)), data: HttpContent) =>
         promise.addListener(new ChannelPromiseNotifier(oldP))
-        ctx.write(new DefaultFullHttpRequest(
-          x.getProtocolVersion,
-          x.getMethod,
-          x.getUri,
-          data.content
-        ), promise)
+        ctx.write(
+          new DefaultFullHttpRequest(
+            x.getProtocolVersion,
+            x.getMethod,
+            x.getUri,
+            data.content
+          ),
+          promise
+        )
         curWrite = None
       case (None, req: HttpRequest) =>
         curWrite = Some((req, promise))
@@ -177,11 +187,8 @@ class Aggregator extends ChannelDuplexHandler {
   override def channelRead(ctx: ChannelHandlerContext, msg: Object): Unit = {
     (curRead, msg) match {
       case (Some(x), data: HttpContent) =>
-        ctx.fireChannelRead(new DefaultFullHttpRequest(
-          x.getProtocolVersion,
-          x.getMethod,
-          x.getUri,
-          data.content)
+        ctx.fireChannelRead(
+          new DefaultFullHttpRequest(x.getProtocolVersion, x.getMethod, x.getUri, data.content)
         )
         curRead = None
       case (None, req: HttpRequest) =>

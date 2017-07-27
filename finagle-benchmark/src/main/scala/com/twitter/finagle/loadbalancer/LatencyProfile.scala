@@ -12,12 +12,13 @@ private object LatencyProfile {
    * represents recorded latencies.
    */
   def fromFile(path: java.net.URL): () => Duration = {
-    val latencies = Source.fromURL(path).getLines.toIndexedSeq map {
-      line: String => Duration.fromNanoseconds((line.toDouble*1000000).toLong)
+    val latencies = Source.fromURL(path).getLines.toIndexedSeq map { line: String =>
+      Duration.fromNanoseconds((line.toDouble * 1000000).toLong)
     }
     val size = latencies.size
     var i = rng.nextInt(size)
-    () => { i = i + 1; latencies(i%size) }
+    () =>
+      { i = i + 1; latencies(i % size) }
   }
 
   /**
@@ -26,7 +27,8 @@ private object LatencyProfile {
    */
   def between(low: Duration, high: Duration): () => Duration = {
     require(low <= high)
-    () => low + ((high - low) * math.random)
+    () =>
+      low + ((high - low) * math.random)
   }
 
   /**
@@ -62,13 +64,15 @@ private object LatencyProfile {
     latencies: IndexedSeq[() => Duration]
   ): () => Duration = {
     val drv = Drv(dist)
-    () => latencies(drv(rng))()
+    () =>
+      latencies(drv(rng))()
   }
 }
 
 private class LatencyProfile(stopWatch: () => Duration) {
+
   /** Increase latency returned from `next` by `factor`. */
-  def slowBy(factor: Long)(next: () => Duration) = () => { next()*factor }
+  def slowBy(factor: Long)(next: () => Duration) = () => { next() * factor }
 
   /**
    * Increases the latency returned from `next` by `factor` while `stopWatch` is
@@ -76,7 +80,7 @@ private class LatencyProfile(stopWatch: () => Duration) {
    */
   def slowWithin(start: Duration, end: Duration, factor: Long)(next: () => Duration) = () => {
     val time = stopWatch()
-    if (time >= start && time <= end) next()*factor else next()
+    if (time >= start && time <= end) next() * factor else next()
   }
 
   /**
@@ -85,7 +89,7 @@ private class LatencyProfile(stopWatch: () => Duration) {
    */
   def warmup(end: Duration, maxFactor: Double = 5.0)(next: () => Duration) = () => {
     val time = stopWatch()
-    val factor = if (time < end) (1.0/time.inNanoseconds)*(end.inNanoseconds) else 1.0
-    Duration.fromNanoseconds((next().inNanoseconds*factor.min(maxFactor)).toLong)
+    val factor = if (time < end) (1.0 / time.inNanoseconds) * (end.inNanoseconds) else 1.0
+    Duration.fromNanoseconds((next().inNanoseconds * factor.min(maxFactor)).toLong)
   }
 }

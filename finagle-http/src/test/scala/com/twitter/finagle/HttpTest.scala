@@ -82,17 +82,18 @@ class HttpTest extends FunSuite {
     }
 
     val server =
-      Http.server
-        .withHttpStats
+      Http.server.withHttpStats
         .withStatsReceiver(serverReceiver)
         .withLabel("stats_test_server")
         .serve(":*", service)
 
     val client =
-      Http.client
-        .withHttpStats
+      Http.client.withHttpStats
         .withStatsReceiver(clientReceiver)
-        .newService("localhost:" + server.boundAddress.asInstanceOf[InetSocketAddress].getPort, "stats_test_client")
+        .newService(
+          "localhost:" + server.boundAddress.asInstanceOf[InetSocketAddress].getPort,
+          "stats_test_client"
+        )
 
     Await.result(client(Request()), Duration.fromSeconds(5))
 
@@ -103,7 +104,9 @@ class HttpTest extends FunSuite {
     assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "404")) == 1)
     assert(clientReceiver.counters(Seq("stats_test_client", "http", "status", "4XX")) == 1)
     assert(clientReceiver.stats(Seq("stats_test_client", "http", "response_size")) == Seq(5.0))
-    assert(clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size")))
+    assert(
+      clientReceiver.gauges.contains(Seq("stats_test_client", "dispatcher", "serial", "queue_size"))
+    )
   }
 
   test("server uses custom response classifier when specified") {

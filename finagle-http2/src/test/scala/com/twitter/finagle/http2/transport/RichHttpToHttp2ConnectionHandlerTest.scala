@@ -3,8 +3,12 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.Message
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.channel.{DefaultChannelPromise, ChannelHandlerContext}
-import io.netty.handler.codec.http.{DefaultFullHttpRequest, HttpMethod, HttpVersion,
-  HttpHeaderNames}
+import io.netty.handler.codec.http.{
+  DefaultFullHttpRequest,
+  HttpMethod,
+  HttpVersion,
+  HttpHeaderNames
+}
 import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames
 import io.netty.handler.codec.http2._
 import org.junit.runner.RunWith
@@ -13,8 +17,6 @@ import org.mockito.Mockito.{verify, when, RETURNS_SMART_NULLS}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
-
-
 @RunWith(classOf[JUnitRunner])
 class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter with MockitoSugar {
 
@@ -40,12 +42,12 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
 
     val settings = new Http2Settings()
 
-    connectionHandler = new RichHttpToHttp2ConnectionHandler(mockDecoder, mockEncoder, settings, () => ())
+    connectionHandler =
+      new RichHttpToHttp2ConnectionHandler(mockDecoder, mockEncoder, settings, () => ())
 
     request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
     request.headers().add(ExtensionHeaderNames.SCHEME.text(), "https")
   }
-
 
   test("Client sets default stream-dependency and weight") {
     val streamId: Int = 1
@@ -64,9 +66,9 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(false),
       meq(0),
       meq(true),
-      meq(promise))
+      meq(promise)
+    )
   }
-
 
   test("Allows client to specify stream-dependency-id and weight") {
     val streamDependencyId: Int = 15
@@ -88,7 +90,8 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(false),
       meq(0),
       meq(true),
-      meq(promise))
+      meq(promise)
+    )
   }
 
   test("Client properly strips bad headers") {
@@ -111,6 +114,7 @@ class RichHttpToHttp2ConnectionHandlerTest extends FunSuite with BeforeAndAfter 
       meq(false),
       meq(0),
       meq(true),
-      meq(promise))
+      meq(promise)
+    )
   }
 }

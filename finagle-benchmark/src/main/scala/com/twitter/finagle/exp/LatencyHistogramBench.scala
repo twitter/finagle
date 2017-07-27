@@ -29,7 +29,8 @@ class LatencyHistogramBench extends StdBenchAnnotations {
       err,
       1.minute.inMillis,
       LatencyHistogram.DefaultSlices,
-      Stopwatch.systemMillis)
+      Stopwatch.systemMillis
+    )
 
     // give it some data to start with
     0L.until(maxDurationMs).foreach(histo.add)

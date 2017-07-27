@@ -17,7 +17,6 @@ abstract class AbstractHeaderMapTest extends FunSuite {
   private[this] val date = new Date(1441322139353L)
   private[this] val formattedDate = "Thu, 03 Sep 2015 23:15:39 GMT"
 
-
   ////// MapHeaderMap derived tests /////////////
 
   test("empty map") {
@@ -141,11 +140,10 @@ abstract class AbstractHeaderMapTest extends FunSuite {
   test("get") {
     val map = newHeaderMap("Host" -> "api.twitter.com")
 
-    assert(map.get("Host")    == Some("api.twitter.com"))
-    assert(map.get("HOST")    == Some("api.twitter.com"))
+    assert(map.get("Host") == Some("api.twitter.com"))
+    assert(map.get("HOST") == Some("api.twitter.com"))
     assert(map.get("missing") == None)
   }
-
 
   test("get is case insensitive and returns the first inserted header") {
     val map1 = newHeaderMap()
@@ -166,7 +164,7 @@ abstract class AbstractHeaderMapTest extends FunSuite {
     val map = newHeaderMap("Host" -> "api.twitter.com")
 
     assert(map.getOrNull("Host") == "api.twitter.com")
-    assert(map.getOrNull("HOST")    == "api.twitter.com")
+    assert(map.getOrNull("HOST") == "api.twitter.com")
     assert(map.getOrNull("missing") == null)
   }
 
@@ -175,7 +173,7 @@ abstract class AbstractHeaderMapTest extends FunSuite {
 
     assert(map.getAll("Cookie").toList.sorted == List("1", "2"))
     assert(map.getAll("COOKIE").toList.sorted == List("1", "2"))
-    assert(map.getAll("missing").toList       == Nil)
+    assert(map.getAll("missing").toList == Nil)
   }
 
   test("getAll is case insensitive") {

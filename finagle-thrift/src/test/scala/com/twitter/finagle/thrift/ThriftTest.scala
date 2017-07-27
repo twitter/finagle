@@ -51,27 +51,29 @@ trait ThriftTest { self: FunSuite =>
     () // noop
   }
 
-  private val newBuilderServer = (protocolFactory: TProtocolFactory) => new {
-    val server = ServerBuilder()
-      .stack(Thrift.server.withProtocolFactory(protocolFactory))
-      .bindTo(new InetSocketAddress(loopback, 0))
-      .name("thriftserver")
-      .tracer(DefaultTracer)
-      .build(ifaceToService(processor, protocolFactory))
+  private val newBuilderServer = (protocolFactory: TProtocolFactory) =>
+    new {
+      val server = ServerBuilder()
+        .stack(Thrift.server.withProtocolFactory(protocolFactory))
+        .bindTo(new InetSocketAddress(loopback, 0))
+        .name("thriftserver")
+        .tracer(DefaultTracer)
+        .build(ifaceToService(processor, protocolFactory))
 
-    val boundAddr = server.boundAddress
+      val boundAddr = server.boundAddress
 
-    def close() {
-      server.close()
-    }
+      def close() {
+        server.close()
+      }
   }
 
   private val newBuilderClient = (
     protocolFactory: TProtocolFactory,
     addr: SocketAddress,
     clientIdOpt: Option[ClientId]
-  ) => new {
-    val serviceFactory = ClientBuilder()
+  ) =>
+    new {
+      val serviceFactory = ClientBuilder()
         .stack {
           val base = Thrift.client.withProtocolFactory(protocolFactory)
           clientIdOpt match {
@@ -79,51 +81,55 @@ trait ThriftTest { self: FunSuite =>
             case None => base
           }
         }
-      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
-      .name("thriftclient")
-      .hostConnectionLimit(2)
-      .tracer(DefaultTracer)
-      .buildFactory()
-    val service = serviceFactory.toService
-    val client = serviceToIface(service, protocolFactory)
+        .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
+        .name("thriftclient")
+        .hostConnectionLimit(2)
+        .tracer(DefaultTracer)
+        .buildFactory()
+      val service = serviceFactory.toService
+      val client = serviceToIface(service, protocolFactory)
 
-    def close() {
-      service.close()
-    }
+      def close() {
+        service.close()
+      }
   }
 
   private def newAPIServer(): NewServer =
-    (protocolFactory: TProtocolFactory) => new {
-    val server = Thrift.server
-      .withLabel("thriftserver")
-      .withProtocolFactory(protocolFactory)
-      .serveIface("localhost:*", processor)
-    val boundAddr = server.boundAddress
+    (protocolFactory: TProtocolFactory) =>
+      new {
+        val server = Thrift.server
+          .withLabel("thriftserver")
+          .withProtocolFactory(protocolFactory)
+          .serveIface("localhost:*", processor)
+        val boundAddr = server.boundAddress
 
-    def close() {
-      server.close()
-    }
-  }
-
-  private def newAPIClient(): NewClient = (
-    protocolFactory: TProtocolFactory,
-    addr: SocketAddress,
-    clientIdOpt: Option[ClientId]
-  ) => new {
-    implicit val cls = ifaceManifest
-    val client = {
-      val thrift = clientIdOpt.foldLeft(Thrift.client.withProtocolFactory(protocolFactory)) {
-        case (thrift, clientId) => thrift.withClientId(clientId)
-      }
-
-      thrift
-        .newIface[Iface](
-          Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
-          "thriftclient")
+        def close() {
+          server.close()
+        }
     }
 
-    def close() = ()
-  }
+  private def newAPIClient(): NewClient =
+    (
+      protocolFactory: TProtocolFactory,
+      addr: SocketAddress,
+      clientIdOpt: Option[ClientId]
+    ) =>
+      new {
+        implicit val cls = ifaceManifest
+        val client = {
+          val thrift = clientIdOpt.foldLeft(Thrift.client.withProtocolFactory(protocolFactory)) {
+            case (thrift, clientId) => thrift.withClientId(clientId)
+          }
+
+          thrift
+            .newIface[Iface](
+              Name.bound(Address(addr.asInstanceOf[InetSocketAddress])),
+              "thriftclient"
+            )
+        }
+
+        def close() = ()
+    }
 
   private val protocols = Map(
     // Commenting out due to flakiness - see DPT-175 and DPT-181
@@ -156,30 +162,33 @@ trait ThriftTest { self: FunSuite =>
   )
 
   /** Invoke this in your test to run all defined thrift tests */
-  def runThriftTests() = for {
-    (protoName, proto) <- protocols
-    (clientName, newClient) <- clients
-    (serverName, newServer) <- servers
-    testDef <- thriftTests
-  } test("server:%s client:%s proto:%s %s".format(
-    serverName, clientName, protoName, testDef.label)) {
-    val tracer = new BufferingTracer
-    val previous = DefaultTracer.self
-    DefaultTracer.self = tracer
-    val server = newServer(proto)
-    val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
-    Trace.letClear {
-      try testDef.testFunction(client.client, tracer) finally {
-        DefaultTracer.self = previous
-        server.close()
-        client.close()
+  def runThriftTests() =
+    for {
+      (protoName, proto) <- protocols
+      (clientName, newClient) <- clients
+      (serverName, newServer) <- servers
+      testDef <- thriftTests
+    } test(
+      "server:%s client:%s proto:%s %s".format(serverName, clientName, protoName, testDef.label)
+    ) {
+      val tracer = new BufferingTracer
+      val previous = DefaultTracer.self
+      DefaultTracer.self = tracer
+      val server = newServer(proto)
+      val client = newClient(proto, server.boundAddr, testDef.clientIdOpt)
+      Trace.letClear {
+        try testDef.testFunction(client.client, tracer)
+        finally {
+          DefaultTracer.self = previous
+          server.close()
+          client.close()
+        }
       }
     }
-  }
 }
 
 /*
   p.s. The very complexity of the above code should be enough to
   convince anyone of Thrift's hazardous attitude towards software
   modularity and proper layering.
-*/
+ */

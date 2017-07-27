@@ -10,9 +10,10 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{FunSuite, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
-class UnpoolHttpHandlerTest extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with OneInstancePerTest {
+class UnpoolHttpHandlerTest
+    extends FunSuite
+    with GeneratorDrivenPropertyChecks
+    with OneInstancePerTest {
 
   val channel = new EmbeddedChannel(UnpoolHttpHandler)
 
@@ -20,23 +21,30 @@ class UnpoolHttpHandlerTest extends FunSuite
   //  - Capacity: [1..100]
   //  - Write-Index: [0..Capacity]
   //  - Read-Index: [0..Write-Index]
-  def genHttpContent: Gen[HttpContent] = for {
-    capacity <- Gen.choose(1, 100)
-    bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
-    writer <- Gen.choose(0, capacity)
-    reader <- Gen.choose(0, writer)
-    content <- Gen.oneOf(
-      Unpooled.buffer(capacity).setBytes(0, bytes.toArray)
-        .writerIndex(writer).readerIndex(reader),
-      Unpooled.directBuffer(capacity).setBytes(0, bytes.toArray)
-        .writerIndex(writer).readerIndex(reader)
-    )
-    httpContent <- Gen.oneOf(
-      new DefaultHttpContent(content),
-      new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content),
-      new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/", content)
-    )
-  } yield httpContent
+  def genHttpContent: Gen[HttpContent] =
+    for {
+      capacity <- Gen.choose(1, 100)
+      bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
+      writer <- Gen.choose(0, capacity)
+      reader <- Gen.choose(0, writer)
+      content <- Gen.oneOf(
+        Unpooled
+          .buffer(capacity)
+          .setBytes(0, bytes.toArray)
+          .writerIndex(writer)
+          .readerIndex(reader),
+        Unpooled
+          .directBuffer(capacity)
+          .setBytes(0, bytes.toArray)
+          .writerIndex(writer)
+          .readerIndex(reader)
+      )
+      httpContent <- Gen.oneOf(
+        new DefaultHttpContent(content),
+        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content),
+        new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/", content)
+      )
+    } yield httpContent
 
   test("convert to heap") {
     forAll(genHttpContent) { in: HttpContent =>
@@ -72,4 +80,3 @@ class UnpoolHttpHandlerTest extends FunSuite
     assert(in.release())
   }
 }
-

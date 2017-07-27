@@ -38,8 +38,10 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
     assert(bodyObserved.content == content)
   }
 
-  test("fixed length messages which are chunked and smaller than " +
-       "the specified length are aggregated") {
+  test(
+    "fixed length messages which are chunked and smaller than " +
+      "the specified length are aggregated"
+  ) {
     val agg = new FixedLengthMessageAggregator(12.bytes)
     val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
     val content = Unpooled.wrappedBuffer(new Array[Byte](11))
@@ -73,8 +75,10 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
     assert(reqObserved.content == content)
   }
 
-  test("fixed length messages which are chunked and larger than than the " +
-       "specified size remain chunked") {
+  test(
+    "fixed length messages which are chunked and larger than than the " +
+      "specified size remain chunked"
+  ) {
     val agg = new FixedLengthMessageAggregator(11.byte)
     val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
     val content = Unpooled.wrappedBuffer(new Array[Byte](12))
@@ -101,7 +105,6 @@ class FixedLengthMessageAggregatorTest extends FunSuite {
       HttpResponseStatus.SWITCHING_PROTOCOLS,
       HttpResponseStatus.PROCESSING
     ).foreach { status =>
-
       val agg = new FixedLengthMessageAggregator(11.byte)
       val channel: EmbeddedChannel = new EmbeddedChannel(new HttpRequestEncoder(), agg)
       val head = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)

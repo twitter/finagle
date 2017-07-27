@@ -16,7 +16,6 @@ import org.scalatest.junit.JUnitRunner
 class ScriptClientIntegrationSuite extends RedisClientTest {
   def stringToBuffer(s: String): Buf = Buf.Utf8(s)
 
-
   def stringsToBuffers(s: String*): Seq[Buf] =
     s.map(stringToBuffer)
 
@@ -113,9 +112,13 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName, scripts, { client => (s, keys, argv) => client.eval(s, keys, argv) map cast })
+    testCase(testName, scripts, { client => (s, keys, argv) =>
+      client.eval(s, keys, argv) map cast
+    })
 
-    test("In " + testName + ", scriptExists should return true for executed scripts; and return false after scriptFlush") {
+    test(
+      "In " + testName + ", scriptExists should return true for executed scripts; and return false after scriptFlush"
+    ) {
       withRedisClient { client =>
         allSha1sExist(client)
 
@@ -124,11 +127,12 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-
-    test("In " + testName + ", scriptLoad should return SHA1 hex string of scripts; and make scriptExists return true") {
+    test(
+      "In " + testName + ", scriptLoad should return SHA1 hex string of scripts; and make scriptExists return true"
+    ) {
       withRedisClient { client =>
-        val digests = Await.result(Future.collect(scripts map {
-          s => client.scriptLoad(s)
+        val digests = Await.result(Future.collect(scripts map { s =>
+          client.scriptLoad(s)
         }))
         assert(digests == sha1s)
 
@@ -136,9 +140,13 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName + " SHA w/o fallback", scripts, { client => (s, keys, argv) => client.evalSha(SHA1hex(s), keys, argv) map cast })
+    testCase(testName + " SHA w/o fallback", scripts, { client => (s, keys, argv) =>
+      client.evalSha(SHA1hex(s), keys, argv) map cast
+    })
 
-    test(testName + " SHA w/o fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false") {
+    test(
+      testName + " SHA w/o fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false"
+    ) {
       withRedisClient { client =>
         allSha1sExist(client)
 
@@ -147,9 +155,13 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
       }
     }
 
-    testCase(testName + " SHA w/ fallback", scripts, { client => (s, keys, argv) => client.evalSha(SHA1hex(s), s, keys, argv) map cast })
+    testCase(testName + " SHA w/ fallback", scripts, { client => (s, keys, argv) =>
+      client.evalSha(SHA1hex(s), s, keys, argv) map cast
+    })
 
-    test(testName + " SHA w/ fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false again" ) {
+    test(
+      testName + " SHA w/ fallback should make scriptsExists return true; and scriptFlush should make scriptExists return false again"
+    ) {
       withRedisClient { client =>
         allSha1sExist(client)
         Await.result(client.scriptFlush())
@@ -198,7 +210,7 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
   testScriptAndSha(
     "eval to Unit",
     stringsToBuffers(scriptSet, scriptSetReturn, scriptFactorial),
-    castReply[Unit],    // test conversion with explicit castReply[T] function call
+    castReply[Unit], // test conversion with explicit castReply[T] function call
     testScriptUnit
   )
 
@@ -243,7 +255,7 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
   testScriptAndSha(
     "eval to Long",
     stringsToBuffers(scriptGetLong, scriptUse),
-    _.cast[Long],       // test conversion through the help of CastableReply (implicitly)
+    _.cast[Long], // test conversion through the help of CastableReply (implicitly)
     testScriptLong
   )
 
@@ -256,21 +268,29 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
 
     test(testName + " should succeed with Boolean return value") {
       withRedisClient { client =>
-        assert(Await.result(for {
-          _ <- client.set(k1, stringToBuffer("1"))
-          x <- eval(client)(scriptCompare, Seq(k1), stringsToBuffers("1"))
-          y <- eval(client)(scriptCompare, Seq(k1), stringsToBuffers("2"))
-        } yield (x, y)).==((true, false)))
+        assert(
+          Await
+            .result(for {
+              _ <- client.set(k1, stringToBuffer("1"))
+              x <- eval(client)(scriptCompare, Seq(k1), stringsToBuffers("1"))
+              y <- eval(client)(scriptCompare, Seq(k1), stringsToBuffers("2"))
+            } yield (x, y))
+            .==((true, false))
+        )
       }
     }
 
     test(testName + " should succeed with status return value and EmptyBulk return value") {
       withRedisClient { client =>
-        assert(Await.result(for {
-          _ <- client.set(stringToBuffer("strength"), stringToBuffer("10"))
-          x <- eval(client)(scriptTest, stringsToBuffers("strength"), stringsToBuffers("9"))
-          y <- eval(client)(scriptTest, stringsToBuffers("strength"), stringsToBuffers("200"))
-        } yield (x, y)).==((true, false)))
+        assert(
+          Await
+            .result(for {
+              _ <- client.set(stringToBuffer("strength"), stringToBuffer("10"))
+              x <- eval(client)(scriptTest, stringsToBuffers("strength"), stringsToBuffers("9"))
+              y <- eval(client)(scriptTest, stringsToBuffers("strength"), stringsToBuffers("200"))
+            } yield (x, y))
+            .==((true, false))
+        )
       }
     }
 
@@ -304,11 +324,15 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
 
     test(testName + " succeed with returned Buf") {
       withRedisClient { client =>
-        assert(Await.result(for {
-          _ <- client.set(stringToBuffer("username"), stringToBuffer("blah"))
-          s1 <- eval(client)(scriptGet, stringsToBuffers("username"), Nil)
-          s2 <- eval(client)(scriptGet, stringsToBuffers("nonexisting"), Nil)
-        } yield (s1, s2)).==((stringToBuffer("blah"), stringToBuffer(""))))
+        assert(
+          Await
+            .result(for {
+              _ <- client.set(stringToBuffer("username"), stringToBuffer("blah"))
+              s1 <- eval(client)(scriptGet, stringsToBuffers("username"), Nil)
+              s2 <- eval(client)(scriptGet, stringsToBuffers("nonexisting"), Nil)
+            } yield (s1, s2))
+            .==((stringToBuffer("blah"), stringToBuffer("")))
+        )
       }
     }
   }
@@ -329,21 +353,32 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
 
     test(testName + " should succeed with returned Seq[Buf]") {
       withRedisClient { client =>
-        assert(Await.result(for {
-          _ <- client.hMSet(Buf.Utf8("info"), Map("x" -> "1", "y" -> "2").map { case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v)})
-          s1 <- eval(client)(scriptHGetAll, stringsToBuffers("info"), Nil)
-          s2 <- eval(client)(scriptHGetAll, stringsToBuffers("nonexsisting"), Nil)
-          s3 <- eval(client)(scriptHMGet, stringsToBuffers("info"), stringsToBuffers("a", "b", "c"))
-          s4 <- eval(client)(scriptHMGet, stringsToBuffers("info"), stringsToBuffers("x", "z"))
-          s5 <- client.hMGet(Buf.Utf8("info"), stringsToBuffers("x", "z"))
-        } yield (s1, s2, s3, s4, s5)).==(
-          (
-            stringsToBuffers("x", "1", "y", "2"),
-            Nil,
-            stringsToBuffers("", "", ""),
-            stringsToBuffers("1", ""),
-            stringsToBuffers("1", "")
-          )))
+        assert(
+          Await
+            .result(for {
+              _ <- client.hMSet(Buf.Utf8("info"), Map("x" -> "1", "y" -> "2").map {
+                case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v)
+              })
+              s1 <- eval(client)(scriptHGetAll, stringsToBuffers("info"), Nil)
+              s2 <- eval(client)(scriptHGetAll, stringsToBuffers("nonexsisting"), Nil)
+              s3 <- eval(client)(
+                scriptHMGet,
+                stringsToBuffers("info"),
+                stringsToBuffers("a", "b", "c")
+              )
+              s4 <- eval(client)(scriptHMGet, stringsToBuffers("info"), stringsToBuffers("x", "z"))
+              s5 <- client.hMGet(Buf.Utf8("info"), stringsToBuffers("x", "z"))
+            } yield (s1, s2, s3, s4, s5))
+            .==(
+              (
+                stringsToBuffers("x", "1", "y", "2"),
+                Nil,
+                stringsToBuffers("", "", ""),
+                stringsToBuffers("1", ""),
+                stringsToBuffers("1", "")
+              )
+            )
+        )
       }
     }
   }

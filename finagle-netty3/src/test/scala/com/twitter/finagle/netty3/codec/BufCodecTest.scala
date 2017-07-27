@@ -4,7 +4,11 @@ import com.twitter.finagle.Failure
 import com.twitter.io.Buf
 import java.nio.charset.StandardCharsets.UTF_8
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.embedder.{CodecEmbedderException, DecoderEmbedder, EncoderEmbedder}
+import org.jboss.netty.handler.codec.embedder.{
+  CodecEmbedderException,
+  DecoderEmbedder,
+  EncoderEmbedder
+}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

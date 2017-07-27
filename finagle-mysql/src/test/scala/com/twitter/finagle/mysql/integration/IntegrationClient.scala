@@ -20,8 +20,10 @@ trait IntegrationClient {
     case e: BindException => false
   }
 
-  val propFile = new File(System.getProperty("user.home") +
-    "/.finagle-mysql/integration-test.properties")
+  val propFile = new File(
+    System.getProperty("user.home") +
+      "/.finagle-mysql/integration-test.properties"
+  )
 
   val p = new Properties
   val propFileExists = try {
@@ -41,17 +43,20 @@ trait IntegrationClient {
   // mysql credentials.
   val isAvailable = !isPortAvailable && propFileExists
 
-  protected def configureClient(username: String, password: String, db: String) = Mysql.client
-    .withCredentials(username, password)
-    .withDatabase(db)
+  protected def configureClient(username: String, password: String, db: String) =
+    Mysql.client
+      .withCredentials(username, password)
+      .withDatabase(db)
 
   val client: Option[Client with Transactions with Cursors] = if (isAvailable) {
     logger.log(Level.INFO, "Attempting to connect to mysqld @ localhost:3306")
     val username = p.getProperty("username", "<user>")
     val password = p.getProperty("password", null)
     val db = p.getProperty("db", "test")
-    Some(configureClient(username, password, db)
-      .newRichClient("localhost:3306"))
+    Some(
+      configureClient(username, password, db)
+        .newRichClient("localhost:3306")
+    )
   } else {
     None
   }

@@ -100,4 +100,3 @@ class ByteBufAsBufBenchmark extends StdBenchAnnotations {
     byteBuf.length
 
 }
-

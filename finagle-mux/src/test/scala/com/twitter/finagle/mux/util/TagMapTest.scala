@@ -12,8 +12,8 @@ class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
   implicit val genTagSet: Arbitrary[Range] =
     Arbitrary(for {
       start <- Gen.choose(0, max)
-      end <- Gen.choose(start, max-min)
-    } yield start to end+min)
+      end <- Gen.choose(start, max - min)
+    } yield start to end + min)
 
   test("map tags to elems") {
     forAll { range: Range =>
@@ -25,10 +25,10 @@ class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("ignore tags outside its range") {
     forAll { range: Range =>
-      val right = range.last+1
+      val right = range.last + 1
       val ints = TagMap[java.lang.Integer](range, 256)
       assert(ints.unmap(right) == None)
-      val left = range.start-1
+      val left = range.start - 1
       assert(ints.unmap(left) == None)
     }
   }

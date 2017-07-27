@@ -4,14 +4,16 @@ import com.twitter.finagle.mysql.{IsolationLevel, LongValue}
 import com.twitter.util.{Await, Duration}
 import org.scalatest.FunSuite
 
-class TransactionTest extends FunSuite with IntegrationClient  {
+class TransactionTest extends FunSuite with IntegrationClient {
   val defaultTimeout = Duration.fromSeconds(1)
 
   test("Simple transaction") {
     for (c <- client) {
       assertResult(Seq(Seq(LongValue(1)))) {
         Await.result(c.transaction { client =>
-          client.select("SELECT 1") { row => row.values }
+          client.select("SELECT 1") { row =>
+            row.values
+          }
         }, defaultTimeout)
       }
     }
@@ -23,12 +25,15 @@ class TransactionTest extends FunSuite with IntegrationClient  {
         IsolationLevel.ReadCommitted,
         IsolationLevel.ReadUncommitted,
         IsolationLevel.RepeatableRead,
-        IsolationLevel.Serializable)
+        IsolationLevel.Serializable
+      )
 
       for (iso <- isolationLevels) {
         assertResult(Seq(Seq(LongValue(1)))) {
           Await.result(c.transactionWithIsolation(iso) { client =>
-            client.select("SELECT 1") { row => row.values }
+            client.select("SELECT 1") { row =>
+              row.values
+            }
           }, defaultTimeout)
         }
       }

@@ -69,8 +69,8 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
 
   var status: Status = Status.Open
   val onClose = new Promise[Throwable]
-  def localAddress = new java.net.SocketAddress{}
-  def remoteAddress = new java.net.SocketAddress{}
+  def localAddress = new java.net.SocketAddress {}
+  def remoteAddress = new java.net.SocketAddress {}
   val peerCertificate = None
 }
 
@@ -79,13 +79,14 @@ class HttpClientDispatcherTest extends FunSuite {
   def mkPair() = {
     val inQ = new AsyncQueue[Any]
     val outQ = new AsyncQueue[Any]
-    (new Netty3ClientStreamTransport(new QueueTransport[Any, Any](inQ, outQ)),
-      new QueueTransport[Any, Any](outQ, inQ))
+    (
+      new Netty3ClientStreamTransport(new QueueTransport[Any, Any](inQ, outQ)),
+      new QueueTransport[Any, Any](outQ, inQ)
+    )
   }
 
   def chunk(content: String) =
-    new DefaultHttpChunk(
-      ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
+    new DefaultHttpChunk(ChannelBuffers.wrappedBuffer(content.getBytes("UTF-8")))
 
   private val timeout = Duration.fromSeconds(15)
 
@@ -108,19 +109,25 @@ class HttpClientDispatcherTest extends FunSuite {
     val c = res.reader.read(Int.MaxValue)
     assert(!c.isDefined)
     req.writer.write(Buf.Utf8("a"))
-    out.read() flatMap { c => out.write(c) }
+    out.read() flatMap { c =>
+      out.write(c)
+    }
     assert(Await.result(c, timeout) === Some(Buf.Utf8("a")))
 
     val cc = res.reader.read(Int.MaxValue)
     assert(!cc.isDefined)
     req.writer.write(Buf.Utf8("some other thing"))
-    out.read() flatMap { c => out.write(c) }
+    out.read() flatMap { c =>
+      out.write(c)
+    }
     assert(Await.result(cc, timeout) === Some(Buf.Utf8("some other thing")))
 
     val last = res.reader.read(Int.MaxValue)
     assert(!last.isDefined)
     req.close()
-    out.read() flatMap { c => out.write(c) }
+    out.read() flatMap { c =>
+      out.write(c)
+    }
     assert(Await.result(last, timeout).isEmpty)
   }
 
@@ -191,12 +198,11 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val writep = new Promise[Unit]
     val readp = new Promise[Unit]
-    val transport = OpTransport[Any, Any](
-      Write(Function.const(true), writep),
-      Read(readp),
-      Close(Future.Done))
+    val transport =
+      OpTransport[Any, Any](Write(Function.const(true), writep), Read(readp), Close(Future.Done))
 
-    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+    val disp =
+      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -225,9 +231,11 @@ class HttpClientDispatcherTest extends FunSuite {
       Write(_.isInstanceOf[HttpRequest], Future.Done),
       // Read the response
       Read(readp),
-      Close(Future.Done))
+      Close(Future.Done)
+    )
 
-    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+    val disp =
+      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -258,9 +266,11 @@ class HttpClientDispatcherTest extends FunSuite {
       Read(Future.never),
       // Then we try to write the chunk
       Write(_.isInstanceOf[HttpChunk], chunkp),
-      Close(Future.Done))
+      Close(Future.Done)
+    )
 
-    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
+    val disp =
+      new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -320,7 +330,7 @@ class HttpClientDispatcherTest extends FunSuite {
     val serverSr = new InMemoryStatsReceiver
     val clientSr = new InMemoryStatsReceiver
     @volatile var needsNack = true
-    val service = Service.mk{ _: Request =>
+    val service = Service.mk { _: Request =>
       val resp =
         if (needsNack) {
           needsNack = false
@@ -329,7 +339,8 @@ class HttpClientDispatcherTest extends FunSuite {
           val resp = Response(status = HttpNackFilter.ResponseStatus)
           resp.headerMap.set(HttpNackFilter.RetryableNackHeader, "true")
           resp.setChunked(true)
-          resp.writer.write(nackBody)
+          resp.writer
+            .write(nackBody)
             .before(resp.writer.close())
           resp
         } else {
@@ -351,9 +362,11 @@ class HttpClientDispatcherTest extends FunSuite {
       Http.client
         .withStatsReceiver(clientSr)
         .withStreaming(true)
-        .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
+        .newService(
+          Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+          "http"
+        )
 
     val request = Request("/")
   }
 }
-

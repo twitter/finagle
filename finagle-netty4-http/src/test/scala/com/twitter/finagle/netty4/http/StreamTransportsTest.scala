@@ -11,7 +11,12 @@ import com.twitter.io.{Reader, Buf}
 import com.twitter.util._
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.codec.http.{HttpContent, LastHttpContent, DefaultLastHttpContent, DefaultHttpContent}
+import io.netty.handler.codec.http.{
+  HttpContent,
+  LastHttpContent,
+  DefaultLastHttpContent,
+  DefaultHttpContent
+}
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
@@ -26,7 +31,7 @@ class StreamTransportsTest extends FunSuite {
   import StreamTransports._
 
   test("readChunk: returned bufs have same content as http chunk") {
-    val input = Array[Byte](1,2,3)
+    val input = Array[Byte](1, 2, 3)
     val output = readChunk(new DefaultHttpContent(Unpooled.wrappedBuffer(input)))
     assert(output == Buf.ByteArray.Owned(input))
   }
@@ -37,7 +42,7 @@ class StreamTransportsTest extends FunSuite {
   }
 
   test("chunkOfBuf: wraps buf in http chunk") {
-    val input = Array[Byte](1,2,3)
+    val input = Array[Byte](1, 2, 3)
     val chunk = chunkOfBuf(Buf.ByteArray.Owned(input))
 
     val output = new Array[Byte](chunk.content.readableBytes)
@@ -49,7 +54,7 @@ class StreamTransportsTest extends FunSuite {
     val rw = Reader.writable()
 
     val (write, read) = (new AsyncQueue[Any], new AsyncQueue[Any])
-    val tr = new QueueTransport[Any,Any](write, read)
+    val tr = new QueueTransport[Any, Any](write, read)
 
     rw.write(Buf.Utf8("msg1"))
 
@@ -62,7 +67,6 @@ class StreamTransportsTest extends FunSuite {
 
     assert(chunk.content.toString(UTF_8) == "msg1")
 
-
     val chunkF = write.poll()
 
     rw.write(Buf.Utf8("msg2"))
@@ -72,7 +76,6 @@ class StreamTransportsTest extends FunSuite {
 
     Await.ready(rw.close(), 2.seconds)
 
-
     val lastChunk = Await.result(write.poll(), 2.seconds).asInstanceOf[NettyHttp.HttpContent]
 
     assert(lastChunk.isInstanceOf[NettyHttp.LastHttpContent])
@@ -80,7 +83,7 @@ class StreamTransportsTest extends FunSuite {
 
   test("can collate a HttpContent stream") {
     val (write, read) = (new AsyncQueue[Any], new AsyncQueue[Any])
-    val tr = new QueueTransport[Any,Any](write, read)
+    val tr = new QueueTransport[Any, Any](write, read)
     val coll = collate(tr, readChunk)(_.isInstanceOf[LastHttpContent])
 
     val bytes: Array[Byte] = (1 to 10).map(_.toByte).toArray
@@ -93,7 +96,7 @@ class StreamTransportsTest extends FunSuite {
 
   test("can collate a HttpContent stream that is terminated by a non-empty chunk") {
     val (write, read) = (new AsyncQueue[Any], new AsyncQueue[Any])
-    val tr = new QueueTransport[Any,Any](write, read)
+    val tr = new QueueTransport[Any, Any](write, read)
     val coll = collate(tr, readChunk)(_.isInstanceOf[LastHttpContent])
 
     val bytes: Array[Byte] = (1 to 10).map(_.toByte).toArray
@@ -113,11 +116,11 @@ class StreamTransportsTest extends FunSuite {
       Future.value(Some(ByteBufAsBuf(chunk.content.duplicate)))
   }
 
-
   test("eof satisfies collated reader") {
     val channel: EmbeddedChannel = new EmbeddedChannel()
     val chanTran = Transport.cast[Any, HttpContent](new ChannelTransport(channel))
-    val coll: Reader with Future[Unit] = collate(chanTran, readChunk)(_.isInstanceOf[LastHttpContent])
+    val coll: Reader with Future[Unit] =
+      collate(chanTran, readChunk)(_.isInstanceOf[LastHttpContent])
     val read = coll.read(10)
 
     val bytes: Array[Byte] = (1 to 10).map(_.toByte).toArray
@@ -128,7 +131,6 @@ class StreamTransportsTest extends FunSuite {
     channel.writeInbound(new DefaultLastHttpContent)
     Await.ready(coll, 2.seconds)
   }
-
 
   val failingT = new Transport[Any, Any] {
     def write(req: Any): Future[Unit] = Future.exception(new Exception("nop"))
@@ -157,7 +159,6 @@ class StreamTransportsTest extends FunSuite {
     intercept[ReaderDiscarded] { Await.result(rw.read(1)) }
   }
 
-
   trait Collate {
     val writeq = new AsyncQueue[String]
     val readq = new AsyncQueue[String]
@@ -176,7 +177,8 @@ class StreamTransportsTest extends FunSuite {
     }
   }
 
-  test("collate: read through") {val c = new Collate {}
+  test("collate: read through") {
+    val c = new Collate {}
     // Long read
     val r1 = c.coll.read(10)
     assert(!r1.isDefined)
@@ -207,7 +209,7 @@ class StreamTransportsTest extends FunSuite {
     assert(r4 == None)
   }
 
-  test("collate: discard while reading") (new Collate {
+  test("collate: discard while reading")(new Collate {
     val trans1 = new Transport[String, String] {
       val p = new Promise[String]
       var theIntr: Throwable = null
@@ -242,7 +244,7 @@ class StreamTransportsTest extends FunSuite {
     assertDiscarded(coll1)
   })
 
-  test("collate: discard while writing") (new Collate {
+  test("collate: discard while writing")(new Collate {
     readq.offer("hello")
 
     coll.discard()
@@ -250,7 +252,7 @@ class StreamTransportsTest extends FunSuite {
     assertDiscarded(coll.read(10))
   })
 
-  test("collate: discard while buffering") (new Collate {
+  test("collate: discard while buffering")(new Collate {
     readq.offer("hello")
     val r1 = coll.read(1)
     assert(Await.result(r1, 2.seconds) == Some(Buf.Utf8("h")))

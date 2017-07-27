@@ -45,7 +45,10 @@ class NackTest extends FunSuite {
       val client =
         FHttp.client
           .configured(Stats(clientSr))
-          .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
+          .newService(
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "http"
+          )
 
       assert(Await.result(client(request), timeout).status == Status.Ok)
       assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
@@ -70,11 +73,15 @@ class NackTest extends FunSuite {
       val client =
         FHttp.client
           .configured(Stats(clientSr))
-          .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
+          .newService(
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "http"
+          )
 
       n.set(-1)
       Await.result(client(request).liftToTry, timeout) match {
-        case Throw(f: Failure) => assert(f.isFlagged(Failure.Rejected) && f.isFlagged(Failure.NonRetryable))
+        case Throw(f: Failure) =>
+          assert(f.isFlagged(Failure.Rejected) && f.isFlagged(Failure.NonRetryable))
         case _ => fail("Response was not a non-restartable failure")
       }
 
@@ -98,7 +105,8 @@ class NackTest extends FunSuite {
           .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
           .stack(FHttp.client)
           .reportTo(clientSr)
-          .hostConnectionLimit(1).build()
+          .hostConnectionLimit(1)
+          .build()
 
       assert(Await.result(client(request), timeout).status == Status.Ok)
       assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
@@ -122,7 +130,10 @@ class NackTest extends FunSuite {
       val client =
         FHttp.client
           .configured(Stats(clientSr))
-          .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http")
+          .newService(
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "http"
+          )
 
       assert(Await.result(client(request), timeout).status == Status.Ok)
       assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
@@ -149,7 +160,10 @@ class NackTest extends FunSuite {
       val client =
         FHttp.client
           .configured(Stats(clientSr))
-          .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http-client")
+          .newService(
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "http-client"
+          )
 
       val rep = Await.result(client(request), timeout)
       assert(rep.status == Status.InternalServerError)
@@ -180,7 +194,10 @@ class NackTest extends FunSuite {
       val client =
         FHttp.client
           .configured(Stats(clientSr))
-          .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "http-client")
+          .newService(
+            Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+            "http-client"
+          )
 
       val rep = Await.result(client(request), timeout)
       assert(rep.status == Status.InternalServerError)

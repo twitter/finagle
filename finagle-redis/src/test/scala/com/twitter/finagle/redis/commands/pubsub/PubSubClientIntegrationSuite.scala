@@ -109,8 +109,9 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
     val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
 
     def subscribe(channels: Buf*) = {
-      result(c.subscribe(channels) { case (channel, message) =>
-        q.get(message).map(_.setValue((channel, message, None)))
+      result(c.subscribe(channels) {
+        case (channel, message) =>
+          q.get(message).map(_.setValue((channel, message, None)))
       })
     }
 
@@ -119,8 +120,9 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
     }
 
     def pSubscribe(patterns: String*) = {
-      result(c.pSubscribe(patterns.map(s2b)) { case (pattern, channel, message) =>
-        q.get(message).map(_.setValue((channel, message, Some(pattern))))
+      result(c.pSubscribe(patterns.map(s2b)) {
+        case (pattern, channel, message) =>
+          q.get(message).map(_.setValue((channel, message, Some(pattern))))
       })
     }
 

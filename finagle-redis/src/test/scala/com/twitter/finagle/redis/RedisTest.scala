@@ -33,8 +33,7 @@ trait RedisTest extends FunSuite {
         Thread.sleep(1000)
         waitUntil(message, countDown - 1)(ready)
       }
-    }
-    else throw new IllegalStateException(s"Timeout: $message")
+    } else throw new IllegalStateException(s"Timeout: $message")
   }
 
   def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit): Unit = {
@@ -50,13 +49,14 @@ trait MissingInstances {
     Gen.nonEmptyListOf(Gen.alphaChar).map(_.mkString)
 
   // Gen non empty Bufs (per Redis protocol)
-  def genBuf: Gen[Buf] = for {
-    s <- genNonEmptyString
-    b <- Gen.oneOf(
-      Buf.Utf8(s),
-      Buf.ByteArray.Owned(s.getBytes("UTF-8"))
-    )
-  } yield b
+  def genBuf: Gen[Buf] =
+    for {
+      s <- genNonEmptyString
+      b <- Gen.oneOf(
+        Buf.Utf8(s),
+        Buf.ByteArray.Owned(s.getBytes("UTF-8"))
+      )
+    } yield b
 
   implicit val arbitraryBuf: Arbitrary[Buf] = Arbitrary(genBuf)
 
@@ -65,22 +65,38 @@ trait MissingInstances {
   def genIntegerReply: Gen[IntegerReply] = Arbitrary.arbLong.arbitrary.map(IntegerReply.apply)
   def genBulkReply: Gen[BulkReply] = genBuf.map(BulkReply.apply)
 
-  def genFlatMBulkReply: Gen[MBulkReply] = for {
-    n <- Gen.choose(1, 10)
-    line <- Gen.listOfN(n, Gen.oneOf(genStatusReply, genErrorReply, genIntegerReply, genBulkReply))
-  } yield MBulkReply(line)
+  def genFlatMBulkReply: Gen[MBulkReply] =
+    for {
+      n <- Gen.choose(1, 10)
+      line <- Gen.listOfN(
+        n,
+        Gen.oneOf(genStatusReply, genErrorReply, genIntegerReply, genBulkReply)
+      )
+    } yield MBulkReply(line)
 
   def genMBulkReply(maxDeep: Int): Gen[MBulkReply] =
     if (maxDeep == 0) genFlatMBulkReply
-    else for {
-      n <- Gen.choose(1, 10)
-      line <- Gen.listOfN(n, Gen.oneOf(
-        genStatusReply, genErrorReply, genIntegerReply, genBulkReply, genMBulkReply(maxDeep - 1)
-      ))
-    } yield MBulkReply(line)
+    else
+      for {
+        n <- Gen.choose(1, 10)
+        line <- Gen.listOfN(
+          n,
+          Gen.oneOf(
+            genStatusReply,
+            genErrorReply,
+            genIntegerReply,
+            genBulkReply,
+            genMBulkReply(maxDeep - 1)
+          )
+        )
+      } yield MBulkReply(line)
 
   def genReply: Gen[Reply] = Gen.oneOf(
-    genStatusReply, genErrorReply, genIntegerReply, genBulkReply, genMBulkReply(10)
+    genStatusReply,
+    genErrorReply,
+    genIntegerReply,
+    genBulkReply,
+    genMBulkReply(10)
   )
 
   implicit def arbitraryStatusReply: Arbitrary[StatusReply] = Arbitrary(genStatusReply)
@@ -95,13 +111,14 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
 
   private[this] def chunk(buf: Buf): Gen[Seq[Buf]] =
     if (buf.isEmpty) Gen.const(Seq.empty[Buf])
-    else Gen.choose(1, buf.length).flatMap { n =>
-      val taken = math.min(buf.length, n)
-      val a = buf.slice(0, taken)
-      val b = buf.slice(taken, buf.length)
+    else
+      Gen.choose(1, buf.length).flatMap { n =>
+        val taken = math.min(buf.length, n)
+        val a = buf.slice(0, taken)
+        val b = buf.slice(taken, buf.length)
 
-      chunk(b).map(rest => a +: rest)
-    }
+        chunk(b).map(rest => a +: rest)
+      }
 
   def genChunkedReply[R <: Reply](implicit a: Arbitrary[R]): Gen[(R, Seq[Buf])] =
     a.arbitrary.flatMap(r => chunk(encodeReply(r)).map(chunks => r -> chunks))
@@ -122,14 +139,16 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
     case ErrorReply(s) => Buf.Utf8("-").concat(Buf.Utf8(s)).concat(Eol)
     case IntegerReply(i) => Buf.Utf8(":").concat(Buf.Utf8(i.toString)).concat(Eol)
     case BulkReply(buf) =>
-      Buf.Utf8("$")
+      Buf
+        .Utf8("$")
         .concat(Buf.Utf8(buf.length.toString))
         .concat(Eol)
         .concat(buf)
         .concat(Eol)
     case MBulkReply(replies) =>
       val header =
-        Buf.Utf8("*")
+        Buf
+          .Utf8("*")
           .concat(Buf.Utf8(replies.size.toString))
           .concat(Eol)
       val body = replies.map(encodeReply).reduce((a, b) => a.concat(b))
@@ -140,17 +159,19 @@ trait RedisResponseTest extends RedisTest with GeneratorDrivenPropertyChecks wit
 
 trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with MissingInstances {
 
-  def genZMember: Gen[ZMember] = for {
-    d <- Arbitrary.arbitrary[Double]
-    b <- genBuf
-  } yield ZMember(d, b)
+  def genZMember: Gen[ZMember] =
+    for {
+      d <- Arbitrary.arbitrary[Double]
+      b <- genBuf
+    } yield ZMember(d, b)
 
   implicit val arbitraryZMember: Arbitrary[ZMember] = Arbitrary(genZMember)
 
-  def genZInterval: Gen[ZInterval] = for {
-    d <- Arbitrary.arbitrary[Double]
-    i <- Gen.oneOf(ZInterval.MAX, ZInterval.MIN, ZInterval.exclusive(d), ZInterval(d))
-  } yield i
+  def genZInterval: Gen[ZInterval] =
+    for {
+      d <- Arbitrary.arbitrary[Double]
+      i <- Gen.oneOf(ZInterval.MAX, ZInterval.MIN, ZInterval.exclusive(d), ZInterval(d))
+    } yield i
 
   implicit val arbitraryZInterval: Arbitrary[ZInterval] = Arbitrary(genZInterval)
 
@@ -241,13 +262,15 @@ trait RedisRequestTest extends RedisTest with GeneratorDrivenPropertyChecks with
       )
     }
 
-    Arbitrary.arbitrary[A].sample.foreach(a =>
-      intercept[ClientError](encodeCommand(f(Buf.Empty, a)))
-    )
+    Arbitrary
+      .arbitrary[A]
+      .sample
+      .foreach(a => intercept[ClientError](encodeCommand(f(Buf.Empty, a))))
   }
 
   def checkSingleKey2ArbitraryVals[A: Arbitrary, B: Arbitrary](
-    c: String, f: (Buf, A, B) => Command
+    c: String,
+    f: (Buf, A, B) => Command
   ): Unit = {
     forAll { (key: Buf, a: A, b: B) =>
       assert(encodeCommand(f(key, a, b)) == c +: Seq(key.asString, a.toString, b.toString))
@@ -274,20 +297,24 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
     try { testCode(client) } finally { client.close() }
   }
 
-  protected def assertMBulkReply(reply: Future[Reply], expects: List[String],
-    contains: Boolean = false) = Await.result(reply) match {
-    case MBulkReply(msgs) => contains match {
-      case true =>
-        assert(!expects.isEmpty, "Test did no supply a list of expected replies.")
-        val newMsgs = ReplyFormat.toString(msgs)
-        expects.foreach({ msg =>
-          val doesMBulkReplyContainMessage = newMsgs.contains(msg)
-          assert(doesMBulkReplyContainMessage)
-        })
-      case false =>
-        val actualMessages = ReplyFormat.toBuf(msgs).flatMap(Buf.Utf8.unapply)
-        assert(actualMessages == expects)
-    }
+  protected def assertMBulkReply(
+    reply: Future[Reply],
+    expects: List[String],
+    contains: Boolean = false
+  ) = Await.result(reply) match {
+    case MBulkReply(msgs) =>
+      contains match {
+        case true =>
+          assert(!expects.isEmpty, "Test did no supply a list of expected replies.")
+          val newMsgs = ReplyFormat.toString(msgs)
+          expects.foreach({ msg =>
+            val doesMBulkReplyContainMessage = newMsgs.contains(msg)
+            assert(doesMBulkReplyContainMessage)
+          })
+        case false =>
+          val actualMessages = ReplyFormat.toBuf(msgs).flatMap(Buf.Utf8.unapply)
+          assert(actualMessages == expects)
+      }
 
     case EmptyMBulkReply =>
       val isEmpty = true
@@ -352,7 +379,8 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
 
   protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any) {
     val client = SentinelClient(
-      Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1)))
+      Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1))
+    )
     try { testCode(client) } finally { client.close() }
   }
 }

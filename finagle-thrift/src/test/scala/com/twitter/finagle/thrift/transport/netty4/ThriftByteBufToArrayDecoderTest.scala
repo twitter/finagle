@@ -30,7 +30,6 @@ class ThriftByteBufToArrayDecoderTest extends FunSuite {
   def bytes(str: String): Array[Byte] = str.getBytes(StandardCharsets.UTF_8)
   def str(bytes: Array[Byte]): String = new String(bytes, StandardCharsets.UTF_8)
 
-
   test("ThriftChannelBufferDecoder convert buffers to an Array[Byte]") {
 
     val arr = "hello, world!"

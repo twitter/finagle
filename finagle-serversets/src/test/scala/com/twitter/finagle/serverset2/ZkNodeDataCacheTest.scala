@@ -60,4 +60,3 @@ class ZkNodeDataCacheTest extends FunSuite {
     assert(cache.parseNodeCalledCount == 2)
   }
 }
-

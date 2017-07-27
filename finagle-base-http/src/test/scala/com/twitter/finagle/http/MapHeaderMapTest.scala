@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 class MapHeaderMapTest extends AbstractHeaderMapTest {
 
-  final def newHeaderMap(headers: (String, String)*): HeaderMap = MapHeaderMap(headers:_*)
+  final def newHeaderMap(headers: (String, String)*): HeaderMap = MapHeaderMap(headers: _*)
 
   test("apply()") {
     assert(MapHeaderMap().size == 0)
@@ -11,7 +11,7 @@ class MapHeaderMapTest extends AbstractHeaderMapTest {
 
   test("apply(kv1, kv2) is the same as adding headers") {
     val testHeaders = Seq("a" -> "a1", "A" -> "a2", "b" -> "b")
-    val map1 = MapHeaderMap(testHeaders:_*)
+    val map1 = MapHeaderMap(testHeaders: _*)
 
     val map2 = {
       val m = MapHeaderMap()
@@ -33,7 +33,6 @@ class MapHeaderMapTest extends AbstractHeaderMapTest {
 
     assert(map1.getAll("A") == Seq("a1", "a2"))
     assert(map1.getAll("A") == map1.getAll("A"))
-
 
     assert(map1.iterator.toSeq.sorted == Seq("A" -> "a2", "a" -> "a1", "b" -> "b"))
     assert(map1.iterator.toSeq.sorted == map2.iterator.toSeq.sorted)

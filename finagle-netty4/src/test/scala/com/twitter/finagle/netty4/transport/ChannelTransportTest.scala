@@ -19,8 +19,11 @@ import java.security.cert.Certificate
 import javax.net.ssl.{SSLEngine, SSLSession}
 
 @RunWith(classOf[JUnitRunner])
-class ChannelTransportTest extends FunSuite
-  with GeneratorDrivenPropertyChecks with OneInstancePerTest with MockitoSugar {
+class ChannelTransportTest
+    extends FunSuite
+    with GeneratorDrivenPropertyChecks
+    with OneInstancePerTest
+    with MockitoSugar {
 
   val timeout = 10.seconds
 
@@ -42,9 +45,10 @@ class ChannelTransportTest extends FunSuite
   test("ChannelTransport still works if we channel.write before transport.read") {
     forAll { ss: Seq[String] =>
       val written = ss.map(s => channel.writeInbound(s))
-      written.zip(ss).foreach { case (w, s) =>
-        assertSeenWhatsWritten(w, s, transport.read())
-        assert(transport.status == Status.Open)
+      written.zip(ss).foreach {
+        case (w, s) =>
+          assertSeenWhatsWritten(w, s, transport.read())
+          assert(transport.status == Status.Open)
       }
     }
 
@@ -58,9 +62,10 @@ class ChannelTransportTest extends FunSuite
       val seen = ss.map(_ => transport.read())
       val written = ss.map(s => channel.writeInbound(s))
 
-      written.zip(ss).zip(seen).foreach { case ((w, s), f) =>
-        assertSeenWhatsWritten(w, s, f)
-        assert(transport.status == Status.Open)
+      written.zip(ss).zip(seen).foreach {
+        case ((w, s), f) =>
+          assertSeenWhatsWritten(w, s, f)
+          assert(transport.status == Status.Open)
       }
     }
 
@@ -172,7 +177,6 @@ class ChannelTransportTest extends FunSuite
     // an empty queue leads to a single read
     verify(channel, times(1)).read()
 
-
     // the offer q is drained, so reading another message triggers another channel read
     trans.read()
     eventually { verify(channel, times(2)).read() }
@@ -229,7 +233,6 @@ class ChannelTransportTest extends FunSuite
     verify(channel, times(6)).read()
     assert("three" == Await.result(readThree, timeout))
   }
-
 
   test("buffered messages are not flushed on transport shutdown") {
     val em = new EmbeddedChannel

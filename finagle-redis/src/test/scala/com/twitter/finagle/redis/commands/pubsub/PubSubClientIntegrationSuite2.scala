@@ -120,7 +120,9 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
   def ensureMasterSlave() {
     slave.withClient { client =>
       val masterAddr = master.address.get
-      result(client.slaveOf(Buf.Utf8(masterAddr.getHostString), Buf.Utf8(masterAddr.getPort.toString)))
+      result(
+        client.slaveOf(Buf.Utf8(masterAddr.getHostString), Buf.Utf8(masterAddr.getPort.toString))
+      )
       waitUntil("master-slave replication") {
         val status = b2s(result(client.info(Buf.Utf8("replication"))).get)
           .split("\n")
@@ -140,7 +142,8 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
           .mkString(",")
         val subscribeClnt = Redis.newRichClient(dest)
         val ctx = new TestContext(masterClnt, slaveClnt, subscribeClnt)
-        try test(ctx) finally subscribeClnt.close()
+        try test(ctx)
+        finally subscribeClnt.close()
       }
     }
   }

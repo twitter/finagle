@@ -34,7 +34,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   // a Transport whose reads and writes never complete
-  private[netty4] class NullTransport[In,Out] extends Transport[In, Out] {
+  private[netty4] class NullTransport[In, Out] extends Transport[In, Out] {
     val closeP = new Promise[Throwable]
     val readP = Future.never
     val writeP = Future.never
@@ -56,7 +56,9 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   // the /dev/null of dispatchers
-  val nopDispatch = { _: Transport[ByteBuf, ByteBuf] => () }
+  val nopDispatch = { _: Transport[ByteBuf, ByteBuf] =>
+    ()
+  }
 
   private[this] trait StatsCtx {
     val sr: InMemoryStatsReceiver = new InMemoryStatsReceiver
@@ -75,13 +77,16 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val listener = Netty4Listener[ByteBuf, ByteBuf](
       pipelineInit = _ => (),
       params = p,
-      transportFactory = { _: Channel => new NullTransport }
+      transportFactory = { _: Channel =>
+        new NullTransport
+      }
     )
   }
 
-
-  test("frames pipeline messages and bridges transports and service dispatchers (aka it works end-to-end)") {
-    val ctx = new StatsCtx { }
+  test(
+    "frames pipeline messages and bridges transports and service dispatchers (aka it works end-to-end)"
+  ) {
+    val ctx = new StatsCtx {}
     import ctx._
 
     val p = Params.empty + Label("test") + Stats(sr)
@@ -97,7 +102,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     }
 
     val serveTransport = (t: Transport[String, String]) => new SerialServerDispatcher(t, service)
-    val server = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
+    val server =
+      listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
 
     val client = new Socket()
     eventually { client.connect(server.boundAddress) }
@@ -114,7 +120,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   test("bytebufs in default pipeline have refCnt == 1") {
-    val ctx = new StatsCtx { }
+    val ctx = new StatsCtx {}
     import ctx._
 
     val p = Params.empty + Label("test") + Stats(sr)
@@ -129,7 +135,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     }
 
     val serveTransport = (t: Transport[ByteBuf, ByteBuf]) => new SerialServerDispatcher(t, service)
-    val server = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
+    val server =
+      listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
 
     val client = new Socket()
     eventually { client.connect(server.boundAddress) }
@@ -151,18 +158,22 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   test("Netty4Listener records basic channel stats") {
-    val ctx = new StatsCtx { }
+    val ctx = new StatsCtx {}
     import ctx._
 
     // need to turn off backpressure since we don't read off the transport
     val p = Params.empty + Label("srv") + Stats(sr) + BackPressure(false)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
-        pipelineInit = _ => (),
-        params = p,
-        transportFactory = { _: Channel => new NullTransport }
-      )
-    val server1 = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)
-    val server2 = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)
+      pipelineInit = _ => (),
+      params = p,
+      transportFactory = { _: Channel =>
+        new NullTransport
+      }
+    )
+    val server1 =
+      listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)
+    val server2 =
+      listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)
 
     val (client1, client2) = (new Socket(), new Socket())
 
@@ -214,7 +225,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   test("Netty4Listener notices when the client cuts the connection with autoread enabled") {
-    val ctx = new StatsCtx { }
+    val ctx = new StatsCtx {}
     import ctx._
 
     // we need to turn backpressure off because netty doesn't notify you if the
@@ -228,8 +239,9 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
 
     val p = Promise[String]()
     @volatile var interrupted = false
-    p.setInterruptHandler { case NonFatal(t) =>
-      interrupted = true
+    p.setInterruptHandler {
+      case NonFatal(t) =>
+        interrupted = true
     }
     val service = new Service[String, String] {
       def apply(request: String) = {
@@ -239,7 +251,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     }
 
     val serveTransport = (t: Transport[String, String]) => new SerialServerDispatcher(t, service)
-    val server = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
+    val server =
+      listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
 
     val client = new Socket()
     eventually { client.connect(server.boundAddress) }

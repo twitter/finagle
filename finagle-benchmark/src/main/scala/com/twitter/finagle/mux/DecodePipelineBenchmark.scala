@@ -22,7 +22,6 @@ class DecodePipelineBenchmark extends StdBenchAnnotations {
     mux.RefCountingFramer(channel.pipeline)
   }
 
-
   val RreqOk = msgToDirectByteBuf(mux.Message.RreqOk(0, data))
   @Benchmark
   def decodeRreqOk(): mux.Message = decode(RreqOk)
@@ -35,7 +34,9 @@ class DecodePipelineBenchmark extends StdBenchAnnotations {
   @Benchmark
   def decodeRreqNack(): mux.Message = decode(RreqNack)
 
-  val Tdispatch = msgToDirectByteBuf(mux.Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, data))
+  val Tdispatch = msgToDirectByteBuf(
+    mux.Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, data)
+  )
   @Benchmark
   def decodeTdispatch(): mux.Message = decode(Tdispatch)
 

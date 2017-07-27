@@ -76,7 +76,6 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-
   test("Correctly merge lkeys with destination and set expiry", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
@@ -93,7 +92,6 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       assert(ttl > 10000 && ttl < 90000) // ttl is updated only if a field was added
     }
   }
-
 
   test("Correctly merge lkeys with destination without expiry", RedisTest, ClientTest) {
     withRedisClient { client =>
@@ -131,7 +129,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     "Correctly set multiple values one of which is an empty string value",
     RedisTest,
     ClientTest
-    ) {
+  ) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar, bufMoo -> Buf.Empty)), TIMEOUT)
       val result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
@@ -175,8 +173,8 @@ final class HashClientIntegrationSuite extends RedisClientTest {
   test("Correctly do a setnx", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hDel(bufFoo, Seq(bufBar)))
-      assert(Await.result(client.hSetNx(bufFoo,bufBar, bufBaz), TIMEOUT) == 1)
-      assert(Await.result(client.hSetNx(bufFoo,bufBar, bufMoo), TIMEOUT) == 0)
+      assert(Await.result(client.hSetNx(bufFoo, bufBar, bufBaz), TIMEOUT) == 1)
+      assert(Await.result(client.hSetNx(bufFoo, bufBar, bufMoo), TIMEOUT) == 0)
       assert(BufToString(Await.result(client.hGet(bufFoo, bufBar), TIMEOUT).get) == "baz")
     }
   }

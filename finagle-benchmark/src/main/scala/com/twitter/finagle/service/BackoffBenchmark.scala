@@ -36,27 +36,32 @@ object BackoffBenchmark {
   }
 
   @State(Scope.Thread)
-  class FromFunction extends BackoffState(
-    Backoff.fromFunction(() => 10.seconds) ++ Backoff.const(300.seconds)
-  )
+  class FromFunction
+      extends BackoffState(
+        Backoff.fromFunction(() => 10.seconds) ++ Backoff.const(300.seconds)
+      )
 
   @State(Scope.Thread)
-  class Constant extends BackoffState(
-    Backoff.const(10.seconds) ++ Backoff.const(300.seconds)
-  )
+  class Constant
+      extends BackoffState(
+        Backoff.const(10.seconds) ++ Backoff.const(300.seconds)
+      )
 
   @State(Scope.Thread)
-  class EqualJittered extends BackoffState(
-    Backoff.equalJittered(5.seconds, 300.seconds) ++ Backoff.const(300.seconds)
-  )
+  class EqualJittered
+      extends BackoffState(
+        Backoff.equalJittered(5.seconds, 300.seconds) ++ Backoff.const(300.seconds)
+      )
 
   @State(Scope.Thread)
-  class ExponentialJittered extends BackoffState(
-    Backoff.exponentialJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
-  )
+  class ExponentialJittered
+      extends BackoffState(
+        Backoff.exponentialJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
+      )
 
   @State(Scope.Thread)
-  class DecorrelatedJittered extends BackoffState(
-    Backoff.decorrelatedJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
-  )
+  class DecorrelatedJittered
+      extends BackoffState(
+        Backoff.decorrelatedJittered(5.second, 300.seconds) ++ Backoff.const(300.seconds)
+      )
 }

@@ -10,10 +10,11 @@ trait HexDump {
   val hex: String
   // parse multi-line hex dump where packets are delimited by '|'
   lazy val packets: Seq[Packet] = {
-    val tokens = hex.stripMargin.split('|').map(_.replace("\n", " "))
+    val tokens = hex.stripMargin
+      .split('|')
+      .map(_.replace("\n", " "))
       .map(s => s.split(' ').filterNot(_ == ""))
-    val asBytes = tokens.map(_.map(s =>
-      ((s(0).asDigit << 4) + s(1).asDigit).toByte))
+    val asBytes = tokens.map(_.map(s => ((s(0).asDigit << 4) + s(1).asDigit).toByte))
     asBytes.map(arr => Packet(arr(3), Buf.ByteArray.Owned(arr.drop(4))))
   }
 }
@@ -21,29 +22,28 @@ trait HexDump {
 @RunWith(classOf[JUnitRunner])
 class HandshakeInitTest extends FunSuite {
   val authPluginHex =
-
-  test("decode protocol version 10") (new HexDump {
-    val hex =
-      """36 00 00 00 0a 35 2e 35    2e 32 2d 6d 32 00 0b 00
+    test("decode protocol version 10")(new HexDump {
+      val hex =
+        """36 00 00 00 0a 35 2e 35    2e 32 2d 6d 32 00 0b 00
         |00 00 64 76 48 40 49 2d    43 4a 00 ff f7 21 02 00
         |00 00 00 00 00 00 00 00    00 00 00 00 00 2a 34 64
         |7c 63 5a 77 6b 34 5e 5d    3a 00"""
-    assert(packets.size > 0)
-    val h = HandshakeInit.decode(packets(0))
-    assert(h.protocol == 10)
-    assert(h.version == "5.5.2-m2")
-    assert(h.threadId == 11)
-    assert(h.serverCap.mask == 0xf7ff)
-    assert(h.charset == Charset.Utf8_general_ci)
-    assert(h.status == 2)
-    assert(h.salt.length == 20)
-    assert(h.salt === Array[Byte](
-      100, 118, 72, 64, 73, 45, 67, 74,
-      42, 52, 100, 124, 99, 90, 119, 107,
-      52, 94, 93, 58))
-  })
+      assert(packets.size > 0)
+      val h = HandshakeInit.decode(packets(0))
+      assert(h.protocol == 10)
+      assert(h.version == "5.5.2-m2")
+      assert(h.threadId == 11)
+      assert(h.serverCap.mask == 0xf7ff)
+      assert(h.charset == Charset.Utf8_general_ci)
+      assert(h.status == 2)
+      assert(h.salt.length == 20)
+      assert(
+        h.salt === Array[Byte](100, 118, 72, 64, 73, 45, 67, 74, 42, 52, 100, 124, 99, 90, 119, 107,
+          52, 94, 93, 58)
+      )
+    })
 
-  test("decode protocol version 10 with auth plugin name") (new HexDump {
+  test("decode protocol version 10 with auth plugin name")(new HexDump {
     val hex =
       """50 00 00 00 0a 35 2e 36    2e 34 2d 6d 37 2d 6c 6f
         |67 00 56 0a 00 00 52 42    33 76 7a 26 47 72 00 ff
@@ -124,8 +124,10 @@ class PrepareOKTest extends FunSuite with HexDump {
     assert(p.numOfParams == 2)
     assert(p.numOfCols == 1)
     assert(packets.size >= 1 + p.numOfParams, "expected %d param packets".format(p.numOfParams))
-    val params = packets.drop(1) /*drop header*/
-      .take(p.numOfParams).map(Field.decode(_))
+    val params = packets
+      .drop(1) /*drop header*/
+      .take(p.numOfParams)
+      .map(Field.decode(_))
     val p1 = params(0)
     val p2 = params(1)
     assert(p1.name == "?")
@@ -134,9 +136,14 @@ class PrepareOKTest extends FunSuite with HexDump {
     assert(p2.name == "?")
     assert(p2.fieldType == Type.VarString)
     assert(p2.charset == Charset.Binary)
-    assert(packets.size >= 1 + p.numOfParams + p.numOfCols, "expected %d column packets".format(p.numOfCols))
-    val cols = packets.drop(2 + p.numOfParams) /*drop header + eof + params*/
-      .take(p.numOfCols).map(Field.decode(_))
+    assert(
+      packets.size >= 1 + p.numOfParams + p.numOfCols,
+      "expected %d column packets".format(p.numOfCols)
+    )
+    val cols = packets
+      .drop(2 + p.numOfParams) /*drop header + eof + params*/
+      .take(p.numOfCols)
+      .map(Field.decode(_))
     val col = cols(0)
     assert(col.name == "col1")
   }
@@ -154,7 +161,8 @@ class BinaryResultSetTest extends FunSuite with HexDump {
       |02 00"""
   test("decode") {
     assert(packets.size == 5, "expected at least 5 packet")
-    val rs = ResultSet.decode(true)(packets.head,
+    val rs = ResultSet.decode(true)(
+      packets.head,
       packets.drop(1).take(1), /* column_count = 1 */
       packets.drop(3).take(1) /* drop eof, 1 row */
     )

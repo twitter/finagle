@@ -14,7 +14,7 @@ import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 
 class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
-  def mkAttr[T](initial: T): Attribute[T] = new Attribute[T]{
+  def mkAttr[T](initial: T): Attribute[T] = new Attribute[T] {
     var _v = initial
     def set(value: T): Unit = _v = value
     def key(): AttributeKey[T] = ???
@@ -33,7 +33,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     when(chan.isWritable).thenReturn(false, true, false)
     when(ctx.channel).thenReturn(chan)
     when(chan.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
-    when(chan.attr(ChannelStatsHandler.ChannelWritableDurationKey)).thenReturn(mkAttr(Stopwatch.start()))
+    when(chan.attr(ChannelStatsHandler.ChannelWritableDurationKey))
+      .thenReturn(mkAttr(Stopwatch.start()))
   }
 
   trait InMemoryStatsTest extends SocketTest {
@@ -61,14 +62,16 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   }
 
   private class TestContext(
-      bytesReceived: LongAdder = new LongAdder(),
-      bytesWritten: LongAdder = new LongAdder()) {
+    bytesReceived: LongAdder = new LongAdder(),
+    bytesWritten: LongAdder = new LongAdder()
+  ) {
     val ctx = mock[ChannelHandlerContext]
     private val chan = new EmbeddedChannel()
     private val start = Time.now
 
     when(ctx.channel).thenReturn(chan)
-    chan.attr(ChannelStatsHandler.ConnectionStatsKey)
+    chan
+      .attr(ChannelStatsHandler.ConnectionStatsKey)
       .set(ChannelStats(bytesReceived, bytesWritten))
 
     val durationAttr: () => Duration = () => Time.now - start
@@ -76,7 +79,6 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     chan.attr(ChannelStatsHandler.ChannelWasWritableKey).set(true)
     chan.attr(ChannelStatsHandler.ChannelWritableDurationKey).set(Stopwatch.start())
   }
-
 
   private def connectionCountEquals(sr: InMemoryStatsReceiver, num: Float): Unit = {
     assert(sr.gauges(Seq("connections"))() == num)

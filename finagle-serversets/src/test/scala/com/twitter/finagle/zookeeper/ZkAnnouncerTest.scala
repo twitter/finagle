@@ -21,9 +21,8 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)
 
-  implicit val patienceConfig = PatienceConfig(
-    timeout = toSpan(zkTimeout*3),
-    interval = toSpan(zkTimeout))
+  implicit val patienceConfig =
+    PatienceConfig(timeout = toSpan(zkTimeout * 3), interval = toSpan(zkTimeout))
 
   before {
     inst = new ZkInstance
@@ -40,7 +39,7 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
   // TODO: remove when no longer flaky.
   override def test(testName: String, testTags: Tag*)(f: => Any)(implicit pos: Position): Unit = {
     if (!sys.props.contains("SKIP_FLAKY"))
-      super.test(testName, testTags:_*)(f)
+      super.test(testName, testTags: _*)(f)
   }
 
   test("announce a primary endpoint") {
@@ -85,11 +84,11 @@ class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
       case e: TestFailedDueToTimeoutException =>
         var exceptionString = "#%d eventually failed.\n".format(failedEventually)
 
-        if(va1 != null) {
+        if (va1 != null) {
           exceptionString += "va1 status: %s\n".format(Var.sample(va1).toString)
         }
 
-        if(va2 != null) {
+        if (va2 != null) {
           exceptionString += "va2 status: %s\n".format(Var.sample(va2).toString)
         }
 

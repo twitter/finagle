@@ -2,7 +2,10 @@ package com.twitter.finagle.netty3
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.netty3.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+  ChannelRequestStatsHandler,
+  ChannelStatsHandler,
+  WriteCompletionTimeoutHandler
+}
 import com.twitter.finagle.netty3.ssl.server.SslServerConnectHandler
 import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.server.SslServerConfiguration
@@ -24,21 +27,22 @@ import scala.reflect.ClassTag
 @RunWith(classOf[JUnitRunner])
 class Netty3ListenerTest extends FunSuite with MockitoSugar {
 
-  private[this] def findHandlerInPipeline[T <: ChannelHandler : ClassTag](
+  private[this] def findHandlerInPipeline[T <: ChannelHandler: ClassTag](
     pipeline: ChannelPipeline
   ): Option[T] = {
     val clazz = implicitly[ClassTag[T]].runtimeClass
 
-    pipeline.toMap.asScala.values.find {
-      case h if clazz.isInstance(h) => true
-      case _ => false
-    }.map(_.asInstanceOf[T])
+    pipeline.toMap.asScala.values
+      .find {
+        case h if clazz.isInstance(h) => true
+        case _ => false
+      }
+      .map(_.asInstanceOf[T])
   }
 
   // Netty3Listener.apply return a Listener[In, Out] but tests require a concrete Netty3Listener.
   private[this] def makeNetty3Listener(params: Stack.Params): Netty3Listener[Int, Int] = {
-    val listener = Netty3Listener[Int, Int](
-      Channels.pipelineFactory(Channels.pipeline()), params)
+    val listener = Netty3Listener[Int, Int](Channels.pipelineFactory(Channels.pipeline()), params)
     listener.asInstanceOf[Netty3Listener[Int, Int]]
   }
 
@@ -47,8 +51,8 @@ class Netty3ListenerTest extends FunSuite with MockitoSugar {
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): ChannelPipeline = {
     val listener = makeNetty3Listener(params)
-    val pipelineFactory = listener.newServerPipelineFactory(
-      statsReceiver, () => new SimpleChannelHandler)
+    val pipelineFactory =
+      listener.newServerPipelineFactory(statsReceiver, () => new SimpleChannelHandler)
     val pipeline = pipelineFactory.getPipeline()
     assert(pipeline != null)
     pipeline
@@ -200,14 +204,14 @@ class Netty3ListenerTest extends FunSuite with MockitoSugar {
   }
 
   test("FinagleBridge is added by default") {
-    class TestBridgeHandler extends SimpleChannelHandler { }
+    class TestBridgeHandler extends SimpleChannelHandler {}
 
     val testBridgeHandler = new TestBridgeHandler()
     val params = Stack.Params.empty + Label("name")
 
     val listener = makeNetty3Listener(params)
-    val pipelineFactory = listener.newServerPipelineFactory(
-      NullStatsReceiver, () => testBridgeHandler)
+    val pipelineFactory =
+      listener.newServerPipelineFactory(NullStatsReceiver, () => testBridgeHandler)
     val pipeline = pipelineFactory.getPipeline()
 
     val bridgeHandler = findHandlerInPipeline[TestBridgeHandler](pipeline)

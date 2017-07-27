@@ -7,10 +7,7 @@ import org.scalatest.{Matchers, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BucketedHistogramTest extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with Matchers
-{
+class BucketedHistogramTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
   test("constructor limits cannot be empty") {
     intercept[IllegalArgumentException] { new BucketedHistogram(new Array[Int](0)) }
   }
@@ -45,16 +42,17 @@ class BucketedHistogramTest extends FunSuite
 
     def assertPercentiles(maxVal: Long): Unit = {
       val actuals = h.getQuantiles(wantedPs)
-      actuals.zip(wantedPs).foreach { case (actual, wantedP) =>
-        withClue(s"percentile=$wantedP") {
-          // verify that each percentile is within the error bounds.
-          val ideal = Math.round(wantedP * maxVal)
-          assertWithinError(ideal, actual)
+      actuals.zip(wantedPs).foreach {
+        case (actual, wantedP) =>
+          withClue(s"percentile=$wantedP") {
+            // verify that each percentile is within the error bounds.
+            val ideal = Math.round(wantedP * maxVal)
+            assertWithinError(ideal, actual)
 
-          // verify that getting each percentile 1-at-a-time
-          // is the same as the bulk call
-          assert(h.percentile(wantedP) == actual)
-        }
+            // verify that getting each percentile 1-at-a-time
+            // is the same as the bulk call
+            assert(h.percentile(wantedP) == actual)
+          }
       }
     }
 
@@ -159,8 +157,13 @@ class BucketedHistogramTest extends FunSuite
     h.add(1)
     h.add(Int.MaxValue)
     h.add(Int.MaxValue)
-    assert(h.bucketAndCounts == Seq(BucketAndCount(0, 1, 2), BucketAndCount(1, 2, 3), 
-      BucketAndCount(2137204091, Int.MaxValue, 2)))
+    assert(
+      h.bucketAndCounts == Seq(
+        BucketAndCount(0, 1, 2),
+        BucketAndCount(1, 2, 3),
+        BucketAndCount(2137204091, Int.MaxValue, 2)
+      )
+    )
   }
 
   test("exporting counts responds to clear") {
@@ -175,32 +178,35 @@ class BucketedHistogramTest extends FunSuite
   }
 
   test("percentile and min and max stays within error bounds") {
-    forAll(BucketedHistogramTest.generator) { case (samples: List[Int], p: Double) =>
-      // although this uses Gen.nonEmptyContainerOf I observed an empty List
-      // generated. As an example, this failed with an NPE:
-      //
-      //      Occurred when passed generated values (
-      //        arg0 = (List(),0.941512699565841) // 4 shrinks
-      //
-      // Also, observed negative values even with Gen.chooseNum constraint:
-      //
-      //      Occurred when passed generated values (
-      //        arg0 = (List(-1),0.9370612091967268) // 33 shrinks
-      //
-      whenever(samples.nonEmpty && samples.forall(_ >= 0)) {
-        val h = BucketedHistogram()
-        samples.foreach { s => h.add(s.toLong)}
+    forAll(BucketedHistogramTest.generator) {
+      case (samples: List[Int], p: Double) =>
+        // although this uses Gen.nonEmptyContainerOf I observed an empty List
+        // generated. As an example, this failed with an NPE:
+        //
+        //      Occurred when passed generated values (
+        //        arg0 = (List(),0.941512699565841) // 4 shrinks
+        //
+        // Also, observed negative values even with Gen.chooseNum constraint:
+        //
+        //      Occurred when passed generated values (
+        //        arg0 = (List(-1),0.9370612091967268) // 33 shrinks
+        //
+        whenever(samples.nonEmpty && samples.forall(_ >= 0)) {
+          val h = BucketedHistogram()
+          samples.foreach { s =>
+            h.add(s.toLong)
+          }
 
-        val sorted = samples.sorted.toIndexedSeq
-        val index = (Math.round(sorted.size * p).toInt - 1).max(0)
-        val ideal = sorted(index).toLong
-        val actual = h.percentile(p)
-        assertWithinError(ideal, actual)
+          val sorted = samples.sorted.toIndexedSeq
+          val index = (Math.round(sorted.size * p).toInt - 1).max(0)
+          val ideal = sorted(index).toLong
+          val actual = h.percentile(p)
+          assertWithinError(ideal, actual)
 
-        // check min and max too
-        assertWithinError(sorted.head, h.minimum)
-        assertWithinError(sorted.last, h.maximum)
-      }
+          // check min and max too
+          assertWithinError(sorted.head, h.minimum)
+          assertWithinError(sorted.last, h.maximum)
+        }
     }
   }
 
@@ -208,9 +214,10 @@ class BucketedHistogramTest extends FunSuite
 
 private object BucketedHistogramTest {
 
-  def generator = for {
-    samples <- Gen.nonEmptyContainerOf[List, Int](Gen.chooseNum(0, Int.MaxValue))
-    percentile <- Gen.choose(0.5, 0.9999)
-  } yield (samples, percentile)
+  def generator =
+    for {
+      samples <- Gen.nonEmptyContainerOf[List, Int](Gen.chooseNum(0, Int.MaxValue))
+      percentile <- Gen.choose(0.5, 0.9999)
+    } yield (samples, percentile)
 
 }

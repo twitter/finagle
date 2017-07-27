@@ -18,8 +18,7 @@ object ToggleGenerator {
 }
 
 @RunWith(classOf[JUnitRunner])
-class ToggleTest extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+class ToggleTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private val IntGen =
     Gen.chooseNum(Int.MinValue, Int.MaxValue)

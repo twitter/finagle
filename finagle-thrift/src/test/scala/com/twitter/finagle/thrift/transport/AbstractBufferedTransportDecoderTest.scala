@@ -36,13 +36,13 @@ abstract class AbstractBufferedTransportDecoderTest extends FunSuite {
 
   test("Slice multiple messages") {
     { // sent concatenated
-    val results = decode(Seq(messageArray ++ messageArray))
+      val results = decode(Seq(messageArray ++ messageArray))
       assert(results.length == 2)
       results.foreach(data => assert(data.sameElements(messageArray)))
     }
 
     { // sent discretely
-    val results = decode(Seq(messageArray, messageArray))
+      val results = decode(Seq(messageArray, messageArray))
       assert(results.length == 2)
       results.foreach(data => assert(data.sameElements(messageArray)))
     }
@@ -62,9 +62,10 @@ abstract class AbstractBufferedTransportDecoderTest extends FunSuite {
   }
 
   test("Aggregate single byte input interspersed with empty input") {
-    val results = decode((messageArray ++ messageArray)
-      .toSeq
-      .flatMap(byte => Seq(Array(byte), Array[Byte]())))  // Seq(Array(1), Array(), Array(1)...)
+    val results = decode(
+      (messageArray ++ messageArray).toSeq
+        .flatMap(byte => Seq(Array(byte), Array[Byte]()))
+    ) // Seq(Array(1), Array(), Array(1)...)
     assert(results.length == 2)
     results.foreach(data => assert(data.sameElements(messageArray)))
   }

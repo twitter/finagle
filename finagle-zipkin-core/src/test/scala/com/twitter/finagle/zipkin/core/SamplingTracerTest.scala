@@ -59,14 +59,16 @@ private[twitter] object ZipkinTracerTest {
       ClientSendFragment(),
       ClientRecvFragment(),
       ServerSendFragment(),
-      ServerRecvFragment()),
+      ServerRecvFragment()
+    ),
     for (s <- arbitrary[String]) yield Message(s),
     for (s <- arbitrary[String]) yield ServiceName(s),
     for (s <- arbitrary[String]) yield Rpc(s),
     Gen.oneOf(
       ClientAddr(new InetSocketAddress(0)),
       ServerAddr(new InetSocketAddress(0)),
-      LocalAddr(new InetSocketAddress(0))),
+      LocalAddr(new InetSocketAddress(0))
+    ),
     // We only guarantee successful deserialization for primitive values and
     // Strings, here we test String.
     for (v <- Gen.oneOf(arbitrary[AnyVal], arbitrary[String])) yield BinaryAnnotation("k", v)

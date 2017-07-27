@@ -13,43 +13,46 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class BufCodecTest extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with OneInstancePerTest {
+class BufCodecTest extends FunSuite with GeneratorDrivenPropertyChecks with OneInstancePerTest {
 
   val channel = new EmbeddedChannel(BufCodec)
 
-  def genArrayBeginAndEnd: Gen[(Array[Byte], Int, Int)] = for {
-    capacity <- Gen.choose(1, 100)
-    bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
-    begin <- Gen.choose(0, capacity)
-    end <- Gen.choose(begin, capacity)
-  } yield (bytes.toArray, begin, end)
+  def genArrayBeginAndEnd: Gen[(Array[Byte], Int, Int)] =
+    for {
+      capacity <- Gen.choose(1, 100)
+      bytes <- Gen.listOfN(capacity, Arbitrary.arbByte.arbitrary)
+      begin <- Gen.choose(0, capacity)
+      end <- Gen.choose(begin, capacity)
+    } yield (bytes.toArray, begin, end)
 
-  def genRegularBuf: Gen[Buf] = for {
-    (bytes, begin, end) <- genArrayBeginAndEnd
-    result <- Gen.oneOf(
-      Buf.ByteArray.Owned(bytes, begin, end),
-      Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes, begin, end - begin)),
-      ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, begin, end - begin))
-    )
-  } yield result
+  def genRegularBuf: Gen[Buf] =
+    for {
+      (bytes, begin, end) <- genArrayBeginAndEnd
+      result <- Gen.oneOf(
+        Buf.ByteArray.Owned(bytes, begin, end),
+        Buf.ByteBuffer.Owned(ByteBuffer.wrap(bytes, begin, end - begin)),
+        ByteBufAsBuf(Unpooled.wrappedBuffer(bytes, begin, end - begin))
+      )
+    } yield result
 
-  def genCompositeBuf: Gen[Buf] = for {
-    length <- Gen.choose(1, 5)
-    bufs <- Gen.listOfN(length, genRegularBuf)
-  } yield Buf(bufs)
+  def genCompositeBuf: Gen[Buf] =
+    for {
+      length <- Gen.choose(1, 5)
+      bufs <- Gen.listOfN(length, genRegularBuf)
+    } yield Buf(bufs)
 
   def genBuf: Gen[Buf] = Gen.oneOf(genCompositeBuf, genRegularBuf)
 
-  def genRegularByteBuf: Gen[ByteBuf] = for {
-    (bytes, begin, end) <- genArrayBeginAndEnd
-  } yield Unpooled.wrappedBuffer(bytes, begin, end - begin)
+  def genRegularByteBuf: Gen[ByteBuf] =
+    for {
+      (bytes, begin, end) <- genArrayBeginAndEnd
+    } yield Unpooled.wrappedBuffer(bytes, begin, end - begin)
 
-  def genCompositeByteBuf: Gen[ByteBuf] = for {
-    length <- Gen.choose(1, 5)
-    byteBufs <- Gen.listOfN(length, genRegularByteBuf)
-  } yield Unpooled.wrappedBuffer(byteBufs: _*)
+  def genCompositeByteBuf: Gen[ByteBuf] =
+    for {
+      length <- Gen.choose(1, 5)
+      byteBufs <- Gen.listOfN(length, genRegularByteBuf)
+    } yield Unpooled.wrappedBuffer(byteBufs: _*)
 
   def genByteBuf: Gen[ByteBuf] = Gen.oneOf(genRegularByteBuf, genCompositeByteBuf)
 

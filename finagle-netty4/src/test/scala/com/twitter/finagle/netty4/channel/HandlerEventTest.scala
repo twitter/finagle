@@ -155,17 +155,25 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
     }
 
     var connectFired = false
-    override def connect(ctx: ChannelHandlerContext, remoteAddress: SocketAddress, localAddress: SocketAddress, future: ChannelPromise): Unit = {
+    override def connect(
+      ctx: ChannelHandlerContext,
+      remoteAddress: SocketAddress,
+      localAddress: SocketAddress,
+      future: ChannelPromise
+    ): Unit = {
       connectFired = true
       super.connect(ctx, remoteAddress, localAddress, future)
     }
 
     var bindFired = false
-    override def bind(ctx: ChannelHandlerContext, localAddress: SocketAddress, future: ChannelPromise): Unit = {
+    override def bind(
+      ctx: ChannelHandlerContext,
+      localAddress: SocketAddress,
+      future: ChannelPromise
+    ): Unit = {
       bindFired = true
       super.bind(ctx, localAddress, future)
     }
-
 
     // inbound events
     var exceptionCaughtFired = false

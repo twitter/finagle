@@ -7,8 +7,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class NullToggleMapTest extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+class NullToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   private val IntGen = arbitrary[Int]
 

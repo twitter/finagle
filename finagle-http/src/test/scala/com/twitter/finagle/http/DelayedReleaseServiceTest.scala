@@ -26,7 +26,7 @@ class DelayedReleaseServiceTest extends FunSuite with MockitoSugar {
     val request = Request()
     request.response.setChunked(true)
 
-    val service = mock[Service[Request,Response]]
+    val service = mock[Service[Request, Response]]
     stub(service.close()).toReturn(Future.Done)
     stub(service.apply(any[Request])).toReturn(Future.value(request.response))
 

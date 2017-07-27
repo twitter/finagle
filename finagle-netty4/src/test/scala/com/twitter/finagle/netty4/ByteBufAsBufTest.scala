@@ -10,12 +10,9 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{FunSuite, OneInstancePerTest}
 
 @RunWith(classOf[JUnitRunner])
-class ByteBufAsBufTest
-  extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with OneInstancePerTest {
+class ByteBufAsBufTest extends FunSuite with GeneratorDrivenPropertyChecks with OneInstancePerTest {
 
-  private val bytes = Array[Byte](1,2,3,4)
+  private val bytes = Array[Byte](1, 2, 3, 4)
   private val underlying = Unpooled.buffer(100)
   underlying.writeBytes(bytes)
   private val buf = new ByteBufAsBuf(underlying)
@@ -28,19 +25,19 @@ class ByteBufAsBufTest
 
   test("writes to underlying ByteBuf are reflected in containing ByteBufAsBuf") {
     assert(Buf.ByteArray.Owned(bytes) == buf)
-    val newBytes = Array[Byte](10,20,30,40)
+    val newBytes = Array[Byte](10, 20, 30, 40)
     underlying.writerIndex(0)
     underlying.writeBytes(newBytes)
     assert(Buf.ByteArray.Owned(newBytes) == buf)
   }
 
   test("writes to slices of the underlying ByteBuf are reflected in ByteBufAsBuf") {
-    val bbSlice = underlying.slice(1,2)
+    val bbSlice = underlying.slice(1, 2)
     bbSlice.writerIndex(0)
     bbSlice.writeByte(99)
     bbSlice.writeByte(100)
 
-    Buf.ByteArray.Owned.extract(buf).toSeq == Seq(1,99,100,4)
+    Buf.ByteArray.Owned.extract(buf).toSeq == Seq(1, 99, 100, 4)
   }
 
   test("equality") {
@@ -73,15 +70,16 @@ class ByteBufAsBufTest
       k <- Gen.choose(j, b.length)
     } yield (b, i, j, k)
 
-    forAll(bufSplits) { case (bytes, i, j, k) =>
-      whenever(i <= j && j <= k) {
-        val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-        val b1 = buf.slice(i, k)
-        val b2 = b1.slice(0, j - i)
+    forAll(bufSplits) {
+      case (bytes, i, j, k) =>
+        whenever(i <= j && j <= k) {
+          val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+          val b1 = buf.slice(i, k)
+          val b2 = b1.slice(0, j - i)
 
-        assert(b1.length == k - i)
-        assert(b2.length == j - i)
-      }
+          assert(b1.length == k - i)
+          assert(b2.length == j - i)
+        }
     }
   }
 
@@ -97,7 +95,7 @@ class ByteBufAsBufTest
         buf.slice(0, 1).write(out, 0)
         assert(out(0) == buf.get(0))
 
-        buf.slice(buf.length-1, buf.length).write(out, 0)
+        buf.slice(buf.length - 1, buf.length).write(out, 0)
         assert(out(0) == buf.get(buf.length - 1))
       }
     }
@@ -134,7 +132,7 @@ class ByteBufAsBufTest
 
   test("write(ByteBuffer) validates output ByteBuffer is large enough") {
     forAll { bytes: Array[Byte] =>
-      whenever (bytes.length > 0) {
+      whenever(bytes.length > 0) {
         val buf = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
         val out = java.nio.ByteBuffer.allocate(bytes.length - 1)
         val clonedIndexes = out.duplicate()
@@ -162,19 +160,19 @@ class ByteBufAsBufTest
   }
 }
 
-class ByteBufAsBufProcessTest extends ReadableBufProcessorTest(
-  "ByteBufAsBuf",
-  { bytes: Array[Byte] =>
-    val bb = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
-    new ReadableBufProcessorTest.CanProcess {
-      def process(
-        from: Int,
-        until: Int,
-        processor: Buf.Processor
-      ): Int = bb.process(from, until, processor)
-      def process(processor: Buf.Processor): Int = bb.process(processor)
-      def readBytes(num: Int): Unit = bb.underlying.readBytes(num)
-      def readerIndex(): Int = bb.underlying.readerIndex()
-    }
-  }
-)
+class ByteBufAsBufProcessTest
+    extends ReadableBufProcessorTest(
+      "ByteBufAsBuf", { bytes: Array[Byte] =>
+        val bb = new ByteBufAsBuf(Unpooled.wrappedBuffer(bytes))
+        new ReadableBufProcessorTest.CanProcess {
+          def process(
+            from: Int,
+            until: Int,
+            processor: Buf.Processor
+          ): Int = bb.process(from, until, processor)
+          def process(processor: Buf.Processor): Int = bb.process(processor)
+          def readBytes(num: Int): Unit = bb.underlying.readBytes(num)
+          def readerIndex(): Int = bb.underlying.readerIndex()
+        }
+      }
+    )

@@ -20,11 +20,12 @@ class BadRequestHandlerTest extends FunSuite {
   def genInvalidRequest(maxRequestLineLen: Int, maxHeaderSize: Int)(req: HttpRequest): HttpRequest = {
     val encodeChannel = new EmbeddedChannel(new HttpRequestEncoder())
     val decodeChannel = new EmbeddedChannel(
-      new HttpRequestDecoder(maxRequestLineLen, maxHeaderSize, Int.MaxValue))
+      new HttpRequestDecoder(maxRequestLineLen, maxHeaderSize, Int.MaxValue)
+    )
 
     assert(encodeChannel.writeOutbound(req))
     while (!encodeChannel.outboundMessages().isEmpty &&
-      decodeChannel.writeInbound(encodeChannel.readOutbound[ByteBuf]())) {  }
+      decodeChannel.writeInbound(encodeChannel.readOutbound[ByteBuf]())) {}
 
     val result = decodeChannel.readInbound[HttpRequest]()
     assert(result.decoderResult.isFailure)
@@ -34,7 +35,7 @@ class BadRequestHandlerTest extends FunSuite {
   test("Passes through valid requests") {
     val ch = getChannel
     val content = ch.alloc().directBuffer()
-    content.writeBytes(Array[Byte](1,2,3,4))
+    content.writeBytes(Array[Byte](1, 2, 3, 4))
     val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo", content)
 
     try {
@@ -53,7 +54,7 @@ class BadRequestHandlerTest extends FunSuite {
   test("Invalid messages have any existing buffer released") {
     val ch = getChannel
     val content = ch.alloc().directBuffer()
-    content.writeBytes(Array[Byte](1,2,3,4))
+    content.writeBytes(Array[Byte](1, 2, 3, 4))
     val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo", content)
     req.setDecoderResult(DecoderResult.failure(new Exception("boom")))
 
@@ -74,7 +75,7 @@ class BadRequestHandlerTest extends FunSuite {
     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/wayToLong" * 1024)
   }
 
-  private val tooLargeHeaders = genInvalidRequest(Int.MaxValue, 10){
+  private val tooLargeHeaders = genInvalidRequest(Int.MaxValue, 10) {
     val req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/foo")
     req.headers().add("HeaderName", "Way To Long" * 1024)
     req
@@ -90,14 +91,14 @@ class BadRequestHandlerTest extends FunSuite {
     Status.RequestURITooLong -> tooLongUri,
     Status.RequestHeaderFieldsTooLarge -> tooLargeHeaders,
     Status.BadRequest -> randomError
-
-  ).foreach { case (status, badReq) =>
-    test(s"Too long request line is converted into a $status response") {
-      val ch = getChannel
-      assert(!ch.writeInbound(badReq)) // message should not make it through
-      assert(ch.inboundMessages().isEmpty)
-      val out = ch.readOutbound[HttpResponse]()
-      assert(out.status.code == status.code)
-    }
+  ).foreach {
+    case (status, badReq) =>
+      test(s"Too long request line is converted into a $status response") {
+        val ch = getChannel
+        assert(!ch.writeInbound(badReq)) // message should not make it through
+        assert(ch.inboundMessages().isEmpty)
+        val out = ch.readOutbound[HttpResponse]()
+        assert(out.status.code == status.code)
+      }
   }
 }

@@ -15,17 +15,17 @@ class TimestampValueTest extends FunSuite {
   val timestampValueLocal = new TimestampValue(TimeZone.getDefault, TimeZone.getDefault)
 
   test("encode timestamp") {
-    val RawValue(_, _, true, bytes)
-      = timestampValueLocal(Timestamp.valueOf("2014-10-09 08:27:53.123456789"))
+    val RawValue(_, _, true, bytes) =
+      timestampValueLocal(Timestamp.valueOf("2014-10-09 08:27:53.123456789"))
     val br = MysqlBuf.reader(bytes)
 
     assert(br.readShortLE() == 2014)
-    assert(br.readByte()  == 10)
-    assert(br.readByte()  == 9)
-    assert(br.readByte()  == 8)
-    assert(br.readByte()  == 27)
-    assert(br.readByte()  == 53)
-    assert(br.readIntLE()   == 123456)
+    assert(br.readByte() == 10)
+    assert(br.readByte() == 9)
+    assert(br.readByte() == 8)
+    assert(br.readByte() == 27)
+    assert(br.readByte() == 53)
+    assert(br.readIntLE() == 123456)
   }
 
   private def timestampBinary: Array[Byte] = {
@@ -47,21 +47,24 @@ class TimestampValueTest extends FunSuite {
   }
 
   test("decode binary timestamp with utf8_general_ci character set") {
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, true, timestampBinary)
+    val timestampValueLocal(ts) =
+      RawValue(Type.Timestamp, Charset.Utf8_general_ci, true, timestampBinary)
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.678901"))
   }
 
   test("decode text timestamp with binary character set") {
     val str = "2015-01-02 03:04:05.67890"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(US_ASCII))
+    val timestampValueLocal(ts) =
+      RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(US_ASCII))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 
   test("decode text timestamp with utf8_general_ci character set") {
     val str = "2015-01-02 03:04:05.67890"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(UTF_8))
+    val timestampValueLocal(ts) =
+      RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(UTF_8))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 

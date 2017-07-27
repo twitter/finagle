@@ -22,11 +22,12 @@ import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.language.reflectiveCalls
 
-abstract class AbstractEndToEndTest extends FunSuite
-  with BeforeAndAfter
-  with Eventually
-  with IntegrationPatience
-  with OneInstancePerTest {
+abstract class AbstractEndToEndTest
+    extends FunSuite
+    with BeforeAndAfter
+    with Eventually
+    with IntegrationPatience
+    with OneInstancePerTest {
 
   sealed trait Feature
   object TooLongStream extends Feature
@@ -96,13 +97,13 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
   }
 
-  override def test(testName: String, testTags: Tag*)
-    (testFun: => Any)
-    (implicit pos: Position): Unit = {
+  override def test(testName: String, testTags: Tag*)(
+    testFun: => Any
+  )(implicit pos: Position): Unit = {
     if (skipWholeTest)
       ignore(testName)(testFun)
     else
-      super.test(testName, testTags:_*)(testFun)
+      super.test(testName, testTags: _*)(testFun)
   }
 
   /**
@@ -233,24 +234,26 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     if (!sys.props.contains("SKIP_FLAKY"))
-    testIfImplemented(TooLongStream)(implName +
-      ": return 413s for chunked requests which stream too much data") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
+      testIfImplemented(TooLongStream)(
+        implName +
+          ": return 413s for chunked requests which stream too much data"
+      ) {
+        val service = new HttpService {
+          def apply(request: Request) = Future.value(Response())
+        }
+        val client = connect(service)
+
+        val justRight = Request("/")
+        assert(await(client(justRight)).status == Status.Ok)
+
+        val tooMuch = Request("/")
+        tooMuch.setChunked(true)
+        val w = tooMuch.writer
+        w.write(buf("a" * 1000)).before(w.close)
+        val res = await(client(tooMuch))
+        assert(res.status == Status.RequestEntityTooLarge)
+        await(client.close())
       }
-      val client = connect(service)
-
-      val justRight = Request("/")
-      assert(await(client(justRight)).status == Status.Ok)
-
-      val tooMuch = Request("/")
-      tooMuch.setChunked(true)
-      val w = tooMuch.writer
-      w.write(buf("a"*1000)).before(w.close)
-      val res = await(client(tooMuch))
-      assert(res.status == Status.RequestEntityTooLarge)
-      await(client.close())
-    }
   }
 
   def standardBehaviour(connect: HttpService => HttpService) {
@@ -330,7 +333,6 @@ abstract class AbstractEndToEndTest extends FunSuite
         assert(res.contentString == "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
 
-
       await(client.close())
     }
 
@@ -378,25 +380,25 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     if (!sys.props.contains("SKIP_FLAKY"))
-    testIfImplemented(ClientAbort)(implName + ": client abort") {
-      import com.twitter.conversions.time._
-      val timer = new JavaTimer
-      val promise = new Promise[Response]
-      val service = new HttpService {
-        def apply(request: Request) = promise
-      }
-      val client = connect(service)
-      client(Request())
-      await(timer.doLater(20.milliseconds) {
-        await(client.close(20.milliseconds))
-        intercept[CancelledRequestException] {
-          promise.isInterrupted match {
-            case Some(intr) => throw intr
-            case _ =>
-          }
+      testIfImplemented(ClientAbort)(implName + ": client abort") {
+        import com.twitter.conversions.time._
+        val timer = new JavaTimer
+        val promise = new Promise[Response]
+        val service = new HttpService {
+          def apply(request: Request) = promise
         }
-      })
-    }
+        val client = connect(service)
+        client(Request())
+        await(timer.doLater(20.milliseconds) {
+          await(client.close(20.milliseconds))
+          intercept[CancelledRequestException] {
+            promise.isInterrupted match {
+              case Some(intr) => throw intr
+              case _ =>
+            }
+          }
+        })
+      }
 
     test(implName + ": measure payload size") {
       val service = new HttpService {
@@ -428,8 +430,9 @@ abstract class AbstractEndToEndTest extends FunSuite
         def apply(request: Request) = {
           p.setDone()
           val interruptee = Promise[Response]()
-          interruptee.setInterruptHandler { case exn: Throwable =>
-            interrupted.setDone()
+          interruptee.setInterruptHandler {
+            case exn: Throwable =>
+              interrupted.setDone()
           }
           interruptee
         }
@@ -463,8 +466,9 @@ abstract class AbstractEndToEndTest extends FunSuite
           if (!p.isDefined) {
             p.setDone()
             val interruptee = Promise[Response]()
-            interruptee.setInterruptHandler { case exn: Throwable =>
-              interrupted.setDone()
+            interruptee.setInterruptHandler {
+              case exn: Throwable =>
+                interrupted.setDone()
             }
             interruptee
           } else {
@@ -495,7 +499,6 @@ abstract class AbstractEndToEndTest extends FunSuite
       second.setValue(req.response)
       assert(await(f2).status == Status.Ok)
 
-
       await(client.close())
     }
   }
@@ -524,42 +527,42 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     if (!sys.props.contains("SKIP_FLAKY"))
-    test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
-      class ResponseProxyFilter extends SimpleFilter[Request, Response] {
-        override def apply(
-          request: Request,
-          service: Service[Request, Response]
-        ): Future[Response] = {
-          service(request).map { responseOriginal =>
-            new ResponseProxy {
-              override val response = responseOriginal
-              override def reader = responseOriginal.reader
+      test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
+        class ResponseProxyFilter extends SimpleFilter[Request, Response] {
+          override def apply(
+            request: Request,
+            service: Service[Request, Response]
+          ): Future[Response] = {
+            service(request).map { responseOriginal =>
+              new ResponseProxy {
+                override val response = responseOriginal
+                override def reader = responseOriginal.reader
+              }
             }
           }
         }
-      }
 
-      def service = new HttpService {
-        def apply(request: Request) = {
-          val response = Response()
-          response.setChunked(true)
-          response.writer.write(buf("goodbye")).before {
-            response.writer.write(buf("world")).before {
-              response.close()
+        def service = new HttpService {
+          def apply(request: Request) = {
+            val response = Response()
+            response.setChunked(true)
+            response.writer.write(buf("goodbye")).before {
+              response.writer.write(buf("world")).before {
+                response.close()
+              }
             }
+            Future.value(response)
           }
-          Future.value(response)
         }
+
+        val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
+
+        val client = connect(serviceWithResponseProxy)
+        val response = await(client(Request()))
+        val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
+        assert(actual == "goodbyeworld")
+        await(client.close())
       }
-
-      val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
-
-      val client = connect(serviceWithResponseProxy)
-      val response = await(client(Request()))
-      val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
-      assert(actual == "goodbyeworld")
-      await(client.close())
-    }
 
     test(s"$implName (streaming): aggregates responses that must not have a body") {
       val service = new HttpService {
@@ -618,7 +621,9 @@ abstract class AbstractEndToEndTest extends FunSuite
       val req = Request("/")
       req.headerMap.set("accept-encoding", "gzip")
 
-      val content = await(client(req).flatMap { rep => Reader.readAll(rep.reader) })
+      val content = await(client(req).flatMap { rep =>
+        Reader.readAll(rep.reader)
+      })
       assert(Buf.Utf8.unapply(content).get == "raw content")
       await(client.close())
     }
@@ -643,7 +648,9 @@ abstract class AbstractEndToEndTest extends FunSuite
       assert(res.contentString == "hello")
     }
 
-    testIfImplemented(ReaderClose)(s"$implName (streaming): transport closure propagates to request stream reader") {
+    testIfImplemented(ReaderClose)(
+      s"$implName (streaming): transport closure propagates to request stream reader"
+    ) {
       val p = new Promise[Buf]
       val s = Service.mk[Request, Response] { req =>
         p.become(Reader.readAll(req.reader))
@@ -657,9 +664,13 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[ChannelClosedException] { await(p) }
     }
 
-    test(s"$implName (streaming)" +
-      ": transport closure propagates to request stream producer") {
-      val s = Service.mk[Request, Response] { _ => Future.value(Response()) }
+    test(
+      s"$implName (streaming)" +
+        ": transport closure propagates to request stream producer"
+    ) {
+      val s = Service.mk[Request, Response] { _ =>
+        Future.value(Response())
+      }
       val client = connect(s)
       val req = Request()
       req.setChunked(true)
@@ -668,16 +679,19 @@ abstract class AbstractEndToEndTest extends FunSuite
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    test(s"$implName (streaming): " +
-      "request discard terminates remote stream producer") {
+    test(
+      s"$implName (streaming): " +
+        "request discard terminates remote stream producer"
+    ) {
       val s = Service.mk[Request, Response] { req =>
         val res = Response()
         res.setChunked(true)
-        def go = for {
-          Some(c) <- req.reader.read(Int.MaxValue)
-          _  <- res.writer.write(c)
-          _  <- res.close()
-        } yield ()
+        def go =
+          for {
+            Some(c) <- req.reader.read(Int.MaxValue)
+            _ <- res.writer.write(c)
+            _ <- res.close()
+          } yield ()
         // discard the reader, which should terminate the drip.
         go ensure req.reader.discard()
 
@@ -691,15 +705,19 @@ abstract class AbstractEndToEndTest extends FunSuite
 
       await(req.writer.write(buf("hello")))
 
-      val contentf = resf flatMap { res => Reader.readAll(res.reader) }
+      val contentf = resf flatMap { res =>
+        Reader.readAll(res.reader)
+      }
       assert(await(contentf) == Buf.Utf8("hello"))
 
       // drip should terminate because the request is discarded.
       intercept[Reader.ReaderDiscarded] { await(drip(req.writer)) }
     }
 
-    test(s"$implName (streaming): " +
-      "client discard terminates stream and frees up the connection") {
+    test(
+      s"$implName (streaming): " +
+        "client discard terminates stream and frees up the connection"
+    ) {
       val s = new Service[Request, Response] {
         var rep: Response = null
 
@@ -728,15 +746,19 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     test(s"$implName (streaming)" + ": two fixed-length requests") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val svc = Service.mk[Request, Response] { _ =>
+        Future.value(Response())
+      }
       val client = connect(svc)
       await(client(Request()))
       await(client(Request()))
       await(client.close())
     }
 
-    test(s"$implName (streaming)" +": does not measure payload size") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+    test(s"$implName (streaming)" + ": does not measure payload size") {
+      val svc = Service.mk[Request, Response] { _ =>
+        Future.value(Response())
+      }
       val client = connect(svc)
       await(client(Request()))
 
@@ -757,30 +779,30 @@ abstract class AbstractEndToEndTest extends FunSuite
     }
 
     test("Responses with Content-length header larger than 8 KB are not aggregated") {
-      val svc = makeService(8*1024 + 1)
+      val svc = makeService(8 * 1024 + 1)
       val client = connect(svc)
       val resp = await(client(Request()))
       assert(resp.isChunked)
       assert(resp.content.isEmpty)
-      assert(resp.contentLength == Some(8*1024 + 1))
+      assert(resp.contentLength == Some(8 * 1024 + 1))
     }
 
     test("Responses with Content-length header equal to 8 KB are aggregated") {
-      val svc = makeService(8*1024)
+      val svc = makeService(8 * 1024)
       val client = connect(svc)
       val resp = await(client(Request()))
       assert(!resp.isChunked)
       assert(!resp.content.isEmpty)
-      assert(resp.contentLength == Some(8*1024))
+      assert(resp.contentLength == Some(8 * 1024))
     }
 
     test("Responses with Content-length header smaller than 8 KB are aggregated") {
-      val svc = makeService(8*1024 - 1)
+      val svc = makeService(8 * 1024 - 1)
       val client = connect(svc)
       val resp = await(client(Request()))
       assert(!resp.isChunked)
       assert(!resp.content.isEmpty)
-      assert(resp.contentLength == Some(8*1024 - 1))
+      assert(resp.contentLength == Some(8 * 1024 - 1))
     }
   }
 
@@ -1192,15 +1214,17 @@ abstract class AbstractEndToEndTest extends FunSuite
         val response = Response()
         response.contentString = request.uri
 
-        if (holdResponses) p.map { _ => response }
-        else Future.value(response)
+        if (holdResponses) p.map { _ =>
+          response
+        } else Future.value(response)
       }
     }
 
     val server = serverImpl().serve(new InetSocketAddress(0), service)
     val client = clientImpl().newService(
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
-      "client")
+      "client"
+    )
 
     await(client(Request("/1")))
 
@@ -1378,7 +1402,6 @@ abstract class AbstractEndToEndTest extends FunSuite
       .withStatsReceiver(NullStatsReceiver)
       .serve("localhost:*", svc)
 
-
     val stats = new InMemoryStatsReceiver()
     val client = clientImpl()
     val clientBuilder = ClientBuilder()
@@ -1419,14 +1442,18 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(server.close())
     }
 
-    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
+    List(
+      Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing,
+      Status.NoContent,
+      Status.NotModified
+    ).foreach {
       check(_)
     }
   }
 
   testIfImplemented(NoBodyMessage)(
     "response with status code {1xx, 204 and 304} must not have a message body nor Content-Length header field" +
-    "when non-empty body is returned"
+      "when non-empty body is returned"
   ) {
     def check(resStatus: Status): Unit = {
       val svc = new Service[Request, Response] {
@@ -1454,7 +1481,11 @@ abstract class AbstractEndToEndTest extends FunSuite
       await(server.close())
     }
 
-    List(Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing, Status.NoContent, Status.NotModified).foreach {
+    List(
+      Status.Continue, /*Status.SwitchingProtocols,*/ Status.Processing,
+      Status.NoContent,
+      Status.NotModified
+    ).foreach {
       check(_)
     }
   }

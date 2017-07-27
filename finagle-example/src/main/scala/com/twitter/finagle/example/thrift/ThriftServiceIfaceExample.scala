@@ -31,7 +31,8 @@ object ThriftServiceIfaceExample {
             Future.value(4)
           }
         }
-      })
+      }
+    )
     //#thriftserverapi
 
     import LoggerService._
@@ -49,7 +50,10 @@ object ThriftServiceIfaceExample {
 
     //#thriftclientapi-filters
     val uppercaseFilter = new SimpleFilter[Log.Args, Log.SuccessType] {
-      def apply(req: Log.Args, service: Service[Log.Args, Log.SuccessType]): Future[Log.SuccessType] = {
+      def apply(
+        req: Log.Args,
+        service: Service[Log.Args, Log.SuccessType]
+      ): Future[Log.SuccessType] = {
         val uppercaseRequest = req.copy(message = req.message.toUpperCase)
         service(uppercaseRequest)
       }
@@ -69,8 +73,7 @@ object ThriftServiceIfaceExample {
     //#thriftclientapi-filters
 
     //#thriftclientapi-retries
-    val retryPolicy = RetryPolicy.tries[Try[GetLogSize.Result]](3,
-    {
+    val retryPolicy = RetryPolicy.tries[Try[GetLogSize.Result]](3, {
       case Throw(ex: ReadException) => true
     })
 
@@ -82,7 +85,8 @@ object ThriftServiceIfaceExample {
     //#thriftclientapi-retries
 
     //#thriftclientapi-methodiface
-    val client: LoggerService.FutureIface = Thrift.client.newIface[LoggerService.FutureIface]("localhost:1234")
+    val client: LoggerService.FutureIface =
+      Thrift.client.newIface[LoggerService.FutureIface]("localhost:1234")
     client.log("message", 4) onSuccess { response =>
       println("Client received response: " + response)
     }

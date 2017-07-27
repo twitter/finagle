@@ -11,8 +11,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class TracingTest extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+class TracingTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   import HttpTracing.{Header, stripParameters}
 

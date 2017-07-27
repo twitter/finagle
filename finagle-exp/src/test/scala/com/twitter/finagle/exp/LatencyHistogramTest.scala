@@ -8,14 +8,17 @@ import org.scalatest.junit.JUnitRunner
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class LatencyHistogramTest extends FunSuite
-  with Matchers
-{
+class LatencyHistogramTest extends FunSuite with Matchers {
   val range = 10 * 1000 // 10 seconds
 
   def testRandom(rng: Random, N: Int, err: Double): Unit = {
     val histo = new LatencyHistogram(
-      range, err, Duration.Top.inMilliseconds, LatencyHistogram.DefaultSlices, Stopwatch.timeMillis)
+      range,
+      err,
+      Duration.Top.inMilliseconds,
+      LatencyHistogram.DefaultSlices,
+      Stopwatch.timeMillis
+    )
     val input = Array.fill(N) {
       (rng.nextDouble() * range).toLong
     }
@@ -78,7 +81,8 @@ class LatencyHistogramTest extends FunSuite
         error = 0.0,
         history = 4000,
         slices = LatencyHistogram.DefaultSlices,
-        now = Stopwatch.timeMillis)
+        now = Stopwatch.timeMillis
+      )
       for (_ <- 0 until 100) histo.add(30)
       tc.advance(1.second)
 
@@ -100,7 +104,8 @@ class LatencyHistogramTest extends FunSuite
       error = 0.0,
       history = 4 * 1000,
       slices = LatencyHistogram.DefaultSlices,
-      now = Stopwatch.timeMillis)
+      now = Stopwatch.timeMillis
+    )
     histo.add(40)
   }
 }

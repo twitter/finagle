@@ -37,8 +37,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 1") {
     try {
       buffer.writerIndex(0)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(-1)
@@ -48,8 +49,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 2") {
     try {
       buffer.writerIndex(buffer.capacity())
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(buffer.capacity() + 1)
@@ -59,8 +61,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   test("reader index boundary check 3") {
     try {
       buffer.writerIndex(CAPACITY / 2)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.readerIndex(CAPACITY * 3 / 2)
@@ -84,8 +87,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     try {
       buffer.writerIndex(CAPACITY)
       buffer.readerIndex(CAPACITY)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.writerIndex(buffer.capacity() + 1)
@@ -96,8 +100,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     try {
       buffer.writerIndex(CAPACITY)
       buffer.readerIndex(CAPACITY / 2)
-    } catch { case e: IndexOutOfBoundsException =>
-      fail()
+    } catch {
+      case e: IndexOutOfBoundsException =>
+        fail()
     }
     intercept[IndexOutOfBoundsException] {
       buffer.writerIndex(CAPACITY / 4)
@@ -184,7 +189,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 3") {
     val dst = new Array[Byte](4)
-    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1, 2, 3, 4)))
     intercept[IndexOutOfBoundsException] {
       bcb.getBytes(0, dst, -1, 4)
     }
@@ -198,7 +203,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 4") {
     val dst = new Array[Byte](4)
-    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1, 2, 3, 4)))
     intercept[IndexOutOfBoundsException] {
       bcb.getBytes(0, dst, 1, 4)
     }
@@ -263,7 +268,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1, 2, 3, 4)))
     bcb.getBytes(1, dst)
 
     assert(3 == dst.position())
@@ -287,7 +292,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1, 2, 3, 4)))
     bcb.getBytes(1, dst)
 
     assert(3 == dst.position())
@@ -300,10 +305,9 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     assert(0 == dst.get(3))
   }
 
-
   test("random byte access") {
-    val buf = Buf.ByteArray.Owned(0.until(CAPACITY).map(_ =>
-      random.nextInt().asInstanceOf[Byte]).toArray)
+    val buf =
+      Buf.ByteArray.Owned(0.until(CAPACITY).map(_ => random.nextInt().asInstanceOf[Byte]).toArray)
     val bcb = new BufChannelBuffer(buf)
 
     random.setSeed(seed)
@@ -1375,8 +1379,12 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
 
     assert(bcb.compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, value, 0, 31)) > 0)
     assert(bcb.compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, value, 0, 31)) > 0)
-    assert(bcb.slice(0, 31).compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, value)) < 0)
-    assert(bcb.slice(0, 31).compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, value)) < 0)
+    assert(
+      bcb.slice(0, 31).compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.BIG_ENDIAN, value)) < 0
+    )
+    assert(
+      bcb.slice(0, 31).compareTo(ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, value)) < 0
+    )
   }
 
   test("toString") {
@@ -1386,7 +1394,7 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
   }
 
   test("indexOf") {
-    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1,2,3,2,1)))
+    val bcb = new BufChannelBuffer(Buf.ByteArray.Owned(Array[Byte](1, 2, 3, 2, 1)))
 
     assertEquals(-1, bcb.indexOf(1, 4, 1: Byte))
     assertEquals(-1, bcb.indexOf(4, 1, 1: Byte))

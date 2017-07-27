@@ -20,7 +20,7 @@ class ThriftBufferedTransportDecoderTest extends AbstractBufferedTransportDecode
     val channel = new EmbeddedChannel()
 
     channel.pipeline().addLast(getDecoder)
-    channel.writeInbound(data:_*)
+    channel.writeInbound(data: _*)
 
     var acc = Vector.empty[Array[Byte]]
     while (!channel.inboundMessages().isEmpty) {

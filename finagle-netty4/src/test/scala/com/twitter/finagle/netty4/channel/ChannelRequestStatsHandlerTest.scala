@@ -42,7 +42,6 @@ class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
     when(ctx.channel).thenReturn(chan)
     when(chan.attr(ChannelRequestStatsHandler.ConnectionRequestsKey)).thenReturn(reqAttr)
 
-
     val msg = new Object
 
     // first connection sends two messages

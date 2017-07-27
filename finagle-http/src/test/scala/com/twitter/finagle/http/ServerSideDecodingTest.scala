@@ -25,8 +25,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
  * (see https://github.com/netty/netty/issues/4970).
  */
 @RunWith(classOf[JUnitRunner])
-class ServerSideDecodingTest extends FunSuite
-                                     with GeneratorDrivenPropertyChecks {
+class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks {
   // Helper class - might be overkill to have a sum type for just one test, but
   // it makes it simple to provide an Arbitrary instance for encoders and to
   // make the actual test that much more readable.
@@ -63,13 +62,16 @@ class ServerSideDecodingTest extends FunSuite
     val server = finagle.Http.server
       .withLabel("server")
       .withDecompression(true)
-      .serve("localhost:*", new Service[Request, Response] {
-        def apply(request: Request) = {
-          val response = Response()
-          response.contentString = request.contentString
-          Future.value(response)
+      .serve(
+        "localhost:*",
+        new Service[Request, Response] {
+          def apply(request: Request) = {
+            val response = Response()
+            response.contentString = request.contentString
+            Future.value(response)
+          }
         }
-      })
+      )
 
     // Standard client
     val client = ClientBuilder()

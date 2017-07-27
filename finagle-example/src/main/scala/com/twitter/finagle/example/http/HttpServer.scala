@@ -13,6 +13,7 @@ import java.net.InetSocketAddress
  * the main service (here called "Respond") for better code organization.
  */
 object HttpServer {
+
   /**
    * A simple Filter that catches exceptions and converts them to appropriate
    * HTTP responses.
@@ -21,17 +22,18 @@ object HttpServer {
     def apply(request: Request, service: Service[Request, Response]) = {
 
       // `handle` asynchronously handles exceptions.
-      service(request) handle { case error =>
-        val statusCode = error match {
-          case _: IllegalArgumentException =>
-            Status.Forbidden
-          case _ =>
-            Status.InternalServerError
-        }
-        val errorResponse = Response(Version.Http11, statusCode)
-        errorResponse.contentString = error.getStackTrace.mkString("\n")
+      service(request) handle {
+        case error =>
+          val statusCode = error match {
+            case _: IllegalArgumentException =>
+              Status.Forbidden
+            case _ =>
+              Status.InternalServerError
+          }
+          val errorResponse = Response(Version.Http11, statusCode)
+          errorResponse.contentString = error.getStackTrace.mkString("\n")
 
-        errorResponse
+          errorResponse
       }
     }
   }

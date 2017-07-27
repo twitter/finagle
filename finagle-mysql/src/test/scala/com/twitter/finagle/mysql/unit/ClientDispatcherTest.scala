@@ -12,9 +12,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ClientDispatcherTest extends FunSuite {
   val rawInit = Array[Byte](
-    10,53,46,53,46,50,52,0,31,0,0,0,70,38,43,66,74,
-    48,79,126,0,-1,-9,33,2,0,15,-128,21,0,0,0,0,0,
-    0,0,0,0,0,76,66,70,118,67,40,63,68,120,80,103,54,0
+    10, 53, 46, 53, 46, 50, 52, 0, 31, 0, 0, 0, 70, 38, 43, 66, 74, 48, 79, 126, 0, -1, -9, 33, 2,
+    0, 15, -128, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103,
+    54, 0
   )
   val initPacket = Packet(0, Buf.ByteArray.Owned(rawInit))
   val init = HandshakeInit.decode(initPacket)
@@ -33,8 +33,8 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(okPacket)
   }
 
-  val okPacket = Packet(1, Buf.ByteArray.Owned(Array[Byte](0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00, 0x00)))
+  val okPacket =
+    Packet(1, Buf.ByteArray.Owned(Array[Byte](0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00)))
 
   test("handshaking") {
     val ctx = newCtx
@@ -115,7 +115,7 @@ class ClientDispatcherTest extends FunSuite {
           0,
           0
         )
-        f :: aux(len-1)
+        f :: aux(len - 1)
     }
     aux(numFields)
   }
@@ -149,7 +149,7 @@ class ClientDispatcherTest extends FunSuite {
   val numFields = 5
   val numRows = 3
   val headerPacket = Packet(0, Buf.ByteArray.Owned(Array(numFields.toByte)))
-  val eof = Packet(0,  Buf.ByteArray.Owned(Array[Byte](Packet.EofByte, 0x00, 0x00, 0x00, 0x00)))
+  val eof = Packet(0, Buf.ByteArray.Owned(Array[Byte](Packet.EofByte, 0x00, 0x00, 0x00, 0x00)))
   val fields = createFields(numFields)
   val fieldPackets = fields.map(toPacket)
 
@@ -158,7 +158,7 @@ class ClientDispatcherTest extends FunSuite {
     val bufferSize = numFields * valueSize
     val bw = MysqlBuf.writer(new Array[Byte](bufferSize))
     for (i <- 1 to numFields) {
-      bw.writeLengthCodedString("value"+i, Charset.defaultCharset)
+      bw.writeLengthCodedString("value" + i, Charset.defaultCharset)
     }
 
     Packet(0, bw.owned())
@@ -249,8 +249,7 @@ class ClientDispatcherTest extends FunSuite {
 
   test("Failure to auth closes the service") {
     val clientq = new AsyncQueue[Packet]()
-    val trans = new QueueTransport[Packet, Packet](
-      new AsyncQueue[Packet](), clientq)
+    val trans = new QueueTransport[Packet, Packet](new AsyncQueue[Packet](), clientq)
     val service = new ClientDispatcher(trans, handshake)
     clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
     intercept[LostSyncException] { Await.result(service(PingRequest)) }

@@ -24,10 +24,7 @@ class ZkInstance {
   def start() {
     started = true
 
-    zookeeperServer = new ZooKeeperServer(
-      create(),
-      create(),
-      ZooKeeperServer.DEFAULT_TICK_TIME)
+    zookeeperServer = new ZooKeeperServer(create(), create(), ZooKeeperServer.DEFAULT_TICK_TIME)
     zookeeperServer.setMaxSessionTimeout(100)
     zookeeperServer.setMinSessionTimeout(100)
     connectionFactory = ServerCnxnFactory(InetAddress.getLoopbackAddress)

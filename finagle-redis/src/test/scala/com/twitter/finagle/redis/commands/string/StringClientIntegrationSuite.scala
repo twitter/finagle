@@ -106,8 +106,14 @@ final class StringClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform mGet, mSet, and mSetNx commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.mSet(Map(bufFoo -> bufBar, bufBar -> bufBaz)))
-      assert(Await.result(client.mGet(Seq(bufFoo, bufBar, bufBaz))) == Seq(Some(bufBar), Some(bufBaz), None))
-      assert(Await.result(client.mSetNx(Map(bufFoo -> bufBar, bufBaz -> bufFoo, bufBoo -> bufMoo))) == false)
+      assert(
+        Await
+          .result(client.mGet(Seq(bufFoo, bufBar, bufBaz))) == Seq(Some(bufBar), Some(bufBaz), None)
+      )
+      assert(
+        Await
+          .result(client.mSetNx(Map(bufFoo -> bufBar, bufBaz -> bufFoo, bufBoo -> bufMoo))) == false
+      )
       assert(Await.result(client.mSetNx(Map(bufBaz -> bufFoo, bufBoo -> bufMoo))) == true)
       assert(Await.result(client.mGet(Seq(bufBaz, bufBoo))) == Seq(Some(bufFoo), Some(bufMoo)))
     }

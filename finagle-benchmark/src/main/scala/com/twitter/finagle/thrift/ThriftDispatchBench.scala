@@ -72,7 +72,7 @@ class ThriftDispatchBench extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def scroogeProxy_StdBinaryProt(): String  = {
+  def scroogeProxy_StdBinaryProt(): String = {
     Await.result(scroogeClient0.echo("hello world"))
   }
 
@@ -82,7 +82,7 @@ class ThriftDispatchBench extends StdBenchAnnotations {
   }
 
   @Benchmark
-  def scroogeProxy_CustomTBinaryProt(): String  = {
+  def scroogeProxy_CustomTBinaryProt(): String = {
     Await.result(scroogeClient1.echo("hello world"))
   }
 }

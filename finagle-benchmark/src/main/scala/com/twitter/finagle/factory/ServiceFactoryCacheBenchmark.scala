@@ -22,7 +22,9 @@ class ServiceFactoryCacheBenchmark extends StdBenchAnnotations {
 object ServiceFactoryCacheBenchmark {
 
   private[this] val newFactory: Int => ServiceFactory[Int, Int] = key => {
-    val svc = Service.mk[Int, Int] { in => Future.value(key + in) }
+    val svc = Service.mk[Int, Int] { in =>
+      Future.value(key + in)
+    }
     ServiceFactory.const(svc)
   }
 
@@ -34,11 +36,8 @@ object ServiceFactoryCacheBenchmark {
   class CacheState {
     val conn: ClientConnection = ClientConnection.nil
 
-    val cache = new ServiceFactoryCache[Int, Int, Int](
-      newFactory,
-      Timer.Nil,
-      NullStatsReceiver,
-      MaxCacheSize)
+    val cache =
+      new ServiceFactoryCache[Int, Int, Int](newFactory, Timer.Nil, NullStatsReceiver, MaxCacheSize)
 
     def nextKey(): Int = {
       val offset = pos.incrementAndGet()

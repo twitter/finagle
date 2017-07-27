@@ -12,9 +12,7 @@ import scala.collection.immutable
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class ToggleMapTest extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with Matchers {
+class ToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks with Matchers {
 
   private val IntGen = arbitrary[Int]
 
@@ -344,14 +342,24 @@ class ToggleMapTest extends FunSuite
 
     val mds01 = tm01.iterator.toSeq
     assert(mds01.size == 2)
-    assert(mds01.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 })
-    assert(mds01.exists { md => md.id == "com.toggle.t1" && md.fraction == 1.0 })
+    assert(mds01.exists { md =>
+      md.id == "com.toggle.t0" && md.fraction == 0.0
+    })
+    assert(mds01.exists { md =>
+      md.id == "com.toggle.t1" && md.fraction == 1.0
+    })
 
     val mds012 = tm012.iterator.toSeq
     assert(mds012.size == 3)
-    assert(mds012.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 })
-    assert(mds012.exists { md => md.id == "com.toggle.t1" && md.fraction == 1.0 })
-    assert(mds012.exists { md => md.id == "com.toggle.t2" && md.fraction == 0.3 })
+    assert(mds012.exists { md =>
+      md.id == "com.toggle.t0" && md.fraction == 0.0
+    })
+    assert(mds012.exists { md =>
+      md.id == "com.toggle.t1" && md.fraction == 1.0
+    })
+    assert(mds012.exists { md =>
+      md.id == "com.toggle.t2" && md.fraction == 0.3
+    })
   }
 
   test("ToggleMap.orElse.iterator uses Toggles from earlier ToggleMaps") {
@@ -364,7 +372,9 @@ class ToggleMapTest extends FunSuite
     val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val mds = tm01.iterator.toSeq
     assert(mds.size == 1)
-    assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
+    assert(mds.exists { md =>
+      md.id == "com.toggle.t0" && md.fraction == 0.0
+    }, mds)
   }
 
   test("ToggleMap.orElse.apply") {
@@ -404,8 +414,10 @@ class ToggleMapTest extends FunSuite
     assert(Seq(tm0, tm1) == ToggleMap.components(tm0.orElse(tm1)))
     assert(Seq(tm1, tm0) == ToggleMap.components(tm1.orElse(tm0)))
     assert(Seq(tm0, tm1, tm2) == ToggleMap.components(tm0.orElse(tm1).orElse(tm2)))
-    assert(Seq(tm0, tm1, tm2) == ToggleMap.components(
-      ToggleMap.observed(tm0.orElse(tm1).orElse(tm2), NullStatsReceiver)))
+    assert(
+      Seq(tm0, tm1, tm2) == ToggleMap
+        .components(ToggleMap.observed(tm0.orElse(tm1).orElse(tm2), NullStatsReceiver))
+    )
   }
 
   test("ToggleMap.On") {

@@ -8,9 +8,10 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class BufferingChannelOutboundHandlerTest extends FunSuite
-  with GeneratorDrivenPropertyChecks
-  with OneInstancePerTest {
+class BufferingChannelOutboundHandlerTest
+    extends FunSuite
+    with GeneratorDrivenPropertyChecks
+    with OneInstancePerTest {
 
   class Buffering extends ChannelOutboundHandlerAdapter with BufferingChannelOutboundHandler {
     private[this] var ctx: ChannelHandlerContext = _

@@ -35,20 +35,22 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
 
   test("raw channel initializer exposes netty pipeline") {
     val reverser = new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = msg match {
-        case b: ByteBuf =>
-          val bytes = new Array[Byte](b.readableBytes)
-          b.readBytes(bytes)
-          val reversed = Unpooled.wrappedBuffer(bytes.reverse)
-          super.write(ctx, reversed, promise)
-        case _ => fail("expected ByteBuf message")
-      }
+      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit =
+        msg match {
+          case b: ByteBuf =>
+            val bytes = new Array[Byte](b.readableBytes)
+            b.readBytes(bytes)
+            val reversed = Unpooled.wrappedBuffer(bytes.reverse)
+            super.write(ctx, reversed, promise)
+          case _ => fail("expected ByteBuf message")
+        }
     }
 
     val init =
       new RawNetty4ClientChannelInitializer(
         pipelineInit = _.addLast(reverser),
-        params = Params.empty)
+        params = Params.empty
+      )
 
     val channel: SocketChannel = new NioSocketChannel()
     val loop = new NioEventLoopGroup()
@@ -57,7 +59,11 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
 
     val msgSeen = new Promise[ByteBuf]
     channel.pipeline.addFirst(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = msg match {
+      override def write(
+        ctx: ChannelHandlerContext,
+        msg: scala.Any,
+        promise: ChannelPromise
+      ): Unit = msg match {
         case b: ByteBuf => msgSeen.setValue(b)
         case _ => fail("expected ByteBuf message")
       }

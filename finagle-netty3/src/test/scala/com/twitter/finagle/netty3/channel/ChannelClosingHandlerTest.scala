@@ -7,8 +7,12 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 import org.jboss.netty.channel.{
-Channels, Channel, ChannelHandlerContext,
-ChannelStateEvent, ChannelPipeline}
+  Channels,
+  Channel,
+  ChannelHandlerContext,
+  ChannelStateEvent,
+  ChannelPipeline
+}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelClosingHandlerTest extends FunSuite with MockitoSugar {
@@ -48,7 +52,9 @@ class ChannelClosingHandlerTest extends FunSuite with MockitoSugar {
     verify(channel, times(1)).close()
   }
 
-  test("ChannelClosingHandler should delay closing until it has been opened before channel has been opened") {
+  test(
+    "ChannelClosingHandler should delay closing until it has been opened before channel has been opened"
+  ) {
     val h = new ChannelHelper
     import h._
 
@@ -59,7 +65,9 @@ class ChannelClosingHandlerTest extends FunSuite with MockitoSugar {
     verify(channel, times(1)).close()
   }
 
-  test("ChannelClosingHandler should delay closing until it has been opened before channel has been attached") {
+  test(
+    "ChannelClosingHandler should delay closing until it has been opened before channel has been attached"
+  ) {
     val h = new ChannelHelper
     import h._
 

@@ -16,22 +16,16 @@ import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.collection.immutable.Queue
 
 @RunWith(classOf[JUnitRunner])
-class HandshakeTest extends FunSuite
-  with OneInstancePerTest
-  with MockitoSugar {
+class HandshakeTest extends FunSuite with OneInstancePerTest with MockitoSugar {
 
   import Message.{encode => enc, decode => dec}
 
   val clientToServer = new AsyncQueue[Buf]
   val serverToClient = new AsyncQueue[Buf]
 
-  val clientTransport = new QueueTransport(
-    writeq = clientToServer,
-    readq = serverToClient)
+  val clientTransport = new QueueTransport(writeq = clientToServer, readq = serverToClient)
 
-  val serverTransport = new QueueTransport(
-    writeq = serverToClient,
-    readq = clientToServer)
+  val serverTransport = new QueueTransport(writeq = serverToClient, readq = clientToServer)
 
   test("handshake") {
     var clientNegotiated = false
@@ -66,8 +60,8 @@ class HandshakeTest extends FunSuite
   }
 
   test("sync operations are proxied") {
-    val remote = new java.net.SocketAddress { }
-    val local = new java.net.SocketAddress { }
+    val remote = new java.net.SocketAddress {}
+    val local = new java.net.SocketAddress {}
     val peerCert = Some(mock[X509Certificate])
 
     val q = new AsyncQueue[Buf]
@@ -158,8 +152,10 @@ class HandshakeTest extends FunSuite
 
     val f = client.write(Message.Tping(2))
 
-    assert(dec(Await.result(clientToServer.poll(), 5.seconds)) ==
-      Message.Rerr(1, "tinit check"))
+    assert(
+      dec(Await.result(clientToServer.poll(), 5.seconds)) ==
+        Message.Rerr(1, "tinit check")
+    )
     assert(!negotiated)
     assert(!f.isDefined)
   }
@@ -181,15 +177,19 @@ class HandshakeTest extends FunSuite
 
     val f = client.write(Message.Tping(2))
 
-    assert(dec(Await.result(clientToServer.poll(), 5.seconds)) ==
-      Message.Rerr(1, "tinit check"))
+    assert(
+      dec(Await.result(clientToServer.poll(), 5.seconds)) ==
+        Message.Rerr(1, "tinit check")
+    )
     assert(!negotiated)
     assert(!f.isDefined)
 
     serverToClient.offer(enc(Message.Rerr(1, "tinit check")))
 
-    assert(dec(Await.result(clientToServer.poll(), 5.seconds)) ==
-      Message.Tinit(1, version, headers))
+    assert(
+      dec(Await.result(clientToServer.poll(), 5.seconds)) ==
+        Message.Tinit(1, version, headers)
+    )
     assert(!negotiated)
     assert(!f.isDefined)
 
@@ -213,8 +213,10 @@ class HandshakeTest extends FunSuite
 
     val f = client.write(Message.Tping(2))
 
-    assert(dec(Await.result(clientToServer.poll(), 5.seconds)) ==
-      Message.Rerr(1, "tinit check"))
+    assert(
+      dec(Await.result(clientToServer.poll(), 5.seconds)) ==
+        Message.Rerr(1, "tinit check")
+    )
     assert(!negotiated)
     assert(!f.isDefined)
 
@@ -241,8 +243,10 @@ class HandshakeTest extends FunSuite
 
     clientToServer.offer(enc(Message.Tinit(1, version, Seq.empty)))
 
-    assert(dec(Await.result(serverToClient.poll(), 5.seconds)) ==
-      Message.Rinit(1, version, hdrs))
+    assert(
+      dec(Await.result(serverToClient.poll(), 5.seconds)) ==
+        Message.Rinit(1, version, hdrs)
+    )
     assert(negotiated)
   }
 

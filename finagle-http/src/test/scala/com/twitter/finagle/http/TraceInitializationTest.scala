@@ -29,21 +29,26 @@ class TraceInitializationTest extends FunSuite {
     val tracer = new BufferingTracer
 
     val (svc, closable) = f(tracer, tracer)
-    try Await.result(svc(req)) finally {
+    try Await.result(svc(req))
+    finally {
       Closable.all(svc, closable).close()
     }
 
-    assertAnnotationsInOrder(tracer.toSeq, Seq(
-      Annotation.Rpc("GET"),
-      Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
-      Annotation.ServiceName("theClient"),
-      Annotation.ClientSend(),
-      Annotation.Rpc("GET"),
-      Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
-      Annotation.ServiceName("theServer"),
-      Annotation.ServerRecv(),
-      Annotation.ServerSend(),
-      Annotation.ClientRecv()))
+    assertAnnotationsInOrder(
+      tracer.toSeq,
+      Seq(
+        Annotation.Rpc("GET"),
+        Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
+        Annotation.ServiceName("theClient"),
+        Annotation.ClientSend(),
+        Annotation.Rpc("GET"),
+        Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
+        Annotation.ServiceName("theServer"),
+        Annotation.ServerRecv(),
+        Annotation.ServerSend(),
+        Annotation.ClientRecv()
+      )
+    )
 
     assert(tracer.map(_.traceId).toSet.size == 1)
   }
@@ -53,10 +58,12 @@ class TraceInitializationTest extends FunSuite {
       import com.twitter.finagle
       val server = finagle.Http.server
         .withTracer(serverTracer)
-        .withLabel("theServer").serve(":*", Svc)
+        .withLabel("theServer")
+        .serve(":*", Svc)
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
       val client = finagle.Http.client
-        .withTracer(clientTracer).newService(":" + port, "theClient")
+        .withTracer(clientTracer)
+        .newService(":" + port, "theClient")
       (client, server)
     }
   }

@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
 final class ListClientIntegrationSuite extends RedisClientTest {
 
   val IndexFailureMessage = "Unknown failure calling Index"
-  val PopFailureMessage   = "Failure popping element from list"
+  val PopFailureMessage = "Failure popping element from list"
 
   test("Correctly push elements onto a list", RedisTest, ClientTest) {
     withRedisClient { client =>
@@ -65,10 +65,15 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
       assert(Await.result(client.lPush(key, List(bufMoo))) == 1)
       assert(
-        Await.result(client.lInsertAfter(key, bufMoo, bufBar)).getOrElse(fail(PivotFailureMessage)) == 2)
+        Await
+          .result(client.lInsertAfter(key, bufMoo, bufBar))
+          .getOrElse(fail(PivotFailureMessage)) == 2
+      )
       assert(
-        Await.result(
-          client.lInsertBefore(key, bufMoo, bufFoo)).getOrElse(fail(PivotFailureMessage)) == 3)
+        Await
+          .result(client.lInsertBefore(key, bufMoo, bufFoo))
+          .getOrElse(fail(PivotFailureMessage)) == 3
+      )
       assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufFoo)
       assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
       assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
@@ -96,7 +101,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
-      */
+       */
       Await.result(client.lSet(key, 0L, bufMoo))
 
       assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
@@ -149,7 +154,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
-      */
+       */
       Await.result(client.lTrim(key, 0L, 1L))
 
       assert(Await.result(client.lPush(key, List(bufMoo))) == 3)
@@ -157,7 +162,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
-      */
+       */
       Await.result(client.lTrim(key, 0L, 1L))
 
       assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBoo)

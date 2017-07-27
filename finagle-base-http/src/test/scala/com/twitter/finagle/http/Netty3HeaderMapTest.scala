@@ -32,7 +32,9 @@ class Netty3HeaderMapTest extends AbstractHeaderMapTest {
     assert(wrapper.remove("foo") == Some("bar"))
 
     val all =
-      netty.entries.asScala.map { e => e.getKey -> e.getValue }.toSet
+      netty.entries.asScala.map { e =>
+        e.getKey -> e.getValue
+      }.toSet
 
     assert(all == Set("key" -> "val", "qux" -> "something"))
 

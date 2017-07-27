@@ -53,10 +53,13 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     pipeline.addLast("upgradeHandler", dummyUpgradeHandler)
   }
 
-
   test("removes self and re-emits consumed bytes when not matching") {
-    val nonPrefaceBytes = directBuffer(24).writeBytes("PRI * HTTP/18 Foo\nBAR AB"
-      .getBytes(UTF_8)).asReadOnly()
+    val nonPrefaceBytes = directBuffer(24)
+      .writeBytes(
+        "PRI * HTTP/18 Foo\nBAR AB"
+          .getBytes(UTF_8)
+      )
+      .asReadOnly()
 
     channel.writeInbound(nonPrefaceBytes)
 
@@ -66,11 +69,14 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
 
-
   test("partial matching buffers are sent down pipeline on no match") {
     val partialPreface = connectionPrefaceBuf.slice(0, 10)
-    val nonMatching = directBuffer(16).writeBytes("MORE BYTES\n\nHERE"
-      .getBytes(UTF_8)).asReadOnly()
+    val nonMatching = directBuffer(16)
+      .writeBytes(
+        "MORE BYTES\n\nHERE"
+          .getBytes(UTF_8)
+      )
+      .asReadOnly()
 
     channel.writeInbound(partialPreface.duplicate())
 
@@ -95,13 +101,17 @@ class PriorKnowledgeHandlerTest extends FunSuite with BeforeAndAfter with Mockit
     assert(!stats.counters.contains(Seq("upgrade", "success")))
   }
 
-
   test("removes self replaces http with http/2 and re-emits bytes when matching") {
     // append extra bytes after preface to ensure that everything is correctly passed along
-    val extraBytes = directBuffer(16).writeBytes("MORE BYTES\n\nHERE"
-      .getBytes(UTF_8)).asReadOnly()
+    val extraBytes = directBuffer(16)
+      .writeBytes(
+        "MORE BYTES\n\nHERE"
+          .getBytes(UTF_8)
+      )
+      .asReadOnly()
 
-    val prefacePlusExtra = directBuffer(40).writeBytes(connectionPrefaceBuf).writeBytes(extraBytes.duplicate())
+    val prefacePlusExtra =
+      directBuffer(40).writeBytes(connectionPrefaceBuf).writeBytes(extraBytes.duplicate())
 
     channel.writeInbound(prefacePlusExtra)
 

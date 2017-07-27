@@ -9,10 +9,9 @@ class ResourceAwareQueueTest extends FunSuite {
   test("releaseFn sees and transforms pending messages on session close") {
     val seen = collection.mutable.ListBuffer.empty[String]
     val q = new ResourceAwareQueue[String](Int.MaxValue, {
-        case m: String => seen.append(m); m.reverse
-        case other => fail(s"Unexpected message: $other")
-      }
-    )
+      case m: String => seen.append(m); m.reverse
+      case other => fail(s"Unexpected message: $other")
+    })
     q.offer("one")
     q.offer("two")
     q.offer("three")
@@ -51,7 +50,7 @@ class ResourceAwareQueueTest extends FunSuite {
         msgsSeen += 1
         i * 10
     })
-    (1 to 4).foreach { q.offer(_)}
+    (1 to 4).foreach { q.offer(_) }
     q.fail(new Exception, discard = false)
 
     // because of the release exception we flushed

@@ -9,7 +9,8 @@ import org.scalatest.FunSuite
 @RunWith(classOf[JUnitRunner])
 class ConnectPromiseDelayListenersTest extends FunSuite {
 
-  class Ctx extends ChannelOutboundHandlerAdapter
+  class Ctx
+      extends ChannelOutboundHandlerAdapter
       with BufferingChannelOutboundHandler
       with ConnectPromiseDelayListeners {
 

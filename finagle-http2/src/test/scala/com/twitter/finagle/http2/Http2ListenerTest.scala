@@ -42,8 +42,9 @@ class Http2ListenerTest extends FunSuite {
 
   // this test fails on travisci, so let's disable it until we understand why
   ignore("Http2Listener should upgrade neatly") {
-    val result = evaluate { case (writer, reader) =>
-      val msg = s"""GET http:/// HTTP/1.1
+    val result = evaluate {
+      case (writer, reader) =>
+        val msg = s"""GET http:/// HTTP/1.1
        |x-http2-stream-id: 1
        |upgrade: h2c
        |HTTP2-Settings: AAEAABAAAAIAAAABAAN_____AAQAAP__AAUAAEAAAAZ_____
@@ -52,17 +53,17 @@ class Http2ListenerTest extends FunSuite {
        |
        |""".stripMargin.replaceAll("\n", "\r\n")
 
-      val response = """HTTP/1.1 101 Switching Protocols
+        val response = """HTTP/1.1 101 Switching Protocols
        |connection: upgrade
        |upgrade: h2c
        |content-length: 0
        |
        |""".stripMargin.replaceAll("\n", "\r\n")
 
-      Await.result(writer.write(Buf.Utf8(msg)), 5.seconds)
+        Await.result(writer.write(Buf.Utf8(msg)), 5.seconds)
 
-      val Buf.Utf8(rep1) = Await.result(reader.read(Int.MaxValue), 5.seconds).get
-      assert(rep1 == response)
+        val Buf.Utf8(rep1) = Await.result(reader.read(Int.MaxValue), 5.seconds).get
+        assert(rep1 == response)
     }
 
     assert(result.isInstanceOf[HttpMessage])

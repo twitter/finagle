@@ -22,54 +22,54 @@ class ParamMapTest extends FunSuite {
   }
 
   test("getShort") {
-    assert(Request("?x=1").params.getShort("x")       == Some(1.toShort))
-    assert(Request("?x=0").params.getShort("x")       == Some(0.toShort))
-    assert(Request("?x=-1").params.getShort("x")      == Some((-1).toShort))
-    assert(Request("?x=32767").params.getShort("x")   == Some(32767.toShort))
-    assert(Request("?x=-32768").params.getShort("x")  == Some((-32768).toShort))
-    assert(Request("?x=32768").params.getShort("x")   == Some(0.toShort))
-    assert(Request("?x=-32769").params.getShort("x")  == Some(0.toShort))
+    assert(Request("?x=1").params.getShort("x") == Some(1.toShort))
+    assert(Request("?x=0").params.getShort("x") == Some(0.toShort))
+    assert(Request("?x=-1").params.getShort("x") == Some((-1).toShort))
+    assert(Request("?x=32767").params.getShort("x") == Some(32767.toShort))
+    assert(Request("?x=-32768").params.getShort("x") == Some((-32768).toShort))
+    assert(Request("?x=32768").params.getShort("x") == Some(0.toShort))
+    assert(Request("?x=-32769").params.getShort("x") == Some(0.toShort))
     assert(Request("?x=garbage").params.getShort("x") == Some(0.toShort))
-    assert(Request("?x=").params.getShort("x")        == Some(0.toShort))
-    assert(Request("?y=2").params.getShort("x")       == None)
+    assert(Request("?x=").params.getShort("x") == Some(0.toShort))
+    assert(Request("?y=2").params.getShort("x") == None)
   }
 
   test("getInt") {
-    assert(Request("?x=1").params.getInt("x")           == Some(1))
-    assert(Request("?x=0").params.getInt("x")           == Some(0))
-    assert(Request("?x=-1").params.getInt("x")          == Some(-1))
-    assert(Request("?x=2147483647").params.getInt("x")  == Some(2147483647))
+    assert(Request("?x=1").params.getInt("x") == Some(1))
+    assert(Request("?x=0").params.getInt("x") == Some(0))
+    assert(Request("?x=-1").params.getInt("x") == Some(-1))
+    assert(Request("?x=2147483647").params.getInt("x") == Some(2147483647))
     assert(Request("?x=-2147483648").params.getInt("x") == Some(-2147483648))
-    assert(Request("?x=2147483648").params.getInt("x")  == Some(0))
+    assert(Request("?x=2147483648").params.getInt("x") == Some(0))
     assert(Request("?x=-2147483649").params.getInt("x") == Some(0))
-    assert(Request("?x=garbage").params.getInt("x")     == Some(0))
-    assert(Request("?x=").params.getInt("x")            == Some(0))
-    assert(Request("?y=2").params.getInt("x")           == None)
+    assert(Request("?x=garbage").params.getInt("x") == Some(0))
+    assert(Request("?x=").params.getInt("x") == Some(0))
+    assert(Request("?y=2").params.getInt("x") == None)
   }
 
   test("getLong") {
-    assert(Request("?x=1").params.getLong("x")                    == Some(1L))
-    assert(Request("?x=0").params.getLong("x")                    == Some(0L))
-    assert(Request("?x=-1").params.getLong("x")                   == Some(-1L))
-    assert(Request("?x=9223372036854775807").params.getLong("x")  == Some(9223372036854775807L))
+    assert(Request("?x=1").params.getLong("x") == Some(1L))
+    assert(Request("?x=0").params.getLong("x") == Some(0L))
+    assert(Request("?x=-1").params.getLong("x") == Some(-1L))
+    assert(Request("?x=9223372036854775807").params.getLong("x") == Some(9223372036854775807L))
     assert(Request("?x=-9223372036854775808").params.getLong("x") == Some(-9223372036854775808L))
-    assert(Request("?x=9223372036854775808").params.getLong("x")  == Some(0L))
+    assert(Request("?x=9223372036854775808").params.getLong("x") == Some(0L))
     assert(Request("?x=-9223372036854775809").params.getLong("x") == Some(0L))
-    assert(Request("?x=garbage").params.getLong("x")              == Some(0L))
-    assert(Request("?x=").params.getLong("x")                     == Some(0L))
-    assert(Request("?y=2").params.getLong("x")                    == None)
+    assert(Request("?x=garbage").params.getLong("x") == Some(0L))
+    assert(Request("?x=").params.getLong("x") == Some(0L))
+    assert(Request("?y=2").params.getLong("x") == None)
   }
 
   test("getBoolean") {
-    assert(Request("?x=true").params.getBoolean("x")    == Some(true))
-    assert(Request("?x=TRUE").params.getBoolean("x")    == Some(true))
-    assert(Request("?x=True").params.getBoolean("x")    == Some(true))
-    assert(Request("?x=t").params.getBoolean("x")       == Some(true))
-    assert(Request("?x=1").params.getBoolean("x")       == Some(true))
-    assert(Request("?x=false").params.getBoolean("x")   == Some(false))
-    assert(Request("?x=").params.getBoolean("x")        == Some(false))
+    assert(Request("?x=true").params.getBoolean("x") == Some(true))
+    assert(Request("?x=TRUE").params.getBoolean("x") == Some(true))
+    assert(Request("?x=True").params.getBoolean("x") == Some(true))
+    assert(Request("?x=t").params.getBoolean("x") == Some(true))
+    assert(Request("?x=1").params.getBoolean("x") == Some(true))
+    assert(Request("?x=false").params.getBoolean("x") == Some(false))
+    assert(Request("?x=").params.getBoolean("x") == Some(false))
     assert(Request("?x=garbage").params.getBoolean("x") == Some(false))
-    assert(Request("?y=2").params.getBoolean("x")       == None)
+    assert(Request("?y=2").params.getBoolean("x") == None)
   }
 
   test("params encoded") {
@@ -84,7 +84,7 @@ class ParamMapTest extends FunSuite {
 
   test("multiple params") {
     val request = Request("/search.json?q=twitter&lang=en")
-    assert(request.params.get("q")    == Some("twitter"))
+    assert(request.params.get("q") == Some("twitter"))
     assert(request.params.get("lang") == Some("en"))
   }
 
@@ -113,13 +113,19 @@ class ParamMapTest extends FunSuite {
 
   test("iterator") {
     val request = Request("/search.json?q=twitter&q=twitter2&lang=en")
-    assert(request.params.iterator.toList.sorted == List(("lang", "en"), ("q", "twitter"), ("q", "twitter2")))
+    assert(
+      request.params.iterator.toList.sorted == List(
+        ("lang", "en"),
+        ("q", "twitter"),
+        ("q", "twitter2")
+      )
+    )
   }
 
   test("plus") {
     val request = Request("/search.json?q=twitter")
     val params = request.params + ("lang" -> "en")
-    assert(params.get("q")    == Some("twitter"))
+    assert(params.get("q") == Some("twitter"))
     assert(params.get("lang") == Some("en"))
   }
 
@@ -137,7 +143,7 @@ class ParamMapTest extends FunSuite {
 
   test("toString") {
     assert(Request("/search.json?q=twitter").params.toString == "?q=twitter")
-    assert(Request("/search.json").params.toString           == "")
+    assert(Request("/search.json").params.toString == "")
   }
 
   test("get, POST params") {

@@ -14,8 +14,8 @@ class StringUtilTest extends FunSuite {
   }
 
   test("toSomeInt") {
-    assert(StringUtil.toSomeInt("0")             == 0)
-    assert(StringUtil.toSomeInt("blarg")         == 0)
+    assert(StringUtil.toSomeInt("0") == 0)
+    assert(StringUtil.toSomeInt("blarg") == 0)
     assert(StringUtil.toSomeInt("1000000000000") == 0)
   }
 

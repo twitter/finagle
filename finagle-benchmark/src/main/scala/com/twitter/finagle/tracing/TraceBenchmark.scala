@@ -61,7 +61,6 @@ class TraceBenchmark extends StdBenchAnnotations {
   def contexts5(hole: Blackhole): Unit =
     Trace.letTracer(NullTracer) { contexts4(hole) }
 
-
   private[this] def traced(n: Int): Boolean =
     if (n == 0) {
       Trace.letId(traceId) {

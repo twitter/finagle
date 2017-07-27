@@ -7,21 +7,21 @@ import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Future}
 
 /**
-  * This demo shows how to register your service in zookeeper.
-  * It assumes your zookeeper runs on your local machine with port 2181, 2182 and 2183.
-  * You can change zookeeperDest to your zookeeper ip and port.
-  *
-  * Run ServiceProvider before ServiceConsumer
-  *
-  */
+ * This demo shows how to register your service in zookeeper.
+ * It assumes your zookeeper runs on your local machine with port 2181, 2182 and 2183.
+ * You can change zookeeperDest to your zookeeper ip and port.
+ *
+ * Run ServiceProvider before ServiceConsumer
+ *
+ */
 object ServiceProvider {
 
   //change it to your zookeeper ip and port
   val zookeeperDest = "127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183"
 
   /**
-    * The echo server simply return the request content.
-    */
+   * The echo server simply return the request content.
+   */
   class EchoServer extends Service[Request, Response] {
     def apply(request: Request) = {
       val response = Response(Version.Http11, Status.Ok)
@@ -48,10 +48,8 @@ object ServiceProvider {
     Await.ready(
       Http.server
         .withLabel("echo-server")
-        .serveAndAnnounce(
-          echoServicePath,
-          new InetSocketAddress(8080),
-          new EchoServer))
+        .serveAndAnnounce(echoServicePath, new InetSocketAddress(8080), new EchoServer)
+    )
   }
 
   def buildProviderPath(servicePath: String, zookeeperDest: String = zookeeperDest): String = {

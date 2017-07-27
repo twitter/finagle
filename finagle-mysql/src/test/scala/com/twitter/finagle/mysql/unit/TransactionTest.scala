@@ -27,10 +27,16 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
       } yield "success"
     }
 
-    Await.result(result) must equal ("success")
-    service.requests must equal (List(
-      "SET TRANSACTION ISOLATION LEVEL READ COMMITTED", "START TRANSACTION", sqlQuery, sqlQuery, "COMMIT"
-    ).map(QueryRequest(_)))
+    Await.result(result) must equal("success")
+    service.requests must equal(
+      List(
+        "SET TRANSACTION ISOLATION LEVEL READ COMMITTED",
+        "START TRANSACTION",
+        sqlQuery,
+        sqlQuery,
+        "COMMIT"
+      ).map(QueryRequest(_))
+    )
 
     verify(factory, times(1)).apply()
     verify(factory, times(0)).close(any[Time])
@@ -43,22 +49,28 @@ class TransactionTest extends FunSuite with MockitoSugar with MustMatchers {
 
     try {
       client.transaction[String] { c =>
-        c.query(sqlQuery).map { r1 =>
-          throw new RuntimeException("Fake exception to trigger ROLLBACK")
-          "first response object"
-        }.flatMap { r2 =>
-          c.query(sqlQuery).map { r3 =>
-            "final response object"
+        c.query(sqlQuery)
+          .map { r1 =>
+            throw new RuntimeException("Fake exception to trigger ROLLBACK")
+            "first response object"
           }
-        }
+          .flatMap { r2 =>
+            c.query(sqlQuery).map { r3 =>
+              "final response object"
+            }
+          }
       }
     } catch {
       case e: Exception =>
     }
 
-    service.requests must equal (List(
-      "START TRANSACTION", sqlQuery, "ROLLBACK"
-    ).map(QueryRequest(_)))
+    service.requests must equal(
+      List(
+        "START TRANSACTION",
+        sqlQuery,
+        "ROLLBACK"
+      ).map(QueryRequest(_))
+    )
 
     verify(factory, times(1)).apply()
     verify(factory, times(0)).close(any[Time])

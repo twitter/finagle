@@ -17,10 +17,8 @@ import org.scalatest.FunSuite
 
 class MultiplexedTransporterTest extends FunSuite {
 
-  class SlowClosingQueue(
-      left: AsyncQueue[StreamMessage],
-      right: AsyncQueue[StreamMessage])
-    extends QueueTransport[StreamMessage, StreamMessage](left, right) {
+  class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
+      extends QueueTransport[StreamMessage, StreamMessage](left, right) {
     override val onClose: Future[Throwable] = Future.never
   }
 
@@ -131,7 +129,11 @@ class MultiplexedTransporterTest extends FunSuite {
 
     val c1, c3 = multi().get
 
-    val res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer("whatever", StandardCharsets.UTF_8))
+    val res = new DefaultFullHttpResponse(
+      HttpVersion.HTTP_1_1,
+      HttpResponseStatus.OK,
+      Unpooled.copiedBuffer("whatever", StandardCharsets.UTF_8)
+    )
 
     // Both streams make a request
     c1.write(H1Req)
@@ -162,7 +164,9 @@ class MultiplexedTransporterTest extends FunSuite {
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
     val multi = new MultiplexedTransporter(transport, addr, params)
 
     assert(multi.status == Status.Open)
@@ -239,7 +243,9 @@ class MultiplexedTransporterTest extends FunSuite {
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
     val multi = new MultiplexedTransporter(transport, addr, params)
 
     multi.setStreamId(5)
@@ -256,7 +262,9 @@ class MultiplexedTransporterTest extends FunSuite {
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
     val multi = new MultiplexedTransporter(transport, addr, params)
 
     multi.setStreamId(5)
@@ -275,7 +283,9 @@ class MultiplexedTransporterTest extends FunSuite {
     val transport = new SlowClosingQueue(writeq, readq)
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
-    val params = Stack.Params.empty + FailureDetector.Param(new FailureDetector.MockConfig(() => cur))
+    val params = Stack.Params.empty + FailureDetector.Param(
+      new FailureDetector.MockConfig(() => cur)
+    )
     val multi = new MultiplexedTransporter(transport, addr, params)
 
     readq.offer(Rst(11, Http2Error.INTERNAL_ERROR.code))

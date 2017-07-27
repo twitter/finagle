@@ -25,22 +25,30 @@ import org.scalatest.fixture.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
 object Netty4SslTest {
-  case class Client(clientCert: SelfSignedCertificate, serverCert: SelfSignedCertificate,
-      params: Params = Params.empty,
-      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack)
-    extends StdStackClient[String, String, Client] {
+  case class Client(
+    clientCert: SelfSignedCertificate,
+    serverCert: SelfSignedCertificate,
+    params: Params = Params.empty,
+    stack: Stack[ServiceFactory[String, String]] = StackClient.newStack
+  ) extends StdStackClient[String, String, Client] {
 
     override protected type In = String
     override protected type Out = String
 
     override protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
-      Netty4Transporter.raw[String, String](pipeline => {
-        pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter(): _*))
-        pipeline.addLast(new StringDecoder())
-        pipeline.addLast(new StringEncoder())
-      }, addr, params)
+      Netty4Transporter.raw[String, String](
+        pipeline => {
+          pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter(): _*))
+          pipeline.addLast(new StringDecoder())
+          pipeline.addLast(new StringEncoder())
+        },
+        addr,
+        params
+      )
 
-    override protected def newDispatcher(transport: Transport[String, String]): Service[String, String] =
+    override protected def newDispatcher(
+      transport: Transport[String, String]
+    ): Service[String, String] =
       new SerialClientDispatcher(transport)
 
     override protected def copy1(stack: Stack[ServiceFactory[String, String]], params: Params) =
@@ -57,7 +65,10 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
 
     private object StringServerInit extends (ChannelPipeline => Unit) {
       def apply(pipeline: ChannelPipeline): Unit = {
-        pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter(): _*))
+        pipeline.addLast(
+          "line",
+          new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter(): _*)
+        )
         pipeline.addLast("stringDecoder", new StringDecoder(UTF_8))
         pipeline.addLast("stringEncoder", new StringEncoder(UTF_8))
       }
@@ -77,16 +88,19 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
         }
 
       val serverConfig = SslServerConfiguration(
-        keyCredentials = KeyCredentials.CertAndKey(serverCert.certificate(), serverCert.privateKey()),
+        keyCredentials =
+          KeyCredentials.CertAndKey(serverCert.certificate(), serverCert.privateKey()),
         trustCredentials = TrustCredentials.CertCollection(clientCert.certificate()),
-        clientAuth = ClientAuth.Needed)
+        clientAuth = ClientAuth.Needed
+      )
 
       val p = Params.empty +
         ServerSsl(Some(serverConfig)) +
         Label("test")
       val listener = Netty4Listener[String, String](StringServerInit, p)
       val serveTransport = (t: Transport[String, String]) => {
-        if (t.peerCertificate.isEmpty) throw new IllegalStateException("No peer certificate in transport")
+        if (t.peerCertificate.isEmpty)
+          throw new IllegalStateException("No peer certificate in transport")
         new SerialServerDispatcher(t, service)
       }
       listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
@@ -94,11 +108,12 @@ class Netty4SslTest extends FunSuite with Eventually with IntegrationPatience {
 
     val clientConfig = SslClientConfiguration(
       keyCredentials = KeyCredentials.CertAndKey(clientCert.certificate(), clientCert.privateKey()),
-      trustCredentials = TrustCredentials.CertCollection(serverCert.certificate()))
+      trustCredentials = TrustCredentials.CertCollection(serverCert.certificate())
+    )
     val client = {
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      new finagle.netty4.Netty4SslTest.Client(clientCert, serverCert)
-        .withTransport.tls(clientConfig)
+      new finagle.netty4.Netty4SslTest.Client(clientCert, serverCert).withTransport
+        .tls(clientConfig)
         .newService(s"${addr.getHostName}:${addr.getPort}", "client")
     }
 

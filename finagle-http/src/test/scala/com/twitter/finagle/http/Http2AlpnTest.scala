@@ -15,8 +15,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
     val intermediateFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
     // deleteOnExit is handled by TempFile
 
-    SslClientConfiguration(
-      trustCredentials = TrustCredentials.CertCollection(intermediateFile))
+    SslClientConfiguration(trustCredentials = TrustCredentials.CertCollection(intermediateFile))
   }
 
   def serverConfiguration(): SslServerConfiguration = {
@@ -26,8 +25,7 @@ class Http2AlpnTest extends AbstractEndToEndTest {
     val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
 
-    SslServerConfiguration(
-      keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile))
+    SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile))
   }
 
   // we need this to turn off ALPN in ci

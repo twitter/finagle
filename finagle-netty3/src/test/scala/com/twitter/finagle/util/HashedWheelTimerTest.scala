@@ -45,7 +45,11 @@ class HashedWheelTimerTest extends FunSuite with MockitoSugar {
 
     taskCaptor.getValue.run(firstTimeout)
 
-    verify(timer, atMost(1)).newTimeout(any[org.jboss.netty.util.TimerTask], any[Long], any[java.util.concurrent.TimeUnit])
+    verify(timer, atMost(1)).newTimeout(
+      any[org.jboss.netty.util.TimerTask],
+      any[Long],
+      any[java.util.concurrent.TimeUnit]
+    )
   }
 
   test("HashedWheelTimer.Default should ignore stop()") {

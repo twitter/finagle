@@ -27,7 +27,7 @@ class JsonpFilterTest extends FunSuite {
     val request = Request("/test.json", "callback" -> "mycallback")
     val response = Await.result(JsonpFilter(request, dummyService))
 
-    assert(response.contentType   == Some("application/javascript"))
+    assert(response.contentType == Some("application/javascript"))
     assert(response.contentString == "/**/mycallback({});")
   }
 
@@ -35,9 +35,9 @@ class JsonpFilterTest extends FunSuite {
     val request = Request("/test.json", "callback" -> "mycallback", "not_json" -> "t")
     val response = Await.result(JsonpFilter(request, dummyService))
 
-    assert(response.mediaType     == Some("not_json"))
+    assert(response.mediaType == Some("not_json"))
     assert(response.contentString == "{}")
-    assert(response.contentType   == Some("not_json"))
+    assert(response.contentType == Some("not_json"))
   }
 
   test("ignore HEAD") {
@@ -45,7 +45,7 @@ class JsonpFilterTest extends FunSuite {
     request.method = Method.Head
 
     val response = Await.result(JsonpFilter(request, dummyService))
-    assert(response.contentType   == Some("application/json"))
+    assert(response.contentType == Some("application/json"))
     assert(response.contentString == "{}")
   }
 
@@ -54,7 +54,7 @@ class JsonpFilterTest extends FunSuite {
     val request = Request("/test.json", "callback" -> "")
 
     val response = Await.result(JsonpFilter(request, dummyService))
-    assert(response.contentType   == Some("application/json"))
+    assert(response.contentType == Some("application/json"))
     assert(response.contentString == "{}")
   }
 }

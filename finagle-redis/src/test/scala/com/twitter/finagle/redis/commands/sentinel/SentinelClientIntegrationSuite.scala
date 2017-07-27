@@ -54,11 +54,14 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     val until = startTime + 20.seconds
     def checkLater(): Future[Boolean] = {
       if (Time.now > until) Future.value(false)
-      else DefaultTimer.doLater(1.second) {
-        log.info("%s", Time.now - startTime)
-        if (check) Future.value(true)
-        else checkLater()
-      }.flatten
+      else
+        DefaultTimer
+          .doLater(1.second) {
+            log.info("%s", Time.now - startTime)
+            if (check) Future.value(true)
+            else checkLater()
+          }
+          .flatten
     }
     assert(Await.result(checkLater, 25.seconds))
   }
@@ -143,11 +146,12 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
         }.toSet
       }.toMap
 
-      def slaves() = expected.keys.map { name =>
-        name -> result(client.slaves(name))
-          .map(s => s.port)
-          .toSet
-      }.toMap
+      def slaves() =
+        expected.keys.map { name =>
+          name -> result(client.slaves(name))
+            .map(s => s.port)
+            .toSet
+        }.toMap
 
       // Sentinel PINGs masters every 10 seconds to get the latest slave list.
       // We keep checking the slave lists periodically, until it is updated
@@ -190,9 +194,10 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       // Errors should be throw for unknown names
       assert(result(client.failover(noSuchMaster).liftToTry).isThrow)
 
-      def currentMasterPort = result(client.getMasterAddrByName(master0))
-        .map(_.getPort)
-        .get
+      def currentMasterPort =
+        result(client.getMasterAddrByName(master0))
+          .map(_.getPort)
+          .get
 
       val oldValue = currentMasterPort
       ready(client.failover(master0))
@@ -214,15 +219,14 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   test("Correctly perform the FLUSHCONFIG command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
-      val configFile = result(client.info(Buf.Utf8("server")))
-        .flatMap { buf =>
-          val prefix = "config_file:"
-          BufToString(buf).trim
-            .split("\n")
-            .find(_.startsWith(prefix))
-            .map(_.substring(prefix.length))
-            .map(new java.io.File(_))
-        }.get
+      val configFile = result(client.info(Buf.Utf8("server"))).flatMap { buf =>
+        val prefix = "config_file:"
+        BufToString(buf).trim
+          .split("\n")
+          .find(_.startsWith(prefix))
+          .map(_.substring(prefix.length))
+          .map(new java.io.File(_))
+      }.get
       assert(configFile.delete())
       assert(!configFile.exists())
       ready(client.flushConfig())

@@ -43,8 +43,10 @@ class ThriftResponseClassifierTest extends FunSuite {
       Contexts.local.let(DeserializeCtx.Key, ctx) {
         val rep = in.getBytes(UTF_8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
-        assert(expectedClass ==
-          classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
+        assert(
+          expectedClass ==
+            classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+        )
       }
     }
     testApplyOrElse("yep", Success)
@@ -63,16 +65,20 @@ class ThriftResponseClassifierTest extends FunSuite {
       val rep = input.getBytes(UTF_8)
 
       assert(!classifier.isDefinedAt(ReqRep(input, Return(rep))))
-      assert(Success ==
-        classifier.applyOrElse(ReqRep(input, Return(rep)), ResponseClassifier.Default))
+      assert(
+        Success ==
+          classifier.applyOrElse(ReqRep(input, Return(rep)), ResponseClassifier.Default)
+      )
     }
   }
 
   test("usingDeserializeCtx handles no DeserializationCtx") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
       val rep = in.getBytes(UTF_8)
-      assert(expectedClass ==
-        classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
+      assert(
+        expectedClass ==
+          classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+      )
     }
     testApply("nope", Success)
     testApply("lol", Success)
@@ -98,10 +104,10 @@ class ThriftResponseClassifierTest extends FunSuite {
       Contexts.local.let(DeserializeCtx.Key, ctx) {
         val rep = in.getBytes(UTF_8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
-        assert(expectedClass ==
-          classifier.applyOrElse(
-            ReqRep(in, Return(rep)),
-            ResponseClassifier.Default))
+        assert(
+          expectedClass ==
+            classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default)
+        )
       }
     }
 
@@ -120,6 +126,5 @@ class ThriftResponseClassifierTest extends FunSuite {
       assert(Success == ThriftResponseClassifier.DeserializeCtxOnly(reqRep))
     }
   }
-
 
 }

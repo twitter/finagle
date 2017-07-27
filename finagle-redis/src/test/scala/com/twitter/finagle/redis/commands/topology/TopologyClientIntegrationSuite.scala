@@ -20,7 +20,7 @@ final class TopologyClientIntegrationSuite extends RedisClientTest {
   protected val bufVal = Buf.Utf8("5")
   protected val bufKeyNonNumeric = Buf.Utf8("asdf")
   protected val bufValNonNumeric = Buf.Utf8("g")
-  protected val bufValLarge = Buf.Utf8("99999")  // a value >= #databases (configured in redis)
+  protected val bufValLarge = Buf.Utf8("99999") // a value >= #databases (configured in redis)
 
   test("Correctly perform TOPOLOGYADD", RedisTest, ClientTest) {
     withRedisClient { client =>

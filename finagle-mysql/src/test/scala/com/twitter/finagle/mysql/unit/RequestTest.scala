@@ -7,8 +7,6 @@ import java.util.{Calendar, Date, TimeZone}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-
 @RunWith(classOf[JUnitRunner])
 class SimpleCommandRequestTest extends FunSuite {
   test("encode") {
@@ -25,8 +23,8 @@ class SimpleCommandRequestTest extends FunSuite {
 class HandshakeResponseTest extends FunSuite {
   val username = Some("username")
   val password = Some("password")
-  val salt = Array[Byte](70,38,43,66,74,48,79,126,76,66,
-                          70,118,67,40,63,68,120,80,103,54)
+  val salt =
+    Array[Byte](70, 38, 43, 66, 74, 48, 79, 126, 76, 66, 70, 118, 67, 40, 63, 68, 120, 80, 103, 54)
   val req = HandshakeResponse(
     username,
     password,
@@ -77,7 +75,7 @@ class ExecuteRequestTest extends FunSuite {
     val br = MysqlBuf.reader(e.toPacket.body)
     br.skip(10) // payload header (10bytes)
     br.skip(1) // new params bound flag
-    assert(br.remaining == ((numOfParams+7)/8))
+    assert(br.remaining == ((numOfParams + 7) / 8))
   }
 
   // supported types
@@ -168,11 +166,11 @@ class ExecuteRequestTest extends FunSuite {
     }
 
     test("String") {
-      assert(br.readLengthCodedString(Charset.defaultCharset)== strVal)
+      assert(br.readLengthCodedString(Charset.defaultCharset) == strVal)
     }
 
     test("Non-Ascii String") {
-      assert(br.readLengthCodedString(Charset.defaultCharset)== nonAsciiStrVal)
+      assert(br.readLengthCodedString(Charset.defaultCharset) == nonAsciiStrVal)
     }
 
     test("Boolean") {
@@ -224,7 +222,7 @@ class ExecuteRequestTest extends FunSuite {
     }
 
     test("StringValue") {
-      assert(br.readLengthCodedString(Charset.defaultCharset)== strVal)
+      assert(br.readLengthCodedString(Charset.defaultCharset) == strVal)
     }
 
     test("ByteValue") {

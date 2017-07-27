@@ -19,14 +19,16 @@ import scala.collection.mutable.ArrayBuffer
 class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import MuxFramerTest._
 
-  test("writes") (forAll { (msg: Message, window: Int) =>
+  test("writes")(forAll { (msg: Message, window: Int) =>
     whenever(window > 0) {
       val writeq = new AsyncQueue[Buf]
       // Create a queued transport that seals writes as if we've written
       // the bytes to the wire. Note, this is important since the
       // written channel buffers share buffer regions to avoid allocations.
       val transport = new QueueTransport(writeq, new AsyncQueue[Buf])
-        .map({ buf: Buf => deepCopy(buf) }, identity)
+        .map({ buf: Buf =>
+          deepCopy(buf)
+        }, identity)
 
       val sr = new InMemoryStatsReceiver
       val flow = MuxFramer(transport, Some(window), sr)
@@ -34,13 +36,14 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
       val payloadSize = msg.buf.length
 
-      if (window >= payloadSize) assert(writeq.size == 1) else {
+      if (window >= payloadSize) assert(writeq.size == 1)
+      else {
         val Return(q) = writeq.drain()
 
         // ensure that we've written the correct amount of bytes
         val written = q.foldLeft(0) { _ + _.length }
         val expected = Message.encode(msg).length
-        val hdrSize = 4 * (q.size-1)
+        val hdrSize = 4 * (q.size - 1)
         assert(written == expected + hdrSize)
 
         assert(sr.stats(Seq("write_stream_bytes")).forall { _ == window + 4 })
@@ -58,7 +61,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
   })
 
-  test("reads") (forAll { (msg: Message, window: Int) =>
+  test("reads")(forAll { (msg: Message, window: Int) =>
     whenever(window > 0) {
       val transq = new AsyncQueue[Buf]
       val readLatch = new Latch
@@ -92,7 +95,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
   })
 
-  test("write fragments disabled") (forAll { msg: Message =>
+  test("write fragments disabled")(forAll { msg: Message =>
     val transq = new AsyncQueue[Buf]
     val transport = new QueueTransport(transq, transq)
     val flow = MuxFramer(transport, None, NullStatsReceiver)
@@ -102,7 +105,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(out == msg)
   })
 
-  test("concurrent round-trip") (forAll { messages: Seq[Message] =>
+  test("concurrent round-trip")(forAll { messages: Seq[Message] =>
     // make sure messages have unique tags.
     val msgs = messages.foldLeft(Map.empty[Int, Message]) {
       case (map, msg) => map + (msg.tag -> msg)
@@ -133,8 +136,13 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("diverse stream in the presence of concurrency") {
     val msgs = (1 to 20).map { tag =>
-      Message.Tdispatch(tag, Seq.empty, Path.read("/foo/bar/baz"),
-        Dtab.empty, Buf.ByteArray.Owned(payload.getBytes))
+      Message.Tdispatch(
+        tag,
+        Seq.empty,
+        Path.read("/foo/bar/baz"),
+        Dtab.empty,
+        Buf.ByteArray.Owned(payload.getBytes)
+      )
     }
 
     val transq = new AsyncQueue[Buf]
@@ -146,7 +154,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
         val br = ByteReader(buf)
         val tag = Message.Tags.extractTag(br.readIntBE())
         // clear fragment bit and store tag
-        writtenTags += tag  & ~Message.Tags.TagMSB
+        writtenTags += tag & ~Message.Tags.TagMSB
         writeGate
       }
     }
@@ -171,8 +179,13 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
   }
 
   test("Tdiscarded") {
-    val msg = Message.Tdispatch(20, Seq.empty, Path.read("/foo/bar/baz"),
-      Dtab.empty, Buf.ByteArray.Owned(payload.getBytes))
+    val msg = Message.Tdispatch(
+      20,
+      Seq.empty,
+      Path.read("/foo/bar/baz"),
+      Dtab.empty,
+      Buf.ByteArray.Owned(payload.getBytes)
+    )
 
     val writeq = new AsyncQueue[Buf]
     val writeLatch = new Latch
@@ -243,9 +256,8 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(sr.gauges(Seq("pending_write_streams"))() == 0)
   }
 
-  test("header endec") (forAll(Gen.choose(1, Int.MaxValue)) { size: Int =>
-    assert(MuxFramer.Header.decodeFrameSize(
-      MuxFramer.Header.encodeFrameSize(size)) == size)
+  test("header endec")(forAll(Gen.choose(1, Int.MaxValue)) { size: Int =>
+    assert(MuxFramer.Header.decodeFrameSize(MuxFramer.Header.encodeFrameSize(size)) == size)
   })
 }
 
@@ -267,8 +279,13 @@ object MuxFramerTest {
     val contexts = Seq(ctxBuf -> ctxBuf)
     val bodyBuf = Buf.Utf8(body)
     if (typ == Message.Types.Tdispatch)
-      Message.Tdispatch(tag, contexts,
-        Path.read(path), Dtab(IndexedSeq(Dentry.read(dentry))), bodyBuf)
+      Message.Tdispatch(
+        tag,
+        contexts,
+        Path.read(path),
+        Dtab(IndexedSeq(Dentry.read(dentry))),
+        bodyBuf
+      )
     else
       Message.RdispatchOk(tag, contexts, bodyBuf)
   }

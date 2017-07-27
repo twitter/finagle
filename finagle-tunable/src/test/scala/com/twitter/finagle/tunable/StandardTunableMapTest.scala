@@ -16,26 +16,32 @@ class StandardTunableMapTestClient extends ServiceLoadedTunableMap with TunableM
 class StandardTunableMapTest extends FunSuite {
 
   test("Application returns the same map for the same id") {
-     val map1 = StandardTunableMap("foo")
-     val map2 = StandardTunableMap("foo")
+    val map1 = StandardTunableMap("foo")
+    val map2 = StandardTunableMap("foo")
 
-     assert(map1 eq map2)
-   }
+    assert(map1 eq map2)
+  }
 
   test("composes in-memory, service-loaded, and file-based tunable maps") {
     val inMemory = TunableMap.newMutable()
     inMemory.put("com.twitter.util.tunable.InMemory", "in memory")
 
-    val standardTunableMap = StandardTunableMap(
-      "IdForStandardTunableMapTest", ServerInfo.Empty, inMemory)
+    val standardTunableMap =
+      StandardTunableMap("IdForStandardTunableMapTest", ServerInfo.Empty, inMemory)
     val components = TunableMap.components(standardTunableMap)
 
-    assert(components(0)(TunableMap.Key[String]("com.twitter.util.tunable.InMemory"))() ==
-      Some("in memory"))
-    assert(components(1)(TunableMap.Key[String]("com.twitter.util.tunable.ServiceLoaded"))() ==
-      Some("service loaded"))
-    assert(components(2)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
-      Some("file based"))
+    assert(
+      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.InMemory"))() ==
+        Some("in memory")
+    )
+    assert(
+      components(1)(TunableMap.Key[String]("com.twitter.util.tunable.ServiceLoaded"))() ==
+        Some("service loaded")
+    )
+    assert(
+      components(2)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
+        Some("file based")
+    )
   }
 
   // For loadJsonConfig, there are 4 different files that we look for, in order of priority:
@@ -56,14 +62,22 @@ class StandardTunableMapTest extends FunSuite {
 
     assert(components.size == 4)
 
-    assert(components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnvPerInstance"))() ==
-      Some("file based per env per instance"))
-    assert(components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnv"))() ==
-      Some("file based per env"))
-    assert(components(2)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerInstance"))() ==
-      Some("file based per instance"))
-    assert(components(3)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
-      Some("file based"))
+    assert(
+      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnvPerInstance"))() ==
+        Some("file based per env per instance")
+    )
+    assert(
+      components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnv"))() ==
+        Some("file based per env")
+    )
+    assert(
+      components(2)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerInstance"))() ==
+        Some("file based per instance")
+    )
+    assert(
+      components(3)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
+        Some("file based")
+    )
   }
 
   test("loadJsonConfig: per-instance-id and all-instances files exists") {
@@ -78,10 +92,14 @@ class StandardTunableMapTest extends FunSuite {
 
     assert(components.size == 2)
 
-    assert(components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerInstance"))() ==
-      Some("file based per instance"))
-    assert(components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
-      Some("file based"))
+    assert(
+      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerInstance"))() ==
+        Some("file based per instance")
+    )
+    assert(
+      components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
+        Some("file based")
+    )
   }
 
   test("loadJsonConfig: per-environment all-instances and all-instances files exist") {
@@ -96,10 +114,14 @@ class StandardTunableMapTest extends FunSuite {
 
     assert(components.size == 2)
 
-    assert(components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnv"))() ==
-      Some("file based per env"))
-    assert(components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
-      Some("file based"))
+    assert(
+      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBasedPerEnv"))() ==
+        Some("file based per env")
+    )
+    assert(
+      components(1)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
+        Some("file based")
+    )
   }
 
   test("loadJsonConfig: all-instances file exists") {
@@ -114,8 +136,10 @@ class StandardTunableMapTest extends FunSuite {
 
     assert(components.size == 1)
 
-    assert(components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
-      Some("file based"))
+    assert(
+      components(0)(TunableMap.Key[String]("com.twitter.util.tunable.FileBased"))() ==
+        Some("file based")
+    )
   }
 
   test("loadJsonConfig: no files exist") {

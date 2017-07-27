@@ -6,10 +6,12 @@ import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class CapabilityTest extends FunSuite {
-  val c = Capability(Capability.LongPassword,
-                   Capability.SSL,
-                   Capability.Transactions,
-                   Capability.MultiResults)
+  val c = Capability(
+    Capability.LongPassword,
+    Capability.SSL,
+    Capability.Transactions,
+    Capability.MultiResults
+  )
 
   test("contain capability") {
     assertResult(true) { c.has(Capability.SSL) }

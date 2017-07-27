@@ -41,8 +41,7 @@ class MethodBuilderTest extends FunSuite {
       val server = stackServer.serve("localhost:*", mkService(rep))
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-      val methodBuilder = MethodBuilder.from(
-        s"${addr.getHostName}:${addr.getPort}", stackClient)
+      val methodBuilder = MethodBuilder.from(s"${addr.getHostName}:${addr.getPort}", stackClient)
 
       val short = methodBuilder.withTimeout.total(10.millis).newService("short")
       val long = methodBuilder.withTimeout.total(5.seconds).newService("long")
@@ -90,7 +89,7 @@ class MethodBuilderTest extends FunSuite {
     "Mux",
     Mux.server,
     Mux.client.withSessionQualifier.noFailFast, // we disable failfast to allow retries to
-    mux.Request.empty,                          // smooth over the race with the server bind.
+    mux.Request.empty, // smooth over the race with the server bind.
     mux.Response.empty
   )
 
@@ -105,8 +104,7 @@ class MethodBuilderTest extends FunSuite {
       val server = stackServer.serve("localhost:*", mkService(rep))
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
 
-      val methodBuilder = MethodBuilder.from(
-        s"${addr.getHostName}:${addr.getPort}", stackClient)
+      val methodBuilder = MethodBuilder.from(s"${addr.getHostName}:${addr.getPort}", stackClient)
 
       val short = methodBuilder.withTimeout.perRequest(5.millis).newService("short")
       val long = methodBuilder.withTimeout.perRequest(5.seconds).newService("long")

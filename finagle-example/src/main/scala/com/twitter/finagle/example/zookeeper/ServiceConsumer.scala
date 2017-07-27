@@ -10,22 +10,23 @@ import com.twitter.io.Reader
 import com.twitter.util.Await
 
 /**
-  * This demo shows how to consume the service in zookeeper.
-  *
-  * Run ServiceProvider before ServiceConsumer
-  *
-  */
+ * This demo shows how to consume the service in zookeeper.
+ *
+ * Run ServiceProvider before ServiceConsumer
+ *
+ */
 object ServiceConsumer {
 
   def main(args: Array[String]): Unit = {
 
     //use zookeeper to discover service
-    val client = Http.client
-      .withSessionPool.maxSize(10)
+    val client = Http.client.withSessionPool
+      .maxSize(10)
       .newService(ServiceProvider.buildConsumerPath(EchoServer.servicePath), "echo-client")
 
     //create a "Greetings!" request.
-    val data = Reader.fromStream(new ByteArrayInputStream("Greetings!".getBytes(StandardCharsets.UTF_8)))
+    val data =
+      Reader.fromStream(new ByteArrayInputStream("Greetings!".getBytes(StandardCharsets.UTF_8)))
     val request = Request(Version.Http11, Method.Post, "/", data)
 
     Await.ready(client(request)) onSuccess { response =>

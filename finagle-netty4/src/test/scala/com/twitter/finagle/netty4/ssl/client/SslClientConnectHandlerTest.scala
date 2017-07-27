@@ -42,8 +42,16 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
   }
 
   test("success") {
-    channel.pipeline().addFirst(
-      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
+    channel
+      .pipeline()
+      .addFirst(
+        new SslClientConnectHandler(
+          sslHandler,
+          address,
+          config,
+          SslClientSessionVerifier.AlwaysValid
+        )
+      )
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -58,8 +66,9 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
   }
 
   test("session verification failed") {
-    channel.pipeline().addFirst(
-      new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(false)))
+    channel
+      .pipeline()
+      .addFirst(new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(false)))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -68,15 +77,18 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
 
     handshakePromise.setSuccess(channel)
     assert(connectPromise.cause().isInstanceOf[SslVerificationFailedException])
-    assert(intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException])
+    assert(
+      intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException]
+    )
 
     channel.finishAndReleaseAll()
   }
 
   test("failed session validation") {
     val e = new Exception("whoa")
-    channel.pipeline().addFirst(
-      new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(throw e)))
+    channel
+      .pipeline()
+      .addFirst(new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(throw e)))
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -85,14 +97,24 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
 
     handshakePromise.setSuccess(channel)
     assert(connectPromise.cause.getMessage.startsWith("whoa"))
-    assert(intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException])
+    assert(
+      intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException]
+    )
 
     channel.finishAndReleaseAll()
   }
 
   test("cancelled after connected") {
-    channel.pipeline().addFirst(
-      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
+    channel
+      .pipeline()
+      .addFirst(
+        new SslClientConnectHandler(
+          sslHandler,
+          address,
+          config,
+          SslClientSessionVerifier.AlwaysValid
+        )
+      )
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -103,8 +125,16 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
   }
 
   test("failed handshake") {
-    channel.pipeline().addFirst(
-      new SslClientConnectHandler(sslHandler, address, config, SslClientSessionVerifier.AlwaysValid))
+    channel
+      .pipeline()
+      .addFirst(
+        new SslClientConnectHandler(
+          sslHandler,
+          address,
+          config,
+          SslClientSessionVerifier.AlwaysValid
+        )
+      )
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 

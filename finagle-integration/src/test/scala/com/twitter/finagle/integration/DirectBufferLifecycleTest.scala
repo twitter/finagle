@@ -41,15 +41,15 @@ class DirectBufferLifecycleTest extends FunSuite {
     msg: Buf,
     pipelineInit: (ChannelPipeline => Unit)
   ) = test(s"$protocol framer releases inbound direct byte bufs") {
-      val e = new EmbeddedChannel()
-      pipelineInit(e.pipeline)
-      val direct = Unpooled.directBuffer()
-      direct.writeBytes(Buf.ByteArray.Owned.extract(msg))
-      assert(direct.refCnt() == 1)
-      e.writeInbound(direct)
-      assert(direct.refCnt() == 0)
-      val framed: T = e.readInbound[T]()
-    }
+    val e = new EmbeddedChannel()
+    pipelineInit(e.pipeline)
+    val direct = Unpooled.directBuffer()
+    direct.writeBytes(Buf.ByteArray.Owned.extract(msg))
+    assert(direct.refCnt() == 1)
+    e.writeInbound(direct)
+    assert(direct.refCnt() == 0)
+    val framed: T = e.readInbound[T]()
+  }
 
   testDirect[Buf](
     protocol = "mux client/server",

@@ -45,7 +45,7 @@ class PoolBench extends StdBenchAnnotations {
       highWatermark = poolSize
     )
 
-    for (i <- 0 until (poolSize*loadedRatio).toInt) {
+    for (i <- 0 until (poolSize * loadedRatio).toInt) {
       watermark()
       cache()
       buffer()

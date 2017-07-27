@@ -3,7 +3,11 @@ package com.twitter.finagle.netty4.ssl.client
 import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
-import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory, SslContextClientEngineFactory}
+import com.twitter.finagle.ssl.client.{
+  SslClientConfiguration,
+  SslClientEngineFactory,
+  SslContextClientEngineFactory
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.TempFile
 import io.netty.channel.embedded.EmbeddedChannel
@@ -35,7 +39,7 @@ class Netty4ClientSslHandlerTest extends FunSuite {
 
   def withContext(config: SslClientConfiguration): Stack.Params =
     withConfig(config) +
-    SslClientEngineFactory.Param(new SslContextClientEngineFactory(SSLContext.getDefault))
+      SslClientEngineFactory.Param(new SslContextClientEngineFactory(SSLContext.getDefault))
 
   val paramsConfigurations: Seq[Stack.Params] = Seq(
     withConfig(SslClientConfiguration()),
@@ -43,11 +47,13 @@ class Netty4ClientSslHandlerTest extends FunSuite {
     withConfig(SslClientConfiguration(keyCredentials = useKeyCredentials())),
     withConfig(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure)),
     withContext(SslClientConfiguration()),
-    withContext(SslClientConfiguration(hostname = Some("example.com"))))
+    withContext(SslClientConfiguration(hostname = Some("example.com")))
+  )
 
   test("default doesn't contain ssl handlers") {
     val fakeAddr = InetSocketAddress.createUnresolved("foobar.com", 80)
-    val ch = channel(Stack.Params.empty + Transporter.EndpointAddr(Address.Inet(fakeAddr, Map.empty)))
+    val ch =
+      channel(Stack.Params.empty + Transporter.EndpointAddr(Address.Inet(fakeAddr, Map.empty)))
     val pipeline = ch.pipeline()
 
     // There is no Transport.ClientSsl param set, so these should be null

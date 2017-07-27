@@ -11,10 +11,11 @@ class LeakSafeCompositeByteBufTest extends FunSuite {
     "unpooled-direct" -> Unpooled.directBuffer()
   )
 
-  IllegalInstances.foreach { case (k, v) =>
-    test(s"$k: throws exceptions on direct buffers") {
-      val comp = new LeakSafeCompositeByteBuf (UnpooledByteBufAllocator.DEFAULT, true, 10)
-      intercept[IllegalArgumentException] { comp.addComponents(v) }
-    }
+  IllegalInstances.foreach {
+    case (k, v) =>
+      test(s"$k: throws exceptions on direct buffers") {
+        val comp = new LeakSafeCompositeByteBuf(UnpooledByteBufAllocator.DEFAULT, true, 10)
+        intercept[IllegalArgumentException] { comp.addComponents(v) }
+      }
   }
 }

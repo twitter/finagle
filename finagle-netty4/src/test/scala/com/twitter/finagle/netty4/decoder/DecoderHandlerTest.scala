@@ -58,7 +58,6 @@ class DecoderHandlerTest extends FunSuite with MockitoSugar {
     assert(exnThrown == exnSeen)
   }
 
-
   test("DecoderHandler throws exceptions when handling non-Buf messages") {
     val notABuf = "I'm definitely not a buf"
     val noopFramer = new Framer {

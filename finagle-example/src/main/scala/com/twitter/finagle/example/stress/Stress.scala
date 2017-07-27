@@ -17,11 +17,11 @@ import scala.collection.JavaConverters._
  */
 object Stress {
   def main(args: Array[String]) {
-    val uri           = new URI(args(0))
-    val concurrency   = args(1).toInt
+    val uri = new URI(args(0))
+    val concurrency = args(1).toInt
     val totalRequests = args(2).toInt
 
-    val errors    = new AtomicInteger(0)
+    val errors = new AtomicInteger(0)
     val responses = AtomicLongMap.create[Status]()
 
     val request = Request(Version.Http11, Method.Get, uri.getPath)
@@ -44,8 +44,9 @@ object Stress {
       Future.times(totalRequests / concurrency) {
         client(request) onSuccess { response =>
           responses.incrementAndGet(response.status)
-        } handle { case e =>
-          errors.incrementAndGet()
+        } handle {
+          case e =>
+            errors.incrementAndGet()
         } ensure {
           completedRequests.incrementAndGet()
         }
@@ -62,9 +63,13 @@ object Stress {
       for ((status, count) <- responses.asMap.asScala)
         println("%20s\t%d".format(status, count))
       println("================")
-      println("%d requests completed in %dms (%f requests per second)".format(
-        completedRequests.get, duration.inMilliseconds,
-        totalRequests.toFloat / duration.inMillis.toFloat * 1000))
+      println(
+        "%d requests completed in %dms (%f requests per second)".format(
+          completedRequests.get,
+          duration.inMilliseconds,
+          totalRequests.toFloat / duration.inMillis.toFloat * 1000
+        )
+      )
       println("%d errors".format(errors.get))
 
       println("stats")

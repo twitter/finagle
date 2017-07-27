@@ -49,4 +49,3 @@ object WindowedMaxBenchmark {
     }
   }
 }
-

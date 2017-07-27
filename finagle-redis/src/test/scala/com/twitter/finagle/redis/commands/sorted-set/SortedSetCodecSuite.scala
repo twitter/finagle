@@ -12,8 +12,10 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("ZADD", CodecTest) {
     forAll(Gen.nonEmptyListOf(genZMember)) { ms =>
-      assert(encodeCommand(ZAdd(Buf.Utf8("foo"), ms)) ==
-        Seq("ZADD", "foo") ++ ms.flatMap(zm => Seq(zm.score.toString, zm.member.asString)))
+      assert(
+        encodeCommand(ZAdd(Buf.Utf8("foo"), ms)) ==
+          Seq("ZADD", "foo") ++ ms.flatMap(zm => Seq(zm.score.toString, zm.member.asString))
+      )
     }
   }
 
@@ -38,8 +40,10 @@ final class SortedSetCodecSuite extends RedisRequestTest {
   test("ZRANGE", CodecTest) {
     forAll { (k: Buf, a: Int, b: Int) =>
       assert(encodeCommand(ZRange(k, a, b)) == Seq("ZRANGE", k.asString, a.toString, b.toString))
-      assert(encodeCommand(ZRange(k, a, b, WithScores)) ==
-        Seq("ZRANGE", k.asString, a.toString, b.toString, "WITHSCORES"))
+      assert(
+        encodeCommand(ZRange(k, a, b, WithScores)) ==
+          Seq("ZRANGE", k.asString, a.toString, b.toString, "WITHSCORES")
+      )
     }
   }
 
@@ -47,31 +51,43 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
   test("ZINTERSTORE|ZUNIONSTORE", CodecTest) {
     forAll(genBuf, Gen.nonEmptyListOf(genBuf)) { (d, keys) =>
-      assert(encodeCommand(ZInterStore(d, keys)) ==
-        Seq("ZINTERSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
-      assert(encodeCommand(ZUnionStore(d, keys)) ==
-        Seq("ZUNIONSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString))
+      assert(
+        encodeCommand(ZInterStore(d, keys)) ==
+          Seq("ZINTERSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString)
+      )
+      assert(
+        encodeCommand(ZUnionStore(d, keys)) ==
+          Seq("ZUNIONSTORE", d.asString, keys.length.toString) ++ keys.map(_.asString)
+      )
     }
   }
 
   test("ZREVRANGE") {
     forAll { (k: Buf, a: Long, b: Long) =>
-      assert(encodeCommand(ZRevRange(k, a, b)) == Seq("ZREVRANGE", k.asString, a.toString, b.toString))
+      assert(
+        encodeCommand(ZRevRange(k, a, b)) == Seq("ZREVRANGE", k.asString, a.toString, b.toString)
+      )
     }
   }
 
   test("ZREVRANGEBYSCORE") {
-    checkSingleKey2ArbitraryVals("ZREVRANGEBYSCORE",
-      (k: Buf, a: ZInterval, b: ZInterval) => ZRevRangeByScore(k, a, b))
+    checkSingleKey2ArbitraryVals(
+      "ZREVRANGEBYSCORE",
+      (k: Buf, a: ZInterval, b: ZInterval) => ZRevRangeByScore(k, a, b)
+    )
   }
 
   test("ZREMRANGEBYSCORE") {
-    checkSingleKey2ArbitraryVals("ZREMRANGEBYSCORE",
-      (k: Buf, a: ZInterval, b: ZInterval) => ZRemRangeByScore(k, a, b))
+    checkSingleKey2ArbitraryVals(
+      "ZREMRANGEBYSCORE",
+      (k: Buf, a: ZInterval, b: ZInterval) => ZRemRangeByScore(k, a, b)
+    )
   }
 
   test("ZREMRANGEBYRANK") {
-    checkSingleKey2ArbitraryVals("ZREMRANGEBYRANK",
-      (k: Buf, a: Long, b: Long) => ZRemRangeByRank(k, a, b))
+    checkSingleKey2ArbitraryVals(
+      "ZREMRANGEBYRANK",
+      (k: Buf, a: Long, b: Long) => ZRemRangeByRank(k, a, b)
+    )
   }
 }

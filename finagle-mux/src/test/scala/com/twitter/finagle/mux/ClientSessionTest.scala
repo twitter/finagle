@@ -20,7 +20,7 @@ private class ClientSessionTest extends FunSuite {
     val clientToServer = new AsyncQueue[Message]
     val serverToClient = new AsyncQueue[Message]
 
-    val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
+    val transport = new QueueTransport(writeq = clientToServer, readq = serverToClient)
 
     val stats = new InMemoryStatsReceiver
     val session = new ClientSession(transport, FailureDetector.NullConfig, "test", stats)

@@ -173,4 +173,3 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   }
 
 }
-

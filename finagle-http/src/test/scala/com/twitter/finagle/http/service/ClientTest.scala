@@ -25,7 +25,8 @@ class ClientTest extends FunSuite {
         .hostConnectionLimit(1)
         .stack(Http.client)
 
-    try spec(builder) finally {
+    try spec(builder)
+    finally {
       Await.result(server.close())
     }
   }

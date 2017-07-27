@@ -24,14 +24,14 @@ class VersionTest extends FunSuite {
     val v: Version = Version.Http10
     v match {
       case Version.Http10 => assert(true)
-      case _  => fail()
+      case _ => fail()
     }
   }
 
   test("pattern matching version numbers") {
-    Version.Http10  match {
+    Version.Http10 match {
       case Version(1, 0) => assert(true)
-      case _  => fail()
+      case _ => fail()
     }
   }
 }

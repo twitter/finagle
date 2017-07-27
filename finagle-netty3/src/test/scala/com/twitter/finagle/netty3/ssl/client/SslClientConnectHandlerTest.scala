@@ -40,12 +40,11 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val address = mock[Address]
     val config = mock[SslClientConfiguration]
     val sessionVerifier = mock[SslClientSessionVerifier]
-    when(sessionVerifier.apply(
-      any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn true
+    when(sessionVerifier.apply(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn true
 
     val connectFuture = Channels.future(channel, true)
-    val connectRequested = new DownstreamChannelStateEvent(
-      channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
+    val connectRequested =
+      new DownstreamChannelStateEvent(channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
 
     val ch = new SslClientConnectHandler(sslHandler, address, config, sessionVerifier)
     ch.handleDownstream(ctx, connectRequested)
@@ -90,8 +89,10 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
 
   class helper2 extends SslClientConnectHandlerHelper {
     verify(sslHandler, times(0)).handshake()
-    ch.handleUpstream(ctx, new UpstreamChannelStateEvent(
-      channel, ChannelState.CONNECTED, remoteAddress))
+    ch.handleUpstream(
+      ctx,
+      new UpstreamChannelStateEvent(channel, ChannelState.CONNECTED, remoteAddress)
+    )
     assert(!connectFuture.isDone)
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
@@ -110,18 +111,24 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
   }
 
-  test("SslClientConnectHandler when connect is successful should propagate handshake failures as SslVerificationFailedException") {
+  test(
+    "SslClientConnectHandler when connect is successful should propagate handshake failures as SslVerificationFailedException"
+  ) {
     val h = new helper2
     import h._
 
     val exc = new Exception("sad panda")
     handshakeFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause ==
-      new SslVerificationFailedException(exc, remoteAddress))
+    assert(
+      connectFuture.getCause ==
+        new SslVerificationFailedException(exc, remoteAddress)
+    )
   }
 
-  test("SslClientConnectHandler when connect is successful should propagate connection cancellation") {
+  test(
+    "SslClientConnectHandler when connect is successful should propagate connection cancellation"
+  ) {
     val h = new helper2
     import h._
 
@@ -150,19 +157,18 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     val h = new helper2
     import h._
 
-    verify(sessionVerifier, times(0)).apply(
-      any[Address], any[SslClientConfiguration], any[SSLSession])
+    verify(sessionVerifier, times(0))
+      .apply(any[Address], any[SslClientConfiguration], any[SSLSession])
     handshakeFuture.setSuccess()
-    verify(sessionVerifier, times(1)).apply(
-      any[Address], any[SslClientConfiguration], any[SSLSession])
+    verify(sessionVerifier, times(1))
+      .apply(any[Address], any[SslClientConfiguration], any[SSLSession])
   }
 
   test("SslClientConnectHandler should close when session verification fails") {
     val h = new helper2
     import h._
 
-    when(sessionVerifier(
-      any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn false
+    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenReturn false
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
     assert(connectFuture.getCause.isInstanceOf[SslVerificationFailedException])
@@ -174,8 +180,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar {
     import h._
 
     val e = new RuntimeException("Failed verification")
-    when(sessionVerifier(
-      any[Address], any[SslClientConfiguration], any[SSLSession])) thenThrow e
+    when(sessionVerifier(any[Address], any[SslClientConfiguration], any[SSLSession])) thenThrow e
     handshakeFuture.setSuccess()
     assert(connectFuture.isDone)
     assert(connectFuture.getCause.getMessage.startsWith("Failed verification"))

@@ -2,7 +2,12 @@ package com.twitter.finagle.netty4.proxy
 
 import com.twitter.finagle.{ChannelClosedException, ProxyConnectException}
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelHandlerAdapter, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.channel.{
+  ChannelHandlerAdapter,
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPromise
+}
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -16,7 +21,10 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
   class ConnectPromiseSnooper extends ChannelOutboundHandlerAdapter {
     var promise: ChannelPromise = _
     override def connect(
-      ctx: ChannelHandlerContext, r: SocketAddress, l: SocketAddress, p: ChannelPromise
+      ctx: ChannelHandlerContext,
+      r: SocketAddress,
+      l: SocketAddress,
+      p: ChannelPromise
     ): Unit = {
       promise = p
       // drop connect request
@@ -24,12 +32,11 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
   }
 
   val fakeAddress = InetSocketAddress.createUnresolved("http-proxy", 8081)
-  val emptyCodec = new ChannelHandlerAdapter { }
+  val emptyCodec = new ChannelHandlerAdapter {}
   val connectPromiseSnooper = new ConnectPromiseSnooper
 
   test("connect to proxy (success)") {
-    val channel = new EmbeddedChannel(
-      new HttpProxyConnectHandler("example.com", None, emptyCodec))
+    val channel = new EmbeddedChannel(new HttpProxyConnectHandler("example.com", None, emptyCodec))
 
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
@@ -97,8 +104,7 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
   }
 
   test("connect to proxy (http connect failed)") {
-    val channel = new EmbeddedChannel(
-      new HttpProxyConnectHandler("example.com", None, emptyCodec))
+    val channel = new EmbeddedChannel(new HttpProxyConnectHandler("example.com", None, emptyCodec))
 
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
@@ -108,11 +114,14 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     assert(channel.outboundMessages().size() == 0)
 
     val rep = new DefaultFullHttpResponse(
-      HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST,
+      HttpVersion.HTTP_1_1,
+      HttpResponseStatus.BAD_REQUEST,
       Unpooled.wrappedBuffer("do not talk to me ever again".getBytes("UTF-8"))
     )
 
-    assert(intercept[Exception](channel.writeInbound(rep.retain())).isInstanceOf[ProxyConnectException])
+    assert(
+      intercept[Exception](channel.writeInbound(rep.retain())).isInstanceOf[ProxyConnectException]
+    )
     assert(!connectPromise.isSuccess)
     assert(connectPromise.cause().isInstanceOf[ProxyConnectException])
     assert(rep.release())
@@ -121,8 +130,7 @@ class HttpProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
   }
 
   test("connect to proxy (exception caught after connected)") {
-    val channel = new EmbeddedChannel(
-      new HttpProxyConnectHandler("example.com", None, emptyCodec))
+    val channel = new EmbeddedChannel(new HttpProxyConnectHandler("example.com", None, emptyCodec))
 
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)

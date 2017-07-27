@@ -20,11 +20,11 @@ class HttpMuxerTest extends FunSuite {
   }
 
   val (fooBarPrefix, fooBarExact, fooBooBaz, exactMatch, specialCase, percentEncode) =
-      ("fooBarPrefix", "fooBarExact", "fooBooBaz", "exactMatch", "specialCase", "percentEncode")
+    ("fooBarPrefix", "fooBarExact", "fooBooBaz", "exactMatch", "specialCase", "percentEncode")
 
   val muxService = new HttpMuxer()
     .withHandler("foo/bar/", new DummyService(fooBarPrefix)) // prefix match
-    .withHandler("foo/bar", new DummyService(fooBarExact))  // exact match -- not shadowed by foo/bar/
+    .withHandler("foo/bar", new DummyService(fooBarExact)) // exact match -- not shadowed by foo/bar/
     .withHandler("foo/boo/baz/", new DummyService(fooBooBaz))
     .withHandler("exact/match", new DummyService(exactMatch)) // exact match
     .withHandler("foo/<a>", new DummyService(percentEncode))

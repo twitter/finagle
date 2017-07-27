@@ -18,7 +18,6 @@ class BufsTest extends FunSuite {
     assert(n4buf.refCnt() == 0)
   }
 
-
   test("BufUtil#release recursively releases concat buf contents") {
     val n4bufs =
       List(

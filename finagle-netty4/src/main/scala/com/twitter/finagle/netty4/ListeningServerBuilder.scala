@@ -2,7 +2,10 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.{ListeningServer, Stack}
-import com.twitter.finagle.netty4.channel.{Netty4FramedServerChannelInitializer, Netty4RawServerChannelInitializer}
+import com.twitter.finagle.netty4.channel.{
+  Netty4FramedServerChannelInitializer,
+  Netty4RawServerChannelInitializer
+}
 import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
@@ -25,9 +28,10 @@ import java.util.concurrent.TimeUnit
  * @see [[com.twitter.finagle.param]]
  */
 private class ListeningServerBuilder(
-    pipelineInit: ChannelPipeline => Unit,
-    params: Stack.Params,
-    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler){
+  pipelineInit: ChannelPipeline => Unit,
+  params: Stack.Params,
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
+) {
   import Netty4Listener.BackPressure
 
   // Exports N4-related metrics under `finagle/netty4`.
@@ -64,12 +68,12 @@ private class ListeningServerBuilder(
       private[this] val bossLoop: EventLoopGroup =
         if (nativeEpoll.enabled)
           new EpollEventLoopGroup(
-            1 /*nThreads*/ ,
+            1 /*nThreads*/,
             new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
           )
         else
           new NioEventLoopGroup(
-            1 /*nThreads*/ ,
+            1 /*nThreads*/,
             new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
           )
 
@@ -131,16 +135,19 @@ private class ListeningServerBuilder(
           // we use `setupMarshalling` to support protocols where the
           // connection is multiplexed over child channels in the
           // netty layer
-          ch.pipeline.addLast("marshalling", setupMarshalling(new ChannelInitializer[Channel] {
-            def initChannel(ch: Channel): Unit = {
-              ch.pipeline.addLast("framedInitializer", framedInitializer)
+          ch.pipeline.addLast(
+            "marshalling",
+            setupMarshalling(new ChannelInitializer[Channel] {
+              def initChannel(ch: Channel): Unit = {
+                ch.pipeline.addLast("framedInitializer", framedInitializer)
 
-              // The bridge handler must be last in the pipeline to ensure
-              // that the bridging code sees all encoding and transformations
-              // of inbound messages.
-              ch.pipeline.addLast("finagleBridge", bridge)
-            }
-          }))
+                // The bridge handler must be last in the pipeline to ensure
+                // that the bridging code sees all encoding and transformations
+                // of inbound messages.
+                ch.pipeline.addLast("finagleBridge", bridge)
+              }
+            })
+          )
         }
       })
 
@@ -150,7 +157,8 @@ private class ListeningServerBuilder(
       private[this] val bound = bootstrap.bind(addr).awaitUninterruptibly()
       if (!bound.isSuccess)
         throw new java.net.BindException(
-          s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}")
+          s"Failed to bind to ${addr.toString}: ${bound.cause().getMessage}"
+        )
 
       private[this] val ch = bound.channel()
 
@@ -173,7 +181,7 @@ private class ListeningServerBuilder(
         // The boss loop immediately starts refusing new work.
         // Existing tasks have ``timeoutMs`` time to finish executing.
         bossLoop
-          .shutdownGracefully(0 /* quietPeriod */ , timeoutMs.max(0), TimeUnit.MILLISECONDS)
+          .shutdownGracefully(0 /* quietPeriod */, timeoutMs.max(0), TimeUnit.MILLISECONDS)
           .addListener(new FutureListener[Any] {
             def operationComplete(future: NettyFuture[Any]): Unit = p.setDone()
           })
@@ -181,7 +189,9 @@ private class ListeningServerBuilder(
         // Don't rely on netty to satisfy the promise and transform all results to
         // success because we don't want the non-deterministic lifecycle of external
         // resources to affect application success.
-        p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
+        p.raiseWithin(timeout)(timer).transform { _ =>
+          Future.Done
+        }
       }
 
       def boundAddress: SocketAddress = ch.localAddress()

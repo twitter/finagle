@@ -6,7 +6,10 @@ import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.httpproxy.HttpConnectHandler
 import com.twitter.finagle.netty3.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, IdleChannelHandler}
+  ChannelRequestStatsHandler,
+  ChannelStatsHandler,
+  IdleChannelHandler
+}
 import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.client.SslClientConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
@@ -44,15 +47,17 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
   private[this] val linkLocalSockAddr = new InetSocketAddress("169.254.0.1", 9999)
   private[this] val routableSockAddr = new InetSocketAddress("8.8.8.8", 9999)
 
-  private[this] def findHandlerInPipeline[T <: ChannelHandler : ClassTag](
+  private[this] def findHandlerInPipeline[T <: ChannelHandler: ClassTag](
     pipeline: ChannelPipeline
   ): Option[T] = {
     val clazz = implicitly[ClassTag[T]].runtimeClass
 
-    pipeline.toMap.asScala.values.find {
-      case h if clazz.isInstance(h) => true
-      case _ => false
-    }.map(_.asInstanceOf[T])
+    pipeline.toMap.asScala.values
+      .find {
+        case h if clazz.isInstance(h) => true
+        case _ => false
+      }
+      .map(_.asInstanceOf[T])
   }
 
   private[this] def makeTransporterPipeline(
@@ -88,12 +93,18 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     val transporter = new Netty3Transporter[Int, Int](pipelineFactory, unresolvedAddr, inputParams)
     assert(transporter.name == inputParams[Label].label)
     assert(transporter.pipelineFactory == pipelineFactory)
-    assert(transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send)
-    assert(transporter.channelOptions.get("receiveBufferSize") == inputParams[Transport.BufferSizes].recv)
+    assert(
+      transporter.channelOptions.get("sendBufferSize") == inputParams[Transport.BufferSizes].send
+    )
+    assert(
+      transporter.channelOptions.get("receiveBufferSize") == inputParams[Transport.BufferSizes].recv
+    )
     assert(transporter.channelOptions.get("keepAlive") == inputParams[Transport.Liveness].keepAlive)
-    assert(transporter.channelOptions.get("connectTimeoutMillis").get ==
-      inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds +
-      inputParams[LatencyCompensation.Compensation].howlong.inMilliseconds)
+    assert(
+      transporter.channelOptions.get("connectTimeoutMillis").get ==
+        inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds +
+          inputParams[LatencyCompensation.Compensation].howlong.inMilliseconds
+    )
   }
 
   test("newPipeline handles unresolved InetSocketAddresses") {
@@ -282,7 +293,9 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     assert(httpConnectHandler.isEmpty)
   }
 
-  test("HttpConnectHandler is not added when HttpProxy is configured and transporter uses an unresolved address") {
+  test(
+    "HttpConnectHandler is not added when HttpProxy is configured and transporter uses an unresolved address"
+  ) {
     val params = Stack.Params.empty + Label("name") +
       Transporter.HttpProxy(Some(unresolvedAddr), None)
     val pipeline = makeTransporterPipeline(params, unresolvedAddr)
@@ -290,7 +303,9 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
     assert(httpConnectHandler.isEmpty)
   }
 
-  test("HttpConnectHandler is added when HttpProxy is configured and transporter uses a resolved address") {
+  test(
+    "HttpConnectHandler is added when HttpProxy is configured and transporter uses a resolved address"
+  ) {
     val params = Stack.Params.empty + Label("name") +
       Transporter.HttpProxy(Some(unresolvedAddr), None)
     val pipeline = makeTransporterPipeline(params, linkLocalSockAddr)
@@ -332,7 +347,10 @@ class Netty3TransporterTest extends FunSuite with MockitoSugar with Eventually {
 
   test("SslHandler should close the channel if the remote peer closed TLS session") {
     val result = new SSLEngineResult(
-      SSLEngineResult.Status.CLOSED, SSLEngineResult.HandshakeStatus.NEED_UNWRAP, 0, 0
+      SSLEngineResult.Status.CLOSED,
+      SSLEngineResult.HandshakeStatus.NEED_UNWRAP,
+      0,
+      0
     )
 
     val session = mock[SSLSession]

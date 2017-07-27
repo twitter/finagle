@@ -6,8 +6,13 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.util.{Await, Duration, Future, Time, Promise, MockTimer}
-import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpVersion,
-  HttpResponseStatus, HttpResponse, LastHttpContent}
+import io.netty.handler.codec.http.{
+  DefaultFullHttpResponse,
+  HttpVersion,
+  HttpResponseStatus,
+  HttpResponse,
+  LastHttpContent
+}
 import java.net.{SocketAddress, InetSocketAddress}
 import java.security.cert.Certificate
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -36,9 +41,7 @@ class Http2TransporterTest extends FunSuite {
     }
   }
 
-  class BackingTransporter(
-      fn: SocketAddress => Transport[Any, Any])
-    extends Transporter[Any, Any] {
+  class BackingTransporter(fn: SocketAddress => Transport[Any, Any]) extends Transporter[Any, Any] {
 
     var count = 0
 
@@ -91,35 +94,33 @@ class Http2TransporterTest extends FunSuite {
     assert(t2.count == 1)
   }
 
-  class UpgradeTransport(
-      upgradeRep: UpgradeEvent,
-      addr: SocketAddress)
-    extends TransportProxy[Any, Any](new TestTransport(addr)) {
+  class UpgradeTransport(upgradeRep: UpgradeEvent, addr: SocketAddress)
+      extends TransportProxy[Any, Any](new TestTransport(addr)) {
 
     @volatile var count = 0
     def write(msg: Any): Future[Unit] = Future.Done
-    def read(): Future[Any] = if (count == 0) {
-      count += 1
-      Future.value(upgradeRep)
-    } else {
-      if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL && count == 1) {
+    def read(): Future[Any] =
+      if (count == 0) {
         count += 1
-        val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Future.value(Http2ClientDowngrader.Message(rep, 1))
-      } else if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
-        count += 1
-        Future.never
+        Future.value(upgradeRep)
       } else {
-        count += 1
-        val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Future.value(rep)
+        if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL && count == 1) {
+          count += 1
+          val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+          Future.value(Http2ClientDowngrader.Message(rep, 1))
+        } else if (upgradeRep == UpgradeEvent.UPGRADE_SUCCESSFUL) {
+          count += 1
+          Future.never
+        } else {
+          count += 1
+          val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+          Future.value(rep)
+        }
       }
-    }
   }
 
-  class UpgradingTransporter(
-      upgradeRep: UpgradeEvent)
-    extends BackingTransporter(new UpgradeTransport(upgradeRep, _))
+  class UpgradingTransporter(upgradeRep: UpgradeEvent)
+      extends BackingTransporter(new UpgradeTransport(upgradeRep, _))
 
   test("Http2Transporter reuses the http2 transporter postupgrade") {
     val t1 = new UpgradingTransporter(UpgradeEvent.UPGRADE_SUCCESSFUL)
@@ -203,7 +204,7 @@ class Http2TransporterTest extends FunSuite {
     var first = true
     var count = 0
 
-    def remoteAddress: SocketAddress = new SocketAddress { }
+    def remoteAddress: SocketAddress = new SocketAddress {}
     def apply(): Future[Transport[Any, Any]] = {
       count += 1
       if (first) {

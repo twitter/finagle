@@ -11,8 +11,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class NumericTypeTest extends FunSuite with IntegrationClient {
   for (c <- client) {
-    Await.ready(c.query(
-      """CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
+    Await.ready(c.query("""CREATE TEMPORARY TABLE IF NOT EXISTS `numeric` (
         `smallint` smallint(6) NOT NULL,
         `tinyint` tinyint(4) NOT NULL,
         `mediumint` mediumint(9) NOT NULL,
@@ -25,8 +24,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
         PRIMARY KEY (`smallint`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
 
-    Await.ready(c.query(
-      """INSERT INTO `numeric` (`smallint`,
+    Await.ready(c.query("""INSERT INTO `numeric` (`smallint`,
         `tinyint`, `mediumint`, `int`,
         `bigint`, `float`, `double`, `decimal`, `bit`)
         VALUES (1, 2, 3, 4, 5, 1.61, 1.618, 1.61803398875, 1);"""))
@@ -117,8 +115,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 @RunWith(classOf[JUnitRunner])
 class BlobTypeTest extends FunSuite with IntegrationClient {
   for (c <- client) {
-    Await.ready(c.query(
-      """CREATE TEMPORARY TABLE `blobs` (
+    Await.ready(c.query("""CREATE TEMPORARY TABLE `blobs` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `char` char(5) DEFAULT NULL,
         `varchar` varchar(10) DEFAULT NULL,
@@ -135,8 +132,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
         PRIMARY KEY (`id`)
       ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;"""))
 
-    Await.ready(c.query(
-      """INSERT INTO `blobs` (`id`, `char`,
+    Await.ready(c.query("""INSERT INTO `blobs` (`id`, `char`,
         `varchar`, `tinytext`,
         `text`, `mediumtext`, `tinyblob`,
         `mediumblob`, `blob`, `binary`,
@@ -249,8 +245,8 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
 @RunWith(classOf[JUnitRunner])
 class DateTimeTypeTest extends FunSuite with IntegrationClient {
   for (c <- client) {
-    Await.ready(c.query(
-      """CREATE TEMPORARY TABLE `datetime` (
+    Await.ready(
+      c.query("""CREATE TEMPORARY TABLE `datetime` (
         `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
         `date` date NOT NULL,
         `datetime` datetime NOT NULL,
@@ -258,10 +254,10 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
         `time` time NOT NULL,
         `year` year(4) NOT NULL,
         PRIMARY KEY (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"""))
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;""")
+    )
 
-    Await.ready(c.query(
-      """INSERT INTO `datetime`
+    Await.ready(c.query("""INSERT INTO `datetime`
         (`id`, `date`, `datetime`, `timestamp`, `time`, `year`)
         VALUES (1, '2013-11-02', '2013-11-02 19:56:24',
         '2013-11-02 19:56:36', '19:56:32', '2013');"""))

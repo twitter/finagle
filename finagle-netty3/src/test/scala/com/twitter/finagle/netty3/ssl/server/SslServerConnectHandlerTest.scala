@@ -42,8 +42,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar {
     val verifier = mock[SslServerSessionVerifier]
 
     val connectHandler = new SslServerConnectHandler(sslHandler, config, verifier, onShutdown)
-    val event = new UpstreamChannelStateEvent(
-      channel, ChannelState.CONNECTED, remoteAddress)
+    val event = new UpstreamChannelStateEvent(channel, ChannelState.CONNECTED, remoteAddress)
 
     connectHandler.handleUpstream(ctx, event)
   }

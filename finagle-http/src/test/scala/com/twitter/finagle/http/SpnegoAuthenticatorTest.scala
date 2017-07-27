@@ -42,7 +42,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
 
   test("success") {
     val credentials = mock[GSSContext]
-    val clientToken: Token = Array[Byte](1,3,3,7)
+    val clientToken: Token = Array[Byte](1, 3, 3, 7)
     val credSrc = new Credentials.ClientSource with Credentials.ServerSource {
       def load() = Future(credentials)
       def init(c: GSSContext, t: Option[Token]) = Future(clientToken)
@@ -69,6 +69,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
   }
 
   test("isLoginValid returns correct result") {
+
     /** Temp class so we can expose isLoginValid which is protected by the JAAS trait */
     class JaasLoginTest extends Credentials.ClientSource with Credentials.JAAS {
       override def init(context: GSSContext, challengeToken: Option[Token]): Future[Token] = ???
@@ -153,17 +154,19 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     clientSrc: Option[Credentials.ClientSource] = None
   ) = {
     val service = mock[Service[Authenticated[Request], Response]]
-    val server = com.twitter.finagle.Http.serve(
-      "localhost:*", new ServerFilter(serverSrc) andThen service)
+    val server =
+      com.twitter.finagle.Http.serve("localhost:*", new ServerFilter(serverSrc) andThen service)
     val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
     val rawClient = com.twitter.finagle.Http.newService(s"localhost:$port")
 
     val client =
-      clientSrc.map { src =>
-        new ClientFilter(src) andThen rawClient
-      }.getOrElse {
-        rawClient
-      }
+      clientSrc
+        .map { src =>
+          new ClientFilter(src) andThen rawClient
+        }
+        .getOrElse {
+          rawClient
+        }
     (client, server, service)
   }
 }

@@ -59,7 +59,7 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     }
 
     test(prefix + "Response with 'Connection: close'") {
-      val service = Service.mk{ req: Request =>
+      val service = Service.mk { req: Request =>
         val resp = Response()
         resp.headerMap.set(Fields.Connection, "close")
         Future.value(resp)
@@ -79,7 +79,9 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     // This is a similar to a test in AbstractEndToEndTest, but checks the status of
     // the connection in a manner that is specific to HTTP/1.x
     test(prefix + ": closes the connection on request header fields too large") {
-      val service = Service.mk{ _: Request => Future.value(Response()) }
+      val service = Service.mk { _: Request =>
+        Future.value(Response())
+      }
 
       val client = connect(service)
       val request = Request("/")
@@ -109,7 +111,9 @@ abstract class AbstractHttp1EndToEndTest extends AbstractEndToEndTest {
     }
   }
 
-  private def connectionCloseTest(request: Request, service: HttpService)(connect: HttpService => HttpService): Unit = {
+  private def connectionCloseTest(request: Request, service: HttpService)(
+    connect: HttpService => HttpService
+  ): Unit = {
     val client = connect(service)
     val response = await(client(request))
     assert(response.status == Status.Ok)

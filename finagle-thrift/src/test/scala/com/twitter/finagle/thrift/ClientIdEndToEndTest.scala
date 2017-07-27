@@ -34,7 +34,8 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   val serviceToIface = new B.ServiceToClient(
     _: Service[ThriftClientRequest, Array[Byte]],
     _: TProtocolFactory,
-    ResponseClassifier.Default)
+    ResponseClassifier.Default
+  )
 
   val clientId = "test.devel"
 

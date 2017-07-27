@@ -35,10 +35,10 @@ object ReadableBufProcessorTest {
 }
 
 abstract class ReadableBufProcessorTest(
-    processable: String,
-    newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess))
-  extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+  processable: String,
+  newProcessable: (Array[Byte] => ReadableBufProcessorTest.CanProcess)
+) extends FunSuite
+    with GeneratorDrivenPropertyChecks {
   import ReadableBufProcessorTest._
 
   test(s"$processable: process throws exception when `from` < 0") {
@@ -68,7 +68,7 @@ abstract class ReadableBufProcessorTest(
   test(s"$processable: process returns -1 when `from` > readable bytes") {
     forAll { bytes: Array[Byte] =>
       val b = newProcessable(bytes)
-      val read = Math.floor(bytes.length/2).toInt
+      val read = Math.floor(bytes.length / 2).toInt
       b.readBytes(read)
       val readable = bytes.length - read
       assert(b.process(readable + 1, readable + 2, newExceptionalProcessor()) == -1)
@@ -114,8 +114,7 @@ abstract class ReadableBufProcessorTest(
         val b = newProcessable(bytes)
         assert(b.process(0, bytes.length, newConsumeAllProcessor) == -1)
         assert(b.process(0, bytes.length + 1, newConsumeAllProcessor) == -1)
-        assert(
-          b.process(1, bytes.length + 10, newConsumeAllProcessor) == -1)
+        assert(b.process(1, bytes.length + 10, newConsumeAllProcessor) == -1)
       }
     }
   }

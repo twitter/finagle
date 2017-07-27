@@ -7,7 +7,7 @@ import org.scalatest.FunSuite
 @RunWith(classOf[JUnitRunner])
 class ZooKeeperClientTest extends FunSuite {
   test("ZooKeeperReader.patToPathAndPrefix") {
-    import ZooKeeperReader.{patToPathAndPrefix=>p}
+    import ZooKeeperReader.{patToPathAndPrefix => p}
 
     intercept[IllegalArgumentException] { p("") }
     intercept[IllegalArgumentException] { p("foo/bar") }

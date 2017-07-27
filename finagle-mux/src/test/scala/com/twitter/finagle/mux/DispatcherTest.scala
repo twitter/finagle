@@ -15,15 +15,14 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class DispatcherTest extends FunSuite
-  with Eventually
-  with IntegrationPatience {
+class DispatcherTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("Discard request properly sent") {
     @volatile var handled = false
     val p = Promise[Response]()
-    p.setInterruptHandler { case t: Throwable =>
-      handled = true
+    p.setInterruptHandler {
+      case t: Throwable =>
+        handled = true
     }
 
     val svc = Service.mk[Request, Response](_ => p)
@@ -33,8 +32,8 @@ class DispatcherTest extends FunSuite
     val serverTrans = new QueueTransport[Message, Message](q1, q0)
 
     val server = ServerDispatcher.newRequestResponse(serverTrans, svc)
-    val session = new ClientSession(
-      clientTrans, FailureDetector.NullConfig, "test", NullStatsReceiver)
+    val session =
+      new ClientSession(clientTrans, FailureDetector.NullConfig, "test", NullStatsReceiver)
     val client = ClientDispatcher.newRequestResponse(session)
 
     val f = client(Request(Path.empty, Buf.Empty))

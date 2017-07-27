@@ -22,7 +22,11 @@ import org.scalatest.mock.MockitoSugar
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(classOf[JUnitRunner])
-class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience{
+class ServiceDiscovererTest
+    extends FunSuite
+    with MockitoSugar
+    with Eventually
+    with IntegrationPatience {
 
   class ServiceDiscovererWithExposedCache(
     varZkSession: Var[ZkSession],
@@ -36,7 +40,8 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
     }
   }
 
-  def ep(port: Int) = Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
+  def ep(port: Int) =
+    Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
   val ForeverEpoch = Epoch(Duration.Top, new MockTimer)
   val retryStream = RetryStream()
 
@@ -53,37 +58,45 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
     val port1 = 80 // not bound
     val port2 = 53 // ditto
     val ents = Seq[Entry](ep(port1), ep(port2), ep(3), ep(4))
-    val v1 = Vector(Seq(
-      Descriptor(Selector.Host("localhost", port1), 1.1, 1),
-      Descriptor(Selector.Host("localhost", port2), 1.4, 1),
-      Descriptor(Selector.Member("3"), 3.1, 1)))
+    val v1 = Vector(
+      Seq(
+        Descriptor(Selector.Host("localhost", port1), 1.1, 1),
+        Descriptor(Selector.Host("localhost", port2), 1.4, 1),
+        Descriptor(Selector.Member("3"), 3.1, 1)
+      )
+    )
     val v2 = Vector(Seq(Descriptor(Selector.Member(port2.toString), 2.0, 1)))
     val vecs = Seq(v1, v2)
 
-    assert(ServiceDiscoverer.zipWithWeights(ents, vecs.toSet).toSet == Set(
-      ep(port1) -> 1.1,
-      ep(port2) -> 2.8,
-      ep(3) -> 3.1,
-      ep(4) -> 1.0))
+    assert(
+      ServiceDiscoverer
+        .zipWithWeights(ents, vecs.toSet)
+        .toSet == Set(ep(port1) -> 1.1, ep(port2) -> 2.8, ep(3) -> 3.1, ep(4) -> 1.0)
+    )
   }
 
   test("New observation do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)), NullStatsReceiver, ForeverEpoch, timer)
+    val sd = new ServiceDiscoverer(
+      Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)),
+      NullStatsReceiver,
+      ForeverEpoch,
+      timer
+    )
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
 
-    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
-    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
     gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(WatchState.Pending)))
 
     assert(!f1.isDefined)
 
-    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Return(Node.Data(None, null))
 
     assert(f1.isDefined)
@@ -95,45 +108,67 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   test("Removed entries are removed from cache") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(retryStream,
-      watchedZk, NullStatsReceiver)), NullStatsReceiver)
+    val sd = new ServiceDiscovererWithExposedCache(
+      Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)),
+      NullStatsReceiver
+    )
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val cache = sd.cache
 
-    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
     assert(cache.keys == Set.empty)
 
-    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
-    gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
+    val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    gw.res() = Return(
+      Watched(
+        Node.Children(Seq("member_1"), null),
+        Var.value(new WatchState.Determined(NodeEvent.Created))
+      )
+    )
 
-    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Return(Node.Data(None, null))
 
     assert(cache.keys == Set("member_1"))
 
-    val gw2@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(3)
-    gw2.res() = Return(Watched(Node.Children(Seq.empty, null), Var.value(new WatchState.Determined(NodeEvent.Created))))
+    val gw2 @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(3)
+    gw2.res() = Return(
+      Watched(
+        Node.Children(Seq.empty, null),
+        Var.value(new WatchState.Determined(NodeEvent.Created))
+      )
+    )
 
     assert(cache.keys == Set.empty)
 
-    val gw3@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(4)
-    gw3.res() = Return(Watched(Node.Children(Seq("member_2"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
+    val gw3 @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(4)
+    gw3.res() = Return(
+      Watched(
+        Node.Children(Seq("member_2"), null),
+        Var.value(new WatchState.Determined(NodeEvent.Created))
+      )
+    )
 
-    val gd2@GetData("/foo/bar/member_2") = watchedZk.value.opq(5)
+    val gd2 @ GetData("/foo/bar/member_2") = watchedZk.value.opq(5)
     gd2.res() = Return(Node.Data(None, null))
 
     assert(cache.keys == Set("member_2"))
 
-    val gw4@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(6)
-    gw4.res() = Return(Watched(Node.Children(Seq("member_3", "member_4"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
+    val gw4 @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(6)
+    gw4.res() = Return(
+      Watched(
+        Node.Children(Seq("member_3", "member_4"), null),
+        Var.value(new WatchState.Determined(NodeEvent.Created))
+      )
+    )
 
-    val gd3@GetData("/foo/bar/member_3") = watchedZk.value.opq(7)
+    val gd3 @ GetData("/foo/bar/member_3") = watchedZk.value.opq(7)
     gd3.res() = Return(Node.Data(None, null))
-    val gd4@GetData("/foo/bar/member_4") = watchedZk.value.opq(8)
+    val gd4 @ GetData("/foo/bar/member_4") = watchedZk.value.opq(8)
     gd4.res() = Return(Node.Data(None, null))
 
     assert(cache.keys == Set("member_3", "member_4"))
@@ -142,23 +177,31 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   test("If all reads fail the serverset is in Failed state") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(retryStream,
-      watchedZk, NullStatsReceiver)), NullStatsReceiver, timer)
+    val sd = new ServiceDiscovererWithExposedCache(
+      Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)),
+      NullStatsReceiver,
+      timer
+    )
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val cache = sd.cache
 
-    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
-    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
-    gw.res() = Return(Watched(Node.Children(Seq("member_1", "member_2"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
+    val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    gw.res() = Return(
+      Watched(
+        Node.Children(Seq("member_1", "member_2"), null),
+        Var.value(new WatchState.Determined(NodeEvent.Created))
+      )
+    )
 
-    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Throw(new Exception)
 
-    val gd2@GetData("/foo/bar/member_2") = watchedZk.value.opq(3)
+    val gd2 @ GetData("/foo/bar/member_2") = watchedZk.value.opq(3)
     gd2.res() = Throw(new Exception)
 
     Await.result(f1, 1.second) match {
@@ -171,27 +214,33 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
     Time.withCurrentTimeFrozen { timeControl =>
       implicit val timer = new MockTimer
       val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-      val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(retryStream,
-        watchedZk, NullStatsReceiver)), NullStatsReceiver, timer)
+      val sd = new ServiceDiscovererWithExposedCache(
+        Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)),
+        NullStatsReceiver,
+        timer
+      )
 
       val currentValue = new AtomicReference[Activity.State[Seq[(Entry, Double)]]]
 
       // Test will become flaky if we don't capture this as the Closeable will be occasionally
       // closed by the CollectCloseables thread
-      val holdRef = sd("/foo/bar").states.filter(_ != Activity.Pending).register(Witness(currentValue))
+      val holdRef =
+        sd("/foo/bar").states.filter(_ != Activity.Pending).register(Witness(currentValue))
       val cache = sd.cache
 
-      val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+      val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
       val ewwatchv = Var[WatchState](WatchState.Pending)
       ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
-      val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
-      gw.res() = Return(Watched(Node.Children(Seq("member_1", "member_2"), null), Var.value(WatchState.Pending)))
+      val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+      gw.res() = Return(
+        Watched(Node.Children(Seq("member_1", "member_2"), null), Var.value(WatchState.Pending))
+      )
 
-      val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+      val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
       gd.res() = Throw(new Exception)
 
-      val gd2@GetData("/foo/bar/member_2") = watchedZk.value.opq(3)
+      val gd2 @ GetData("/foo/bar/member_2") = watchedZk.value.opq(3)
       gd2.res() = Return(Node.Data(Some(createEntry(1)), null))
 
       // Should succeed with only 1 resolved value
@@ -207,7 +256,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
         timeControl.advance(2.minutes)
         timer.tick()
 
-        val gd3@GetData("/foo/bar/member_1") = watchedZk.value.opq(4)
+        val gd3 @ GetData("/foo/bar/member_1") = watchedZk.value.opq(4)
         gd3.res() = Return(Node.Data(Some(createEntry(2)), null))
       }
 
@@ -222,22 +271,27 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   test("Consecutive observations do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(retryStream,watchedZk, NullStatsReceiver)), NullStatsReceiver, ForeverEpoch, timer)
+    val sd = new ServiceDiscoverer(
+      Var.value(new ZkSession(retryStream, watchedZk, NullStatsReceiver)),
+      NullStatsReceiver,
+      ForeverEpoch,
+      timer
+    )
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
 
-    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
-    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
     gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(WatchState.Pending)))
 
     assert(!f1.isDefined)
     assert(!f2.isDefined)
 
-    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Return(Node.Data(None, null))
 
     // ensure that we are hitting the cache: even though we called
@@ -250,7 +304,8 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
     implicit val timer = new MockTimer
     val fakeWatchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val watchedZkVar = new ReadWriteVar(new ZkSession(retryStream, fakeWatchedZk, NullStatsReceiver))
+    val watchedZkVar =
+      new ReadWriteVar(new ZkSession(retryStream, fakeWatchedZk, NullStatsReceiver))
     val sd = new ServiceDiscoverer(watchedZkVar, NullStatsReceiver, ForeverEpoch, timer)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
@@ -258,17 +313,17 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
 
     watchedZkVar.update(new ZkSession(retryStream, watchedZk, NullStatsReceiver))
 
-    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ew @ ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
 
-    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    val gw @ GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
     gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(WatchState.Pending)))
 
     assert(!f1.isDefined)
     assert(!f2.isDefined)
 
-    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    val gd @ GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Return(Node.Data(None, null))
 
     // ensure that we are hitting the cache: even though we called
@@ -325,38 +380,38 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
   }
 
   test("ServiceDiscoverer rawHealth is reported correctly") {
-      val zkSession = Event[ZkSession]()
-      val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
-      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer)
+    val zkSession = Event[ZkSession]()
+    val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
+    val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch, DefaultTimer)
 
-      val health = new AtomicReference[ClientHealth](ClientHealth.Healthy)
-      sd.rawHealth.changes.register(Witness {
-        health
-      })
+    val health = new AtomicReference[ClientHealth](ClientHealth.Healthy)
+    sd.rawHealth.changes.register(Witness {
+      health
+    })
 
-      // should start as healthy until updated otherwise
-      assert(health.get == ClientHealth.Healthy)
+    // should start as healthy until updated otherwise
+    assert(health.get == ClientHealth.Healthy)
 
-      val (session1, state1) = newZkSession()
-      zkSession.notify(session1)
-      assert(health.get == ClientHealth.Healthy)
+    val (session1, state1) = newZkSession()
+    zkSession.notify(session1)
+    assert(health.get == ClientHealth.Healthy)
 
-      // make unhealthy
-      state1.notify(WatchState.SessionState(SessionState.Expired))
-      assert(health.get == ClientHealth.Unhealthy)
+    // make unhealthy
+    state1.notify(WatchState.SessionState(SessionState.Expired))
+    assert(health.get == ClientHealth.Unhealthy)
 
-      // flip to a new session
-      val (session2, state2) = newZkSession()
-      state2.notify(WatchState.SessionState(SessionState.SyncConnected))
-      zkSession.notify(session2)
-      assert(health.get == ClientHealth.Healthy)
+    // flip to a new session
+    val (session2, state2) = newZkSession()
+    state2.notify(WatchState.SessionState(SessionState.SyncConnected))
+    zkSession.notify(session2)
+    assert(health.get == ClientHealth.Healthy)
 
-      // pulse the bad session (which is NOT the current session) and ensure we stay healthy
-      state1.notify(WatchState.SessionState(SessionState.Disconnected))
-      assert(health.get == ClientHealth.Healthy)
+    // pulse the bad session (which is NOT the current session) and ensure we stay healthy
+    state1.notify(WatchState.SessionState(SessionState.Disconnected))
+    assert(health.get == ClientHealth.Healthy)
 
-      // pulse the current session with an event that should be ignored
-      state2.notify(WatchState.Pending)
-      assert(health.get == ClientHealth.Healthy)
+    // pulse the current session with an event that should be ignored
+    state2.notify(WatchState.Pending)
+    assert(health.get == ClientHealth.Healthy)
   }
 }

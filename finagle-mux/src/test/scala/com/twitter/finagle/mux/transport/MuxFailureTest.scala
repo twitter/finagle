@@ -18,7 +18,7 @@ class MuxFailureTest extends FunSuite {
 
   test("convert flags with c.t.f.FailureFlags") {
     val flagTests = Seq(
-      (FailureFlags.Retryable|FailureFlags.Rejected, MuxFailure.Retryable|MuxFailure.Rejected),
+      (FailureFlags.Retryable | FailureFlags.Rejected, MuxFailure.Retryable | MuxFailure.Rejected),
       (FailureFlags.NonRetryable, MuxFailure.NonRetryable),
       (0L, 0L)
     )

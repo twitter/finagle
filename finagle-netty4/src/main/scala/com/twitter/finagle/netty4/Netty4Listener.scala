@@ -46,8 +46,8 @@ private[finagle] case class Netty4Listener[In, Out](
 )(implicit mIn: Manifest[In], mOut: Manifest[Out])
     extends Listener[In, Out] {
 
-  private[this] val listeningServerBuilder = new ListeningServerBuilder(
-    pipelineInit, params, setupMarshalling)
+  private[this] val listeningServerBuilder =
+    new ListeningServerBuilder(pipelineInit, params, setupMarshalling)
 
   /**
    * Listen for connections and apply the `serveTransport` callback on
@@ -60,8 +60,7 @@ private[finagle] case class Netty4Listener[In, Out](
    *       [[Transport.close() close]] on  [[Transport transports]].
    */
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer = {
-    val bridge = new ServerBridge(
-      transportFactory.andThen(Transport.cast[In, Out]), serveTransport)
+    val bridge = new ServerBridge(transportFactory.andThen(Transport.cast[In, Out]), serveTransport)
 
     listeningServerBuilder.bindWithBridge(bridge, addr)
   }

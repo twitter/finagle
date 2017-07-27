@@ -40,18 +40,10 @@ class StandardToggleMapTest extends FunSuite {
   test("apply returns the same instance for a given libraryName") {
     val name = "com.twitter.Test"
     val registry = newRegistry()
-    val tm0 = StandardToggleMap(
-      name,
-      NullStatsReceiver,
-      ToggleMap.newMutable(),
-      ServerInfo(),
-      registry)
-    val tm1 = StandardToggleMap(
-      name,
-      NullStatsReceiver,
-      ToggleMap.newMutable(),
-      ServerInfo(),
-      registry)
+    val tm0 =
+      StandardToggleMap(name, NullStatsReceiver, ToggleMap.newMutable(), ServerInfo(), registry)
+    val tm1 =
+      StandardToggleMap(name, NullStatsReceiver, ToggleMap.newMutable(), ServerInfo(), registry)
     assert(tm0 eq tm1)
   }
 
@@ -90,7 +82,8 @@ class StandardToggleMapTest extends FunSuite {
       NullStatsReceiver,
       NullToggleMap,
       ServerInfo.Empty,
-      newRegistry())
+      newRegistry()
+    )
 
     val togs = togMap.iterator.toSeq
 
@@ -118,7 +111,8 @@ class StandardToggleMapTest extends FunSuite {
       NullStatsReceiver,
       NullToggleMap,
       serverInfo,
-      newRegistry())
+      newRegistry()
+    )
 
     val togs = togMap.iterator.toSeq
 
@@ -136,8 +130,12 @@ class StandardToggleMapTest extends FunSuite {
   test("selectResource ignores duplicate inputs") {
     // this will have a corresponding file in test/resources/com/twitter/toggles/configs/
     val rsc = getClass.getClassLoader
-      .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json")
-      .asScala.toSeq.head
+      .getResources(
+        "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json"
+      )
+      .asScala
+      .toSeq
+      .head
 
     val selected = StandardToggleMap.selectResource("configName", Seq(rsc, rsc))
     assert(selected == rsc)
@@ -146,11 +144,17 @@ class StandardToggleMapTest extends FunSuite {
   test("selectResource fails with multiple unique inputs") {
     // these will have a corresponding file in test/resources/com/twitter/toggles/configs/
     val rsc1 = getClass.getClassLoader
-      .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json")
-      .asScala.toSeq.head
+      .getResources(
+        "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json"
+      )
+      .asScala
+      .toSeq
+      .head
     val rsc2 = getClass.getClassLoader
       .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Valid.json")
-      .asScala.toSeq.head
+      .asScala
+      .toSeq
+      .head
 
     intercept[IllegalArgumentException] {
       StandardToggleMap.selectResource("configName", Seq(rsc1, rsc2))
@@ -177,7 +181,8 @@ class StandardToggleMapTest extends FunSuite {
       NullStatsReceiver,
       inMem,
       ServerInfo.Empty,
-      newRegistry())
+      newRegistry()
+    )
     flag.overrides.letClear("com.toggle.a") {
       // start without the flag or in-memory, and only the service loaded
       assertFraction(togMap, 1.0)
@@ -213,8 +218,7 @@ class StandardToggleMapTest extends FunSuite {
     // start with the toggle turned on.
     inMem.put(toggleName, 1.0)
 
-    val togMap = StandardToggleMap(
-      libraryName, stats, inMem, ServerInfo.Empty, newRegistry())
+    val togMap = StandardToggleMap(libraryName, stats, inMem, ServerInfo.Empty, newRegistry())
     val gauge = stats.gauges(Seq("toggles", libraryName, "checksum"))
     val initial = gauge()
 
@@ -226,7 +230,12 @@ class StandardToggleMapTest extends FunSuite {
   test("components") {
     val inMem = ToggleMap.newMutable()
     val togMap = StandardToggleMap(
-      "com.twitter.components", NullStatsReceiver, inMem, ServerInfo.Empty, newRegistry())
+      "com.twitter.components",
+      NullStatsReceiver,
+      inMem,
+      ServerInfo.Empty,
+      newRegistry()
+    )
 
     val components = ToggleMap.components(togMap)
     assert(5 == components.size, components.mkString(", "))

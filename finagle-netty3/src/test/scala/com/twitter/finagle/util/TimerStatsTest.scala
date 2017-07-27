@@ -12,17 +12,15 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class TimerStatsTest extends FunSuite
-  with MockitoSugar
-  with Eventually
-  with IntegrationPatience
-{
+class TimerStatsTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
 
   test("deviation") {
     val tickDuration = 10.milliseconds
     val hwt = new netty.HashedWheelTimer(
       new NamedPoolThreadFactory(getClass.getSimpleName),
-      tickDuration.inMillis, TimeUnit.MILLISECONDS)
+      tickDuration.inMillis,
+      TimeUnit.MILLISECONDS
+    )
     val sr = new InMemoryStatsReceiver()
     val deviation: ReadableStat = sr.stat("deviation_ms")
     assert(deviation().isEmpty)
@@ -40,7 +38,9 @@ class TimerStatsTest extends FunSuite
     val tickDuration = 10.milliseconds
     val hwt = new netty.HashedWheelTimer(
       new NamedPoolThreadFactory(getClass.getSimpleName),
-      tickDuration.inMillis, TimeUnit.MILLISECONDS)
+      tickDuration.inMillis,
+      TimeUnit.MILLISECONDS
+    )
     val sr = new InMemoryStatsReceiver()
     val pendingTimeouts: ReadableStat = sr.stat("pending_tasks")
 

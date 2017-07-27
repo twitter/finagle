@@ -8,7 +8,7 @@ import com.twitter.util.{Time, Future}
  */
 class MockService extends Service[Request, Result] {
   var requests = List[Request]()
-  val resultSet = new ResultSet(fields=Seq(), rows=Seq())
+  val resultSet = new ResultSet(fields = Seq(), rows = Seq())
 
   def apply(request: Request): Future[Result] = {
     requests = requests ++ List(request)
@@ -16,7 +16,8 @@ class MockService extends Service[Request, Result] {
   }
 }
 
-class MockServiceFactory(service: Service[Request, Result]) extends ServiceFactory[Request, Result] {
+class MockServiceFactory(service: Service[Request, Result])
+    extends ServiceFactory[Request, Result] {
   def apply(conn: ClientConnection): Future[Service[Request, Result]] = Future.value(service)
   def close(deadline: Time): Future[Unit] = Future.Unit
 }

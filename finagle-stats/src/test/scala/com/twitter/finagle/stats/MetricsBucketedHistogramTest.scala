@@ -18,9 +18,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
     // the next snap window while the test does `roll()`s.
     Time.withTimeAt(Time.fromSeconds(1439242122)) { tc =>
       val ps = Array[Double](0.5, 0.9)
-      val h = new MetricsBucketedHistogram(
-        name = "h",
-        percentiles = ps)
+      val h = new MetricsBucketedHistogram(name = "h", percentiles = ps)
 
       def roll(): Unit = {
         tc.advance(60.seconds)
@@ -140,8 +138,9 @@ class MetricsBucketedHistogramTest extends FunSuite {
       h.add(Int.MaxValue)
       // roll to window 2 (this should make data A visible after a call to snapshot)
       roll()
-      assert(details.counts == Seq(BucketAndCount(1, 2, 1),
-        BucketAndCount(2137204091, Int.MaxValue, 1)))
+      assert(
+        details.counts == Seq(BucketAndCount(1, 2, 1), BucketAndCount(2137204091, Int.MaxValue, 1))
+      )
     }
   }
 
@@ -197,13 +196,15 @@ class MetricsBucketedHistogramTest extends FunSuite {
       h.add(10)
       tc.advance(1.minute - 4.seconds)
       h.snapshot()
-      assert(details.counts == Seq(
-        BucketAndCount(6, 7, 1),
-        BucketAndCount(7, 8, 1),
-        BucketAndCount(8, 9, 1),
-        BucketAndCount(9, 10, 1),
-        BucketAndCount(10, 11, 1)
-      ))
+      assert(
+        details.counts == Seq(
+          BucketAndCount(6, 7, 1),
+          BucketAndCount(7, 8, 1),
+          BucketAndCount(8, 9, 1),
+          BucketAndCount(9, 10, 1),
+          BucketAndCount(10, 11, 1)
+        )
+      )
     }
   }
 

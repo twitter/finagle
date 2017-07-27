@@ -9,8 +9,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
-class JsonToggleMapTest extends FunSuite
-  with GeneratorDrivenPropertyChecks {
+class JsonToggleMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   import JsonToggleMap.{DescriptionIgnored, DescriptionRequired}
 
@@ -58,7 +57,8 @@ class JsonToggleMapTest extends FunSuite
   }
 
   test("parse invalid JSON string with empty description") {
-    assertParseFails("""
+    assertParseFails(
+      """
       |{"toggles": [
       |    { "id": "com.twitter.EmptyDescription",
       |      "description": "    ",
@@ -66,7 +66,8 @@ class JsonToggleMapTest extends FunSuite
       |    }
       |  ]
       |}""".stripMargin,
-      DescriptionRequired)
+      DescriptionRequired
+    )
   }
 
   private val jsonWithNoDescription = """
@@ -171,9 +172,12 @@ class JsonToggleMapTest extends FunSuite
   }
 
   test("parse valid JSON resource file") {
-    val rscs = getClass.getClassLoader.getResources(
-      "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Valid.json"
-    ).asScala.toSeq
+    val rscs = getClass.getClassLoader
+      .getResources(
+        "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Valid.json"
+      )
+      .asScala
+      .toSeq
 
     assert(1 == rscs.size)
     validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionIgnored))
@@ -183,9 +187,12 @@ class JsonToggleMapTest extends FunSuite
   test("parse invalid JSON resource file") {
     // this json file is missing an "id" on a toggle definition and therefore
     // should fail to parse.
-    val rscs = getClass.getClassLoader.getResources(
-      "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Invalid.json"
-    ).asScala.toSeq
+    val rscs = getClass.getClassLoader
+      .getResources(
+        "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Invalid.json"
+      )
+      .asScala
+      .toSeq
 
     assert(1 == rscs.size)
     JsonToggleMap.parse(rscs.head, DescriptionIgnored) match {

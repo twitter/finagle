@@ -21,16 +21,18 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   def makeRequest(version: Version, headers: (String, String)*) = {
     val request = Request(version, Method.Get, "/")
-    headers.foreach { case (k, v) =>
-      request.headerMap.set(k, v)
+    headers.foreach {
+      case (k, v) =>
+        request.headerMap.set(k, v)
     }
     request
   }
 
   def makeResponse(version: Version, headers: (String, String)*) = {
     val response = Response(version, Status.Ok)
-    headers.foreach { case (k, v) =>
-      response.headerMap.set(k, v)
+    headers.foreach {
+      case (k, v) =>
+        response.headerMap.set(k, v)
     }
     response
   }
@@ -99,7 +101,8 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     assert(!manager.shouldClose())
     manager.observeResponse(
       makeResponse(Version.Http11, Fields.ContentLength -> "1", "Connection" -> "close"),
-      Future.Done)
+      Future.Done
+    )
     assert(manager.shouldClose())
   }
 
@@ -129,12 +132,12 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   }
 
   test("not terminate on a response with a status code that must not have a body") {
-    val reps = Seq(                        // Status code
-      Response(Status.Continue),           // 100
+    val reps = Seq( // Status code
+      Response(Status.Continue), // 100
       Response(Status.SwitchingProtocols), // 101
-      Response(Status.Processing),         // 102
-      Response(Status.NoContent),          // 204
-      Response(Status.NotModified)         // 304
+      Response(Status.Processing), // 102
+      Response(Status.NoContent), // 204
+      Response(Status.NotModified) // 304
     )
 
     reps.foreach { rep =>
@@ -162,7 +165,8 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
     val disp = new HttpClientDispatcher(
       new HttpTransport(new IdentityStreamTransport(trans)),
-      NullStatsReceiver)
+      NullStatsReceiver
+    )
 
     val wp = new Promise[Unit]
     when(trans.write(any[Request])).thenReturn(wp)
@@ -200,7 +204,8 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     perform(
       makeRequest(Version.Http11),
       makeResponse(Version.Http11, Fields.ContentLength -> "1"),
-      false)
+      false
+    )
   }
 
   // Note: by way of the codec, this reply is already taken care of.

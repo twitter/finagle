@@ -26,6 +26,7 @@ private trait Server extends EndpointFactory[Unit, Unit] {
  * it creates.
  */
 private object ServerFactory {
+
   /**
    * Creates a [[Server]] with the given `id` and applies `nextLatency`
    * latency for each request.

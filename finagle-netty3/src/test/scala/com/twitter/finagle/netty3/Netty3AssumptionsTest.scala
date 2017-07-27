@@ -17,8 +17,7 @@ class Netty3AssumptionsTest extends FunSuite {
   private[this] val executor = Executors.newCachedThreadPool()
 
   def makeServer() = {
-    val bootstrap = new ServerBootstrap(
-      new NioServerSocketChannelFactory(executor, executor))
+    val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(executor, executor))
     bootstrap.setPipelineFactory(new ChannelPipelineFactory {
       def getPipeline = {
         val pipeline = Channels.pipeline()
@@ -32,7 +31,6 @@ class Netty3AssumptionsTest extends FunSuite {
     })
     bootstrap.bind(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
   }
-
 
   test("Channel.close() should leave the channel in a closed state [immediately]") {
 
@@ -52,18 +50,20 @@ class Netty3AssumptionsTest extends FunSuite {
 
     val latch = new CountDownLatch(1)
 
-    bootstrap.connect(addr).addListener(new ChannelFutureListener {
-      override def operationComplete(f: ChannelFuture): Unit =
-        if (f.isSuccess) {
-          val channel = f.getChannel
-          assert(channel.isOpen)
-          Channels.close(channel)
-          assert(!channel.isOpen)
-          latch.countDown()
-        } else {
-          throw new Exception("connect attempt failed: " + f)
-        }
-    })
+    bootstrap
+      .connect(addr)
+      .addListener(new ChannelFutureListener {
+        override def operationComplete(f: ChannelFuture): Unit =
+          if (f.isSuccess) {
+            val channel = f.getChannel
+            assert(channel.isOpen)
+            Channels.close(channel)
+            assert(!channel.isOpen)
+            latch.countDown()
+          } else {
+            throw new Exception("connect attempt failed: " + f)
+          }
+      })
 
     assert(latch.await(1.second))
 

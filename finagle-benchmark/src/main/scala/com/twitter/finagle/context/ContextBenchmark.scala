@@ -57,7 +57,7 @@ class ContextBenchmark extends StdBenchAnnotations {
   @Benchmark
   def get(): Boolean = doInContext {
     broadcast.get(unusedKey).isEmpty &&
-      broadcast.get(shadowedKey).isDefined
+    broadcast.get(shadowedKey).isDefined
   }
 
   def doInContext[T](fn: => T): T = {

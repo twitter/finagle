@@ -15,7 +15,7 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
 
-  case class ValidateThriftServiceContext(p: Promise[Array[Byte]] = new Promise[Array[Byte]]){
+  case class ValidateThriftServiceContext(p: Promise[Array[Byte]] = new Promise[Array[Byte]]) {
     def newValidate() = new ValidateThriftService(service, protocolFactory)
 
     lazy val service: Service[ThriftClientRequest, Array[Byte]] = {
@@ -65,7 +65,8 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       TApplicationException.INVALID_MESSAGE_TYPE,
       TApplicationException.MISSING_RESULT,
       TApplicationException.UNKNOWN,
-      TApplicationException.WRONG_METHOD_NAME)
+      TApplicationException.WRONG_METHOD_NAME
+    )
 
     for (typ <- codes) {
       val buf = new OutputBuffer(protocolFactory)
@@ -96,8 +97,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
     val c = ValidateThriftServiceContext()
     import c._
 
-    val codes = Seq(TApplicationException.INTERNAL_ERROR,
-      TApplicationException.UNKNOWN_METHOD)
+    val codes = Seq(TApplicationException.INTERNAL_ERROR, TApplicationException.UNKNOWN_METHOD)
 
     for (typ <- codes) {
       val buf = new OutputBuffer(protocolFactory)

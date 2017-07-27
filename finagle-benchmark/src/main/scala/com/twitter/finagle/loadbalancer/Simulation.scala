@@ -15,14 +15,12 @@ private object Simulation extends com.twitter.app.App {
   val bal = flag("bal", "p2c", "The load balancer used by the clients")
 
   val coldStartBackend = flag("coldstart", false, "Add a cold starting backend")
-  val slowMiddleBackend = flag("slowmiddle", false,
-    "Adds a fast-then-slow-then-fast again backend")
+  val slowMiddleBackend = flag("slowmiddle", false, "Adds a fast-then-slow-then-fast again backend")
 
   val showProgress = flag("showprogress", false, "Print stats each second")
-  val showSummary = flag("showsummary", true,
-    "Print a stats summary at the end of the test")
-  val showLoadDist = flag("showloaddist", true,
-    "Print a summary of server load distribution at the end of the test")
+  val showSummary = flag("showsummary", true, "Print a stats summary at the end of the test")
+  val showLoadDist =
+    flag("showloaddist", true, "Print a summary of server load distribution at the end of the test")
 
   // Exception returned by balancers when they have no members in the set.
   private val noBrokers = new NoBrokersAvailableException
@@ -40,10 +38,14 @@ private object Simulation extends com.twitter.app.App {
     val url = getClass.getClassLoader.getResource("real_latencies.data")
     val stableLatency = LatencyProfile.fromFile(url)
 
-    val servers = Var(Seq.tabulate(nBackends()) { _ =>
-      val id = genServerId()
-      ServerFactory(id, stableLatency, stats.scope(s"srv_${id}"))
-    }.toSet)
+    val servers = Var(
+      Seq
+        .tabulate(nBackends()) { _ =>
+          val id = genServerId()
+          ServerFactory(id, stableLatency, stats.scope(s"srv_${id}"))
+        }
+        .toSet
+    )
 
     val activityServers = Activity(servers.map { srvs =>
       Activity.Ok(srvs.toVector)
@@ -63,30 +65,48 @@ private object Simulation extends com.twitter.app.App {
       // of clients (even and odds) running a separate aperture
       // config.
       val balancer = bal() match {
-        case "p2c" => Balancers.p2c().newBalancer(
-          activityServers,
-          noBrokers,
-          Stack.Params.empty + param.Stats(sr.scope("p2c")))
-        case "ewma" => Balancers.p2cPeakEwma().newBalancer(
-          activityServers,
-          noBrokers,
-          Stack.Params.empty + param.Stats(sr.scope("p2c_ewma")))
+        case "p2c" =>
+          Balancers
+            .p2c()
+            .newBalancer(
+              activityServers,
+              noBrokers,
+              Stack.Params.empty + param.Stats(sr.scope("p2c"))
+            )
+        case "ewma" =>
+          Balancers
+            .p2cPeakEwma()
+            .newBalancer(
+              activityServers,
+              noBrokers,
+              Stack.Params.empty + param.Stats(sr.scope("p2c_ewma"))
+            )
         case "aperture" =>
-          Balancers.aperture().newBalancer(
-            activityServers,
-            noBrokers,
-            Stack.Params.empty + param.Stats(sr.scope("aperture")))
+          Balancers
+            .aperture()
+            .newBalancer(
+              activityServers,
+              noBrokers,
+              Stack.Params.empty + param.Stats(sr.scope("aperture"))
+            )
         case "rr" =>
-          Balancers.roundRobin().newBalancer(
-            activityServers,
-            noBrokers,
-            Stack.Params.empty + param.Stats(sr.scope("round_robin")))
+          Balancers
+            .roundRobin()
+            .newBalancer(
+              activityServers,
+              noBrokers,
+              Stack.Params.empty + param.Stats(sr.scope("round_robin"))
+            )
       }
       ClientFactory(id, balancer, sr)
     }
 
     val query: () => Future[Unit] = () => {
-      Future.collect(clients.map { clnt => clnt(()) }).unit
+      Future
+        .collect(clients.map { clnt =>
+          clnt(())
+        })
+        .unit
     }
 
     val elapsed = Stopwatch.start()
@@ -100,19 +120,21 @@ private object Simulation extends com.twitter.app.App {
     // the simulation. They should probably be defined in terms of a ratio
     // of the running time to be more flexible.
     if (coldStartBackend()) {
-      val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
+      val coldStart = p.warmup(10.seconds) _ andThen p.slowWithin(19.seconds, 23.seconds, 10)
       servers() += ServerFactory(
         genServerId(),
         coldStart(stableLatency),
-        stats.scope("srv_cold_start"))
+        stats.scope("srv_cold_start")
+      )
     }
 
     if (slowMiddleBackend()) {
-      val slowMiddle = p.slowWithin(15.seconds, 45.seconds, 10)_
+      val slowMiddle = p.slowWithin(15.seconds, 45.seconds, 10) _
       servers() += ServerFactory(
         genServerId(),
         slowMiddle(stableLatency),
-        stats.scope("srv_slow_middle"))
+        stats.scope("srv_slow_middle")
+      )
     }
 
     // Note, it's important to actually elapse time here instead of
@@ -155,8 +177,10 @@ private object Simulation extends com.twitter.app.App {
       srvs.sortBy(_.count).foreach { srv =>
         val variance = math.abs(srv.count - optimal)
         val variancePct = (variance / optimal.toDouble) * 100
-        println(s"srv=${srv.toString} load=${srv.count} " +
-          f"variance=$variance%1.2f (${variancePct}%1.2f%%)")
+        println(
+          s"srv=${srv.toString} load=${srv.count} " +
+            f"variance=$variance%1.2f (${variancePct}%1.2f%%)"
+        )
       }
       // TODO: export standard deviation.
     }

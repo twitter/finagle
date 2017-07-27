@@ -23,7 +23,8 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
       Future.value(PrepareOK(stmtId, 1, 1, 0))
     }
 
-    val cache = Caffeine.newBuilder()
+    val cache = Caffeine
+      .newBuilder()
       .maximumSize(11)
       .executor(new Executor { def execute(r: Runnable) = r.run() })
 

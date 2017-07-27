@@ -19,7 +19,7 @@ class MultipartTest extends FunSuite {
    *   <input type="submit" name="submit" value="Submit">
    * </form>
    */
-   private[this] def newRequest(buf: Buf): Request =
+  private[this] def newRequest(buf: Buf): Request =
     RequestBuilder()
       .url("http://example.com")
       .add(FileElement("groups", buf, Some("image/gif"), Some("dealwithit.gif")))
@@ -31,10 +31,16 @@ class MultipartTest extends FunSuite {
     req.method = Method.Post
     req.contentString = "abc=foo&def=123&abc=bar"
 
-    assert(req.multipart == Some(Multipart(Map(
-      "abc" -> Seq("foo", "bar"),
-      "def" -> Seq("123")
-      ), Map.empty[String, Seq[Multipart.FileUpload]]))
+    assert(
+      req.multipart == Some(
+        Multipart(
+          Map(
+            "abc" -> Seq("foo", "bar"),
+            "def" -> Seq("123")
+          ),
+          Map.empty[String, Seq[Multipart.FileUpload]]
+        )
+      )
     )
   }
 

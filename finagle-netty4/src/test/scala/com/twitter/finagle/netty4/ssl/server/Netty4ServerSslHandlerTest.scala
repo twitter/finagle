@@ -3,7 +3,10 @@ package com.twitter.finagle.netty4.ssl.server
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.KeyCredentials
 import com.twitter.finagle.ssl.server.{
-  SslServerConfiguration, SslServerEngineFactory, SslContextServerEngineFactory}
+  SslServerConfiguration,
+  SslServerEngineFactory,
+  SslContextServerEngineFactory
+}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.TempFile
 import io.netty.channel.embedded.EmbeddedChannel
@@ -34,11 +37,12 @@ class Netty4ServerSslHandlerTest extends FunSuite {
 
   def withContext(config: SslServerConfiguration): Stack.Params =
     withConfig(config) +
-    SslServerEngineFactory.Param(new SslContextServerEngineFactory(SSLContext.getDefault))
+      SslServerEngineFactory.Param(new SslContextServerEngineFactory(SSLContext.getDefault))
 
   val paramsConfiguration: Seq[Stack.Params] = Seq(
     withConfig(SslServerConfiguration(keyCredentials = useKeyCredentials())),
-    withContext(SslServerConfiguration()))
+    withContext(SslServerConfiguration())
+  )
 
   test("default doesn't contain ssl handler") {
     val ch = channel(Stack.Params.empty)
