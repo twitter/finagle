@@ -122,7 +122,8 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         }
 
         assert(
-          counter.rate() == (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
+          counter
+            .rate() == (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
         )
     }
   }
