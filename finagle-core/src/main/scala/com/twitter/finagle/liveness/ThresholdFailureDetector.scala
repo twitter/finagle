@@ -2,11 +2,7 @@ package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
-import com.twitter.finagle.stats.{
-  MultiCategorizingExceptionStatsHandler,
-  NullStatsReceiver,
-  StatsReceiver
-}
+import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver, Verbosity}
 import com.twitter.finagle.util._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -50,7 +46,7 @@ private class ThresholdFailureDetector(
 ) extends FailureDetector {
   require(windowSize > 0)
   private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
-  private[this] val pingLatencyStat = statsReceiver.stat("ping_latency_us")
+  private[this] val pingLatencyStat = statsReceiver.stat(Verbosity.Debug, "ping_latency_us")
   private[this] val closeCounter = statsReceiver.counter("close")
   private[this] val pingCounter = statsReceiver.counter("ping")
   private[this] val busyCounter = statsReceiver.counter("marked_busy")

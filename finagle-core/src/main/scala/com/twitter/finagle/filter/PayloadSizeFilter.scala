@@ -1,8 +1,8 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.Stack.{Role, Module1}
+import com.twitter.finagle.Stack.{Module1, Role}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.finagle._
 import com.twitter.util.Future
 
@@ -18,8 +18,8 @@ private[finagle] class PayloadSizeFilter[Req, Rep](
   repSize: Rep => Int
 ) extends SimpleFilter[Req, Rep] {
 
-  private[this] val requestBytes = statsReceiver.stat("request_payload_bytes")
-  private[this] val responseBytes = statsReceiver.stat("response_payload_bytes")
+  private[this] val requestBytes = statsReceiver.stat(Verbosity.Debug, "request_payload_bytes")
+  private[this] val responseBytes = statsReceiver.stat(Verbosity.Debug, "response_payload_bytes")
 
   private[this] val recordRepSize: Rep => Unit =
     rep => responseBytes.add(repSize(rep).toFloat)

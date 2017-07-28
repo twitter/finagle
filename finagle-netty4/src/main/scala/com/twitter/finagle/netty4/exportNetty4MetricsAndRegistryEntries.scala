@@ -1,7 +1,9 @@
 package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.Once
-import com.twitter.finagle.stats.{FinagleStatsReceiver, Gauge}
+import com.twitter.finagle.stats.{
+  FinagleStatsReceiver, Gauge, Verbosity, VerbosityAdjustingStatsReceiver
+}
 import com.twitter.util.registry.GlobalRegistry
 import io.netty.buffer.{PoolArenaMetric, PooledByteBufAllocator}
 import scala.collection.JavaConverters._
@@ -13,7 +15,10 @@ import scala.collection.mutable
  */
 private[netty4] object exportNetty4MetricsAndRegistryEntries {
 
-  private[this] val stats = FinagleStatsReceiver.scope("netty4")
+  private[this] val stats = new VerbosityAdjustingStatsReceiver(
+    FinagleStatsReceiver.scope("netty4"),
+    Verbosity.Debug
+  )
 
   private[this] val gauges = mutable.Set.empty[Gauge]
 

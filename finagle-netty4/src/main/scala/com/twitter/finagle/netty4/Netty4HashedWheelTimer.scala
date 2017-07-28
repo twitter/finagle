@@ -4,7 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.netty4.util.Netty4Timer
-import com.twitter.finagle.stats.{FinagleStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{FinagleStatsReceiver, StatsReceiver, Verbosity}
 import com.twitter.finagle.util.ServiceLoadedTimer
 import com.twitter.logging.Logger
 import com.twitter.util.{Duration, Time}
@@ -41,7 +41,7 @@ private class HashedWheelTimer(
   private object deviationStat extends io.netty.util.TimerTask {
 
     private[this] val tickDuration = timerTickDuration()
-    private[this] val deviationMs = statsReceiver.stat("timer", "deviation_ms")
+    private[this] val deviationMs = statsReceiver.stat(Verbosity.Debug, "timer", "deviation_ms")
     private[this] var nextAt = Time.now + tickDuration
 
     def run(timeout: io.netty.util.Timeout): Unit = {
@@ -55,7 +55,7 @@ private class HashedWheelTimer(
   }
 
   private object pendingTasksStat extends io.netty.util.TimerTask {
-    private[this] val pendingTasks = statsReceiver.stat("timer", "pending_tasks")
+    private[this] val pendingTasks = statsReceiver.stat(Verbosity.Debug, "timer", "pending_tasks")
 
     def run(timeout: io.netty.util.Timeout): Unit = {
       pendingTasks.add(self.pendingTimeouts)

@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandler.Sharable
@@ -39,13 +39,20 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionCount = new LongAdder()
 
   private[this] val connects = statsReceiver.counter("connects")
-  private[this] val connectionDuration = statsReceiver.stat("connection_duration")
-  private[this] val connectionReceivedBytes = statsReceiver.stat("connection_received_bytes")
-  private[this] val connectionSentBytes = statsReceiver.stat("connection_sent_bytes")
+
+  private[this] val connectionDuration =
+    statsReceiver.stat(Verbosity.Debug, "connection_duration")
+  private[this] val connectionReceivedBytes =
+    statsReceiver.stat(Verbosity.Debug, "connection_received_bytes")
+  private[this] val connectionSentBytes =
+    statsReceiver.stat(Verbosity.Debug, "connection_sent_bytes")
+  private[this] val writable =
+    statsReceiver.counter(Verbosity.Debug, "socket_writable_ms")
+  private[this] val unwritable =
+    statsReceiver.counter(Verbosity.Debug, "socket_unwritable_ms")
+
   private[this] val receivedBytes = statsReceiver.counter("received_bytes")
   private[this] val sentBytes = statsReceiver.counter("sent_bytes")
-  private[this] val writable = statsReceiver.counter("socket_writable_ms")
-  private[this] val unwritable = statsReceiver.counter("socket_unwritable_ms")
   private[this] val exceptions = statsReceiver.scope("exn")
   private[this] val closesCount = statsReceiver.counter("closes")
   private[this] val connections = statsReceiver.addGauge("connections") {

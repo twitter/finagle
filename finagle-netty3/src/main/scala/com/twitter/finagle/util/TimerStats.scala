@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Verbosity}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.{Try, Time, Duration}
 import java.lang.reflect.Field
@@ -24,7 +24,7 @@ private[finagle] object TimerStats {
     tickDuration: Duration,
     statsReceiver: StatsReceiver
   ): Unit = {
-    val deviation = statsReceiver.stat("deviation_ms")
+    val deviation = statsReceiver.stat(Verbosity.Debug, "deviation_ms")
 
     // it is thread-safe to update this variable in the timer thread
     // because a `HashedWheelTimer` always uses a single thread to run
@@ -56,7 +56,7 @@ private[finagle] object TimerStats {
     nextRunAt: () => Duration,
     statsReceiver: StatsReceiver
   ): Unit = {
-    val pendingTimeouts = statsReceiver.stat("pending_tasks")
+    val pendingTimeouts = statsReceiver.stat(Verbosity.Debug, "pending_tasks")
 
     // this represents HashedWheelTimer's pending queue of tasks
     // that have yet to be scheduled into a bucket
