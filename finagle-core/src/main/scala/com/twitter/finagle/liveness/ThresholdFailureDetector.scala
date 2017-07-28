@@ -2,7 +2,12 @@ package com.twitter.finagle.liveness
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
-import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver, Verbosity}
+import com.twitter.finagle.stats.{
+  MultiCategorizingExceptionStatsHandler,
+  NullStatsReceiver,
+  StatsReceiver,
+  Verbosity
+}
 import com.twitter.finagle.util._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference

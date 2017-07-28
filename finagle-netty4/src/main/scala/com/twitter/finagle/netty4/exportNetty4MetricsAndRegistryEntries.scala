@@ -2,7 +2,10 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.stats.{
-  FinagleStatsReceiver, Gauge, Verbosity, VerbosityAdjustingStatsReceiver
+  FinagleStatsReceiver,
+  Gauge,
+  Verbosity,
+  VerbosityAdjustingStatsReceiver
 }
 import com.twitter.util.registry.GlobalRegistry
 import io.netty.buffer.{PoolArenaMetric, PooledByteBufAllocator}
