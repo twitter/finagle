@@ -5,7 +5,7 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{BlacklistStatsReceiver, ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -23,6 +23,20 @@ import scala.util.control.NonFatal
 object ScribeRawZipkinTracer {
   val tracerCache = new TracerCache[ScribeRawZipkinTracer]
 
+  /**
+   * Only report `requests`, `success`, and `failures` (including underlying counters for
+   * individual exceptions).
+   */
+  private val statsReceiver: StatsReceiver = new BlacklistStatsReceiver(
+    ClientStatsReceiver,
+    {
+      case Seq(_, "requests") => false
+      case Seq(_, "success") => false
+      case Seq(_, "failures", _*) => false
+      case _ => true
+    }
+  )
+
   private[this] def newClient(
     scribeHost: String,
     scribePort: Int,
@@ -36,7 +50,7 @@ object ScribeRawZipkinTracer {
       )
       .name(name)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
-      .reportTo(ClientStatsReceiver)
+      .reportTo(statsReceiver)
       .hostConnectionLimit(5)
       // somewhat arbitrary, but bounded timeouts
       .timeout(1.second)
