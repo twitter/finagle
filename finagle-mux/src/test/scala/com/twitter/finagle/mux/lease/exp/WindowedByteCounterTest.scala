@@ -1,14 +1,12 @@
 package com.twitter.finagle.mux.lease.exp
 
+import com.twitter.conversions.time._
 import com.twitter.util._
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.util.Random
 
-@RunWith(classOf[JUnitRunner])
 class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationPatience {
 
   trait ByteCounterHelper {
@@ -53,7 +51,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
       closed = true
       nextPeriod()
 
-      counter.join()
+      counter.join(5.seconds.inMilliseconds)
     }
   }
 
@@ -66,7 +64,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
 
     assert(counter.close().poll == Some(Return.Unit))
 
-    counter.join()
+    counter.join(5.seconds.inMilliseconds)
     assert(counter.isAlive == false)
   }
 
