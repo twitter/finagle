@@ -5,7 +5,12 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, SimpleFilter, Thrift}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.stats.{BlacklistStatsReceiver, ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{
+  BlacklistStatsReceiver,
+  ClientStatsReceiver,
+  NullStatsReceiver,
+  StatsReceiver
+}
 import com.twitter.finagle.thrift.Protocols
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -28,8 +33,7 @@ object ScribeRawZipkinTracer {
    * individual exceptions).
    */
   private val statsReceiver: StatsReceiver = new BlacklistStatsReceiver(
-    ClientStatsReceiver,
-    {
+    ClientStatsReceiver, {
       case Seq(_, "requests") => false
       case Seq(_, "success") => false
       case Seq(_, "failures", _*) => false

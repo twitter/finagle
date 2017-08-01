@@ -45,7 +45,7 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
    * @param responses: per partition responses
    * @return merged response
    */
-  protected def mergeResponses(responses:Seq[Rep]): Rep
+  protected def mergeResponses(responses: Seq[Rep]): Rep
 
   final def apply(request: Req): Future[Rep] = {
     // Note that the services will be constructed in the implementing classes. So the
@@ -56,14 +56,13 @@ private[finagle] abstract class PartitioningService[Req, Rep] extends Service[Re
         getPartitionFor(request).flatMap(_(request))
       case servicesSeq =>
         // multiple partitions
-        Future.collect(
-          servicesSeq.map { partitionedRequest =>
-            getPartitionFor(partitionedRequest).flatMap(_(partitionedRequest))
-          }
-        ).map(mergeResponses)
+        Future
+          .collect(
+            servicesSeq.map { partitionedRequest =>
+              getPartitionFor(partitionedRequest).flatMap(_(partitionedRequest))
+            }
+          )
+          .map(mergeResponses)
     }
   }
 }
-
-
-

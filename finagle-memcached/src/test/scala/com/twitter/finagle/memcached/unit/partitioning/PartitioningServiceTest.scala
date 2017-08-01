@@ -17,17 +17,16 @@ import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import scala.collection.mutable
 
 class PartitioningServiceTest
-  extends FunSuite
-  with StringClient
-  with StringServer
-  with BeforeAndAfterEach
-{
+    extends FunSuite
+    with StringClient
+    with StringServer
+    with BeforeAndAfterEach {
   private[this] val EchoDelimiter = ':'
   private[this] val failingHosts = new mutable.HashSet[String]()
   private[this] val slowHosts = new mutable.HashSet[String]()
 
   private[this] var servers: Seq[(ListeningServer, InetSocketAddress, Int, Int)] = _
-  private[this] var client: Service[String,String] = _
+  private[this] var client: Service[String, String] = _
 
   override def beforeEach(): Unit = {
     failingHosts.clear()
@@ -45,9 +44,11 @@ class PartitioningServiceTest
         if (failingHosts.contains(servername)) {
           Future.exception(new RuntimeException(s"$servername failed!"))
         } else if (slowHosts.contains(servername)) {
-          Future.sleep(5.seconds)(DefaultTimer).before(
-            Future.value(s"Response from $servername: after sleep")
-          )
+          Future
+            .sleep(5.seconds)(DefaultTimer)
+            .before(
+              Future.value(s"Response from $servername: after sleep")
+            )
         } else {
           // sending back the hostname along with the request value, so that the caller can
           // assert that the request landed on the correct host
@@ -67,12 +68,13 @@ class PartitioningServiceTest
 
   private[this] def createClient(
     sr: InMemoryStatsReceiver
-  ): Service[String,String] = {
+  ): Service[String, String] = {
     val dest: Name = Name.bound(servers.map(s => Address(s._2)): _*)
 
     // create a partitioning aware finagle client by inserting the PartitioningService appropriately
     val newClientStack =
-      StackClient.newStack[String, String]
+      StackClient
+        .newStack[String, String]
         .insertAfter(
           BindingFactory.role,
           SimplePartitioningService.module
@@ -102,9 +104,10 @@ class PartitioningServiceTest
       // wait for all three to finish
       Await.result(Future.join(resFutures), 1.second)
 
-      servers zip resFutures foreach { case (s, resFuture) =>
-        val res = Await.result(resFuture, 1.second)
-        assert(res == s"${s._3}${EchoDelimiter}server#${s._4}", s"i=$i $s res=$res")
+      servers zip resFutures foreach {
+        case (s, resFuture) =>
+          val res = Await.result(resFuture, 1.second)
+          assert(res == s"${s._3}${EchoDelimiter}server#${s._4}", s"i=$i $s res=$res")
       }
       assert(sr.counters(Seq("client", "loadbalancer", "adds")) == numServers, s"i=$i")
     }
@@ -122,9 +125,11 @@ class PartitioningServiceTest
 
     // using multiple iterations to test repeatability
     0 until 5 foreach { i =>
-      val batchedRequest: String = servers.map(s => s"${s._3}").mkString(
-        SimplePartitioningService.RequestDelimiter
-      )
+      val batchedRequest: String = servers
+        .map(s => s"${s._3}")
+        .mkString(
+          SimplePartitioningService.RequestDelimiter
+        )
       val batchedResponse = Await.result(client(batchedRequest), 1.second)
       val responses = batchedResponse.split(SimplePartitioningService.ResponseDelimiter)
       assert(responses.length == numServers)
@@ -156,9 +161,11 @@ class PartitioningServiceTest
     assert(servers.length == numServers)
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == numServers)
 
-    val batchedRequest: String = servers.map(s => s"${s._3}").mkString(
-      SimplePartitioningService.RequestDelimiter
-    )
+    val batchedRequest: String = servers
+      .map(s => s"${s._3}")
+      .mkString(
+        SimplePartitioningService.RequestDelimiter
+      )
     intercept[ChannelClosedException] {
       Await.result(client(batchedRequest), 1.second)
     }
@@ -175,9 +182,11 @@ class PartitioningServiceTest
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == numServers)
 
     Time.withCurrentTimeFrozen { timeControl =>
-      val batchedRequest: String = servers.map(s => {s._3 }).mkString(
-        SimplePartitioningService.RequestDelimiter
-      )
+      val batchedRequest: String = servers
+        .map(s => { s._3 })
+        .mkString(
+          SimplePartitioningService.RequestDelimiter
+        )
       intercept[IndividualRequestTimeoutException] {
         val future = client(batchedRequest)
         timeControl.advance(2.seconds)
@@ -234,10 +243,10 @@ private[this] object SimplePartitioningService {
  * will combine the smaller maps into a single key-value map before returning the response to the
  * caller.
  */
-private[this] class SimplePartitioningService (
-    underlying: Stack[ServiceFactory[String, String]],
-    params: Stack.Params,
-    dest: Var[Addr]
+private[this] class SimplePartitioningService(
+  underlying: Stack[ServiceFactory[String, String]],
+  params: Stack.Params,
+  dest: Var[Addr]
 ) extends PartitioningService[String, String] {
 
   import SimplePartitioningService._
@@ -256,7 +265,7 @@ private[this] class SimplePartitioningService (
     val serviceMapVar = dest.map {
       case Addr.Bound(addresses: Set[Address], _) =>
         addresses.map {
-          case addr@Address.Inet(ia: InetSocketAddress, _) =>
+          case addr @ Address.Inet(ia: InetSocketAddress, _) =>
             val service = mkService(addr)
             serviceMap.put(ia.getPort.toString, service)
             (ia.getPort.toString, service)
@@ -266,7 +275,8 @@ private[this] class SimplePartitioningService (
       case _ =>
         Map.empty
     }
-    serviceMapVar.changes.register(Witness({_ => }))
+    serviceMapVar.changes.register(Witness({ _ =>
+      }))
   }
 
   private[this] def mkService(addr: Address.Inet): Future[Service[String, String]] = {
