@@ -4,7 +4,7 @@ import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
 import com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.util.{DefaultLogger, LoadService}
 import com.twitter.util.FuturePool
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
@@ -82,6 +82,15 @@ private[twitter] object Init {
   }
 
   private[this] val once = Once {
+    LoadService[FinagleInit]().foreach { init =>
+      try {
+        init()
+      } catch {
+        case NonFatal(nf) =>
+          log.log(Level.WARNING, s"error running ${init.label}", nf)
+      }
+    }
+
     FinagleScheduler.init()
 
     val p = loadBuildProperties.getOrElse { new Properties() }

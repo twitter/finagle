@@ -236,6 +236,16 @@ lazy val finagleToggle = Project(
     jacksonLibs
 )
 
+lazy val finagleInit = Project(
+  id = "finagle-init",
+  base = file("finagle-init")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-init",
+  libraryDependencies
+)
+
 lazy val finagleCore = Project(
   id = "finagle-core",
   base = file("finagle-core")
@@ -261,7 +271,7 @@ lazy val finagleCore = Project(
     netty3Lib % "test"
   ),
   unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty3"), Compile)).value
-).dependsOn(finagleToggle)
+).dependsOn(finagleToggle, finagleInit)
 
 lazy val finagleNetty4 = Project(
   id = "finagle-netty4",

@@ -8,6 +8,7 @@ scala_library(
     '3rdparty/jvm/com/github/ben-manes/caffeine',
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     'finagle/finagle-core/src/main/resources',
+    'finagle/finagle-init/src/main/scala',
     'finagle/finagle-toggle',
     'util/util-app',
     'util/util-cache',

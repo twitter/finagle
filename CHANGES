@@ -34,6 +34,9 @@ New Features
     See the user guide for details: https://twitter.github.io/finagle/guide/MethodBuilder.html
     ``PHAB_ID=D60032``
 
+  * finagle-init: Introduce a module to support service-loading initialization
+    code. ``PHAB_ID=D75950``
+
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
