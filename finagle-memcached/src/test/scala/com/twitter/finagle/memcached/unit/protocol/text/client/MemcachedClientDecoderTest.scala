@@ -6,20 +6,20 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.client.MemcachedClientDecoder
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
 class MemcachedClientDecoderTest extends FunSuite {
 
   private class Context {
     val decoder = new MemcachedClientDecoder
 
-    def decodeString(data: String): IndexedSeq[Response] =
+    def decodeString(data: String): Seq[Response] =
       decodeBuf(Buf.Utf8(data))
 
-    private def decodeBuf(data: Buf): IndexedSeq[Response] = {
-      val out = new ArrayBuffer[Response]
+    private def decodeBuf(data: Buf): Seq[Response] = {
+      val out = new mutable.ArrayBuffer[Response]()
       decoder.decodeData(data, out)
-      out.toVector
+      out
     }
   }
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.unit.protocol.text
 
 import com.twitter.finagle.memcached.protocol.text.{FrameDecoder, FramingDecoder}
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, ByteReader}
 import org.scalatest.FunSuite
 import org.scalatest.mockito.MockitoSugar
 import scala.collection.mutable
@@ -25,35 +25,41 @@ class FramingDecoderTest extends FunSuite with MockitoSugar {
 
   test("return empty frame sequence on partial frame") {
     val framer = newFramer(-1)
-    assert(framer(Buf.Utf8("STO")) == Seq.empty)
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("STO")), outputMessages)
+    assert(outputMessages.isEmpty)
   }
 
   test("frame response without data") {
     val framer = newFramer(-1, -1) // second one because the framer checks to see if we need an empty Buf
-    assert(framer(Buf.Utf8("STORED\r\n")) == Seq(Buf.Utf8("STORED")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("STORED\r\n")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("STORED")))
   }
 
-  test("accumulate partial response frame") {
-    val framer = newFramer(-1, -1, -1, -1, -1)
-    assert(framer(Buf.Utf8("ST")).isEmpty)
-    assert(framer(Buf.Utf8("OR")).isEmpty)
-    assert(framer(Buf.Utf8("ED\r")).isEmpty)
-    assert(framer(Buf.Utf8("\n")) == Seq(Buf.Utf8("STORED")))
+  test("don't incremement reader's reader index if frame not read") {
+    val framer = newFramer(-1)
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    val reader = ByteReader(Buf.Utf8("STO"))
+    framer(reader, outputMessages)
+    assert(outputMessages.isEmpty)
+    assert(reader.remaining == 3)
   }
 
-  test("accumulate response frame after returning frame") {
+  test("incremement reader's reader index after returning frame") {
     val framer = newFramer(-1, -1, -1, -1, -1)
-    framer(Buf.Utf8("ST"))
-    assert(framer(Buf.Utf8("ORED\r\nNOT_ST")) == Seq(Buf.Utf8("STORED")))
-    assert(framer(Buf.Utf8("ORED\r\n")) == Seq(Buf.Utf8("NOT_STORED")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    val reader = ByteReader(Buf.Utf8("STORED\r\nNOT"))
+    framer(reader, outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("STORED")))
+    assert(reader.remaining == 3)
   }
 
   test("Frame multiple frames") {
-    val framer = newFramer(-1, -1, -1)
-    assert(
-      framer(Buf.Utf8("STORED\r\nNOT_STORED\r\n")) ==
-        Seq(Buf.Utf8("STORED"), Buf.Utf8("NOT_STORED"))
-    )
+    val framer = newFramer(-1, -1, -1, -1)
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("STORED\r\nNOT_STORED\r\nSTORED\r\n")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("STORED"), Buf.Utf8("NOT_STORED"), Buf.Utf8("STORED")))
   }
 
   test("Frame data frame") {
@@ -63,11 +69,12 @@ class FramingDecoderTest extends FunSuite with MockitoSugar {
       10, // gets more data, asks again and gets 10 again -> can decode
       -1 // has zero data, but asks again in case the decoder wants a zero size buffer
     )
-    assert(framer(Buf.Utf8("VALUE foo 0 10\r\n")) == Seq(Buf.Utf8("VALUE foo 0 10")))
-    assert(framer(Buf.Utf8("abcdefghij\r\n")) == Seq(Buf.Utf8("abcdefghij")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("VALUE foo 0 10\r\nabcdefghij\r\n")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("VALUE foo 0 10"), Buf.Utf8("abcdefghij")))
   }
 
-  test("accumulate partial data frames") {
+  test("frame data frame in second decode") {
     val framer = newFramer(
       -1, // initial line
       10, // need 10 bytes. Only 3 available.
@@ -76,39 +83,23 @@ class FramingDecoderTest extends FunSuite with MockitoSugar {
       10, // need 10 bytes. All 10 available.
       -1 // Back to text line
     )
-    assert(framer(Buf.Utf8("VALUE foo 0 10\r\nabc")) == Seq(Buf.Utf8("VALUE foo 0 10")))
-    framer(Buf.Utf8("def"))
-    framer(Buf.Utf8("ghi"))
-    assert(framer(Buf.Utf8("j\r\n")) == Seq(Buf.Utf8("abcdefghij")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("VALUE foo 0 10\r\nabc")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("VALUE foo 0 10")))
+    framer(ByteReader(Buf.Utf8("abcdefghij\r\n")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("VALUE foo 0 10"), Buf.Utf8("abcdefghij")))
   }
 
-  test("accumulate response after framing data frame") {
+  test("don't incremement reader's reader index if full data frame not read") {
     val framer = newFramer(
       -1, // initial line
-      3, // data frame
-      -1, // text mode
-      -1, // text mode for second half of text frame
-      -1 // still text mode
+      10 // need 10 bytes. Only 3 available.
     )
-    assert(
-      framer(Buf.Utf8("VALUE foo 0 3\r\nabc\r\nSTO")) ==
-        Seq(Buf.Utf8("VALUE foo 0 3"), Buf.Utf8("abc"))
-    )
-    assert(framer(Buf.Utf8("RED\r\n")) == Seq(Buf.Utf8("STORED")))
-  }
-
-  test("Don't frame data frame until newlines are received") {
-    val framer = newFramer(
-      -1, // text mode
-      3, // data mode 3 bytes, will have none.
-      3, // still data mode: now we have 3 but not the line endings
-      3, // still data mode: now we have 3 and the line endings
-      -1 // text mode
-    )
-
-    framer(Buf.Utf8("VALUE foo 0 3\r\n"))
-    assert(framer(Buf.Utf8("abc")) == Seq.empty)
-    assert(framer(Buf.Utf8("\r\n")) == Seq(Buf.Utf8("abc")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    val reader = ByteReader(Buf.Utf8("VALUE foo 0 10\r\nabc"))
+    framer(reader, outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("VALUE foo 0 10")))
+    assert(reader.remaining == 3)
   }
 
   test("Ignore newlines in the middle of data frames") {
@@ -118,7 +109,8 @@ class FramingDecoderTest extends FunSuite with MockitoSugar {
       10, // still data mode. Have all the data now.
       -1 // back to text mode
     )
-    framer(Buf.Utf8("VALUE foo 0 10\r\n"))
-    assert(framer(Buf.Utf8("abc\r\ndef\r\n\r\n")) == Seq(Buf.Utf8("abc\r\ndef\r\n")))
+    val outputMessages = new mutable.ArrayBuffer[Buf]()
+    framer(ByteReader(Buf.Utf8("VALUE foo 0 10\r\nabc\r\ndef\r\n\r\n")), outputMessages)
+    assert(outputMessages == Seq(Buf.Utf8("VALUE foo 0 10"), Buf.Utf8("abc\r\ndef\r\n")))
   }
 }

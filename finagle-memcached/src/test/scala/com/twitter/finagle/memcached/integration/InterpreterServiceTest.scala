@@ -47,6 +47,18 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
     assert(awaitResult(result) == Values(Seq(Value(key, value, None, Some(Buf.Utf8(zero))))))
   }
 
+  test("huge set value to force framing") {
+    val key = Buf.Utf8("key")
+    val value = Buf.Utf8("value" * 5000)
+    val zero = "0"
+    val result = for {
+      _ <- client(Delete(key))
+      _ <- client(Set(key, 0, Time.epoch, value))
+      r <- client(Get(Seq(key)))
+    } yield r
+    assert(awaitResult(result) == Values(Seq(Value(key, value, None, Some(Buf.Utf8(zero))))))
+  }
+
   test("quit") {
     val result = client(Quit())
     assert(awaitResult(result) == NoOp)
