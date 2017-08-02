@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.Metrics
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -9,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 class CounterDeltasTest extends FunSuite {
 
   test("deltas are computed based on last call to update") {
-    val metrics = Metrics.createDetached()
+    val metrics = new Metrics()
     val sr = new MetricsStatsReceiver(metrics)
 
     val cd = new CounterDeltas()
@@ -34,14 +33,14 @@ class CounterDeltasTest extends FunSuite {
     assertNoDelta()
 
     // after `update` we should be comparing against the current value, 6
-    cd.update(metrics.sampleCounters())
+    cd.update(metrics.counters)
     assert(counterDelta == 6)
     // this increment will not be visible until the next `update`,
     // so the delta remains stable at 6
     counter.incr(1)
     assert(counterDelta == 6)
     // this `update` should now pick up that earlier increment
-    cd.update(metrics.sampleCounters())
+    cd.update(metrics.counters)
     assert(counterDelta == 1)
   }
 

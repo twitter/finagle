@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
@@ -18,7 +17,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   private val zeroSecs = Time.fromSeconds(1423166700)
 
   test("readBooleanParam") {
-    val exporter = new JsonExporter(Metrics.createDetached())
+    val exporter = new JsonExporter(new Metrics())
     val r = Request()
 
     def assertParam(r: Request, expected: Boolean, default: Boolean): Unit =
@@ -42,7 +41,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("samples can be filtered") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
     val exporter = new JsonExporter(registry) {
       override lazy val statsFilterRegex: Option[Regex] = mkRegex("abc,ill_be_partially_matched.*")
     }
@@ -63,7 +62,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("empty regex filter string should not result in a regex") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
     val exporter = new JsonExporter(registry)
     assert(
       exporter.mkRegex("").isEmpty,
@@ -72,13 +71,13 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile defaults without exception") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
     val exporter1 = new JsonExporter(registry)
     assert(exporter1.statsFilterRegex.isEmpty)
   }
 
   test("statsFilterFile reads empty files") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
 
     statsFilterFile.let(Set(new File("/dev/null"))) {
       val exporter = new JsonExporter(registry)
@@ -87,7 +86,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile reads multiple files") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
 
     val tFile1 = File.createTempFile("regex", ".txt")
     tFile1.deleteOnExit()
@@ -115,7 +114,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("statsFilterFile and statsFilter combine") {
-    val registry = Metrics.createDetached()
+    val registry = new Metrics()
 
     val tFile = File.createTempFile("regex", ".txt")
     tFile.deleteOnExit()
@@ -136,11 +135,11 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("end-to-end fetching stats works") {
-    val registry = Metrics.createDetached()
-    val viewsCounter = registry.createCounter("views")
-    val gcCounter = registry.createCounter("jvm_gcs")
-    viewsCounter.increment()
-    gcCounter.increment()
+    val registry = new Metrics()
+    val viewsCounter = registry.getOrCreateCounter(Seq("views")).counter
+    val gcCounter = registry.getOrCreateCounter(Seq("jvm_gcs")).counter
+    viewsCounter.incr()
+    gcCounter.incr()
     val exporter = new JsonExporter(registry) {
       override lazy val statsFilterRegex: Option[Regex] = mkRegex("jvm.*,vie")
     }
@@ -184,8 +183,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     val reqNoPeriod = Request("/admin/metrics.json")
 
     val name = "anCounter"
-    val registry = Metrics.createDetached()
-    val counter = registry.createCounter(name)
+    val registry = new Metrics()
+    val counter = registry.getOrCreateCounter(Seq(name)).counter
 
     val timer = new MockTimer()
     val exporter = new JsonExporter(registry, timer)
@@ -209,7 +208,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
         }
 
         // Note: the `CounterDeltas.update()`s happen async
-        counter.add(11)
+        counter.incr(11)
         update()
         eventually {
           // with the param
@@ -217,7 +216,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
           assert(res == """{"anCounter":11}""")
         }
 
-        counter.add(5)
+        counter.incr(5)
         update()
         eventually {
           // verify returning deltas, when param requested
@@ -228,7 +227,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
         // verify totals returned when param omitted
         val res3 = Await.result(exporter(reqNoPeriod)).contentString
         assert(res3 == """{"anCounter":16}""")
-        counter.add(5)
+        counter.incr(5)
         update() // should not matter when the param is omitted.
         val res4 = Await.result(exporter(reqNoPeriod)).contentString
         assert(res4 == """{"anCounter":21}""")
@@ -239,9 +238,9 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   test("useCounterDeltas flag disabled") {
     val reqWithPeriod = Request("/admin/metrics.json?period=60")
 
-    val registry = Metrics.createDetached()
-    val counter = registry.createCounter("anCounter")
-    counter.add(11)
+    val registry = new Metrics()
+    val counter = registry.getOrCreateCounter(Seq("anCounter")).counter
+    counter.incr(11)
 
     val timer = new MockTimer()
     val exporter = new JsonExporter(registry, timer)
@@ -258,7 +257,7 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
         assert(res1 == """{"anCounter":11}""")
 
         // update should have no effect, even when param included
-        counter.add(5)
+        counter.incr(5)
         update()
         val res2 = Await.result(exporter(reqWithPeriod)).contentString
         assert(res2 == """{"anCounter":16}""")
@@ -267,8 +266,8 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
   }
 
   test("formatter flag") {
-    val registry = Metrics.createDetached()
-    val sr = new ImmediateMetricsStatsReceiver(registry)
+    val registry = new Metrics(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
+    val sr = new MetricsStatsReceiver(registry)
     val histo = sr.stat("anHisto")
     histo.add(555)
 
@@ -277,22 +276,19 @@ class JsonExporterTest extends FunSuite with Eventually with IntegrationPatience
     format.let(format.Ostrich) {
       val exporter = new JsonExporter(registry)
       val res = Await.result(exporter(req)).contentString
-      assert(res.contains(""""anHisto.maximum":555"""))
+      assert(res.contains(""""anHisto.maximum":558"""))
     }
 
     format.let(format.CommonsMetrics) {
       val exporter = new JsonExporter(registry)
       val res = Await.result(exporter(req)).contentString
-      assert(res.contains(""""anHisto.max":555"""))
+      assert(res.contains(""""anHisto.max":558"""))
     }
   }
 
   test("deadly gauge") {
-    val registry = Metrics.createDetached()
-    val g = new AbstractGauge[java.lang.Double]("boom") {
-      def read: java.lang.Double = throw new RuntimeException("loolool")
-    }
-    val sr = registry.registerGauge(g)
+    val registry = new Metrics()
+    val sr = registry.registerGauge(Seq("boom"), throw new RuntimeException("loolool"))
 
     val exporter = new JsonExporter(registry)
     val json = exporter.json(pretty = true, filtered = false)

@@ -1,39 +1,20 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.Metrics
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.collection.JavaConverters._
 
-@RunWith(classOf[JUnitRunner])
 class StatsFormatterTest extends FunSuite {
 
-  private val metrics = Metrics.createDetached()
-  private val sr = new ImmediateMetricsStatsReceiver(metrics)
+  private[this] def newMetrics(): Metrics =
+    new Metrics(mkHistogram = ImmediateMetricsHistogram.apply _, separator = "/")
+
+  private val metrics = newMetrics()
+  private val sr = new MetricsStatsReceiver(metrics)
 
   private val histo1 = sr.stat("histo1")
   (0 to 100).foreach(histo1.add(_))
 
-  private val values = SampledValues(Map.empty, Map.empty, metrics.sampleHistograms().asScala)
-
-  test("CommonsMetrics is formatted the same as Metrics.sample") {
-    val formatter = StatsFormatter.CommonsMetrics
-    val formatted = formatter(values)
-
-    // remove stddev as it is not supported
-    assert(formatted == metrics.sample().asScala.filterKeys(!_.endsWith("stddev")))
-
-    assert(formatted("histo1.p50") == 50)
-    assert(formatted("histo1.p90") == 90)
-    assert(formatted("histo1.p9990") == 100)
-    assert(formatted("histo1.p9999") == 100)
-
-    assert(formatted("histo1.count") == 101)
-    assert(formatted("histo1.max") == 100)
-    assert(formatted("histo1.min") == 0)
-    assert(formatted("histo1.avg") == 50)
-  }
+  private val values = SampledValues(Map.empty, Map.empty, metrics.histograms.asScala)
 
   test("Ostrich") {
     val formatter = StatsFormatter.Ostrich
@@ -67,10 +48,10 @@ class StatsFormatterTest extends FunSuite {
   }
 
   test("includeEmptyHistograms flag") {
-    val metrics = Metrics.createDetached()
-    val stats = new ImmediateMetricsStatsReceiver(metrics)
+    val metrics = newMetrics()
+    val stats = new MetricsStatsReceiver(metrics)
     stats.stat("empty_histo")
-    val values = SampledValues(Map.empty, Map.empty, metrics.sampleHistograms().asScala)
+    val values = SampledValues(Map.empty, Map.empty, metrics.histograms.asScala)
 
     val formatter = StatsFormatter.Ostrich
     includeEmptyHistograms.let(false) {

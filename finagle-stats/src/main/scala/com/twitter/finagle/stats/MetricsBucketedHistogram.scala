@@ -1,13 +1,15 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.{Histogram, HistogramInterface, Percentile, Snapshot}
 import com.twitter.concurrent.Once
 import com.twitter.conversions.time._
 import com.twitter.util.{Duration, Time}
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Adapts `BucketedHistogram` to the `HistogramInterface`.
+ * A [[MetricsHistogram]] that is latched such that a snapshot of
+ * the values are taken every `latchPeriod` and that value is returned
+ * for rest of `latchPeriod`. This gives pull based collectors a
+ * simple way to get consistent results.
  *
  * This is safe to use from multiple threads.
  *
@@ -16,9 +18,9 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class MetricsBucketedHistogram(
   name: String,
-  percentiles: Array[Double] = Histogram.DEFAULT_QUANTILES,
+  percentiles: IndexedSeq[Double] = BucketedHistogram.DefaultQuantiles,
   latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod
-) extends HistogramInterface {
+) extends MetricsHistogram {
   import MetricsBucketedHistogram.{MutableSnapshot, HistogramCountsSnapshot}
   assert(name.length > 0)
 
@@ -96,26 +98,26 @@ class MetricsBucketedHistogram(
         val _max = snap.max
         val _min = snap.min
         val _avg = snap.avg
-        val ps = new Array[Percentile](MetricsBucketedHistogram.this.percentiles.length)
+        val ps = new Array[Snapshot.Percentile](MetricsBucketedHistogram.this.percentiles.length)
         var i = 0
         while (i < ps.length) {
-          ps(i) = new Percentile(MetricsBucketedHistogram.this.percentiles(i), snap.quantiles(i))
+          ps(i) =
+            new Snapshot.Percentile(MetricsBucketedHistogram.this.percentiles(i), snap.quantiles(i))
           i += 1
         }
-        override def count(): Long = _count
-        override def max(): Long = _max
-        override def percentiles(): Array[Percentile] = ps
-        override def avg(): Double = _avg
-        override def min(): Long = _min
-        override def sum(): Long = _sum
+        def count: Long = _count
+        def max: Long = _max
+        def percentiles: IndexedSeq[Snapshot.Percentile] = ps
+        def average: Double = _avg
+        def min: Long = _min
+        def sum: Long = _sum
 
         override def toString: String = {
           val _ps = ps
             .map { p =>
-              s"p${p.getQuantile}=${p.getValue}"
+              s"p${p.quantile}=${p.value}"
             }
             .mkString("[", ", ", "]")
-
           s"Snapshot(count=${_count}, max=${_max}, min=${_min}, avg=${_avg}, sum=${_sum}, %s=${_ps})"
         }
       }
@@ -137,7 +139,7 @@ private object MetricsBucketedHistogram {
    * NOT THREAD SAFE, and thread-safety must be provided
    * by the MetricsBucketedHistogram that owns a given instance.
    */
-  private final class MutableSnapshot(percentiles: Array[Double]) {
+  private final class MutableSnapshot(percentiles: IndexedSeq[Double]) {
     var count = 0L
     var sum = 0L
     var max = 0L

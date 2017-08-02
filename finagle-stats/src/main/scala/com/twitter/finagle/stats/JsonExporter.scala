@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.app.GlobalFlag
-import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{MediaType, RequestParamMap, Response, Request}
@@ -60,11 +59,11 @@ object JsonExporter {
   private val log = Logger.get()
 }
 
-class JsonExporter(registry: Metrics, timer: Timer) extends Service[Request, Response] { self =>
+class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, Response] { self =>
 
   import JsonExporter._
 
-  def this(registry: Metrics) = this(registry, DefaultTimer)
+  def this(registry: MetricsView) = this(registry, DefaultTimer)
 
   private[this] val mapper = new ObjectMapper
   mapper.registerModule(DefaultScalaModule)
@@ -147,7 +146,7 @@ class JsonExporter(registry: Metrics, timer: Timer) extends Service[Request, Res
         deltas = Some(new CounterDeltas())
         timer.schedule(startOfNextMinute, 1.minute) {
           val ds = self.synchronized { deltas.get }
-          ds.update(registry.sampleCounters())
+          ds.update(metrics.counters)
         }
         deltas.get
     }
@@ -158,7 +157,7 @@ class JsonExporter(registry: Metrics, timer: Timer) extends Service[Request, Res
     filtered: Boolean,
     counterDeltasOn: Boolean = false
   ): String = {
-    val gauges = try registry.sampleGauges().asScala
+    val gauges = try metrics.gauges.asScala
     catch {
       case NonFatal(e) =>
         // because gauges run arbitrary user code, we want to protect ourselves here.
@@ -167,11 +166,11 @@ class JsonExporter(registry: Metrics, timer: Timer) extends Service[Request, Res
         log.error(e, "exception while collecting gauges")
         Map.empty[String, Number]
     }
-    val histos = registry.sampleHistograms().asScala
+    val histos = metrics.histograms.asScala
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas
     } else {
-      registry.sampleCounters().asScala
+      metrics.counters.asScala
     }
     val values = SampledValues(gauges, counters, histos)
 

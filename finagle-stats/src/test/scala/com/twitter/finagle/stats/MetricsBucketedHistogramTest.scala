@@ -28,70 +28,70 @@ class MetricsBucketedHistogramTest extends FunSuite {
       1L.to(100L).foreach(h.add)
 
       // since we have not rolled to the next window, we should not see that data
-      val snap0 = h.snapshot()
+      val snap0 = h.snapshot
       withClue(snap0) {
-        assert(snap0.min() == 0, snap0)
-        assert(snap0.max() == 0, snap0)
-        assert(snap0.count() == 0, snap0)
-        assert(snap0.sum() == 0, snap0)
-        assert(snap0.avg() == 0, snap0)
-        assert(snap0.percentiles().map(_.getValue) === Array(0, 0))
+        assert(snap0.min == 0, snap0)
+        assert(snap0.max == 0, snap0)
+        assert(snap0.count == 0, snap0)
+        assert(snap0.sum == 0, snap0)
+        assert(snap0.average == 0, snap0)
+        assert(snap0.percentiles.map(_.value) === Array(0, 0))
       }
 
       // roll to window 2 (this should make data A visible after a call to snapshot)
       roll()
-      val snap1 = h.snapshot()
+      val snap1 = h.snapshot
       withClue(snap1) {
-        assert(snap1.min() == 1)
-        assert(snap1.max() == 100)
-        assert(snap1.count() == 100)
-        assert(snap1.sum() == 1.to(100).sum)
-        assert(snap1.avg() == 50.5d)
-        assert(snap1.percentiles().map(_.getValue) === Array(50, 90))
+        assert(snap1.min == 1)
+        assert(snap1.max == 100)
+        assert(snap1.count == 100)
+        assert(snap1.sum == 1.to(100).sum)
+        assert(snap1.average == 50.5d)
+        assert(snap1.percentiles.map(_.value) === Array(50, 90))
       }
 
       // add a data point (B) to window 2 (it will not be visible in the snapshot)
       h.add(1000)
-      assert(h.snapshot().sum() == snap1.sum(), snap1)
+      assert(h.snapshot.sum == snap1.sum, snap1)
 
       // fill out this 2nd window (C) and roll the window, we should only see B and C
       1001L.to(10000L).foreach(h.add)
       roll()
-      val snap2 = h.snapshot()
+      val snap2 = h.snapshot
       withClue(snap2) {
-        assert(snap2.min() == 1003) // this only needs to be +/- 0.5%
-        assert(snap2.max() == 9987) // this only needs to be +/- 0.5%
-        assert(snap2.count() == 9001)
-        assert(snap2.sum() == 1000L.to(10000L).sum)
-        assert(snap2.avg() == 5500.0)
-        assert(snap2.percentiles().map(_.getValue) === Array(5498, 9132))
+        assert(snap2.min == 1003) // this only needs to be +/- 0.5%
+        assert(snap2.max == 9987) // this only needs to be +/- 0.5%
+        assert(snap2.count == 9001)
+        assert(snap2.sum == 1000L.to(10000L).sum)
+        assert(snap2.average == 5500.0)
+        assert(snap2.percentiles.map(_.value) === Array(5498, 9132))
       }
 
       // roll to the next window, which should evict B and C as well
       roll()
-      val snap3 = h.snapshot()
+      val snap3 = h.snapshot
       withClue(snap3) {
-        assert(snap3.min() == 0L)
-        assert(snap3.max() == 0L)
-        assert(snap3.count() == 0L)
-        assert(snap3.sum() == 0L)
-        assert(snap3.avg() == 0.0)
-        assert(snap3.percentiles().map(_.getValue) === Array(0, 0))
+        assert(snap3.min == 0L)
+        assert(snap3.max == 0L)
+        assert(snap3.count == 0L)
+        assert(snap3.sum == 0L)
+        assert(snap3.average == 0.0)
+        assert(snap3.percentiles.map(_.value) === Array(0, 0))
       }
 
       // add some data (D), roll it into view then confirm clear works
       h.add(1)
       roll()
-      assert(h.snapshot().count() == 1L)
+      assert(h.snapshot.count == 1L)
       h.clear()
-      val snap4 = h.snapshot()
+      val snap4 = h.snapshot
       withClue(snap4) {
-        assert(snap4.min() == 0)
-        assert(snap4.max() == 0)
-        assert(snap4.count() == 0)
-        assert(snap4.sum() == 0)
-        assert(snap4.avg() == 0)
-        assert(snap4.percentiles().map(_.getValue) === Array(0, 0))
+        assert(snap4.min == 0)
+        assert(snap4.max == 0)
+        assert(snap4.count == 0)
+        assert(snap4.sum == 0)
+        assert(snap4.average == 0)
+        assert(snap4.percentiles.map(_.value) === Array(0, 0))
       }
     }
   }
@@ -102,7 +102,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
 
     def roll(): Unit = {
       tc.advance(60.seconds)
-      h.snapshot()
+      h.snapshot
     }
   }
 
@@ -132,7 +132,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
       assert(details.counts == Seq(BucketAndCount(1, 2, 1)))
 
       // call .snapshot() to recompute counts
-      h.snapshot()
+      h.snapshot
       assert(details.counts == Seq(BucketAndCount(1, 2, 1)))
 
       h.add(Int.MaxValue)
@@ -163,7 +163,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
       tc.advance(1.minute)
       h.add(5)
       tc.advance(1.minute)
-      h.snapshot()
+      h.snapshot
       val expectedCounts = Seq(
         BucketAndCount(1, 2, 1),
         BucketAndCount(2, 3, 1),
@@ -175,22 +175,22 @@ class MetricsBucketedHistogramTest extends FunSuite {
 
       h.add(6)
       tc.advance(1.second)
-      h.snapshot()
+      h.snapshot
       assert(details.counts == expectedCounts)
 
       h.add(7)
       tc.advance(1.second)
-      h.snapshot()
+      h.snapshot
       assert(details.counts == expectedCounts)
 
       h.add(8)
       tc.advance(1.second)
-      h.snapshot()
+      h.snapshot
       assert(details.counts == expectedCounts)
 
       h.add(9)
       tc.advance(1.second)
-      h.snapshot()
+      h.snapshot
       assert(details.counts == expectedCounts)
 
       h.add(10)

@@ -111,6 +111,8 @@ Runtime Behavior Changes
   * finagle-http: `serverErrorsAsFailuresV2` toggle is turned into a flag `serverErrorsAsFailures`.
     ``PHAB_ID=D73265``
 
+  * finagle-stats: No longer backed by commons metrics, now its own thing.  ``PHAB_ID=D73497``
+
 6.45.0
 ------
 

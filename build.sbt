@@ -318,7 +318,6 @@ lazy val finagleStats = Project(
 ).settings(
   name := "finagle-stats",
   libraryDependencies ++= Seq(
-    "com.twitter.common" % "metrics" % "0.0.39",
     util("app"),
     util("core"),
     util("events"),

@@ -30,7 +30,7 @@ object includeEmptyHistograms
 /**
  * Allows for customization of how stat names get formatted.
  */
-private[stats] sealed trait StatsFormatter {
+private[finagle] sealed trait StatsFormatter {
 
   def apply(values: SampledValues): Map[String, Number] = {
     val results = new mutable.HashMap[String, Number]()
@@ -44,13 +44,13 @@ private[stats] sealed trait StatsFormatter {
         results += histoName(name, "count") -> count
         if (count > 0 || includeEmpty) {
           results += histoName(name, "sum") -> snapshot.sum
-          results += histoName(name, labelAverage) -> snapshot.avg
+          results += histoName(name, labelAverage) -> snapshot.average
           results += histoName(name, labelMin) -> snapshot.min
           results += histoName(name, labelMax) -> snapshot.max
 
           for (p <- snapshot.percentiles) {
-            val percentileName = histoName(name, labelPercentile(p.getQuantile))
-            results += percentileName -> p.getValue
+            val percentileName = histoName(name, labelPercentile(p.quantile))
+            results += percentileName -> p.value
           }
         }
     }
@@ -79,7 +79,7 @@ private[stats] sealed trait StatsFormatter {
   protected def labelAverage: String
 }
 
-private[stats] object StatsFormatter {
+private[finagle] object StatsFormatter {
 
   /**
    * Uses the global flag, [[format]], to select the formatter used.

@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.Metrics
 import com.twitter.finagle.http._
 import com.twitter.finagle.loadbalancer.perHostStats
 import com.twitter.io.Buf
