@@ -526,43 +526,42 @@ abstract class AbstractEndToEndTest
       await(client.close())
     }
 
-    if (!sys.props.contains("SKIP_FLAKY"))
-      test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
-        class ResponseProxyFilter extends SimpleFilter[Request, Response] {
-          override def apply(
-            request: Request,
-            service: Service[Request, Response]
-          ): Future[Response] = {
-            service(request).map { responseOriginal =>
-              new ResponseProxy {
-                override val response = responseOriginal
-                override def reader = responseOriginal.reader
-              }
+    test(s"$implName (streaming)" + ": stream via ResponseProxy filter") {
+      class ResponseProxyFilter extends SimpleFilter[Request, Response] {
+        override def apply(
+          request: Request,
+          service: Service[Request, Response]
+        ): Future[Response] = {
+          service(request).map { responseOriginal =>
+            new ResponseProxy {
+              override val response = responseOriginal
+              override def reader = responseOriginal.reader
             }
           }
         }
-
-        def service = new HttpService {
-          def apply(request: Request) = {
-            val response = Response()
-            response.setChunked(true)
-            response.writer.write(buf("goodbye")).before {
-              response.writer.write(buf("world")).before {
-                response.close()
-              }
-            }
-            Future.value(response)
-          }
-        }
-
-        val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
-
-        val client = connect(serviceWithResponseProxy)
-        val response = await(client(Request()))
-        val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
-        assert(actual == "goodbyeworld")
-        await(client.close())
       }
+
+      def service = new HttpService {
+        def apply(request: Request) = {
+          val response = Response()
+          response.setChunked(true)
+          response.writer.write(buf("goodbye")).before {
+            response.writer.write(buf("world")).before {
+              response.close()
+            }
+          }
+          Future.value(response)
+        }
+      }
+
+      val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
+
+      val client = connect(serviceWithResponseProxy)
+      val response = await(client(Request()))
+      val Buf.Utf8(actual) = await(Reader.readAll(response.reader))
+      assert(actual == "goodbyeworld")
+      await(client.close())
+    }
 
     test(s"$implName (streaming): aggregates responses that must not have a body") {
       val service = new HttpService {

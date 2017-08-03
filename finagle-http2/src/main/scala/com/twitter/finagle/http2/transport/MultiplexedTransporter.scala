@@ -265,8 +265,11 @@ private[http2] class MultiplexedTransporter(
 
     // must be synchronized externally
     private[this] def checkFinished() = {
+      // We need to make sure that we are both finished writing,
+      // receiving stream messages, _and_ have consumed all the stream
+      // messages before resetting the state to Idle.
       state match {
-        case a: Active if a.finished =>
+        case a: Active if a.finished && queue.size == 0 =>
           if (parent.dead) close()
           else state = Idle
 
@@ -357,11 +360,20 @@ private[http2] class MultiplexedTransporter(
     private[MultiplexedTransporter] def offer(obj: HttpObject): Unit = {
       val shouldOffer = parent.synchronized {
         state match {
-          case a: Active =>
+          case a: Active if !a.finishedReading =>
             if (obj.isInstanceOf[LastHttpContent]) {
               a.finishedReading = true
             }
             true
+
+          case _: Active =>
+            // Technically, this condition is a protocol or stream error depending on
+            // whether the stream is fully or only half closed, but we are going to be
+            // lenient right now as our server implementation may be doing this and we
+            // don't want to clobber any other active streams until the server is
+            // behaving. See https://tools.ietf.org/html/rfc7540#section-5.1
+            log.warning(s"Received message on inbound-closed stream: ($obj)")
+            false
 
           case Idle =>
             badState(s"Offered message to idle child: $obj")
