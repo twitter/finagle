@@ -275,7 +275,7 @@ private[this] class SimplePartitioningService(
       case _ =>
         Map.empty
     }
-    serviceMapVar.changes.register(Witness({ _ =>
+    serviceMapVar.changes.register(Witness({ _: Map[_ <: String, Future[Service[String, String]]] =>
       }))
   }
 

@@ -172,6 +172,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleException,
   finagleIntegration,
   finagleExp,
+  finagleInit,
 
   // Protocols
   finagleHttp,
@@ -192,13 +193,20 @@ lazy val finagle = Project(
 ).settings(
   sharedSettings ++
   unidocSettings ++ Seq(
-  unidocProjectFilter in(ScalaUnidoc, unidoc) :=
-    inAnyProject -- inProjects(
-      finagleBenchmark,
-      finagleBenchmarkThrift,
-      finagleExample
-    )
-)
+    unidocProjectFilter in(ScalaUnidoc, unidoc) :=
+      inAnyProject -- inProjects(
+        finagleBenchmark,
+        finagleBenchmarkThrift,
+        finagleExample
+      ),
+    // We don't generate javadoc for finagle-serversets, so exclude it from
+    // unidoc.
+    unidocAllSources in(ScalaUnidoc, unidoc) :=
+      (unidocAllSources in(ScalaUnidoc, unidoc)).value.map(_.filterNot { file =>
+        file.getPath.contains("finagle-serversets") &&
+        file.getName.endsWith(".java")
+      })
+  )
 ).aggregate(projectList: _*)
 
 lazy val finagleIntegration = Project(
@@ -242,8 +250,7 @@ lazy val finagleInit = Project(
 ).settings(
   sharedSettings
 ).settings(
-  name := "finagle-init",
-  libraryDependencies
+  name := "finagle-init"
 )
 
 lazy val finagleCore = Project(
