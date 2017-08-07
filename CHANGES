@@ -48,6 +48,11 @@ New Features
 
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-mysql: Fix decoding error for medium length integers. ``PHAB_ID=D78505``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

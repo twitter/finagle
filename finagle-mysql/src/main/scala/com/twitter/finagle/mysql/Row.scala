@@ -129,6 +129,9 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
   /**
    * Convert the binary representation of each value
    * into an appropriate Value object.
+   *
+   * @see [[https://mariadb.com/kb/en/mariadb/resultset-row/]] for details
+   *     about the binary row format.
    */
   lazy val values: IndexedSeq[Value] =
     for ((field, idx) <- fields.zipWithIndex) yield {
@@ -137,7 +140,7 @@ class BinaryEncodedRow(rawRow: Buf, val fields: IndexedSeq[Field], indexMap: Map
         field.fieldType match {
           case Type.Tiny => ByteValue(reader.readByte())
           case Type.Short => ShortValue(reader.readShortLE())
-          case Type.Int24 => IntValue(reader.readMediumLE())
+          case Type.Int24 => IntValue(reader.readIntLE()) // transferred as an Int32
           case Type.Long => IntValue(reader.readIntLE())
           case Type.LongLong => LongValue(reader.readLongLE())
           case Type.Float => FloatValue(reader.readFloatLE())
