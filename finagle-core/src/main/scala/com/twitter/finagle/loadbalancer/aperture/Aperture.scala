@@ -189,17 +189,18 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     // Make sure the aperture is within bounds [minAperture, maxAperture].
     adjust(0)
 
-    if (useDeterministicOrdering) {
+    if (useDeterministicOrdering && aperture > 0) {
       // We log the contents of the aperture on each distributor rebuild when using
       // deterministic ordering. Rebuilds are not frequent and usually concentrated around
       // events where this information would be valuable (i.e. coordinate changes or
       // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
-      val apertureSlice = vector
-        .take(math.min(aperture, 100))
-        .map(_.factory.address)
-        .mkString("[", ", ", "]")
+      val fmt: Vector[Node] => String = _.map(_.factory.address).mkString("[", ", ", "]")
+      val apertureSlice = fmt(vector.take(math.min(aperture, 100)))
+      val busySlice = fmt(busy)
       val lbl = if (label.isEmpty) "<unlabelled>" else label
-      log.info(s"Aperture updated for client $lbl: size=$aperture nodes=$apertureSlice")
+      log.info(
+        s"Aperture updated for client $lbl: size=$aperture busy=$busySlice nodes=$apertureSlice"
+      )
     }
 
     /**
