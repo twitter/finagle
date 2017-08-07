@@ -15,8 +15,9 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
+import io.netty.buffer.PooledByteBufAllocator
 import java.io.{PrintWriter, StringWriter}
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.scalactic.source.Position
 import org.scalatest.{BeforeAndAfter, FunSuite, OneInstancePerTest, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -36,6 +37,7 @@ abstract class AbstractEndToEndTest
   object HeaderFields extends Feature
   object ReaderClose extends Feature
   object NoBodyMessage extends Feature
+  object SetsPooledAllocatorMaxOrder extends Feature
 
   var saveBase: Dtab = Dtab.empty
   val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -848,6 +850,38 @@ abstract class AbstractEndToEndTest
   run(standardErrors, standardBehaviour, tracing)(nonStreamingConnect(_))
 
   run(streaming)(streamingConnect(_))
+
+  testIfImplemented(SetsPooledAllocatorMaxOrder)(
+    implName + ": PooledByteBufAllocator maxOrder " +
+      "is 7 for servers"
+  ) {
+    // this will set the default order
+    val server = serverImpl().serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ConstantService[Request, Response](Future.value(Response()))
+    )
+    assert(PooledByteBufAllocator.defaultMaxOrder == 7)
+    await(server.close())
+  }
+
+  testIfImplemented(SetsPooledAllocatorMaxOrder)(
+    implName + ": PooledByteBufAllocator maxOrder " +
+      "is 7 for clients"
+  ) {
+    val server = serverImpl().serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ConstantService[Request, Response](Future.value(Response()))
+    )
+
+    // this will set the default order
+    val client = clientImpl().newService(
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+    client.apply(Request())
+    assert(PooledByteBufAllocator.defaultMaxOrder == 7)
+    await(Closable.all(client, server).close())
+  }
 
   test(implName + ": Status.busy propagates along the Stack") {
     val st = new InMemoryStatsReceiver

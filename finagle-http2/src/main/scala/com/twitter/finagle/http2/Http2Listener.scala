@@ -2,6 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
+import com.twitter.finagle.netty4.Toggles
 import com.twitter.finagle.netty4.http.exp.{Http2ChannelTransportFactory, HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
@@ -19,6 +20,10 @@ import scala.collection.JavaConverters._
  * Please note that the listener cannot be used for TLS yet.
  */
 private[finagle] object Http2Listener {
+
+  // necessary to override the io.netty.allocator.maxOrder property in time. see j/CSL-4971
+  private[this] val _ = Toggles
+
   def apply[In, Out](
     params: Stack.Params
   )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {

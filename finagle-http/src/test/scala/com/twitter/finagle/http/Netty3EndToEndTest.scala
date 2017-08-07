@@ -10,5 +10,6 @@ class Netty3EndToEndTest extends AbstractHttp1EndToEndTest {
   def clientImpl(): FinagleHttp.Client = FinagleHttp.client.configured(FinagleHttp.Netty3Impl)
   def serverImpl(): FinagleHttp.Server = FinagleHttp.server.configured(FinagleHttp.Netty3Impl)
   def featureImplemented(feature: Feature): Boolean =
-    feature != TooLongStream // Disabled due to flakiness. see CSL-2946.
+    feature != TooLongStream && // Disabled due to flakiness. see CSL-2946.
+      feature != SetsPooledAllocatorMaxOrder
 }

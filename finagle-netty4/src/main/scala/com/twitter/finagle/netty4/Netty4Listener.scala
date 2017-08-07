@@ -10,6 +10,10 @@ import java.lang.{Integer => JInt}
 import java.net.SocketAddress
 
 private[finagle] object Netty4Listener {
+
+  // necessary to override the io.netty.allocator.maxOrder property in time. see j/CSL-4971
+  private[this] val _ = Toggles
+
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
 
   /**

@@ -14,6 +14,9 @@ import java.net.SocketAddress
 
 private[finagle] object Netty4Transporter {
 
+  // necessary to override the io.netty.allocator.maxOrder property in time. see j/CSL-4971
+  private[this] val _ = Toggles
+
   /**
    * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to
    * exert backpressure by only reading from the Channel when the [[Transport]] is

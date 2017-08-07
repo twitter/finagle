@@ -15,6 +15,7 @@ scala_library(
     'finagle/finagle-base-http',
     'finagle/finagle-netty4',
     'finagle/finagle-netty4-http',
+    'finagle/finagle-toggle',
     'util/util-core',
     'util/util-logging',
     'util/util-stats',
