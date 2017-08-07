@@ -10,6 +10,7 @@ scala_library(
     'finagle/finagle-core/src/main/resources',
     'finagle/finagle-init/src/main/scala',
     'finagle/finagle-toggle',
+    'finagle-internal/init/src/main/scala',
     'util/util-app',
     'util/util-cache',
     'util/util-codec',
