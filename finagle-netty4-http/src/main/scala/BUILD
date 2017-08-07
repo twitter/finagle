@@ -12,7 +12,6 @@ scala_library(
     'finagle/finagle-base-http',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
-    'finagle/finagle-toggle',
     'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
