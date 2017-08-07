@@ -1,10 +1,10 @@
 # Finagle
 
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
-[![Codecov branch](https://img.shields.io/codecov/c/github/twitter/finagle/develop.svg)](http://codecov.io/github/twitter/finagle?branch=develop)
+[![Codecov](https://codecov.io/gh/twitter/finagle/branch/develop/graph/badge.svg)](https://codecov.io/gh/twitter/finagle)
 [![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
-[![Gitter](https://img.shields.io/badge/gitter-join%20chat-green.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Maven Central](https://img.shields.io/maven-central/v/com.twitter/finagle_2.12.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle_2.12)
+[![Gitter](https://badges.gitter.im/twitter/finagle.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle-core_2.12)
 
 ## Status
 
