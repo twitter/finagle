@@ -21,7 +21,7 @@ private[finagle] class MultiplexedFinagleService(
 
   private[this] def getFunctionMap(
     service: Service[Array[Byte], Array[Byte]]
-  ): collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]] =
+  ): collection.Map[String, Service[(TProtocol, Int), Array[Byte]]] =
     Try {
       scroogeFinagleServiceFunctionMap(service)
     }.handle {
@@ -42,13 +42,13 @@ private[finagle] class MultiplexedFinagleService(
    */
   private[this] def scroogeFinagleServiceFunctionMap[T](
     target: AnyRef
-  ): collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]] = {
-    val m = target.getClass.getMethod("functionMap")
+  ): collection.Map[String, Service[(TProtocol, Int), Array[Byte]]] = {
+    val m = target.getClass.getMethod("serviceMap")
     val accessible = m.isAccessible
     m.setAccessible(true)
     val result = m
       .invoke(target)
-      .asInstanceOf[collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]]]
+      .asInstanceOf[collection.Map[String, Service[(TProtocol, Int), Array[Byte]]]]
     m.setAccessible(accessible)
     result
   }
@@ -58,17 +58,14 @@ private[finagle] class MultiplexedFinagleService(
    */
   private[this] def thriftFinagleServiceFunctionMap(
     target: AnyRef
-  ): collection.Map[String, (TProtocol, Int) => Future[Array[Byte]]] = {
-    val f = target.getClass.getDeclaredField("functionMap")
+  ): collection.Map[String, Service[(TProtocol, Int), Array[Byte]]] = {
+    val f = target.getClass.getDeclaredField("serviceMap")
     val accessible = f.isAccessible
     f.setAccessible(true)
     val functionMap = f
       .get(target)
-      .asInstanceOf[java.util.Map[String, com.twitter.util.Function2[TProtocol, Integer, Future[
-        Array[Byte]
-      ]]]]
+      .asInstanceOf[java.util.Map[String, Service[(TProtocol, Int), Array[Byte]]]]
       .asScala
-      .mapValues(function => (prot: TProtocol, seqId: Int) => function(prot, seqId))
     f.setAccessible(accessible)
     functionMap
   }
@@ -90,10 +87,10 @@ private[finagle] class MultiplexedFinagleService(
         val serviceName = if (index == -1) defaultService.get else msg.name.substring(0, index)
         val functionName = msg.name.substring(index + 1)
         val functionMap = serviceMap.get(serviceName)
-        val func = functionMap.flatMap(_.get(functionName))
-        func match {
-          case Some(fn) =>
-            fn(iprot, msg.seqid)
+        val service = functionMap.flatMap(_.get(functionName))
+        service match {
+          case Some(svc) =>
+            svc((iprot, msg.seqid))
           case _ =>
             TProtocolUtil.skip(iprot, TType.STRUCT)
             val errorMsg = if (functionMap.isEmpty) {

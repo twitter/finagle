@@ -1,16 +1,13 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Address, Name, Thrift}
 import com.twitter.finagle.thrift.thriftscala.{Echo, ExtendedEcho}
+import com.twitter.finagle.{Address, Name, Thrift}
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class MultiplexedServiceTest extends FunSuite {
 
   def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
