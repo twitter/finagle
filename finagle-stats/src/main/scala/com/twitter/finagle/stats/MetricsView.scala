@@ -21,4 +21,10 @@ private[stats] trait MetricsView {
    * A snapshot of instantaneous values for all histograms.
    */
   def histograms: util.Map[String, Snapshot]
+
+  /**
+   * A snapshot of verbosity levels attached to each metric. For the sake of efficiency,
+   * metrics with verbosity [[Verbosity.Default]] aren't included into a returned map.
+   */
+  def verbosity: util.Map[String, Verbosity]
 }

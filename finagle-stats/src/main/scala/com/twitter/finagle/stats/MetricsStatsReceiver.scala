@@ -106,7 +106,7 @@ class MetricsStatsReceiver(val registry: Metrics)
       log.trace(s"Calling StatsReceiver.counter on $names")
     counterRequests.increment()
 
-    val storeCounter = registry.getOrCreateCounter(names)
+    val storeCounter = registry.getOrCreateCounter(verbosity, names)
     storeCounter.counter
   }
 
@@ -117,7 +117,7 @@ class MetricsStatsReceiver(val registry: Metrics)
     if (log.isLoggable(Level.TRACE))
       log.trace(s"Calling StatsReceiver.stat for $names")
     statRequests.increment()
-    val storeStat = registry.getOrCreateStat(names)
+    val storeStat = registry.getOrCreateStat(verbosity, names)
     storeStat.stat
   }
 
@@ -129,7 +129,7 @@ class MetricsStatsReceiver(val registry: Metrics)
   }
 
   protected[this] def registerGauge(verbosity: Verbosity, name: Seq[String], f: => Float): Unit =
-    registry.registerGauge(name, f)
+    registry.registerGauge(verbosity, name, f)
 
   protected[this] def deregisterGauge(name: Seq[String]): Unit = registry.unregisterGauge(name)
 }

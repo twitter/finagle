@@ -71,4 +71,15 @@ class MetricsStatsReceiverTest extends FunSuite {
     val g2 = rootReceiver.addGauge("xxx")(2.0f)
     assert(readGauge(detachedReceiver, "xxx") != readGauge(rootReceiver, "xxx"))
   }
+
+  test("keep track of debug metrics") {
+    val metrics = new Metrics()
+    val sr = new MetricsStatsReceiver(metrics)
+
+    sr.counter(Verbosity.Debug, "foo")
+    sr.counter(Verbosity.Default, "bar")
+
+    assert(metrics.verbosity.get("foo") == Verbosity.Debug)
+    assert(!metrics.verbosity.containsKey("bar"))
+  }
 }

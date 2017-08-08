@@ -46,6 +46,9 @@ New Features
     `Transactions.transactionWithIsolation` method, so the default level can be overridden
     at the transaction level. ``PHAB_ID=D68944``
 
+  * finagle-stats: Metrics now report verbosity levels via `MetricsView.verbosity`.
+    ``PHAB_ID=D78150``
+
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 
 Bug Fixes

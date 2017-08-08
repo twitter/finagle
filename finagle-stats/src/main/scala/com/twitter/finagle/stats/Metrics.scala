@@ -86,6 +86,9 @@ private[finagle] class Metrics(
   private[this] val gaugesMap =
     new ConcurrentHashMap[Seq[String], MetricsStore.StoreGauge]()
 
+  private[this] val verbosityMap =
+    new ConcurrentHashMap[String, Verbosity]()
+
   private[this] val reservedNames = new ConcurrentHashMap[String, Repr]()
 
   val histoDetails = new ConcurrentHashMap[String, HistogramDetail]
@@ -93,7 +96,7 @@ private[finagle] class Metrics(
   private[this] def format(names: Seq[String]): String =
     names.mkString(separator)
 
-  def getOrCreateCounter(names: Seq[String]): MetricsStore.StoreCounter = {
+  def getOrCreateCounter(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreCounter = {
     val counter = countersMap.get(names)
     if (counter != null)
       return counter
@@ -104,6 +107,7 @@ private[finagle] class Metrics(
     if (curNameUsage == null || curNameUsage == CounterRepr) {
       val next = new Metrics.StoreCounterImpl(formatted)
       val prev = countersMap.putIfAbsent(names, next)
+      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
       if (prev != null) prev else next
     } else {
       throw new MetricCollisionException(
@@ -113,10 +117,11 @@ private[finagle] class Metrics(
     }
   }
 
-  def getOrCreateStat(names: Seq[String]): MetricsStore.StoreStat =
-    getOrCreateStat(names, BucketedHistogram.DefaultQuantiles)
+  def getOrCreateStat(verbosity: Verbosity, names: Seq[String]): MetricsStore.StoreStat =
+    getOrCreateStat(verbosity, names, BucketedHistogram.DefaultQuantiles)
 
   def getOrCreateStat(
+    verbosity: Verbosity,
     names: Seq[String],
     percentiles: IndexedSeq[Double]
   ): MetricsStore.StoreStat = {
@@ -124,23 +129,24 @@ private[finagle] class Metrics(
     if (stat != null)
       return stat
 
-    val name = format(names)
-    val doLog = loggedStats.contains(name)
-    val histogram = mkHistogram(name, percentiles)
+    val formatted = format(names)
+    val doLog = loggedStats.contains(formatted)
+    val histogram = mkHistogram(formatted, percentiles)
 
     histogram match {
       case histo: MetricsBucketedHistogram =>
-        histoDetails.put(name, histo.histogramDetail)
+        histoDetails.put(formatted, histo.histogramDetail)
       case _ =>
-        log.debug(s"$name's histogram implementation doesn't support details")
+        log.debug(s"$formatted's histogram implementation doesn't support details")
     }
 
-    val next = new Metrics.StoreStatImpl(histogram, name, doLog)
+    val next = new Metrics.StoreStatImpl(histogram, formatted, doLog)
     val prev = statsMap.putIfAbsent(names, next)
+    if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
     if (prev != null) prev else next
   }
 
-  def registerGauge(names: Seq[String], f: => Float): Unit = {
+  def registerGauge(verbosity: Verbosity, names: Seq[String], f: => Float): Unit = {
     val formatted = format(names)
     val curNameUsage = reservedNames.putIfAbsent(formatted, GaugeRepr)
 
@@ -153,6 +159,7 @@ private[finagle] class Metrics(
       // we replace existing gauges to support commons metrics behavior.
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.put(names, next)
+      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +
@@ -194,4 +201,7 @@ private[finagle] class Metrics(
     }
     util.Collections.unmodifiableMap(snaps.asJava)
   }
+
+  def verbosity: util.Map[String, Verbosity] =
+    util.Collections.unmodifiableMap(verbosityMap)
 }
