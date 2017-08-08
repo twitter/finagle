@@ -513,6 +513,11 @@ lazy val finagleMemcached = Project(
   ),
   libraryDependencies ++= jacksonLibs
 ).dependsOn(
+  // NOTE: Order is important here.
+  // finagleNetty3 must come before finagleCore here, otherwise
+  // tests will fail with NoClassDefFound errors due to
+  // StringClient and StringServer.
+  finagleNetty3 % "test->compile",
   finagleCore % "compile->compile;test->test",
   finagleNetty4,
   finagleServersets,

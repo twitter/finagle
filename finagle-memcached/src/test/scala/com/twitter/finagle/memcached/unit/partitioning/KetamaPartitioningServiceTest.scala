@@ -7,7 +7,7 @@ import com.twitter.finagle.memcached.partitioning.KetamaPartitioningService
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.hashing.KeyHasher
 import com.twitter.util._
-import org.apache.commons.io.Charsets
+import java.nio.charset.StandardCharsets.UTF_8
 import scala.util.Random
 
 class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
@@ -304,7 +304,7 @@ private[this] class TestKetamaPartitioningService(
   import PartitioningServiceTestBase._
 
   protected override def getKeyBytes(key: String): Array[Byte] = {
-    key.getBytes(Charsets.UTF_8)
+    key.getBytes(UTF_8)
   }
 
   protected override def getPartitionKeys(request: String): Seq[String] = {
