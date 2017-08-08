@@ -291,4 +291,43 @@ class ApertureTest extends FunSuite with ApertureSuite {
       assert(bal.aperturex == numClients)
     }
   }
+
+  test("order maintained when status flaps") {
+    val bal = new Bal {
+      override protected val useDeterministicOrdering = true
+    }
+
+    DeterministicOrdering.unsetCoordinate()
+
+    val servers = Vector.tabulate(5) { i =>
+      Factory(i)
+    }
+    bal.update(servers)
+
+    // 3 of 5 servers are in the aperture
+    bal.adjustx(2)
+    assert(bal.aperturex == 3)
+
+    // set a coordinate so that we get a new order
+    DeterministicOrdering.setCoordinate(offset = 0, instanceId = 3, totalInstances = 5)
+
+    // force rebuild, ensure the order has changed
+    bal.rebuildx()
+    val dorder = bal.distx.vector
+    assert(servers != dorder)
+
+    // We just happen to know that based on our ordering, instance 2 is in the aperture.
+    // Note, we have an aperture of 3 and 1 down, so the probability of picking the down
+    // node with p2c is ((1/3)^2)^maxEffort . Instead of attempting to hit this case, we
+    // force a rebuild artificially.
+    servers(2).status = Status.Busy
+    bal.rebuildx()
+    assert(dorder != bal.distx.vector)
+    assert(servers(2) == bal.distx.vector.last.factory)
+
+    // flip back status, order is returned to dorder
+    servers(2).status = Status.Open
+    bal.rebuildx()
+    assert(dorder == bal.distx.vector)
+  }
 }
