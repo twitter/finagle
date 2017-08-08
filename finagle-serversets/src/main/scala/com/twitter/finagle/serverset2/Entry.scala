@@ -51,18 +51,13 @@ case class Endpoint(
 }
 
 object Entry {
-  private val EndpointPrefix = "member_"
-
   /**
    * Parse a JSON response from ZooKeeper into a Seq[Entry].
    */
   def parseJson(path: String, json: String): Seq[Entry] = {
     val basename = path.split("/").last
 
-    if (basename startsWith EndpointPrefix)
-      Endpoint.parseJson(json) map (_.copy(memberId = basename))
-    else
-      Nil
+    Endpoint.parseJson(json) map (_.copy(memberId = basename))
   }
 }
 

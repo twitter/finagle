@@ -7,7 +7,7 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 
 private[serverset2] object ServiceDiscoverer {
-  val EndpointGlob = "/member_"
+  val EndpointGlob = "/"
   val VectorGlob = "/vector_"
 
   /**
