@@ -268,6 +268,15 @@ object Failure {
     wrap(exc, 0L)
 
   /**
+   * Create a new wrapped Failure with the Retryable flag. If the passed-in
+   * exception is a failure, it is simply extended, otherwise a new Failure is
+   * created.
+   *
+   * @note This is an alias for `wrap(exc, FailureFlags.Retryable)`
+   */
+  private[finagle] def retryable(exc: Throwable): Failure = wrap(exc, FailureFlags.Retryable)
+
+  /**
    * Create a new [[Restartable]] and [[Rejected]] failure with the given message.
    */
   def rejected(why: String): Failure =

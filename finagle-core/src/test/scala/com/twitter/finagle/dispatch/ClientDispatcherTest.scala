@@ -3,11 +3,11 @@ package com.twitter.finagle.dispatch
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Failure, WriteException}
+import com.twitter.finagle.{Failure, FailureFlags, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when, never}
+import org.mockito.Mockito.{never, times, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -167,11 +167,13 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     closeP.setException(new Exception("fin"))
 
     // pending requests are failed
-    val e1 = intercept[Exception] { (Await.result(r2, 2.seconds)) }
-    val e2 = intercept[Exception] { (Await.result(r3, 2.seconds)) }
+    val e1 = intercept[Failure] { (Await.result(r2, 2.seconds)) }
+    val e2 = intercept[Failure] { (Await.result(r3, 2.seconds)) }
 
     assert(e1.getMessage == "fin")
+    assert(FailureFlags.isFlagged(FailureFlags.Retryable)(e1))
     assert(e2.getMessage == "fin")
+    assert(FailureFlags.isFlagged(FailureFlags.Retryable)(e2))
   }
 
   test("dispatcher with a closed transport fails fast") {
@@ -179,16 +181,14 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     import h._
 
     closeP.setException(new Exception("fin"))
-    val (r1, r2, r3) = (disp("0"), disp("1"), disp("2"))
 
-    // requests are failed
-    val e1 = intercept[Exception] { (Await.result(r1, 2.seconds)) }
-    val e2 = intercept[Exception] { (Await.result(r2, 2.seconds)) }
-    val e3 = intercept[Exception] { (Await.result(r3, 2.seconds)) }
+    Seq(disp("0"), disp("1"), disp("2")).foreach { r =>
+      // requests are failed
+      val e = intercept[Failure] { (Await.result(r, 2.seconds)) }
 
-    assert(e1.getMessage == "fin")
-    assert(e2.getMessage == "fin")
-    assert(e3.getMessage == "fin")
+      assert(e.getMessage == "fin")
+      assert(FailureFlags.isFlagged(FailureFlags.Retryable)(e))
+    }
 
     // transport never sees write
     verify(trans, never).write(any[String])

@@ -107,17 +107,21 @@ Breaking API Changes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: The `AsyncSemaphore` which sequences dispatches in `GenSerialClientDispatcher`
+    is now failed with a retryable `Failure` so that the retry logic knows that requests that
+    which failed to acquire the semaphore are safe to retry. ``PHAB_ID=D78904``
+
+  * finagle-http: `serverErrorsAsFailuresV2` toggle is turned into a flag `serverErrorsAsFailures`.
+    ``PHAB_ID=D73265``
+
   * finagle-http: Dispatcher stats are now exported under the client scope like
     all other client stats.``PHAB_ID=D72265``
-
-  * finagle-stats, finagle-zipkin-core: No longer publishing `c.t.u.events` as util-events
-    is now deprecated. ``PHAB_ID=D64437``
 
   * finagle-serversets: `Stabilizer` is no longer exporting `pending_tasks` and `deviation_ms`
     stats. See `notify_ms` instead.  ``PHAB_ID=D65571``
 
-  * finagle-http: `serverErrorsAsFailuresV2` toggle is turned into a flag `serverErrorsAsFailures`.
-    ``PHAB_ID=D73265``
+  * finagle-stats, finagle-zipkin-core: No longer publishing `c.t.u.events` as util-events
+    is now deprecated. ``PHAB_ID=D64437``
 
   * finagle-stats: No longer backed by commons metrics, now its own thing.  ``PHAB_ID=D73497``
 

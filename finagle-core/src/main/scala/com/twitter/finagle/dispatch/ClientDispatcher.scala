@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Status, Service, Failure, WriteException}
+import com.twitter.finagle.{Failure, Service, Status, WriteException}
 import com.twitter.util._
 import java.net.InetSocketAddress
 
@@ -33,14 +33,14 @@ abstract class GenSerialClientDispatcher[Req, Rep, In, Out](
     case _ => new InetSocketAddress(0)
   }
 
-  // satisfy pending requests on transport close
+  // satisfy pending requests on transport close with a retryable failure
   trans.onClose.respond { res =>
     val exc = res match {
       case Return(exc) => exc
       case Throw(exc) => exc
     }
 
-    semaphore.fail(exc)
+    semaphore.fail(Failure.retryable(exc))
   }
 
   /**
