@@ -58,17 +58,28 @@ object Handshake {
   }
 
   /**
+    * A class eligible for configuring a mysql client's CLIENT_FOUND_ROWS flag
+    * during the Handshake phase.
+    */
+  case class FoundRows(enabled: Boolean)
+  implicit object FoundRows extends Stack.Param[FoundRows] {
+    val default = FoundRows(true)
+  }
+
+  /**
    * Creates a Handshake from a collection of [[com.twitter.finagle.Stack.Params]].
    */
   def apply(prms: Stack.Params): Handshake = {
     val Credentials(u, p) = prms[Credentials]
     val Database(db) = prms[Database]
     val Charset(cs) = prms[Charset]
+    val FoundRows(fr) = prms[FoundRows]
     Handshake(
       username = u,
       password = p,
       database = db,
-      charset = cs
+      charset = cs,
+      enableFoundRows = fr
     )
   }
 }
@@ -89,6 +100,9 @@ object Handshake {
  *
  * @param charset default character established with the server.
  *
+ * @param enableFoundRows if the server should return the number
+ * of found (matched) rows, not the number of changed rows.
+ *
  * @param maxPacketSize max size of a command packet that the
  * client intends to send to the server. The largest possible
  * packet that can be transmitted to or from a MySQL 5.5 server or
@@ -103,14 +117,22 @@ case class Handshake(
   database: Option[String] = None,
   clientCap: Capability = Capability.baseCap,
   charset: Short = Utf8_general_ci,
+  enableFoundRows: Boolean = true,
   maxPacketSize: StorageUnit = 1.gigabyte
 ) extends (HandshakeInit => Try[HandshakeResponse]) {
   import Capability._
   require(maxPacketSize <= 1.gigabyte, "max packet size can't exceed 1 gigabyte")
 
-  private[this] val newClientCap =
-    if (database.isDefined) clientCap + ConnectWithDB
-    else clientCap - ConnectWithDB
+  private[this] val newClientCap = {
+    val capDb = if (database.isDefined) {
+      clientCap + ConnectWithDB
+    } else {
+      clientCap - ConnectWithDB
+    }
+
+    if (enableFoundRows) capDb + FoundRows
+    else capDb - FoundRows
+  }
 
   private[this] def isCompatibleVersion(init: HandshakeInit) =
     if (init.serverCap.has(Capability.Protocol41)) Return(true)

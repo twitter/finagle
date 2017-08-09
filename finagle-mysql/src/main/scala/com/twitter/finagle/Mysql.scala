@@ -182,6 +182,14 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     def withCharset(charset: Short): Client =
       configured(Handshake.Charset(charset))
 
+    /**
+      * Don't set the CLIENT_FOUND_ROWS flag when connected to the
+      * server. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
+      * statements return the "correct" update count.
+      */
+    def withAffectedRows(): Client =
+      configured(Handshake.FoundRows(false))
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withSessionPool: SessionPoolingParams[Client] =
