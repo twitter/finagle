@@ -7,7 +7,12 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.StreamTransport
-import com.twitter.finagle.http.filter.{ClientContextFilter, HttpNackFilter, ServerContextFilter}
+import com.twitter.finagle.http.filter.{
+  ClientContextFilter,
+  HttpNackFilter,
+  ClientNackFilter,
+  ServerContextFilter
+}
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.http.netty.{
   Netty3ClientStreamTransport,
@@ -161,7 +166,14 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     private val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
         .insertBefore(StackClient.Role.prepConn, ClientContextFilter.module)
+        // We insert the ClientNackFilter close to the bottom of the stack to
+        // eagerly transform the HTTP nack representation to a `Failure`.
+        .insertBefore(StackClient.Role.prepConn, ClientNackFilter.module)
+        // We add a DelayedRelease module at the bottom of the stack to ensure
+        // that the pooling levels above don't discard an active session.
         .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        // Ensure that FactoryToService doesn't release the connection to the layers
+        // below when the response body hasn't been fully consumed.
         .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)

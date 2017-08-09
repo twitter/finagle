@@ -34,6 +34,10 @@ New Features
     See the user guide for details: https://twitter.github.io/finagle/guide/MethodBuilder.html
     ``PHAB_ID=D60032``
 
+  * finagle-http: The nack related logic in the `c.t.f.h.c.HttpClientDispatcher` has been
+    moved into a filter, `c.t.f.h.f.ClientNackFilter` which has been added to the client
+    stack and can now be removed based on its `Stack.Role`. ``PHAB_ID=D78902``
+
   * finagle-init: Introduce a module to support service-loading initialization
     code. ``PHAB_ID=D75950``
 
