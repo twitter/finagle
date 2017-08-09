@@ -93,7 +93,7 @@ import org.apache.thrift.protocol.TProtocolFactory
  * the protocol in order to ship an extra envelope carrying trace IDs
  * and client IDs associated with the request. These are used by
  * Finagle's tracing facilities and may be collected via aggregators
- * like [[http://twitter.github.com/zipkin/ Zipkin]].
+ * like [[https://github.com/openzipkin/zipkin Zipkin]].
  *
  * The negotiation is simple: on connection establishment, an
  * improbably-named method is dispatched on the server. If that

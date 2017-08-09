@@ -32,7 +32,7 @@ import java.net.SocketAddress
  * @note This mixes in a [[BufferingChannelOutboundHandler]] so we can protect ourselves from
  *       channel handlers that write on `channelAdded` or `channelActive`.
  *
- * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+ * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
  * [2]: http://wiki.squid-cache.org/Features/HTTPS
  * [3]: https://github.com/netty/netty/blob/4.1/handler-proxy/src/main/java/io/netty/handler/proxy/HttpProxyHandler.java
  *

@@ -131,7 +131,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
    * to proxy the traffic to a given ultimate destination, specified as `host`.
    *
-   * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+   * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
    *
    * @param host the ultimate host a proxy server connects to
    */
@@ -148,7 +148,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
    * to proxy the traffic to a given ultimate destination, specified as `host`.
    *
-   * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+   * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
    *
    * @param host the ultimate host a proxy server connects to
    *
@@ -167,7 +167,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    * When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
    * to proxy the traffic to a given ultimate destination, specified as `host`.
    *
-   * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+   * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
    *
    * @param host the ultimate host a proxy server connects to
    *

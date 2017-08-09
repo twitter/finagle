@@ -39,7 +39,7 @@ import scala.util.control.NonFatal
  * The `ThriftMux` object is both a `com.twitter.finagle.Client` and a
  * `com.twitter.finagle.Server` for the Thrift protocol served over
  * [[com.twitter.finagle.mux]]. Rich interfaces are provided to adhere to those
- * generated from a [[http://thrift.apache.org/docs/idl/ Thrift IDL]] by
+ * generated from a [[https://thrift.apache.org/docs/idl Thrift IDL]] by
  * [[https://twitter.github.io/scrooge/ Scrooge]] or
  * [[https://github.com/mariusaeriksen/thrift-0.5.0-finagle thrift-finagle]].
  *

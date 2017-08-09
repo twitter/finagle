@@ -53,6 +53,7 @@ extlinks = {
   'util-stats-src': ("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),
   'util-tunable-src': ("https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/%s", 'util-tunable github repo'),
   'finagle-http-src': ("https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/%s", 'finagle-http github repo'),
+  'finagle-base-http-src': ("https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/%s", 'finagle-base-http github repo'),
   'finagle-netty4-src': ("https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/%s", 'finagle-netty4 github repo'),
   'finagle-mux-src': ("https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/%s", 'finagle-mux github repo'),
   'finagle-thriftmux-src': ("https://github.com/twitter/finagle/blob/master/finagle-thriftmux/src/main/scala/%s", 'finagle-thriftmux github repo'),

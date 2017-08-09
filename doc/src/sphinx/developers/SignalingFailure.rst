@@ -140,7 +140,7 @@ HTTP
 Http will pass the flag `Rejected` (a retryable nack) or a combination of `Rejected`
 and `NonRetryable` (a nonretryable nack) via headers. HTTP will completely discard
 any information (stack trace, message, etc) except for the flags. See
-:src:`HttpNackFilter.scala
+:finagle-base-http-src:`HttpNackFilter.scala
 <com/twitter/finagle/http/filter/HttpNackFilter.scala>`
 
 .. csv-table::

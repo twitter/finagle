@@ -2,7 +2,7 @@
 
 *finagle-zipkin* provides the instrumentation for Dapper-style
 distributed tracing in Finagle-based services. See
-<a href="https://github.com/twitter/zipkin">Zipkin</a> for the
+<a href="https://github.com/openzipkin/zipkin">Zipkin</a> for the
 collection and query services.
 
 ## Terminology

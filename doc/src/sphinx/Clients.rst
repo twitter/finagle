@@ -48,7 +48,7 @@ servers (e.g. HTTP, SOCKS5).
 HTTP Proxy
 ~~~~~~~~~~
 
-There is built-in support for `tunneling TCP-based protocols <http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt>`_
+There is built-in support for `tunneling TCP-based protocols <https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01>`_
 through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
 only HTTP(S). See `Squid documentation <http://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
 
@@ -608,7 +608,7 @@ There are at least two modules in the client stacks that might be viewed as circ
 
 In addition to `Fail Fast` and `Failure Accrual`, some of the protocols (i.e., `Mux`) in
 Finagle support `Ping-based Failure Detectors` [#failure_detectors]_
-(i.e., :finagle-mux-src:`ThresholdFailureDetector <com/twitter/finagle/mux/ThresholdFailureDetector.scala>`).
+(i.e., :src:`ThresholdFailureDetector <com/twitter/finagle/liveness/ThresholdFailureDetector.scala>`).
 
 .. _client_fail_fast:
 
