@@ -125,6 +125,9 @@ Runtime Behavior Changes
 
   * finagle-stats: No longer backed by commons metrics, now its own thing.  ``PHAB_ID=D73497``
 
+  * finagle-netty4: Unset Netty's default timeout (10 seconds) for SSL handshake on clients.
+    Use `.withSession.acquisitionTimeout` instead.  ``PHAB_ID=D78500``
+
 6.45.0
 ------
 

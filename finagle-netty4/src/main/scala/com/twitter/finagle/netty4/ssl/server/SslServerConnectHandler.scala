@@ -17,7 +17,6 @@ private[netty4] class SslServerConnectHandler(
 ) extends ChannelInboundHandlerAdapter { self =>
 
   private[this] def verifySession(ctx: ChannelHandlerContext, session: SSLSession): Unit = {
-    val channel = ctx.channel()
     try {
       if (sessionVerifier(config, session)) {
         ctx.pipeline().remove(self)
@@ -31,7 +30,6 @@ private[netty4] class SslServerConnectHandler(
   }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
-    val channel = ctx.channel()
     sslHandler
       .handshakeFuture()
       .addListener(new GenericFutureListener[NettyFuture[Channel]] {
@@ -43,8 +41,8 @@ private[netty4] class SslServerConnectHandler(
         }
       })
 
-    if (!channel.config().isAutoRead) {
-      channel.read()
+    if (!ctx.channel().config().isAutoRead) {
+      ctx.read()
     }
   }
 

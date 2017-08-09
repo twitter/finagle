@@ -77,10 +77,15 @@ private[netty4] class Netty4ClientSslHandler(params: Stack.Params)
   private[this] def createSslHandler(engine: Engine): SslHandler = {
     // Rip the `SSLEngine` out of the wrapper `Engine` and use it to
     // create an `SslHandler`.
-    val ssl: SslHandler = new SslHandler(engine.self)
+    val ssl = new SslHandler(engine.self)
 
     // Close channel on close_notify received from a remote peer.
     ssl.sslCloseFuture().addListener(closeChannelOnCloseNotify)
+
+    // Disable Netty's default handshake timeout (10 seconds). We rely on
+    // Finagle's own timeouts (i.e., session creation timeout) to interrupt
+    // the handshake.
+    ssl.setHandshakeTimeoutMillis(0)
     ssl
   }
 
