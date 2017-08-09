@@ -12,7 +12,6 @@ target(name='core',
     'src/java/com/twitter/common/zookeeper:server-set',
     'src/java/com/twitter/common/io:io',
     'src/java/com/twitter/common/quantity:quantity',
-    '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest',
@@ -27,7 +26,6 @@ junit_tests(name='defaultloader',
   dependencies=[
     ':core',
     '3rdparty/jvm/junit:junit',
-    '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest:scalatest',
     'finagle/finagle-core/src/main/scala:scala',
@@ -35,7 +33,7 @@ junit_tests(name='defaultloader',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala'
   ],
-    
+
   sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala')
 )
 
@@ -59,7 +57,6 @@ junit_tests(name='serversets',
     '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/com/google/inject:guice',
     '3rdparty/jvm/junit:junit',
-    '3rdparty/jvm/org/apache/zookeeper:zookeeper-server',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest:scalatest',
     'finagle/finagle-core/src/main/scala:scala',

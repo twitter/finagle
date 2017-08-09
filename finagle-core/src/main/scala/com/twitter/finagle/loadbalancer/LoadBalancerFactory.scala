@@ -7,7 +7,6 @@ import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.util.{Activity, Var}
 import java.util.logging.{Level, Logger}
 import scala.util.control.NonFatal
-import scala.util.hashing.MurmurHash3
 
 /**
  * Exposes a [[Stack.Module]] which composes load balancing into the respective
@@ -107,37 +106,8 @@ object LoadBalancerFactory {
 
   object AddressOrdering {
 
-    /**
-     * An [[Ordering]] which orders [[Address Addresses]] based on a
-     * deterministic hash of their IP.
-     *
-     * @note In the case of unresolved addresses, certain sorting implementations
-     * will require consistent results across comparisons so it may fail
-     * during the sort.
-     */
-    private val defaultHashOrdering = new Ordering[Address] {
-      def compare(a0: Address, a1: Address): Int = (a0, a1) match {
-        case (Address.Inet(inet0, _), Address.Inet(inet1, _)) =>
-          if (inet0.isUnresolved || inet1.isUnresolved) 0
-          else {
-            val ipHash0 = MurmurHash3.bytesHash(inet0.getAddress.getAddress)
-            val ipHash1 = MurmurHash3.bytesHash(inet1.getAddress.getAddress)
-            val ipCompare = Integer.compare(ipHash0, ipHash1)
-            if (ipCompare != 0) ipCompare
-            else {
-              Integer.compare(inet0.getPort, inet1.getPort)
-            }
-          }
-        case (_: Address.Inet, _) => -1
-        case (_, _: Address.Inet) => 1
-        case _ => 0
-      }
-
-      override def toString: String = "DefaultHashOrdering"
-    }
-
     implicit val param = new Stack.Param[AddressOrdering] {
-      def default: AddressOrdering = AddressOrdering(defaultHashOrdering)
+      def default: AddressOrdering = AddressOrdering(defaultAddressOrdering)
     }
   }
 
