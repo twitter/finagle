@@ -75,8 +75,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     object MuxImpl {
       private val RefCountToggleId: String = "com.twitter.finagle.mux.RefCountControlMessages"
+      private val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
       private val refCountControlToggle: Toggle[Int] = Toggles(RefCountToggleId)
+      private val tlsHeadersToggle: Toggle[Int] = Toggles(TlsHeadersToggleId)
       private def refCountControl: Boolean = refCountControlToggle(ServerInfo().id.hashCode)
+      private[Mux] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
@@ -143,6 +146,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .map { cb =>
         MuxFramer.Header.decodeFrameSize(cb)
       }
+
+    // unused for now
+    val encryptLevel = Handshake.valueOf(OpportunisticTls.Header.KeyBuf, peerHeaders) match {
+      case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
+      case None => OpportunisticTls.Off
+    }
+
     // Decorate the transport with the MuxFramer. We need to handle the
     // cross product of local and remote configuration. The idea is that
     // both clients and servers can specify the maximum frame size they
@@ -150,11 +160,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     val framerStats = statsReceiver.scope("framer")
     (maxFrameSize, remoteMaxFrameSize) match {
       // The remote peer has suggested a max frame size less than the
-      // sentinal value. We need to configure the framer to fragment.
+      // sentinel value. We need to configure the framer to fragment.
       case (_, s @ Some(remote)) if remote < Int.MaxValue =>
         MuxFramer(trans, s, framerStats)
       // The local instance has requested a max frame size less than the
-      // sentinal value. We need to be prepared for the remote to send
+      // sentinel value. We need to be prepared for the remote to send
       // fragments.
       case (local, _) if local.inBytes < Int.MaxValue =>
         MuxFramer(trans, None, framerStats)
@@ -207,9 +217,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * @param maxFrameSize the maximum mux fragment size the client is willing to
      * receive from a server.
      */
-    private def headers(maxFrameSize: StorageUnit): Handshake.Headers = Seq(
-      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
-    )
+    private def headers(maxFrameSize: StorageUnit): Handshake.Headers = {
+      val muxFrameHeader =
+        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
+      if (param.MuxImpl.tlsHeaders) {
+        // this is off for now, but will be different in the future if opportunistic
+        // tls is configured.
+        Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> OpportunisticTls.Off.buf)
+      } else Seq(muxFrameHeader)
+    }
   }
 
   case class Client(
@@ -288,7 +304,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       clientHeaders: Handshake.Headers,
       maxFrameSize: StorageUnit
     ): Handshake.Headers = {
-      Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt))
+      val muxFrameHeader =
+        MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
+      if (param.MuxImpl.tlsHeaders) {
+        // this is off for now, but will be different in the future if opportunistic
+        // tls is configured.
+        Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> OpportunisticTls.Off.buf)
+      } else Seq(muxFrameHeader)
     }
   }
 
