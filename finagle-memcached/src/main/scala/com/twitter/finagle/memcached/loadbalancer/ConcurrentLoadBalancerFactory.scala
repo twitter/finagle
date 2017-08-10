@@ -16,11 +16,11 @@ import com.twitter.finagle.{Addr, Address, Stack, ServiceFactory, Stackable}
 object ConcurrentLoadBalancerFactory {
   private val ReplicaKey = "concurrent_lb_replica"
 
-  private[this] val UseOneConnection =
-    Toggles("com.twitter.finagle.memcached.UseOneConnection")(ServerInfo().id.hashCode)
+  private[this] val UseTwoConnections =
+    Toggles("com.twitter.finagle.memcached.UseTwoConnections")(ServerInfo().id.hashCode)
 
   private[this] val numConnections: Int =
-    if (UseOneConnection) 1
+    if (UseTwoConnections) 2
     else 4
 
   // package private for testing
