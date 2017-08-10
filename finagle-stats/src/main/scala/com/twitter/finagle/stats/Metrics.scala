@@ -63,7 +63,19 @@ private[stats] object Metrics {
 private[stats] class MetricCollisionException(msg: String) extends IllegalArgumentException(msg)
 
 /**
- * A concrete metrics store for creating and reading metrics.
+ * A concrete metrics registry for creating and reading metrics.
+ *
+ * This stats implementation respects [[Verbosity verbosity levels]] such that
+ *
+ *  - it takes [[Verbosity]] as an argument while creating a certain metric and
+ *  - reports verbosity levels via [[MetricsView#verbosity]]
+ *
+ * @note For efficiency reasons, it doesn't keep track of default (i.e., [[Verbosity.Default]])
+ *       metrics.
+ *
+ * @note A verbosity level is only attached once, when metric is being created. Any subsequent
+ *       creation/querying of the same metric (i.e., metric with the same name), doesn't affect
+ *       its initial verbosity.
  */
 private[finagle] class Metrics(
   mkHistogram: (String, IndexedSeq[Double]) => MetricsHistogram,
@@ -107,7 +119,9 @@ private[finagle] class Metrics(
     if (curNameUsage == null || curNameUsage == CounterRepr) {
       val next = new Metrics.StoreCounterImpl(formatted)
       val prev = countersMap.putIfAbsent(names, next)
+
       if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
+
       if (prev != null) prev else next
     } else {
       throw new MetricCollisionException(
@@ -142,7 +156,9 @@ private[finagle] class Metrics(
 
     val next = new Metrics.StoreStatImpl(histogram, formatted, doLog)
     val prev = statsMap.putIfAbsent(names, next)
+
     if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
+
     if (prev != null) prev else next
   }
 
@@ -153,13 +169,14 @@ private[finagle] class Metrics(
     if (curNameUsage == null) {
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.putIfAbsent(names, next)
+
+      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
     } else if (curNameUsage == GaugeRepr) {
       // it should be impossible to collide with a gauge in finagle since
       // StatsReceiverWithCumulativeGauges already protects us.
       // we replace existing gauges to support commons metrics behavior.
       val next = new Metrics.StoreGaugeImpl(formatted, f)
       gaugesMap.put(names, next)
-      if (verbosity != Verbosity.Default) verbosityMap.put(formatted, verbosity)
     } else {
       throw new MetricCollisionException(
         s"A Counter with the name $formatted had already" +

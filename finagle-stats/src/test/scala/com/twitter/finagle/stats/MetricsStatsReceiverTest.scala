@@ -72,14 +72,46 @@ class MetricsStatsReceiverTest extends FunSuite {
     assert(readGauge(detachedReceiver, "xxx") != readGauge(rootReceiver, "xxx"))
   }
 
-  test("keep track of debug metrics") {
+  test("keep track of debug metrics ") {
     val metrics = new Metrics()
     val sr = new MetricsStatsReceiver(metrics)
 
     sr.counter(Verbosity.Debug, "foo")
-    sr.counter(Verbosity.Default, "bar")
+    sr.stat(Verbosity.Debug, "bar")
+    sr.addGauge(Verbosity.Debug, "baz")(0f)
 
     assert(metrics.verbosity.get("foo") == Verbosity.Debug)
+    assert(metrics.verbosity.get("bar") == Verbosity.Debug)
+    assert(metrics.verbosity.get("baz") == Verbosity.Debug)
+  }
+
+  test("does not keep track of default metrics ") {
+    val metrics = new Metrics()
+    val sr = new MetricsStatsReceiver(metrics)
+
+    sr.counter(Verbosity.Default, "foo")
+    sr.stat(Verbosity.Default, "bar")
+    sr.addGauge(Verbosity.Default, "baz")(0f)
+
+    assert(!metrics.verbosity.containsKey("foo"))
     assert(!metrics.verbosity.containsKey("bar"))
+    assert(!metrics.verbosity.containsKey("baz"))
+  }
+
+  test("only assign verbosity at creation") {
+    val metrics = new Metrics()
+    val sr = new MetricsStatsReceiver(metrics)
+
+    sr.counter(Verbosity.Default, "foo")
+    sr.stat(Verbosity.Default, "bar")
+    sr.addGauge(Verbosity.Default, "baz")(0f)
+
+    sr.counter(Verbosity.Debug, "foo")
+    sr.stat(Verbosity.Debug, "bar")
+    sr.addGauge(Verbosity.Debug, "baz")(0f)
+
+    assert(!metrics.verbosity.containsKey("foo"))
+    assert(!metrics.verbosity.containsKey("bar"))
+    assert(!metrics.verbosity.containsKey("baz"))
   }
 }
