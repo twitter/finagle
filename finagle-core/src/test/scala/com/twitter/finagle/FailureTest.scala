@@ -3,13 +3,11 @@ package com.twitter.finagle
 import com.twitter.conversions.time._
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.{Await, Future}
-import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-@RunWith(classOf[JUnitRunner])
 class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenPropertyChecks {
   private val exc = Gen.oneOf[Throwable](null, new Exception("first"), new Exception("second"))
 
@@ -171,5 +169,19 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     for ((f, c) <- failures.zip(categories)) {
       assert(Failure.flagsOf(f) == c)
     }
+  }
+
+  test("Failure.wrap(non-wrapped Failure)") {
+    val ex1 = Failure("Not wrapped.")
+    val ex2 = Failure.wrap(ex1, Failure.Naming)
+    assert(ex2.flags == Failure.Naming)
+  }
+
+  test("Failure.retryable(..) strips NonRetryable flag") {
+    val ex = Failure("Not retryable", Failure.NonRetryable)
+    val result = Failure.retryable(ex)
+
+    assert(result.isFlagged(Failure.Restartable))
+    assert(!result.isFlagged(Failure.NonRetryable))
   }
 }

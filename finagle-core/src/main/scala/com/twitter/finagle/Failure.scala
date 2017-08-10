@@ -255,7 +255,7 @@ object Failure {
   def wrap(exc: Throwable, flags: Long): Failure = {
     require(exc != null)
     exc match {
-      case f: Failure => f.flagged(flags | Failure.Wrapped)
+      case f: Failure => f.flagged(flags)
       case _ => Failure(exc, flags | Failure.Wrapped, computeLogLevel(exc))
     }
   }
@@ -272,9 +272,18 @@ object Failure {
    * exception is a failure, it is simply extended, otherwise a new Failure is
    * created.
    *
-   * @note This is an alias for `wrap(exc, FailureFlags.Retryable)`
+   * @note This is equivalent to stripping the `NonRetryable` flag (if it exists)
+   *       and calling `wrap(exc, Retryable)` on the result.
    */
-  private[finagle] def retryable(exc: Throwable): Failure = wrap(exc, FailureFlags.Retryable)
+  private[finagle] def retryable(exc: Throwable): Failure = {
+    val filteredExc = exc match {
+      case f: FailureFlags[_] if f.isFlagged(FailureFlags.NonRetryable) =>
+        f.unflagged(FailureFlags.NonRetryable)
+
+      case other => other
+    }
+    wrap(filteredExc, FailureFlags.Retryable)
+  }
 
   /**
    * Create a new [[Restartable]] and [[Rejected]] failure with the given message.
