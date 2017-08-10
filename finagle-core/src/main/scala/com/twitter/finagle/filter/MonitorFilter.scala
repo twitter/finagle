@@ -51,14 +51,17 @@ private[finagle] object MonitorFilter {
  * according to the argument [[com.twitter.util.Monitor]].
  */
 class MonitorFilter[Req, Rep](monitor: Monitor) extends SimpleFilter[Req, Rep] {
+  private[this] val someMonitor = Some(monitor)
+
   private[this] val RespondFn: Try[Rep] => Unit = {
     case Throw(exc) => monitor.handle(exc)
     case _ =>
   }
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val saved = Monitor.get
-    Monitor.set(monitor)
+    // note: using Monitor's getOption/setOption to avoid allocations
+    val saved = Monitor.getOption
+    Monitor.setOption(someMonitor)
     try {
       service(request).respond(RespondFn)
     } catch {
@@ -66,7 +69,7 @@ class MonitorFilter[Req, Rep](monitor: Monitor) extends SimpleFilter[Req, Rep] {
         monitor.handle(e)
         Future.exception(e)
     } finally {
-      Monitor.set(saved)
+      Monitor.setOption(saved)
     }
   }
 }
