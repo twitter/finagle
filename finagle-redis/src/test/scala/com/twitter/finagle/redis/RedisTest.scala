@@ -384,3 +384,43 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     try { testCode(client) } finally { client.close() }
   }
 }
+
+trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
+
+  val TotalHashSlots: Int = 16384
+
+  val primaryCount: Int
+
+  val replicasPerPrimary: Int = 1
+
+  lazy val serverCount = primaryCount + primaryCount * replicasPerPrimary
+
+  override def beforeAll(): Unit = {
+    RedisCluster.start(count = serverCount, mode = RedisMode.Cluster)
+
+    // configure the cluster by assigning slots and assign primary/backups
+/*    val slotsPerServer = (0 until TotalHashSlots)
+      .groupBy(_ % primaryCount)
+
+    for ((index, slots) <- slotsPerServer) {
+      // assign the slots to the server
+      val client = ClusterClient(Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1)))
+
+      Await.ready(client.addSlots(slots))
+
+      client.close()
+    }
+
+    // make sure that a single node has MEET all other nodes
+*/
+  }
+
+  override def afterAll(): Unit = RedisCluster.stopAll()
+
+  protected def withClusterClient(index: Int)(testCode: ClusterClient => Any) {
+    val client = ClusterClient(
+      Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1))
+    )
+    try { testCode(client) } finally { client.close() }
+  }
+}
