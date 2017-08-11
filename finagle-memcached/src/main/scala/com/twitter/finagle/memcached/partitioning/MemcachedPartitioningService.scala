@@ -5,7 +5,7 @@ import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.{Memcached, _}
 import com.twitter.hashing.KeyHasher
 import com.twitter.io.Buf
-import org.apache.commons.io.Charsets
+import java.nio.charset.StandardCharsets.UTF_8
 
 /**
  * MemcachedPartitioningService provides Ketama consistent hashing based partitioning for the
@@ -49,7 +49,7 @@ private[finagle] class MemcachedPartitioningService(
     ) {
 
   final override protected def getKeyBytes(key: String): Array[Byte] = {
-    key.getBytes(Charsets.UTF_8)
+    key.getBytes(UTF_8)
   }
 
   final override protected def getPartitionKeys(command: Command): Seq[String] = {
