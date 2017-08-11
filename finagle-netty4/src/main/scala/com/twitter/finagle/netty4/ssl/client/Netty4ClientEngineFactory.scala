@@ -5,13 +5,10 @@ import com.twitter.finagle.netty4.param.Allocator
 import com.twitter.finagle.netty4.ssl.Netty4SslConfigurations
 import com.twitter.finagle.ssl._
 import com.twitter.finagle.ssl.client.{SslClientConfiguration, SslClientEngineFactory}
-import com.twitter.util.security.{Pkcs8EncodedKeySpecFile, X509CertificateFile}
 import com.twitter.util.{Try, Return, Throw}
+import com.twitter.util.security.X509CertificateFile
 import io.netty.buffer.ByteBufAllocator
 import io.netty.handler.ssl.{OpenSsl, SslContext, SslContextBuilder}
-import java.io.File
-import java.security.{KeyFactory, PrivateKey}
-import java.security.spec.InvalidKeySpecException
 import javax.net.ssl.SSLEngine
 
 /**
@@ -33,27 +30,6 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         context.newEngine(allocator)
     }
 
-  private[this] def getPrivateKey(keyFile: File): Try[PrivateKey] = {
-    val encodedKeySpec = new Pkcs8EncodedKeySpecFile(keyFile).readPkcs8EncodedKeySpec()
-
-    // keeps identical behavior to netty
-    // https://github.com/netty/netty/blob/netty-4.1.11.Final/handler/src/main/java/io/netty/handler/ssl/SslContext.java#L1006
-    encodedKeySpec.flatMap { keySpec =>
-      Try {
-        KeyFactory.getInstance("RSA").generatePrivate(keySpec)
-      }.handle {
-          case _: InvalidKeySpecException => KeyFactory.getInstance("DSA").generatePrivate(keySpec)
-        }
-        .handle {
-          case _: InvalidKeySpecException => KeyFactory.getInstance("EC").generatePrivate(keySpec)
-        }
-        .handle {
-          case ex: InvalidKeySpecException =>
-            throw new InvalidKeySpecException("Neither RSA, DSA nor EC worked", ex)
-        }
-    }
-  }
-
   private[this] def addKey(
     builder: SslContextBuilder,
     keyCredentials: KeyCredentials
@@ -67,7 +43,7 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         }
       case KeyCredentials.CertKeyAndChain(certFile, keyFile, chainFile) =>
         for {
-          key <- getPrivateKey(keyFile)
+          key <- Netty4SslConfigurations.getPrivateKey(keyFile)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
           chain <- new X509CertificateFile(chainFile).readX509Certificate()
         } yield builder.keyManager(key, cert, chain)

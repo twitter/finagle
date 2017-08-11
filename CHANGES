@@ -46,6 +46,9 @@ New Features
 
   * finagle-netty4: Netty 4 transports now use pooled allocators by default. ``PHAB_ID=D75014``
 
+  * finagle-netty4: `KeyCredentials.CertKeyAndChain` is now available to use with
+    `Netty4ServerEngineFactory`. ``PHAB_ID=D80494``
+
   * finagle-mysql: `IsolationLevel` support was added with
     `Transactions.transactionWithIsolation` method, so the default level can be overridden
     at the transaction level. ``PHAB_ID=D68944``

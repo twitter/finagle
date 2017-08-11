@@ -51,13 +51,20 @@ class Netty4ServerEngineFactoryTest extends FunSuite {
     }
   }
 
-  test("config with cert, key, and chain fails") {
-    val keyCredentials = KeyCredentials.CertKeyAndChain(certFile, keyFile, certFile)
+  test("config with cert, key, and chain succeeds") {
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    // deleteOnExit is handled by TempFile
+
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertKeyAndChain(tempCertFile, tempKeyFile, tempCertFile)
     val config = SslServerConfiguration(keyCredentials = keyCredentials)
 
-    intercept[SslConfigurationException] {
-      val engine = factory(config)
-    }
+    val engine = factory(config)
+    val sslEngine = engine.self
+
+    assert(sslEngine != null)
   }
 
   test("config with insecure trust credentials succeeds") {
