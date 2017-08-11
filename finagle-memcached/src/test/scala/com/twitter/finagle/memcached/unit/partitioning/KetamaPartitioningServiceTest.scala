@@ -175,7 +175,8 @@ class KetamaPartitioningServiceTest extends PartitioningServiceTestBase {
     // trigger ejection by sending requests
     Await.ready(Future.join(requestToServer.keySet.map(client(_)).toSeq), Timeout)
 
-    // at least one host should get ejected, because we don't which hosts were hit by above requests
+    // at least one host should get ejected, because we don't know which hosts were hit by above
+    // requests
     eventually {
       assert(sr.counters(Seq("client", "partitioner", "ejections")) == 1)
       assert(sr.counters(Seq("client", "partitioner", "redistributes")) == 2)

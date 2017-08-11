@@ -2,52 +2,64 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.memcached.integration.external.TestMemcachedServer
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.memcached.{Client, PartitionedClient}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
+import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
+import org.scalatest.time.{Milliseconds, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
-class MemcachedTest extends FunSuite with BeforeAndAfter {
+abstract class MemcachedTest
+    extends FunSuite
+    with BeforeAndAfter
+    with Eventually
+    with PatienceConfiguration {
 
-  val NumServers = 5
-  val NumConnections = 4
+  protected[this] val NumServers = 5
+  protected[this] val NumConnections = 4
+  protected[this] val Timeout: Duration = 15.seconds
+  protected[this] var servers: Seq[TestMemcachedServer] = Seq.empty
+  protected[this] var client: Client = _
+  protected[this] val clientName = "test_client"
 
-  var servers: Seq[TestMemcachedServer] = Seq.empty
-  var client: Client = null
+  protected[this] val isOldClient: Boolean
+  protected[this] val redistributesKey: Seq[String]
+  protected[this] val leavesKey: Seq[String]
+  protected[this] val revivalsKey: Seq[String]
+  protected[this] val ejectionsKey: Seq[String]
+  protected[this] def createClient(dest: Name, clientName: String): Client
 
-  val TimeOut = 15.seconds
-
-  private def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, TimeOut)
-
-  private val clientName = "test_client"
   before {
     val serversOpt = for (_ <- 1 to NumServers) yield TestMemcachedServer.start()
 
     if (serversOpt.forall(_.isDefined)) {
       servers = serversOpt.flatten
-      val n = Name.bound(servers.map { s =>
-        (Address(s.address))
+      val dest = Name.bound(servers.map { s =>
+        Address(s.address)
       }: _*)
-      client = Memcached.client.newRichClient(n, clientName)
+      client = createClient(dest, clientName)
     }
   }
 
   after {
     servers.foreach(_.stop())
+    client.close()
   }
 
   override def withFixture(test: NoArgTest): Outcome = {
-    if (servers.length == NumServers) test()
-    else {
+    if (servers.length == NumServers) {
+      test()
+    } else {
       info("Cannot start memcached. Skipping test...")
       cancel()
     }
   }
+
+  protected[this] def awaitResult[T](awaitable: Awaitable[T]): T = Await.result(awaitable, Timeout)
 
   test("set & get") {
     awaitResult(client.delete("foo"))
@@ -61,8 +73,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     assert(awaitResult(client.get("bob")) == None)
     awaitResult(client.set("bob", Buf.Utf8("hello there \r\n nice to meet \r\n you")))
     assert(
-      awaitResult(client.get("bob")).get ==
-        Buf.Utf8("hello there \r\n nice to meet \r\n you"),
+      awaitResult(client.get("bob")).get == Buf.Utf8("hello there \r\n nice to meet \r\n you"),
       3.seconds
     )
   }
@@ -96,8 +107,6 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("gets") {
       // create a client that connects to only one server so we can predict CAS tokens
-      val client = Memcached.client.newRichClient(Name.bound(Address(servers(0).address)), "client")
-
       awaitResult(client.set("foos", Buf.Utf8("xyz"))) // CAS: 1
       awaitResult(client.set("bazs", Buf.Utf8("xyz"))) // CAS: 2
       awaitResult(client.set("bazs", Buf.Utf8("zyx"))) // CAS: 3
@@ -111,9 +120,10 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
           case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
             (key, (value, casUnique))
         }
+      // the "cas unique" values are predictable from a fresh memcached
       val expected =
         Map(
-          "foos" -> (("xyz", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "foos" -> (("xyz", "1")),
           "bazs" -> (("zyx", "3")),
           "bars" -> (("yxz", "6"))
         )
@@ -132,9 +142,10 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
             (key, (value, flag, casUnique))
         }
 
+      // the "cas unique" values are predictable from a fresh memcached
       assert(
         result == Map(
-          "foos1" -> (("xyz", "0", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "foos1" -> (("xyz", "0", "1")),
           "bazs1" -> (("zyx", "0", "2"))
         )
       )
@@ -185,15 +196,16 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     test("stats") {
       // We can't use a partitioned client to get stats, because we don't hash to a server based on
       // a key. Instead, we create a ConnectedClient, which is connected to one server.
-      val service = Memcached.client.newService(Name.bound(Address(servers(0).address)), "client")
+      val service = Memcached.client.newService(Name.bound(Address(servers.head.address)), "client")
 
       val connectedClient = Client(service)
       val stats = awaitResult(connectedClient.stats())
       assert(stats != null)
-      assert(!stats.isEmpty)
+      assert(stats.nonEmpty)
       stats.foreach { stat =>
         assert(stat.startsWith("STAT"))
       }
+      service.close()
     }
   }
 
@@ -205,23 +217,36 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.get("foo   ")) }
     intercept[ClientError] { awaitResult(client.get("    foo")) }
     val nullString: String = null
-    intercept[NullPointerException] { awaitResult(client.get(nullString)) }
-    intercept[NullPointerException] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
+    if (isOldClient) {
+      intercept[NullPointerException] { awaitResult(client.get(nullString)) }
+      intercept[NullPointerException] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
+    } else {
+      intercept[ClientError] { awaitResult(client.get(nullString)) }
+      intercept[ClientError] { awaitResult(client.set(nullString, Buf.Utf8("bar"))) }
+    }
     intercept[ClientError] { awaitResult(client.set("    ", Buf.Utf8("bar"))) }
 
-    assert(awaitResult(client.set("\t", Buf.Utf8("bar")).liftToTry) == Return.Unit) // "\t" is a valid key
+    // "\t" is a valid key
+    assert(awaitResult(client.set("\t", Buf.Utf8("bar")).liftToTry) == Return.Unit)
     intercept[ClientError] { awaitResult(client.set("\r", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("\n", Buf.Utf8("bar"))) }
     intercept[ClientError] { awaitResult(client.set("\u0000", Buf.Utf8("bar"))) }
 
-    val veryLongKey =
-      "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+    val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstu" +
+      "vwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdef" +
+      "ghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopq" +
+      "rstuvwxyz"
     intercept[ClientError] { awaitResult(client.get(veryLongKey)) }
     intercept[ClientError] { awaitResult(client.set(veryLongKey, Buf.Utf8("bar"))) }
 
     // test other keyed command validation
     val nullSeq: Seq[String] = null
-    intercept[NullPointerException] { awaitResult(client.get(nullSeq)) }
+    if (isOldClient) {
+      intercept[NullPointerException] { awaitResult(client.get(nullSeq)) }
+    } else {
+      intercept[ClientError] { awaitResult(client.get(nullSeq)) }
+    }
+
     intercept[ClientError] { awaitResult(client.append("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { awaitResult(client.prepend("bad key", Buf.Utf8("rab"))) }
     intercept[ClientError] { awaitResult(client.replace("bad key", Buf.Utf8("bar"))) }
@@ -234,19 +259,12 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     intercept[ClientError] { awaitResult(client.delete("bad key")) }
   }
 
-  test("re-hash when a bad host is ejected") {
-    client = Memcached.client
-      .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-      .configured(Memcached.param.EjectFailedHost(true))
-      .newRichClient(Name.bound(servers.map { s =>
-        (Address(s.address))
-      }: _*), "test_client")
-    val partitionedClient = client.asInstanceOf[PartitionedClient]
-
+  protected[this] def testRehashUponEject(client: Client, sr: InMemoryStatsReceiver) {
+    val max = 200
     // set values
     awaitResult(
       Future.collect(
-        (0 to 20).map { i =>
+        (0 to max).map { i =>
           client.set(s"foo$i", Buf.Utf8(s"bar$i"))
         }
       )
@@ -256,41 +274,55 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     // one client in the partition talking to it. Therefore, we rely on the fact that for 5
     // backends, it's very unlikely all clients will be talking to the same server, and as such,
     // shutting down all backends but one will trigger cache misses.
-    servers.tail.foreach(_.stop)
+    servers.tail.foreach(_.stop())
 
     // trigger ejection
-    for (i <- 0 to 20) {
-      Await.ready(client.get(s"foo$i"), TimeOut)
+    for (i <- 0 to max) {
+      Await.ready(client.get(s"foo$i"), Timeout)
+    }
+    // wait a little longer than default to prevent test flappiness
+    val timeout = PatienceConfiguration.Timeout(Span(10, Seconds))
+    val interval = PatienceConfiguration.Interval(Span(100, Milliseconds))
+    eventually(timeout, interval) {
+      assert(sr.counters.getOrElse(ejectionsKey, 0L) > 2)
     }
 
-    val clientSet =
-      (0 to 20).foldLeft(Set[Client]()) {
-        case (s, i) =>
-          val c = partitionedClient.clientOf(s"foo$i")
-          s + c
-      }
-    assert(clientSet.size == 1)
+    client match {
+      case partitionedClient: PartitionedClient =>
+        val clientSet =
+          (0 to max).foldLeft(Set[Client]()) {
+            case (s, i) =>
+              val c = partitionedClient.clientOf(s"foo$i")
+              s + c
+          }
+        assert(clientSet.size == 1)
+      case _ =>
+      // the new client doesn't have a way to get to the equivalent functionality in
+      // KetamaPartitioningService.partitionByKey
+    }
 
     // previously set values have cache misses
     var cacheMisses = 0
-    for (i <- 0 to 20) {
-      if (awaitResult(client.get(s"foo$i")) == None) cacheMisses = cacheMisses + 1
+    for (i <- 0 to max) {
+      if (awaitResult(client.get(s"foo$i")).isEmpty) cacheMisses = cacheMisses + 1
     }
     assert(cacheMisses > 0)
   }
 
-  test("host comes back into ring after being ejected") {
+  protected[this] def testRingReEntryAfterEjection(
+    createClient: (MockTimer, ListeningServer, StatsReceiver) => Client
+  ) {
     import com.twitter.finagle.memcached.protocol._
 
     class MockedMemcacheServer extends Service[Command, Response] {
-      def apply(command: Command) = command match {
-        case Get(key) => Future.value(Values(List(Value(Buf.Utf8("foo"), Buf.Utf8("bar")))))
+      def apply(command: Command): Future[Response with Product with Serializable] = command match {
+        case Get(_) => Future.value(Values(List(Value(Buf.Utf8("foo"), Buf.Utf8("bar")))))
         case Set(_, _, _, _) => Future.value(Error(new Exception))
         case x => Future.exception(new MatchError(x))
       }
     }
 
-    val cacheServer = Memcached.serve(
+    val cacheServer: ListeningServer = Memcached.serve(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new MockedMemcacheServer
     )
@@ -298,22 +330,14 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     val timer = new MockTimer
     val statsReceiver = new InMemoryStatsReceiver
 
-    val client = Memcached.client
-      .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-      .configured(Memcached.param.EjectFailedHost(true))
-      .configured(param.Timer(timer))
-      .configured(param.Stats(statsReceiver))
-      .newRichClient(
-        Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])),
-        "cacheClient"
-      )
+    val client = createClient(timer, cacheServer, statsReceiver)
 
     Time.withCurrentTimeFrozen { timeControl =>
       // Send a bad request
       intercept[Exception] { awaitResult(client.set("foo", Buf.Utf8("bar"))) }
 
       // Node should have been ejected
-      assert(statsReceiver.counters.get(List("cacheClient", "ejections")) == Some(1))
+      assert(statsReceiver.counters.get(ejectionsKey) == Some(1))
 
       // Node should have been marked dead, and still be dead after 5 minutes
       timeControl.advance(5.minutes)
@@ -327,26 +351,18 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       timer.tick()
 
       // 10 minutes (markDeadFor duration) have passed, so the request should go through
-      assert(statsReceiver.counters.get(List("cacheClient", "revivals")) == Some(1))
+      assert(statsReceiver.counters.get(revivalsKey) == Some(1))
       assert(awaitResult(client.get(s"foo")).get == Buf.Utf8("bar"))
     }
+    client.close()
   }
 
-  test("Add and remove nodes") {
-    val addrs = servers.map { s =>
-      (Address(s.address))
-    }
-
-    // Start with 3 backends
-    val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound(addrs.toSet.drop(2)))
-
-    val sr = new InMemoryStatsReceiver
-    val myClient = Memcached.client
-      .connectionsPerEndpoint(NumConnections)
-      .withStatsReceiver(sr)
-      .newRichClient(Name.Bound.singleton(mutableAddrs), "test_client")
-
-    assert(sr.counters(Seq("test_client", "redistributes")) == 1)
+  protected[this] def testAddAndRemoveNodes(
+    addrs: Seq[Address],
+    mutableAddrs: ReadWriteVar[Addr],
+    sr: InMemoryStatsReceiver
+  ) {
+    assert(sr.counters(redistributesKey) == 1)
     assert(sr.counters(Seq("test_client", "loadbalancer", "rebuilds")) == 3)
     assert(sr.counters(Seq("test_client", "loadbalancer", "updates")) == 3)
     assert(sr.counters(Seq("test_client", "loadbalancer", "adds")) == NumConnections * 3)
@@ -355,7 +371,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     // Add 2 nodes to the backends, for a total of 5 backends
     mutableAddrs.update(Addr.Bound(addrs.toSet))
 
-    assert(sr.counters(Seq("test_client", "redistributes")) == 2)
+    assert(sr.counters(redistributesKey) == 2)
     // Need to rebuild each of the 5 nodes with `numConnections`
     assert(sr.counters(Seq("test_client", "loadbalancer", "rebuilds")) == 5)
     assert(sr.counters(Seq("test_client", "loadbalancer", "updates")) == 5)
@@ -365,19 +381,21 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     // Remove 1 node from the backends, for a total of 4 backends
     mutableAddrs.update(Addr.Bound(addrs.toSet.drop(1)))
 
-    assert(sr.counters(Seq("test_client", "redistributes")) == 3)
+    assert(sr.counters(redistributesKey) == 3)
     // Don't need to rebuild or update any existing nodes
     assert(sr.counters(Seq("test_client", "loadbalancer", "rebuilds")) == 5)
     assert(sr.counters(Seq("test_client", "loadbalancer", "updates")) == 5)
     assert(sr.counters(Seq("test_client", "loadbalancer", "adds")) == NumConnections * 5)
-    assert(sr.counters(Seq("test_client", "leaves")) == 1)
+
+    assert(sr.counters(leavesKey) == 1)
+
     // Node is removed, closing `numConnections` in the LoadBalancer
     assert(sr.counters(Seq("test_client", "loadbalancer", "removes")) == NumConnections)
 
     // Update the backends with the same list, for a total of 4 backends
     mutableAddrs.update(Addr.Bound(addrs.toSet.drop(1)))
 
-    assert(sr.counters(Seq("test_client", "redistributes")) == 4)
+    assert(sr.counters(redistributesKey) == 4)
     // Ensure we don't do anything in the LoadBalancer because the set of nodes is the same
     assert(sr.counters(Seq("test_client", "loadbalancer", "rebuilds")) == 5)
     assert(sr.counters(Seq("test_client", "loadbalancer", "updates")) == 5)
@@ -385,15 +403,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     assert(sr.counters(Seq("test_client", "loadbalancer", "removes")) == NumConnections)
   }
 
-  test("FailureAccrualFactoryException has remote address") {
-
-    val client = Memcached.client
-      .connectionsPerEndpoint(1)
-      // 1 failure triggers FA; make sure FA stays in "dead" state after failure
-      .configured(FailureAccrualFactory.Param(1, 10.minutes))
-      .withEjectFailedHost(false)
-      .newTwemcacheClient(Name.bound(Address("localhost", 1234)), "client")
-
+  protected[this] def testFailureAccrualFactoryExceptionHasRemoteAddress(client: Client) {
     // Trigger transition to "Dead" state
     intercept[Exception] {
       awaitResult(client.delete("foo"))
@@ -405,7 +415,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       awaitResult(client.delete("foo"))
     }
 
-    assert(failureAccrualEx.getMessage.contains("Endpoint is marked dead by failureAccrual"))
-    assert(failureAccrualEx.getMessage.contains("Downstream Address: localhost/127.0.0.1:1234"))
+    assert(failureAccrualEx.getMessage().contains("Endpoint is marked dead by failureAccrual"))
+    assert(failureAccrualEx.getMessage().contains("Downstream Address: localhost/127.0.0.1:1234"))
   }
 }
