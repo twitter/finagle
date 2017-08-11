@@ -84,7 +84,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     val client1 = CacheNode("10.0.1.1", 11211, 600)
     def newService(node: CacheNode) = mockService
     // create a client with no members (yet)
-    val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
+    val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Pending)
     val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
 
     // simulate a cancelled request
@@ -106,6 +106,25 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     verifyZeroInteractions(mockService)
     when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
     mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
+    assert(awaitResult(r2).get == 42)
+  }
+
+  test("client fails requests if initial serverset is empty") {
+    val mockService = mock[Service[Command, Response]]
+    val client1 = CacheNode("10.0.1.1", 11211, 600)
+    def newService(node: CacheNode) = mockService
+    // create a client with no members (yet)
+    val mutableAddrs: ReadWriteVar[Addr] = new ReadWriteVar(Addr.Bound())
+    val ketamaClient = new KetamaPartitionedClient(mutableAddrs, newService)
+
+    intercept[ShardNotAvailableException] {
+      Await.result(ketamaClient.get("key"))
+    }
+
+    // resolve the group: request succeed
+    when(mockService.apply(any[Incr])) thenReturn Future.value(Number(42))
+    mutableAddrs.update(Addr.Bound(CacheNode.toAddress(client1)))
+    val r2 = ketamaClient.incr("key")
     assert(awaitResult(r2).get == 42)
   }
 
