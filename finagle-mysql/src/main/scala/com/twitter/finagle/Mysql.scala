@@ -183,9 +183,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       configured(Handshake.Charset(charset))
 
     /**
-      * Don't set the CLIENT_FOUND_ROWS flag when connected to the
-      * server. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
+      * Don't set the CLIENT_FOUND_ROWS flag when establishing a new
+      * session. This will make "INSERT ... ON DUPLICATE KEY UPDATE"
       * statements return the "correct" update count.
+      *
+      * See https://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_row-count
       */
     def withAffectedRows(): Client =
       configured(Handshake.FoundRows(false))

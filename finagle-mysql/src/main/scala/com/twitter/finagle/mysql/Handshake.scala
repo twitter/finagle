@@ -101,7 +101,8 @@ object Handshake {
  * @param charset default character established with the server.
  *
  * @param enableFoundRows if the server should return the number
- * of found (matched) rows, not the number of changed rows.
+ * of found (matched) rows, not the number of changed rows for
+ * UPDATE and INSERT ... ON DUPLICATE KEY UPDATE statements.
  *
  * @param maxPacketSize max size of a command packet that the
  * client intends to send to the server. The largest possible
