@@ -56,6 +56,10 @@ New Features
   * finagle-stats: Metrics now report verbosity levels via `MetricsView.verbosity`.
     ``PHAB_ID=D78150``
 
+  * finagle-stats: `JsonExporter` now respects verbosity levels (current default behavior is
+    to keep exporting "debug" metrics). Adjust `com.twitter.finagle.stats.verbose` tunable
+    whitelist to change it.  ``PHAB_ID=D79571``
+
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 
 Bug Fixes

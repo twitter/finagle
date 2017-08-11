@@ -6,14 +6,17 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{MediaType, RequestParamMap, Response, Request}
+import com.twitter.finagle.http.{MediaType, ParamMap, Request, Response}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.tunable.Tunable
 import java.util.concurrent.atomic.AtomicBoolean
-import java.io.{IOException, File}
+import java.io.{File, IOException}
+import java.util.regex.Pattern
+import scala.annotation.switch
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.io.{Codec, Source}
@@ -56,17 +59,87 @@ object JsonExporter {
   private[stats] def startOfNextMinute: Time =
     Time.fromSeconds(Time.now.inMinutes * 60) + 1.minute
 
-  private val log = Logger.get()
+  private val log: Logger = Logger.get()
+
+  /**
+   * Merges individual regular expressions (represented as a sequence of strings) into
+   * a [[Regex]] instance that is matches as long as one of these expressions is matched.
+   */
+  private def mergedRegex(regex: Seq[String]): Option[Regex] =
+    if (regex.isEmpty) None
+    else Some(regex.mkString("(", ")|(", ")").r)
+
+  /**
+   * Splits the given string by `,` and merges individual pieces into a [[Regex]].
+   *
+   * @see [[mergedRegex]]
+   */
+  private[stats] def commaSeparatedRegex(regex: String): Option[Regex] = {
+    regex.split(",") match {
+      case Array("") => None
+      case regexes => mergedRegex(regexes)
+    }
+  }
+
+  /**
+   * A simplified (only *-wildcards are supported), possibly comma-separated list of Glob
+   * expressions.
+   *
+   * @see https://en.wikipedia.org/wiki/Glob_(programming)
+   */
+  private[stats] def commaSeparatedGlob(glob: String): Option[Pattern] =
+    if (glob.isEmpty) None
+    else {
+      var i = 0
+      // We expand the resulting string to fit up to 8 regex characters w/o
+      // resizing the string builder.
+      val result = new StringBuilder(glob.length + 8)
+      while (i < glob.length) {
+        (glob.charAt(i): @switch) match {
+          case '[' => result.append("\\[")
+          case ']' => result.append("\\]")
+          case '|' => result.append("\\|")
+          case '^' => result.append("\\^")
+          case '$' => result.append("\\$")
+          case '.' => result.append("\\.")
+          case '?' => result.append("\\?")
+          case '+' => result.append("\\+")
+          case '(' => result.append("\\(")
+          case ')' => result.append("\\)")
+          case '{' => result.append("\\{")
+          case '}' => result.append("\\}")
+          case '*' => result.append(".*")
+          case c => result.append(c)
+        }
+        i += 1
+      }
+
+      commaSeparatedRegex(result.toString).map(_.pattern)
+    }
 }
 
-class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, Response] { self =>
+/**
+ * A Finagle HTTP service that exports [[Metrics]] (available via [[MetricsView]])
+ * in a JSON format.
+ *
+ * This service respects metrics [[Verbosity verbosity levels]]: it doesn't export "debug"
+ * (i.e., [[Verbosity.Debug]]) metrics unless they are whitelisted via the comma-separated
+ * `verbose`.
+ */
+class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
+    extends Service[Request, Response] { self =>
 
   import JsonExporter._
 
+  def this(registry: MetricsView, timer: Timer) = this(
+    registry,
+    Verbose.orElse(Tunable.const(Verbose.id, "*")),
+    timer
+  )
+
   def this(registry: MetricsView) = this(registry, DefaultTimer)
 
-  private[this] val mapper = new ObjectMapper
-  mapper.registerModule(DefaultScalaModule)
+  private[this] val mapper = new ObjectMapper().registerModule(DefaultScalaModule)
 
   private[this] val writer = mapper.writer
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
@@ -82,8 +155,7 @@ class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, 
       }
     }
     val regexesFromFlag = statsFilter.get.toSeq.flatMap(_.split(","))
-    val regexes: Seq[String] = regexesFromFlag ++ regexesFromFile
-    mkRegex(regexes)
+    mergedRegex(regexesFromFlag ++ regexesFromFile)
   }
 
   private[this] val registryLoaded = new AtomicBoolean(false)
@@ -100,11 +172,10 @@ class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, 
     val response = Response()
     response.contentType = MediaType.Json
 
-    val params = new RequestParamMap(request)
-    val pretty = readBooleanParam(params, name = "pretty", default = false)
-    val filtered = readBooleanParam(params, name = "filtered", default = false)
+    val pretty = readBooleanParam(request.params, name = "pretty", default = false)
+    val filtered = readBooleanParam(request.params, name = "filtered", default = false)
     val counterDeltasOn = {
-      val vals = params.getAll("period")
+      val vals = request.params.getAll("period")
       if (vals.isEmpty) {
         false
       } else {
@@ -126,7 +197,7 @@ class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, 
 
   // package protected for testing
   private[stats] def readBooleanParam(
-    params: RequestParamMap,
+    params: ParamMap,
     name: String,
     default: Boolean
   ): Boolean = {
@@ -172,7 +243,17 @@ class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, 
     } else {
       metrics.counters.asScala
     }
-    val values = SampledValues(gauges, counters, histos)
+
+    // Converting a *-wildcard expression into a regular expression so we can match on it.
+    val verbosePatten = verbose().flatMap(commaSeparatedGlob)
+
+    // We have to blacklist debug metrics before we apply formatting, which may change
+    // the names.
+    val values = SampledValues(
+      blacklistDebugSample(gauges, verbosePatten),
+      blacklistDebugSample(counters, verbosePatten),
+      blacklistDebugSample(histos, verbosePatten)
+    )
 
     val formatted = StatsFormatter.default(values)
 
@@ -187,26 +268,22 @@ class JsonExporter(metrics: MetricsView, timer: Timer) extends Service[Request, 
     }
   }
 
-  private[this] def mkRegex(regexes: Seq[String]): Option[Regex] = {
-    if (regexes.isEmpty) {
-      None
-    } else {
-      Some(regexes.mkString("(", ")|(", ")").r)
-    }
-  }
-
-  def mkRegex(regexesString: String): Option[Regex] = {
-    regexesString.split(",") match {
-      case Array("") => None
-      case regexes => mkRegex(regexes)
-    }
-  }
-
-  def filterSample(sample: collection.Map[String, Number]): collection.Map[String, Number] = {
+  def filterSample(sample: collection.Map[String, Number]): collection.Map[String, Number] =
     statsFilterRegex match {
       case Some(regex) => sample.filterKeys(!regex.pattern.matcher(_).matches)
       case None => sample
     }
-  }
 
+  private final def blacklistDebugSample[A](
+    sample: collection.Map[String, A],
+    verbose: Option[Pattern]
+  ): collection.Map[String, A] = verbose match {
+    case Some(pattern) =>
+      sample.filterKeys(
+        name => metrics.verbosity.get(name) != Verbosity.Debug || pattern.matcher(name).matches
+      )
+
+    case None =>
+      sample.filterKeys(name => metrics.verbosity.get(name) != Verbosity.Debug)
+  }
 }
