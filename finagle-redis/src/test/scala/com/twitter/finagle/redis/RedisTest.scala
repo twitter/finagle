@@ -423,4 +423,14 @@ trait ClusterClientTest extends RedisTest with BeforeAndAfterAll {
     )
     try { testCode(client) } finally { client.close() }
   }
+
+  protected def withClusterClients(indices: Int*)(testCode: Seq[ClusterClient] => Any) {
+    val clients = indices.map { index =>
+      ClusterClient(
+        Redis.client.newClient(RedisCluster.hostAddresses(from = index, until = index + 1))
+      )
+    }
+    try { testCode(clients) } finally { clients.foreach(_.close()) }
+  }
+
 }

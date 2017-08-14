@@ -1,9 +1,21 @@
 package com.twitter.finagle.redis.protocol
 
+import java.net.InetSocketAddress
 import com.twitter.io.Buf
 
 // data structure for slots
-case class ClusterNode(host: String, port: Int, id: Option[String] = None)
+object ClusterNode {
+  def apply(host: String, port: Int, id: Option[String] = None, flags: Seq[String] = Seq()) =
+    new ClusterNode(new InetSocketAddress(host, port), id, flags)
+}
+
+case class ClusterNode(
+  addr: InetSocketAddress,
+  id: Option[String],
+  flags: Seq[String]) {
+  def isMyself(): Boolean =
+    flags.contains("myself")
+}
 
 case class Slots(start: Int, end: Int, master: ClusterNode, replicas: Seq[ClusterNode])
 
@@ -13,6 +25,14 @@ case class AddSlots(slots: Seq[Int])
 case class ClusterInfo() extends Cluster("INFO")
 
 case class ClusterSlots() extends Cluster("SLOTS")
+
+case class Replicate(nodeId: String)
+  extends Cluster("REPLICATE", Seq(nodeId))
+
+case class Meet(addr: InetSocketAddress)
+  extends Cluster("MEET", Seq(addr.getAddress.getHostAddress, addr.getPort.toString))
+
+case class Nodes() extends Cluster("NODES")
 
 abstract class Cluster(sub: String, args: Seq[String] = Seq()) extends Command {
   def name: Buf = Command.CLUSTER

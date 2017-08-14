@@ -21,5 +21,5 @@ object ClusterClient {
 
 class ClusterClient(factory: ServiceFactory[Command, Reply])
     extends BaseClient(factory)
+    with BasicServerCommands
     with ClusterCommands
-
