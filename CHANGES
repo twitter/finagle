@@ -44,6 +44,12 @@ New Features
   * finagle-init: Introduce a module to support service-loading initialization
     code. ``PHAB_ID=D75950``
 
+  * finagle-mux: Default to new more efficient decoder. ``PHAB_ID=D80225``
+
+  * finagle-mysql: `IsolationLevel` support was added with
+    `Transactions.transactionWithIsolation` method, so the default level can be overridden
+    at the transaction level. ``PHAB_ID=D68944``
+
   * finagle-mysql: Add support for unsigned integers. When enabled, unsigned integers that do
     not fit into the existing signed representation are widened. For example an unsigned
     Int32 is represented as a Java Long, etc. Because this changes the `c.t.f.mysql.Value`
@@ -57,10 +63,6 @@ New Features
 
   * finagle-netty4: `KeyCredentials.CertKeyAndChain` is now available to use with
     `Netty4ServerEngineFactory`. ``PHAB_ID=D80494``
-
-  * finagle-mysql: `IsolationLevel` support was added with
-    `Transactions.transactionWithIsolation` method, so the default level can be overridden
-    at the transaction level. ``PHAB_ID=D68944``
 
   * finagle-stats: Metrics now report verbosity levels via `MetricsView.verbosity`.
     ``PHAB_ID=D78150``

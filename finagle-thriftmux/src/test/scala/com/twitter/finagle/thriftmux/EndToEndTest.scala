@@ -137,11 +137,7 @@ class EndToEndTest
         .name("ThriftMuxServer")
         .bindTo(new InetSocketAddress(0))
         .build(pfSvc)
-      val protoNew = ThriftMux.server
-        .withProtocolFactory(pf)
-        .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
       val netty4 = ThriftMux.server
-        .configured(Mux.param.MuxImpl.Netty4)
         .withProtocolFactory(pf)
         .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
@@ -150,7 +146,7 @@ class EndToEndTest
 
       Seq(
         ("ServerBuilder", builder, port(builder.boundAddress)),
-        ("ThriftMux with Netty4", netty4, port(netty4.boundAddress))
+        ("ThriftMux", netty4, port(netty4.boundAddress))
       )
     }
 
@@ -176,11 +172,6 @@ class EndToEndTest
         .withClientId(clientId)
         .withProtocolFactory(pf)
         .newService(dest)
-      val netty4 = ThriftMux.client
-        .withClientId(clientId)
-        .withProtocolFactory(pf)
-        .configured(Mux.param.MuxImpl.Netty4)
-        .newService(dest)
 
       def toIface(svc: Service[ThriftClientRequest, Array[Byte]]): TestService$FinagleClient =
         new TestService.FinagledClient(svc, pf)
@@ -189,8 +180,7 @@ class EndToEndTest
         ("ThriftMux via ClientBuilder", toIface(builder), builder),
         ("Thrift via ClientBuilder", toIface(thriftBuilder), thriftBuilder),
         ("Thrift via proto", toIface(thriftProto), thriftProto),
-        ("ThriftMux proto", toIface(newProto), newProto),
-        ("ThriftMux with Netty4", toIface(netty4), netty4)
+        ("ThriftMux proto", toIface(newProto), newProto)
       )
     }
 

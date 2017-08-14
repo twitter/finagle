@@ -74,22 +74,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     object MuxImpl {
-      private val RefCountToggleId: String = "com.twitter.finagle.mux.RefCountControlMessages"
       private val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
-      private val refCountControlToggle: Toggle[Int] = Toggles(RefCountToggleId)
       private val tlsHeadersToggle: Toggle[Int] = Toggles(TlsHeadersToggleId)
-      private def refCountControl: Boolean = refCountControlToggle(ServerInfo().id.hashCode)
       private[Mux] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
-
-      /**
-       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
-       *
-       * @note this is experimental and not yet tested in production.
-       */
-      val Netty4 = MuxImpl(
-        params => Netty4Transporter.raw(CopyingFramer, _, params),
-        params => Netty4Listener(CopyingFramer, params)
-      )
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
@@ -121,11 +108,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         params => Netty4Listener(CopyingFramer, params)
       )
 
-      implicit val param = Stack.Param(
-        // note that ref-counting toggle is dependent on n4 toggle.
-        if (refCountControl) Netty4RefCountingControl
-        else Netty4
-      )
+      implicit val param = Stack.Param(Netty4RefCountingControl)
     }
   }
 

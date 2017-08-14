@@ -1,11 +1,6 @@
 {
   "toggles": [
     {
-      "id": "com.twitter.finagle.mux.RefCountControlMessages",
-      "description": "Use a ref-counting control plane as the transport implementation.",
-      "fraction": 0.0
-    },
-    {
       "id": "com.twitter.finagle.mux.TlsHeaders",
       "description": "Initiate sending tls headers.",
       "fraction": 0.0
