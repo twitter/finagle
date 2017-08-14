@@ -51,7 +51,8 @@ private class StdCursorResult[T](
   sql: String,
   rowsPerFetch: Int,
   params: Seq[Parameter],
-  f: (Row) => T
+  f: (Row) => T,
+  supportUnsigned: Boolean
 ) extends CursorResult[T] { self =>
   import StdCursorResult._
 
@@ -106,7 +107,7 @@ private class StdCursorResult[T](
             // of Results to touching Packets, but there are future
             // refactorings that can help clean this up.
             val rows = fetchResult.rowPackets.map { p =>
-              new BinaryEncodedRow(p.body, columns, indexMap)
+              new BinaryEncodedRow(p.body, columns, indexMap, !supportUnsigned)
             }
             val asyncSeq = AsyncStream.fromSeq(rows.map(f))
             if (!fetchResult.containsLastRow) asyncSeq ++ go()
