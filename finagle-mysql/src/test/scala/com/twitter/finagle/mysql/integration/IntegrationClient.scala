@@ -43,7 +43,7 @@ trait IntegrationClient {
   // mysql credentials.
   val isAvailable = !isPortAvailable && propFileExists
 
-  protected def configureClient(username: String, password: String, db: String) =
+  protected def configureClient(username: String, password: String, db: String): Mysql.Client =
     Mysql.client
       .withCredentials(username, password)
       .withDatabase(db)

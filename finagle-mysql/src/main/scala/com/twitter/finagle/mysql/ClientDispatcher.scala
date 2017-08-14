@@ -65,7 +65,7 @@ private[mysql] class PrepareCache(
   }
 }
 
-object ClientDispatcher {
+private[finagle] object ClientDispatcher {
   private val cancelledRequestExc = new CancelledRequestException
   private val lostSyncExc = new LostSyncException(new Throwable)
   private val emptyTx = (Nil, EOF(0: Short, ServerStatus(0)))
@@ -84,10 +84,11 @@ object ClientDispatcher {
   def apply(
     trans: Transport[Packet, Packet],
     handshake: HandshakeInit => Try[HandshakeResponse],
-    maxConcurrentPrepareStatements: Int
+    maxConcurrentPrepareStatements: Int,
+    supportUnsigned: Boolean
   ): Service[Request, Result] = {
     new PrepareCache(
-      new ClientDispatcher(trans, handshake),
+      new ClientDispatcher(trans, handshake, supportUnsigned),
       Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
     )
   }
@@ -110,9 +111,10 @@ object ClientDispatcher {
  * Note, the mysql protocol does not support any form of multiplexing so
  * requests are dispatched serially and concurrent requests are queued.
  */
-class ClientDispatcher(
+private[finagle] class ClientDispatcher(
   trans: Transport[Packet, Packet],
-  handshake: HandshakeInit => Try[HandshakeResponse]
+  handshake: HandshakeInit => Try[HandshakeResponse],
+  supportUnsigned: Boolean
 ) extends GenSerialClientDispatcher[Request, Result, Packet, Packet](trans) {
   import ClientDispatcher._
 
@@ -248,11 +250,11 @@ class ClientDispatcher(
           readTx(cnt).flatMap {
             case (fields, eof) =>
               if (eof.serverStatus.has(ServerStatus.CursorExists)) {
-                const(ResultSet(isBinaryEncoded)(packet, fields, Seq()))
+                const(ResultSetBuilder(isBinaryEncoded, supportUnsigned)(packet, fields, Seq()))
               } else {
                 readTx().flatMap {
                   case (rows, _) =>
-                    const(ResultSet(isBinaryEncoded)(packet, fields, rows))
+                    const(ResultSetBuilder(isBinaryEncoded, supportUnsigned)(packet, fields, rows))
                 }
               }
           }

@@ -161,7 +161,7 @@ class BinaryResultSetTest extends FunSuite with HexDump {
       |02 00"""
   test("decode") {
     assert(packets.size == 5, "expected at least 5 packet")
-    val rs = ResultSet.decode(true)(
+    val rs = ResultSetBuilder.decode(isBinaryEncoded = true, supportUnsigned = false)(
       packets.head,
       packets.drop(1).take(1), /* column_count = 1 */
       packets.drop(3).take(1) /* drop eof, 1 row */
