@@ -479,6 +479,24 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
     def withHttpStats: Server =
       withStack(stack.replace(http.filter.StatsFilter.role, http.filter.StatsFilter.module))
 
+    /**
+     * By default finagle-http automatically sends 100-CONTINUE responses to inbound
+     * requests which set the 'Expect: 100-Continue' header. Streaming servers will
+     * always return 100-CONTINUE. Non-streaming servers will compare the
+     * content-length header to the configured limit (see: `withMaxRequestSize`)
+     * and send either a 100-CONTINUE or 413-REQUEST ENTITY TOO LARGE as
+     * appropriate. This method disables those automatic responses.
+     *
+     * @note Servers operating as proxies should disable automatic responses in
+     *       order to allow origin servers to determine whether the expectation
+     *       can be met.
+     *
+     * @note Disabling automatic continues is only supported in
+     *       [[com.twitter.finagle.Http.Netty4Impl]] servers.
+     */
+    def withNoAutomaticContinue: Server =
+      configured(http.param.AutomaticContinue(false))
+
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withAdmissionControl: param.ServerAdmissionControlParams[Server] =

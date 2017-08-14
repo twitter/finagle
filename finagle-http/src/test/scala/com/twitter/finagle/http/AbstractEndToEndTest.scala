@@ -36,6 +36,8 @@ abstract class AbstractEndToEndTest
   object HeaderFields extends Feature
   object ReaderClose extends Feature
   object NoBodyMessage extends Feature
+  object AutomaticContinue extends Feature
+  object DisableAutomaticContinue extends Feature
   object SetsPooledAllocatorMaxOrder extends Feature
 
   var saveBase: Dtab = Dtab.empty

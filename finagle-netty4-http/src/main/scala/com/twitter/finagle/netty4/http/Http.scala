@@ -117,6 +117,7 @@ object exp {
   }
 
   private[finagle] def initServer(params: Stack.Params): ChannelPipeline => Unit = {
+    val autoContinue = params[http.param.AutomaticContinue].enabled
     val maxRequestSize = params[http.param.MaxRequestSize].size
     val decompressionEnabled = params[http.param.Decompression].enabled
     val compressionLevel = params[http.param.CompressionLevel].level
@@ -143,12 +144,22 @@ object exp {
       // install handlers to replicate this behavior when streaming.
       if (streaming) {
         pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
-        pipeline.addLast("expectContinue", new NettyHttp.HttpServerExpectContinueHandler)
-        pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxRequestSize))
+        if (autoContinue)
+          pipeline.addLast("expectContinue", new NettyHttp.HttpServerExpectContinueHandler)
+
+        // no need to handle expect headers in the finexLenAggregator since we have the task
+        // specific HttpServerExpectContinueHandler above.
+        pipeline.addLast(
+          "fixedLenAggregator",
+          new FixedLengthMessageAggregator(maxRequestSize, handleExpectContinue = false)
+        )
       } else
         pipeline.addLast(
           "httpDechunker",
-          new NettyHttp.HttpObjectAggregator(maxRequestSize.inBytes.toInt)
+          new FinagleHttpObjectAggregator(
+            maxRequestSize.inBytes.toInt,
+            handleExpectContinue = autoContinue
+          )
         )
 
       // We need to handle bad requests as the dispatcher doesn't know how to handle them.

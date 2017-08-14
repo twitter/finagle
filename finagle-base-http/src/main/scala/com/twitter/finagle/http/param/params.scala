@@ -5,6 +5,17 @@ import com.twitter.finagle.Stack
 import com.twitter.util.StorageUnit
 
 /**
+ * automatically send 100-CONTINUE responses to requests which set
+ * the 'Expect: 100-Continue' header. See longer note on
+ * `com.twitter.finagle.Http.Server#withNoAutomaticContinue`
+ */
+case class AutomaticContinue(enabled: Boolean)
+object AutomaticContinue {
+  implicit val automaticContinue: Stack.Param[AutomaticContinue] =
+    Stack.Param(AutomaticContinue(true))
+}
+
+/**
  * the maximum size of a chunk.
  */
 case class MaxChunkSize(size: StorageUnit)
