@@ -41,12 +41,6 @@ New Features
   * finagle-init: Introduce a module to support service-loading initialization
     code. ``PHAB_ID=D75950``
 
-  * finagle-mysql: Add support for unsigned integers. When enabled, unsigned integers that do
-    not fit into the existing signed representation are widened. For example an unsigned
-    Int32 is represented as a Java Long, etc. Because this changes the `c.t.f.mysql.Value`
-    variant returned by the row, it is disabled by default and must be enabled with the param
-    `c.t.f.Mysql.param.UnsignedColumns`. ``PHAB_ID=D78721``
-
   * finagle-netty4: Adds support for passing a chain file to the default TLS implementation.
     ``PHAB_ID=D59531``
 
@@ -105,10 +99,6 @@ Breaking API Changes
 
   * finagle-memcached: Add `c.t.util.Closable` trait to `c.t.f.memcached.BaseClient`.
     ``PHAB_ID=D63970``
-
-  * finagle-mysql: A number of implementation details were made private such as specific
-    `Row` implementations and `ResultSet` builder functions that consume raw packets.
-    ``PHAB_ID=D78721``
 
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``

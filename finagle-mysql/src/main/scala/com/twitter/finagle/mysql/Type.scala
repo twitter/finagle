@@ -68,37 +68,4 @@ object Type {
     case NullValue => Null
     case _ => -1
   }
-
-  /**
-   * Retrieves string of the given code.
-   */
-  private[mysql] def getCodeString(code: Short): String = code match {
-    case Decimal => "Decimal"
-    case Tiny => "Tiny"
-    case Short => "Short"
-    case Long => "Long"
-    case Float => "Float"
-    case Double => "Double"
-    case Null => "Null"
-    case Timestamp => "Timestamp"
-    case LongLong => "LongLong"
-    case Int24 => "Int24"
-    case Date => "Date"
-    case Time => "Time"
-    case DateTime => "DateTime"
-    case Year => "Year"
-    case NewDate => "NewDate"
-    case VarChar => "VarChar"
-    case Bit => "Bit"
-    case NewDecimal => "NewDecimal"
-    case Enum => "Enum"
-    case Set => "Set"
-    case TinyBlob => "TinyBlob"
-    case MediumBlob => "MediumBlob"
-    case LongBlob => "LongBlob"
-    case Blob => "Blob"
-    case VarString => "VarString"
-    case String => "String"
-    case Geometry => "Geometry"
-  }
 }

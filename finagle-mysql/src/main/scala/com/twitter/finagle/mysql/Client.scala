@@ -8,23 +8,11 @@ object Client {
 
   /**
    * Creates a new Client based on a ServiceFactory.
-   *
-   * @note the returned `Client` will *not* include support for unsigned integer types.
    */
-  @deprecated("Use the three argument constructor instead.", "2017-08-11")
   def apply(
     factory: ServiceFactory[Request, Result],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  ): Client with Transactions with Cursors = apply(factory, statsReceiver, false)
-
-  /**
-   * Creates a new Client based on a ServiceFactory.
-   */
-  def apply(
-    factory: ServiceFactory[Request, Result],
-    statsReceiver: StatsReceiver,
-    supportUnsigned: Boolean
-  ): Client with Transactions with Cursors = new StdClient(factory, supportUnsigned, statsReceiver)
+  ): Client with Transactions with Cursors = new StdClient(factory, statsReceiver)
 }
 
 trait Client extends Closable {
@@ -121,11 +109,8 @@ trait Cursors {
   def cursor(sql: String): CursoredStatement
 }
 
-private class StdClient(
-  factory: ServiceFactory[Request, Result],
-  supportUnsigned: Boolean,
-  statsReceiver: StatsReceiver
-) extends Client
+private class StdClient(factory: ServiceFactory[Request, Result], statsReceiver: StatsReceiver)
+    extends Client
     with Transactions
     with Cursors {
 
@@ -167,7 +152,7 @@ private class StdClient(
         assert(rowsPerFetch > 0, "rowsPerFetch must be positive")
 
         factory().map { svc =>
-          new StdCursorResult[T](cursorStats, svc, sql, rowsPerFetch, params, f, supportUnsigned)
+          new StdCursorResult[T](cursorStats, svc, sql, rowsPerFetch, params, f)
         }
       }
     }
@@ -200,7 +185,7 @@ private class StdClient(
       def apply(conn: ClientConnection) = proxiedService
       def close(deadline: Time): Future[Unit] = svc.flatMap(_.close(deadline))
     }
-    val client = Client(singleton, statsReceiver, supportUnsigned)
+    val client = Client(singleton, statsReceiver)
     val transaction = for {
       _ <- isolationLevel match {
         case Some(iso) => client.query(s"SET TRANSACTION ISOLATION LEVEL ${iso.name}")

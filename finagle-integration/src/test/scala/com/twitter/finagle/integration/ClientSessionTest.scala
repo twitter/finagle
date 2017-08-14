@@ -105,7 +105,7 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   testSessionStatus(
     "mysql-dispatcher", { tr: Transport[mysql.transport.Packet, mysql.transport.Packet] =>
       val handshake = mysql.Handshake(Some("username"), Some("password"))
-      val dispatcher = new mysql.ClientDispatcher(tr, handshake, false)
+      val dispatcher = new mysql.ClientDispatcher(tr, handshake)
       () =>
         dispatcher.status
     }
