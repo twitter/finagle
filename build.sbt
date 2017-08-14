@@ -330,13 +330,15 @@ lazy val finagleStats = Project(
     util("lint"),
     util("logging"),
     util("registry"),
-    util("stats")
+    util("stats"),
+    util("tunable")
   ),
   libraryDependencies ++= jacksonLibs
 ).dependsOn(
   finagleCore,
   finagleHttp,
-  finagleToggle
+  finagleToggle,
+  finagleTunable
 )
 
 lazy val finagleZipkinCore = Project(
