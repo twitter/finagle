@@ -1,5 +1,4 @@
 import Tests._
-import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
 
@@ -652,8 +651,10 @@ lazy val finagleBenchmark = Project(
 lazy val finagleDoc = Project(
   id = "finagle-doc",
   base = file("doc")
+).enablePlugins(
+  SphinxPlugin
 ).settings(
-  site.settings ++ site.sphinxSupport() ++ sharedSettings
+  sharedSettings
 ).settings(
   scalacOptions in doc ++= Seq("-doc-title", "Finagle", "-doc-version", version.value),
   includeFilter in Sphinx := ("*.html" | "*.png" | "*.svg" | "*.js" | "*.css" | "*.gif" | "*.txt"),
