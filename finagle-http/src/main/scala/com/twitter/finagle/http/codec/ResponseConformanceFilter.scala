@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.{Service, SimpleFilter}
-import com.twitter.finagle.http.{Fields, Method, Request, Response, Status}
+import com.twitter.finagle.http.{Fields, Method, Request, Response, Status, Version}
 import com.twitter.finagle.http.Status._
 import com.twitter.logging.Logger
 import com.twitter.util.Future
@@ -112,13 +112,24 @@ private[codec] object ResponseConformanceFilter extends SimpleFilter[Request, Re
   }
 
   private[this] def handleChunkedResponse(rep: Response): Unit = {
-    rep.headerMap.set(Fields.TransferEncoding, "chunked")
-
-    // We remove any content-length headers because "A sender MUST NOT
-    // send a Content-Length header field in any message that contains
-    // a Transfer-Encoding header field."
-    // https://tools.ietf.org/html/rfc7230#section-3.3.2
-    rep.headerMap.remove(Fields.ContentLength)
+    // Evaluation order for managing chunked Responses
+    // - If the message is HTTP/1.0 any Transfer-Encoding headers are stripped
+    //   since HTTP/1.0 doesn't know about transfer-encoding.
+    //   https://tools.ietf.org/html/rfc7230#appendix-A.1.3
+    // - If we have a Transfer-Encoding header it overrides a Content-Length
+    //   header by removing it. https://tools.ietf.org/html/rfc7230#section-3.3.3
+    // - If we have a Content-Length header we assume its accurate and don't
+    //   use chunked transfer-encoding.
+    // - If we don't have a content-length header and are not HTTP/1.0 we add
+    //   the 'transfer-encoding: chunked' header.
+    if (rep.version == Version.Http10) {
+      // HTTP/1.0 doesn't have a notion of Transfer-Encoding
+      rep.headerMap.remove(Fields.TransferEncoding)
+    } else if (rep.headerMap.getAll(Fields.TransferEncoding).contains("chunked")) {
+      rep.headerMap.remove(Fields.ContentLength)
+    } else if (!rep.headerMap.contains(Fields.ContentLength)) {
+      rep.headerMap.add(Fields.TransferEncoding, "chunked")
+    }
   }
 
   /**

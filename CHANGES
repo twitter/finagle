@@ -150,6 +150,10 @@ Runtime Behavior Changes
   * finagle-http: Dispatcher stats are now exported under the client scope like
     all other client stats.``PHAB_ID=D72265``
 
+  * finagle-http: It's now possible to send a response from the HTTP server that has a
+    Content-Length header so long as the 'Transfer-Encoding: chunked' isn't set on the response.
+    ``PHAB_ID=D80087``
+
   * finagle-http: Non-streaming servers strip 'expect' headers when a 100 CONTINUE
     response is sent. ``PHAB_ID=D80017``
 
