@@ -3,37 +3,37 @@ package com.twitter.finagle.http
 import com.google.common.base.Charsets
 import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.io.Reader
+import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.util.Closable
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
-
 import Bijections._
 
 /**
  * Rich HttpResponse
  */
-abstract class Response extends Message {
+abstract class Response private extends Message {
 
   /**
    * Arbitrary user-defined context associated with this response object.
    * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
-   * used here, rather than [[com.twitter.finagle.Context Context]] or similar
+   * used here, rather than [[com.twitter.finagle.context.Context]] or similar
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
    */
   val ctx: Response.Schema.Record = Response.Schema.newRecord()
 
-  def isRequest = false
+  final def isRequest = false
 
-  def status: Status = Bijections.statusFromNetty(httpResponse.getStatus)
+  def status: Status
 
   /**
    * Set the status of this response
    *
    * @note see [[status(Status)]] for Java users.
    */
-  def status_=(value: Status): Unit = { httpResponse.setStatus(from(value)) }
+  def status_=(value: Status): Unit
 
   /**
    * Set the status of this response
@@ -48,14 +48,14 @@ abstract class Response extends Message {
   /**
    * Get the status code of this response
    */
-  def statusCode: Int = status.code
+  final def statusCode: Int = status.code
 
   /**
    * Set the status code of this response
    *
    * @note See [[statusCode(Int)]] for Java users.
    */
-  def statusCode_=(value: Int): Unit = { httpResponse.setStatus(HttpResponseStatus.valueOf(value)) }
+  final def statusCode_=(value: Int): Unit = status = Status.fromCode(value)
 
   /**
    * Set the status code of this response
@@ -78,19 +78,13 @@ abstract class Response extends Message {
   /** Encode as an HTTP message */
   def encodeString(): String = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpResponseEncoder)
-    encoder.offer(httpResponse)
+    encoder.offer(Bijections.responseToNetty(this))
     val buffer = encoder.poll()
     buffer.toString(Charsets.UTF_8)
   }
 
   override def toString =
     "Response(\"" + version + " " + status + "\")"
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected def httpResponse: HttpResponse
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def httpMessage: HttpMessage = httpResponse
 }
 
 object Response {
@@ -98,8 +92,9 @@ object Response {
   /**
    * Utility class to make it possible to mock/spy a Response.
    */
-  class Ok extends Response {
-    val httpResponse = apply.httpResponse
+  @deprecated("Use Response or Response.Proxy", "2017-04-28")
+  class Ok extends Proxy {
+    val response = Response()
   }
 
   /**
@@ -122,7 +117,7 @@ object Response {
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val res = decoder.poll().asInstanceOf[HttpResponse]
     assert(res ne null)
-    Response(res)
+    responseFromNetty(res)
   }
 
   /** Create Response. */
@@ -134,33 +129,65 @@ object Response {
     apply(Version.Http11, status)
 
   /** Create Response from version and status. */
-  def apply(version: Version, status: Status): Response =
-    apply(new DefaultHttpResponse(from(version), from(status)))
+  def apply(version: Version, status: Status): Response = {
+    // Since this is a user made `Response` we use the joined Reader.writable so they
+    // can keep a handle to the writer half and the server implementation can use
+    // the reader half.
+    val rw = Reader.writable()
+    val resp = new ResponseImpl(rw, rw)
+    resp.version = version
+    resp.status = status
+    resp
+  }
 
   /**
    * Create a Response from version, status, and Reader.
    */
   def apply(version: Version, status: Status, reader: Reader): Response = {
-    val res = new DefaultHttpResponse(from(version), from(status))
-    res.setChunked(true)
-    apply(res, reader)
+    chunked(version, status, reader)
+  }
+
+  private[finagle] def chunked(version: Version, status: Status, reader: Reader): Response = {
+    val resp = new ResponseImpl(reader, Writer.FailingWriter)
+    resp.version = version
+    resp.status = status
+    resp.setChunked(true)
+    resp
   }
 
   /** Create 200 Response with the same HTTP version as the provided Request */
-  def apply(request: Request): Response =
-    new Response {
-      final val httpResponse =
-        new DefaultHttpResponse(from(request.version), HttpResponseStatus.OK)
-    }
+  def apply(request: Request): Response = apply(request.version, Status.Ok)
 
-  private[http] def apply(response: HttpResponse): Response =
-    new Response {
-      val httpResponse = response
+  final private class ResponseImpl(val reader: Reader, val writer: Writer with Closable)
+      extends Response {
+    private[this] var _status: Status = Status.Ok
+    override def status: Status = _status
+    override def status_=(value: Status): Unit = {
+      _status = value
     }
+  }
 
-  private[http] def apply(response: HttpResponse, readerIn: Reader): Response =
-    new Response {
-      val httpResponse = response
-      override val reader = readerIn
-    }
+  abstract class Proxy extends Response {
+
+    /**
+     * Underlying `Response`
+     */
+    def response: Response
+
+    def reader: Reader = response.reader
+    def writer: Writer with Closable = response.writer
+    override def headerMap: HeaderMap = response.headerMap
+
+    // These things should never need to be modified
+    final def status: Status = response.status
+    final def status_=(value: Status): Unit = response.status_=(value)
+    final override def content: Buf = response.content
+    final override def content_=(content: Buf): Unit = response.content_=(content)
+    final override def version: Version = response.version
+    final override def version_=(version: Version): Unit = response.version_=(version)
+    final override def isChunked: Boolean = response.isChunked
+    final override def setChunked(chunked: Boolean): Unit = response.setChunked(chunked)
+
+  }
+
 }

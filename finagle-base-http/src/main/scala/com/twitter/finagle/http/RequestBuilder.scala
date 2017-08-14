@@ -1,6 +1,6 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.Bijections._
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
@@ -382,11 +382,15 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
   ): Request = {
     val dataFactory = new DefaultHttpDataFactory(false) // we don't use disk
     val req = withoutContent(Method.Post)
-    val encoder = new HttpPostRequestEncoder(dataFactory, req.httpRequest, multipart)
+    val encoder = new HttpPostRequestEncoder(dataFactory, Bijections.requestToNetty(req), multipart)
 
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
-        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpRequest)(
+        HttpPostRequestEncoderEx.addBodyFileUpload(
+          encoder,
+          dataFactory,
+          Bijections.requestToNetty(req)
+        )(
           name,
           filename.getOrElse(""),
           BufChannelBuffer(content),
@@ -414,7 +418,7 @@ class RequestBuilder[HasUrl, HasForm] private[http] (
       encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks: _*))
     }
 
-    from(encodedReq)
+    Bijections.requestFromNetty(encodedReq)
   }
 
   /**

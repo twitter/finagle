@@ -4,8 +4,9 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http
-import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.{Fields, Request, Response, Version}
+import com.twitter.finagle.http.exp.StreamTransport
+import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.http.netty.Netty3ServerStreamTransport
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -58,7 +59,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val (in, out) = mkPair[Any, Any]
     val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
-    in.write(Request("/foo").httpRequest)
+    in.write(from(Request("/foo")))
     Await.result(in.read, 5.seconds) match {
       case resp: HttpResponse =>
         assert(resp.getStatus == HttpResponseStatus.OK)
@@ -77,7 +78,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
     val req = Request()
     req.setChunked(true)
-    in.write(req.httpRequest)
+    in.write(from(req))
     Await.result(in.read, 5.seconds)
 
     testChunk(in, chunk("a"))
@@ -94,7 +95,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val (in, out) = mkPair[Any, Any]
     val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
-    in.write(Request().httpRequest)
+    in.write(from(Request()))
 
     // Simulate channel closure
     out.close()
@@ -112,7 +113,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     req.response.setChunked(true)
-    in.write(req.httpRequest)
+    in.write(from(req))
 
     Await.result(in.read(), 5.seconds)
 

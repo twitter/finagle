@@ -3,26 +3,24 @@ package com.twitter.finagle.http
 import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.exp.Multipart
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.io.Reader
+import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
 import java.nio.charset.{StandardCharsets => Charsets}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
 import scala.beans.BeanProperty
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 
-import Bijections._
-
 /**
  * Rich HttpRequest.
  *
  * Use RequestProxy to create an even richer subclass.
  */
-abstract class Request extends Message {
+abstract class Request private extends Message {
 
   /**
    * Arbitrary user-defined context associated with this request object.
@@ -34,7 +32,7 @@ abstract class Request extends Message {
   def ctx: Request.Schema.Record = _ctx
   private[this] val _ctx = Request.Schema.newRecord()
 
-  def isRequest: Boolean = true
+  final def isRequest: Boolean = true
 
   /**
    * Returns a [[ParamMap]] instance, which maintains query string and url-encoded
@@ -62,14 +60,14 @@ abstract class Request extends Message {
   /**
    * Returns the HTTP method of this request.
    */
-  def method: Method = from(httpRequest.getMethod())
+  def method: Method
 
   /**
    * Sets the HTTP method of this request to the given `method`.
    *
    * * @see [[method(Method)]] for Java users.
    */
-  def method_=(method: Method): Unit = httpRequest.setMethod(from(method))
+  def method_=(method: Method): Unit
 
   /**
    * Sets the HTTP method of this request to the given `method`.
@@ -84,7 +82,7 @@ abstract class Request extends Message {
   /**
    * Returns the URI of this request.
    */
-  def uri: String = httpRequest.getUri()
+  def uri: String
 
   /**
    * Set the URI of this request.
@@ -101,7 +99,7 @@ abstract class Request extends Message {
    *
    * @see [[uri(String)]] for Java users.
    */
-  def uri_=(uri: String): Unit = httpRequest.setUri(uri)
+  def uri_=(uri: String): Unit
 
   /** Path from URI. */
   @BeanProperty
@@ -228,7 +226,7 @@ abstract class Request extends Message {
   /** Encode an HTTP message to Array[Byte] */
   def encodeBytes(): Array[Byte] = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
-    encoder.offer(from[Request, HttpRequest](this))
+    encoder.offer(Bijections.requestToNetty(this))
     val buffer = encoder.poll()
     val bytes = new Array[Byte](buffer.readableBytes())
     buffer.readBytes(bytes)
@@ -237,12 +235,6 @@ abstract class Request extends Message {
 
   override def toString: String =
     s"""Request("$method $uri", from $remoteSocketAddress)"""
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected[finagle] def httpRequest: HttpRequest
-
-  @deprecated("Going away as part of the Netty 4 transition", "2017-01-26")
-  protected def httpMessage: HttpMessage = httpRequest
 }
 
 object Request {
@@ -267,10 +259,8 @@ object Request {
     decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val req = decoder.poll().asInstanceOf[HttpRequest]
     assert(req ne null)
-    new Request {
-      val httpRequest: HttpRequest = req
-      lazy val remoteSocketAddress: InetSocketAddress = new InetSocketAddress(0)
-    }
+
+    Bijections.requestFromNetty(req)
   }
 
   /**
@@ -312,11 +302,15 @@ object Request {
    * Create an HTTP/1.1 GET Request from version, method, and URI string.
    */
   def apply(version: Version, method: Method, uri: String): Request = {
-    val reqIn = new DefaultHttpRequest(from(version), from(method), uri)
-    new Request {
-      val httpRequest: HttpRequest = reqIn
-      lazy val remoteSocketAddress: InetSocketAddress = new InetSocketAddress(0)
-    }
+    // Since this is a user made `Request` we use the joined Reader.writable so they
+    // can keep a handle to the writer half and the client implementation can use
+    // the reader half.
+    val rw = Reader.writable()
+    val req = new RequestImpl(rw, rw, new InetSocketAddress(0))
+    req.version = version
+    req.method = method
+    req.uri = uri
+    req
   }
 
   /**
@@ -342,41 +336,22 @@ object Request {
     method: Method,
     uri: String,
     reader: Reader
-  ): Request = {
-    val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
-    httpReq.setChunked(true)
-    apply(httpReq, reader, new InetSocketAddress(0))
-  }
+  ): Request = chunked(version, method, uri, reader, new InetSocketAddress(0))
 
-  private[finagle] def apply(
+  private[finagle] def chunked(
     version: Version,
     method: Method,
     uri: String,
     reader: Reader,
     remoteAddr: InetSocketAddress
   ): Request = {
-    val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
-    httpReq.setChunked(true)
-    apply(httpReq, reader, remoteAddr)
+    val req = new RequestImpl(reader, Writer.FailingWriter, remoteAddr)
+    req.setChunked(true)
+    req.version = version
+    req.method = method
+    req.uri = uri
+    req
   }
-
-  private[http] def apply(
-    reqIn: HttpRequest,
-    readerIn: Reader,
-    remoteAddr: InetSocketAddress
-  ): Request = new Request {
-    override val reader: Reader = readerIn
-    val httpRequest: HttpRequest = reqIn
-    lazy val remoteSocketAddress: InetSocketAddress = remoteAddr
-  }
-
-  /** Create Request from HttpRequest and Channel.  Used by Codec. */
-  private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
-    new Request {
-      val httpRequest: HttpRequest = httpRequestArg
-      lazy val remoteSocketAddress: InetSocketAddress =
-        channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
-    }
 
   /** Create a query string from URI and parameters. */
   def queryString(uri: String, params: Tuple2[String, String]*): String = {
@@ -405,4 +380,55 @@ object Request {
    */
   def queryString(params: Map[String, String]): String =
     queryString("", params.toSeq: _*)
+
+  /**
+   * Proxy for Request.  This can be used to create a richer request class
+   * that wraps Request without exposing the underlying netty http type.
+   */
+  abstract class Proxy extends Request {
+
+    /**
+     * Underlying `Request`
+     */
+    def request: Request
+
+    override def ctx: Schema.Record = request.ctx
+    def remoteSocketAddress: InetSocketAddress = request.remoteSocketAddress
+    def reader: Reader = request.reader
+    def writer: Writer with Closable = request.writer
+    override def headerMap: HeaderMap = request.headerMap
+    override def params: ParamMap = request.params
+    override lazy val response: Response = request.response
+    def uri: String = request.uri
+
+    // These should never need to be overridden
+    final def method: Method = request.method
+    final def method_=(method: Method): Unit = request.method_=(method)
+    final def uri_=(uri: String): Unit = request.uri_=(uri)
+    final override def content: Buf = request.content
+    final override def content_=(content: Buf): Unit = request.content_=(content)
+    final override def version: Version = request.version
+    final override def version_=(version: Version): Unit = request.version_=(version)
+    final override def isChunked: Boolean = request.isChunked
+    final override def setChunked(chunked: Boolean): Unit = request.setChunked(chunked)
+  }
+
+  final private class RequestImpl(
+    val reader: Reader,
+    val writer: Writer with Closable,
+    val remoteSocketAddress: InetSocketAddress
+  ) extends Request {
+    private var _method: Method = Method.Get
+    private var _uri: String = ""
+
+    def method: Method = _method
+    def method_=(method: Method): Unit = {
+      _method = method
+    }
+
+    def uri: String = _uri
+    def uri_=(uri: String): Unit = {
+      _uri = uri
+    }
+  }
 }

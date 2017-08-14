@@ -1,8 +1,7 @@
 package com.twitter.finagle.http
 
-import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.{Closable, Duration, Future}
 import java.io._
 import java.util.{Iterator => JIterator}
@@ -10,15 +9,9 @@ import java.nio.charset.Charset
 import java.util.{Date, Locale, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
-import org.jboss.netty.buffer.{
-  ChannelBuffer,
-  ChannelBufferInputStream,
-  ChannelBufferOutputStream,
-  ChannelBuffers
-}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage}
+import org.jboss.netty.buffer.{ChannelBufferOutputStream, ChannelBuffers}
+import org.jboss.netty.handler.codec.http.DefaultHttpHeaders
 import scala.collection.JavaConverters._
-import Bijections._
 
 /**
  * Rich Message
@@ -28,20 +21,24 @@ import Bijections._
  */
 abstract class Message {
 
-  protected def httpMessage: HttpMessage
-  private[this] val readerWriter = BufReader.writable()
+  private[this] var _content: Buf = Buf.Empty
+  private[this] var _version: Version = Version.Http11
+  private[this] var _chunked: Boolean = false
+
+  // We continue to use the Netty 3 type internally to get its validation logic
+  private[this] lazy val _headerMap: HeaderMap = new Netty3HeaderMap(new DefaultHttpHeaders())
 
   /**
    * A read-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Reader]] for more information.
    **/
-  def reader: BufReader = readerWriter
+  def reader: BufReader
 
   /**
    * A write-only handle to the internal stream of bytes, representing the
    * message body. See [[com.twitter.io.Writer]] for more information.
    **/
-  def writer: BufWriter with Closable = readerWriter
+  def writer: BufWriter with Closable
 
   def isRequest: Boolean
   def isResponse = !isRequest
@@ -51,7 +48,7 @@ abstract class Message {
    *
    * If this message is chunked, the resulting `Buf` will always be empty.
    */
-  def content: Buf = ChannelBufferBuf.Owned(getContent())
+  def content: Buf = _content
 
   /**
    * Set the content of this `Message`.
@@ -62,7 +59,11 @@ abstract class Message {
    * @see [[content(Buf)]] for Java users
    */
   @throws[IllegalStateException]
-  def content_=(content: Buf): Unit = { setContent(BufChannelBuffer(content)) }
+  def content_=(content: Buf): Unit = {
+    if (!content.isEmpty && isChunked)
+      throw new IllegalStateException("Cannot set content on Chunked message")
+    _content = content
+  }
 
   /**
    * Set the content of this `Message`.
@@ -79,13 +80,13 @@ abstract class Message {
   }
 
   /** Get the HTTP version */
-  def version: Version = from(httpMessage.getProtocolVersion())
+  def version: Version = _version
 
   /** Set the HTTP version
    *
    * @see [[version(Version)]] for Java users
    */
-  def version_=(version: Version): Unit = httpMessage.setProtocolVersion(from(version))
+  def version_=(version: Version): Unit = _version = version
 
   /** Set the HTTP version
    *
@@ -96,7 +97,23 @@ abstract class Message {
     this
   }
 
-  lazy val headerMap: HeaderMap = new Netty3HeaderMap(httpMessage.headers)
+  def isChunked: Boolean = _chunked
+
+  /**
+   * Manipulate the `Message` content mode.
+   *
+   * If `chunked` is `true`, any existing content will be discarded and further attempts
+   * to manipulate the synchronous content will result in an `IllegalStateException`.
+   *
+   * If `chunked` is `false`, the synchronous content methods will become available
+   * and the `Reader`/`Writer` of the message will be ignored by Finagle.
+   */
+  def setChunked(chunked: Boolean): Unit = {
+    _chunked = chunked
+    if (chunked) clearContent()
+  }
+
+  def headerMap: HeaderMap = _headerMap
 
   /**
    * Cookies. In a request, this uses the Cookie headers.
@@ -295,8 +312,22 @@ abstract class Message {
   /** Get Host header */
   def host: Option[String] = headerMap.get(Fields.Host)
 
-  /** Set Host header */
+  /**
+   * Set Host header
+   *
+   * @see host(String) for Java users
+   */
   def host_=(value: String): Unit = headerMap.set(Fields.Host, value)
+
+  /**
+   * Set the Host header
+   *
+   * @see [[host_=(String)]] for Scala users
+   */
+  final def host(value: String): this.type = {
+    host = value
+    this
+  }
 
   /** Get Last-Modified header */
   def lastModified: Option[String] = headerMap.get(Fields.LastModified)
@@ -399,7 +430,7 @@ abstract class Message {
     headerMap.get("X-Requested-With").exists { _.toLowerCase.contains("xmlhttprequest") }
 
   /** Get length of content. */
-  def length: Int = getContent.readableBytes
+  final def length: Int = content.length
 
   /** Get length of content. */
   final def getLength(): Int = length
@@ -411,17 +442,15 @@ abstract class Message {
     } catch {
       case _: Throwable => Message.Utf8
     }
-    getContent.toString(encoding)
+    Buf.decodeString(content, encoding)
   }
 
   def getContentString(): String = contentString
 
   /** Set the content as a string. */
   def contentString_=(value: String): Unit = {
-    if (value != "")
-      setContent(BufChannelBuffer(Buf.Utf8(value)))
-    else
-      setContent(ChannelBuffers.EMPTY_BUFFER)
+    if (value == "") clearContent()
+    else content = Buf.Utf8(value)
   }
 
   /** Set the content as a string. */
@@ -433,20 +462,18 @@ abstract class Message {
    */
   def withInputStream[T](f: InputStream => T): T = {
     val inputStream = getInputStream()
-    val result = f(inputStream) // throws
-    inputStream.close()
-    result
+    try f(inputStream)
+    finally inputStream.close()
   }
 
   /**
    * Get InputStream for content.  Caller must close.  (Java interface.  Scala
    * users should use withInputStream.)
    */
-  def getInputStream(): InputStream =
-    new ChannelBufferInputStream(getContent)
+  final def getInputStream(): InputStream = new BufInputStream(content)
 
-  /** Use content as Reader.  (Scala interface.  Java usrs can use getReader().) */
-  def withReader[T](f: Reader => T): T = {
+  /** Use content as Reader.  (Scala interface.  Java users can use getReader().) */
+  final def withReader[T](f: Reader => T): T = {
     withInputStream { inputStream =>
       val reader = new InputStreamReader(inputStream)
       f(reader)
@@ -454,7 +481,7 @@ abstract class Message {
   }
 
   /** Get Reader for content.  (Java interface.  Scala users should use withReader.) */
-  def getReader(): Reader =
+  final def getReader(): Reader =
     new InputStreamReader(getInputStream())
 
   /**
@@ -463,7 +490,7 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def write(string: String): Unit = write(Buf.Utf8(string))
+  final def write(string: String): Unit = write(Buf.Utf8(string))
 
   /**
    * Append a Buf to content.
@@ -471,12 +498,9 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def write(buf: Buf): Unit = {
-    val channelBuffer = buf match {
-      case ChannelBufferBuf(channelBuffer) => channelBuffer
-      case _ => BufChannelBuffer(buf)
-    }
-    setContent(ChannelBuffers.wrappedBuffer(getContent(), channelBuffer))
+  final def write(buf: Buf): Unit = {
+    if (!isChunked) content = content.concat(buf)
+    else throw new IllegalStateException("Cannot write buffers to a chunked message!")
   }
 
   /**
@@ -489,7 +513,7 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def write(bytes: Array[Byte]): Unit = write(Buf.ByteArray.Shared(bytes))
+  final def write(bytes: Array[Byte]): Unit = write(Buf.ByteArray.Shared(bytes))
 
   /**
    * Append content via an OutputStream.
@@ -497,14 +521,15 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def withOutputStream[T](f: OutputStream => T): T = {
+  final def withOutputStream[T](f: OutputStream => T): T = {
     // Use buffer size of 1024.  Netty default is 256, which seems too small.
     // Netty doubles buffers on resize.
     val outputStream = new ChannelBufferOutputStream(ChannelBuffers.dynamicBuffer(1024))
-    val result = f(outputStream) // throws
-    outputStream.close()
-    write(ChannelBufferBuf.Owned(outputStream.buffer))
-    result
+    try {
+      val result = f(outputStream) // throws
+      write(ChannelBufferBuf.Owned(outputStream.buffer))
+      result
+    } finally outputStream.close()
   }
 
   /**
@@ -513,51 +538,39 @@ abstract class Message {
    * An `IllegalStateException` is thrown if this message is chunked.
    */
   @throws(classOf[IllegalStateException])
-  def withWriter[T](f: Writer => T): T = {
+  final def withWriter[T](f: Writer => T): T = {
+    // withOutputStream will write() to the message
     withOutputStream { outputStream =>
       val writer = new OutputStreamWriter(outputStream, Message.Utf8)
-      val result = f(writer)
-      writer.close()
-      // withOutputStream will write()
-      result
+      try f(writer)
+      finally writer.close()
     }
   }
 
   /** Clear content (set to ""). */
-  def clearContent(): Unit = setContent(ChannelBuffers.EMPTY_BUFFER)
+  final def clearContent(): Unit = content = Buf.Empty
 
   /** End the response stream. */
   def close(): Future[Unit] = writer.close()
 
-  private[http] def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
+  final def keepAlive(keepAlive: Boolean): this.type = {
+    version match {
+      case Version.Http10 =>
+        if (keepAlive) headerMap.set(Fields.Connection, "keep-alive")
+        else headerMap.remove(Fields.Connection) // HTTP/1.0 defaults to close
 
-  private[this] def headers(): HttpHeaders =
-    httpMessage.headers()
-
-  private[this] def getContent(): ChannelBuffer =
-    httpMessage.getContent()
-
-  @throws[IllegalStateException]
-  private[this] def setContent(content: ChannelBuffer): Unit = {
-    // To preserve netty3 behavior, we only throw an exception if the content is non-empty
-    if (isChunked && content.readable())
-      throw new IllegalStateException("Cannot set non-empty content on chunked message")
-    else httpMessage.setContent(content)
+      case _ =>
+        if (keepAlive) headerMap.remove(Fields.Connection)
+        else headerMap.set(Fields.Connection, "close")
+    }
+    this
   }
 
-  def isChunked: Boolean = httpMessage.isChunked()
-
-  /**
-   * Manipulate the `Message` content mode.
-   *
-   * If `chunked` is `true`, any existing content will be discarded and further attempts
-   * to manipulate the synchronous content will result in an `IllegalStateException`.
-   *
-   * If `chunked` is `false`, the synchronous content methods will become available
-   * and the `Reader`/`Writer` of the message will be ignored by finagle.
-   */
-  def setChunked(chunked: Boolean): Unit =
-    httpMessage.setChunked(chunked)
+  final def keepAlive: Boolean = headerMap.get(Fields.Connection) match {
+    case Some(value) if value.equalsIgnoreCase("close") => false
+    case Some(value) if value.equalsIgnoreCase("keep-alive") => true
+    case _ => version == Version.Http11
+  }
 }
 
 object Message {

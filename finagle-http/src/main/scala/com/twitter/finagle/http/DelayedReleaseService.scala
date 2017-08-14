@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle._
-import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.Reader
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -30,7 +30,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
 
   protected[this] val latch = new AsyncLatch
 
-  private[this] def proxy(in: Response) = {
+  private[this] def proxy(in: Response): Response = {
     val released = new AtomicBoolean(false)
     def done() {
       if (released.compareAndSet(false, true)) {
@@ -38,9 +38,11 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
       }
     }
 
-    Response(
-      Bijections.responseToNetty(in),
-      new Reader {
+    new finagle.http.Response.Proxy {
+
+      def response: Response = in
+
+      override def reader: Reader = new Reader {
         def read(n: Int) = in.reader.read(n) respond {
           case Return(None) => done()
           case Throw(_) => done()
@@ -57,7 +59,7 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
           done()
         }
       }
-    )
+    }
   }
 
   override def apply(request: Req): Future[Response] = {

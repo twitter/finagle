@@ -46,14 +46,14 @@ private[finagle] class ConnectionManager {
   def observeRequest(request: Request, onFinish: Future[Unit]): Unit = synchronized {
     pendingResponses += 1
     isIdle = false
-    isKeepAlive = request.isKeepAlive
+    isKeepAlive = request.keepAlive
     handleIfStream(onFinish)
   }
 
   def observeResponse(response: Response, onFinish: Future[Unit]): Unit = synchronized {
     pendingResponses -= 1
 
-    if (!isKeepAlive || mustCloseOnFinish(response) || !response.isKeepAlive) {
+    if (!isKeepAlive || mustCloseOnFinish(response) || !response.keepAlive) {
       // We are going to close the connection after this response so we ensure that
       // the 'Connection' header is set to 'close' in order to give the client notice.
       response.headerMap.set(Fields.Connection, "close")

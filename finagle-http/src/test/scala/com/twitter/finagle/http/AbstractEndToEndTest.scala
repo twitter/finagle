@@ -6,7 +6,6 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.context.{Contexts, Deadline, Retries}
-import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.service._
@@ -509,11 +508,7 @@ abstract class AbstractEndToEndTest
     test(s"$implName (streaming)" + ": stream") {
       def service(r: Reader) = new HttpService {
         def apply(request: Request) = {
-          val response = new Response {
-            final val httpResponse = Bijections.responseToNetty(Response())
-            override def reader = r
-          }
-          response.setChunked(true)
+          val response = Response.chunked(Version.Http11, Status.Ok, r)
           Future.value(response)
         }
       }

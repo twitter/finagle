@@ -2,7 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.http.netty.{Bijections, Netty3ClientStreamTransport}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{QueueTransport, Transport}
@@ -142,7 +142,9 @@ class HttpClientDispatcherTest extends FunSuite {
     Await.result(out.read(), timeout)
     out.write(httpRes)
     val res = Await.result(f, timeout)
-    assert(Bijections.responseToNetty(res) == httpRes)
+    assert(res.status == HttpStatus.Ok)
+    assert(res.version == Version.Http11)
+    assert(!res.isChunked)
   }
 
   test("chunked") {

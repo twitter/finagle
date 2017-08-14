@@ -11,8 +11,9 @@ class RequestProxyTest extends FunSuite {
     val request1 = Request()
     request1.ctx(field) = 42
     val request2 = new RequestProxy {
-      override val request = request1
+      def request = request1
     }
+
     assert(request2.ctx(field) == 42)
   }
 }
