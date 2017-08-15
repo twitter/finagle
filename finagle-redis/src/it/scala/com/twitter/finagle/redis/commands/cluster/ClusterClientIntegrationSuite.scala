@@ -90,6 +90,18 @@ final class ClusterClientIntegrationSuite extends ClusterClientTest {
     }
   }
 
+  test("Correctly return the list of nodes with NODES", RedisTest, ClientTest) {
+    withClusterClients(0, primaryCount) { case Seq(primary, replica) =>
+      // select the first backup as a replica
+      val primaryNodes = Await.result(primary.nodes())
+      val replicaNodes = Await.result(replica.nodes())
+
+      assert(primaryNodes.size == 2)
+      assert(replicaNodes.size == 2)
+      assert(primaryNodes.filter(_.isMyself).head.id !=
+        replicaNodes.filter(_.isMyself).head.id)
+    }
+  }
 
   test("Correctly assign a node as replica using REPLICATE", RedisTest, ClientTest) {
     withClusterClients(0, primaryCount) { case Seq(primary, replica) =>
