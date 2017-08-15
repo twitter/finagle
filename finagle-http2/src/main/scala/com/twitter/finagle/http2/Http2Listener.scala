@@ -2,7 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.netty4.http.exp.{Http2ChannelTransportFactory, HttpCodecName, initServer}
+import com.twitter.finagle.netty4.http.{Http2ChannelTransportFactory, HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Awaitable.CanAwait

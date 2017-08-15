@@ -10,8 +10,10 @@ import io.netty.handler.codec.http.HttpResponseStatus.CONTINUE
  * ability to ignore and propagate 'expect' headers or strip them after a
  * 100 CONTINUE response is sent.
  */
-private class FinagleHttpObjectAggregator(maxContentLength: Int, handleExpectContinue: Boolean)
-    extends HttpObjectAggregator(maxContentLength) {
+private[netty4] class FinagleHttpObjectAggregator(
+  maxContentLength: Int,
+  handleExpectContinue: Boolean
+) extends HttpObjectAggregator(maxContentLength) {
 
   override def newContinueResponse(
     start: HttpMessage,

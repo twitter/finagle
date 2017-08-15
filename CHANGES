@@ -130,6 +130,9 @@ Breaking API Changes
     `Row` implementations and `ResultSet` builder functions that consume raw packets.
     ``PHAB_ID=D78721``
 
+  * finagle-netty4-http: HTTP/1.1 implementation based on Netty 4 is no longer experimental
+    and is moved out of the `exp` package. ``PHAB_ID=D80181``
+
   * finagle-serversets: Remove `ZkMetaData.AddressOrdering``, it is no longer used.
     ``PHAB_ID=D60698``
 

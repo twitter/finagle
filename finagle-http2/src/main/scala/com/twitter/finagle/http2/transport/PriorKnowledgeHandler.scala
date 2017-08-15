@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.Settings
-import com.twitter.finagle.netty4.http.exp._
+import com.twitter.finagle.netty4.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.buffer.{ByteBuf, ByteBufUtil}

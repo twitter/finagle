@@ -18,7 +18,7 @@ import com.twitter.finagle.http.netty.{
   Netty3ClientStreamTransport,
   Netty3ServerStreamTransport
 }
-import com.twitter.finagle.netty4.http.exp.HttpCodecName
+import com.twitter.finagle.netty4.http.HttpCodecName
 import com.twitter.finagle.stats.{NullStatsReceiver, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{Flags, SpanId, Trace, TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport

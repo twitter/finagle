@@ -7,7 +7,7 @@ import com.twitter.finagle.http2.transport.{
   PriorKnowledgeHandler,
   RichHttp2ServerDowngrader
 }
-import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initServer}
+import com.twitter.finagle.netty4.http.{HttpCodecName, initServer}
 import com.twitter.finagle.param.Stats
 import com.twitter.logging.Logger
 import io.netty.channel.socket.SocketChannel
