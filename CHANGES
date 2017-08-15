@@ -28,6 +28,11 @@ New Features
     `c.t.f.util.defaultTimerSlowTaskMaxRuntime`, and
     `c.t.f.util.defaultTimerSlowTaskLogMinInterval`, respectively. ``PHAB_ID=D70279``
 
+  * finagle-core: The JVM metrics for GC, allocations, memory, and more have moved
+    here from TwitterServer. See the new JVM section in the user guide for details:
+    https://twitter.github.io/finagle/guide/Metrics.html
+    ``PHAB_ID=D80883``
+
   * finagle-http, finagle-thriftmux: `MethodBuilder` has been promoted out of experimental.
     `MethodBuilder` is a collection of APIs for client configuration at a higher level than
     the Finagle 6 APIs while improving upon the deprecated `ClientBuilder`.

@@ -182,6 +182,13 @@ These metrics track the state of name resolution and service discovery.
 
 .. include:: metrics/ServiceDiscovery.rst
 
+JVM
+---
+
+.. _jvm_metrics:
+
+.. include:: metrics/Jvm.rst
+
 Toggles
 -------
 
