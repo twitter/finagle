@@ -53,5 +53,11 @@ private class Netty4Init extends FinagleInit {
     if (System.getProperty("io.netty.allocator.maxOrder") == null) {
       System.setProperty("io.netty.allocator.maxOrder", "7")
     }
+
+    // Initialize N4 metrics.
+    exportNetty4MetricsAndRegistryEntries()
+
+    // Initialize (if enabled) reference leak detector.
+    trackReferenceLeaks.init
   }
 }

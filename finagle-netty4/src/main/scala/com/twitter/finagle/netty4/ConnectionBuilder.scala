@@ -47,9 +47,6 @@ private final class ConnectionBuilder(
   private[this] val failedConnectLatencyStat = statsReceiver.stat("failed_connect_latency_ms")
   private[this] val cancelledConnects = statsReceiver.counter("cancelled_connects")
 
-  // Exports N4-related metrics under `finagle/netty4`.
-  exportNetty4MetricsAndRegistryEntries()
-
   /**
    * Creates a new connection then passes it to the provided builder function, returning
    * the result asynchronously.
@@ -61,7 +58,6 @@ private final class ConnectionBuilder(
    *       the spawned channel.
    */
   def build[T](builder: Channel => Future[T]): Future[T] = {
-    trackReferenceLeaks.init
     val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
     val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
@@ -96,7 +92,7 @@ private final class ConnectionBuilder(
     val elapsed = Stopwatch.start()
     val nettyConnectF = bootstrap.connect(addr)
 
-    val transportP = Promise[T]
+    val transportP = new Promise[T]
     // Try to cancel the connect attempt if the transporter's promise is interrupted.
     // If the future is already complete, the channel will be closed by the interrupt
     // handler that overwrites this one in the success branch of the ChannelFutureListener

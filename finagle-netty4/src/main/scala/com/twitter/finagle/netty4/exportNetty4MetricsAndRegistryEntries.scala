@@ -16,7 +16,7 @@ import scala.collection.mutable
  * Exports a number of N4-related metrics under `finagle/netty4` and registers
  * static values under `library/netty4` in the Registry.
  */
-private[netty4] object exportNetty4MetricsAndRegistryEntries {
+private object exportNetty4MetricsAndRegistryEntries {
 
   private[this] val stats = new VerbosityAdjustingStatsReceiver(
     FinagleStatsReceiver.scope("netty4"),
