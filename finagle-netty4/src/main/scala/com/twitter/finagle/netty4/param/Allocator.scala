@@ -8,7 +8,7 @@ private[netty4] case class Allocator(allocator: ByteBufAllocator)
 private[netty4] object Allocator {
   implicit val allocatorParam: Stack.Param[Allocator] = Stack.Param(
     Allocator(
-      if (trackReferenceLeaks.enabled) LeakDetectingAllocator
+      if (trackReferenceLeaks()) LeakDetectingAllocator
       else PooledByteBufAllocator.DEFAULT
     )
   )

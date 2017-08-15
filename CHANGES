@@ -69,6 +69,9 @@ New Features
   * finagle-netty4: `KeyCredentials.CertKeyAndChain` is now available to use with
     `Netty4ServerEngineFactory`. ``PHAB_ID=D80494``
 
+  * finagle-netty4: `c.t.f.netty4.trackReferenceLeaks` is now a CLI flag (default: disabled)
+    rather than a toggle. ``PHAB_ID=D80654``
+
   * finagle-stats: Metrics now report verbosity levels via `MetricsView.verbosity`.
     ``PHAB_ID=D78150``
 
