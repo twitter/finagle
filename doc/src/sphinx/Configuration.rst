@@ -213,7 +213,7 @@ Concepts
 
 A :util-tunable-src:`Tunable <com/twitter/util/tunable/Tunable.scala>` is like a Function0;
 it produces a value when applied. Dynamic configuration facilitates this value changing
-across invokations at runtime.
+across invocations at runtime.
 
 `Tunables` are accessed by means of a
 :util-tunable-src:`TunableMap <com/twitter/util/tunable/TunableMap.scala>`, which contains all the

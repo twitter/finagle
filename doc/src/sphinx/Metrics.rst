@@ -4,8 +4,14 @@ Metrics
 This section aims to be a comprehensive list of all of the metrics that Finagle
 exposes. The metrics are organized by layer and then by class.
 
-Some of the stats are only for clients, some only for servers, and some are for both.
-Some stats are only visible when certain optional classes are used.
+Finagle leverages `verbosity levels`_ and defines some of its low-utility metrics as "debug".
+Unless explicitly stated, assume ``Verbosity.Default`` is used to define a given metric.
+
+.. NOTE::
+
+   Some of the metrics are only for clients, some only for servers, and some are for both.
+
+   Some metrics are only visible when certain optional classes are used.
 
 NB: Finagle sometimes uses ``RollupStatsReceivers`` internally, which will take
 stats like "failures/twitter/TimeoutException" and roll them up, aggregating
@@ -262,3 +268,5 @@ ThriftMux
 These stats pertain to the :ref:`ThriftMux <whats_thriftmux>` protocol.
 
 .. include:: metrics/ThriftMux.rst
+
+.. _verbosity levels: https://twitter.github.io/util/guide/util-stats/basics.html#verbosity-levels

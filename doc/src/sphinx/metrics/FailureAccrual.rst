@@ -1,7 +1,6 @@
 FailureAccrualFactory
 <<<<<<<<<<<<<<<<<<<<<
 
-
 **removed_for_ms**
   A counter of the total time in milliseconds any host has spent in dead
   state due to failure accrual.
