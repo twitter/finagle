@@ -236,7 +236,6 @@ on an HTTP client with a `Tunable`:
   package com.example.service
 
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.TimeoutFilter
   import com.twitter.finagle.tunable.StandardTunableMap
   import com.twitter.util.Duration
   import com.twitter.util.tunable.{Tunable, TunableMap}
@@ -250,7 +249,7 @@ on an HTTP client with a `Tunable`:
 
   val client = Http.client
     .withLabel(clientId)
-    .configured(TimeoutFilter.Param(timeoutTunable))
+    .withRequestTimeout(timeoutTunable)
     .newService("localhost:10000")
 
 Configuration

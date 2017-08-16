@@ -13,6 +13,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: A `StackClient` can be configured with a `c.t.u.tunable.Tunable`
+    request timeout using `.withRequestTimeout(tunable)`; this facilitates changing
+    the timeout at runtime, without server restart.
+    See https://twitter.github.io/finagle/guide/Configuration.html#tunables for details.
+    ``PHAB_ID=D80751``.
+
   * finagle-core: `SslClientSessionVerifier` and `SslServerSessionVerifier` have been added
     as `Stack` params for executing custom SSL/TLS `Session` verification logic on the
     establishment of an SSL/TLS `Session`. ``PHAB_ID=D63256``
@@ -81,6 +87,11 @@ New Features
   * finagle-stats: `JsonExporter` now respects verbosity levels (current default behavior is
     to keep exporting "debug" metrics). Adjust `com.twitter.finagle.stats.verbose` tunable
     whitelist to change it.  ``PHAB_ID=D79571``
+
+  * finagle-tunable: `StandardTunableMap` is now public. Users can access file-based, in-memory,
+    and service-loaded tunable values using the map.
+    See https://twitter.github.io/finagle/guide/Configuration.html#tunables for details.
+    ``PHAB_ID=D80751``.
 
   * finagle: Changed dependencies of Netty from 4.1.10 to 4.1.12. ``PHAB_ID=D60438``
 

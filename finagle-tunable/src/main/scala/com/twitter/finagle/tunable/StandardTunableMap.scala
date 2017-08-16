@@ -31,7 +31,7 @@ import scala.collection.JavaConverters._
  *  For more information, see
  *  [[https://twitter.github.io/finagle/guide/Configuration.html#tunables]].
  */
-private[twitter] object StandardTunableMap {
+object StandardTunableMap {
 
   private[this] val clientMaps = new ConcurrentHashMap[String, TunableMap]()
 
