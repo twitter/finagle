@@ -170,9 +170,19 @@ Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
 Retries
 ~~~~~~~
 
-Every Finagle client contains a `Retries` module in the top (above load balancers) of its
-stack so it can retry failures from the underlying modules: circuit breakers, timeouts,
-load balancers and connection pools.
+Every Finagle client contains a `Retries` module in the stack, above load balancers,
+so that it can retry failures from the underlying modules: circuit breakers, timeouts,
+load balancers and connection pools. Retries can help improve the client's logical success
+rate when subsequent attempts succeed.
+
+For the most part, service owners will be interested in the logical success rate of a clients.
+Logical requests represent the result of the initial request, after any retries have occurred.
+Concretely, should a request result in a retryable failure on the first attempt, but succeed upon
+retry, this is considered a single successful logical request. By default, a Finagle client's
+success rate metrics include the individual attempts and this can cause confusion.
+:ref:`MethodBuilder <methodbuilder>` offers logical metrics scoped to "logical" for both
+success rate and latency. The deprecated ``ClientBuilder`` code also offers similar metrics
+scoped to "tries".
 
 Failures that are known to be safe to retry (for example, exceptions that occurred before the
 bytes were written to the wire and protocol level NACKs) will be automatically retried by Finagle.

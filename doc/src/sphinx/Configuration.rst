@@ -25,7 +25,7 @@ verbosity.
     .withTransport.verbose
     .newService("localhost:10000,localhost:10001")
 
-A higher-level client API, :ref:`MethodBuilder <methodbuilder>`, builds on
+A :ref:`higher-level client API <methodbuilder>`, `MethodBuilder`, builds on
 the client, providing logical success rate metrics, application-level retry
 policies, per-attempt timeouts, and total timeouts.
 
