@@ -58,6 +58,14 @@ New Features
   * finagle-init: Introduce a module to support service-loading initialization
     code. ``PHAB_ID=D75950``
 
+  * finagle-memcached: Added support for partitioned backends in finagle client. Introducing
+    the new PartitioningService (``PHAB_ID=D75143``), KetamaPartitioningService (``PHAB_ID=D77499``)
+    and MemcachedPartitioningService (``PHAB_ID=D78927``), which provide this support at different
+    levels of abstraction. The c.t.f.Memcached util, that is used for creating new memcached
+    clients, now creates a new partitioning client that utilizes these new services for the
+    Memcached protocol. The new memcached client can be enabled by setting the toggle
+    "com.twitter.finagle.memcached.UsePartitioningMemcachedClient" to 1.0. ``PHAB_ID=D80352``
+
   * finagle-mux: Default to new more efficient decoder. ``PHAB_ID=D80225``
 
   * finagle-mysql: `IsolationLevel` support was added with

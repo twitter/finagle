@@ -12,6 +12,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.time.{Milliseconds, Seconds, Span}
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import scala.util.Random
 
 abstract class MemcachedTest
     extends FunSuite
@@ -417,5 +418,59 @@ abstract class MemcachedTest
 
     assert(failureAccrualEx.getMessage().contains("Endpoint is marked dead by failureAccrual"))
     assert(failureAccrualEx.getMessage().contains("Downstream Address: localhost/127.0.0.1:1234"))
+  }
+
+  /**
+   * Test compatibility between old and new clients for the migration phase
+   */
+  protected[this] def testCompatibility() {
+    val numKeys = 20
+    val keyLength = 50
+    val suffix = ":" + Time.now.inSeconds
+
+    def randomString(length: Int): String = {
+      Random.alphanumeric.take(length).mkString
+    }
+
+    def writeKeys(client: Client): Seq[String] = {
+      // creating multiple random strings so that we get a uniform distribution of keys the
+      // ketama ring and thus the Memcached shards
+      val keys = 1 to numKeys map { _ =>
+        randomString(keyLength)
+      }
+      val writes = keys map { key =>
+        client.set(key, Buf.Utf8(s"$key" + suffix))
+      }
+      awaitResult(Future.join(writes))
+      keys
+    }
+
+    def assertRead(client: Client, keys: Seq[String]): Unit = {
+      val readValues: Map[String, Buf] = awaitResult { client.get(keys) }
+      assert(readValues.size == keys.length)
+      assert(readValues.keySet.toSeq.sorted == keys.sorted)
+      readValues.keys foreach { k =>
+        val Buf.Utf8(readValue) = readValues(k)
+        assert(readValue == k + suffix)
+      }
+    }
+
+    val newClient = client
+    val oldClient = {
+      val dest = Name.bound(servers.map { s =>
+        Address(s.address)
+      }: _*)
+      Memcached.client.newRichClient(dest, clientName)
+    }
+
+    // make sure old and new client can read the values written by old client
+    val keys1 = writeKeys(oldClient)
+    assertRead(oldClient, keys1)
+    assertRead(newClient, keys1)
+
+    // make sure old and new client can read the values written by new client
+    val keys2 = writeKeys(newClient)
+    assertRead(oldClient, keys2)
+    assertRead(newClient, keys2)
   }
 }

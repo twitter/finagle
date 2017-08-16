@@ -13,10 +13,8 @@ import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.hashing.KeyHasher
-import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.InetSocketAddress
-import scala.util.Random
 
 class MemcachedPartitioningClientTest extends MemcachedTest {
 
@@ -135,55 +133,7 @@ class MemcachedPartitioningClientTest extends MemcachedTest {
     client.close()
   }
 
-  // migration test
   test("data read/write consistency between old and new clients") {
-    val numKeys = 20
-    val keyLength = 50
-    val suffix = ":" + Time.now.inSeconds
-
-    def randomString(length: Int): String = {
-      Random.alphanumeric.take(length).mkString
-    }
-
-    def writeKeys(client: Client): Seq[String] = {
-      // creating multiple random strings so that we get a uniform distribution of keys the
-      // ketama ring and thus the Memcached shards
-      val keys = 1 to numKeys map { _ =>
-        randomString(keyLength)
-      }
-      val writes = keys map { key =>
-        client.set(key, Buf.Utf8(s"$key" + suffix))
-      }
-      awaitResult(Future.join(writes))
-      keys
-    }
-
-    def assertRead(client: Client, keys: Seq[String]): Unit = {
-      val readValues: Map[String, Buf] = awaitResult { client.get(keys) }
-      assert(readValues.size == keys.length)
-      assert(readValues.keySet.toSeq.sorted == keys.sorted)
-      readValues.keys foreach { k =>
-        val Buf.Utf8(readValue) = readValues(k)
-        assert(readValue == k + suffix)
-      }
-    }
-
-    val newClient = client
-    val oldClient = {
-      val dest = Name.bound(servers.map { s =>
-        Address(s.address)
-      }: _*)
-      Memcached.client.newRichClient(dest, clientName)
-    }
-
-    // make sure old and new client can read the values written by old client
-    val keys1 = writeKeys(oldClient)
-    assertRead(oldClient, keys1)
-    assertRead(newClient, keys1)
-
-    // make sure old and new client can read the values written by new client
-    val keys2 = writeKeys(newClient)
-    assertRead(oldClient, keys2)
-    assertRead(newClient, keys2)
+    testCompatibility()
   }
 }

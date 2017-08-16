@@ -3,33 +3,29 @@ package com.twitter.finagle
 import _root_.java.net.SocketAddress
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle
-import com.twitter.finagle.client.{
-  ClientRegistry,
-  DefaultPool,
-  StackClient,
-  StdStackClient,
-  Transporter
-}
+import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{
   GenSerialClientDispatcher,
   PipeliningDispatcher,
   SerialServerDispatcher,
   StalledPipelineTimeout
 }
-import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.liveness.{FailureAccrualFactory, FailureAccrualPolicy}
+import com.twitter.finagle.loadbalancer.{Balancers, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.loadbalancer.ConcurrentLoadBalancerFactory
-import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
+import com.twitter.finagle.memcached.partitioning.MemcachedPartitioningService
 import com.twitter.finagle.memcached.protocol.text.CommandToBuf
+import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
 import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
 import com.twitter.finagle.memcached.protocol.text.transport.{
   MemcachedNetty4ClientFramer,
   Netty4ServerFramer
 }
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
+import com.twitter.finagle.memcached.Toggles
+import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
@@ -39,16 +35,16 @@ import com.twitter.finagle.param.{
   _
 }
 import com.twitter.finagle.pool.SingletonPool
-import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.hashing
+import com.twitter.{finagle, hashing}
 import com.twitter.io.Buf
 import com.twitter.util.registry.GlobalRegistry
-import com.twitter.util.{Closable, Duration, Monitor}
+import com.twitter.util.{Closable, Duration, Monitor, Var}
 import scala.collection.mutable
 
 private[finagle] object MemcachedTracingFilter {
@@ -177,6 +173,18 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
 object Memcached extends finagle.Client[Command, Response] with finagle.Server[Command, Response] {
 
   /**
+   * Toggles to the new PartitioningService based Memcached client. Note that the new implementation
+   * is automatically used when the destination is a [[Name.Path]] irrespective of this flag. During
+   * this experimental phase the old implementation will continue to be used by default when
+   * destination is a finagle [[Name.Bound]]. [[Name.Path]] based destinations were not
+   * supported previously. This flag toggles to the new client for all destination types.
+   */
+  private[finagle] val UsePartitioningMemcachedClientToggle =
+    "com.twitter.finagle.memcached.UsePartitioningMemcachedClient"
+  private[this] val toggle = Toggles(UsePartitioningMemcachedClientToggle)
+  private[this] def UsePartitioningMemcachedClient = toggle(ServerInfo().id.hashCode)
+
+  /**
    * Memcached specific stack params.
    */
   object param {
@@ -303,40 +311,66 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       )
 
     def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {
-      val _dest = if (LocalMemcached.enabled) {
+      val destination = if (LocalMemcached.enabled) {
         Resolver.eval(mkDestination("localhost", LocalMemcached.port))
       } else dest
 
-      // Memcache only support Name.Bound names (TRFC-162).
-      // See KetamaPartitionedClient for more details.
-      val va = _dest match {
-        case Name.Bound(va) => va
-        case n =>
-          throw new IllegalArgumentException(s"Memcached client only supports Bound Names, was: $n")
-      }
-
-      val finagle.param.Stats(sr) = params[finagle.param.Stats]
-      val param.KeyHasher(hasher) = params[param.KeyHasher]
-      val param.NumReps(numReps) = params[param.NumReps]
-
+      val Logger(logger) = params[Logger]
       val label0 = if (label == "") params[Label].label else label
 
+      val param.KeyHasher(hasher) = params[param.KeyHasher]
       registerClient(label0, hasher.toString)
 
-      val healthBroker = new Broker[NodeHealth]
-
-      def newService(node: CacheNode): Service[Command, Response] = {
-        val key = KetamaClientKey.fromCacheNode(node)
-        val stk = stack.replace(
-          FailureAccrualFactory.role,
-          KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker)
-        )
-        withStack(stk).newService(mkDestination(node.host, node.port), label0)
+      def partitionAwareFinagleClient() = {
+        logger.info(s"Using the new partitioning finagle client for memcached: $destination")
+        val rawClient: Service[Command, Response] = {
+          val stk = stack.insertAfter(
+            BindingFactory.role,
+            MemcachedPartitioningService.module
+          )
+          withStack(stk).newService(destination, label0)
+        }
+        TwemcacheClient(rawClient)
       }
 
-      val scopedSr = sr.scope(label0)
-      new KetamaPartitionedClient(va, newService, healthBroker, scopedSr, hasher, numReps)
-      with TwemcachePartitionedClient
+      def oldMemcachedClient(va: Var[Addr]) = {
+        logger.info(s"Using the old memcached client: $destination")
+
+        val finagle.param.Stats(sr) = params[finagle.param.Stats]
+        val param.NumReps(numReps) = params[param.NumReps]
+
+        val scopedSr = sr.scope(label0)
+        val healthBroker = new Broker[NodeHealth]
+
+        def newService(node: CacheNode): Service[Command, Response] = {
+          val key = KetamaClientKey.fromCacheNode(node)
+          val stk = stack.replace(
+            FailureAccrualFactory.role,
+            KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker)
+          )
+          withStack(stk).newService(mkDestination(node.host, node.port), label0)
+        }
+
+        new KetamaPartitionedClient(va, newService, healthBroker, scopedSr, hasher, numReps)
+        with TwemcachePartitionedClient
+      }
+
+      if (UsePartitioningMemcachedClient) {
+        partitionAwareFinagleClient()
+      } else {
+        // By default use the new implementation only when destination is a Path (which was
+        // not supported before).
+        destination match {
+          case Name.Bound(va) =>
+            oldMemcachedClient(va)
+          case Name.Path(_path: Path) =>
+            partitionAwareFinagleClient()
+          case n =>
+            throw new IllegalArgumentException(
+              s"Memcached client only supports Bound Names or Name.Path, was: $n"
+            )
+        }
+      }
     }
 
     /**
