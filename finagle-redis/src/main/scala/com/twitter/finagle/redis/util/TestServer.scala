@@ -113,10 +113,14 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
 
   protected def createConfigFile(port: Int): File = {
     val confFile = File.createTempFile("redis-" + rand.nextInt(1000), ".tmp")
-    val nodeFile = File.createTempFile("redis-nodes-" + rand.nextInt(1000), ".tmp")
+    val nodesFile = File.createTempFile("redis-nodes-" + rand.nextInt(1000), ".tmp")
+    val appendFile = File.createTempFile("redis-append-" + rand.nextInt(1000), ".aof")
+    val dbFile = File.createTempFile("redis-db-" + rand.nextInt(1000), ".db")
 
     confFile.deleteOnExit()
-    nodeFile.deleteOnExit()
+    nodesFile.deleteOnExit()
+    appendFile.deleteOnExit()
+    dbFile.deleteOnExit()
 
     val out = new PrintWriter(new BufferedWriter(new FileWriter(confFile)))
     var conf = "port %s".format(port)
@@ -124,10 +128,13 @@ class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
     if (mode == RedisMode.Cluster) {
       conf += s"""
 cluster-enabled yes
-cluster-config-file ${nodeFile.getAbsolutePath}
+cluster-config-file ${nodesFile.getAbsolutePath}
 cluster-node-timeout 5000
 appendonly yes
-      """
+dir ${appendFile.getParent}
+appendfilename ${appendFile.getName}
+dbfilename ${dbFile.getName}
+"""
     }
 
     out.write(conf)

@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.{ClusterClientTest, ServerError}
+import com.twitter.finagle.redis.{ClusterClient, ClusterClientTest, ServerError}
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.{BufToString, RedisCluster}
 import com.twitter.finagle.util.DefaultTimer
@@ -16,7 +16,11 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 final class ClusterClientIntegrationSuite extends ClusterClientTest {
 
-  val primaryCount: Int = 3
+  // Generate hash keys/slots for testing:
+  // while true; do r=`openssl rand -hex 4`;
+  // s=`echo "cluster keyslot $r" | redis-cli | cut -f2`; echo "$s,$r"; done
+
+  val primaryCount: Int = 2
 
   test("Correctly retrieve CLUSTER INFO", RedisTest, ClientTest) {
     withClusterClient(0) { client =>
@@ -38,8 +42,17 @@ final class ClusterClientIntegrationSuite extends ClusterClientTest {
 
   test("Correctly assign slots to a server using ADDSLOTS", RedisTest, ClientTest) {
     withClusterClient(0) { client =>
-      Await.result(client.addSlots((0 until 100)))
-
+      // assign a single slot
+      Await.result(client.addSlots(Seq(0)))
+      val slotSingle = Await.result(client.slots)
+      assert(slotSingle.size == 1)
+      assert(slotSingle.head.start == 0 && slotSingle.head.end == 0)
+ 
+      Await.result(client.addSlots((1 until 100)))
+      val slotRange = Await.result(client.slots)
+      assert(slotRange.size == 1)
+      assert(slotRange.head.start == 0 && slotRange.head.end == 99)
+ 
       val info = Await.result(client.clusterInfo)
 
       assert(info.get("cluster_slots_assigned") == Some("100"))
@@ -122,6 +135,4 @@ final class ClusterClientIntegrationSuite extends ClusterClientTest {
       }
     }
   }
-
-
 }

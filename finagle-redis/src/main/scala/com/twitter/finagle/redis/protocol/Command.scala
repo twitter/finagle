@@ -148,6 +148,7 @@ object Command {
   val EXPIRE = Buf.Utf8("EXPIRE")
   val EXPIREAT = Buf.Utf8("EXPIREAT")
   val KEYS = Buf.Utf8("KEYS")
+  val MIGRATE = Buf.Utf8("MIGRATE")
   val MOVE = Buf.Utf8("MOVE")
   val PERSIST = Buf.Utf8("PERSIST")
   val PEXPIRE = Buf.Utf8("PEXPIRE")

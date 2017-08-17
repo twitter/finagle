@@ -79,7 +79,9 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
         case n =>
           val newAcc = reader.readString(n, UTF_8).split(" ").toList match {
             case nodeId :: hostPort :: flags :: master :: pingSent :: pongRecv :: epoch :: linkState :: slots =>
-              val Array(host, port) = hostPort.split(":")
+              val Array(host, portClusterPort) = hostPort.split(":")
+              // support for 4.0 which has a different format: <host>:<port>@<cluster bus port>
+              val port = portClusterPort.split("@").head
               acc :+ ClusterNode(host, port.toInt, id = Some(nodeId), flags = flags.split(",").toSeq)
             case _ => acc
           }
@@ -97,6 +99,20 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
     doRequest(AddSlots(slots)) {
       case StatusReply(_) => Future.Unit
     }
+
+  def setSlot(command: SetSlotCommand, slot: Int, destinationId: Option[String]): Future[Unit] =
+    doRequest(SetSlot(command, slot, destinationId)) {
+      case StatusReply(_) => Future.Unit
+    }
+
+  def setSlotMigrating(slot: Int, destinationId: String): Future[Unit] =
+    setSlot(SetSlotCommand.Migrating, slot, Some(destinationId))
+
+  def setSlotImporting(slot: Int, destinationId: String): Future[Unit] =
+    setSlot(SetSlotCommand.Importing, slot, Some(destinationId))
+
+  def setSlotNode(slot: Int, destinationId: String): Future[Unit] =
+    setSlot(SetSlotCommand.Node, slot, Some(destinationId))
 
   def clusterInfo(): Future[Map[String, String]] =
     doRequest(ClusterInfo()) {
@@ -117,17 +133,22 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
       case EmptyBulkReply => Future.Nil
     }
 
+  def getKeysInSlot(slot: Int, count: Int = 10): Future[Seq[Buf]] =
+    doRequest(GetKeysInSlot(slot, count)) {
+      case MBulkReply(keys) => Future.value(ReplyFormat.toBuf(keys))
+      case EmptyMBulkReply => Future.Nil
+    }
+
   def replicate(nodeId: String): Future[Unit] =
     doRequest(Replicate(nodeId)) {
       case StatusReply(_) => Future.Unit
     }
 
   def nodeId(): Future[Option[String]] =
-    nodes().map { resp =>
-      resp
-        .flatMap(n => if(n.isMyself) n.id else None)
-        .headOption
-    }
+    node().map(_.flatMap(_.id))
+
+  def node(): Future[Option[ClusterNode]] =
+    nodes().map(_.filter(_.isMyself).headOption)
 
   def infoMap(): Future[Map[String, String]] =
     info().map(_.map(toInfoMap(_)).getOrElse(Map()))
