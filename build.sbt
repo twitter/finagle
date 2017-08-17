@@ -28,6 +28,14 @@ val netty4Libs = Seq(
   "io.netty" % "netty-transport-native-unix-common" % netty4Version,
   "io.netty" % "netty-handler-proxy" % netty4Version
 )
+val netty4LibsTest = Seq(
+  "io.netty" % "netty-handler" % netty4Version % "test",
+  "io.netty" % "netty-transport" % netty4Version % "test",
+  "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
+  // this package is a dep of native-epoll above, explicitly add this for coursier plugin
+  "io.netty" % "netty-transport-native-unix-common" % netty4Version % "test",
+  "io.netty" % "netty-handler-proxy" % netty4Version % "test"
+)
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
 val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.1.Final" % "test"
@@ -273,10 +281,9 @@ lazy val finagleCore = Project(
     util("stats"),
     util("tunable"),
     caffeineLib,
-    jsr305Lib,
-    netty3Lib % "test"
-  ),
-  unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty3"), Compile)).value
+    jsr305Lib
+  ) ++ netty4LibsTest,
+  unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty4"), Compile)).value
 ).dependsOn(finagleToggle, finagleInit)
 
 lazy val finagleNetty4 = Project(
@@ -515,12 +522,11 @@ lazy val finagleMemcached = Project(
   libraryDependencies ++= jacksonLibs
 ).dependsOn(
   // NOTE: Order is important here.
-  // finagleNetty3 must come before finagleCore here, otherwise
+  // finagleNetty4 must come before finagleCore here, otherwise
   // tests will fail with NoClassDefFound errors due to
   // StringClient and StringServer.
-  finagleNetty3 % "test->compile",
-  finagleCore % "compile->compile;test->test",
   finagleNetty4,
+  finagleCore % "compile->compile;test->test",
   finagleServersets,
   finagleStats,
   finagleToggle

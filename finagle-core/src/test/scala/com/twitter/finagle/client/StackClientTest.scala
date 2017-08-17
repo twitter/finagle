@@ -8,7 +8,7 @@ import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.naming.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
-import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
@@ -42,7 +42,7 @@ private object StackClientTest {
     protected type Out = String
 
     protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
-      Netty3Transporter(StringClientPipeline, addr, params)
+      Netty4Transporter.raw(StringClientPipeline, addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
@@ -633,7 +633,7 @@ class StackClientTest
 
     val expectedEntry = Entry(
       key = Seq("client", StringClient.protocolLibrary, label, "Transporter"),
-      value = "Netty3Transporter"
+      value = "Netty4Transporter"
     )
 
     assert(registry.iterator.contains(expectedEntry))

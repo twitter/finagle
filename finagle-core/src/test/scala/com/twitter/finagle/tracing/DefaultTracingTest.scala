@@ -11,14 +11,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-private object StringServerCodec extends com.twitter.finagle.Codec[String, String] {
-  val pipelineFactory = StringServerPipeline
-}
-
-private object StringClientCodec extends com.twitter.finagle.Codec[String, String] {
-  val pipelineFactory = StringClientPipeline
-}
-
 @RunWith(classOf[JUnitRunner])
 class DefaultTracingTest extends FunSuite with StringClient with StringServer {
   object Svc extends Service[String, String] {

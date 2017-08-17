@@ -1,49 +1,43 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
 import com.twitter.util.Future
+import io.netty.channel.{
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
+  ChannelPromise
+}
+import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
-import org.jboss.netty.channel.{
-  ChannelHandlerContext,
-  ChannelPipelineFactory,
-  Channels,
-  MessageEvent,
-  SimpleChannelHandler
-}
-import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
 
-private class DelimEncoder(delim: Char) extends SimpleChannelHandler {
-  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
-    val newMessage = evt.getMessage match {
+private class DelimEncoder(delim: Char) extends ChannelOutboundHandlerAdapter {
+  override def write(ctx: ChannelHandlerContext, msg: Any, p: ChannelPromise): Unit = {
+    val delimMsg = msg match {
       case m: String => m + delim
       case m => m
     }
-
-    Channels.write(ctx, evt.getFuture, newMessage, evt.getRemoteAddress)
+    ctx.write(delimMsg, p)
   }
 }
 
-private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
+private[finagle] object StringClientPipeline extends (ChannelPipeline => Unit) {
+  def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
     pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
     pipeline.addLast("line", new DelimEncoder('\n'))
-    pipeline
   }
 }
 
-private[finagle] object NoDelimStringPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
+private[finagle] object NoDelimStringPipeline extends (ChannelPipeline => Unit) {
+  def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("stringEncode", new StringEncoder(UTF_8))
     pipeline.addLast("stringDecode", new StringDecoder(UTF_8))
-    pipeline
   }
 }
 
@@ -78,8 +72,8 @@ trait StringClient {
     protected type Out = String
 
     protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
-      if (appendDelimeter) Netty3Transporter(StringClientPipeline, addr, params)
-      else Netty3Transporter(NoDelimStringPipeline, addr, params)
+      if (appendDelimeter) Netty4Transporter.raw(StringClientPipeline, addr, params)
+      else Netty4Transporter.raw(NoDelimStringPipeline, addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]

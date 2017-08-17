@@ -64,7 +64,7 @@ class StringServerTest
 
     val expectedEntry = Entry(
       key = Seq("server", StringServer.protocolLibrary, label, "Listener"),
-      value = "Netty3Listener"
+      value = "Netty4Listener"
     )
 
     assert(registry.iterator.contains(expectedEntry))

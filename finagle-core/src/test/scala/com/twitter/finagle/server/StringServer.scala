@@ -3,20 +3,18 @@ package com.twitter.finagle.server
 import com.twitter.finagle._
 import com.twitter.finagle.param
 import com.twitter.finagle.dispatch.SerialServerDispatcher
-import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.transport.Transport
+import io.netty.channel.ChannelPipeline
+import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
+import io.netty.handler.codec.{DelimiterBasedFrameDecoder, Delimiters}
 import java.nio.charset.StandardCharsets
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 
-private[finagle] object StringServerPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
+private[finagle] object StringServerPipeline extends (ChannelPipeline => Unit) {
+  def apply(pipeline: ChannelPipeline): Unit = {
     pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
     pipeline.addLast("stringDecoder", new StringDecoder(StandardCharsets.UTF_8))
     pipeline.addLast("stringEncoder", new StringEncoder(StandardCharsets.UTF_8))
-    pipeline
   }
 }
 
@@ -39,7 +37,7 @@ trait StringServer {
     protected type In = String
     protected type Out = String
 
-    protected def newListener() = Netty3Listener(StringServerPipeline, params)
+    protected def newListener() = Netty4Listener(StringServerPipeline, params)
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[String, String]
