@@ -24,6 +24,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [Hotels.com](https://www.hotels.com)
 * [Hotel Urbano](https://www.hotelurbano.com/)
 * [Hopper](https://www.hopper.com/)
 * [ING Bank](https://ing.nl/)
