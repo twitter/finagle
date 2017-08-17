@@ -22,16 +22,16 @@ case class Slots(start: Int, end: Int, master: ClusterNode, replicas: Seq[Cluste
 case class AddSlots(slots: Seq[Int])
   extends Cluster("ADDSLOTS", slots.map(_.toString))
 
-sealed trait SetSlotCommand
+sealed trait SetSlotState
 
-object SetSlotCommand {
-  case object Migrating extends SetSlotCommand
-  case object Importing extends SetSlotCommand
-  case object Stable extends SetSlotCommand
-  case object Node extends SetSlotCommand
+object SetSlotState {
+  case object Migrating extends SetSlotState
+  case object Importing extends SetSlotState
+  case object Stable extends SetSlotState
+  case object Node extends SetSlotState
 }
 
-case class SetSlot(command: SetSlotCommand, slot: Int, nodeId: Option[String])
+case class SetSlot(command: SetSlotState, slot: Int, nodeId: Option[String])
   extends Cluster("SETSLOT", Seq(slot.toString, command.toString.toUpperCase) ++ nodeId)
 
 case class ClusterInfo() extends Cluster("INFO")

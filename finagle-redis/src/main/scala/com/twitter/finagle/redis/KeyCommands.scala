@@ -77,6 +77,13 @@ private[redis] trait KeyCommands { self: BaseClient =>
       case EmptyMBulkReply => Future.Nil
     }
 
+  /**
+   * Migrates all keys to the destination server
+   * @param destAddr target redis server
+   * @param keys list of keys to be migrated
+   * @param timeout timeout before failing, defaults to 5 seconds
+   * @return unit
+   */
   def migrate(destAddr: InetSocketAddress, keys: Seq[Buf], timeout: Duration = 5.seconds): Future[Unit] = {
     doRequest(Migrate(destAddr, keys, timeout)) {
       case StatusReply(_) => Future.Unit

@@ -95,31 +95,69 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
     readAll(Seq(), ByteReader(buf))
   }
 
+  /**
+   * Add a list of slots this server is responsible for
+   * @param slots
+   * @return unit
+   */
   def addSlots(slots: Seq[Int]): Future[Unit] =
     doRequest(AddSlots(slots)) {
       case StatusReply(_) => Future.Unit
     }
 
-  def setSlot(command: SetSlotCommand, slot: Int, destinationId: Option[String]): Future[Unit] =
-    doRequest(SetSlot(command, slot, destinationId)) {
+  /**
+   * Set the state for this slot
+   * @param command The new slot state
+   * @param slot
+   * @param destinationId the target node id
+   * @return unit
+   */
+  def setSlot(state: SetSlotState, slot: Int, destinationId: Option[String]): Future[Unit] =
+    doRequest(SetSlot(state, slot, destinationId)) {
       case StatusReply(_) => Future.Unit
     }
 
+  /**
+   * Set this slot to be migrating
+   * @param slot
+   * @param destinationId the target node id
+   * @return unit
+   */
   def setSlotMigrating(slot: Int, destinationId: String): Future[Unit] =
-    setSlot(SetSlotCommand.Migrating, slot, Some(destinationId))
+    setSlot(SetSlotState.Migrating, slot, Some(destinationId))
 
-  def setSlotImporting(slot: Int, destinationId: String): Future[Unit] =
-    setSlot(SetSlotCommand.Importing, slot, Some(destinationId))
+  /**
+   * Set this slot to be importing
+   * @param slot
+   * @param destinationId the source node id
+   * @return unit
+   */
+  def setSlotImporting(slot: Int, sourceId: String): Future[Unit] =
+    setSlot(SetSlotState.Importing, slot, Some(sourceId))
 
-  def setSlotNode(slot: Int, destinationId: String): Future[Unit] =
-    setSlot(SetSlotCommand.Node, slot, Some(destinationId))
+  /**
+   * Set the slot to be associated with a node
+   * @param slot
+   * @param ownerId the source node id
+   * @return unit
+   */
+  def setSlotNode(slot: Int, ownerId: String): Future[Unit] =
+    setSlot(SetSlotState.Node, slot, Some(ownerId))
 
+  /**
+   * Returns the cluster info
+   * @return A key, value map with the cluster info
+   */
   def clusterInfo(): Future[Map[String, String]] =
     doRequest(ClusterInfo()) {
       case BulkReply(message) => Future.value(toInfoMap(message))
       case EmptyBulkReply => Future.value(Map())
     }
 
+  /**
+   * Returns a list of slots known by the server
+   * @return A list of slots
+   */
   def slots(): Future[Seq[Slots]] =
     doRequest(ClusterSlots()) {
       case MBulkReply(entries) =>
@@ -127,32 +165,64 @@ private[redis] trait ClusterCommands { self: BaseClient with BasicServerCommands
       case EmptyMBulkReply => Future.Nil
     }
 
+  /**
+   * Returns a list of nodes known by the server
+   * @return A list of cluster nodes
+   */
   def nodes(): Future[Seq[ClusterNode]] =
     doRequest(Nodes()) {
       case BulkReply(entries) => Future.value(toNodes(entries))
       case EmptyBulkReply => Future.Nil
     }
 
+  /**
+   * Returns a list of keys stored by a slot on this server
+   * @param slot the slot id
+   * @param count number of keys to return, default is 10
+   * @return A list of key bufs
+   */
   def getKeysInSlot(slot: Int, count: Int = 10): Future[Seq[Buf]] =
     doRequest(GetKeysInSlot(slot, count)) {
       case MBulkReply(keys) => Future.value(ReplyFormat.toBuf(keys))
       case EmptyMBulkReply => Future.Nil
     }
 
+  /**
+   * Instructs the server to become a replica of the given node
+   * @param nodeId
+   * @return unit
+   */
   def replicate(nodeId: String): Future[Unit] =
     doRequest(Replicate(nodeId)) {
       case StatusReply(_) => Future.Unit
     }
 
+  /**
+   * Return the cluster node id of the server
+   * @return optional node id
+   */
   def nodeId(): Future[Option[String]] =
     node().map(_.flatMap(_.id))
 
+  /**
+   * Return the cluster node for this server
+   * @return optional node cluster node
+   */
   def node(): Future[Option[ClusterNode]] =
     nodes().map(_.filter(_.isMyself).headOption)
 
+  /**
+   * Returns the server info
+   * @return A key, value map with the server info
+   */
   def infoMap(): Future[Map[String, String]] =
     info().map(_.map(toInfoMap(_)).getOrElse(Map()))
 
+  /**
+   * Instructs this cluster server to meet another server
+   * @param addr InetSocketAddress of the server to meet
+   * @return unit
+   */
   def meet(addr: InetSocketAddress): Future[Unit] =
     doRequest(Meet(addr)) {
       case StatusReply(_) => Future.Unit
