@@ -232,7 +232,7 @@ construct a new instance of ``RetryBudget`` backed by *leaky token bucket*.
 
   val budget: RetryBudget = RetryBudget(
     ttl = 10.seconds,
-    minRetriesPerSec = 5
+    minRetriesPerSec = 5,
     percentCanRetry = 0.1
   )
 
