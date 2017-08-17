@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -259,8 +259,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Deleted.html" title=""></a>
-                        <a href="Deleted.html" title="">
+                        <a class="object" href="Deleted$.html" title=""></a>
+                        <a href="Deleted$.html" title="">
                           Deleted
                         </a>
                       </li><li class="current-entities indented5">
@@ -271,8 +271,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Exists.html" title=""></a>
-                        <a href="Exists.html" title="">
+                        <a class="object" href="Exists$.html" title=""></a>
+                        <a href="Exists$.html" title="">
                           Exists
                         </a>
                       </li><li class="current-entities indented5">
@@ -313,14 +313,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="trait" href="KeyValidation.html" title="This trait contains cache command key validation logic."></a>
-                        <a href="KeyValidation.html" title="This trait contains cache command key validation logic.">
-                          KeyValidation
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="NoOp.html" title=""></a>
-                        <a href="NoOp.html" title="">
+                        <a class="object" href="NoOp$.html" title=""></a>
+                        <a href="NoOp$.html" title="">
                           NoOp
                         </a>
                       </li><li class="current-entities indented5">
@@ -339,14 +333,14 @@ non-existent memcached command.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="NotFound.html" title=""></a>
-                        <a href="NotFound.html" title="">
+                        <a class="object" href="NotFound$.html" title=""></a>
+                        <a href="NotFound$.html" title="">
                           NotFound
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="NotStored.html" title=""></a>
-                        <a href="NotStored.html" title="">
+                        <a class="object" href="NotStored$.html" title=""></a>
+                        <a href="NotStored$.html" title="">
                           NotStored
                         </a>
                       </li><li class="current-entities indented5">
@@ -411,8 +405,8 @@ non-existent memcached command.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Stored.html" title=""></a>
-                        <a href="Stored.html" title="">
+                        <a class="object" href="Stored$.html" title=""></a>
+                        <a href="Stored$.html" title="">
                           Stored
                         </a>
                       </li><li class="current-entities indented5">
@@ -456,7 +450,7 @@ non-existent memcached command.">
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Set</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Set</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result"> extends <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -465,7 +459,7 @@ non-existent memcached command.">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a>, <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a>, <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a>, <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -491,7 +485,7 @@ non-existent memcached command.">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.memcached.protocol.Set"><span>Set</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.memcached.protocol.StorageCommand"><span>StorageCommand</span></li><li class="in" name="com.twitter.finagle.memcached.protocol.KeyValidation"><span>KeyValidation</span></li><li class="in" name="com.twitter.finagle.memcached.protocol.Command"><span>Command</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.memcached.protocol.Set"><span>Set</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.memcached.protocol.StorageCommand"><span>StorageCommand</span></li><li class="in" name="com.twitter.finagle.memcached.protocol.Command"><span>Command</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -523,7 +517,7 @@ non-existent memcached command.">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Set</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span>
+        <span class="name">Set</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span>
       </span>
       
       
@@ -601,22 +595,6 @@ non-existent memcached command.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.protocol.KeyValidation#badKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="badKey(key:com.twitter.io.Buf):Boolean"></a><a id="badKey(Buf):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/protocol/Set.html#badKey(key:com.twitter.io.Buf):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">badKey</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -667,7 +645,7 @@ non-existent memcached command.">
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">expiry</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>
+        <span class="name">expiry</span><span class="result">: <span class="extype" name="com.twitter.util.Time">Time</span></span>
       </span>
       
       
@@ -741,7 +719,7 @@ non-existent memcached command.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.protocol.Set#key" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.protocol.Set#key" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="key:com.twitter.io.Buf"></a><a id="key:Buf"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/memcached/protocol/Set.html#key:com.twitter.io.Buf" title="Permalink">
@@ -753,26 +731,10 @@ non-existent memcached command.">
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">key</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">key</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.memcached.protocol.StorageCommand#keys" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="keys:Seq[com.twitter.io.Buf]"></a><a id="keys:Seq[Buf]"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/protocol/Set.html#keys:Seq[com.twitter.io.Buf]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">keys</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a> → <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.protocol.Set">Set</a> → <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.protocol.Command#name" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name:String"></a>
       <span class="permalink">
@@ -865,7 +827,7 @@ non-existent memcached command.">
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">value</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">value</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       
@@ -955,8 +917,6 @@ non-existent memcached command.">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="com.twitter.finagle.memcached.protocol.StorageCommand">
               <h3>Inherited from <a href="StorageCommand.html" class="extype" name="com.twitter.finagle.memcached.protocol.StorageCommand">StorageCommand</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.memcached.protocol.KeyValidation">
-              <h3>Inherited from <a href="KeyValidation.html" class="extype" name="com.twitter.finagle.memcached.protocol.KeyValidation">KeyValidation</a></h3>
             </div><div class="parent" name="com.twitter.finagle.memcached.protocol.Command">
               <h3>Inherited from <a href="Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a></h3>
             </div><div class="parent" name="scala.AnyRef">

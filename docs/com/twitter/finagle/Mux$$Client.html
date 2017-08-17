@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -217,7 +217,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackClient.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -284,7 +284,7 @@ resources for using Finagle.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackClient.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span>
+        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.params</a></span></span></span>)</span>
       </span>
       
       
@@ -305,7 +305,7 @@ resources for using Finagle.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">In</span><span class="result alias"> = <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">In</span><span class="result alias"> = <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
@@ -322,7 +322,7 @@ resources for using Finagle.
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Out</span><span class="result alias"> = <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">Out</span><span class="result alias"> = <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">The type we read out of the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we read out of the transport.
@@ -983,12 +983,12 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
+        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withLabel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withLabel(label:String):A"></a><a id="withLabel(String):Client"></a>
@@ -1043,11 +1043,11 @@ via a least loaded metric.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
+        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
-(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.EndpointerStackClient#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1079,11 +1079,11 @@ via a least loaded metric.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
-work will be interrupted via <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future@raise(interrupt:Throwable):Unit" class="extype" target="_top">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1135,7 +1135,7 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
+        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the requeue backoff policy of this client (default: no delay).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the requeue backoff policy of this client (default: no delay).</p><p>The <code>backoff</code> policy is represented by a stream of delays (i.e.,
@@ -1228,11 +1228,11 @@ retries that can be made by this client.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
+        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
-(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
+(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
 (default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

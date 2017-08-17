@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -284,7 +284,7 @@ server addr.">
                           TraceId
                         </a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="TraceInitializerFilter$.html" title=""></a>
                         <a class="class" href="TraceInitializerFilter.html" title="The TraceInitializerFilter takes care of span lifecycle events."></a>
                         <a href="TraceInitializerFilter.html" title="The TraceInitializerFilter takes care of span lifecycle events.">
                           TraceInitializerFilter
@@ -302,12 +302,6 @@ server addr.">
                         <a href="TracingLogHandler.html" title="A logging Handler that sends log information via tracing
 ">
                           TracingLogHandler
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="debugTrace$.html" title=""></a>
-                        <a href="debugTrace$.html" title="">
-                          debugTrace
                         </a>
                       </li>
               </ul>
@@ -895,7 +889,7 @@ of request context changes.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">record</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       
@@ -927,7 +921,7 @@ of request context changes.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">record</span><span class="params">(<span name="ann">ann: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">record</span><span class="params">(<span name="ann">ann: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       
@@ -1121,7 +1115,7 @@ tracers in the stack.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>
+        <span class="name">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.tracing.Trace.timeFuture.T">T</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Runs the function f and logs that duration until the future is satisfied with the given name.</p>
@@ -1248,29 +1242,7 @@ the correct fields filled in.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.tracing.Trace#recordRpcname" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="recordRpcname(service:String,rpc:String):Unit"></a><a id="recordRpcname(String,String):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/tracing/Trace$.html#recordRpcname(service:String,rpc:String):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.13.x) Use recordRpc and recordServiceName">recordRpcname</span><span class="params">(<span name="service">service: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="rpc">rpc: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.13.x)</i> Use recordRpc and recordServiceName</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

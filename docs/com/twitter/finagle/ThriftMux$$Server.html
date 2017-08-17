@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -179,7 +179,7 @@ com.twitter.finagle.mux." href="ThriftMux$.html">
 <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The <code>ThriftMux</code> object is both a <code>com.twitter.finagle.Client</code> and a
 <code>com.twitter.finagle.Server</code> for the Thrift protocol served over
 <a href="mux/index.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>. Rich interfaces are provided to adhere to those
-generated from a <a href="http://thrift.apache.org/docs/idl/" target="_blank">Thrift IDL</a> by
+generated from a <a href="https://thrift.apache.org/docs/idl" target="_blank">Thrift IDL</a> by
 <a href="https://twitter.github.io/scrooge/" target="_blank">Scrooge</a> or
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><h4> Clients </h4><p>Clients can be created directly from an interface generated from
 a Thrift IDL:</p><p>For example, this IDL:</p><pre>service TestService {
@@ -200,7 +200,7 @@ prefix and servers with &quot;srv/thrift&quot;. If you'd like more configuration
 <a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">configuration documentation</a>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="ThriftMux$$Client$.html" title=""></a>
                         <a class="class" href="ThriftMux$$Client.html" title="A ThriftMux com.twitter.finagle.Client."></a>
                         <a href="ThriftMux$$Client.html" title="A ThriftMux com.twitter.finagle.Client.">
                           Client
@@ -480,6 +480,25 @@ as an example).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.Server#filtered" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.ThriftMux.Server"></a><a id="filtered(Filter[Request,Response,Request,Response]):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response,com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.ThriftMux.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Prepends <code>filter</code> to the top of the server.</p><div class="fullcomment"><div class="comment cmt"><p>Prepends <code>filter</code> to the top of the server. That is, after materializing
+the server (newService) <code>filter</code> will be the first element which requests
+flow through. This is a familiar chaining combinator for filters.
+</p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -842,8 +861,12 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
+into <code>serveIface</code>:</p><pre>ThriftMuxRichServer
+.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
+})</pre><p>Note that this interface is discovered by reflection. Passing an
+invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftRichServer#serveIface" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serveIface(addr:String,iface:AnyRef):com.twitter.finagle.ListeningServer"></a><a id="serveIface(String,AnyRef):ListeningServer"></a>
       <span class="permalink">
@@ -866,8 +889,84 @@ by either <a href="https://github.com/twitter/scrooge" target="_blank">Scrooge</
 <a href="https://github.com/mariusaeriksen/thrift-0.5.0-finagle" target="_blank">thrift-finagle</a>.</p><p>Given the IDL:</p><pre>service TestService {
   string query(<span class="num">1</span>: string x)
 }</pre><p>Scrooge will generate an interface, <code>TestService.FutureIface</code>,
-implementing the above IDL.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+implementing the above IDL.</p><p><code>TestService.FutureIface</code> must be implemented and passed
+into <code>serveIface</code>:</p><pre>ThriftMuxRichServer
+.serveIface(<span class="lit">":*"</span>, <span class="kw">new</span> TestService.FutureIface {
+  <span class="kw">def</span> query(x: <span class="std">String</span>) = Future.value(x)  <span class="cmt">// (echo service)</span>
+})</pre><p>Note that this interface is discovered by reflection. Passing an
+invalid interface implementation will result in a runtime error.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftRichServer#serveIfaces" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer"></a><a id="serveIfaces(SocketAddress,Map[String,AnyRef],Option[String]):ListeningServer"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveIfaces</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="ifaces">ifaces: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>, <span name="defaultService">defaultService: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Serve multiple interfaces:</p><div class="fullcomment"><div class="comment cmt"><p>Serve multiple interfaces:</p><pre><span class="kw">val</span> serviceMap = <span class="std">Map</span>(
+<span class="lit">"echo"</span> -&gt; <span class="kw">new</span> EchoService(),
+<span class="lit">"extendedEcho"</span> -&gt; <span class="kw">new</span> ExtendedEchoService()
+)
+
+<span class="kw">val</span> server = Thrift.server.serveIfaces(address, serviceMap)</pre><p>A default service name can be specified, so we can upgrade an
+existing non-multiplexed server to a multiplexed one without
+breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.server.serveIfaces(
+  address, serviceMap, defaultService = <span class="std">Some</span>(<span class="lit">"extendedEcho"</span>))</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftRichServer#serveIfaces" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef]):com.twitter.finagle.ListeningServer"></a><a id="serveIfaces(SocketAddress,Map[String,AnyRef]):ListeningServer"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#serveIfaces(addr:java.net.SocketAddress,ifaces:Map[String,AnyRef]):com.twitter.finagle.ListeningServer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveIfaces</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="ifaces">ifaces: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Serve multiple interfaces:</p><div class="fullcomment"><div class="comment cmt"><p>Serve multiple interfaces:</p><pre><span class="kw">val</span> serviceMap = <span class="std">Map</span>(
+<span class="lit">"echo"</span> -&gt; <span class="kw">new</span> EchoService(),
+<span class="lit">"extendedEcho"</span> -&gt; <span class="kw">new</span> ExtendedEchoService()
+)
+
+<span class="kw">val</span> server = Thrift.server.serveIfaces(address, serviceMap)</pre><p>A default service name can be specified, so we can upgrade an
+existing non-multiplexed server to a multiplexed one without
+breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.server.serveIfaces(
+  address, serviceMap, defaultService = <span class="std">Some</span>(<span class="lit">"extendedEcho"</span>))</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftRichServer#serveIfaces" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveIfaces(addr:String,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer"></a><a id="serveIfaces(String,Map[String,AnyRef],Option[String]):ListeningServer"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#serveIfaces(addr:String,ifaces:Map[String,AnyRef],defaultService:Option[String]):com.twitter.finagle.ListeningServer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveIfaces</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="ifaces">ifaces: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>, <span name="defaultService">defaultService: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Serve multiple interfaces:</p><div class="fullcomment"><div class="comment cmt"><p>Serve multiple interfaces:</p><pre><span class="kw">val</span> serviceMap = <span class="std">Map</span>(
+<span class="lit">"echo"</span> -&gt; <span class="kw">new</span> EchoService(),
+<span class="lit">"extendedEcho"</span> -&gt; <span class="kw">new</span> ExtendedEchoService()
+)
+
+<span class="kw">val</span> server = Thrift.server.serveIfaces(address, serviceMap)</pre><p>A default service name can be specified, so we can upgrade an
+existing non-multiplexed server to a multiplexed one without
+breaking the old clients:</p><pre><span class="kw">val</span> server = Thrift.server.serveIfaces(
+  address, serviceMap, defaultService = <span class="std">Some</span>(<span class="lit">"extendedEcho"</span>))</pre></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#serverLabel" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serverLabel:String"></a>
       <span class="permalink">
@@ -896,7 +995,7 @@ implementing the above IDL.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">serverStats</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
+        <span class="name">serverStats</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
@@ -1026,12 +1125,12 @@ implementing the above IDL.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#withLabel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withLabel(label:String):com.twitter.finagle.ThriftMux.Server"></a><a id="withLabel(String):Server"></a>
@@ -1083,11 +1182,11 @@ allocated for the next thrift response.</p></div><dl class="paramcmts block"><dt
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
-(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1135,11 +1234,11 @@ allocated for the next thrift response.</p></div><dl class="paramcmts block"><dt
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
-work will be interrupted via <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future@raise(interrupt:Throwable):Unit" class="extype" target="_top">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1195,6 +1294,22 @@ HTTP classification tools.</p></span></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.Server#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]):com.twitter.finagle.ThriftMux.Server"></a><a id="withStack(Stack[ServiceFactory[Request,Response]]):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]):com.twitter.finagle.ThriftMux.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Produce a <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">com.twitter.finagle.ThriftMux.Server</a> using the provided stack.</p>
     </li><li name="com.twitter.finagle.ThriftMux.Server#withStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.ThriftMux.Server"></a><a id="withStatsReceiver(StatsReceiver):Server"></a>
       <span class="permalink">
@@ -1207,11 +1322,11 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
-(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
+(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
 (default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.Server#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

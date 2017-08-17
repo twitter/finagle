@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -198,9 +198,9 @@ Stack." href="LoadBalancerFactory$.html">
       
       <p class="shortcomment cmt">Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
-<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>. This is mixed in by default into Finagle's <span class="extype" name="StackClient">StackClient</span>. The only
-necessary configuration is a <a href="LoadBalancerFactory$$Dest.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Dest">Dest</a> which represents a changing collection of
-addresses that is load balanced over.
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>. This is mixed in by default into Finagle's <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.
+The only necessary configuration is a <a href="LoadBalancerFactory$$Dest.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Dest">LoadBalancerFactory.Dest</a> which
+represents a changing collection of addresses that is load balanced over.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <a class="object" href="LoadBalancerFactory$$AddressOrdering$.html" title=""></a>
@@ -255,6 +255,14 @@ com.twitter.finagle.loadbalancer.LoadBalancerFactory."></a>
                         <a href="LoadBalancerFactory$$Param.html" title="A class eligible for configuring a com.twitter.finagle.Stackable
 com.twitter.finagle.loadbalancer.LoadBalancerFactory.">
                           Param
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="LoadBalancerFactory$$WhenNoNodesOpenParam$.html" title=""></a>
+                        <a class="class" href="LoadBalancerFactory$$WhenNoNodesOpenParam.html" title="A class eligible for configuring the LoadBalancerFactory behavior
+when the balancer does not find a node with Status.Open."></a>
+                        <a href="LoadBalancerFactory$$WhenNoNodesOpenParam.html" title="A class eligible for configuring the LoadBalancerFactory behavior
+when the balancer does not find a node with Status.Open.">
+                          WhenNoNodesOpenParam
                         </a>
                       </li>
               </ul>

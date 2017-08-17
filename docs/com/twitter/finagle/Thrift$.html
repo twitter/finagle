@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -861,31 +825,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1240,12 +1179,6 @@ factories in one (when available).">
                           ConnectionRefusedException
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Deadline$.html" title=""></a>
-                        <a class="class" href="Deadline.html" title=""></a>
-                        <a href="Deadline.html" title="">
-                          Deadline
-                        </a>
-                      </li><li class="current-entities indented3">
                         <a class="object" href="Dentry$.html" title=""></a>
                         <a class="class" href="Dentry.html" title="Trait Dentry describes a delegation table entry."></a>
                         <a href="Dentry.html" title="Trait Dentry describes a delegation table entry.">
@@ -1321,6 +1254,14 @@ handling of a request.">
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="trait" href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler)."></a>
+                        <a href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler).">
+                          FinagleInit
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
 and does not poll for updates."></a>
                         <a href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
@@ -1382,12 +1323,6 @@ some server.">
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">
                           InetResolver
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="object" href="Kestrel$.html" title=""></a>
-                        <a href="Kestrel$.html" title="">
-                          Kestrel
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1536,6 +1471,12 @@ hierarchically-addressed object.">
                         <a class="trait" href="ProxyAnnouncement.html" title=""></a>
                         <a href="ProxyAnnouncement.html" title="">
                           ProxyAnnouncement
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request."></a>
+                        <a href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request.">
+                          ProxyConnectException
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1720,6 +1661,18 @@ with a server at a given remoteAddress.">
                           SslHostVerificationException
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate."></a>
+                        <a href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate.">
+                          SslVerificationFailedException
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Stack$.html" title=""></a>
                         <a class="trait" href="Stack.html" title="Stacks represent stackable elements of type T."></a>
                         <a href="Stack.html" title="Stacks represent stackable elements of type T.">
@@ -1730,6 +1683,12 @@ with a server at a given remoteAddress.">
                         <a class="class" href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks."></a>
                         <a href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks.">
                           StackBuilder
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API."></a>
+                        <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">
+                          StackParams
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1904,7 +1863,7 @@ both framed and buffered transports. Finagle attempts to upgrade
 the protocol in order to ship an extra envelope carrying trace IDs
 and client IDs associated with the request. These are used by
 Finagle's tracing facilities and may be collected via aggregators
-like <a href="http://twitter.github.com/zipkin/" target="_blank">Zipkin</a>.</p><p>The negotiation is simple: on connection establishment, an
+like <a href="https://github.com/openzipkin/zipkin" target="_blank">Zipkin</a>.</p><p>The negotiation is simple: on connection establishment, an
 improbably-named method is dispatched on the server. If that
 method isn't found, we are dealing with a legacy thrift server,
 and the standard protocol is used. If the remote server is also a
@@ -1981,7 +1940,7 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
       <span class="symbol">
         <a title="A ThriftMux com.twitter.finagle.Client." href="Thrift$$Client.html">
               <span class="name">Client</span>
-            </a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]] = <span class="symbol"><span class="name"><a href="Thrift$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackClient.defaultParams + ProtocolLibrary(&quot;thrift&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]] = <span class="symbol"><span class="name"><a href="Thrift$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Thrift$$Client$.html">Client.params</a></span></span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A ThriftMux <code>com.twitter.finagle.Client</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A ThriftMux <code>com.twitter.finagle.Client</code>.
@@ -2000,41 +1959,11 @@ ThriftMux.server.serveIface(<span class="lit">":*"</span>, <span class="kw">new<
       <span class="symbol">
         <a title="A ThriftMux com.twitter.finagle.Server." href="Thrift$$Server.html">
               <span class="name">Server</span>
-            </a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]] = <span class="symbol"><span class="name"><a href="Thrift$$Server$.html">Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackServer.defaultParams + ProtocolLibrary(&quot;thrift&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]] = <span class="symbol"><span class="name"><a href="Thrift$$Server$.html">Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Thrift$$Server$.html">Server.params</a></span></span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A ThriftMux <code>com.twitter.finagle.Server</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A ThriftMux <code>com.twitter.finagle.Server</code>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Protocols.html#thrift" target="_blank">Thrift</a> documentation</p></span><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Configuration.html#clients-and-servers" target="_blank">Configuration</a> documentation</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift.ThriftImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ThriftImplextendsProductwithSerializable"></a><a id="ThriftImpl:ThriftImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$.html#ThriftImplextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="The vanilla Thrift Transporter and Listener factories deviate from other protocols in
-the result of the netty pipeline: most other protocols expect to receive a framed Buf
-while vanilla thrift produces an Array[Byte]." href="Thrift$$ThriftImpl.html">
-              <span class="name">ThriftImpl</span>
-            </a><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
-the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
-while vanilla thrift produces an <code>Array[Byte]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
-the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
-while vanilla thrift produces an <code>Array[Byte]</code>. This has two related motivations. First, the
-end result needed by the thrift implementations is an <code>Array[Byte]</code>, which is relatively
-trivial to deal with and is a JVM native type so it's unnecessary to go through a <code>Buf</code>.
-By avoiding an indirection through <code>Buf</code> we can avoid an unnecessary copy in the netty4
-pipeline that would be required to ensure that the bytes were on the heap before
-entering the Finagle transport types.
-</p></div></div>
     </li></ol>
             </div>
 
@@ -2425,7 +2354,7 @@ for details on destination names.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.Thrift#protocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Thrift#protocolFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="protocolFactory:org.apache.thrift.protocol.TProtocolFactory"></a><a id="protocolFactory:TProtocolFactory"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/Thrift$.html#protocolFactory:org.apache.thrift.protocol.TProtocolFactory" title="Permalink">
@@ -2440,7 +2369,17 @@ for details on destination names.
         <span class="name">protocolFactory</span><span class="result">: <span class="extype" name="org.apache.thrift.protocol.TProtocolFactory">TProtocolFactory</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
+the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
+while vanilla thrift produces an <code>Array[Byte]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The vanilla Thrift <code>Transporter</code> and <code>Listener</code> factories deviate from other protocols in
+the result of the netty pipeline: most other protocols expect to receive a framed <code>Buf</code>
+while vanilla thrift produces an <code>Array[Byte]</code>. This has two related motivations. First, the
+end result needed by the thrift implementations is an <code>Array[Byte]</code>, which is relatively
+trivial to deal with and is a JVM native type so it's unnecessary to go through a <code>Buf</code>.
+By avoiding an indirection through <code>Buf</code> we can avoid an unnecessary copy in the netty4
+pipeline that would be required to ensure that the bytes were on the heap before
+entering the Finagle transport types.
+</p></div></div>
     </li><li name="com.twitter.finagle.Thrift#serve" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ListeningServer"></a><a id="serve(SocketAddress,ServiceFactory[Array[Byte],Array[Byte]]):ListeningServer"></a>
       <span class="permalink">
@@ -2761,24 +2700,6 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <a title="" href="Thrift$$Server$.html">
               <span class="name">Server</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.Thrift.ThriftImpl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ThriftImpl"></a><a id="ThriftImpl:ThriftImpl"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/Thrift$.html#ThriftImpl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Thrift$$ThriftImpl$.html">
-              <span class="name">ThriftImpl</span>
             </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       

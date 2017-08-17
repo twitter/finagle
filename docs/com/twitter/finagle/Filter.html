@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -861,31 +825,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1240,12 +1179,6 @@ factories in one (when available).">
                           ConnectionRefusedException
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Deadline$.html" title=""></a>
-                        <a class="class" href="Deadline.html" title=""></a>
-                        <a href="Deadline.html" title="">
-                          Deadline
-                        </a>
-                      </li><li class="current-entities indented3">
                         <a class="object" href="Dentry$.html" title=""></a>
                         <a class="class" href="Dentry.html" title="Trait Dentry describes a delegation table entry."></a>
                         <a href="Dentry.html" title="Trait Dentry describes a delegation table entry.">
@@ -1321,6 +1254,14 @@ handling of a request.">
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="trait" href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler)."></a>
+                        <a href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler).">
+                          FinagleInit
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
 and does not poll for updates."></a>
                         <a href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
@@ -1382,12 +1323,6 @@ some server.">
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">
                           InetResolver
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="object" href="Kestrel$.html" title=""></a>
-                        <a href="Kestrel$.html" title="">
-                          Kestrel
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1536,6 +1471,12 @@ hierarchically-addressed object.">
                         <a class="trait" href="ProxyAnnouncement.html" title=""></a>
                         <a href="ProxyAnnouncement.html" title="">
                           ProxyAnnouncement
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request."></a>
+                        <a href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request.">
+                          ProxyConnectException
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1720,6 +1661,18 @@ with a server at a given remoteAddress.">
                           SslHostVerificationException
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate."></a>
+                        <a href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate.">
+                          SslVerificationFailedException
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Stack$.html" title=""></a>
                         <a class="trait" href="Stack.html" title="Stacks represent stackable elements of type T."></a>
                         <a href="Stack.html" title="Stacks represent stackable elements of type T.">
@@ -1730,6 +1683,12 @@ with a server at a given remoteAddress.">
                         <a class="class" href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks."></a>
                         <a href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks.">
                           StackBuilder
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API."></a>
+                        <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">
+                          StackParams
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1866,7 +1825,7 @@ request.">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Filter</span><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
+        <span class="name">Filter</span><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       </h4>
 
@@ -1886,12 +1845,12 @@ In other words, it converts a <code>Service[ReqOut, RepIn]</code> to a
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent">(<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent">(<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="MySqlClientTracingFilter$$TracingFilter$.html" class="extype" name="com.twitter.finagle.MySqlClientTracingFilter.TracingFilter">TracingFilter</a>, <a href="SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>, <a href="exp/BackupRequestFilter.html" class="extype" name="com.twitter.finagle.exp.BackupRequestFilter">BackupRequestFilter</a>, <a href="exp/DarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter">DarkTrafficFilter</a>, <a href="exp/ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>, <a href="exp/ThriftForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter">ThriftForwardingWarmUpFilter</a>, <a href="filter/DtabStatsFilter.html" class="extype" name="com.twitter.finagle.filter.DtabStatsFilter">DtabStatsFilter</a>, <a href="filter/ExceptionSourceFilter.html" class="extype" name="com.twitter.finagle.filter.ExceptionSourceFilter">ExceptionSourceFilter</a>, <a href="filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">LoggingFilter</a>, <a href="filter/MaskCancelFilter.html" class="extype" name="com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>, <a href="filter/MonitorFilter.html" class="extype" name="com.twitter.finagle.filter.MonitorFilter">MonitorFilter</a>, <a href="filter/RequestMeterFilter.html" class="extype" name="com.twitter.finagle.filter.RequestMeterFilter">RequestMeterFilter</a>, <a href="filter/RequestSemaphoreFilter.html" class="extype" name="com.twitter.finagle.filter.RequestSemaphoreFilter">RequestSemaphoreFilter</a>, <a href="http/SpnegoAuthenticator$$Client.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client">Client</a>, <a href="http/SpnegoAuthenticator$$ClientFilter.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter">ClientFilter</a>, <a href="http/SpnegoAuthenticator$$Server.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server">Server</a>, <a href="http/SpnegoAuthenticator$$ServerFilter.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ServerFilter">ServerFilter</a>, <a href="http/TlsFilter.html" class="extype" name="com.twitter.finagle.http.TlsFilter">TlsFilter</a>, <a href="http/filter/AddResponseHeadersFilter.html" class="extype" name="com.twitter.finagle.http.filter.AddResponseHeadersFilter">AddResponseHeadersFilter</a>, <a href="http/filter/Cors$$HttpFilter.html" class="extype" name="com.twitter.finagle.http.filter.Cors.HttpFilter">HttpFilter</a>, <a href="http/filter/DtabFilter.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter">DtabFilter</a>, <a href="http/filter/DtabFilter$$Extractor.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter.Extractor">Extractor</a>, <a href="http/filter/DtabFilter$$Injector.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter.Injector">Injector</a>, <a href="http/filter/ExceptionFilter.html" class="extype" name="com.twitter.finagle.http.filter.ExceptionFilter">ExceptionFilter</a>, <a href="http/filter/ExceptionFilter$.html" class="extype" name="com.twitter.finagle.http.filter.ExceptionFilter">ExceptionFilter</a>, <a href="http/filter/HeadFilter.html" class="extype" name="com.twitter.finagle.http.filter.HeadFilter">HeadFilter</a>, <a href="http/filter/HeadFilter$.html" class="extype" name="com.twitter.finagle.http.filter.HeadFilter">HeadFilter</a>, <a href="http/filter/JsonpFilter.html" class="extype" name="com.twitter.finagle.http.filter.JsonpFilter">JsonpFilter</a>, <a href="http/filter/JsonpFilter$.html" class="extype" name="com.twitter.finagle.http.filter.JsonpFilter">JsonpFilter</a>, <a href="http/filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>, <a href="http/filter/LoggingFilter$.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>, <a href="http/filter/MethodRequiredFilter.html" class="extype" name="com.twitter.finagle.http.filter.MethodRequiredFilter">MethodRequiredFilter</a>, <a href="http/filter/MethodRequiredFilter$.html" class="extype" name="com.twitter.finagle.http.filter.MethodRequiredFilter">MethodRequiredFilter</a>, <a href="http/filter/StatsFilter.html" class="extype" name="com.twitter.finagle.http.filter.StatsFilter">StatsFilter</a>, <a href="service/OptionallyServableFilter.html" class="extype" name="com.twitter.finagle.service.OptionallyServableFilter">OptionallyServableFilter</a>, <a href="service/RateLimitingFilter.html" class="extype" name="com.twitter.finagle.service.RateLimitingFilter">RateLimitingFilter</a>, <a href="service/RetryExceptionsFilter.html" class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter">RetryExceptionsFilter</a>, <a href="service/RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a>, <a href="service/StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">StatsFilter</a>, <a href="service/TimeoutFilter.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter">TimeoutFilter</a>, <a href="thrift/ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">ClientIdRequiredFilter</a>, <a href="thrift/SeqIdFilter.html" class="extype" name="com.twitter.finagle.thrift.SeqIdFilter">SeqIdFilter</a>, <a href="tracing/AnnotatingTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.AnnotatingTracingFilter">AnnotatingTracingFilter</a>, <a href="tracing/ClientDestTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter">ClientDestTracingFilter</a>, <a href="tracing/ClientRequestTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientRequestTracingFilter">ClientRequestTracingFilter</a>, <a href="tracing/ClientTracingFilter$$TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientTracingFilter.TracingFilter">TracingFilter</a>, <a href="tracing/ServerTracingFilter$$TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ServerTracingFilter.TracingFilter">TracingFilter</a>, <a href="tracing/TraceInitializerFilter.html" class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter">TraceInitializerFilter</a>, <a href="http/filter/ValidateRequestFilter.html" class="extype" name="com.twitter.finagle.http.filter.ValidateRequestFilter">ValidateRequestFilter</a>, <a href="http/filter/ValidateRequestFilter$.html" class="extype" name="com.twitter.finagle.http.filter.ValidateRequestFilter">ValidateRequestFilter</a></div>
+            <div class="subClasses hiddenContent"><a href="MySqlClientTracingFilter$$TracingFilter$.html" class="extype" name="com.twitter.finagle.MySqlClientTracingFilter.TracingFilter">TracingFilter</a>, <a href="SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>, <a href="exp/BackupRequestFilter.html" class="extype" name="com.twitter.finagle.exp.BackupRequestFilter">BackupRequestFilter</a>, <a href="exp/DarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter">DarkTrafficFilter</a>, <a href="exp/ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>, <a href="exp/ThriftForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter">ThriftForwardingWarmUpFilter</a>, <a href="filter/DtabStatsFilter.html" class="extype" name="com.twitter.finagle.filter.DtabStatsFilter">DtabStatsFilter</a>, <a href="filter/ExceptionSourceFilter.html" class="extype" name="com.twitter.finagle.filter.ExceptionSourceFilter">ExceptionSourceFilter</a>, <a href="filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">LoggingFilter</a>, <a href="filter/MaskCancelFilter.html" class="extype" name="com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>, <a href="filter/MonitorFilter.html" class="extype" name="com.twitter.finagle.filter.MonitorFilter">MonitorFilter</a>, <a href="filter/RequestMeterFilter.html" class="extype" name="com.twitter.finagle.filter.RequestMeterFilter">RequestMeterFilter</a>, <a href="filter/RequestSemaphoreFilter.html" class="extype" name="com.twitter.finagle.filter.RequestSemaphoreFilter">RequestSemaphoreFilter</a>, <a href="http/SpnegoAuthenticator$$Client.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Client">Client</a>, <a href="http/SpnegoAuthenticator$$ClientFilter.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ClientFilter">ClientFilter</a>, <a href="http/SpnegoAuthenticator$$Server.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.Server">Server</a>, <a href="http/SpnegoAuthenticator$$ServerFilter.html" class="extype" name="com.twitter.finagle.http.SpnegoAuthenticator.ServerFilter">ServerFilter</a>, <a href="http/TlsFilter.html" class="extype" name="com.twitter.finagle.http.TlsFilter">TlsFilter</a>, <a href="http/filter/AddResponseHeadersFilter.html" class="extype" name="com.twitter.finagle.http.filter.AddResponseHeadersFilter">AddResponseHeadersFilter</a>, <a href="http/filter/Cors$$HttpFilter.html" class="extype" name="com.twitter.finagle.http.filter.Cors.HttpFilter">HttpFilter</a>, <a href="http/filter/DtabFilter.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter">DtabFilter</a>, <a href="http/filter/DtabFilter$$Extractor.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter.Extractor">Extractor</a>, <a href="http/filter/DtabFilter$$Injector.html" class="extype" name="com.twitter.finagle.http.filter.DtabFilter.Injector">Injector</a>, <a href="http/filter/ExceptionFilter.html" class="extype" name="com.twitter.finagle.http.filter.ExceptionFilter">ExceptionFilter</a>, <a href="http/filter/ExceptionFilter$.html" class="extype" name="com.twitter.finagle.http.filter.ExceptionFilter">ExceptionFilter</a>, <a href="http/filter/HeadFilter.html" class="extype" name="com.twitter.finagle.http.filter.HeadFilter">HeadFilter</a>, <a href="http/filter/HeadFilter$.html" class="extype" name="com.twitter.finagle.http.filter.HeadFilter">HeadFilter</a>, <a href="http/filter/JsonpFilter.html" class="extype" name="com.twitter.finagle.http.filter.JsonpFilter">JsonpFilter</a>, <a href="http/filter/JsonpFilter$.html" class="extype" name="com.twitter.finagle.http.filter.JsonpFilter">JsonpFilter</a>, <a href="http/filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>, <a href="http/filter/LoggingFilter$.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>, <a href="http/filter/MethodRequiredFilter.html" class="extype" name="com.twitter.finagle.http.filter.MethodRequiredFilter">MethodRequiredFilter</a>, <a href="http/filter/MethodRequiredFilter$.html" class="extype" name="com.twitter.finagle.http.filter.MethodRequiredFilter">MethodRequiredFilter</a>, <a href="http/filter/StatsFilter.html" class="extype" name="com.twitter.finagle.http.filter.StatsFilter">StatsFilter</a>, <a href="service/OptionallyServableFilter.html" class="extype" name="com.twitter.finagle.service.OptionallyServableFilter">OptionallyServableFilter</a>, <a href="service/RateLimitingFilter.html" class="extype" name="com.twitter.finagle.service.RateLimitingFilter">RateLimitingFilter</a>, <a href="service/RetryExceptionsFilter.html" class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter">RetryExceptionsFilter</a>, <a href="service/RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a>, <a href="service/StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">StatsFilter</a>, <a href="service/TimeoutFilter.html" class="extype" name="com.twitter.finagle.service.TimeoutFilter">TimeoutFilter</a>, <a href="thrift/ClientIdRequiredFilter.html" class="extype" name="com.twitter.finagle.thrift.ClientIdRequiredFilter">ClientIdRequiredFilter</a>, <a href="thrift/SeqIdFilter.html" class="extype" name="com.twitter.finagle.thrift.SeqIdFilter">SeqIdFilter</a>, <a href="tracing/AnnotatingTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.AnnotatingTracingFilter">AnnotatingTracingFilter</a>, <a href="tracing/ClientDestTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientDestTracingFilter">ClientDestTracingFilter</a>, <a href="tracing/ClientRequestTracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientRequestTracingFilter">ClientRequestTracingFilter</a>, <a href="tracing/ClientTracingFilter$$TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ClientTracingFilter.TracingFilter">TracingFilter</a>, <a href="tracing/ServerTracingFilter$$TracingFilter.html" class="extype" name="com.twitter.finagle.tracing.ServerTracingFilter.TracingFilter">TracingFilter</a>, <a href="tracing/TraceInitializerFilter.html" class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter">TraceInitializerFilter</a></div>
           </div></div>
         
 
@@ -1972,7 +1931,7 @@ In other words, it converts a <code>Service[ReqOut, RepIn]</code> to a
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Filter.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Filter.
@@ -2167,7 +2126,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>) ⇒ (<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
+        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>) ⇒ (<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -2368,7 +2327,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>])) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
+        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>])) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -2452,7 +2411,7 @@ on a configuration file, for instance.
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.Function2">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

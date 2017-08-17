@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -892,12 +856,10 @@ com.twitter.finagle.util.LoadService mechanism.">
                           HostStatsReceiver
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ImmediateMetricsStatsReceiver$.html" title=""></a>
-                        <a class="class" href="ImmediateMetricsStatsReceiver.html" title="This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram."></a>
-                        <a href="ImmediateMetricsStatsReceiver.html" title="This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram.">
-                          ImmediateMetricsStatsReceiver
+                        <span class="separator"></span>
+                        <a class="object" href="ImmediateMetricsHistogram$.html" title=""></a>
+                        <a href="ImmediateMetricsHistogram$.html" title="">
+                          ImmediateMetricsHistogram
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -913,8 +875,10 @@ but ApproximateHistogram.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="JsonExporter$.html" title=""></a>
-                        <a class="class" href="JsonExporter.html" title=""></a>
-                        <a href="JsonExporter.html" title="">
+                        <a class="class" href="JsonExporter.html" title="A Finagle HTTP service that exports Metrics (available via MetricsView)
+in a JSON format."></a>
+                        <a href="JsonExporter.html" title="A Finagle HTTP service that exports Metrics (available via MetricsView)
+in a JSON format.">
                           JsonExporter
                         </a>
                       </li><li class="current-entities indented4">
@@ -935,9 +899,25 @@ all service-loadable receivers and broadcasts stats to them.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of
+the values are taken every latchPeriod and that value is returned
+for rest of latchPeriod."></a>
+                        <a href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of
+the values are taken every latchPeriod and that value is returned
+for rest of latchPeriod.">
+                          MetricsBucketedHistogram
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="MetricsExporter.html" title=""></a>
                         <a href="MetricsExporter.html" title="">
                           MetricsExporter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting."></a>
+                        <a href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting.">
+                          MetricsHistogram
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -947,29 +927,23 @@ all service-loadable receivers and broadcasts stats to them.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MetricsStatsReceiver$.html" title=""></a>
-                        <a class="class" href="MetricsStatsReceiver.html" title="This implementation of StatsReceiver uses the com.twitter.common.metrics library under
-the hood."></a>
-                        <a href="MetricsStatsReceiver.html" title="This implementation of StatsReceiver uses the com.twitter.common.metrics library under
-the hood.">
+                        <a class="class" href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead."></a>
+                        <a href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead.">
                           MetricsStatsReceiver
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="OstrichExporter.html" title=""></a>
-                        <a href="OstrichExporter.html" title="">
-                          OstrichExporter
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="OstrichStatsReceiver.html" title=""></a>
-                        <a href="OstrichStatsReceiver.html" title="">
-                          OstrichStatsReceiver
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver."></a>
                         <a href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver.">
                           ServerStatsReceiver
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Snapshot$.html" title=""></a>
+                        <a class="trait" href="Snapshot.html" title="A snapshot of the state of the underlying stat."></a>
+                        <a href="Snapshot.html" title="A snapshot of the state of the underlying stat.">
+                          Snapshot
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -1001,12 +975,6 @@ be no interesting data there.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ostrichFilterRegex$.html" title=""></a>
-                        <a href="ostrichFilterRegex$.html" title="">
-                          ostrichFilterRegex
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="scopeSeparator$.html" title=""></a>
                         <a href="scopeSeparator$.html" title="">
                           scopeSeparator
@@ -1029,32 +997,7 @@ be no interesting data there.">
                         <a href="useCounterDeltas$.html" title="">
                           useCounterDeltas
                         </a>
-                      </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                      </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/index.html#thrift" title="Permalink">
@@ -1331,34 +1274,11 @@ generator.
       <span class="symbol">
         <a title="A StatsReceiver type that's used for per host stats only." href="HostStatsReceiver.html">
               <span class="name">HostStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       
       <p class="shortcomment cmt">A StatsReceiver type that's used for per host stats only.</p><div class="fullcomment"><div class="comment cmt"><p>A StatsReceiver type that's used for per host stats only. The underlying
 implementation can be any StatsReceiver. The type is used as a marker.
-</p></div></div>
-    </li><li name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ImmediateMetricsStatsReceiverextendsMetricsStatsReceiver"></a><a id="ImmediateMetricsStatsReceiver:ImmediateMetricsStatsReceiver"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#ImmediateMetricsStatsReceiverextendsMetricsStatsReceiver" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram." href="ImmediateMetricsStatsReceiver.html">
-              <span class="name">ImmediateMetricsStatsReceiver</span>
-            </a><span class="result"> extends <a href="MetricsStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram.</p><div class="fullcomment"><div class="comment cmt"><p>This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram.
-Any value added is immediately aggregated in the result.
 </p></div></div>
     </li><li name="com.twitter.finagle.stats.InMemoryHostStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InMemoryHostStatsReceiverextendsHostStatsReceiver"></a><a id="InMemoryHostStatsReceiver:InMemoryHostStatsReceiver"></a>
@@ -1392,11 +1312,11 @@ Any value added is immediately aggregated in the result.
       <span class="symbol">
         <a title="" href="JavaLoggerStatsReceiver.html">
               <span class="name">JavaLoggerStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       
       
-    </li><li name="com.twitter.finagle.stats.JsonExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.stats.JsonExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="JsonExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]"></a><a id="JsonExporter:JsonExporter"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/stats/index.html#JsonExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]" title="Permalink">
@@ -1408,12 +1328,44 @@ Any value added is immediately aggregated in the result.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="JsonExporter.html">
+        <a title="A Finagle HTTP service that exports Metrics (available via MetricsView)
+in a JSON format." href="JsonExporter.html">
               <span class="name">JsonExporter</span>
             </a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
+      <p class="shortcomment cmt">A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
+in a JSON format.</p><div class="fullcomment"><div class="comment cmt"><p>A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
+in a JSON format.</p><p>This service respects metrics <span class="extype" name="Verbosity">verbosity levels</span>: it doesn't export &quot;debug&quot;
+(i.e., <span class="extype" name="Verbosity.Debug">Verbosity.Debug</span>) metrics unless they are whitelisted via the comma-separated
+<code>verbose</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.stats.MetricsBucketedHistogram" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MetricsBucketedHistogramextendsMetricsHistogram"></a><a id="MetricsBucketedHistogram:MetricsBucketedHistogram"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#MetricsBucketedHistogramextendsMetricsHistogram" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A MetricsHistogram that is latched such that a snapshot of
+the values are taken every latchPeriod and that value is returned
+for rest of latchPeriod." href="MetricsBucketedHistogram.html">
+              <span class="name">MetricsBucketedHistogram</span>
+            </a><span class="result"> extends <a href="MetricsHistogram.html" class="extype" name="com.twitter.finagle.stats.MetricsHistogram">MetricsHistogram</a></span>
+      </span>
       
+      <p class="shortcomment cmt">A <a href="MetricsHistogram.html" class="extype" name="com.twitter.finagle.stats.MetricsHistogram">MetricsHistogram</a> that is latched such that a snapshot of
+the values are taken every <code>latchPeriod</code> and that value is returned
+for rest of <code>latchPeriod</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="MetricsHistogram.html" class="extype" name="com.twitter.finagle.stats.MetricsHistogram">MetricsHistogram</a> that is latched such that a snapshot of
+the values are taken every <code>latchPeriod</code> and that value is returned
+for rest of <code>latchPeriod</code>. This gives pull based collectors a
+simple way to get consistent results.</p><p>This is safe to use from multiple threads.
+</p></div></div>
     </li><li name="com.twitter.finagle.stats.MetricsExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MetricsExporterextendsJsonExporterwithHttpMuxHandlerwithMetricsRegistry"></a><a id="MetricsExporter:MetricsExporter"></a>
       <span class="permalink">
@@ -1432,6 +1384,25 @@ Any value added is immediately aggregated in the result.
       </span>
       
       
+    </li><li name="com.twitter.finagle.stats.MetricsHistogram" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="MetricsHistogramextendsAnyRef"></a><a id="MetricsHistogram:MetricsHistogram"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#MetricsHistogramextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A histogram that supports writing, querying, and resetting." href="MetricsHistogram.html">
+              <span class="name">MetricsHistogram</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A histogram that supports writing, querying, and resetting.</p><div class="fullcomment"><div class="comment cmt"><p>A histogram that supports writing, querying, and resetting.</p><p>This API is too powerful for normal usage, but is useful for implementors.
+</p></div></div>
     </li><li name="com.twitter.finagle.stats.MetricsHostStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MetricsHostStatsReceiverextendsHostStatsReceiver"></a><a id="MetricsHostStatsReceiver:MetricsHostStatsReceiver"></a>
       <span class="permalink">
@@ -1451,9 +1422,9 @@ Any value added is immediately aggregated in the result.
       
       
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MetricsStatsReceiverextendsWithHistogramDetailswithStatsReceiverWithCumulativeGauges"></a><a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
+      <a id="MetricsStatsReceiverextendsStatsReceiverWithCumulativeGaugeswithWithHistogramDetails"></a><a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#MetricsStatsReceiverextendsWithHistogramDetailswithStatsReceiverWithCumulativeGauges" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#MetricsStatsReceiverextendsStatsReceiverWithCumulativeGaugeswithWithHistogramDetails" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1462,55 +1433,36 @@ Any value added is immediately aggregated in the result.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="This implementation of StatsReceiver uses the com.twitter.common.metrics library under
-the hood." href="MetricsStatsReceiver.html">
+        <a title="The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead." href="MetricsStatsReceiver.html">
               <span class="name">MetricsStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.WithHistogramDetails" class="extype" target="_top">WithHistogramDetails</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span> with <span class="extype" name="com.twitter.finagle.stats.WithHistogramDetails">WithHistogramDetails</span></span>
       </span>
       
-      <p class="shortcomment cmt">This implementation of StatsReceiver uses the <span class="extype" name="com.twitter.common.metrics">com.twitter.common.metrics</span> library under
-the hood.</p><div class="fullcomment"><div class="comment cmt"><p>This implementation of StatsReceiver uses the <span class="extype" name="com.twitter.common.metrics">com.twitter.common.metrics</span> library under
-the hood.</p><p>Note: Histogram uses <span class="extype" name="com.twitter.common.stats.WindowedApproxHistogram">com.twitter.common.stats.WindowedApproxHistogram</span> under the hood.
-It is (by default) configured to store events in a 80 seconds moving window, reporting
-metrics on the first 60 seconds. It means that when you add a value, you need to wait at most
-20 seconds before this value will be aggregated in the exported metrics.
+      <p class="shortcomment cmt">The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead.</p><div class="fullcomment"><div class="comment cmt"><p>The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead.</p><p>Note: Histogram is configured to store events in 60 second snapshots.  It
+means that when you add a value, you need to wait at most 20 seconds before
+this value will be aggregated in the exported metrics.
 </p></div></div>
-    </li><li name="com.twitter.finagle.stats.OstrichExporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OstrichExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withHttpMuxHandler"></a><a id="OstrichExporter:OstrichExporter"></a>
+    </li><li name="com.twitter.finagle.stats.Snapshot" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SnapshotextendsAnyRef"></a><a id="Snapshot:Snapshot"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#OstrichExporterextendsService[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]withHttpMuxHandler" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#SnapshotextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="OstrichExporter.html">
-              <span class="name">OstrichExporter</span>
-            </a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>] with <a href="../http/HttpMuxHandler.html" class="extype" name="com.twitter.finagle.http.HttpMuxHandler">HttpMuxHandler</a></span>
+        <a title="A snapshot of the state of the underlying stat." href="Snapshot.html">
+              <span class="name">Snapshot</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      
-    </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OstrichStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a><a id="OstrichStatsReceiver:OstrichStatsReceiver"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#OstrichStatsReceiverextendsStatsReceiverWithCumulativeGauges" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="OstrichStatsReceiver.html">
-              <span class="name">OstrichStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
-      </span>
-      
-      
+      <p class="shortcomment cmt">A snapshot of the state of the underlying stat.</p>
     </li><li name="com.twitter.finagle.stats.SummarizingStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SummarizingStatsReceiverextendsStatsReceiverWithCumulativeGauges"></a><a id="SummarizingStatsReceiver:SummarizingStatsReceiver"></a>
       <span class="permalink">
@@ -1525,7 +1477,7 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <a title="" href="SummarizingStatsReceiver.html">
               <span class="name">SummarizingStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges">StatsReceiverWithCumulativeGauges</span></span>
       </span>
       
       
@@ -1569,7 +1521,7 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <a title="A client-specific StatsReceiver." href="ClientStatsReceiver$.html">
               <span class="name">ClientStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       
       <p class="shortcomment cmt">A client-specific StatsReceiver.</p><div class="fullcomment"><div class="comment cmt"><p>A client-specific StatsReceiver. All stats recorded using this receiver
@@ -1590,15 +1542,15 @@ are prefixed with the string &quot;clnt&quot; by default.
         <a title="A &quot;default&quot; StatsReceiver loaded by Finagle's
 com.twitter.finagle.util.LoadService mechanism." href="DefaultStatsReceiver$.html">
               <span class="name">DefaultStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       
       <p class="shortcomment cmt">A &quot;default&quot; StatsReceiver loaded by Finagle's
 <a href="../util/LoadService$.html" class="extype" name="com.twitter.finagle.util.LoadService">com.twitter.finagle.util.LoadService</a> mechanism.</p>
-    </li><li name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ImmediateMetricsStatsReceiver"></a><a id="ImmediateMetricsStatsReceiver:ImmediateMetricsStatsReceiver"></a>
+    </li><li name="com.twitter.finagle.stats.ImmediateMetricsHistogram" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImmediateMetricsHistogram"></a><a id="ImmediateMetricsHistogram:ImmediateMetricsHistogram"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#ImmediateMetricsStatsReceiver" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#ImmediateMetricsHistogram" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1607,8 +1559,8 @@ com.twitter.finagle.util.LoadService mechanism." href="DefaultStatsReceiver$.htm
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="ImmediateMetricsStatsReceiver$.html">
-              <span class="name">ImmediateMetricsStatsReceiver</span>
+        <a title="" href="ImmediateMetricsHistogram$.html">
+              <span class="name">ImmediateMetricsHistogram</span>
             </a>
       </span>
       
@@ -1684,10 +1636,10 @@ all service-loadable receivers and broadcasts stats to them.</p>
         <a title="A com.twitter.finagle.stats.StatsReceiver that loads
 all service-loadable receivers and broadcasts stats to them." href="LoadedStatsReceiver$.html">
               <span class="name">LoadedStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       
-      <p class="shortcomment cmt">A <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">com.twitter.finagle.stats.StatsReceiver</a> that loads
+      <p class="shortcomment cmt">A <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">com.twitter.finagle.stats.StatsReceiver</span> that loads
 all service-loadable receivers and broadcasts stats to them.</p>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MetricsStatsReceiver"></a><a id="MetricsStatsReceiver:MetricsStatsReceiver"></a>
@@ -1721,12 +1673,30 @@ all service-loadable receivers and broadcasts stats to them.</p>
       <span class="symbol">
         <a title="A server-specific StatsReceiver." href="ServerStatsReceiver$.html">
               <span class="name">ServerStatsReceiver</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.stats.StatsReceiverProxy">StatsReceiverProxy</span></span>
       </span>
       
       <p class="shortcomment cmt">A server-specific StatsReceiver.</p><div class="fullcomment"><div class="comment cmt"><p>A server-specific StatsReceiver. All stats recorded using this receiver
 are prefixed with the string &quot;srv&quot; by default.
 </p></div></div>
+    </li><li name="com.twitter.finagle.stats.Snapshot" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Snapshot"></a><a id="Snapshot:Snapshot"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/index.html#Snapshot" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Snapshot$.html">
+              <span class="name">Snapshot</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.stats.debugLoggedStatNames" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="debugLoggedStatNames"></a><a id="debugLoggedStatNames:debugLoggedStatNames"></a>
       <span class="permalink">
@@ -1741,7 +1711,7 @@ are prefixed with the string &quot;srv&quot; by default.
       <span class="symbol">
         <a title="" href="debugLoggedStatNames$.html">
               <span class="name">debugLoggedStatNames</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
       
       
@@ -1759,7 +1729,7 @@ are prefixed with the string &quot;srv&quot; by default.
       <span class="symbol">
         <a title="" href="format$.html">
               <span class="name">format</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       
@@ -1779,7 +1749,7 @@ are prefixed with the string &quot;srv&quot; by default.
 beneficial to not export all the histogram details as there will
 be no interesting data there." href="includeEmptyHistograms$.html">
               <span class="name">includeEmptyHistograms</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">If a histogram has no data collected (its count is 0), it can be
@@ -1790,24 +1760,6 @@ be no interesting data there. When this flag is set to <code>false</code>,
 only the <code>count=0</code> is exported. When <code>true</code>, all of the details
 will be exported.
 </p></div></div>
-    </li><li name="com.twitter.finagle.stats.ostrichFilterRegex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ostrichFilterRegex"></a><a id="ostrichFilterRegex:ostrichFilterRegex"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/index.html#ostrichFilterRegex" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ostrichFilterRegex$.html">
-              <span class="name">ostrichFilterRegex</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.stats.scopeSeparator" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="scopeSeparator"></a><a id="scopeSeparator:scopeSeparator"></a>
       <span class="permalink">
@@ -1822,7 +1774,7 @@ will be exported.
       <span class="symbol">
         <a title="" href="scopeSeparator$.html">
               <span class="name">scopeSeparator</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       
@@ -1840,7 +1792,7 @@ will be exported.
       <span class="symbol">
         <a title="Blacklist of regex, comma-separated." href="statsFilter$.html">
               <span class="name">statsFilter</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Blacklist of regex, comma-separated.</p><div class="fullcomment"><div class="comment cmt"><p>Blacklist of regex, comma-separated. Comma is a reserved character and
@@ -1860,7 +1812,7 @@ cannot be used. Used with regexes from statsFilterFile.</p><p>See http://www.sca
       <span class="symbol">
         <a title="Comma-separated blacklist of files." href="statsFilterFile$.html">
               <span class="name">statsFilterFile</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       
       <p class="shortcomment cmt">Comma-separated blacklist of files.</p><div class="fullcomment"><div class="comment cmt"><p>Comma-separated blacklist of files. Each file may have multiple filters,
@@ -1880,7 +1832,7 @@ separated by new lines. Used with regexes from statsFilter.</p><p>See http://www
       <span class="symbol">
         <a title="" href="useCounterDeltas$.html">
               <span class="name">useCounterDeltas</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       
       

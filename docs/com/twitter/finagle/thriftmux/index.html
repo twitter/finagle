@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -861,31 +825,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -960,9 +899,13 @@ generator.
       
       
     </li><li class="current-entities indented4">
-                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
-                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
-                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                        <a class="object" href="MethodBuilder$.html" title=""></a>
+                        <a class="class" href="MethodBuilder.html" title=" * MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder."></a>
+                        <a href="MethodBuilder.html" title=" * MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder.">
                           MethodBuilder
                         </a>
                       </li><li name="com.twitter.finagle.toggle" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1148,14 +1091,27 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Experimental: This API is under construction." href="MethodBuilder.html">
+        <a title=" * MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder." href="MethodBuilder.html">
               <span class="name">MethodBuilder</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.finagle.client.MethodBuilderScaladoc">MethodBuilderScaladoc</span>[<a href="MethodBuilder.html" class="extype" name="com.twitter.finagle.thriftmux.MethodBuilder">MethodBuilder</a>]</span>
       </span>
       
-      <p class="shortcomment cmt"><b>Experimental:</b> This API is under construction.</p><div class="fullcomment"><div class="comment cmt"><p><b>Experimental:</b> This API is under construction.
-</p></div><dl class="attributes block"> <div class="block">Example:
-               <ol><li class="cmt"><p>Given an example IDL:</p><pre>exception AnException {
+      <p class="shortcomment cmt"> * <code>MethodBuilder</code> is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+<span class="extype" name="ClientBuilder">ClientBuilder</span>.</p><div class="fullcomment"><div class="comment cmt"><p> * <code>MethodBuilder</code> is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+<span class="extype" name="ClientBuilder">ClientBuilder</span>. <code>MethodBuilder</code> provides:</p><ul><li>Logical success rate metrics.</li><li>Retries based on application-level requests and responses (e.g. a code in
+   the Thrift response).</li><li>Configuration of per-attempt and total timeouts.</li></ul><p>All of these can be customized per method (or endpoint) while sharing a single
+underlying Finagle client. Concretely, a single service might offer both
+<code>getOneTweet</code> as well as <code>deleteTweets</code>, whilst each having
+wildly different characteristics. The get is idempotent and has a tight latency
+distribution while the delete is not idempotent and has a wide latency
+distribution. If users want different configurations, without <code>MethodBuilder</code>
+they must create separate Finagle clients for each grouping. While long-lived
+clients in Finagle are not expensive, they are not free. They create
+duplicate metrics and waste heap, file descriptors, and CPU.</p><h3> Example </h3><p>Given an example IDL:</p><pre>exception AnException {
   <span class="num">1</span>: i32 errorCode
 }
 
@@ -1181,9 +1137,37 @@ service SomeService {
         ResponseClass.RetryableFailure
     }
     .newServiceIface(<span class="lit">"the_method"</span>)
-    .theMethod</pre></li></ol>
-            </div><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>
-     and <span class="extype" name="client.MethodBuilderScaladoc">client.MethodBuilderScaladoc</span> for documentation.</p></span><span class="cmt"><p><a href="../ThriftMux$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.ThriftMux.Client#methodBuilder">com.twitter.finagle.ThriftMux.Client.methodBuilder</a> to construct instances.</p></span></dd></dl></div>
+    .theMethod</pre><h3> Timeouts </h3><p>Defaults to using the StackClient's configuration.</p><p>An example of setting a per-request timeout of 50 milliseconds and a total
+timeout of 100 milliseconds:</p><pre><span class="kw">import</span> com.twitter.conversions.time._
+<span class="kw">import</span> com.twitter.finagle.thriftmux.MethodBuilder
+
+<span class="kw">val</span> builder: MethodBuilder = ???
+builder
+  .withTimeoutPerRequest(<span class="num">50.</span>milliseconds)
+  .withTimeoutTotal(<span class="num">100.</span>milliseconds)</pre><h3> Retries </h3><p>Retries are intended to help clients improve success rate by trying
+failed requests additional times. Care must be taken by developers
+to only retry when it is known to be safe to issue the request multiple
+times. This is because the client cannot always be sure what the
+backend service has done. An example of a request that is safe to
+retry would be a read-only request.</p><p>Defaults to using the client's <span class="extype" name="ResponseClassifier">ResponseClassifier</span> to retry failures
+<a href="../service/ResponseClass$.html#RetryableFailure:com.twitter.finagle.service.ResponseClass.Failed" class="extmbr" name="com.twitter.finagle.service.ResponseClass#RetryableFailure">marked as retryable</a>.
+See <a href="MethodBuilder.html#withRetryForClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.thriftmux.MethodBuilder#withRetryForClassifier">withRetryForClassifier</a> for details.</p><p>A <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">com.twitter.finagle.service.RetryBudget</a> is used to prevent retries from overwhelming
+the backend service. The budget is shared across clients created from
+an initial <code>MethodBuilder</code>. As such, even if the retry rules
+deem the request retryable, it may not be retried if there is insufficient
+budget.</p><p>Finagle will automatically retry failures that are known to be safe
+to retry via <span class="extype" name="com.twitter.finagle.service.RequeueFilter">com.twitter.finagle.service.RequeueFilter</span>. This includes
+<a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteExceptions</a> and
+<a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">retryable nacks</a>. As these should have
+already been retried, we avoid retrying them again by ignoring them at this layer.</p><p>Additional information regarding retries can be found in the
+<a href="https://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">user guide</a>.</p><p>The classifier is also used to determine the logical success metrics of
+the client. Logical here means after any retries are run. For example
+should a request result in retryable failure on the first attempt, but
+succeed upon retry, this is exposed through metrics as a success.
+Logical success rate metrics are scoped to
+&quot;clnt/your_client_label/method_name/logical&quot; and get &quot;success&quot; and
+&quot;requests&quot; counters along with a &quot;request_latency_ms&quot; stat.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">user guide</a>.</p></span><span class="cmt"><p><a href="../ThriftMux$$Client.html#methodBuilder(dest:com.twitter.finagle.Name):com.twitter.finagle.thriftmux.MethodBuilder" class="extmbr" name="com.twitter.finagle.ThriftMux.Client#methodBuilder">com.twitter.finagle.ThriftMux.Client.methodBuilder</a> to construct instances.</p></span></dd></dl></div>
     </li></ol>
             </div>
 
@@ -1204,12 +1188,12 @@ service SomeService {
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Experimental: This API is under construction." href="MethodBuilder$.html">
+        <a title="" href="MethodBuilder$.html">
               <span class="name">MethodBuilder</span>
             </a>
       </span>
       
-      <p class="shortcomment cmt"><b>Experimental:</b> This API is under construction.</p>
+      
     </li>
               </ol>
             </div>

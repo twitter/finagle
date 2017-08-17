@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -193,12 +193,6 @@ resources for using Finagle.
                           ClientConfigEvidence
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Cluster$.html" title=""></a>
-                        <a class="trait" href="Cluster.html" title="Cluster is a collection of servers."></a>
-                        <a href="Cluster.html" title="Cluster is a collection of servers.">
-                          Cluster
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">
@@ -221,12 +215,6 @@ a port).">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerBuildertoTwitterService.html" title=""></a>
-                        <a href="ServerBuildertoTwitterService.html" title="">
-                          ServerBuildertoTwitterService
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerConfig$.html" title=""></a>
                         <a href="ServerConfig$.html" title="">
                           ServerConfig
@@ -242,12 +230,6 @@ a port).">
                         <a class="class" href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any"></a>
                         <a href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any">
                           SourceTrackingMonitor
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StaticCluster.html" title="A simple static cluster implementation."></a>
-                        <a href="StaticCluster.html" title="A simple static cluster implementation.">
-                          StaticCluster
                         </a>
                       </li>
               </ul>
@@ -284,12 +266,12 @@ a port).  This class is subclassable. Override copy() and build()
 to do your own dirty work.</p><p>Please see the
 <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
 for information on the preferred <code>with</code>-style client-construction APIs.</p><p>The main class to use is <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>, as so</p><pre>ServerBuilder()
-  .codec(Http)
+  .stack(Http.server)
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
   .readTimeout(<span class="num">2.</span>minutes)
   .name(<span class="lit">"servicename"</span>)
   .bindTo(<span class="kw">new</span> InetSocketAddress(serverPort))
-  .build(plusOneService)</pre><p>The <code>ServerBuilder</code> requires the definition of <code>codec</code>, <code>bindTo</code>
+  .build(plusOneService)</pre><p>The <code>ServerBuilder</code> requires the definition of <code>stack</code>, <code>bindTo</code>
 and <code>name</code>. In Scala, these are statically type
 checked, and in Java the lack of any of the above causes a runtime
 error.</p><p>The <code>build</code> method uses an implicit argument to statically
@@ -299,7 +281,7 @@ function in Java to accomplish this. Thus, the Java code for the
 above is</p><pre>ServerBuilder.safeBuild(
  plusOneService,
  ServerBuilder.get()
-  .codec(Http)
+  .stack(Http.server())
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
   .readTimeout(<span class="num">2.</span>minutes)
   .name(<span class="lit">"servicename"</span>)
@@ -600,66 +582,6 @@ Http.server.configured(MaskCancelFilter.Param(!yesOrNo))</pre></div><dl class="a
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#codec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="codec[Req1,Rep1](codecFactory:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a><a id="codec[Req1,Rep1]((ServerCodecConfig)⇒Codec[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#codec[Req1,Rep1](codecFactory:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-ServerBuilder().stack(Http.server)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#codec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="codec[Req1,Rep1](codecFactory:com.twitter.finagle.CodecFactory[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a><a id="codec[Req1,Rep1](CodecFactory[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#codec[Req1,Rep1](codecFactory:com.twitter.finagle.CodecFactory[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-ServerBuilder().stack(Http.server)</pre></div></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#codec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="codec[Req1,Rep1](codec:com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a><a id="codec[Req1,Rep1](Codec[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#codec[Req1,Rep1](codec:com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codec">codec: <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.codec.Rep1">Rep1</span>, <a href="ServerConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ServerConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasBindTo">HasBindTo</span>, <span class="extype" name="com.twitter.finagle.builder.ServerBuilder.HasName">HasName</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>ServerBuilder.stack(Protocol.server)</code>
-instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
-
-ServerBuilder().stack(Http.server)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#configured" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="configured[P](paramAndStackParam:(P,com.twitter.finagle.Stack.Param[P])):ServerBuilder.this.This"></a><a id="configured[P]((P,Param[P])):This"></a>
       <span class="permalink">
@@ -800,7 +722,7 @@ Http.server.configured(ServerAdmissionControl.Param(enable))</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exceptionCategorizer</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">exceptionCategorizer</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">Provide an alternative to putting all request exceptions under
@@ -877,7 +799,7 @@ Http.server.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       
@@ -893,7 +815,7 @@ Http.server.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl clas
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       
@@ -1006,7 +928,7 @@ Http.server.withAdmissionControl.concurrencyLimit(<span class="num">10</span>, <
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.
@@ -1142,7 +1064,7 @@ Http.server.withLabel(<span class="lit">"my_server"</span>)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">readTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.
@@ -1180,7 +1102,7 @@ Http.server.withTransport.receiveBufferSize(value)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withStatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withStatsReceiver</code>.
@@ -1199,7 +1121,7 @@ Http.server.withStatsReceiver(receiver)</pre></div></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">requestTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">requestTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.
@@ -1336,6 +1258,44 @@ discretion of <code>server</code> itself and the protocol implementation.</p></d
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.server.withTransport.tls(...)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,engineFactory:com.twitter.finagle.ssl.server.SslServerEngineFactory,sessionVerifier:com.twitter.finagle.ssl.server.SslServerSessionVerifier):ServerBuilder.this.This"></a><a id="tls(SslServerConfiguration,SslServerEngineFactory,SslServerSessionVerifier):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,engineFactory:com.twitter.finagle.ssl.server.SslServerEngineFactory,sessionVerifier:com.twitter.finagle.ssl.server.SslServerSessionVerifier):ServerBuilder.this.This" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/server/SslServerConfiguration.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerConfiguration">SslServerConfiguration</a></span>, <span name="engineFactory">engineFactory: <a href="../ssl/server/SslServerEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerEngineFactory">SslServerEngineFactory</a></span>, <span name="sessionVerifier">sessionVerifier: <a href="../ssl/server/SslServerSessionVerifier.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerSessionVerifier">SslServerSessionVerifier</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.server.withTransport.tls(config, engineFactory, sessionVerifier)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,sessionVerifier:com.twitter.finagle.ssl.server.SslServerSessionVerifier):ServerBuilder.this.This"></a><a id="tls(SslServerConfiguration,SslServerSessionVerifier):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,sessionVerifier:com.twitter.finagle.ssl.server.SslServerSessionVerifier):ServerBuilder.this.This" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/server/SslServerConfiguration.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerConfiguration">SslServerConfiguration</a></span>, <span name="sessionVerifier">sessionVerifier: <a href="../ssl/server/SslServerSessionVerifier.html" class="extype" name="com.twitter.finagle.ssl.server.SslServerSessionVerifier">SslServerSessionVerifier</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encrypt the connection with SSL/TLS.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL/TLS.</p><p>To migrate to the Stack-based APIs, use <code>ServerTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.server.withTransport.tls(config, sessionVerifier)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(config:com.twitter.finagle.ssl.server.SslServerConfiguration,engineFactory:com.twitter.finagle.ssl.server.SslServerEngineFactory):ServerBuilder.this.This"></a><a id="tls(SslServerConfiguration,SslServerEngineFactory):This"></a>
       <span class="permalink">
@@ -1524,7 +1484,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeCompletionTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+        <span class="name">writeCompletionTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.
@@ -1619,25 +1579,6 @@ or supports transactions).
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#channelFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This"></a><a id="channelFactory(ServerChannelFactory):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2015-11-18) use com.twitter.finagle.netty3.numWorkers flag instead">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-11-18)</i> use com.twitter.finagle.netty3.numWorkers flag instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a><a id="stack[Req1,Rep1]((Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>
       <span class="permalink">
@@ -1664,44 +1605,6 @@ implementation.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use stack(server: StackBasedServer)</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#tracerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tracerFactory(t:com.twitter.finagle.tracing.Tracer):ServerBuilder.this.This"></a><a id="tracerFactory(Tracer):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tracerFactory(t:com.twitter.finagle.tracing.Tracer):ServerBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="t">t: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#tracerFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ServerBuilder.this.This"></a><a id="tracerFactory(Factory):This"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ServerBuilder.html#tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ServerBuilder.this.This" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="factory">factory: <a href="../tracing/Tracer$.html#Factory=()=&gt;com.twitter.finagle.tracing.Tracer" class="extmbr" name="com.twitter.finagle.tracing.Tracer.Factory">Factory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>

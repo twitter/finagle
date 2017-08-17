@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -286,7 +286,7 @@ resources for using Finagle.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MethodIface</span><span class="result"> extends <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>]</span>
+        <span class="name">MethodIface</span><span class="result"> extends <a href="Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface">FutureIface</a></span>
       </span>
       </h4>
 
@@ -295,7 +295,7 @@ resources for using Finagle.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>], <span class="extype" name="com.twitter.scrooge.ThriftService">ThriftService</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface">FutureIface</a>, <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>], <span class="extype" name="com.twitter.scrooge.ThriftService">ThriftService</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -321,7 +321,7 @@ resources for using Finagle.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.MethodIface"><span>MethodIface</span></li><li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe"><span>Scribe</span></li><li class="in" name="com.twitter.scrooge.ThriftService"><span>ThriftService</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.MethodIface"><span>MethodIface</span></li><li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface"><span>FutureIface</span></li><li class="in" name="com.twitter.finagle.exception.thriftscala.Scribe"><span>Scribe</span></li><li class="in" name="com.twitter.scrooge.ThriftService"><span>ThriftService</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -567,10 +567,10 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">log</span><span class="params">(<span name="messages">messages: <span class="extype" name="scala.Seq">Seq</span>[<a href="LogEntry.html" class="extype" name="com.twitter.finagle.exception.thriftscala.LogEntry">LogEntry</a>] = <span class="defval" name="Seq[com.twitter.finagle.exception.thriftscala.LogEntry]()">...</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ResultCode.html" class="extype" name="com.twitter.finagle.exception.thriftscala.ResultCode">ResultCode</a>]</span>
+        <span class="name">log</span><span class="params">(<span name="messages">messages: <span class="extype" name="scala.Seq">Seq</span>[<a href="LogEntry.html" class="extype" name="com.twitter.finagle.exception.thriftscala.LogEntry">LogEntry</a>] = <span class="defval" name="Seq[com.twitter.finagle.exception.thriftscala.LogEntry]()">...</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="ResultCode.html" class="extype" name="com.twitter.finagle.exception.thriftscala.ResultCode">ResultCode</a>]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.MethodIface">MethodIface</a> → <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.MethodIface">MethodIface</a> → <a href="Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface">FutureIface</a> → <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -727,8 +727,10 @@ resources for using Finagle.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.exception.thriftscala.Scribe">
-              <h3>Inherited from <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>]</h3>
+        <div class="parent" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface">
+              <h3>Inherited from <a href="Scribe$$FutureIface.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe.FutureIface">FutureIface</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.exception.thriftscala.Scribe">
+              <h3>Inherited from <a href="Scribe.html" class="extype" name="com.twitter.finagle.exception.thriftscala.Scribe">Scribe</a>[<span class="extype" name="com.twitter.util.Future">Future</span>]</h3>
             </div><div class="parent" name="com.twitter.scrooge.ThriftService">
               <h3>Inherited from <span class="extype" name="com.twitter.scrooge.ThriftService">ThriftService</span></h3>
             </div><div class="parent" name="scala.AnyRef">

@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -220,6 +220,16 @@ Engines for use with TLS."></a>
                         <a href="SslClientEngineFactory.html" title="Instances of this class provide a method to create Finagle
 Engines for use with TLS.">
                           SslClientEngineFactory
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <a class="object" href="SslClientSessionVerifier$.html" title=""></a>
+                        <a class="class" href="SslClientSessionVerifier.html" title="SslClientSessionVerifier represents an opportunity for a user or system
+to perform additional client-side verification checks against an address,
+configuration, or session."></a>
+                        <a href="SslClientSessionVerifier.html" title="SslClientSessionVerifier represents an opportunity for a user or system
+to perform additional client-side verification checks against an address,
+configuration, or session.">
+                          SslClientSessionVerifier
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
@@ -389,6 +399,32 @@ Engines for use with TLS." href="SslClientEngineFactory.html">
       
       <p class="shortcomment cmt">Instances of this class provide a method to create Finagle
 <a href="../Engine.html" class="extype" name="com.twitter.finagle.ssl.Engine">Engines</a> for use with TLS.</p>
+    </li><li name="com.twitter.finagle.ssl.client.SslClientSessionVerifier" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SslClientSessionVerifierextendsAnyRef"></a><a id="SslClientSessionVerifier:SslClientSessionVerifier"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#SslClientSessionVerifierextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="SslClientSessionVerifier represents an opportunity for a user or system
+to perform additional client-side verification checks against an address,
+configuration, or session." href="SslClientSessionVerifier.html">
+              <span class="name">SslClientSessionVerifier</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">SslClientSessionVerifier represents an opportunity for a user or system
+to perform additional client-side verification checks against an address,
+configuration, or session.</p><div class="fullcomment"><div class="comment cmt"><p>SslClientSessionVerifier represents an opportunity for a user or system
+to perform additional client-side verification checks against an address,
+configuration, or session. The <code>apply</code> method of the verifier is called
+when an <code>SSLSession</code> has been established.
+</p></div></div>
     </li><li name="com.twitter.finagle.ssl.client.SslContextClientEngineFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SslContextClientEngineFactoryextendsSslClientEngineFactory"></a><a id="SslContextClientEngineFactory:SslContextClientEngineFactory"></a>
       <span class="permalink">
@@ -451,6 +487,24 @@ coverage for a wide array of configurations.</p>
       <span class="symbol">
         <a title="" href="SslClientEngineFactory$.html">
               <span class="name">SslClientEngineFactory</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.ssl.client.SslClientSessionVerifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslClientSessionVerifier"></a><a id="SslClientSessionVerifier:SslClientSessionVerifier"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/ssl/client/index.html#SslClientSessionVerifier" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SslClientSessionVerifier$.html">
+              <span class="name">SslClientSessionVerifier</span>
             </a>
       </span>
       

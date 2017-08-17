@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -248,24 +248,6 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transport"></a><a id="transport:transport"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#transport" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="transport/index.html">
-              <span class="name">transport</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <a class="object" href="ClientId$.html" title="ClientId provides the client identification of the incoming request if available."></a>
                         <a class="class" href="ClientId.html" title=""></a>
@@ -351,20 +333,6 @@ on the corresponding request.">
                           ServiceIfaceBuilder
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ThriftClientFramedCodec$.html" title="ThriftClientFramedCodec implements a framed thrift transport that
-supports upgrading in order to provide TraceContexts across
-requests."></a>
-                        <a class="class" href="ThriftClientFramedCodec.html" title=""></a>
-                        <a href="ThriftClientFramedCodec.html" title="">
-                          ThriftClientFramedCodec
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ThriftClientFramedCodecFactory.html" title=""></a>
-                        <a href="ThriftClientFramedCodecFactory.html" title="">
-                          ThriftClientFramedCodecFactory
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ThriftClientRequest.html" title="Defines a (framed) thrift request, simply composed of the raw
 message and a boolean indicating whether it is a one-shot message or
@@ -379,18 +347,6 @@ not.">
                         <a class="class" href="ThriftMethodStats.html" title=""></a>
                         <a href="ThriftMethodStats.html" title="">
                           ThriftMethodStats
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ThriftServerFramedCodec$.html" title=""></a>
-                        <a class="class" href="ThriftServerFramedCodec.html" title=""></a>
-                        <a href="ThriftServerFramedCodec.html" title="">
-                          ThriftServerFramedCodec
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ThriftServerFramedCodecFactory.html" title=""></a>
-                        <a href="ThriftServerFramedCodecFactory.html" title="">
-                          ThriftServerFramedCodecFactory
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>

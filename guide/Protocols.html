@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &#8212; Finagle 6.44.0 documentation</title>
+    <title>Protocols &#8212; Finagle 7.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.44.0',
+        VERSION:     '7.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -139,7 +139,8 @@ following rich APIs:</p>
         <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
       <span class="o">}</span>
     <span class="o">}</span>
-  <span class="o">})</span>
+  <span class="o">}</span>
+<span class="o">)</span>
 </pre></div>
 </div>
 <p id="finagle-thrift-client">Construct a client:</p>
@@ -153,7 +154,10 @@ following rich APIs:</p>
 </div>
 <p>Thrift services can be combined with <a class="reference external" href="https://twitter.github.io/finagle/docs/com/twitter/finagle/Filter$">Filters</a>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span>
+    <span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span>
+    <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.SuccessType</span><span class="o">]</span>
+  <span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="k">val</span> <span class="n">uppercaseRequest</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">message</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">toUpperCase</span><span class="o">)</span>
     <span class="n">service</span><span class="o">(</span><span class="n">uppercaseRequest</span><span class="o">)</span>
   <span class="o">}</span>
@@ -161,7 +165,7 @@ following rich APIs:</p>
 
 <span class="k">def</span> <span class="n">timeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="k">:</span> <span class="kt">Duration</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">exc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">IndividualRequestTimeoutException</span><span class="o">(</span><span class="n">duration</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
+  <span class="k">val</span> <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span>
   <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="o">,</span> <span class="n">exc</span><span class="o">,</span> <span class="n">timer</span><span class="o">)</span>
 <span class="o">}</span>
 <span class="k">val</span> <span class="n">filteredLog</span> <span class="k">=</span> <span class="n">timeoutFilter</span><span class="o">(</span><span class="mf">2.</span><span class="n">seconds</span><span class="o">)</span>
@@ -173,20 +177,20 @@ following rich APIs:</p>
 </pre></div>
 </div>
 <p>Here&#8217;s an example of a retry policy that retries on Thrift exceptions:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span>
-<span class="o">{</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span> <span class="o">{</span>
   <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
 <span class="o">})</span>
 
 <span class="k">val</span> <span class="n">retriedGetLogSize</span> <span class="k">=</span>
-  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span><span class="o">)</span>
+  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">)</span>
     <span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">getLogSize</span><span class="o">)</span>
 
 <span class="n">retriedGetLogSize</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">.</span><span class="nc">Args</span><span class="o">())</span>
 </pre></div>
 </div>
 <p>Another way to construct Thrift clients is using the method interface:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.FutureIface</span> <span class="o">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">LoggerService.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.FutureIface</span> <span class="o">=</span>
+  <span class="nc">Thrift</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">LoggerService.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="o">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;message&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">)</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
   <span class="n">println</span><span class="o">(</span><span class="s">&quot;Client received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
 <span class="o">}</span>
@@ -318,6 +322,24 @@ other useful methods are available on <a class="reference external" href="https:
 from the call to <cite>newRichClient</cite>.</p>
 <p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
 </div>
+<div class="section" id="http">
+<h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
+<p>Finagle supports both HTTP/1 and HTTP/2. Details can be found in <em>finagle-http</em> and <em>finagle-http2</em>.</p>
+<p><strong>Headers</strong></p>
+<p>Finagle sets certain request/response headers to transmit additional metadata.</p>
+<dl class="docutils">
+<dt><cite>Finagle-Ctx-com.twitter.finagle.Retries</cite></dt>
+<dd>The number of times this request has been retried. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
+<dt><cite>Finagle-Ctx-com.twitter.finagle.Deadline</cite></dt>
+<dd>The time by which this request must be satisfied. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpContext.scala">HttpContext.scala</a></dd>
+<dt><cite>dtab-local</cite></dt>
+<dd>A list of dtab overrides for this request. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/codec/HttpDtab.scala">HttpDtab.scala</a> and <a class="reference internal" href="Names.html#dtabs"><span class="std std-ref">dtabs</span></a>.</dd>
+<dt><cite>finagle-http-nack</cite></dt>
+<dd>Makes finagle treat this reply as a retryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
+<dt><cite>finagle-http-nonretryable-nack</cite></dt>
+<dd>Makes finagle treat this reply as a nonretryable nack. See <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-base-http/src/main/scala/com/twitter/finagle/http/filter/HttpNackFilter.scala">HttpNackFilter.scala</a></dd>
+</dl>
+</div>
 </div>
 
 
@@ -346,6 +368,7 @@ from the call to <cite>newRichClient</cite>.</p>
 </li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#mysql">Mysql</a></li>
+<li><a class="reference internal" href="#http">HTTP</a></li>
 </ul>
 </li>
 </ul>

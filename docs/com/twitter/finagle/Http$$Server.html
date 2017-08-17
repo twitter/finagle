@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -1038,12 +1038,12 @@ for all content-types with specified compression level.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <span class="extype" name="com.twitter.finagle.stats.ExceptionStatsHandler">ExceptionStatsHandler</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
+<span class="extype" name="stats.ExceptionStatsHandler">exception stats handler</span>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withHttpStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withHttpStats:com.twitter.finagle.Http.Server"></a><a id="withHttpStats:Server"></a>
@@ -1080,6 +1080,28 @@ for all content-types with specified compression level.
       <p class="shortcomment cmt">Configures this server or client with given <code>label</code> (default: empty string).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <code>label</code> (default: empty string).</p><p>The <code>label</code> value is used for stats reporting to scope stats reported
 from different clients/servers to a single stats receiver.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Http.Server#withMaxHeaderSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withMaxHeaderSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Server"></a><a id="withMaxHeaderSize(StorageUnit):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Http$$Server.html#withMaxHeaderSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withMaxHeaderSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">For HTTP1*, configures the max size of headers
+For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
+number of uncompressed bytes of header name/values.</p><div class="fullcomment"><div class="comment cmt"><p>For HTTP1*, configures the max size of headers
+For HTTP2, sets the MAX_HEADER_LIST_SIZE setting which is the maximum
+number of uncompressed bytes of header name/values.
+These may be set independently via the .configured API.
+</p></div></div>
     </li><li name="com.twitter.finagle.Http.Server#withMaxInitialLineSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withMaxInitialLineSize(size:com.twitter.util.StorageUnit):com.twitter.finagle.Http.Server"></a><a id="withMaxInitialLineSize(StorageUnit):Server"></a>
       <span class="permalink">
@@ -1092,7 +1114,7 @@ from different clients/servers to a single stats receiver.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMaxInitialLineSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withMaxInitialLineSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the maximum initial http line length the server is
@@ -1109,7 +1131,7 @@ willing to accept.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMaxRequestSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withMaxRequestSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the maximum request size this server can receive.</p>
@@ -1125,7 +1147,7 @@ willing to accept.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMaxResponseSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withMaxResponseSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the maximum response size this server can send.</p>
@@ -1141,13 +1163,39 @@ willing to accept.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
-(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Http.Server#withNoAutomaticContinue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withNoAutomaticContinue:com.twitter.finagle.Http.Server"></a><a id="withNoAutomaticContinue:Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/Http$$Server.html#withNoAutomaticContinue:com.twitter.finagle.Http.Server" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withNoAutomaticContinue</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">By default finagle-http automatically sends 100-CONTINUE responses to inbound
+requests which set the 'Expect: 100-Continue' header.</p><div class="fullcomment"><div class="comment cmt"><p>By default finagle-http automatically sends 100-CONTINUE responses to inbound
+requests which set the 'Expect: 100-Continue' header. Streaming servers will
+always return 100-CONTINUE. Non-streaming servers will compare the
+content-length header to the configured limit (see: <code>withMaxRequestSize</code>)
+and send either a 100-CONTINUE or 413-REQUEST ENTITY TOO LARGE as
+appropriate. This method disables those automatic responses.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Disabling automatic continues is only supported in
+      <a href="Http$.html#Netty4Impl:com.twitter.finagle.Http.HttpImpl" class="extmbr" name="com.twitter.finagle.Http#Netty4Impl">com.twitter.finagle.Http.Netty4Impl</a> servers.</p></span>, <span class="cmt"><p>Servers operating as proxies should disable automatic responses in
+      order to allow origin servers to determine whether the expectation
+      can be met.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.ListeningStackServer#withParams" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withParams(params:com.twitter.finagle.Stack.Params):This"></a><a id="withParams(Params):Server"></a>
       <span class="permalink">
@@ -1177,11 +1225,11 @@ willing to accept.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
       <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
-work will be interrupted via <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future@raise(interrupt:Throwable):Unit" class="extype" target="_top">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1237,10 +1285,10 @@ HTTP classification tools.</p></span></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.server.ListeningStackServer#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a><a id="withStack(Stack[ServiceFactory[Request,Response]]):Server"></a>
+    </li><li name="com.twitter.finagle.Http.Server#withStack" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]]):com.twitter.finagle.Http.Server"></a><a id="withStack(Stack[ServiceFactory[Request,Response]]):Server"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Http$$Server.html#withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This" title="Permalink">
+      <a href="../../../com/twitter/finagle/Http$$Server.html#withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]]):com.twitter.finagle.Http.Server" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1252,7 +1300,7 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">A new StackServer with the provided Stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackServer with the provided Stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
+      <p class="shortcomment cmt">A new StackServer with the provided Stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackServer with the provided Stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withStatsReceiver" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.Http.Server"></a><a id="withStatsReceiver(StatsReceiver):Server"></a>
       <span class="permalink">
@@ -1265,11 +1313,11 @@ HTTP classification tools.</p></span></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
+        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
-(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
+      <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
+(default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <span class="extype" name="stats.StatsReceiver">stats.StatsReceiver</span>
 (default: <a href="stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Http.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Http.Server#withStreaming" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1290,9 +1338,9 @@ HTTP classification tools.</p></span></dd></dl></div>
       <p class="shortcomment cmt">Streaming allows applications to work with HTTP messages that have large
 (or infinite) content bodies.</p><div class="fullcomment"><div class="comment cmt"><p>Streaming allows applications to work with HTTP messages that have large
 (or infinite) content bodies. When this set to <code>true</code>, the message content is
-available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>, which gives the application a
+available through a <span class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</span>, which gives the application a
 handle to the byte stream. If <code>false</code>, the entire message content is buffered
-into a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a>.
+into a <span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span>.
 </p></div></div>
     </li><li name="com.twitter.finagle.Http.Server#withTracer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withTracer(tracer:com.twitter.finagle.tracing.Tracer):com.twitter.finagle.Http.Server"></a><a id="withTracer(Tracer):Server"></a>

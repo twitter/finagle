@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -410,9 +410,13 @@ their name.">
                           Method
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
-                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
-                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                        <a class="object" href="MethodBuilder$.html" title=""></a>
+                        <a class="class" href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder."></a>
+                        <a href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder.">
                           MethodBuilder
                         </a>
                       </li><li class="current-entities indented4">
@@ -474,8 +478,8 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ResponseProxy.html" title=""></a>
-                        <a href="ResponseProxy.html" title="">
+                        <a class="class" href="ResponseProxy.html" title="Proxy for Response."></a>
+                        <a href="ResponseProxy.html" title="Proxy for Response.">
                           ResponseProxy
                         </a>
                       </li><li class="current-entities indented4">
@@ -540,6 +544,12 @@ its credentials from a provided CredentialSource...">
                         <a href="Versions.html" title="Java friendly versions of com.twitter.finagle.http.Version.">
                           Versions
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$serverErrorsAsFailures$.html" title=""></a>
+                        <a href="package$$serverErrorsAsFailures$.html" title="">
+                          serverErrorsAsFailures
+                        </a>
                       </li>
               </ul>
             </div>
@@ -565,7 +575,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">HttpMuxer</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">HttpMuxer</span><span class="result"> extends <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></span>
       </span>
       </h4>
 
@@ -575,7 +585,7 @@ its credentials from a provided CredentialSource...">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -601,7 +611,7 @@ its credentials from a provided CredentialSource...">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http.HttpMuxer"><span>HttpMuxer</span></li><li class="in" name="com.twitter.finagle.Service"><span>Service</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.HttpMuxer"><span>HttpMuxer</span></li><li class="in" name="com.twitter.finagle.http.HttpMuxer"><span>HttpMuxer</span></li><li class="in" name="com.twitter.finagle.Service"><span>Service</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -736,7 +746,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -744,9 +754,9 @@ its credentials from a provided CredentialSource...">
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.http.HttpMuxer#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(request:com.twitter.finagle.http.Request):com.twitter.util.Future[com.twitter.finagle.http.Response]"></a><a id="apply(Request):Future[Response]"></a>
+      <a id="apply(req:com.twitter.finagle.http.Request):com.twitter.util.Future[com.twitter.finagle.http.Response]"></a><a id="apply(Request):Future[Response]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#apply(request:com.twitter.finagle.http.Request):com.twitter.util.Future[com.twitter.finagle.http.Response]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#apply(req:com.twitter.finagle.http.Request):com.twitter.util.Future[com.twitter.finagle.http.Response]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -755,11 +765,14 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1</dd></dl></div>
+      <p class="shortcomment cmt">Extract path from Request; look for a matching pattern; if found, dispatch the
+Request to the registered service; otherwise create a NOT_FOUND response
+</p><div class="fullcomment"><div class="comment cmt"><p>Extract path from Request; look for a matching pattern; if found, dispatch the
+Request to the registered service; otherwise create a NOT_FOUND response
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Function1</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -810,7 +823,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
@@ -826,7 +839,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -842,7 +855,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -858,7 +871,7 @@ its credentials from a provided CredentialSource...">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -1050,7 +1063,7 @@ with a reasonable likelihood of success).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.HttpMuxer#patterns" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.HttpMuxer#patterns" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="patterns:Seq[String]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#patterns:Seq[String]" title="Permalink">
@@ -1065,8 +1078,27 @@ with a reasonable likelihood of success).
         <span class="name">patterns</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpMuxer#route" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="route(req:com.twitter.finagle.http.Request):Option[com.twitter.finagle.http.Route]"></a><a id="route(Request):Option[Route]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#route(req:com.twitter.finagle.http.Request):Option[com.twitter.finagle.http.Route]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">route</span><span class="params">(<span name="req">req: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Route.html" class="extype" name="com.twitter.finagle.http.Route">Route</a>]</span>
+      </span>
       
-    </li><li name="com.twitter.finagle.http.HttpMuxer#routes" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Find the route that a request will take, or None if there's no matching
+route.</p><div class="fullcomment"><div class="comment cmt"><p>Find the route that a request will take, or None if there's no matching
+route.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpMuxer#routes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="routes:Seq[com.twitter.finagle.http.Route]"></a><a id="routes:Seq[Route]"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#routes:Seq[com.twitter.finagle.http.Route]" title="Permalink">
@@ -1081,7 +1113,7 @@ with a reasonable likelihood of success).
         <span class="name">routes</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="Route.html" class="extype" name="com.twitter.finagle.http.Route">Route</a>]</span>
       </span>
       
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Service#status" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a><a id="status:finagle.Status"></a>
       <span class="permalink">
@@ -1197,6 +1229,40 @@ with a reasonable likelihood of success).
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpMuxer#withHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withHandler(route:com.twitter.finagle.http.Route):com.twitter.finagle.http.HttpMuxer"></a><a id="withHandler(Route):HttpMuxer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#withHandler(route:com.twitter.finagle.http.Route):com.twitter.finagle.http.HttpMuxer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withHandler</span><span class="params">(<span name="route">route: <a href="Route.html" class="extype" name="com.twitter.finagle.http.Route">Route</a></span>)</span><span class="result">: <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> → <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpMuxer#withHandler" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withHandler(pattern:String,service:com.twitter.finagle.Service[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]):com.twitter.finagle.http.HttpMuxer"></a><a id="withHandler(String,Service[Request,Response]):HttpMuxer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/HttpMuxer$.html#withHandler(pattern:String,service:com.twitter.finagle.Service[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response]):com.twitter.finagle.http.HttpMuxer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withHandler</span><span class="params">(<span name="pattern">pattern: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>)</span><span class="result">: <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Create a new Mux service with the specified pattern added.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
+Pattern ending with &quot;/&quot; indicates prefix matching; otherwise exact matching.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></dd></dl></div>
     </li>
               </ol>
             </div>
@@ -1207,12 +1273,14 @@ with a reasonable likelihood of success).
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.Service">
+        <div class="parent" name="com.twitter.finagle.http.HttpMuxer">
+              <h3>Inherited from <a href="HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.Service">
               <h3>Inherited from <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
+              <h3>Inherited from (<a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

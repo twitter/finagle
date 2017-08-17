@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -861,31 +825,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1041,8 +980,8 @@ functions.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="DefaultTimer$.html" title="Retained for compatibility."></a>
-                        <a href="DefaultTimer$.html" title="Retained for compatibility.">
+                        <a class="object" href="DefaultTimer$.html" title="Finagle's default Timer that's intended to be shared across a number of servers/clients."></a>
+                        <a href="DefaultTimer$.html" title="Finagle's default Timer that's intended to be shared across a number of servers/clients.">
                           DefaultTimer
                         </a>
                       </li><li class="current-entities indented4">
@@ -1130,6 +1069,26 @@ a com.twitter.finagle.Stack and its params."></a>
                         <a href="StackRegistry.html" title="A registry that allows the registration of a string identifier with a
 a com.twitter.finagle.Stack and its params.">
                           StackRegistry
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer."></a>
+                        <a href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer.">
+                          defaultTimerProbeSlowTasks
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is
+detected in the default Timer."></a>
+                        <a href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is
+detected in the default Timer.">
+                          defaultTimerSlowTaskLogMinInterval
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer."></a>
+                        <a href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer.">
+                          defaultTimerSlowTaskMaxRuntime
                         </a>
                       </li><li name="com.twitter.finagle.zipkin" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="zipkin"></a><a id="zipkin:zipkin"></a>
@@ -1365,7 +1324,7 @@ delivered in the order received.</p><p>They can be thought of as featherweight a
       <span class="symbol">
         <a title="" href="ReporterFactory.html">
               <span class="name">ReporterFactory</span>
-            </a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
+            </a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       
       
@@ -1506,13 +1465,15 @@ dynamic introspection.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Retained for compatibility." href="DefaultTimer$.html">
+        <a title="Finagle's default Timer that's intended to be shared across a number of servers/clients." href="DefaultTimer$.html">
               <span class="name">DefaultTimer</span>
-            </a>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</span></span>
       </span>
       
-      <p class="shortcomment cmt">Retained for compatibility.</p><div class="fullcomment"><div class="comment cmt"><p>Retained for compatibility. Prefer <a href="HashedWheelTimer$.html" class="extype" name="com.twitter.finagle.util.HashedWheelTimer">HashedWheelTimer</a>.
-</p></div></div>
+      <p class="shortcomment cmt">Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
+shouldn't be used to schedule tasks that will occupy the executing thread for a significant
+duration.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This timer is &quot;unstoppable&quot; such that calls to <code>stop()</code> is ignored.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.util.Drv" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Drv"></a><a id="Drv:Drv"></a>
       <span class="permalink">
@@ -1738,6 +1699,69 @@ more resilient to varying Java packaging configurations than ServiceLoader.
       </span>
       
       
+    </li><li name="com.twitter.finagle.util.defaultTimerProbeSlowTasks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultTimerProbeSlowTasks"></a><a id="defaultTimerProbeSlowTasks:defaultTimerProbeSlowTasks"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/index.html#defaultTimerProbeSlowTasks" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Configures whether to probe for slow tasks executing in the default Timer." href="defaultTimerProbeSlowTasks$.html">
+              <span class="name">defaultTimerProbeSlowTasks</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures whether to probe for slow tasks executing in the default <code>Timer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures whether to probe for slow tasks executing in the default <code>Timer</code>.</p><p>When enabled, tasks are monitored to detect tasks that are slow to complete. A counter of
+the number of slow tasks is registered at <code>finagle/timer/slow</code>. Additionally, if a slow
+task is observed executing the stack traces of all threads will be logged at level
+WARN. The maximum runtime and minimum interval between logging stack traces can be tuned
+using the global flags <code>c.t.f.u.defaultTimerSlowTaskMaxRuntime</code> and
+<code>c.t.f.u.defaultTimerSlowTaskLogMinInterval</code>, defined below.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Observation of a slow task in progress is performed when scheduling additional work
+      and is thus susceptible to false negatives.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.util.defaultTimerSlowTaskLogMinInterval" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultTimerSlowTaskLogMinInterval"></a><a id="defaultTimerSlowTaskLogMinInterval:defaultTimerSlowTaskLogMinInterval"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/index.html#defaultTimerSlowTaskLogMinInterval" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Configures the minimum duration between logging stack traces when a slow task is
+detected in the default Timer." href="defaultTimerSlowTaskLogMinInterval$.html">
+              <span class="name">defaultTimerSlowTaskLogMinInterval</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the minimum duration between logging stack traces when a slow task is
+detected in the default <code>Timer</code>.</p>
+    </li><li name="com.twitter.finagle.util.defaultTimerSlowTaskMaxRuntime" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="defaultTimerSlowTaskMaxRuntime"></a><a id="defaultTimerSlowTaskMaxRuntime:defaultTimerSlowTaskMaxRuntime"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/index.html#defaultTimerSlowTaskMaxRuntime" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Configures the maximum allowed runtime for tasks executing in the default Timer." href="defaultTimerSlowTaskMaxRuntime$.html">
+              <span class="name">defaultTimerSlowTaskMaxRuntime</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the maximum allowed runtime for tasks executing in the default <code>Timer</code>.</p>
     </li>
               </ol>
             </div>

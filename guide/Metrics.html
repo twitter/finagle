@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &#8212; Finagle 6.44.0 documentation</title>
+    <title>Metrics &#8212; Finagle 7.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.44.0',
+        VERSION:     '7.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
     <link rel="next" title="Unsuccessful Responses" href="UnsuccessfulResponses.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -238,6 +238,9 @@ outside of <code class="docutils literal"><span class="pre">com.twitter.util.Awa
 <dd>A stat of the deviation in milliseconds of tasks scheduled on
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/util/HashedWheelTimer.scala">HashedWheelTimer.Default</a>
 from their expected time.</dd>
+<dt><strong>finagle/timer/slow</strong></dt>
+<dd>A counter of the number of tasks found to be executing for longer
+than 2 seconds.</dd>
 </dl>
 </div>
 <div class="section" id="clientregistry">
@@ -363,8 +366,8 @@ request.</dd>
 <dd>A gauge exported with the name of the algorithm used for load balancing.</dd>
 </dl>
 </div>
-<div class="section" id="apertureloadbandbalancer">
-<h3>ApertureLoadBandBalancer<a class="headerlink" href="#apertureloadbandbalancer" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="aperture-based-load-balancers">
+<h3>Aperture Based Load Balancers<a class="headerlink" href="#aperture-based-load-balancers" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>aperture</strong></dt>
 <dd>A gauge of the width of the window over which endpoints are
@@ -378,6 +381,9 @@ the Aperture implementation.</dd>
 <dt><strong>coordinate_updates</strong></dt>
 <dd>A counter of the number of times the Aperture implementation receives
 updates from the <cite>DeterministicOrdering</cite> process global.</dd>
+<dt><strong>expired</strong></dt>
+<dd>A counter of the number of endpoints which have been closed because they
+have fallen out of the aperture window and become idle.</dd>
 </dl>
 </div>
 </div>
@@ -539,12 +545,20 @@ eligible for requeues are failures which are known to be safe&nbsp;—&nbsp;see
 <dt><strong>retries/request_limit</strong></dt>
 <dd>A counter of the number of times the limit of retry attempts for a logical
 request has been reached.</dd>
+<dt><strong>retries/not_open</strong></dt>
+<dd>A counter of the number of times a request was deemed retryable but
+was not retried due to the underlying <code class="docutils literal"><span class="pre">Service</span></code> not having a status
+of <code class="docutils literal"><span class="pre">Open</span></code>.</dd>
+<dt><strong>retries/cannot_retry</strong></dt>
+<dd>A counter of the number of times a request was deemed requeueable but
+was not requeued due to the underlying <code class="docutils literal"><span class="pre">ServiceFactory</span></code> not having a
+status of <code class="docutils literal"><span class="pre">Open</span></code>.</dd>
 </dl>
 </div>
 <div class="section" id="dispatching">
 <h2>Dispatching<a class="headerlink" href="#dispatching" title="Permalink to this headline">¶</a></h2>
-<p id="id2">Metrics scoped under <cite>dispatcher</cite> represent information about a client&#8217;s dispatching
-layer.</p>
+<p id="id2">The client metrics scoped under <cite>dispatcher</cite> represent information about a
+client&#8217;s dispatching layer.</p>
 <p>Depending on the underlying protocol, dispatchers may have different request
 queueing rules.</p>
 <dl class="docutils">
@@ -693,17 +707,6 @@ param to set the max buffer size to the size of a typical thrift response for
 your server.</dd>
 </dl>
 </div>
-<div class="section" id="recvbuffersizestatshandler-when-netty-4-pooling-is-enabled">
-<h3>RecvBufferSizeStatsHandler (when Netty 4 pooling is enabled)<a class="headerlink" href="#recvbuffersizestatshandler-when-netty-4-pooling-is-enabled" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>transport/receive_buffer_bytes</strong></dt>
-<dd>A histogram of the receive buffer size in bytes. This metric is useful when
-it comes to tuning pooling of receive buffers in <code class="docutils literal"><span class="pre">finagle-netty4</span></code> (can be enabled
-with a flag: <cite>-com.twitter.finagle.netty.poolReceiveBuffers</cite>). For maximum throughput,
-pool&#8217;s chunk size should be bigger than <code class="docutils literal"><span class="pre">receive_buffer_bytes.max</span></code> of any client/server
-running on a given JVM.</dd>
-</dl>
-</div>
 </div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
@@ -848,6 +851,113 @@ operations).</dd>
 </dl>
 </div>
 </div>
+</div>
+<div class="section" id="jvm">
+<h2>JVM<a class="headerlink" href="#jvm" title="Permalink to this headline">¶</a></h2>
+<p id="jvm-metrics">A wide variety of metrics are exported which provide insight into the JVM&#8217;s
+runtime. These include garbage collection, allocations, threads, uptime,
+and more.</p>
+<p>If you are using a Hotspot VM, additional metrics are exported that
+may be useful. This includes safe point time (<cite>jvm/safepoint</cite>),
+metaspace usage (<cite>jvm/mem/metaspace</cite>), allocation rates (<cite>jvm/mem/allocations</cite>),
+time running application code since start (<cite>jvm/application_time_millis</cite>),
+and tenuring threshold (<cite>jvm/tenuring_threshold</cite>).</p>
+<dl class="docutils">
+<dt><strong>jvm/mem/allocations/eden/bytes</strong></dt>
+<dd>A gauge of the number of bytes allocated into the eden. This is a particularly
+relevant metric for service developers. The vast majority of allocations are
+done into the eden space, so this metric can be used to calculate the allocations
+per request which in turn can be used to validate code changes
+don&#8217;t increase garbage collection pressure on the hot path.</dd>
+<dt><strong>jvm/gc/msec</strong></dt>
+<dd>A gauge of the total elapsed time doing collections, in milliseconds.</dd>
+<dt><strong>jvm/gc/cycles</strong></dt>
+<dd>A gauge of the number of the total number of collections that have occurred.</dd>
+<dt><strong>jvm/gc/eden/pause_msec</strong></dt>
+<dd>A stat of the durations, in millseconds, of the eden collection pauses.</dd>
+<dt><strong>jvm/gc/{gc_pool_name}/msec</strong></dt>
+<dd>A gauge for the named gc pool of the total elapsed time garbage collection pool
+doing collections, in milliseconds. Names are subject to change.</dd>
+<dt><strong>jvm/gc/{gc_pool_name}/cycles</strong></dt>
+<dd>A gauge for the named gc pool of the total number of collections that have occurred.
+Names are subject to change.</dd>
+<dt><strong>jvm/thread/count</strong></dt>
+<dd>A gauge of the number of live threads including both daemon and non-daemon threads.</dd>
+<dt><strong>jvm/thread/daemon_count</strong></dt>
+<dd>A gauge of the number of live daemon threads.</dd>
+<dt><strong>jvm/thread/peak_count</strong></dt>
+<dd>A gauge of the peak live thread count since the Java virtual machine started or peak was reset.</dd>
+<dt><strong>jvm/uptime</strong></dt>
+<dd>A gauge of the uptime of the Java virtual machine in milliseconds.</dd>
+<dt><strong>jvm/start_time</strong></dt>
+<dd>A gauge of the start time of the Java virtual machine in milliseconds since the epoch.</dd>
+<dt><strong>jvm/application_time_millis</strong></dt>
+<dd>A gauge of the total time running application code since the process started in milliseconds.</dd>
+<dt><strong>jvm/tenuring_threshold</strong></dt>
+<dd>A gauge of the number of times an object must survive GC in order to be promoted
+or 0 if the metric is unavailable.</dd>
+<dt><strong>jvm/num_cpus</strong></dt>
+<dd>A gauge of the number of processors available to the JVM.</dd>
+<dt><strong>jvm/fd_limit</strong></dt>
+<dd>(only available on Unix-based OS) A gauge of the maximum number of file descriptors.</dd>
+<dt><strong>jvm/fd_count</strong></dt>
+<dd>(only available on Unix-based OS) A gauge of the number of open file descriptors.</dd>
+<dt><strong>jvm/compilation/time_msec</strong></dt>
+<dd>A gauge of the elapsed time, in milliseconds, spent in compilation.</dd>
+<dt><strong>jvm/classes/current_loaded</strong></dt>
+<dd>A gauge of the number of classes that are currently loaded.</dd>
+<dt><strong>jvm/classes/total_loaded</strong></dt>
+<dd>A gauge of total number of classes that have been loaded since the JVM started.</dd>
+<dt><strong>jvm/classes/total_unloaded</strong></dt>
+<dd>A gauge of total number of classes that have been unloaded since the JVM started.</dd>
+<dt><strong>jvm/safepoint/count</strong></dt>
+<dd>A gauge of the number of safepoints taken place since the JVM started.</dd>
+<dt><strong>jvm/safepoint/sync_time_millis</strong></dt>
+<dd>A gauge of the cumulative time, in milliseconds, spent getting all threads to
+safepoint states.</dd>
+<dt><strong>jvm/safepoint/total_time_millis</strong></dt>
+<dd>A gauge of the cumulative time, in milliseconds, that the application has been
+stopped for safepoint operations.</dd>
+<dt><strong>jvm/mem/metaspace/max_capacity</strong></dt>
+<dd>A gauge of the maximum size, in bytes, that the metaspace can grow to.</dd>
+<dt><strong>jvm/heap/used</strong></dt>
+<dd>For the heap used for object allocation, a gauge of the current amount of memory used, in bytes.</dd>
+<dt><strong>jvm/heap/committed</strong></dt>
+<dd>For the heap used for object allocation, a gauge of the amount of memory, in bytes,
+committed for the JVM to use.</dd>
+<dt><strong>jvm/heap/max</strong></dt>
+<dd>For the heap used for object allocation, a gauge of the maximum amount of memory, in bytes,
+that can be used by the JVM.</dd>
+<dt><strong>jvm/nonheap/used</strong></dt>
+<dd>For the non-heap memory, a gauge of the current amount of memory used, in bytes.</dd>
+<dt><strong>jvm/nonheap/committed</strong></dt>
+<dd>For the non-heap memory, a gauge of the amount of memory, in bytes,
+committed for the JVM to use.</dd>
+<dt><strong>jvm/nonheap/max</strong></dt>
+<dd>For the non-heap memory, a gauge of the maximum amount of memory, in bytes,
+that can be used by the JVM.</dd>
+<dt><strong>jvm/mem/current/used</strong></dt>
+<dd>A gauge of the of the current memory used, in bytes, across all memory pools.</dd>
+<dt><strong>jvm/mem/current/{memory_pool_name}/used</strong></dt>
+<dd>A gauge of the of the current memory used, in bytes, for the named memory pools.</dd>
+<dt><strong>jvm/mem/current/{memory_pool_name}/max</strong></dt>
+<dd>A gauge of the of the maximum memory that can be used, in bytes, for the named memory pool.</dd>
+<dt><strong>jvm/mem/postGC/used</strong></dt>
+<dd>A gauge of the memory used, in bytes, across all memory pools after the most recent
+garbage collection.</dd>
+<dt><strong>jvm/mem/postGC/{memory_pool_name}/used</strong></dt>
+<dd>A gauge of the memory used, in bytes, for the named memory pool after the most recent
+garbage collection.</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/count</strong></dt>
+<dd>A gauge of the number of buffers in the named pool. Example pool names include direct and mapped,
+though the names are subject to change.</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/used</strong></dt>
+<dd>A gauge of the amount of memory used, in bytes, for the named pool. Example pool names
+include direct and mapped, though the names are subject to change.</dd>
+<dt><strong>jvm/mem/buffer/{buffer_pool_name}/max</strong></dt>
+<dd>A gauge of the amount of memory capacity, in bytes, for the named pool. Example pool names
+include direct and mapped, though the names are subject to change.</dd>
+</dl>
 </div>
 <div class="section" id="toggles">
 <h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
@@ -1020,7 +1130,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </li>
 <li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>
 <li><a class="reference internal" href="#all-balancers">All Balancers</a></li>
-<li><a class="reference internal" href="#apertureloadbandbalancer">ApertureLoadBandBalancer</a></li>
+<li><a class="reference internal" href="#aperture-based-load-balancers">Aperture Based Load Balancers</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#fail-fast">Fail Fast</a><ul>
@@ -1064,7 +1174,6 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
 <li><a class="reference internal" href="#thrift">Thrift</a></li>
-<li><a class="reference internal" href="#recvbuffersizestatshandler-when-netty-4-pooling-is-enabled">RecvBufferSizeStatsHandler (when Netty 4 pooling is enabled)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
@@ -1078,6 +1187,7 @@ connection for &#8220;plain&#8221; Thrift.</dd>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#jvm">JVM</a></li>
 <li><a class="reference internal" href="#toggles">Toggles</a></li>
 <li><a class="reference internal" href="#http">HTTP</a></li>
 <li><a class="reference internal" href="#http2">HTTP2</a></li>

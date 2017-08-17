@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -180,6 +180,16 @@ resources for using Finagle.
                           ExpiringServerDispatcher
                         </a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="GenPipeliningDispatcher$.html" title=""></a>
+                        <a class="class" href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will
+respect normal pipelining semantics, and that replies will be sent
+in the same order as requests were sent."></a>
+                        <a href="GenPipeliningDispatcher.html" title="A generic pipelining dispatcher, which assumes that servers will
+respect normal pipelining semantics, and that replies will be sent
+in the same order as requests were sent.">
+                          GenPipeliningDispatcher
+                        </a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GenSerialClientDispatcher$.html" title=""></a>
                         <a class="class" href="GenSerialClientDispatcher.html" title="Dispatches requests one at a time; concurrent requests are queued."></a>
                         <a href="GenSerialClientDispatcher.html" title="Dispatches requests one at a time; concurrent requests are queued.">
@@ -197,6 +207,12 @@ allowing the implementor to furnish custom dispatchers &amp; handlers.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="PipeliningDispatcher.html" title=""></a>
+                        <a href="PipeliningDispatcher.html" title="">
+                          PipeliningDispatcher
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="SerialClientDispatcher.html" title=""></a>
                         <a href="SerialClientDispatcher.html" title="">
                           SerialClientDispatcher
@@ -208,6 +224,16 @@ concurrent requests."></a>
                         <a href="" title="Dispatch requests from transport one at a time, queueing
 concurrent requests.">
                           SerialServerDispatcher
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="StalledPipelineTimeout$.html" title=""></a>
+                        <a class="class" href="StalledPipelineTimeout.html" title="A class eligible for configuring a timeout
+com.twitter.util.Duration to consider a pipeline to have stalled
+(stopped making progress after an initial interruption)."></a>
+                        <a href="StalledPipelineTimeout.html" title="A class eligible for configuring a timeout
+com.twitter.util.Duration to consider a pipeline to have stalled
+(stopped making progress after an initial interruption).">
+                          StalledPipelineTimeout
                         </a>
                       </li>
               </ul>
@@ -244,7 +270,7 @@ released after any error.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -414,7 +440,7 @@ released after any error.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a> → Closable</dd></dl></div>
@@ -430,7 +456,7 @@ released after any error.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -446,7 +472,7 @@ released after any error.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -462,7 +488,7 @@ released after any error.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dispatch</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span></span>, <span name="eos">eos: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Promise" class="extype" target="_top">Promise</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>]</span>
+        <span class="name">dispatch</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span></span>, <span name="eos">eos: <span class="extype" name="com.twitter.util.Promise">Promise</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Dispatches a request.</p><div class="fullcomment"><div class="comment cmt"><p>Dispatches a request. The first argument is the request. The second
@@ -555,7 +581,7 @@ receipt of last chunk). Refer to the implementation in
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handle</span><span class="params">(<span name="rep">rep: <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">handle</span><span class="params">(<span name="rep">rep: <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a> → <a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a></dd></dl></div>
@@ -766,7 +792,7 @@ receipt of last chunk). Refer to the implementation in
         <div class="parent" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">
               <h3>Inherited from <a href="GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher.Req">Req</span>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

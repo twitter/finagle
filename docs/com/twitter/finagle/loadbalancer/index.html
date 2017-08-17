@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -497,6 +479,14 @@ and Updating).
                           DefaultBalancerFactory
                         </a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="EndpointFactory.html" title="A specialized ServiceFactory which admits that it backs a
+concrete endpoint."></a>
+                        <a href="EndpointFactory.html" title="A specialized ServiceFactory which admits that it backs a
+concrete endpoint.">
+                          EndpointFactory
+                        </a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="LoadBalancerFactory$.html" title="Exposes a Stack.Module which composes load balancing into the respective
 Stack."></a>
                         <a class="class" href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in
@@ -504,6 +494,34 @@ context from the stack to the balancers at construction time."></a>
                         <a href="LoadBalancerFactory.html" title="A thin interface around a Balancer's constructor that allows Finagle to pass in
 context from the stack to the balancers at construction time.">
                           LoadBalancerFactory
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NoNodesOpenException.html" title="While this exception is safe to retry, the assumption used here is
+that the underlying situation will not change soon enough to make
+a retry worthwhile as retrying is most likely to eat up the entire
+budget."></a>
+                        <a href="NoNodesOpenException.html" title="While this exception is safe to retry, the assumption used here is
+that the underlying situation will not change soon enough to make
+a retry worthwhile as retrying is most likely to eat up the entire
+budget.">
+                          NoNodesOpenException
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="WhenNoNodesOpen$.html" title=""></a>
+                        <a class="trait" href="WhenNoNodesOpen.html" title="The behavior the load balancer should take when none
+of its nodes have a com.twitter.finagle.Status of
+Open."></a>
+                        <a href="WhenNoNodesOpen.html" title="The behavior the load balancer should take when none
+of its nodes have a com.twitter.finagle.Status of
+Open.">
+                          WhenNoNodesOpen
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="WhenNoNodesOpens.html" title="Java API for WhenNoNodesOpen."></a>
+                        <a href="WhenNoNodesOpens.html" title="Java API for WhenNoNodesOpen.">
+                          WhenNoNodesOpens
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -519,25 +537,7 @@ stats to be toggled."></a>
 stats to be toggled.">
                           perHostStats
                         </a>
-                      </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+                      </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/index.html#memcached" title="Permalink">
@@ -930,31 +930,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1205,7 +1180,30 @@ and Updating).
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.loadbalancer.EndpointFactory" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="EndpointFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a><a id="EndpointFactory[Req,Rep]:EndpointFactory[Req,Rep]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#EndpointFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A specialized ServiceFactory which admits that it backs a
+concrete endpoint." href="EndpointFactory.html">
+              <span class="name">EndpointFactory</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.EndpointFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.EndpointFactory.Rep">Rep</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A specialized <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> which admits that it backs a
+concrete endpoint.</p><div class="fullcomment"><div class="comment cmt"><p>A specialized <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> which admits that it backs a
+concrete endpoint. The extra information and functionality provided
+here is used by Finagle's load balancers.
+</p></div></div>
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="LoadBalancerFactoryextendsAnyRef"></a><a id="LoadBalancerFactory:LoadBalancerFactory"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/loadbalancer/index.html#LoadBalancerFactoryextendsAnyRef" title="Permalink">
@@ -1228,6 +1226,78 @@ context from the stack to the balancers at construction time.</p><div class="ful
 context from the stack to the balancers at construction time.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
 for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.NoNodesOpenException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NoNodesOpenExceptionextendsRuntimeExceptionwithFailureFlags[com.twitter.finagle.loadbalancer.NoNodesOpenException]withHasLogLevelwithSourcedException"></a><a id="NoNodesOpenException:NoNodesOpenException"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#NoNodesOpenExceptionextendsRuntimeExceptionwithFailureFlags[com.twitter.finagle.loadbalancer.NoNodesOpenException]withHasLogLevelwithSourcedException" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="While this exception is safe to retry, the assumption used here is
+that the underlying situation will not change soon enough to make
+a retry worthwhile as retrying is most likely to eat up the entire
+budget." href="NoNodesOpenException.html">
+              <span class="name">NoNodesOpenException</span>
+            </a><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <span class="extype" name="com.twitter.finagle.FailureFlags">FailureFlags</span>[<a href="NoNodesOpenException.html" class="extype" name="com.twitter.finagle.loadbalancer.NoNodesOpenException">NoNodesOpenException</a>] with <span class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</span> with <a href="../SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">While this exception is safe to retry, the assumption used here is
+that the underlying situation will not change soon enough to make
+a retry worthwhile as retrying is most likely to eat up the entire
+budget.</p>
+    </li><li name="com.twitter.finagle.loadbalancer.WhenNoNodesOpen" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="WhenNoNodesOpenextendsAnyRef"></a><a id="WhenNoNodesOpen:WhenNoNodesOpen"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#WhenNoNodesOpenextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="The behavior the load balancer should take when none
+of its nodes have a com.twitter.finagle.Status of
+Open." href="WhenNoNodesOpen.html">
+              <span class="name">WhenNoNodesOpen</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The behavior the load balancer should take when none
+of its nodes have a <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status</a> of
+<a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Open</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The behavior the load balancer should take when none
+of its nodes have a <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status</a> of
+<a href="../Status$$Open$.html" class="extype" name="com.twitter.finagle.Status.Open">Open</a>.</p><p>The default behavior is <a href="WhenNoNodesOpen$$PickOne$.html" class="extype" name="com.twitter.finagle.loadbalancer.WhenNoNodesOpen.PickOne">WhenNoNodesOpen.PickOne</a>
+and can be customized on a client through <a href="LoadBalancerFactory$$WhenNoNodesOpenParam.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam">LoadBalancerFactory.WhenNoNodesOpenParam</a>:</p><pre><span class="kw">import</span> com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam
+<span class="kw">import</span> com.twitter.finagle.loadbalancer.WhenNoNodesOpen
+<span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client
+  .configured(WhenNoNodesOpenParam(WhenNoNodesOpen.FailFast))</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>WhenNoNodesOpens</code> for Java friendly API.</p></span><span class="cmt"><p>the <a href="https://twitter.github.io/finagle/guide/Clients.html#behavior-when-no-nodes-are-available" target="_blank">user guide</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.WhenNoNodesOpens" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WhenNoNodesOpensextendsObject"></a><a id="WhenNoNodesOpens:WhenNoNodesOpens"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#WhenNoNodesOpensextendsObject" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Java API for WhenNoNodesOpen." href="WhenNoNodesOpens.html">
+              <span class="name">WhenNoNodesOpens</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Java API for <code><a href="WhenNoNodesOpen.html" class="extype" name="com.twitter.finagle.loadbalancer.WhenNoNodesOpen">WhenNoNodesOpen</a></code>.</p>
     </li></ol>
             </div>
 
@@ -1253,7 +1323,7 @@ for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class
       
       <p class="shortcomment cmt">Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
 <code>defaultAddressOrdering</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the default process global <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a> ordering as set via
-<code>defaultAddressOrdering</code>. If no value is set, <a href="../Address$.html#OctetOrdering:Ordering[com.twitter.finagle.Address]" class="extmbr" name="com.twitter.finagle.Address#OctetOrdering">Address.OctetOrdering</a>
+<code>defaultAddressOrdering</code>. If no value is set, <span class="extype" name="Address.OctetOrdering">Address.OctetOrdering</span>
 is used with the assumption that hosts resolved via Finagle provide the
 load balancer with resolved InetAddresses. If a separate resolution process
 is used, outside of Finagle, the default ordering should be overriden.
@@ -1342,10 +1412,28 @@ Stack." href="LoadBalancerFactory$.html">
       
       <p class="shortcomment cmt">Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Exposes a <a href="../Stack$$Module.html" class="extype" name="com.twitter.finagle.Stack.Module">Stack.Module</a> which composes load balancing into the respective
-<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>. This is mixed in by default into Finagle's <span class="extype" name="StackClient">StackClient</span>. The only
-necessary configuration is a <a href="LoadBalancerFactory$$Dest.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Dest">Dest</a> which represents a changing collection of
-addresses that is load balanced over.
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>. This is mixed in by default into Finagle's <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.
+The only necessary configuration is a <a href="LoadBalancerFactory$$Dest.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.Dest">LoadBalancerFactory.Dest</a> which
+represents a changing collection of addresses that is load balanced over.
 </p></div></div>
+    </li><li name="com.twitter.finagle.loadbalancer.WhenNoNodesOpen" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WhenNoNodesOpen"></a><a id="WhenNoNodesOpen:WhenNoNodesOpen"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/loadbalancer/index.html#WhenNoNodesOpen" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="WhenNoNodesOpen$.html">
+              <span class="name">WhenNoNodesOpen</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="defaultBalancer"></a><a id="defaultBalancer:defaultBalancer"></a>
       <span class="permalink">
@@ -1360,7 +1448,7 @@ addresses that is load balanced over.
       <span class="symbol">
         <a title="A GlobalFlag that changes the default balancer for every client in the process." href="defaultBalancer$.html">
               <span class="name">defaultBalancer</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A <span class="extype" name="GlobalFlag">GlobalFlag</span> that changes the default balancer for every client in the process.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="GlobalFlag">GlobalFlag</span> that changes the default balancer for every client in the process.
@@ -1385,7 +1473,7 @@ Valid choices are ['heap', 'choice', and 'aperture'].</p><p>To configure the loa
         <a title="A GlobalFlag which allows the configuration of per host (or endpoint)
 stats to be toggled." href="perHostStats$.html">
               <span class="name">perHostStats</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.app.GlobalFlag">GlobalFlag</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A <span class="extype" name="GlobalFlag">GlobalFlag</span> which allows the configuration of per host (or endpoint)

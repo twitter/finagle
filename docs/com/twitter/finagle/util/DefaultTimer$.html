@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -201,8 +201,8 @@ functions.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title="Retained for compatibility."></a>
-                        <a href="" title="Retained for compatibility.">
+                        <a class="object" href="" title="Finagle's default Timer that's intended to be shared across a number of servers/clients."></a>
+                        <a href="" title="Finagle's default Timer that's intended to be shared across a number of servers/clients.">
                           DefaultTimer
                         </a>
                       </li><li class="current-entities indented4">
@@ -291,6 +291,26 @@ a com.twitter.finagle.Stack and its params."></a>
 a com.twitter.finagle.Stack and its params.">
                           StackRegistry
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer."></a>
+                        <a href="defaultTimerProbeSlowTasks$.html" title="Configures whether to probe for slow tasks executing in the default Timer.">
+                          defaultTimerProbeSlowTasks
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is
+detected in the default Timer."></a>
+                        <a href="defaultTimerSlowTaskLogMinInterval$.html" title="Configures the minimum duration between logging stack traces when a slow task is
+detected in the default Timer.">
+                          defaultTimerSlowTaskLogMinInterval
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer."></a>
+                        <a href="defaultTimerSlowTaskMaxRuntime$.html" title="Configures the maximum allowed runtime for tasks executing in the default Timer.">
+                          defaultTimerSlowTaskMaxRuntime
+                        </a>
                       </li>
               </ul>
             </div>
@@ -314,17 +334,19 @@ a com.twitter.finagle.Stack and its params.">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultTimer</span>
+        <span class="name">DefaultTimer</span><span class="result"> extends <span class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Retained for compatibility. Prefer <a href="HashedWheelTimer$.html" class="extype" name="com.twitter.finagle.util.HashedWheelTimer">HashedWheelTimer</a>.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Finagle's default <span class="extype" name="Timer">Timer</span> that's intended to be shared across a number of servers/clients.</p><p>The default <span class="extype" name="Timer">Timer</span> is intended for scheduling tasks that will finish very quickly and
+shouldn't be used to schedule tasks that will occupy the executing thread for a significant
+duration.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This timer is &quot;unstoppable&quot; such that calls to <code>stop()</code> is ignored.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</span>, <span class="extype" name="com.twitter.util.Timer">Timer</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -350,7 +372,7 @@ a com.twitter.finagle.Stack and its params.">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.util.DefaultTimer"><span>DefaultTimer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.util.DefaultTimer"><span>DefaultTimer</span></li><li class="in" name="com.twitter.util.ProxyTimer"><span>ProxyTimer</span></li><li class="in" name="com.twitter.util.Timer"><span>Timer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -463,6 +485,38 @@ a com.twitter.finagle.Stack and its params.">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.util.Timer#doAt" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="doAt[A](time:com.twitter.util.Time)(f:=&gt;A):com.twitter.util.Future[A]"></a><a id="doAt[A](Time)(⇒A):Future[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#doAt[A](time:com.twitter.util.Time)(f:=&gt;A):com.twitter.util.Future[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doAt</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="time">time: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Timer.doAt.A">A</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.util.Timer.doAt.A">A</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
+    </li><li name="com.twitter.util.Timer#doLater" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="doLater[A](delay:com.twitter.util.Duration)(f:=&gt;A):com.twitter.util.Future[A]"></a><a id="doLater[A](Duration)(⇒A):Future[A]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#doLater[A](delay:com.twitter.util.Duration)(f:=&gt;A):com.twitter.util.Future[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">doLater</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="delay">delay: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.util.Timer.doLater.A">A</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.util.Timer.doLater.A">A</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -517,22 +571,6 @@ a com.twitter.finagle.Stack and its params.">
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="get:com.twitter.finagle.util.DefaultTimer.type"></a><a id="get:DefaultTimer.type"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#get:com.twitter.finagle.util.DefaultTimer.type" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">get</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.type</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -549,6 +587,22 @@ a com.twitter.finagle.Stack and its params.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.DefaultTimer#getInstance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getInstance:com.twitter.util.Timer"></a><a id="getInstance:Timer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#getInstance:com.twitter.util.Timer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getInstance</span><span class="result">: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A Java-friendly accessor for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -629,6 +683,118 @@ a com.twitter.finagle.Stack and its params.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schedule(period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Duration)(⇒Unit):TimerTask"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">schedule</span><span class="params">(<span name="period">period: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.TimerTask">TimerTask</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
+    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schedule(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Time,Duration)(⇒Unit):TimerTask"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">schedule</span><span class="params">(<span name="when">when: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="period">period: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.TimerTask">TimerTask</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
+    </li><li name="com.twitter.util.Timer#schedule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schedule(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedule(Time)(⇒Unit):TimerTask"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedule(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">schedule</span><span class="params">(<span name="when">when: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.TimerTask">TimerTask</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Timer</dd></dl></div>
+    </li><li name="com.twitter.util.ProxyTimer#scheduleOnce" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scheduleOnce(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="scheduleOnce(Time)(⇒Unit):TimerTask"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#scheduleOnce(when:com.twitter.util.Time)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scheduleOnce</span><span class="params">(<span name="when">when: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.TimerTask">TimerTask</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
+    </li><li name="com.twitter.util.ProxyTimer#schedulePeriodically" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schedulePeriodically(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask"></a><a id="schedulePeriodically(Time,Duration)(⇒Unit):TimerTask"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#schedulePeriodically(when:com.twitter.util.Time,period:com.twitter.util.Duration)(f:=&gt;Unit):com.twitter.util.TimerTask" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">schedulePeriodically</span><span class="params">(<span name="when">when: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="period">period: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.TimerTask">TimerTask</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>ProxyTimer → Timer</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.DefaultTimer#self" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="self:com.twitter.util.Timer"></a><a id="self:Timer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#self:com.twitter.util.Timer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">self</span><span class="result">: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → ProxyTimer</dd></dl></div>
+    </li><li name="com.twitter.finagle.util.DefaultTimer#stop" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stop():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#stop():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → ProxyTimer → Timer</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -661,22 +827,6 @@ a com.twitter.finagle.Stack and its params.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a> → AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.util.DefaultTimer#twitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="twitter:com.twitter.util.Timer"></a><a id="twitter:Timer"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#twitter:com.twitter.util.Timer" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">twitter</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">An alias for <a href="HashedWheelTimer$.html#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">HashedWheelTimer.Default</a>.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -749,11 +899,58 @@ a com.twitter.finagle.Stack and its params.">
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.util.DefaultTimer#get" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get:com.twitter.finagle.util.DefaultTimer.type"></a><a id="get:DefaultTimer.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#get:com.twitter.finagle.util.DefaultTimer.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-5-4) Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java">get</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-5-4)</i> Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.util.DefaultTimer#twitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="twitter:com.twitter.util.Timer"></a><a id="twitter:Timer"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/util/DefaultTimer$.html#twitter:com.twitter.util.Timer" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-5-4) Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java">twitter</span><span class="result">: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.</p><div class="fullcomment"><div class="comment cmt"><p>An alias for <a href="" class="extype" name="com.twitter.finagle.util.DefaultTimer">DefaultTimer</a>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-5-4)</i> Use DefaultTimer from Scala and DefaultTimer.getInstance() from Java</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.util.ProxyTimer">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.ProxyTimer">ProxyTimer</span></h3>
+            </div><div class="parent" name="com.twitter.util.Timer">
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Timer">Timer</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

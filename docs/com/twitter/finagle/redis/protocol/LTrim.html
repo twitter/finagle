@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -454,6 +454,18 @@ resources for using Finagle.
                         <a class="class" href="HMSet.html" title=""></a>
                         <a href="HMSet.html" title="">
                           HMSet
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="HMSetEx.html" title=""></a>
+                        <a href="HMSetEx.html" title="">
+                          HMSetEx
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="class" href="HMergeEx.html" title=""></a>
+                        <a href="HMergeEx.html" title="">
+                          HMergeEx
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
@@ -865,6 +877,12 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="SScan.html" title=""></a>
+                        <a href="SScan.html" title="">
+                          SScan
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="Scan.html" title=""></a>
                         <a href="Scan.html" title="">
                           Scan
@@ -1267,6 +1285,12 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="ZScan.html" title=""></a>
+                        <a href="ZScan.html" title="">
+                          ZScan
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="class" href="ZScore.html" title=""></a>
                         <a href="ZScore.html" title="">
                           ZScore
@@ -1314,7 +1338,7 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">LTrim</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="ListRangeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.ListRangeCommand">ListRangeCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">LTrim</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="ListRangeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.ListRangeCommand">ListRangeCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -1381,7 +1405,7 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">LTrim</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span>
+        <span class="name">LTrim</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span>
       </span>
       
       
@@ -1471,7 +1495,7 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">body</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">body</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ListRangeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.ListRangeCommand">ListRangeCommand</a> → <a href="KeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeyCommand">KeyCommand</a> → <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
@@ -1595,7 +1619,7 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">key</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">key</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.LTrim">LTrim</a> → <a href="KeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeyCommand">KeyCommand</a></dd></dl></div>
@@ -1611,7 +1635,7 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">name</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">name</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.LTrim">LTrim</a> → <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>

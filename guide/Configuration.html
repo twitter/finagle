@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &#8212; Finagle 6.44.0 documentation</title>
+    <title>Configuration &#8212; Finagle 7.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.44.0',
+        VERSION:     '7.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -306,7 +306,9 @@ be used. If the in-memory configuration is then set, those new values will be us
 <p>File-based configurations are defined in JSON files with the format specified in
 <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/JsonTunableMapper.scala">JsonTunableMapper</a>.</p>
 <p>Per-environment and per-instance configurations are supported. Configurations for a given id are
-composed from files located at <cite>resources/com/twitter/tunables/</cite>, in the following order:</p>
+composed from files located at <cite>resources/com/twitter/tunables/</cite>
+(ensure that the <cite>resources</cite> directory is properly packaged with your application) in the following
+order:</p>
 <ol class="arabic simple">
 <li>$id/$env/instance-$instance.json</li>
 <li>$id/$env/instances.json</li>

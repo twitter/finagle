@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -175,6 +175,24 @@ resources for using Finagle.
       <p class="shortcomment cmt">Package exp contains experimental code.</p><div class="fullcomment"><div class="comment cmt"><p>Package exp contains experimental code. This can be removed or
 stabilized (moved elsewhere) at any time.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.pushsession" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pushsession"></a><a id="pushsession:pushsession"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/exp/index.html#pushsession" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="pushsession/index.html">
+              <span class="name">pushsession</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.exp">exp</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="trait" href="AbstractDarkTrafficFilter.html" title=""></a>
@@ -267,7 +285,7 @@ are idempotent).</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -325,7 +343,7 @@ are idempotent).</p></span></dd></dl><div class="toggleContainer block">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BackupRequestFilter</span><span class="params">(<span name="quantile">quantile: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="clipDuration">clipDuration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="history">history: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span>
+        <span class="name">BackupRequestFilter</span><span class="params">(<span name="quantile">quantile: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="clipDuration">clipDuration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>, <span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="history">history: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
       </span>
       
       
@@ -487,7 +505,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Filter.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Filter.
@@ -542,7 +560,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
+        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -743,7 +761,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>])) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
+        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>])) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -831,7 +849,7 @@ on a configuration file, for instance.
             </div><div class="parent" name="com.twitter.finagle.Filter">
               <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.Function2">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

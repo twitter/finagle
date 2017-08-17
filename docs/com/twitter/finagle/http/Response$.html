@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -410,9 +410,13 @@ their name.">
                           Method
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
-                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
-                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                        <a class="object" href="MethodBuilder$.html" title=""></a>
+                        <a class="class" href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder."></a>
+                        <a href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder.">
                           MethodBuilder
                         </a>
                       </li><li class="current-entities indented4">
@@ -474,8 +478,8 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ResponseProxy.html" title=""></a>
-                        <a href="ResponseProxy.html" title="">
+                        <a class="class" href="ResponseProxy.html" title="Proxy for Response."></a>
+                        <a href="ResponseProxy.html" title="Proxy for Response.">
                           ResponseProxy
                         </a>
                       </li><li class="current-entities indented4">
@@ -539,6 +543,12 @@ its credentials from a provided CredentialSource...">
                         <a class="class" href="Versions.html" title="Java friendly versions of com.twitter.finagle.http.Version."></a>
                         <a href="Versions.html" title="Java friendly versions of com.twitter.finagle.http.Version.">
                           Versions
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$serverErrorsAsFailures$.html" title=""></a>
+                        <a href="package$$serverErrorsAsFailures$.html" title="">
+                          serverErrorsAsFailures
                         </a>
                       </li>
               </ul>
@@ -622,10 +632,28 @@ its credentials from a provided CredentialSource...">
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.http.Response.Ok" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OkextendsResponse"></a><a id="Ok:Ok"></a>
+              <ol><li name="com.twitter.finagle.http.Response.Proxy" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ProxyextendsResponse"></a><a id="Proxy:Proxy"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Response$.html#OkextendsResponse" title="Permalink">
+      <a href="../../../../com/twitter/finagle/http/Response$.html#ProxyextendsResponse" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Response$$Proxy.html">
+              <span class="name">Proxy</span>
+            </a><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.Response.Ok" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="OkextendsResponse.Proxy"></a><a id="Ok:Ok"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Response$.html#OkextendsResponse.Proxy" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -635,11 +663,15 @@ its credentials from a provided CredentialSource...">
       </span>
       <span class="symbol">
         <a title="Utility class to make it possible to mock/spy a Response." href="Response$$Ok.html">
-              <span class="name">Ok</span>
-            </a><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
+              <span class="name deprecated" title="Deprecated: (Since version 2017-04-28) Use Response or Response.Proxy">Ok</span>
+            </a><span class="result"> extends <a href="Response$$Proxy.html" class="extype" name="com.twitter.finagle.http.Response.Proxy">Proxy</a></span>
       </span>
       
-      <p class="shortcomment cmt">Utility class to make it possible to mock/spy a Response.</p>
+      <p class="shortcomment cmt">Utility class to make it possible to mock/spy a Response.</p><div class="fullcomment"><div class="comment cmt"><p>Utility class to make it possible to mock/spy a Response.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-04-28)</i> Use Response or Response.Proxy</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -708,11 +740,11 @@ its credentials from a provided CredentialSource...">
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">Schema</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema" class="extype" target="_top">RecordSchema</a></span>
+        <span class="name">Schema</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema">RecordSchema</span></span>
       </span>
       
-      <p class="shortcomment cmt"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema" class="extype" target="_top">RecordSchema</a> declaration, used
-to generate <a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema.Record" class="extype" target="_top">Record</a> instances
+      <p class="shortcomment cmt"><span class="extype" name="com.twitter.collection.RecordSchema">RecordSchema</span> declaration, used
+to generate <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span> instances
 for Response.ctx.</p>
     </li><li name="com.twitter.finagle.http.Response#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(request:com.twitter.finagle.http.Request):com.twitter.finagle.http.Response"></a><a id="apply(Request):Response"></a>
@@ -742,7 +774,7 @@ for Response.ctx.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>, <span name="status">status: <a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">Status</a></span>, <span name="reader">reader: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">Reader</a></span>)</span><span class="result">: <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
+        <span class="name">apply</span><span class="params">(<span name="version">version: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>, <span name="status">status: <a href="Status.html" class="extype" name="com.twitter.finagle.http.Status">Status</a></span>, <span name="reader">reader: <span class="extype" name="com.twitter.io.Reader">Reader</span></span>)</span><span class="result">: <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a Response from version, status, and Reader.</p>

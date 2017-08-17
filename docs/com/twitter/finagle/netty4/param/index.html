@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -180,42 +180,6 @@ the netty4 event loop.</p><div class="fullcomment"><div class="comment cmt"><p>P
 <a href="../../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> and a client transport in terms of
 the netty4 event loop.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.channel" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channel"></a><a id="channel:channel"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#channel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../channel/index.html">
-              <span class="name">channel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty4.http" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="http"></a><a id="http:http"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty4/index.html#http" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../http/index.html">
-              <span class="name">http</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.netty4">netty4</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty4.param" visbl="pub" class="indented5 current" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="param"></a><a id="param:param"></a>
       <span class="permalink">
@@ -346,7 +310,7 @@ among clients and servers such that we can inline work on the I/O threads. Modif
 the default has performance and instrumentation implications and should only be
 done so with care. If there is particular work you would like to schedule off
 the I/O threads, consider scheduling that work on a separate thread pool
-more granularly (e.g. <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.FuturePool" class="extype" target="_top">com.twitter.util.FuturePool</a> is a good tool for this).
+more granularly (e.g. <span class="extype" name="com.twitter.util.FuturePool">com.twitter.util.FuturePool</span> is a good tool for this).
 </p></div></div>
     </li></ol>
             </div>

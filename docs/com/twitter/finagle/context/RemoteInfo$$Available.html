@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -193,14 +193,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.context">context</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="" title="Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id."></a>
-                        <a href="" title="Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id.">
+                        <a class="class" href="" title="Represents the case where remote information is available."></a>
+                        <a href="" title="Represents the case where remote information is available.">
                           Available
                         </a>
                       </li><li class="current-entities indented5">
@@ -240,15 +234,14 @@ or has not yet been set.">
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Available</span><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamId">downstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result"> extends <a href="RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Available</span><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamLabel">downstreamLabel: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result"> extends <a href="RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Represents the case where remote information is available.</p><p>Includes the upstream's (sender of the request) socket address and id,
+downstream's (sender of the response) socket address and label, and the
+trace id.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -300,9 +293,9 @@ and the trace id.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.context.RemoteInfo.Available#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(upstreamAddr:Option[java.net.SocketAddress],upstreamId:Option[com.twitter.finagle.thrift.ClientId],downstreamAddr:Option[java.net.SocketAddress],downstreamId:Option[com.twitter.finagle.thrift.ClientId],traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.context.RemoteInfo.Available"></a><a id="&lt;init&gt;:Available"></a>
+      <a id="&lt;init&gt;(upstreamAddr:Option[java.net.SocketAddress],upstreamId:Option[String],downstreamAddr:Option[java.net.SocketAddress],downstreamLabel:Option[String],traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.context.RemoteInfo.Available"></a><a id="&lt;init&gt;:Available"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#&lt;init&gt;(upstreamAddr:Option[java.net.SocketAddress],upstreamId:Option[com.twitter.finagle.thrift.ClientId],downstreamAddr:Option[java.net.SocketAddress],downstreamId:Option[com.twitter.finagle.thrift.ClientId],traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.context.RemoteInfo.Available" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#&lt;init&gt;(upstreamAddr:Option[java.net.SocketAddress],upstreamId:Option[String],downstreamAddr:Option[java.net.SocketAddress],downstreamLabel:Option[String],traceId:com.twitter.finagle.tracing.TraceId):com.twitter.finagle.context.RemoteInfo.Available" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -311,7 +304,7 @@ and the trace id.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Available</span><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamId">downstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span>
+        <span class="name">Available</span><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamLabel">downstreamLabel: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span>
       </span>
       
       
@@ -427,10 +420,10 @@ and the trace id.
       </span>
       
       
-    </li><li name="com.twitter.finagle.context.RemoteInfo.Available#downstreamId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="downstreamId:Option[com.twitter.finagle.thrift.ClientId]"></a><a id="downstreamId:Option[ClientId]"></a>
+    </li><li name="com.twitter.finagle.context.RemoteInfo.Available#downstreamLabel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="downstreamLabel:Option[String]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#downstreamId:Option[com.twitter.finagle.thrift.ClientId]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#downstreamLabel:Option[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -439,7 +432,7 @@ and the trace id.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">downstreamId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>
+        <span class="name">downstreamLabel</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       
@@ -626,9 +619,9 @@ and the trace id.
       
       
     </li><li name="com.twitter.finagle.context.RemoteInfo.Available#upstreamId" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="upstreamId:Option[com.twitter.finagle.thrift.ClientId]"></a><a id="upstreamId:Option[ClientId]"></a>
+      <a id="upstreamId:Option[String]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#upstreamId:Option[com.twitter.finagle.thrift.ClientId]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/context/RemoteInfo$$Available.html#upstreamId:Option[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -637,7 +630,7 @@ and the trace id.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">upstreamId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>
+        <span class="name">upstreamId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       

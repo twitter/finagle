@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -209,10 +209,8 @@ marshalled and sent across process boundaries.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="RemoteInfo$.html" title=""></a>
-                        <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available
-"></a>
-                        <a href="RemoteInfo.html" title="Contains the remote information for a request, if available
-">
+                        <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available."></a>
+                        <a href="RemoteInfo.html" title="Contains the remote information for a request, if available.">
                           RemoteInfo
                         </a>
                       </li>
@@ -556,7 +554,7 @@ strictest deadline and the latest observation.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">marshal</span><span class="params">(<span name="deadline">deadline: <a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">marshal</span><span class="params">(<span name="deadline">deadline: <a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">Marshal deadline to byte buffer, deadline.timestamp and deadline.deadline
@@ -576,7 +574,7 @@ must not be Time.Top, Time.Bottom or Time.Undefined
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">marshalId</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">marshalId</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">A unique identifier defining this marshaller.</p><div class="fullcomment"><div class="comment cmt"><p>A unique identifier defining this marshaller. This is
@@ -643,7 +641,7 @@ pick the the appropriate unmarshaller for a given value.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ofTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a></span>
+        <span class="name">ofTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a></span>
       </span>
       
       <p class="shortcomment cmt">Construct a deadline from a timeout.</p>
@@ -691,7 +689,7 @@ pick the the appropriate unmarshaller for a given value.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tryUnmarshal</span><span class="params">(<span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a>]</span>
+        <span class="name">tryUnmarshal</span><span class="params">(<span name="body">body: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Attempt to unmarshal an A-typed context value.</p><div class="fullcomment"><div class="comment cmt"><p>Attempt to unmarshal an A-typed context value.

@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -263,7 +263,7 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ConnectTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">ConnectTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -332,7 +332,7 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ConnectTimeout</span><span class="params">(<span name="howlong">howlong: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span>
+        <span class="name">ConnectTimeout</span><span class="params">(<span name="howlong">howlong: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">howlong</dt><dd class="cmt"><p>Maximum amount of time a transport is allowed to
@@ -499,7 +499,7 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">howlong</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>
+        <span class="name">howlong</span><span class="result">: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>
       </span>
       
       

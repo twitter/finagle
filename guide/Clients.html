@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 6.44.0 documentation</title>
+    <title>Clients &#8212; Finagle 7.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.44.0',
+        VERSION:     '7.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -106,7 +106,7 @@ options, but also upgrade the transport protocol to support encryption (e.g. TLS
 servers (e.g. HTTP, SOCKS5).</p>
 <div class="section" id="http-proxy">
 <h3>HTTP Proxy<a class="headerlink" href="#http-proxy" title="Permalink to this headline">¶</a></h3>
-<p>There is built-in support for <a class="reference external" href="http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt">tunneling TCP-based protocols</a>
+<p>There is built-in support for <a class="reference external" href="https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01">tunneling TCP-based protocols</a>
 through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
 only HTTP(S). See <a class="reference external" href="http://wiki.squid-cache.org/Features/HTTPS">Squid documentation</a> on this feature.</p>
 <p>The following example enables tunneling HTTP traffic through a web proxy server <cite>my-proxy-server.com</cite>
@@ -117,25 +117,32 @@ to <cite>twitter.com</cite>.</p>
 <span class="k">import</span> <span class="nn">java.net.SocketAddress</span>
 
 <span class="k">val</span> <span class="n">twitter</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">Transporter</span><span class="o">.</span><span class="nc">HttpProxy</span><span class="o">(</span><span class="nc">Some</span><span class="o">(</span><span class="k">new</span> <span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;my-proxy-server.com&quot;</span><span class="o">,</span> <span class="mi">3128</span><span class="o">))))</span>
-  <span class="o">.</span><span class="n">withSessionQualifier</span><span class="o">.</span><span class="n">noFailFast</span>
-  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withTransport</span><span class="o">.</span><span class="n">httpProxyTo</span><span class="o">(</span>
+    <span class="n">host</span> <span class="k">=</span> <span class="s">&quot;twitter.com:443&quot;</span><span class="o">,</span>
+    <span class="n">credentials</span> <span class="k">=</span> <span class="nc">Transporter</span><span class="o">.</span><span class="nc">Credentials</span><span class="o">(</span><span class="s">&quot;user&quot;</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">)</span>
+  <span class="o">)</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;inet!my-proxy-server.com:3128&quot;</span><span class="o">)</span> <span class="c1">// using local DNS to resolve proxy</span>
 </pre></div>
 </div>
+<p>While this setup may look somewhat counter intuitive with regards to where the ultimate destination
+and the proxy server address are applied, it enables a variety of resiliency features by utilizing
+Finagle&#8217;s naming and load balancing subsystems. Given a web proxy server address/name falls under
+a standard name resolution process, it might be (and should be) backed by a replica set (multiple
+hosts) to get the greatest out of a client.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>The web proxy server, represented as a static <cite>SocketAddress</cite>, acts as a single point of failure
-for a client. Whenever a proxy server is down, no traffic is served through the client no matter
-how big its replica set. This is why <a class="reference internal" href="#client-fail-fast"><span class="std std-ref">Fail Fast</span></a> is disabled on this
-client.</p>
-<p class="last">There is better HTTP proxy support coming to Finagle along with the Netty 4 upgrade.</p>
+<p class="last">There is also a legacy support to web proxy servers available in Finagle via the
+<cite>Transporter.HttpProxy</cite> stack param. In that case, proxy server is forced to represented as a single
+<cite>SocketAddress</cite>, which not only introduces a single point of failure within a client (i.e., a
+client goes offline if a web proxy server is down), but also disables Finagle&#8217;s resiliency features
+such as failure detection and load balancing.</p>
 </div>
 </div>
 <div class="section" id="socks5-proxy">
 <h3>SOCKS5 Proxy<a class="headerlink" href="#socks5-proxy" title="Permalink to this headline">¶</a></h3>
 <p>SOCKS5 proxy support in Finagle is designed and implemented exclusively for testing/development
 (assuming that SOCKS proxy is provided via <cite>ssh -D</cite>), not for production usage. For production
-traffic, an HTTP proxy should be used instead.</p>
+traffic, an HTTP(S) proxy should be used instead.</p>
 <p>Use the following CLI flags to enable SOCKS proxy on every Finagle client on a given JVM instance
 (username and password are optional).</p>
 <div class="highlight-shell"><div class="highlight"><pre><span></span>-com.twitter.finagle.socks.socksProxyHost<span class="o">=</span>localhost <span class="se">\</span>
@@ -327,7 +334,9 @@ stack params <a class="footnote-reference" href="#example" id="id7">[3]</a>.</p>
 time allowed for a request to be outstanding. An important implementation detail of the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
-already been dispatched, the only way to cancel the request is to terminate the connection.</p>
+already been dispatched, the only way to cancel the request is to terminate the connection.
+Note that HTTP/2 and Mux both have first-class support for request cancellation without
+needing to tear down the connection.</p>
 <p>The default timeout for the <cite>Request Timeout</cite> module is unbounded (i.e., <code class="docutils literal"><span class="pre">Duration.Top</span></code>).
 Here is an example <a class="footnote-reference" href="#example" id="id8">[3]</a> of how to override that default.</p>
 <div class="highlight-scala" id="configuring-timeouts"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
@@ -338,11 +347,15 @@ Here is an example <a class="footnote-reference" href="#example" id="id8">[3]</a
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;twitter.com&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
+<p>Regarding <a class="reference internal" href="#client-retries"><span class="std std-ref">retries</span></a>, the timeout is given to each attempt.</p>
+<p>As Finagle does not know whether or not a request is idempotent, request timeouts
+are not retried by default. However this can be configured through a
+<a class="reference internal" href="#client-retries"><span class="std std-ref">retry policy</span></a>.</p>
 <p>See <a class="reference internal" href="Metrics.html#metrics-stats-filter"><span class="std std-ref">Request Latency metrics</span></a> for more details.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Requests timed out by the <cite>Request Timeout</cite> module are not retried by default
-given it&#8217;s not known whether or not they were written to the wire.</p>
+<p class="last">This module only works with request/response usage and does not
+support streaming (such as with HTTP).</p>
 </div>
 <p>The <cite>Expiration</cite> module is attached at the connection level and expires a service/session
 after a certain amount of idle time. The module is implemented by
@@ -545,9 +558,19 @@ behind a client parameter <a class="footnote-reference" href="#probation" id="id
 <div class="section" id="behavior-when-no-nodes-are-available">
 <h4>Behavior when no nodes are available<a class="headerlink" href="#behavior-when-no-nodes-are-available" title="Permalink to this headline">¶</a></h4>
 <p>When there are no nodes in the <cite>com.twitter.finagle.Status.Open</cite> state, the balancers
-must make a decision. One approach is to fail the request at this point. Instead,
-Finagle makes an optimistic decision that its view of the nodes may be out-of-date
-and picks a node it hopes has become available.</p>
+must make a decision. Finagle&#8217;s default behavior makes an optimistic decision
+that its view of the nodes may be out-of-date and picks a node it hopes has become available.
+This can be customized to fail the request immediately through
+<code class="docutils literal"><span class="pre">LoadBalancerFactory.WhenNoNodesOpenParam</span></code> which will cause clients to see
+a non-retryable <code class="docutils literal"><span class="pre">c.t.f.loadbalancer.NoNodesOpenException</span></code>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.LoadBalancerFactory.WhenNoNodesOpenParam</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.loadbalancer.WhenNoNodesOpen</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">WhenNoNodesOpenParam</span><span class="o">(</span><span class="nc">WhenNoNodesOpen</span><span class="o">.</span><span class="nc">FailFast</span><span class="o">))</span>
+</pre></div>
+</div>
 <p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><span class="std std-ref">Related stats</span></a></p>
 </div>
 </div>
@@ -563,7 +586,7 @@ triggered, temporarily suspend the use of a particular endpoint.</p>
 </ol>
 <p>In addition to <cite>Fail Fast</cite> and <cite>Failure Accrual</cite>, some of the protocols (i.e., <cite>Mux</cite>) in
 Finagle support <cite>Ping-based Failure Detectors</cite> <a class="footnote-reference" href="#failure-detectors" id="id21">[10]</a>
-(i.e., <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/com/twitter/finagle/mux/ThresholdFailureDetector.scala">ThresholdFailureDetector</a>).</p>
+(i.e., <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/liveness/ThresholdFailureDetector.scala">ThresholdFailureDetector</a>).</p>
 <div class="section" id="fail-fast">
 <span id="client-fail-fast"></span><h4>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h4>
 <p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
@@ -875,10 +898,6 @@ for more details.</p>
 </div>
 <div class="section" id="methodbuilder">
 <h2>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h2>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">These APIs are experimental and subject to change.</p>
-</div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.

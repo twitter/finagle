@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -229,6 +229,12 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="BMergeEx.html" title=""></a>
+                        <a href="BMergeEx.html" title="">
+                          BMergeEx
+                        </a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="" title=""></a>
                         <a href="" title="">
                           BRange
@@ -262,7 +268,7 @@ resources for using Finagle.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">BRange</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="startField">startField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="endField">endField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="../Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="../StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">BRange</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="count">count: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="startField">startField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>, <span name="endField">endField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>)</span><span class="result"> extends <a href="../Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="../StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -318,9 +324,9 @@ resources for using Finagle.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.redis.protocol.commands.BRange#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(key:com.twitter.io.Buf,startField:Option[com.twitter.io.Buf],endField:Option[com.twitter.io.Buf]):com.twitter.finagle.redis.protocol.commands.BRange"></a><a id="&lt;init&gt;:BRange"></a>
+      <a id="&lt;init&gt;(key:com.twitter.io.Buf,count:com.twitter.io.Buf,startField:Option[com.twitter.io.Buf],endField:Option[com.twitter.io.Buf]):com.twitter.finagle.redis.protocol.commands.BRange"></a><a id="&lt;init&gt;:BRange"></a>
       <span class="permalink">
-      <a href="../../../../../../com/twitter/finagle/redis/protocol/commands/BRange.html#&lt;init&gt;(key:com.twitter.io.Buf,startField:Option[com.twitter.io.Buf],endField:Option[com.twitter.io.Buf]):com.twitter.finagle.redis.protocol.commands.BRange" title="Permalink">
+      <a href="../../../../../../com/twitter/finagle/redis/protocol/commands/BRange.html#&lt;init&gt;(key:com.twitter.io.Buf,count:com.twitter.io.Buf,startField:Option[com.twitter.io.Buf],endField:Option[com.twitter.io.Buf]):com.twitter.finagle.redis.protocol.commands.BRange" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -329,7 +335,7 @@ resources for using Finagle.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BRange</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="startField">startField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>, <span name="endField">endField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span>
+        <span class="name">BRange</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="count">count: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="startField">startField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>, <span name="endField">endField: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>)</span>
       </span>
       
       
@@ -419,7 +425,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">body</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">body</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.commands.BRange">BRange</a> → <a href="../KeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeyCommand">KeyCommand</a> → <a href="../Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
@@ -445,6 +451,22 @@ resources for using Finagle.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.protocol.commands.BRange#count" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="count:com.twitter.io.Buf"></a><a id="count:Buf"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/twitter/finagle/redis/protocol/commands/BRange.html#count:com.twitter.io.Buf" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">count</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.redis.protocol.commands.BRange#endField" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="endField:Option[com.twitter.io.Buf]"></a><a id="endField:Option[Buf]"></a>
       <span class="permalink">
@@ -457,7 +479,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">endField</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">endField</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       
@@ -543,7 +565,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">key</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">key</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.commands.BRange">BRange</a> → <a href="../KeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeyCommand">KeyCommand</a></dd></dl></div>
@@ -559,7 +581,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">name</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">name</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.commands.BRange">BRange</a> → <a href="../Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></dd></dl></div>
@@ -623,7 +645,7 @@ resources for using Finagle.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">startField</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">startField</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       

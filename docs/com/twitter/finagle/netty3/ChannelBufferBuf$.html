@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -215,24 +215,6 @@ package netty3 can move into its own package, so that only the
       <span class="symbol">
         <a title="" href="socks/index.html">
               <span class="name">socks</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.ssl" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ssl"></a><a id="ssl:ssl"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#ssl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ssl/index.html">
-              <span class="name">ssl</span>
             </a>
       </span>
       
@@ -313,8 +295,10 @@ In-typed downstream messages.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="numWorkers$.html" title=""></a>
-                        <a href="numWorkers$.html" title="">
+                        <a class="object" href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 3 backend
+"></a>
+                        <a href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 3 backend
+">
                           numWorkers
                         </a>
                       </li>
@@ -502,7 +486,7 @@ In-typed downstream messages.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">coerce</span><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="ChannelBufferBuf.html" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a></span>
+        <span class="name">coerce</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="ChannelBufferBuf.html" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a></span>
       </span>
       
       <p class="shortcomment cmt">Coerce a buf to a ChannelBufferBuf
@@ -637,7 +621,7 @@ In-typed downstream messages.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newOwned</span><span class="params">(<span name="cb">cb: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">newOwned</span><span class="params">(<span name="cb">cb: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <p class="shortcomment cmt">Java API for <a href="ChannelBufferBuf$$Owned$.html#apply(cb:org.jboss.netty.buffer.ChannelBuffer):com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.netty3.ChannelBufferBuf.Owned#apply">ChannelBufferBuf.Owned.apply</a>.</p>

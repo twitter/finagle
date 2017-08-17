@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -612,7 +612,7 @@ Finagle servers or clients.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">connectTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">connectTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures the TCP connection <code>timeout</code> of this client (default: 1 second).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the TCP connection <code>timeout</code> of this client (default: 1 second).</p><p>The connection timeout is the maximum amount of time a transport is allowed
@@ -705,9 +705,9 @@ to spend establishing a TCP connection.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#httpProxyTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A"></a><a id="httpProxyTo(String,Option[Credentials]):A"></a>
+      <a id="httpProxyTo(host:String,credentials:com.twitter.finagle.client.Transporter.Credentials):A"></a><a id="httpProxyTo(String,Credentials):A"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A" title="Permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#httpProxyTo(host:String,credentials:com.twitter.finagle.client.Transporter.Credentials):A" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -716,14 +716,36 @@ to spend establishing a TCP connection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="credentials">credentials: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="credentials">credentials: <a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
-      <p class="shortcomment cmt">Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
+      <p class="shortcomment cmt">Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
 establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.</p><p>When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
-to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
-</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd><dt class="param">credentials</dt><dd class="cmt"><p>optional credentials for a proxy server</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This is only enabled for finagle-netty4 right now. Applying this to a Netty 3 based
-      client has no effect.</p></span></dd></dl></div>
+to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
+</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd><dt class="param">credentials</dt><dd class="cmt"><p>credentials for a proxy server</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#httpProxyTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpProxyTo(host:String):A"></a><a id="httpProxyTo(String):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#httpProxyTo(host:String):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
+establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.</p><p>When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
+to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
+</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -800,7 +822,7 @@ to proxy the traffic to a given ultimate destination, specified as <code>host</c
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">readTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures this client or server with given transport-level read <code>timeout</code>
@@ -820,7 +842,7 @@ connection/transport may have received no data.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">receiveBufferSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">receiveBufferSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures this client or server with given TCP receive buffer <code>size</code> (default: unspecified,
@@ -839,7 +861,7 @@ a system-level value will be used).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sendBufferSize</span><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">sendBufferSize</span><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures this client or server with given TCP send buffer <code>size</code> (default: unspecified,
@@ -937,6 +959,38 @@ Hostname verification will be provided against the given <code>hostname</code>.
       <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables SSL/TLS support (connection encrypting) on this client.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Given that this uses default <span class="extype" name="SSLContext">SSLContext</span>, all configuration params (trust/key stores)
       should be passed as Java system properties.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,engineFactory:com.twitter.finagle.ssl.client.SslClientEngineFactory,sessionVerifier:com.twitter.finagle.ssl.client.SslClientSessionVerifier):A"></a><a id="tls(SslClientConfiguration,SslClientEngineFactory,SslClientSessionVerifier):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,engineFactory:com.twitter.finagle.ssl.client.SslClientEngineFactory,sessionVerifier:com.twitter.finagle.ssl.client.SslClientSessionVerifier):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/client/SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a></span>, <span name="engineFactory">engineFactory: <a href="../ssl/client/SslClientEngineFactory.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientEngineFactory">SslClientEngineFactory</a></span>, <span name="sessionVerifier">sessionVerifier: <a href="../ssl/client/SslClientSessionVerifier.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientSessionVerifier">SslClientSessionVerifier</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,sessionVerifier:com.twitter.finagle.ssl.client.SslClientSessionVerifier):A"></a><a id="tls(SslClientConfiguration,SslClientSessionVerifier):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,sessionVerifier:com.twitter.finagle.ssl.client.SslClientSessionVerifier):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="config">config: <a href="../ssl/client/SslClientConfiguration.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientConfiguration">SslClientConfiguration</a></span>, <span name="sessionVerifier">sessionVerifier: <a href="../ssl/client/SslClientSessionVerifier.html" class="extype" name="com.twitter.finagle.ssl.client.SslClientSessionVerifier">SslClientSessionVerifier</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables SSL/TLS support (connection encrypting) on this client.</p>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tls(config:com.twitter.finagle.ssl.client.SslClientConfiguration,engineFactory:com.twitter.finagle.ssl.client.SslClientEngineFactory):A"></a><a id="tls(SslClientConfiguration,SslClientEngineFactory):A"></a>
       <span class="permalink">
@@ -1101,7 +1155,7 @@ standard output).
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+        <span class="name">writeTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
       </span>
       
       <p class="shortcomment cmt">Configures this client or server with given transport-level write <code>timeout</code>
@@ -1115,7 +1169,34 @@ connection/transport may not have sent any data.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.param.ClientTransportParams#httpProxyTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A"></a><a id="httpProxyTo(String,Option[Credentials]):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-7-11) Use httpProxyTo(String, Tansporter.Credentials) instead">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="credentials">credentials: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
+(default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
+establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.</p><p>When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
+to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
+</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd><dt class="param">credentials</dt><dd class="cmt"><p>optional credentials for a proxy server</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-7-11)</i> Use httpProxyTo(String, Tansporter.Credentials) instead</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

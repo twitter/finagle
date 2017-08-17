@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -193,12 +193,6 @@ resources for using Finagle.
                           ClientConfigEvidence
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Cluster$.html" title=""></a>
-                        <a class="trait" href="Cluster.html" title="Cluster is a collection of servers."></a>
-                        <a href="Cluster.html" title="Cluster is a collection of servers.">
-                          Cluster
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">
@@ -221,12 +215,6 @@ a port).">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerBuildertoTwitterService.html" title=""></a>
-                        <a href="ServerBuildertoTwitterService.html" title="">
-                          ServerBuildertoTwitterService
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerConfig$.html" title=""></a>
                         <a href="ServerConfig$.html" title="">
                           ServerConfig
@@ -242,12 +230,6 @@ a port).">
                         <a class="class" href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any"></a>
                         <a href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any">
                           SourceTrackingMonitor
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StaticCluster.html" title="A simple static cluster implementation."></a>
-                        <a href="StaticCluster.html" title="A simple static cluster implementation.">
-                          StaticCluster
                         </a>
                       </li>
               </ul>
@@ -688,31 +670,6 @@ a port).">
       </span>
       
       <p class="shortcomment cmt">Provides a typesafe <code>buildFactory</code> for Java.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#stackClientOfCodec" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stackClientOfCodec[Req,Rep](codecFactory:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]):com.twitter.finagle.client.StackClient[Req,Rep]"></a><a id="stackClientOfCodec[Req,Rep]((ClientCodecConfig)⇒Codec[Req,Rep]):StackClient[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/ClientBuilder$.html#stackClientOfCodec[Req,Rep](codecFactory:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]):com.twitter.finagle.client.StackClient[Req,Rep]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">stackClientOfCodec</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="codecFactory">codecFactory: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stackClientOfCodec.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stackClientOfCodec.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stackClientOfCodec.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stackClientOfCodec.Rep">Rep</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Returns a <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a> which is equivalent to a
-<code>ClientBuilder</code> configured with the same codec; that is, given</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a> which is equivalent to a
-<code>ClientBuilder</code> configured with the same codec; that is, given</p><pre><span class="kw">val</span> cb = ClientBuilder()
-  .dest(dest)
-  .name(name)
-  .codec(codec)
-
-<span class="kw">val</span> sc = ClientBuilder.stackClientOfCodec(codec)</pre><p>then the following are equivalent</p><pre>cb.build()
-sc.newService(dest, name)</pre><p>and the following are also equivalent</p><pre>cb.buildFactory()
-sc.newClient(dest, name)</pre></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

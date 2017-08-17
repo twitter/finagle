@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 current" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -591,19 +555,6 @@ and Updating).
                         <a class="object" href="CacheNodeGroup$.html" title=""></a>
                         <a href="CacheNodeGroup$.html" title="">
                           CacheNodeGroup
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="CachePoolConfig$.html" title="Cache pool config data object
-"></a>
-                        <a class="class" href="CachePoolConfig.html" title="Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now."></a>
-                        <a href="CachePoolConfig.html" title="Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now.">
-                          CachePoolConfig
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="CasResult$.html" title=""></a>
@@ -741,8 +692,8 @@ the key value.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="TwemcachePartitionedClient.html" title="Twemcache commands implemenation for a partitioned client."></a>
-                        <a href="TwemcachePartitionedClient.html" title="Twemcache commands implemenation for a partitioned client.">
+                        <a class="trait" href="TwemcachePartitionedClient.html" title="Twemcache commands implementation for a partitioned client."></a>
+                        <a href="TwemcachePartitionedClient.html" title="Twemcache commands implementation for a partitioned client.">
                           TwemcachePartitionedClient
                         </a>
                       </li><li class="current-entities indented4">
@@ -1142,31 +1093,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1413,9 +1339,9 @@ generator.
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.memcached.BaseClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="BaseClient[T]extendsAnyRef"></a><a id="BaseClient[T]:BaseClient[T]"></a>
+      <a id="BaseClient[T]extendsClosable"></a><a id="BaseClient[T]:BaseClient[T]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#BaseClient[T]extendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/memcached/index.html#BaseClient[T]extendsClosable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1426,7 +1352,7 @@ generator.
       <span class="symbol">
         <a title="A friendly client to talk to a Memcached server." href="BaseClient.html">
               <span class="name">BaseClient</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p><div class="fullcomment"><div class="comment cmt"><p>A friendly client to talk to a Memcached server.
@@ -1451,35 +1377,6 @@ generator.
       </span>
       
       
-    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CachePoolConfigextendsProductwithSerializable"></a><a id="CachePoolConfig:CachePoolConfig"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#CachePoolConfigextendsProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now." href="CachePoolConfig.html">
-              <span class="name">CachePoolConfig</span>
-            </a><span class="params">(<span name="cachePoolSize">cachePoolSize: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="detectKeyRemapping">detectKeyRemapping: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now.</p><div class="fullcomment"><div class="comment cmt"><p>Cache pool config data format
-Currently this data format is only used by ZookeeperCachePoolManager to read the config data
-from zookeeper serverset parent node, and the expected cache pool size is the only attribute
-we need for now. In the future this can be extended for other config attributes like cache
-pool migrating state, backup cache servers list, or replication role, etc
-</p></div></div>
     </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="CasResultextendsAnyRef"></a><a id="CasResult:CasResult"></a>
       <span class="permalink">
@@ -1513,7 +1410,7 @@ pool migrating state, backup cache servers list, or replication role, etc
       <span class="symbol">
         <a title="" href="Client.html">
               <span class="name">Client</span>
-            </a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+            </a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       
@@ -1568,7 +1465,7 @@ pool migrating state, backup cache servers list, or replication role, etc
       <span class="symbol">
         <a title="" href="Entry.html">
               <span class="name">Entry</span>
-            </a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       
@@ -1881,13 +1778,13 @@ This trait can only be mixed into a memcache client implementation as extension.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Twemcache commands implemenation for a partitioned client." href="TwemcachePartitionedClient.html">
+        <a title="Twemcache commands implementation for a partitioned client." href="TwemcachePartitionedClient.html">
               <span class="name">TwemcachePartitionedClient</span>
             </a><span class="result"> extends <a href="TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
       </span>
       
-      <p class="shortcomment cmt">Twemcache commands implemenation for a partitioned client.</p><div class="fullcomment"><div class="comment cmt"><p>Twemcache commands implemenation for a partitioned client.
-This trait can only be mixed into a ParitionedClient that is delegating twemcache compatible clients.
+      <p class="shortcomment cmt">Twemcache commands implementation for a partitioned client.</p><div class="fullcomment"><div class="comment cmt"><p>Twemcache commands implementation for a partitioned client.
+This trait can only be mixed into a PartitionedClient that is delegating twemcache compatible clients.
 </p></div></div>
     </li><li name="com.twitter.finagle.memcached.TwitterCacheResolver" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TwitterCacheResolverextendsResolver"></a><a id="TwitterCacheResolver:TwitterCacheResolver"></a>
@@ -2000,26 +1897,6 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
       </span>
       
       
-    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CachePoolConfig"></a><a id="CachePoolConfig:CachePoolConfig"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/memcached/index.html#CachePoolConfig" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Cache pool config data object
-" href="CachePoolConfig$.html">
-              <span class="name">CachePoolConfig</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Cache pool config data object
-</p>
     </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CasResult"></a><a id="CasResult:CasResult"></a>
       <span class="permalink">

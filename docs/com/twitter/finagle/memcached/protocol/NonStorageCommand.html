@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -259,8 +259,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Deleted.html" title=""></a>
-                        <a href="Deleted.html" title="">
+                        <a class="object" href="Deleted$.html" title=""></a>
+                        <a href="Deleted$.html" title="">
                           Deleted
                         </a>
                       </li><li class="current-entities indented5">
@@ -271,8 +271,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Exists.html" title=""></a>
-                        <a href="Exists.html" title="">
+                        <a class="object" href="Exists$.html" title=""></a>
+                        <a href="Exists$.html" title="">
                           Exists
                         </a>
                       </li><li class="current-entities indented5">
@@ -313,14 +313,8 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="trait" href="KeyValidation.html" title="This trait contains cache command key validation logic."></a>
-                        <a href="KeyValidation.html" title="This trait contains cache command key validation logic.">
-                          KeyValidation
-                        </a>
-                      </li><li class="current-entities indented5">
-                        <span class="separator"></span>
-                        <a class="class" href="NoOp.html" title=""></a>
-                        <a href="NoOp.html" title="">
+                        <a class="object" href="NoOp$.html" title=""></a>
+                        <a href="NoOp$.html" title="">
                           NoOp
                         </a>
                       </li><li class="current-entities indented5">
@@ -339,14 +333,14 @@ non-existent memcached command.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="NotFound.html" title=""></a>
-                        <a href="NotFound.html" title="">
+                        <a class="object" href="NotFound$.html" title=""></a>
+                        <a href="NotFound$.html" title="">
                           NotFound
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="NotStored.html" title=""></a>
-                        <a href="NotStored.html" title="">
+                        <a class="object" href="NotStored$.html" title=""></a>
+                        <a href="NotStored$.html" title="">
                           NotStored
                         </a>
                       </li><li class="current-entities indented5">
@@ -411,8 +405,8 @@ non-existent memcached command.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="Stored.html" title=""></a>
-                        <a href="Stored.html" title="">
+                        <a class="object" href="Stored$.html" title=""></a>
+                        <a href="Stored$.html" title="">
                           Stored
                         </a>
                       </li><li class="current-entities indented5">
@@ -452,7 +446,7 @@ non-existent memcached command.">
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
+        <span class="modifier">sealed abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -514,26 +508,7 @@ non-existent memcached command.">
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.memcached.protocol.NonStorageCommand#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(name:String):com.twitter.finagle.memcached.protocol.NonStorageCommand"></a><a id="&lt;init&gt;:NonStorageCommand"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/memcached/protocol/NonStorageCommand.html#&lt;init&gt;(name:String):com.twitter.finagle.memcached.protocol.NonStorageCommand" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">NonStorageCommand</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         
 

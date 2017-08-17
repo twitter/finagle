@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -630,11 +594,15 @@ use.</p><p> Flag          Value     Meaning
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="BinaryEncodedRow.html" title="Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol."></a>
-                        <a href="BinaryEncodedRow.html" title="Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol.">
-                          BinaryEncodedRow
+                        <a class="class" href="BigIntTooLongException.html" title=""></a>
+                        <a href="BigIntTooLongException.html" title="">
+                          BigIntTooLongException
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="BigIntValue.html" title=""></a>
+                        <a href="BigIntValue.html" title="">
+                          BigIntValue
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -665,12 +633,6 @@ mysql binary protocol.">
                         <a class="trait" href="Client.html" title=""></a>
                         <a href="Client.html" title="">
                           Client
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ClientDispatcher$.html" title=""></a>
-                        <a class="class" href="ClientDispatcher.html" title="A ClientDispatcher that implements the mysql client/server protocol."></a>
-                        <a href="ClientDispatcher.html" title="A ClientDispatcher that implements the mysql client/server protocol.">
-                          ClientDispatcher
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -791,6 +753,14 @@ a prepared statement.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="FieldAttributes$.html" title="These bit masks are to understand whether corresponding attribute
+is set for the field."></a>
+                        <a href="FieldAttributes$.html" title="These bit masks are to understand whether corresponding attribute
+is set for the field.">
+                          FieldAttributes
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="FloatValue.html" title=""></a>
                         <a href="FloatValue.html" title="">
                           FloatValue
@@ -846,6 +816,12 @@ a version of MySQL that the client is incompatible with.">
                         <a class="class" href="IntValue.html" title=""></a>
                         <a href="IntValue.html" title="">
                           IntValue
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="IsolationLevel$.html" title="MySQL Isolation Levels."></a>
+                        <a class="trait" href="IsolationLevel.html" title=""></a>
+                        <a href="IsolationLevel.html" title="">
+                          IsolationLevel
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -954,8 +930,7 @@ bytes.">
                           Result
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ResultSet$.html" title="Resultset returned from the server containing field definitions and
-rows."></a>
+                        <span class="separator"></span>
                         <a class="class" href="ResultSet.html" title=""></a>
                         <a href="ResultSet.html" title="">
                           ResultSet
@@ -995,14 +970,6 @@ associated data into a packet."></a>
                         <a href="SimpleCommandRequest.html" title="Defines a request that encodes the command byte and
 associated data into a packet.">
                           SimpleCommandRequest
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StringEncodedRow.html" title="Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol."></a>
-                        <a href="StringEncodedRow.html" title="Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol.">
-                          StringEncodedRow
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -1297,31 +1264,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1567,10 +1509,10 @@ generator.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.mysql.BinaryEncodedRow" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="BinaryEncodedRowextendsRow"></a><a id="BinaryEncodedRow:BinaryEncodedRow"></a>
+              <ol><li name="com.twitter.finagle.mysql.BigIntTooLongException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BigIntTooLongExceptionextendsException"></a><a id="BigIntTooLongException:BigIntTooLongException"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#BinaryEncodedRowextendsRow" title="Permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#BigIntTooLongExceptionextendsException" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1579,17 +1521,30 @@ generator.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol." href="BinaryEncodedRow.html">
-              <span class="name">BinaryEncodedRow</span>
-            </a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a></span>
+        <a title="" href="BigIntTooLongException.html">
+              <span class="name">BigIntTooLongException</span>
+            </a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
       
-      <p class="shortcomment cmt">Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol.
-<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html" target="_blank">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html</a>
-</p></div></div>
+      
+    </li><li name="com.twitter.finagle.mysql.BigIntValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BigIntValueextendsValuewithProductwithSerializable"></a><a id="BigIntValue:BigIntValue"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#BigIntValueextendsValuewithProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="BigIntValue.html">
+              <span class="name">BigIntValue</span>
+            </a><span class="params">(<span name="bi">bi: <span class="extype" name="scala.BigInt">BigInt</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.mysql.ByteValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ByteValueextendsValuewithProductwithSerializable"></a><a id="ByteValue:ByteValue"></a>
       <span class="permalink">
@@ -1658,32 +1613,10 @@ mysql binary protocol.
       <span class="symbol">
         <a title="" href="Client.html">
               <span class="name">Client</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.ClientDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result,com.twitter.finagle.mysql.transport.Packet,com.twitter.finagle.mysql.transport.Packet]"></a><a id="ClientDispatcher:ClientDispatcher"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#ClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.mysql.Request,com.twitter.finagle.mysql.Result,com.twitter.finagle.mysql.transport.Packet,com.twitter.finagle.mysql.transport.Packet]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="A ClientDispatcher that implements the mysql client/server protocol." href="ClientDispatcher.html">
-              <span class="name">ClientDispatcher</span>
-            </a><span class="result"> extends <a href="../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p><div class="fullcomment"><div class="comment cmt"><p>A ClientDispatcher that implements the mysql client/server protocol.
-For a detailed exposition of the client/server protocol refer to:
-<a href="http://dev.mysql.com/doc/internals/en/client-server-protocol.html" target="_blank">http://dev.mysql.com/doc/internals/en/client-server-protocol.html</a></p><p>Note, the mysql protocol does not support any form of multiplexing so
-requests are dispatched serially and concurrent requests are queued.
-</p></div></div>
     </li><li name="com.twitter.finagle.mysql.CloseRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CloseRequestextendsCommandRequestwithProductwithSerializable"></a><a id="CloseRequest:CloseRequest"></a>
       <span class="permalink">
@@ -1739,7 +1672,7 @@ and has a cmd byte associated with it.</p>
       <span class="symbol">
         <a title="A closable async stream of projected rows from a CursoredStatement." href="CursorResult.html">
               <span class="name">CursorResult</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A closable async stream of projected rows from a CursoredStatement.</p>
@@ -1800,7 +1733,7 @@ a lazy stream of rows. Can be used concurrently.
       <span class="symbol">
         <a title="A decoder for Results contained in a single packet." href="Decoder.html">
               <span class="name">Decoder</span>
-            </a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.mysql.Decoder.T">T</span>]</span>
+            </a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<span class="extype" name="com.twitter.finagle.mysql.Decoder.T">T</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A decoder for Results contained in a single packet.</p>
@@ -1969,7 +1902,7 @@ a prepared statement.
 client handshake (HandshakeResponse) using the given
 parameters." href="Handshake.html">
               <span class="name">Handshake</span>
-            </a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="maxPacketSize">maxPacketSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../index.html">Utf8_general_ci</a></span></span></span>, <span name="maxPacketSize">maxPacketSize: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span> = <span class="symbol"><span class="name"><a href="../../../index.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Bridges a server handshake (HandshakeInit) with a
@@ -2058,6 +1991,24 @@ upstream MySQL server.</p>
         <a title="" href="IntValue.html">
               <span class="name">IntValue</span>
             </a><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.mysql.IsolationLevel" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="IsolationLevelextendsAnyRef"></a><a id="IsolationLevel:IsolationLevel"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#IsolationLevelextendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="IsolationLevel.html">
+              <span class="name">IsolationLevel</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
       
@@ -2402,29 +2353,6 @@ associated data into a packet." href="SimpleCommandRequest.html">
       
       <p class="shortcomment cmt">Defines a request that encodes the command byte and
 associated data into a packet.</p>
-    </li><li name="com.twitter.finagle.mysql.StringEncodedRow" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="StringEncodedRowextendsRow"></a><a id="StringEncodedRow:StringEncodedRow"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#StringEncodedRowextendsRow" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol." href="StringEncodedRow.html">
-              <span class="name">StringEncodedRow</span>
-            </a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.mysql.Row">Row</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol.
-<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow</a>
-</p></div></div>
     </li><li name="com.twitter.finagle.mysql.StringValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StringValueextendsValuewithProductwithSerializable"></a><a id="StringValue:StringValue"></a>
       <span class="permalink">
@@ -2617,24 +2545,6 @@ received from a mysql server.</p>
       </span>
       
       
-    </li><li name="com.twitter.finagle.mysql.ClientDispatcher" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientDispatcher"></a><a id="ClientDispatcher:ClientDispatcher"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#ClientDispatcher" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ClientDispatcher$.html">
-              <span class="name">ClientDispatcher</span>
-            </a>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.mysql.CloseStatementOK" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CloseStatementOK"></a><a id="CloseStatementOK:CloseStatementOK"></a>
       <span class="permalink">
@@ -2814,6 +2724,29 @@ Sent during ResultSet transmission and as part of the
 meta-data associated with a Row.
 <a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41</a>
 </p></div></div>
+    </li><li name="com.twitter.finagle.mysql.FieldAttributes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FieldAttributes"></a><a id="FieldAttributes:FieldAttributes"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#FieldAttributes" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="These bit masks are to understand whether corresponding attribute
+is set for the field." href="FieldAttributes$.html">
+              <span class="name">FieldAttributes</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">These bit masks are to understand whether corresponding attribute
+is set for the field.</p><div class="fullcomment"><div class="comment cmt"><p>These bit masks are to understand whether corresponding attribute
+is set for the field. Link to source code from mysql is below.
+<a href="https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h" target="_blank">https://github.com/mysql/mysql-server/blob/5.7/include/mysql_com.h</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.mysql.Handshake" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Handshake"></a><a id="Handshake:Handshake"></a>
       <span class="permalink">
@@ -2892,6 +2825,26 @@ a version of MySQL that the client is incompatible with." href="IncompatibleVers
       
       <p class="shortcomment cmt">Indicates that the server to which the client is connected is running
 a version of MySQL that the client is incompatible with.</p>
+    </li><li name="com.twitter.finagle.mysql.IsolationLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IsolationLevel"></a><a id="IsolationLevel:IsolationLevel"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/mysql/index.html#IsolationLevel" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="MySQL Isolation Levels." href="IsolationLevel$.html">
+              <span class="name">IsolationLevel</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">MySQL Isolation Levels.</p><div class="fullcomment"><div class="comment cmt"><p>MySQL Isolation Levels. Used to override the SESSION or GLOBAL isolation level when
+executing transactions.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html" target="_blank">https://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-isolation-levels.html</a></p></span><span class="cmt"><p><a href="Transactions.html" class="extype" name="com.twitter.finagle.mysql.Transactions">com.twitter.finagle.mysql.Transactions</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.mysql.NullValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullValue"></a><a id="NullValue:NullValue"></a>
       <span class="permalink">
@@ -3032,31 +2985,6 @@ COM_STMT_PREPARE.
       
       <p class="shortcomment cmt">Tells the server that the client wants to close the connection.</p><div class="fullcomment"><div class="comment cmt"><p>Tells the server that the client wants to close the connection.
 <a href="http://dev.mysql.com/doc/internals/en/com-quit.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-quit.html</a>
-</p></div></div>
-    </li><li name="com.twitter.finagle.mysql.ResultSet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ResultSet"></a><a id="ResultSet:ResultSet"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/mysql/index.html#ResultSet" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="Resultset returned from the server containing field definitions and
-rows." href="ResultSet$.html">
-              <span class="name">ResultSet</span>
-            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Resultset returned from the server containing field definitions and
-rows.</p><div class="fullcomment"><div class="comment cmt"><p>Resultset returned from the server containing field definitions and
-rows. The rows can be binary encoded (for prepared statements)
-or text encoded (for regular queries).
-<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset</a>
-<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html" target="_blank">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html</a>
 </p></div></div>
     </li><li name="com.twitter.finagle.mysql.ServerStatus" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerStatus"></a><a id="ServerStatus:ServerStatus"></a>

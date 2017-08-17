@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -206,12 +206,10 @@ com.twitter.finagle.util.LoadService mechanism.">
                           HostStatsReceiver
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ImmediateMetricsStatsReceiver$.html" title=""></a>
-                        <a class="class" href="ImmediateMetricsStatsReceiver.html" title="This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram."></a>
-                        <a href="ImmediateMetricsStatsReceiver.html" title="This implementation of MetricsStatsReceiver that doesn't use WindowedApproximateHistogram
-but ApproximateHistogram.">
-                          ImmediateMetricsStatsReceiver
+                        <span class="separator"></span>
+                        <a class="object" href="ImmediateMetricsHistogram$.html" title=""></a>
+                        <a href="ImmediateMetricsHistogram$.html" title="">
+                          ImmediateMetricsHistogram
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -227,8 +225,10 @@ but ApproximateHistogram.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="JsonExporter$.html" title=""></a>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">
+                        <a class="class" href="" title="A Finagle HTTP service that exports Metrics (available via MetricsView)
+in a JSON format."></a>
+                        <a href="" title="A Finagle HTTP service that exports Metrics (available via MetricsView)
+in a JSON format.">
                           JsonExporter
                         </a>
                       </li><li class="current-entities indented4">
@@ -249,9 +249,25 @@ all service-loadable receivers and broadcasts stats to them.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of
+the values are taken every latchPeriod and that value is returned
+for rest of latchPeriod."></a>
+                        <a href="MetricsBucketedHistogram.html" title="A MetricsHistogram that is latched such that a snapshot of
+the values are taken every latchPeriod and that value is returned
+for rest of latchPeriod.">
+                          MetricsBucketedHistogram
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="MetricsExporter.html" title=""></a>
                         <a href="MetricsExporter.html" title="">
                           MetricsExporter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting."></a>
+                        <a href="MetricsHistogram.html" title="A histogram that supports writing, querying, and resetting.">
+                          MetricsHistogram
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -261,29 +277,23 @@ all service-loadable receivers and broadcasts stats to them.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MetricsStatsReceiver$.html" title=""></a>
-                        <a class="class" href="MetricsStatsReceiver.html" title="This implementation of StatsReceiver uses the com.twitter.common.metrics library under
-the hood."></a>
-                        <a href="MetricsStatsReceiver.html" title="This implementation of StatsReceiver uses the com.twitter.common.metrics library under
-the hood.">
+                        <a class="class" href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead."></a>
+                        <a href="MetricsStatsReceiver.html" title="The standard implementation of StatsReceiver, optimized to be high precision
+and low overhead.">
                           MetricsStatsReceiver
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="OstrichExporter.html" title=""></a>
-                        <a href="OstrichExporter.html" title="">
-                          OstrichExporter
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="OstrichStatsReceiver.html" title=""></a>
-                        <a href="OstrichStatsReceiver.html" title="">
-                          OstrichStatsReceiver
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver."></a>
                         <a href="ServerStatsReceiver$.html" title="A server-specific StatsReceiver.">
                           ServerStatsReceiver
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Snapshot$.html" title=""></a>
+                        <a class="trait" href="Snapshot.html" title="A snapshot of the state of the underlying stat."></a>
+                        <a href="Snapshot.html" title="A snapshot of the state of the underlying stat.">
+                          Snapshot
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -312,12 +322,6 @@ be no interesting data there."></a>
 beneficial to not export all the histogram details as there will
 be no interesting data there.">
                           includeEmptyHistograms
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="object" href="ostrichFilterRegex$.html" title=""></a>
-                        <a href="ostrichFilterRegex$.html" title="">
-                          ostrichFilterRegex
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -373,11 +377,15 @@ be no interesting data there.">
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A Finagle HTTP service that exports <span class="extype" name="Metrics">Metrics</span> (available via <span class="extype" name="MetricsView">MetricsView</span>)
+in a JSON format.</p><p>This service respects metrics <span class="extype" name="Verbosity">verbosity levels</span>: it doesn't export &quot;debug&quot;
+(i.e., <span class="extype" name="Verbosity.Debug">Verbosity.Debug</span>) metrics unless they are whitelisted via the comma-separated
+<code>verbose</code>.
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.JsonExporter">JsonExporter</a></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <span class="extype" name="com.twitter.util.Closable">Closable</span>, (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">
               Known Subclasses
@@ -429,9 +437,9 @@ be no interesting data there.">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.stats.JsonExporter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(registry:com.twitter.common.metrics.Metrics):com.twitter.finagle.stats.JsonExporter"></a><a id="&lt;init&gt;:JsonExporter"></a>
+      <a id="&lt;init&gt;(registry:com.twitter.finagle.stats.MetricsView):com.twitter.finagle.stats.JsonExporter"></a><a id="&lt;init&gt;:JsonExporter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#&lt;init&gt;(registry:com.twitter.common.metrics.Metrics):com.twitter.finagle.stats.JsonExporter" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#&lt;init&gt;(registry:com.twitter.finagle.stats.MetricsView):com.twitter.finagle.stats.JsonExporter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -440,14 +448,14 @@ be no interesting data there.">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">JsonExporter</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>)</span>
+        <span class="name">JsonExporter</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.finagle.stats.MetricsView">MetricsView</span></span>)</span>
       </span>
       
       
     </li><li name="com.twitter.finagle.stats.JsonExporter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter"></a><a id="&lt;init&gt;:JsonExporter"></a>
+      <a id="&lt;init&gt;(registry:com.twitter.finagle.stats.MetricsView,timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter"></a><a id="&lt;init&gt;:JsonExporter"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter" title="Permalink">
+      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#&lt;init&gt;(registry:com.twitter.finagle.stats.MetricsView,timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -456,7 +464,23 @@ be no interesting data there.">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">JsonExporter</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>)</span>
+        <span class="name">JsonExporter</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.finagle.stats.MetricsView">MetricsView</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.stats.JsonExporter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(metrics:com.twitter.finagle.stats.MetricsView,verbose:com.twitter.util.tunable.Tunable[String],timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter"></a><a id="&lt;init&gt;:JsonExporter"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#&lt;init&gt;(metrics:com.twitter.finagle.stats.MetricsView,verbose:com.twitter.util.tunable.Tunable[String],timer:com.twitter.util.Timer):com.twitter.finagle.stats.JsonExporter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">JsonExporter</span><span class="params">(<span name="metrics">metrics: <span class="extype" name="com.twitter.finagle.stats.MetricsView">MetricsView</span></span>, <span name="verbose">verbose: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span></span>)</span>
       </span>
       
       
@@ -530,7 +554,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -549,7 +573,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
@@ -604,7 +628,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <span class="extype" name="com.twitter.util.Time">Time</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a> → Closable</dd></dl></div>
@@ -620,7 +644,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">(<span name="after">after: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -636,7 +660,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
@@ -652,7 +676,7 @@ be no interesting data there.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -828,22 +852,6 @@ with a reasonable likelihood of success).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stats.JsonExporter#mkRegex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mkRegex(regexesString:String):Option[scala.util.matching.Regex]"></a><a id="mkRegex(String):Option[Regex]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/stats/JsonExporter.html#mkRegex(regexesString:String):Option[scala.util.matching.Regex]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">mkRegex</span><span class="params">(<span name="regexesString">regexesString: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.matching.Regex" class="extype" target="_top">Regex</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -1036,9 +1044,9 @@ with a reasonable likelihood of success).
         <div class="parent" name="com.twitter.finagle.Service">
               <h3>Inherited from <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.util.Closable">Closable</span></h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
+              <h3>Inherited from (<a href="../http/Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../http/Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

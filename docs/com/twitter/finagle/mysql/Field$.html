@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -199,11 +199,15 @@ resources for using Finagle.
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="BinaryEncodedRow.html" title="Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol."></a>
-                        <a href="BinaryEncodedRow.html" title="Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol.">
-                          BinaryEncodedRow
+                        <a class="class" href="BigIntTooLongException.html" title=""></a>
+                        <a href="BigIntTooLongException.html" title="">
+                          BigIntTooLongException
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="BigIntValue.html" title=""></a>
+                        <a href="BigIntValue.html" title="">
+                          BigIntValue
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -234,12 +238,6 @@ mysql binary protocol.">
                         <a class="trait" href="Client.html" title=""></a>
                         <a href="Client.html" title="">
                           Client
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ClientDispatcher$.html" title=""></a>
-                        <a class="class" href="ClientDispatcher.html" title="A ClientDispatcher that implements the mysql client/server protocol."></a>
-                        <a href="ClientDispatcher.html" title="A ClientDispatcher that implements the mysql client/server protocol.">
-                          ClientDispatcher
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -360,6 +358,14 @@ a prepared statement.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="FieldAttributes$.html" title="These bit masks are to understand whether corresponding attribute
+is set for the field."></a>
+                        <a href="FieldAttributes$.html" title="These bit masks are to understand whether corresponding attribute
+is set for the field.">
+                          FieldAttributes
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="FloatValue.html" title=""></a>
                         <a href="FloatValue.html" title="">
                           FloatValue
@@ -415,6 +421,12 @@ a version of MySQL that the client is incompatible with.">
                         <a class="class" href="IntValue.html" title=""></a>
                         <a href="IntValue.html" title="">
                           IntValue
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="IsolationLevel$.html" title="MySQL Isolation Levels."></a>
+                        <a class="trait" href="IsolationLevel.html" title=""></a>
+                        <a href="IsolationLevel.html" title="">
+                          IsolationLevel
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -523,8 +535,7 @@ bytes.">
                           Result
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="ResultSet$.html" title="Resultset returned from the server containing field definitions and
-rows."></a>
+                        <span class="separator"></span>
                         <a class="class" href="ResultSet.html" title=""></a>
                         <a href="ResultSet.html" title="">
                           ResultSet
@@ -564,14 +575,6 @@ associated data into a packet."></a>
                         <a href="SimpleCommandRequest.html" title="Defines a request that encodes the command byte and
 associated data into a packet.">
                           SimpleCommandRequest
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StringEncodedRow.html" title="Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol."></a>
-                        <a href="StringEncodedRow.html" title="Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol.">
-                          StringEncodedRow
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -649,7 +652,7 @@ meta-data associated with a Row.
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="Decoder.html" class="extype" name="com.twitter.finagle.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>], (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="Decoder.html" class="extype" name="com.twitter.finagle.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>], (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -762,7 +765,7 @@ meta-data associated with a Row.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -781,7 +784,7 @@ meta-data associated with a Row.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="packet">packet: <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="packet">packet: <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Decoder.html" class="extype" name="com.twitter.finagle.mysql.Decoder">Decoder</a> → Function1</dd></dl></div>
@@ -835,7 +838,7 @@ meta-data associated with a Row.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -1123,7 +1126,7 @@ meta-data associated with a Row.
             </div><div class="parent" name="com.twitter.finagle.mysql.Decoder">
               <h3>Inherited from <a href="Decoder.html" class="extype" name="com.twitter.finagle.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</h3>
+              <h3>Inherited from (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.mysql.transport.Packet">Packet</a>) ⇒ <span class="extype" name="com.twitter.util.Try">Try</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.mysql.Field">Field</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

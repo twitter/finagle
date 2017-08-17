@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -218,7 +218,7 @@ communication.">
                           Sampler
                         </a>
                       </li><li class="current-entities indented5">
-                        <a class="object" href="SamplingTracer$.html" title=""></a>
+                        <span class="separator"></span>
                         <a class="class" href="SamplingTracer.html" title="Tracer that supports sampling."></a>
                         <a href="SamplingTracer.html" title="Tracer that supports sampling.">
                           SamplingTracer
@@ -325,7 +325,7 @@ communication.">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RawZipkinTracer</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../../index.html">DefaultTimer.twitter</a></span></span></span>)</span>
+        <span class="name">RawZipkinTracer</span><span class="params">(<span name="statsReceiver">statsReceiver: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver">StatsReceiver</span></span>, <span name="timer">timer: <span class="extype" name="com.twitter.util.Timer">Timer</span> = <span class="symbol"><span class="name"><a href="../../../../index.html">DefaultTimer</a></span></span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">statsReceiver</dt><dd class="cmt"><p>We generate stats to keep track of traces sent, failures and so on</p></dd><dt class="param">timer</dt><dd class="cmt"><p>A Timer used for timing out spans in the <span class="extype" name="DeadlineSpanMap">DeadlineSpanMap</span></p></dd></dl></div>
@@ -348,7 +348,7 @@ communication.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sendSpans</span><span class="params">(<span name="spans">spans: <span class="extype" name="scala.Seq">Seq</span>[<a href="Span.html" class="extype" name="com.twitter.finagle.zipkin.core.Span">Span</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">sendSpans</span><span class="params">(<span name="spans">spans: <span class="extype" name="scala.Seq">Seq</span>[<a href="Span.html" class="extype" name="com.twitter.finagle.zipkin.core.Span">Span</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       
@@ -543,7 +543,7 @@ communication.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">flush</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">flush</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="index.html" class="extype" name="com.twitter.finagle.zipkin.core">com.twitter.finagle.zipkin.core</a>] </dd></dl></div>

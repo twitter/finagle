@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -180,6 +180,20 @@ strategy."></a>
                         <a href="DefaultInterpreter$.html" title="Interpret names against the Dtab, using the default evaluation
 strategy.">
                           DefaultInterpreter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="LoadedNameInterpreter$.html" title="A NameInterpreter that delegates to a service-loaded
+NameInterpreter."></a>
+                        <a href="LoadedNameInterpreter$.html" title="A NameInterpreter that delegates to a service-loaded
+NameInterpreter.">
+                          LoadedNameInterpreter
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MultipleNameInterpretersException.html" title=""></a>
+                        <a href="MultipleNameInterpretersException.html" title="">
+                          MultipleNameInterpretersException
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
@@ -339,9 +353,9 @@ strategy.">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.naming.NameInterpreter#bind" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bind(dtab:com.twitter.finagle.Dtab,tree:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]"></a><a id="bind(Dtab,Path):Activity[NameTree[Bound]]"></a>
+      <a id="bind(dtab:com.twitter.finagle.Dtab,path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]"></a><a id="bind(Dtab,Path):Activity[NameTree[Bound]]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/naming/NameInterpreter$.html#bind(dtab:com.twitter.finagle.Dtab,tree:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/naming/NameInterpreter$.html#bind(dtab:com.twitter.finagle.Dtab,path:com.twitter.finagle.Path):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -350,7 +364,7 @@ strategy.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bind</span><span class="params">(<span name="dtab">dtab: <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>, <span name="tree">tree: <a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="../Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a>]]</span>
+        <span class="name">bind</span><span class="params">(<span name="dtab">dtab: <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>, <span name="path">path: <a href="../Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Activity">Activity</span>[<a href="../NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="../Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Bind <code>path</code> against the given <code>dtab</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Bind <code>path</code> against the given <code>dtab</code>.

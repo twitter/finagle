@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -209,10 +209,8 @@ marshalled and sent across process boundaries.">
                         </a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available
-"></a>
-                        <a href="RemoteInfo.html" title="Contains the remote information for a request, if available
-">
+                        <a class="trait" href="RemoteInfo.html" title="Contains the remote information for a request, if available."></a>
+                        <a href="RemoteInfo.html" title="Contains the remote information for a request, if available.">
                           RemoteInfo
                         </a>
                       </li>
@@ -297,7 +295,7 @@ marshalled and sent across process boundaries.">
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.context.RemoteInfo.Available" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.context.RemoteInfo.Available" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="AvailableextendsRemoteInfowithProductwithSerializable"></a><a id="Available:Available"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/context/RemoteInfo$.html#AvailableextendsRemoteInfowithProductwithSerializable" title="Permalink">
@@ -309,18 +307,15 @@ marshalled and sent across process boundaries.">
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id." href="RemoteInfo$$Available.html">
+        <a title="Represents the case where remote information is available." href="RemoteInfo$$Available.html">
               <span class="name">Available</span>
-            </a><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamId">downstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../thrift/ClientId.html" class="extype" name="com.twitter.finagle.thrift.ClientId">ClientId</a>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result"> extends <a href="RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="upstreamAddr">upstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="upstreamId">upstreamId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="downstreamAddr">downstreamAddr: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="downstreamLabel">downstreamLabel: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="traceId">traceId: <a href="../tracing/TraceId.html" class="extype" name="com.twitter.finagle.tracing.TraceId">TraceId</a></span>)</span><span class="result"> extends <a href="RemoteInfo.html" class="extype" name="com.twitter.finagle.context.RemoteInfo">RemoteInfo</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id.</p>
+      <p class="shortcomment cmt">Represents the case where remote information is available.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the case where remote information is available.</p><p>Includes the upstream's (sender of the request) socket address and id,
+downstream's (sender of the response) socket address and label, and the
+trace id.
+</p></div></div>
     </li></ol>
             </div>
 

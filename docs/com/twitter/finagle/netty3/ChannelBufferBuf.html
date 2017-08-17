@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -215,24 +215,6 @@ package netty3 can move into its own package, so that only the
       <span class="symbol">
         <a title="" href="socks/index.html">
               <span class="name">socks</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.ssl" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ssl"></a><a id="ssl:ssl"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#ssl" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ssl/index.html">
-              <span class="name">ssl</span>
             </a>
       </span>
       
@@ -313,8 +295,10 @@ In-typed downstream messages.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="numWorkers$.html" title=""></a>
-                        <a href="numWorkers$.html" title="">
+                        <a class="object" href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 3 backend
+"></a>
+                        <a href="numWorkers$.html" title="Flag for defining the number of worker threads used by the Finagle Netty 3 backend
+">
                           numWorkers
                         </a>
                       </li>
@@ -342,12 +326,12 @@ In-typed downstream messages.">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelBufferBuf</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">ChannelBufferBuf</span><span class="result"> extends <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a> wrapper for
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> wrapper for
 Netty <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffers</span>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Since <code>ChannelBuffer</code>s are mutable, modifying the wrapped buffer
 within <code>slice</code>s of a <code>ChannelBufferBuf</code> will modify the original wrapped
@@ -356,7 +340,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.io.Buf">Buf</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -418,7 +402,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">underlying</dt><dd class="cmt"><p>The <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">org.jboss.netty.buffer.ChannelBuffer</span> to be wrapped in a
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a> interface.</p></dd></dl></div>
+<span class="extype" name="com.twitter.io.Buf">com.twitter.io.Buf</span> interface.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -493,22 +477,6 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.io.Buf#checkSliceArgs" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="checkSliceArgs(from:Int,until:Int):Unit"></a><a id="checkSliceArgs(Int,Int):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/ChannelBufferBuf.html#checkSliceArgs(from:Int,until:Int):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">checkSliceArgs</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>Buf</dd></dl></div>
     </li><li name="com.twitter.io.Buf#checkWriteArgs" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="checkWriteArgs(outputLen:Int,outputOff:Int):Unit"></a><a id="checkWriteArgs(Int,Int):Unit"></a>
       <span class="permalink">
@@ -575,7 +543,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">concat</span><span class="params">(<span name="right">right: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">concat</span><span class="params">(<span name="right">right: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Buf</dd></dl></div>
@@ -869,7 +837,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">slice</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="j">j: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">slice</span><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="j">j: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.ChannelBufferBuf">ChannelBufferBuf</a> → Buf</dd></dl></div>
@@ -1062,7 +1030,7 @@ reflected in slices.</p></span></dd></dl><div class="toggleContainer block">
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.io.Buf">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.io.Buf">Buf</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

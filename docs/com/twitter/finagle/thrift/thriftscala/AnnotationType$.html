@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -214,8 +214,10 @@ generator.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <a class="object" href="Annotation$.html" title="An annotation is similar to a log statement."></a>
-                        <a class="trait" href="Annotation.html" title=""></a>
-                        <a href="Annotation.html" title="">
+                        <a class="trait" href="Annotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Annotation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Annotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Annotation.apply
+for construction if you don't need to specify passthrough fields.">
                           Annotation
                         </a>
                       </li><li class="current-entities indented5">
@@ -226,22 +228,28 @@ generator.
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="BinaryAnnotation$.html" title="Binary annotations are tags applied to a Span to give it context."></a>
-                        <a class="trait" href="BinaryAnnotation.html" title=""></a>
-                        <a href="BinaryAnnotation.html" title="">
+                        <a class="trait" href="BinaryAnnotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="BinaryAnnotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply
+for construction if you don't need to specify passthrough fields.">
                           BinaryAnnotation
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ClientId$.html" title="At connection time, we can let the server know who we are so
 they can book keep and optionally reject unknown clients."></a>
-                        <a class="trait" href="ClientId.html" title=""></a>
-                        <a href="ClientId.html" title="">
+                        <a class="trait" href="ClientId.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ClientId.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ClientId.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ClientId.apply
+for construction if you don't need to specify passthrough fields.">
                           ClientId
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ConnectionOptions$.html" title="These are connection-level options negotiated during protocol
 upgrade."></a>
-                        <a class="trait" href="ConnectionOptions.html" title=""></a>
-                        <a href="ConnectionOptions.html" title="">
+                        <a class="trait" href="ConnectionOptions.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ConnectionOptions.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply
+for construction if you don't need to specify passthrough fields.">
                           ConnectionOptions
                         </a>
                       </li><li class="current-entities indented5">
@@ -252,46 +260,60 @@ upgrade."></a>
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Delegation$.html" title="Serializes an individual delegation."></a>
-                        <a class="trait" href="Delegation.html" title=""></a>
-                        <a href="Delegation.html" title="">
+                        <a class="trait" href="Delegation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Delegation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Delegation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Delegation.apply
+for construction if you don't need to specify passthrough fields.">
                           Delegation
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Endpoint$.html" title="Indicates the network context of a service recording an annotation with two
 exceptions."></a>
-                        <a class="trait" href="Endpoint.html" title=""></a>
-                        <a href="Endpoint.html" title="">
+                        <a class="trait" href="Endpoint.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Endpoint.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Endpoint.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Endpoint.apply
+for construction if you don't need to specify passthrough fields.">
                           Endpoint
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="RequestContext$.html" title="This struct serializes com.twitter.finagle.Context
 "></a>
-                        <a class="trait" href="RequestContext.html" title=""></a>
-                        <a href="RequestContext.html" title="">
+                        <a class="trait" href="RequestContext.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestContext.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="RequestContext.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestContext.apply
+for construction if you don't need to specify passthrough fields.">
                           RequestContext
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="RequestHeader$.html" title="RequestHeader defines headers for the request."></a>
-                        <a class="trait" href="RequestHeader.html" title=""></a>
-                        <a href="RequestHeader.html" title="">
+                        <a class="trait" href="RequestHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestHeader.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="RequestHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestHeader.apply
+for construction if you don't need to specify passthrough fields.">
                           RequestHeader
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ResponseHeader$.html" title="The Response carries a reply header for tracing."></a>
-                        <a class="trait" href="ResponseHeader.html" title=""></a>
-                        <a href="ResponseHeader.html" title="">
+                        <a class="trait" href="ResponseHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ResponseHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply
+for construction if you don't need to specify passthrough fields.">
                           ResponseHeader
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Span$.html" title="A trace is a series of spans (often RPC calls) which form a latency tree."></a>
-                        <a class="trait" href="Span.html" title=""></a>
-                        <a href="Span.html" title="">
+                        <a class="trait" href="Span.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Span.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Span.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Span.apply
+for construction if you don't need to specify passthrough fields.">
                           Span
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="UpgradeReply$.html" title="This is the struct that a successful upgrade will reply with."></a>
-                        <a class="trait" href="UpgradeReply.html" title=""></a>
-                        <a href="UpgradeReply.html" title="">
+                        <a class="trait" href="UpgradeReply.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="UpgradeReply.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply
+for construction if you don't need to specify passthrough fields.">
                           UpgradeReply
                         </a>
                       </li>
@@ -453,7 +475,23 @@ exceptions."></a>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.thriftscala.AnnotationType#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.thrift.thriftscala.AnnotationType#annotations" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="annotations:scala.collection.immutable.Map[String,String]"></a><a id="annotations:Map[String,String]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/thrift/thriftscala/AnnotationType$.html#annotations:scala.collection.immutable.Map[String,String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">annotations</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.collection.immutable.Map" class="extype" target="_top">Map</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.thrift.thriftscala.AnnotationType#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(value:Int):com.twitter.finagle.thrift.thriftscala.AnnotationType"></a><a id="apply(Int):AnnotationType"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/thrift/thriftscala/AnnotationType$.html#apply(value:Int):com.twitter.finagle.thrift.thriftscala.AnnotationType" title="Permalink">
@@ -468,7 +506,7 @@ exceptions."></a>
         <span class="name">apply</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="AnnotationType.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.AnnotationType">AnnotationType</a></span>
       </span>
       
-      <p class="shortcomment cmt">Find the enum by its integer value, as defined in the Thrift IDL.</p><div class="fullcomment"><div class="comment cmt"><p>Find the enum by its integer value, as defined in the Thrift IDL.</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="NoSuchElementException"><code>NoSuchElementException</code></span> if the value is not found.</p></span></dd></dl></div>
+      <p class="shortcomment cmt">Find the enum by its integer value, as defined in the Thrift IDL.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">

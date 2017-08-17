@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -336,7 +336,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl></div>
@@ -352,7 +352,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Store a key but only if it doesn't already exist on the server.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key but only if it doesn't already exist on the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if stored, false if not stored</p></dd></dl></div>
@@ -368,7 +368,7 @@ resources for using Finagle.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Append bytes to the end of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Append bytes to the end of an existing key. If the key doesn't
@@ -385,7 +385,7 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="casUnique">casUnique: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">A version of cas with default flags &amp; expiry paramters.</p>
@@ -401,7 +401,7 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="casUnique">casUnique: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Perform a compare-and-set operation.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a compare-and-set operation.  This is like a replace,
@@ -420,7 +420,7 @@ provided.  Tokens are retrieved with &quot;gets&quot;
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="delta">delta: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">decr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="delta">delta: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       
       
@@ -436,7 +436,7 @@ provided.  Tokens are retrieved with &quot;gets&quot;
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">decr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an Long if it is parsable.
@@ -454,7 +454,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">delete</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">delete</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Remove a key.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a key.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if deleted, false if not found</p></dd></dl></div>
@@ -470,7 +470,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="keys">keys: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="java.lang.String">String</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
+        <span class="name">get</span><span class="params">(<span name="keys">keys: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="java.lang.String">String</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]]</span>
       </span>
       
       <p class="shortcomment cmt">Get a set of keys from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, Buf] of all of the keys that the server had.</p></dd></dl></div>
@@ -486,7 +486,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
+        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Get a key from the server.</p>
@@ -502,7 +502,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">gets</span><span class="params">(<span name="keys">keys: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.String">String</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="java.lang.String">String</span>, <a href="ResultWithCAS.html" class="extype" name="com.twitter.finagle.memcached.java.ResultWithCAS">ResultWithCAS</a>]]</span>
+        <span class="name">gets</span><span class="params">(<span name="keys">keys: <span class="extype" name="java.util.List">List</span>[<span class="extype" name="java.lang.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="java.lang.String">String</span>, <a href="ResultWithCAS.html" class="extype" name="com.twitter.finagle.memcached.java.ResultWithCAS">ResultWithCAS</a>]]</span>
       </span>
       
       <p class="shortcomment cmt">Get a set of keys from the server together with a &quot;cas unique&quot; token.</p><div class="fullcomment"><div class="comment cmt"><p>Get a set of keys from the server together with a &quot;cas unique&quot; token.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Map[String, ResultWithCAS] of all of the keys that the server had.</p></dd></dl></div>
@@ -518,7 +518,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">gets</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ResultWithCAS.html" class="extype" name="com.twitter.finagle.memcached.java.ResultWithCAS">ResultWithCAS</a>]</span>
+        <span class="name">gets</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="ResultWithCAS.html" class="extype" name="com.twitter.finagle.memcached.java.ResultWithCAS">ResultWithCAS</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Get a key from the server together with a &quot;cas unique&quot; token used
@@ -535,7 +535,7 @@ in cas operations.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">incr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="delta">delta: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">incr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="delta">delta: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       
       
@@ -551,7 +551,7 @@ in cas operations.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">incr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">incr</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parsable.
@@ -569,7 +569,7 @@ This operation has no effect if there is no value there already.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">prepend</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">prepend</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Prepend bytes to the beginning of an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Prepend bytes to the beginning of an existing key. If the key
@@ -603,7 +603,7 @@ doesn't exist, the operation has no effect.</p></div><dl class="paramcmts block"
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">replace</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">replace</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
@@ -620,7 +620,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">replace</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">replace</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Replace bytes on an existing key.</p><div class="fullcomment"><div class="comment cmt"><p>Replace bytes on an existing key. If the key doesn't exist, the
@@ -637,7 +637,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Void">Void</span>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <span class="extype" name="com.twitter.util.Time">Time</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Void">Void</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>void</p></dd></dl></div>
@@ -653,7 +653,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Void">Void</span>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Void">Void</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Store a key.</p><div class="fullcomment"><div class="comment cmt"><p>Store a key. Override an existing value.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true</p></dd></dl></div>
@@ -723,7 +723,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">add</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       
@@ -739,7 +739,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       
@@ -771,7 +771,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>, <span name="casUnique">casUnique: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Convenience version of cas used to store string values.</p>
@@ -959,7 +959,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">prepend</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">prepend</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       
       
@@ -975,7 +975,7 @@ operation has no effect.</p></div><dl class="paramcmts block"><dt>returns</dt><d
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Void">Void</span>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Void">Void</span>]</span>
       </span>
       
       

@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -294,14 +294,14 @@ server and client.">
       <span class="symbol">
         <a title="" href="MysqlBufReader.html">
               <span class="name">MysqlBufReader</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</span></span>
       </span>
       
       
     </li><li name="com.twitter.finagle.mysql.transport.MysqlBufWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MysqlBufWriterextendsByteWriterwithProxyByteWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
+      <a id="MysqlBufWriterextendsProxyByteWriterwithBufByteWriter"></a><a id="MysqlBufWriter:MysqlBufWriter"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufWriterextendsByteWriterwithProxyByteWriter" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/index.html#MysqlBufWriterextendsProxyByteWriterwithBufByteWriter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -312,7 +312,7 @@ server and client.">
       <span class="symbol">
         <a title="" href="MysqlBufWriter.html">
               <span class="name">MysqlBufWriter</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ByteWriter" class="extype" target="_top">ByteWriter</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteWriter" class="extype" target="_top">ProxyByteWriter</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.io.ProxyByteWriter">ProxyByteWriter</span> with <span class="extype" name="com.twitter.io.BufByteWriter">BufByteWriter</span></span>
       </span>
       
       
@@ -331,7 +331,7 @@ server and client.">
         <a title="A logical packet exchanged between the mysql
 server and client." href="Packet.html">
               <span class="name">Packet</span>
-            </a><span class="params">(<span name="seq">seq: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="seq">seq: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="body">body: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">A logical packet exchanged between the mysql

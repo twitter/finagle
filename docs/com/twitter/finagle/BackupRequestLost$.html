@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -391,24 +391,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -450,24 +432,6 @@ via the <a href="loadbalancer/Balancers$.html" class="extype" name="com.twitter.
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -861,31 +825,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1240,12 +1179,6 @@ factories in one (when available).">
                           ConnectionRefusedException
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Deadline$.html" title=""></a>
-                        <a class="class" href="Deadline.html" title=""></a>
-                        <a href="Deadline.html" title="">
-                          Deadline
-                        </a>
-                      </li><li class="current-entities indented3">
                         <a class="object" href="Dentry$.html" title=""></a>
                         <a class="class" href="Dentry.html" title="Trait Dentry describes a delegation table entry."></a>
                         <a href="Dentry.html" title="Trait Dentry describes a delegation table entry.">
@@ -1321,6 +1254,14 @@ handling of a request.">
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="trait" href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler)."></a>
+                        <a href="FinagleInit.html" title="Initialization code to run before Finagle bootstraps any resources (such
+as its scheduler).">
+                          FinagleInit
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
 and does not poll for updates."></a>
                         <a href="FixedInetResolver$.html" title="InetResolver that caches all successful DNS lookups indefinitely
@@ -1382,12 +1323,6 @@ some server.">
                         <a class="object" href="InetResolver$.html" title="Resolver for inet scheme."></a>
                         <a href="InetResolver$.html" title="Resolver for inet scheme.">
                           InetResolver
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="object" href="Kestrel$.html" title=""></a>
-                        <a href="Kestrel$.html" title="">
-                          Kestrel
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1536,6 +1471,12 @@ hierarchically-addressed object.">
                         <a class="trait" href="ProxyAnnouncement.html" title=""></a>
                         <a href="ProxyAnnouncement.html" title="">
                           ProxyAnnouncement
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request."></a>
+                        <a href="ProxyConnectException.html" title="Indicates that either SOCKS or HTTP(S) proxy server rejected client's connect request.">
+                          ProxyConnectException
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1720,6 +1661,18 @@ with a server at a given remoteAddress.">
                           SslHostVerificationException
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate."></a>
+                        <a href="SslVerificationFailedException.html" title="Indicates that an error occurred while SslClientSessionVerification was
+being performed, or the server disconnected from the client in a way that
+indicates that there was high probability that the server failed to verify
+the client's certificate.">
+                          SslVerificationFailedException
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Stack$.html" title=""></a>
                         <a class="trait" href="Stack.html" title="Stacks represent stackable elements of type T."></a>
                         <a href="Stack.html" title="Stacks represent stackable elements of type T.">
@@ -1730,6 +1683,12 @@ with a server at a given remoteAddress.">
                         <a class="class" href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks."></a>
                         <a href="StackBuilder.html" title="StackBuilders are imperative-style builders for Stacks.">
                           StackBuilder
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API."></a>
+                        <a href="StackParams$.html" title="Stack.Params forwarder to provide a clean Java API.">
+                          StackParams
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -1864,7 +1823,7 @@ request.">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
+        <span class="name">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a> with <span class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</span></span>
       </span>
       </h4>
 
@@ -1876,7 +1835,7 @@ their corresponding backup requests succeeded first. See
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -2257,7 +2216,7 @@ their corresponding backup requests succeeded first. See
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">logLevel</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>
+        <span class="name">logLevel</span><span class="result">: <span class="extype" name="com.twitter.logging.Level">Level</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.BackupRequestLost">BackupRequestLost</a> → HasLogLevel</dd></dl></div>
@@ -2482,7 +2441,7 @@ their corresponding backup requests succeeded first. See
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.logging.HasLogLevel">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.logging.HasLogLevel">HasLogLevel</span></h3>
             </div><div class="parent" name="scala.util.control.NoStackTrace">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.util.control.NoStackTrace" class="extype" target="_top">NoStackTrace</a></h3>
             </div><div class="parent" name="java.lang.Exception">

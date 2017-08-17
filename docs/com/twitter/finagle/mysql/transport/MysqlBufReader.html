@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -242,7 +242,7 @@ server and client.">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MysqlBufReader</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></span>
+        <span class="name">MysqlBufReader</span><span class="result"> extends <span class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</span></span>
       </span>
       </h4>
 
@@ -251,7 +251,7 @@ server and client.">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a>, <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</span>, <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span>, <span class="extype" name="java.lang.AutoCloseable">AutoCloseable</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -277,7 +277,7 @@ server and client.">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufReader"><span>MysqlBufReader</span></li><li class="in" name="com.twitter.io.ProxyByteReader"><span>ProxyByteReader</span></li><li class="in" name="com.twitter.io.ByteReader"><span>ByteReader</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.mysql.transport.MysqlBufReader"><span>MysqlBufReader</span></li><li class="in" name="com.twitter.io.ProxyByteReader"><span>ProxyByteReader</span></li><li class="in" name="com.twitter.io.ByteReader"><span>ByteReader</span></li><li class="in" name="java.lang.AutoCloseable"><span>AutoCloseable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -309,7 +309,7 @@ server and client.">
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">MysqlBufReader</span><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span>
+        <span class="name">MysqlBufReader</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span>
       </span>
       
       
@@ -409,6 +409,22 @@ server and client.">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#close" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#close():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → AutoCloseable</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -559,6 +575,38 @@ server and client.">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#process" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="process(processor:com.twitter.io.Buf.Processor):Int"></a><a id="process(Processor):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#process(processor:com.twitter.io.Buf.Processor):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">process</span><span class="params">(<span name="processor">processor: <span class="extype" name="com.twitter.io.Buf.Processor">Processor</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#process" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="process(from:Int,until:Int,processor:com.twitter.io.Buf.Processor):Int"></a><a id="process(Int,Int,Processor):Int"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#process(from:Int,until:Int,processor:com.twitter.io.Buf.Processor):Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">process</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="processor">processor: <span class="extype" name="com.twitter.io.Buf.Processor">Processor</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.io.ProxyByteReader#readAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readAll():com.twitter.io.Buf"></a><a id="readAll():Buf"></a>
       <span class="permalink">
@@ -571,7 +619,7 @@ server and client.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readAll</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">readAll</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
@@ -603,7 +651,7 @@ server and client.">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readBytes</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
+        <span class="name">readBytes</span><span class="params">(<span name="n">n: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
@@ -874,6 +922,22 @@ offset.</p></dd></dl></div>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readString(bytes:Int,charset:java.nio.charset.Charset):String"></a><a id="readString(Int,java.nio.charset.Charset):String"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readString(bytes:Int,charset:java.nio.charset.Charset):String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readString</span><span class="params">(<span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="charset">charset: <span class="extype" name="java.nio.charset.Charset">java.nio.charset.Charset</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
     </li><li name="com.twitter.io.ProxyByteReader#readUnsignedByte" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readUnsignedByte():Short"></a>
       <span class="permalink">
@@ -919,6 +983,38 @@ offset.</p></dd></dl></div>
       </span>
       <span class="symbol">
         <span class="name">readUnsignedIntLE</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedLongBE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readUnsignedLongBE():BigInt"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedLongBE():BigInt" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readUnsignedLongBE</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.BigInt">BigInt</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
+    </li><li name="com.twitter.io.ProxyByteReader#readUnsignedLongLE" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="readUnsignedLongLE():BigInt"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/mysql/transport/MysqlBufReader.html#readUnsignedLongLE():BigInt" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readUnsignedLongLE</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.BigInt">BigInt</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProxyByteReader → ByteReader</dd></dl></div>
@@ -1197,9 +1293,11 @@ bytes expected to follow.</p></dd></dl></div>
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.io.ProxyByteReader">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.ProxyByteReader" class="extype" target="_top">ProxyByteReader</a></h3>
+              <h3>Inherited from <span class="extype" name="com.twitter.io.ProxyByteReader">ProxyByteReader</span></h3>
             </div><div class="parent" name="com.twitter.io.ByteReader">
               <h3>Inherited from <span class="extype" name="com.twitter.io.ByteReader">ByteReader</span></h3>
+            </div><div class="parent" name="java.lang.AutoCloseable">
+              <h3>Inherited from <span class="extype" name="java.lang.AutoCloseable">AutoCloseable</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

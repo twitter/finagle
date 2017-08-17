@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -196,6 +196,12 @@ resources for using Finagle.
                         <a class="class" href="AddResponseHeadersFilter.html" title=""></a>
                         <a href="AddResponseHeadersFilter.html" title="">
                           AddResponseHeadersFilter
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
+                        <a class="object" href="ClientNackFilter$.html" title=""></a>
+                        <a href="ClientNackFilter$.html" title="">
+                          ClientNackFilter
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
@@ -271,14 +277,6 @@ NackResponse, i.e.">
                         <a href="StatsFilter.html" title="Statistic filter.">
                           StatsFilter
                         </a>
-                      </li><li class="current-entities indented5">
-                        <a class="object" href="ValidateRequestFilter$.html" title=""></a>
-                        <a class="class" href="ValidateRequestFilter.html" title="Validate request filter:
-  400 Bad Request if the parameters are invalid."></a>
-                        <a href="ValidateRequestFilter.html" title="Validate request filter:
-  400 Bad Request if the parameters are invalid.">
-                          ValidateRequestFilter
-                        </a>
                       </li>
               </ul>
             </div>
@@ -313,7 +311,7 @@ NackResponse, i.e.">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="LoggingFilter.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>], <a href="../../filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">filter.LoggingFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="../../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="LoggingFilter.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>], <a href="../../filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">filter.LoggingFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="../../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -514,7 +512,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="service">service: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="service">service: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <p class="shortcomment cmt">This is the method to override/implement to create your own Filter.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Filter.
@@ -569,7 +567,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ (<a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">curried</span><span class="result">: (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ (<a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -706,7 +704,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">log</span><span class="params">(<span name="replyTime">replyTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="reply">reply: <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">log</span><span class="params">(<span name="replyTime">replyTime: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="reply">reply: <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="../../filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">LoggingFilter</a></dd></dl></div>
@@ -738,7 +736,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">logException</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">logException</span><span class="params">(<span name="duration">duration: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>, <span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>, <span name="throwable">throwable: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="LoggingFilter.html" class="extype" name="com.twitter.finagle.http.filter.LoggingFilter">LoggingFilter</a> → <a href="../../filter/LoggingFilter.html" class="extype" name="com.twitter.finagle.filter.LoggingFilter">LoggingFilter</a></dd></dl></div>
@@ -834,7 +832,7 @@ on a configuration file, for instance.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>])) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
+        <span class="name">tupled</span><span class="result">: ((<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>])) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
@@ -926,7 +924,7 @@ on a configuration file, for instance.
             </div><div class="parent" name="com.twitter.finagle.Filter">
               <h3>Inherited from <a href="../../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.Function2">
-              <h3>Inherited from (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
+              <h3>Inherited from (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]) ⇒ <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

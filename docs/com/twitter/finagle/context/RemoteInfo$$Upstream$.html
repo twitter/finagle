@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -193,14 +193,8 @@ resources for using Finagle.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.context">context</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="class" href="RemoteInfo$$Available.html" title="Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id."></a>
-                        <a href="RemoteInfo$$Available.html" title="Represents the case where remote information is available:
-the upstream (sender of the request) address/client id,
-downstream (sender of the response) address/client id,
-and the trace id.">
+                        <a class="class" href="RemoteInfo$$Available.html" title="Represents the case where remote information is available."></a>
+                        <a href="RemoteInfo$$Available.html" title="Represents the case where remote information is available.">
                           Available
                         </a>
                       </li><li class="current-entities indented5">
@@ -382,7 +376,8 @@ or has not yet been set.">
         <span class="name">addr</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">The <code>SocketAddress</code> of the upstream client (sender of the request),
+when available.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">

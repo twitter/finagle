@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -262,6 +262,14 @@ resources for using Finagle.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.http">http</a></dd></dl></div>
     </li><li class="current-entities indented5">
+                        <a class="object" href="AutomaticContinue$.html" title=""></a>
+                        <a class="class" href="AutomaticContinue.html" title="automatically send 100-CONTINUE responses to requests which set
+the 'Expect: 100-Continue' header."></a>
+                        <a href="AutomaticContinue.html" title="automatically send 100-CONTINUE responses to requests which set
+the 'Expect: 100-Continue' header.">
+                          AutomaticContinue
+                        </a>
+                      </li><li class="current-entities indented5">
                         <a class="object" href="CompressionLevel$.html" title=""></a>
                         <a class="class" href="CompressionLevel.html" title=""></a>
                         <a href="CompressionLevel.html" title="">
@@ -426,7 +434,30 @@ resources for using Finagle.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.http.param.CompressionLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.param.AutomaticContinue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AutomaticContinueextendsProductwithSerializable"></a><a id="AutomaticContinue:AutomaticContinue"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/index.html#AutomaticContinueextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="automatically send 100-CONTINUE responses to requests which set
+the 'Expect: 100-Continue' header." href="AutomaticContinue.html">
+              <span class="name">AutomaticContinue</span>
+            </a><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">automatically send 100-CONTINUE responses to requests which set
+the 'Expect: 100-Continue' header.</p><div class="fullcomment"><div class="comment cmt"><p>automatically send 100-CONTINUE responses to requests which set
+the 'Expect: 100-Continue' header. See longer note on
+<code>com.twitter.finagle.Http.Server#withNoAutomaticContinue</code>
+</p></div></div>
+    </li><li name="com.twitter.finagle.http.param.CompressionLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CompressionLevelextendsProductwithSerializable"></a><a id="CompressionLevel:CompressionLevel"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/http/param/index.html#CompressionLevelextendsProductwithSerializable" title="Permalink">
@@ -476,7 +507,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="the maximum size of a chunk." href="MaxChunkSize.html">
               <span class="name">MaxChunkSize</span>
-            </a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">the maximum size of a chunk.</p>
@@ -494,7 +525,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="the maximum size of all headers." href="MaxHeaderSize.html">
               <span class="name">MaxHeaderSize</span>
-            </a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">the maximum size of all headers.</p>
@@ -512,7 +543,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="the maximum size of the initial line." href="MaxInitialLineSize.html">
               <span class="name">MaxInitialLineSize</span>
-            </a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">the maximum size of the initial line.</p>
@@ -530,7 +561,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="" href="MaxRequestSize.html">
               <span class="name">MaxRequestSize</span>
-            </a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       
@@ -548,7 +579,7 @@ resources for using Finagle.
       <span class="symbol">
         <a title="" href="MaxResponseSize.html">
               <span class="name">MaxResponseSize</span>
-            </a><span class="params">(<span name="size">size: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+            </a><span class="params">(<span name="size">size: <span class="extype" name="com.twitter.util.StorageUnit">StorageUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       
       
@@ -578,7 +609,25 @@ resources for using Finagle.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.http.param.CompressionLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.twitter.finagle.http.param.AutomaticContinue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AutomaticContinue"></a><a id="AutomaticContinue:AutomaticContinue"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/http/param/index.html#AutomaticContinue" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="AutomaticContinue$.html">
+              <span class="name">AutomaticContinue</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.http.param.CompressionLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CompressionLevel"></a><a id="CompressionLevel:CompressionLevel"></a>
       <span class="permalink">
       <a href="../../../../../com/twitter/finagle/http/param/index.html#CompressionLevel" title="Permalink">

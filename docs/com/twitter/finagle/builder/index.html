@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -209,12 +209,6 @@ resources for using Finagle.
                           ClientConfigEvidence
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Cluster$.html" title=""></a>
-                        <a class="trait" href="Cluster.html" title="Cluster is a collection of servers."></a>
-                        <a href="Cluster.html" title="Cluster is a collection of servers.">
-                          Cluster
-                        </a>
-                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete."></a>
                         <a href="IncompleteSpecification.html" title="Used by builder to throw exceptions if the specification is incomplete.">
@@ -237,12 +231,6 @@ a port).">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ServerBuildertoTwitterService.html" title=""></a>
-                        <a href="ServerBuildertoTwitterService.html" title="">
-                          ServerBuildertoTwitterService
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
                         <a class="object" href="ServerConfig$.html" title=""></a>
                         <a href="ServerConfig$.html" title="">
                           ServerConfig
@@ -258,12 +246,6 @@ a port).">
                         <a class="class" href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any"></a>
                         <a href="SourceTrackingMonitor.html" title="A monitor that unrolls the exception causes to report source information if any">
                           SourceTrackingMonitor
-                        </a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="StaticCluster.html" title="A simple static cluster implementation."></a>
-                        <a href="StaticCluster.html" title="A simple static cluster implementation.">
-                          StaticCluster
                         </a>
                       </li><li name="com.twitter.finagle.client" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="client"></a><a id="client:client"></a>
@@ -465,24 +447,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.kestrel" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="kestrel"></a><a id="kestrel:kestrel"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#kestrel" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../kestrel/index.html">
-              <span class="name">kestrel</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.liveness" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="liveness"></a><a id="liveness:liveness"></a>
       <span class="permalink">
@@ -524,24 +488,6 @@ via the <a href="../loadbalancer/Balancers$.html" class="extype" name="com.twitt
 out common behavior and can be mixed in (i.e. Balancer, DistributorT, NodeT,
 and Updating).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.mdns" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mdns"></a><a id="mdns:mdns"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#mdns" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../mdns/index.html">
-              <span class="name">mdns</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="memcached"></a><a id="memcached:memcached"></a>
       <span class="permalink">
@@ -935,31 +881,6 @@ finagle clients and servers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.stream" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="stream"></a><a id="stream:stream"></a>
-      <span class="permalink">
-      <a href="../../../com/twitter/finagle/index.html#stream" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks." href="../stream/index.html">
-              <span class="name">stream</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt">Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle-stream implements a rather peculiar protocol: it streams
-discrete messages delineated by HTTP chunks. It isn't how we'd design
-a protocol to stream messages, but we are stuck with it for legacy
-reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></code>: each session handles
-exactly one stream. The session terminates together with the stream.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="thrift"></a><a id="thrift:thrift"></a>
       <span class="permalink">
@@ -1205,16 +1126,17 @@ generator.
             </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the
-<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
-for information on the preferred <code>with</code>-style client-construction APIs.</p><pre><span class="kw">val</span> client = ClientBuilder()
-  .codec(Http)
+      <p class="shortcomment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the user guide for information on the preferred
+<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank"><code>with</code>-style</a> and
+<a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">MethodBuilder</a>
+client-construction APIs.</p><pre><span class="kw">val</span> client = ClientBuilder()
+  .stack(Http.client)
   .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
   .hostConnectionLimit(<span class="num">1</span>)
   .tcpConnectTimeout(<span class="num">1.</span>second)        <span class="cmt">// max time to spend establishing a TCP connection.</span>
   .retries(<span class="num">2</span>)                         <span class="cmt">// (1) per-request retries</span>
   .reportTo(DefaultStatsReceiver)     <span class="cmt">// export host-level load data to the loaded-StatsReceiver</span>
-  .build()</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>codec</code>,
+  .build()</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>stack</code>,
 and <code>hostConnectionLimit</code>. In Scala, these are statically type
 checked, and in Java the lack of any of the above causes a runtime
 error.</p><p>The <code>build</code> method uses an implicit argument to statically
@@ -1224,7 +1146,7 @@ function in Java to accomplish this. Thus, the Java code for the
 above is</p><pre>Service&lt;HttpRequest, HttpResponse&gt; service =
  ClientBuilder.safeBuild(
    ClientBuilder.get()
-     .codec(<span class="kw">new</span> Http())
+     .stack(Http.client())
      .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
      .hostConnectionLimit(<span class="num">1</span>)
      .tcpConnectTimeout(<span class="num">1.</span>second)
@@ -1239,8 +1161,10 @@ affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
    of <code>false</code> is used</li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span>
-</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
-     for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
+</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The user guide for information on the preferred
+<a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank"><code>with</code>-style</a> and
+<a href="https://twitter.github.io/finagle/guide/MethodBuilder.html" target="_blank">MethodBuilder</a>
+client-construction APIs.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientConfigEvidence" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]extendsAnyRef"></a><a id="ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]:ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]"></a>
       <span class="permalink">
@@ -1328,12 +1252,12 @@ a port).  This class is subclassable. Override copy() and build()
 to do your own dirty work.</p><p>Please see the
 <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
 for information on the preferred <code>with</code>-style client-construction APIs.</p><p>The main class to use is <a href="ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>, as so</p><pre>ServerBuilder()
-  .codec(Http)
+  .stack(Http.server)
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
   .readTimeout(<span class="num">2.</span>minutes)
   .name(<span class="lit">"servicename"</span>)
   .bindTo(<span class="kw">new</span> InetSocketAddress(serverPort))
-  .build(plusOneService)</pre><p>The <code>ServerBuilder</code> requires the definition of <code>codec</code>, <code>bindTo</code>
+  .build(plusOneService)</pre><p>The <code>ServerBuilder</code> requires the definition of <code>stack</code>, <code>bindTo</code>
 and <code>name</code>. In Scala, these are statically type
 checked, and in Java the lack of any of the above causes a runtime
 error.</p><p>The <code>build</code> method uses an implicit argument to statically
@@ -1343,7 +1267,7 @@ function in Java to accomplish this. Thus, the Java code for the
 above is</p><pre>ServerBuilder.safeBuild(
  plusOneService,
  ServerBuilder.get()
-  .codec(Http)
+  .stack(Http.server())
   .hostConnectionMaxLifeTime(<span class="num">5.</span>minutes)
   .readTimeout(<span class="num">2.</span>minutes)
   .name(<span class="lit">"servicename"</span>)
@@ -1358,24 +1282,6 @@ these options are typically only changed by expert users.</p><p>- <code>openConn
 - <code>backlog</code>: OS-defined default value
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
      for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuildertoTwitterService" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ServerBuildertoTwitterService[Req,Rep]extendsService"></a><a id="ServerBuildertoTwitterService[Req,Rep]:ServerBuildertoTwitterService[Req,Rep]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#ServerBuildertoTwitterService[Req,Rep]extendsService" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="ServerBuildertoTwitterService.html">
-              <span class="name">ServerBuildertoTwitterService</span>
-            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <span class="extype" name="com.twitter.ostrich.admin.Service">ostrich.admin.Service</span></span>
-      </span>
-      
-      
     </li><li name="com.twitter.finagle.builder.ServerConfigEvidence" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]extendsAnyRef"></a><a id="ServerConfigEvidence[HasCodec,HasBindTo,HasName]:ServerConfigEvidence[HasCodec,HasBindTo,HasName]"></a>
       <span class="permalink">
@@ -1414,57 +1320,10 @@ these options are typically only changed by expert users.</p><p>- <code>openConn
       <span class="symbol">
         <a title="A monitor that unrolls the exception causes to report source information if any" href="SourceTrackingMonitor.html">
               <span class="name">SourceTrackingMonitor</span>
-            </a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
+            </a><span class="result"> extends <span class="extype" name="com.twitter.util.Monitor">Monitor</span></span>
       </span>
       
       <p class="shortcomment cmt">A monitor that unrolls the exception causes to report source information if any</p>
-    </li><li name="com.twitter.finagle.builder.Cluster" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="Cluster[T]extendsAnyRef"></a><a id="Cluster[T]:Cluster[T]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#Cluster[T]extendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="Cluster is a collection of servers." href="Cluster.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">Cluster</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Cluster is a collection of servers.</p><div class="fullcomment"><div class="comment cmt"><p>Cluster is a collection of servers. The intention of this interface
-to express membership in a cluster of servers that provide a
-specific service.</p><p>Note that a Cluster can be elastic: members can join or leave at
-any time.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.StaticCluster" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="StaticCluster[T]extendsCluster[T]withProductwithSerializable"></a><a id="StaticCluster[T]:StaticCluster[T]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#StaticCluster[T]extendsCluster[T]withProductwithSerializable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="A simple static cluster implementation." href="StaticCluster.html">
-              <span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">StaticCluster</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>]</span>)</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.StaticCluster.T">T</span>] with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A simple static cluster implementation.</p><div class="fullcomment"><div class="comment cmt"><p>A simple static cluster implementation.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -1507,24 +1366,6 @@ any time.
       <span class="symbol">
         <a title="" href="ClientConfig$.html">
               <span class="name">ClientConfig</span>
-            </a>
-      </span>
-      
-      
-    </li><li name="com.twitter.finagle.builder.Cluster" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Cluster"></a><a id="Cluster:Cluster"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/builder/index.html#Cluster" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="Cluster$.html">
-              <span class="name">Cluster</span>
             </a>
       </span>
       

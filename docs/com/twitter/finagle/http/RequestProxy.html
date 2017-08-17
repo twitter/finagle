@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -410,9 +410,13 @@ their name.">
                           Method
                         </a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MethodBuilder$.html" title="Experimental: This API is under construction."></a>
-                        <a class="class" href="MethodBuilder.html" title="Experimental: This API is under construction."></a>
-                        <a href="MethodBuilder.html" title="Experimental: This API is under construction.">
+                        <a class="object" href="MethodBuilder$.html" title=""></a>
+                        <a class="class" href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder."></a>
+                        <a href="MethodBuilder.html" title="MethodBuilder is a collection of APIs for client configuration at
+a higher level than the Finagle 6 APIs while improving upon the deprecated
+ClientBuilder.">
                           MethodBuilder
                         </a>
                       </li><li class="current-entities indented4">
@@ -474,8 +478,8 @@ their name.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ResponseProxy.html" title=""></a>
-                        <a href="ResponseProxy.html" title="">
+                        <a class="class" href="ResponseProxy.html" title="Proxy for Response."></a>
+                        <a href="ResponseProxy.html" title="Proxy for Response.">
                           ResponseProxy
                         </a>
                       </li><li class="current-entities indented4">
@@ -540,6 +544,12 @@ its credentials from a provided CredentialSource...">
                         <a href="Versions.html" title="Java friendly versions of com.twitter.finagle.http.Version.">
                           Versions
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$serverErrorsAsFailures$.html" title=""></a>
+                        <a href="package$$serverErrorsAsFailures$.html" title="">
+                          serverErrorsAsFailures
+                        </a>
                       </li>
               </ul>
             </div>
@@ -563,18 +573,17 @@ its credentials from a provided CredentialSource...">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">RequestProxy</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
+        <span class="name">RequestProxy</span><span class="result"> extends <a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Proxy for Request.  This can be used to create a richer request class
-that wraps Request without exposing the underlying netty http type.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Proxy for Request.  This can be used to create a richer request class.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a>, <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -600,7 +609,7 @@ that wraps Request without exposing the underlying netty http type.
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.http.RequestProxy"><span>RequestProxy</span></li><li class="in" name="com.twitter.finagle.http.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.http.Message"><span>Message</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.http.RequestProxy"><span>RequestProxy</span></li><li class="in" name="com.twitter.finagle.http.Request.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.http.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.http.Message"><span>Message</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -643,7 +652,7 @@ that wraps Request without exposing the underlying netty http type.
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.RequestProxy#request" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Request.Proxy#request" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="request:com.twitter.finagle.http.Request"></a><a id="request:Request"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#request:com.twitter.finagle.http.Request" title="Permalink">
@@ -658,7 +667,9 @@ that wraps Request without exposing the underlying netty http type.
         <span class="name">request</span><span class="result">: <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Underlying <code>Request</code>
+</p><div class="fullcomment"><div class="comment cmt"><p>Underlying <code>Request</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -917,7 +928,7 @@ that wraps Request without exposing the underlying netty http type.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: cacheControl_$eq" class="name">cacheControl_=</span><span class="params">(<span name="maxAge">maxAge: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span title="gt4s: cacheControl_$eq" class="name">cacheControl_=</span><span class="params">(<span name="maxAge">maxAge: <span class="extype" name="com.twitter.util.Duration">Duration</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Set Cache-Control header with a max-age (and must-revalidate).</p><div class="fullcomment"><div class="comment cmt"><p>Set Cache-Control header with a max-age (and must-revalidate).</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
@@ -977,7 +988,7 @@ that wraps Request without exposing the underlying netty http type.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -1019,7 +1030,7 @@ that wraps Request without exposing the underlying netty http type.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">close</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       
       <p class="shortcomment cmt">End the response stream.</p><div class="fullcomment"><div class="comment cmt"><p>End the response stream.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
@@ -1039,6 +1050,23 @@ that wraps Request without exposing the underlying netty http type.
       </span>
       
       <p class="shortcomment cmt">Check if parameter exists.</p><div class="fullcomment"><div class="comment cmt"><p>Check if parameter exists.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request.Proxy#content" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="content:com.twitter.io.Buf"></a><a id="content:Buf"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#content:com.twitter.io.Buf" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">content</span><span class="result">: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Retrieve the current content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current content of this <code>Message</code>.</p><p>If this message is chunked, the resulting <code>Buf</code> will always be empty.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#content" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="content(content:com.twitter.io.Buf):Message.this.type"></a><a id="content(Buf):RequestProxy.this.type"></a>
       <span class="permalink">
@@ -1051,7 +1079,7 @@ that wraps Request without exposing the underlying netty http type.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">content</span><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a>.this.type</span>
+        <span class="name">content</span><span class="params">(<span name="content">content: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a>.this.type</span>
       </span>
       
       <p class="shortcomment cmt">Set the content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content of this <code>Message</code>.</p><p>Any existing content is discarded. If this <code>Message</code> is set to chunked,
@@ -1063,23 +1091,6 @@ an <code>IllegalStateException</code> is thrown.
     </span>)</span>
               
         </dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="content_=(Buf)">content_=(Buf)</span> for Scala users</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#content" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="content:com.twitter.io.Buf"></a><a id="content:Buf"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#content:com.twitter.io.Buf" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">content</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Retrieve the current content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current content of this <code>Message</code>.</p><p>If this message is chunked, the resulting <code>Buf</code> will always be empty.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#contentLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contentLength(value:Long):Message.this.type"></a><a id="contentLength(Long):RequestProxy.this.type"></a>
       <span class="permalink">
@@ -1214,7 +1225,7 @@ Codec, but this method allows you to override that.
       </span>
       
       <p class="shortcomment cmt">Set Content-Type header</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#content_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#content_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="content_=(content:com.twitter.io.Buf):Unit"></a><a id="content_=(Buf):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#content_=(content:com.twitter.io.Buf):Unit" title="Permalink">
@@ -1222,22 +1233,16 @@ Codec, but this method allows you to override that.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: content_$eq" class="name">content_=</span><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span title="gt4s: content_$eq" class="name">content_=</span><span class="params">(<span name="content">content: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Set the content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content of this <code>Message</code>.</p><p>Any existing content is discarded. If this <code>Message</code> is set to chunked,
 an <code>IllegalStateException</code> is thrown.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="scala.this.throws.&lt;init&gt;$default$1[IllegalStateException]">...</span>
-    </span>)</span>
-              
-        </dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="content(Buf)">content(Buf)</span> for Java users</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="content(Buf)">content(Buf)</span> for Java users</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#cookies" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="cookies:com.twitter.finagle.http.CookieMap"></a><a id="cookies:CookieMap"></a>
       <span class="permalink">
@@ -1256,7 +1261,7 @@ an <code>IllegalStateException</code> is thrown.
       <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
 In a response, it uses the Set-Cookie headers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#ctx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#ctx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ctx:com.twitter.finagle.http.Request.Schema.Record"></a><a id="ctx:Record"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#ctx:com.twitter.finagle.http.Request.Schema.Record" title="Permalink">
@@ -1272,11 +1277,11 @@ In a response, it uses the Set-Cookie headers.
       </span>
       
       <p class="shortcomment cmt">Arbitrary user-defined context associated with this request object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this request object.
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema.Record" class="extype" target="_top">RecordSchema.Record</a> is
+<span class="extype" name="com.twitter.collection.RecordSchema.Record">RecordSchema.Record</span> is
 used here, rather than <a href="../context/Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a> or similar
 out-of-band mechanisms, to make the connection between the request and its
 associated context explicit.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#date" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="date:Option[String]"></a>
       <span class="permalink">
@@ -1566,7 +1571,7 @@ associated context explicit.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -1744,7 +1749,7 @@ users should use withInputStream.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -1800,7 +1805,7 @@ users should use withInputStream.)
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#headerMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#headerMap" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="headerMap:com.twitter.finagle.http.HeaderMap"></a><a id="headerMap:HeaderMap"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#headerMap:com.twitter.finagle.http.HeaderMap" title="Permalink">
@@ -1809,13 +1814,31 @@ users should use withInputStream.)
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">lazy val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">headerMap</span><span class="result">: <a href="HeaderMap.html" class="extype" name="com.twitter.finagle.http.HeaderMap">HeaderMap</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#host" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="host(value:String):Message.this.type"></a><a id="host(String):RequestProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#host(value:String):Message.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">host</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a>.this.type</span>
+      </span>
+      
+      <p class="shortcomment cmt">Set the Host header
+</p><div class="fullcomment"><div class="comment cmt"><p>Set the Host header
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="host_=(String)">host_=(String)</span> for Scala users</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#host" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="host:Option[String]"></a>
       <span class="permalink">
@@ -1847,24 +1870,10 @@ users should use withInputStream.)
         <span title="gt4s: host_$eq" class="name">host_=</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
-      <p class="shortcomment cmt">Set Host header</p><div class="fullcomment"><div class="comment cmt"><p>Set Host header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#httpRequest" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpRequest:org.jboss.netty.handler.codec.http.HttpRequest"></a><a id="httpRequest:HttpRequest"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#httpRequest:org.jboss.netty.handler.codec.http.HttpRequest" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">httpRequest</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../index.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#isChunked" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Set Host header
+</p><div class="fullcomment"><div class="comment cmt"><p>Set Host header
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p>host(String) for Java users</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request.Proxy#isChunked" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isChunked:Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#isChunked:Boolean" title="Permalink">
@@ -1872,14 +1881,14 @@ users should use withInputStream.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">isChunked</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -1904,7 +1913,7 @@ users should use withInputStream.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -1949,6 +1958,38 @@ request from a JavaScript AJAX libraries.  Some servers treat these
 requests specially.  For example, an endpoint might render JSON or XML
 instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#keepAlive" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="keepAlive:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#keepAlive:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">keepAlive</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#keepAlive" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="keepAlive(keepAlive:Boolean):Message.this.type"></a><a id="keepAlive(Boolean):RequestProxy.this.type"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#keepAlive(keepAlive:Boolean):Message.this.type" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">keepAlive</span><span class="params">(<span name="keepAlive">keepAlive: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a>.this.type</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#lastModified" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="lastModified:Option[String]"></a>
       <span class="permalink">
@@ -2005,7 +2046,7 @@ instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2079,6 +2120,23 @@ instead HTML if it's an XmlHttpRequest.  (Tip: don't do this - it's gross.)
       <p class="shortcomment cmt">Set media-type in Content-Type header.</p><div class="fullcomment"><div class="comment cmt"><p>Set media-type in Content-Type header.  Charset and parameter values are
 preserved, though may not be appropriate for the new media type.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request.Proxy#method" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="method:com.twitter.finagle.http.Method"></a><a id="method:Method"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#method:com.twitter.finagle.http.Method" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">method</span><span class="result">: <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">Method</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the HTTP method of this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the HTTP method of this request.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#method" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="method(method:com.twitter.finagle.http.Method):Request.this.type"></a><a id="method(Method):RequestProxy.this.type"></a>
       <span class="permalink">
@@ -2096,24 +2154,7 @@ preserved, though may not be appropriate for the new media type.
       
       <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the HTTP method of this request to the given <code>method</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="method_=(Method)">method_=(Method)</span> for Scala users.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#method" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="method:com.twitter.finagle.http.Method"></a><a id="method:Method"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#method:com.twitter.finagle.http.Method" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">method</span><span class="result">: <a href="Method.html" class="extype" name="com.twitter.finagle.http.Method">Method</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Returns the HTTP method of this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the HTTP method of this request.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#method_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#method_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="method_=(method:com.twitter.finagle.http.Method):Unit"></a><a id="method_=(Method):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#method_=(method:com.twitter.finagle.http.Method):Unit" title="Permalink">
@@ -2121,7 +2162,7 @@ preserved, though may not be appropriate for the new media type.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2129,7 +2170,7 @@ preserved, though may not be appropriate for the new media type.
       </span>
       
       <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the HTTP method of this request to the given <code>method</code>.</p><p>* @see <span class="extype" name="method(Method)">method(Method)</span> for Java users.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#multipart" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="multipart:Option[com.twitter.finagle.http.exp.Multipart]"></a><a id="multipart:Option[Multipart]"></a>
       <span class="permalink">
@@ -2201,7 +2242,7 @@ to support streaming requests.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#params" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="params:com.twitter.finagle.http.ParamMap"></a><a id="params:ParamMap"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#params:com.twitter.finagle.http.ParamMap" title="Permalink">
@@ -2219,7 +2260,7 @@ to support streaming requests.
       <p class="shortcomment cmt">Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which maintains query string and url-encoded
 params associated with this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which maintains query string and url-encoded
 params associated with this request.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#path" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="path:String"></a>
       <span class="permalink">
@@ -2239,7 +2280,7 @@ params associated with this request.
                 <span class="name">@BeanProperty</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#reader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#reader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reader:com.twitter.io.Reader"></a><a id="reader:Reader"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#reader:com.twitter.io.Reader" title="Permalink">
@@ -2251,13 +2292,13 @@ params associated with this request.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reader</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">Reader</a></span>
+        <span class="name">reader</span><span class="result">: <span class="extype" name="com.twitter.io.Reader">Reader</span></span>
       </span>
       
       <p class="shortcomment cmt">A read-only handle to the internal stream of bytes, representing the
 message body.</p><div class="fullcomment"><div class="comment cmt"><p>A read-only handle to the internal stream of bytes, representing the
-message body. See <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a> for more information.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+message body. See <span class="extype" name="com.twitter.io.Reader">com.twitter.io.Reader</span> for more information.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#referer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="referer:Option[String]"></a>
       <span class="permalink">
@@ -2347,7 +2388,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
                 <span class="name">@BeanProperty</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#remoteSocketAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#remoteSocketAddress" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="remoteSocketAddress:java.net.InetSocketAddress"></a><a id="remoteSocketAddress:InetSocketAddress"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#remoteSocketAddress:java.net.InetSocketAddress" title="Permalink">
@@ -2365,7 +2406,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
       <p class="shortcomment cmt">The InetSocketAddress of the client or a place-holder
 ephemeral address for requests that have yet to be dispatched.</p><div class="fullcomment"><div class="comment cmt"><p>The InetSocketAddress of the client or a place-holder
 ephemeral address for requests that have yet to be dispatched.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#removeCookie" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="removeCookie(name:String):Unit"></a><a id="removeCookie(String):Unit"></a>
       <span class="permalink">
@@ -2382,7 +2423,7 @@ ephemeral address for requests that have yet to be dispatched.
       </span>
       
       <p class="shortcomment cmt">Remove a cookie</p><div class="fullcomment"><div class="comment cmt"><p>Remove a cookie</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#response" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#response" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="response:com.twitter.finagle.http.Response"></a><a id="response:Response"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#response:com.twitter.finagle.http.Response" title="Permalink">
@@ -2397,7 +2438,7 @@ ephemeral address for requests that have yet to be dispatched.
         <span class="name">response</span><span class="result">: <a href="Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a></span>
       </span>
       
-      <p class="shortcomment cmt">Response associated with request.</p><div class="fullcomment"><div class="comment cmt"><p>Response associated with request.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
+      <p class="shortcomment cmt">Response associated with request.</p><div class="fullcomment"><div class="comment cmt"><p>Response associated with request.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#retryAfter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retryAfter:Option[String]"></a>
       <span class="permalink">
@@ -2478,7 +2519,7 @@ ephemeral address for requests that have yet to be dispatched.
       </span>
       
       <p class="shortcomment cmt">Set Server header</p><div class="fullcomment"><div class="comment cmt"><p>Set Server header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#setChunked" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#setChunked" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setChunked(chunked:Boolean):Unit"></a><a id="setChunked(Boolean):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#setChunked(chunked:Boolean):Unit" title="Permalink">
@@ -2486,7 +2527,7 @@ ephemeral address for requests that have yet to be dispatched.
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2495,8 +2536,8 @@ ephemeral address for requests that have yet to be dispatched.
       
       <p class="shortcomment cmt">Manipulate the <code>Message</code> content mode.</p><div class="fullcomment"><div class="comment cmt"><p>Manipulate the <code>Message</code> content mode.</p><p>If <code>chunked</code> is <code>true</code>, any existing content will be discarded and further attempts
 to manipulate the synchronous content will result in an <code>IllegalStateException</code>.</p><p>If <code>chunked</code> is <code>false</code>, the synchronous content methods will become available
-and the <code>Reader</code>/<code>Writer</code> of the message will be ignored by finagle.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+and the <code>Reader</code>/<code>Writer</code> of the message will be ignored by Finagle.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#setContentString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setContentString(value:String):Unit"></a><a id="setContentString(String):Unit"></a>
       <span class="permalink">
@@ -2577,6 +2618,23 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a> → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request.Proxy#uri" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="uri:String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#uri:String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">uri</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the URI of this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the URI of this request.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#uri" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="uri(value:String):Request.this.type"></a><a id="uri(String):RequestProxy.this.type"></a>
       <span class="permalink">
@@ -2594,24 +2652,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       
       <p class="shortcomment cmt">Set the URI of this request.</p><div class="fullcomment"><div class="comment cmt"><p>Set the URI of this request.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="uri_=(String)">uri_=(String)</span> for Scala users.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#uri" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="uri:String"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#uri:String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">uri</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Returns the URI of this request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the URI of this request.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#uri_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#uri_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="uri_=(uri:String):Unit"></a><a id="uri_=(String):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#uri_=(uri:String):Unit" title="Permalink">
@@ -2619,7 +2660,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2627,7 +2668,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </span>
       
       <p class="shortcomment cmt">Set the URI of this request to the given <code>uri</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the URI of this request to the given <code>uri</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="uri(String)">uri(String)</span> for Java users.</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="uri(String)">uri(String)</span> for Java users.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#userAgent" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="userAgent:Option[String]"></a>
       <span class="permalink">
@@ -2660,6 +2701,22 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </span>
       
       <p class="shortcomment cmt">Set User-Agent header</p><div class="fullcomment"><div class="comment cmt"><p>Set User-Agent header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request.Proxy#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="version:com.twitter.finagle.http.Version"></a><a id="version:Version"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#version:com.twitter.finagle.http.Version" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">version</span><span class="result">: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Get the HTTP version</p><div class="fullcomment"><div class="comment cmt"><p>Get the HTTP version</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="version(version:com.twitter.finagle.http.Version):Message.this.type"></a><a id="version(Version):RequestProxy.this.type"></a>
       <span class="permalink">
@@ -2677,23 +2734,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       
       <p class="shortcomment cmt">Set the HTTP version</p><div class="fullcomment"><div class="comment cmt"><p>Set the HTTP version</p><p>* @see <span class="extype" name="version_=(Version)">version_=(Version)</span> for Scala users
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#version" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="version:com.twitter.finagle.http.Version"></a><a id="version:Version"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#version:com.twitter.finagle.http.Version" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">version</span><span class="result">: <a href="Version.html" class="extype" name="com.twitter.finagle.http.Version">Version</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Get the HTTP version</p><div class="fullcomment"><div class="comment cmt"><p>Get the HTTP version</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#version_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#version_=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="version_=(version:com.twitter.finagle.http.Version):Unit"></a><a id="version_=(Version):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#version_=(version:com.twitter.finagle.http.Version):Unit" title="Permalink">
@@ -2701,7 +2742,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2710,7 +2751,7 @@ and the <code>Reader</code>/<code>Writer</code> of the message will be ignored b
       
       <p class="shortcomment cmt">Set the HTTP version
 </p><div class="fullcomment"><div class="comment cmt"><p>Set the HTTP version
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="version(Version)">version(Version)</span> for Java users</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="version(Version)">version(Version)</span> for Java users</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
@@ -2803,7 +2844,7 @@ index is advanced.  (Scala interface.  Java users can use getInputStream().)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2826,14 +2867,14 @@ index is advanced.  (Scala interface.  Java users can use getInputStream().)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">withReader</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="java.io.Reader">Reader</span>) ⇒ <span class="extype" name="com.twitter.finagle.http.Message.withReader.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.http.Message.withReader.T">T</span></span>
       </span>
       
-      <p class="shortcomment cmt">Use content as Reader.</p><div class="fullcomment"><div class="comment cmt"><p>Use content as Reader.  (Scala interface.  Java usrs can use getReader().)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+      <p class="shortcomment cmt">Use content as Reader.</p><div class="fullcomment"><div class="comment cmt"><p>Use content as Reader.  (Scala interface.  Java users can use getReader().)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#withWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withWriter[T](f:java.io.Writer=&gt;T):T"></a><a id="withWriter[T]((Writer)⇒T):T"></a>
       <span class="permalink">
@@ -2842,7 +2883,7 @@ index is advanced.  (Scala interface.  Java users can use getInputStream().)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2865,7 +2906,7 @@ index is advanced.  (Scala interface.  Java users can use getInputStream().)
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2890,11 +2931,11 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">write</span><span class="params">(<span name="buf">buf: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       
       <p class="shortcomment cmt">Append a Buf to content.</p><div class="fullcomment"><div class="comment cmt"><p>Append a Buf to content.</p><p>An <code>IllegalStateException</code> is thrown if this message is chunked.
@@ -2913,7 +2954,7 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -2928,7 +2969,7 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.RequestProxy#writer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#writer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writer:com.twitter.io.Writerwithcom.twitter.util.Closable"></a><a id="writer:WriterwithClosable"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#writer:com.twitter.io.Writerwithcom.twitter.util.Closable" title="Permalink">
@@ -2940,13 +2981,13 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writer</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Writer" class="extype" target="_top">Writer</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
+        <span class="name">writer</span><span class="result">: <span class="extype" name="com.twitter.io.Writer">Writer</span> with <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">A write-only handle to the internal stream of bytes, representing the
 message body.</p><div class="fullcomment"><div class="comment cmt"><p>A write-only handle to the internal stream of bytes, representing the
-message body. See <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Writer" class="extype" target="_top">com.twitter.io.Writer</a> for more information.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+message body. See <span class="extype" name="com.twitter.io.Writer">com.twitter.io.Writer</span> for more information.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#wwwAuthenticate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wwwAuthenticate:Option[String]"></a>
       <span class="permalink">
@@ -3038,31 +3079,14 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-12-29)</i> Use the Response constructor functions</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#httpMessage" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpMessage:org.jboss.netty.handler.codec.http.HttpMessage"></a><a id="httpMessage:HttpMessage"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#httpMessage:org.jboss.netty.handler.codec.http.HttpMessage" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-01-26) Going away as part of the Netty 4 transition">httpMessage</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-01-26)</i> Going away as part of the Netty 4 transition</p></dd></dl></div>
     </li></ol>
             </div>
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.http.Request">
+        <div class="parent" name="com.twitter.finagle.http.Request.Proxy">
+              <h3>Inherited from <a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.http.Request">
               <h3>Inherited from <a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></h3>
             </div><div class="parent" name="com.twitter.finagle.http.Message">
               <h3>Inherited from <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></h3>

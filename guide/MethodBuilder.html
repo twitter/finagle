@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MethodBuilder &#8212; Finagle 6.44.0 documentation</title>
+    <title>MethodBuilder &#8212; Finagle 7.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.44.0',
+        VERSION:     '7.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 6.44.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -63,10 +63,6 @@
             
   <div class="section" id="methodbuilder">
 <h1>MethodBuilder<a class="headerlink" href="#methodbuilder" title="Permalink to this headline">¶</a></h1>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">These APIs are experimental and subject to change.</p>
-</div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Currently there is <code class="docutils literal"><span class="pre">MethodBuilder</span></code> support for HTTP and ThriftMux.
@@ -364,12 +360,42 @@ so this is limited to Scala.</p>
     <span class="o">.</span><span class="n">follow</span>
 </pre></div>
 </div>
+<p>If you are working with code that prefers Scrooge&#8217;s <code class="docutils literal"><span class="pre">FutureIface</span></code> you can
+convert the <code class="docutils literal"><span class="pre">ServiceIface</span></code> by wrapping it with a <code class="docutils literal"><span class="pre">MethodIface</span></code>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Filter</span><span class="o">,</span> <span class="nc">ThriftMux</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.example.graph._</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
+
+<span class="k">val</span> <span class="n">stackClient</span> <span class="k">=</span> <span class="nc">ThriftMux</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;thriftmux_example&quot;</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">serviceIface</span><span class="k">:</span> <span class="kt">GraphService.ServiceIface</span> <span class="o">=</span>
+  <span class="n">stackClient</span>
+    <span class="o">.</span><span class="n">methodBuilder</span><span class="o">(</span><span class="s">&quot;inet!localhost:8989&quot;</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">withTimeoutPerRequest</span><span class="o">(</span><span class="mf">20.</span><span class="n">milliseconds</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">newServiceIface</span><span class="o">[</span><span class="kt">GraphService.ServiceIface</span><span class="o">](</span><span class="n">methodName</span> <span class="k">=</span> <span class="s">&quot;followers&quot;</span><span class="o">)</span>
+
+<span class="c1">// `FutureIface` is a collection of methods that return `Futures`.</span>
+<span class="c1">// It will use the configuration from the `ServiceIface` which allows you to decorate</span>
+<span class="c1">// the endpoints with `Filters`.</span>
+<span class="k">val</span> <span class="n">loggingFilter</span><span class="k">:</span> <span class="kt">Filter</span><span class="o">[</span><span class="kt">GraphService.Follow.Args</span>, <span class="kt">GraphService.Follow.SuccessType</span><span class="o">]</span> <span class="k">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">filtered</span><span class="k">:</span> <span class="kt">GraphService.ServiceIface</span> <span class="o">=</span>
+  <span class="n">serviceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">follow</span> <span class="k">=</span> <span class="n">loggingFilter</span><span class="o">.</span><span class="n">andThen</span><span class="o">(</span><span class="n">serviceIface</span><span class="o">.</span><span class="n">follow</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">futureIface</span><span class="k">:</span> <span class="kt">GraphService.FutureIface</span> <span class="o">=</span>
+  <span class="k">new</span> <span class="nc">GraphService</span><span class="o">.</span><span class="nc">MethodIface</span><span class="o">(</span><span class="n">filtered</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">result</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">futureIface</span><span class="o">.</span><span class="n">follow</span><span class="o">(</span><span class="n">follower</span> <span class="k">=</span> <span class="mi">568825492L</span><span class="o">,</span> <span class="n">followee</span> <span class="k">=</span> <span class="mi">4196983835L</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Further details on the differences between <code class="docutils literal"><span class="pre">ServiceIface</span></code> and <code class="docutils literal"><span class="pre">FutureIface</span></code>
+and how to work with them are in
+<a class="reference external" href="https://twitter.github.io/scrooge/Finagle.html">Scrooge&#8217;s Finagle docs</a>.</p>
 </div>
 <div class="section" id="logical-request-definition">
 <span id="mb-logical-req"></span><h2>Logical request definition<a class="headerlink" href="#logical-request-definition" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal"><span class="pre">MethodBuilder</span></code>&#8216;s logical requests represent the result of the
 initial request, after any retries have occurred. Concretely, should a request result
-in a retryable failure on the first attempt, but succeed upon retry, this considered
+in a retryable failure on the first attempt, but succeed upon retry, this is considered
 a single successful logical request while the logical request latency is the sum of
 both the initial attempt and the retry.</p>
 </div>

@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -248,8 +248,10 @@ generator.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <a class="object" href="Annotation$.html" title="An annotation is similar to a log statement."></a>
-                        <a class="trait" href="Annotation.html" title=""></a>
-                        <a href="Annotation.html" title="">
+                        <a class="trait" href="Annotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Annotation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Annotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Annotation.apply
+for construction if you don't need to specify passthrough fields.">
                           Annotation
                         </a>
                       </li><li class="current-entities indented5">
@@ -260,22 +262,28 @@ generator.
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="BinaryAnnotation$.html" title="Binary annotations are tags applied to a Span to give it context."></a>
-                        <a class="trait" href="BinaryAnnotation.html" title=""></a>
-                        <a href="BinaryAnnotation.html" title="">
+                        <a class="trait" href="BinaryAnnotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="BinaryAnnotation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply
+for construction if you don't need to specify passthrough fields.">
                           BinaryAnnotation
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ClientId$.html" title="At connection time, we can let the server know who we are so
 they can book keep and optionally reject unknown clients."></a>
-                        <a class="trait" href="ClientId.html" title=""></a>
-                        <a href="ClientId.html" title="">
+                        <a class="trait" href="ClientId.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ClientId.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ClientId.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ClientId.apply
+for construction if you don't need to specify passthrough fields.">
                           ClientId
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ConnectionOptions$.html" title="These are connection-level options negotiated during protocol
 upgrade."></a>
-                        <a class="trait" href="ConnectionOptions.html" title=""></a>
-                        <a href="ConnectionOptions.html" title="">
+                        <a class="trait" href="ConnectionOptions.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ConnectionOptions.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply
+for construction if you don't need to specify passthrough fields.">
                           ConnectionOptions
                         </a>
                       </li><li class="current-entities indented5">
@@ -286,67 +294,63 @@ upgrade."></a>
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Delegation$.html" title="Serializes an individual delegation."></a>
-                        <a class="trait" href="Delegation.html" title=""></a>
-                        <a href="Delegation.html" title="">
+                        <a class="trait" href="Delegation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Delegation.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Delegation.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Delegation.apply
+for construction if you don't need to specify passthrough fields.">
                           Delegation
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Endpoint$.html" title="Indicates the network context of a service recording an annotation with two
 exceptions."></a>
-                        <a class="trait" href="Endpoint.html" title=""></a>
-                        <a href="Endpoint.html" title="">
+                        <a class="trait" href="Endpoint.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Endpoint.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Endpoint.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Endpoint.apply
+for construction if you don't need to specify passthrough fields.">
                           Endpoint
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="RequestContext$.html" title="This struct serializes com.twitter.finagle.Context
 "></a>
-                        <a class="trait" href="RequestContext.html" title=""></a>
-                        <a href="RequestContext.html" title="">
+                        <a class="trait" href="RequestContext.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestContext.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="RequestContext.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestContext.apply
+for construction if you don't need to specify passthrough fields.">
                           RequestContext
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="RequestHeader$.html" title="RequestHeader defines headers for the request."></a>
-                        <a class="trait" href="RequestHeader.html" title=""></a>
-                        <a href="RequestHeader.html" title="">
+                        <a class="trait" href="RequestHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestHeader.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="RequestHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestHeader.apply
+for construction if you don't need to specify passthrough fields.">
                           RequestHeader
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="ResponseHeader$.html" title="The Response carries a reply header for tracing."></a>
-                        <a class="trait" href="ResponseHeader.html" title=""></a>
-                        <a href="ResponseHeader.html" title="">
+                        <a class="trait" href="ResponseHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="ResponseHeader.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply
+for construction if you don't need to specify passthrough fields.">
                           ResponseHeader
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="Span$.html" title="A trace is a series of spans (often RPC calls) which form a latency tree."></a>
-                        <a class="trait" href="Span.html" title=""></a>
-                        <a href="Span.html" title="">
+                        <a class="trait" href="Span.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Span.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="Span.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Span.apply
+for construction if you don't need to specify passthrough fields.">
                           Span
                         </a>
                       </li><li class="current-entities indented5">
                         <a class="object" href="UpgradeReply$.html" title="This is the struct that a successful upgrade will reply with."></a>
-                        <a class="trait" href="UpgradeReply.html" title=""></a>
-                        <a href="UpgradeReply.html" title="">
+                        <a class="trait" href="UpgradeReply.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply
+for construction if you don't need to specify passthrough fields."></a>
+                        <a href="UpgradeReply.html" title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply
+for construction if you don't need to specify passthrough fields.">
                           UpgradeReply
                         </a>
-                      </li><li name="com.twitter.finagle.thrift.transport" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transport"></a><a id="transport:transport"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/thrift/index.html#transport" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="../transport/index.html">
-              <span class="name">transport</span>
-            </a>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.thrift">thrift</a></dd></dl></div>
-    </li>
+                      </li>
               </ul>
             </div>
           </div>
@@ -421,12 +425,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Annotation.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Annotation.apply
+for construction if you don't need to specify passthrough fields." href="Annotation.html">
               <span class="name">Annotation</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product3" class="extype" target="_top">Product3</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Endpoint.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Endpoint">Endpoint</a>]] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="Annotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation">Annotation</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="Annotation$.html#apply(timestamp:Long,value:String,host:Option[com.twitter.finagle.thrift.thriftscala.Endpoint]):com.twitter.finagle.thrift.thriftscala.Annotation" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.Annotation#apply">com.twitter.finagle.thrift.thriftscala.Annotation.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.AnnotationType" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="AnnotationTypeextendsThriftEnumwithSerializable"></a><a id="AnnotationType:AnnotationType"></a>
       <span class="permalink">
@@ -460,12 +466,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="BinaryAnnotation.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply
+for construction if you don't need to specify passthrough fields." href="BinaryAnnotation.html">
               <span class="name">BinaryAnnotation</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product4" class="extype" target="_top">Product4</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>, <a href="AnnotationType.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.AnnotationType">AnnotationType</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Endpoint.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Endpoint">Endpoint</a>]] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation">BinaryAnnotation</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="BinaryAnnotation$.html#apply(key:String,value:java.nio.ByteBuffer,annotationType:com.twitter.finagle.thrift.thriftscala.AnnotationType,host:Option[com.twitter.finagle.thrift.thriftscala.Endpoint]):com.twitter.finagle.thrift.thriftscala.BinaryAnnotation" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation#apply">com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.ClientId" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ClientIdextendsThriftStructwithProduct1[String]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.ClientId]withSerializable"></a><a id="ClientId:ClientId"></a>
       <span class="permalink">
@@ -478,12 +486,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="ClientId.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ClientId.apply
+for construction if you don't need to specify passthrough fields." href="ClientId.html">
               <span class="name">ClientId</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product1" class="extype" target="_top">Product1</a>[<span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ClientId">ClientId</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="ClientId$.html#apply(name:String):com.twitter.finagle.thrift.thriftscala.ClientId" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.ClientId#apply">com.twitter.finagle.thrift.thriftscala.ClientId.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ConnectionOptionsextendsThriftStructwithProductwithHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.ConnectionOptions]withSerializable"></a><a id="ConnectionOptions:ConnectionOptions"></a>
       <span class="permalink">
@@ -496,12 +506,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="ConnectionOptions.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply
+for construction if you don't need to specify passthrough fields." href="ConnectionOptions.html">
               <span class="name">ConnectionOptions</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="ConnectionOptions.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions">ConnectionOptions</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="ConnectionOptions$.html#apply():com.twitter.finagle.thrift.thriftscala.ConnectionOptions" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.ConnectionOptions#apply">com.twitter.finagle.thrift.thriftscala.ConnectionOptions.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.Delegation" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="DelegationextendsThriftStructwithProduct2[String,String]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.Delegation]withSerializable"></a><a id="Delegation:Delegation"></a>
       <span class="permalink">
@@ -514,12 +526,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Delegation.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Delegation.apply
+for construction if you don't need to specify passthrough fields." href="Delegation.html">
               <span class="name">Delegation</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product2" class="extype" target="_top">Product2</a>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Delegation">Delegation</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="Delegation$.html#apply(src:String,dst:String):com.twitter.finagle.thrift.thriftscala.Delegation" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.Delegation#apply">com.twitter.finagle.thrift.thriftscala.Delegation.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.Endpoint" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="EndpointextendsThriftStructwithProduct3[Int,Short,String]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.Endpoint]withSerializable"></a><a id="Endpoint:Endpoint"></a>
       <span class="permalink">
@@ -532,12 +546,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Endpoint.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Endpoint.apply
+for construction if you don't need to specify passthrough fields." href="Endpoint.html">
               <span class="name">Endpoint</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product3" class="extype" target="_top">Product3</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Short" class="extype" target="_top">Short</a>, <span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="Endpoint.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Endpoint">Endpoint</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="Endpoint$.html#apply(ipv4:Int,port:Short,serviceName:String):com.twitter.finagle.thrift.thriftscala.Endpoint" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.Endpoint#apply">com.twitter.finagle.thrift.thriftscala.Endpoint.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.RequestContext" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestContextextendsThriftStructwithProduct2[java.nio.ByteBuffer,java.nio.ByteBuffer]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestContext]withSerializable"></a><a id="RequestContext:RequestContext"></a>
       <span class="permalink">
@@ -550,12 +566,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="RequestContext.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestContext.apply
+for construction if you don't need to specify passthrough fields." href="RequestContext.html">
               <span class="name">RequestContext</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product2" class="extype" target="_top">Product2</a>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>, <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="RequestContext$.html#apply(key:java.nio.ByteBuffer,value:java.nio.ByteBuffer):com.twitter.finagle.thrift.thriftscala.RequestContext" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.RequestContext#apply">com.twitter.finagle.thrift.thriftscala.RequestContext.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.RequestHeader" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestHeaderextendsThriftStructwithProduct9[Long,Long,Option[Long],Option[Boolean],Option[com.twitter.finagle.thrift.thriftscala.ClientId],Option[Long],Seq[com.twitter.finagle.thrift.thriftscala.RequestContext],Option[String],Option[Seq[com.twitter.finagle.thrift.thriftscala.Delegation]]]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.RequestHeader]withSerializable"></a><a id="RequestHeader:RequestHeader"></a>
       <span class="permalink">
@@ -568,12 +586,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="RequestHeader.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.RequestHeader.apply
+for construction if you don't need to specify passthrough fields." href="RequestHeader.html">
               <span class="name">RequestHeader</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product9" class="extype" target="_top">Product9</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ClientId">ClientId</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>], <span class="extype" name="scala.Seq">Seq</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Delegation">Delegation</a>]]] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="RequestHeader.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestHeader">RequestHeader</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="RequestHeader$.html#apply(traceId:Long,spanId:Long,parentSpanId:Option[Long],sampled:Option[Boolean],clientId:Option[com.twitter.finagle.thrift.thriftscala.ClientId],flags:Option[Long],contexts:Seq[com.twitter.finagle.thrift.thriftscala.RequestContext],dest:Option[String],delegations:Option[Seq[com.twitter.finagle.thrift.thriftscala.Delegation]]):com.twitter.finagle.thrift.thriftscala.RequestHeader" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.RequestHeader#apply">com.twitter.finagle.thrift.thriftscala.RequestHeader.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.ResponseHeader" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ResponseHeaderextendsThriftStructwithProduct2[Seq[com.twitter.finagle.thrift.thriftscala.Span],Seq[com.twitter.finagle.thrift.thriftscala.RequestContext]]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.ResponseHeader]withSerializable"></a><a id="ResponseHeader:ResponseHeader"></a>
       <span class="permalink">
@@ -586,12 +606,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="ResponseHeader.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply
+for construction if you don't need to specify passthrough fields." href="ResponseHeader.html">
               <span class="name">ResponseHeader</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product2" class="extype" target="_top">Product2</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="Span.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Span">Span</a>], <span class="extype" name="scala.Seq">Seq</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.RequestContext">RequestContext</a>]] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="ResponseHeader.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.ResponseHeader">ResponseHeader</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="ResponseHeader$.html#apply(spans:Seq[com.twitter.finagle.thrift.thriftscala.Span],contexts:Seq[com.twitter.finagle.thrift.thriftscala.RequestContext]):com.twitter.finagle.thrift.thriftscala.ResponseHeader" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.ResponseHeader#apply">com.twitter.finagle.thrift.thriftscala.ResponseHeader.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.Span" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SpanextendsThriftStructwithProduct7[Long,String,Long,Option[Long],Seq[com.twitter.finagle.thrift.thriftscala.Annotation],Seq[com.twitter.finagle.thrift.thriftscala.BinaryAnnotation],Boolean]withHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.Span]withSerializable"></a><a id="Span:Span"></a>
       <span class="permalink">
@@ -604,12 +626,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="Span.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.Span.apply
+for construction if you don't need to specify passthrough fields." href="Span.html">
               <span class="name">Span</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product7" class="extype" target="_top">Product7</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>, <span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>], <span class="extype" name="scala.Seq">Seq</span>[<a href="Annotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation">Annotation</a>], <span class="extype" name="scala.Seq">Seq</span>[<a href="BinaryAnnotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation">BinaryAnnotation</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>] with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="Span.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Span">Span</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="Span$.html#apply(traceId:Long,name:String,id:Long,parentId:Option[Long],annotations:Seq[com.twitter.finagle.thrift.thriftscala.Annotation],binaryAnnotations:Seq[com.twitter.finagle.thrift.thriftscala.BinaryAnnotation],debug:Boolean):com.twitter.finagle.thrift.thriftscala.Span" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.Span#apply">com.twitter.finagle.thrift.thriftscala.Span.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li><li name="com.twitter.finagle.thrift.thriftscala.UpgradeReply" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="UpgradeReplyextendsThriftStructwithProductwithHasThriftStructCodec3[com.twitter.finagle.thrift.thriftscala.UpgradeReply]withSerializable"></a><a id="UpgradeReply:UpgradeReply"></a>
       <span class="permalink">
@@ -622,12 +646,14 @@ exceptions."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="" href="UpgradeReply.html">
+        <a title="Prefer the companion object's com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply
+for construction if you don't need to specify passthrough fields." href="UpgradeReply.html">
               <span class="name">UpgradeReply</span>
             </a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <span class="extype" name="com.twitter.scrooge.HasThriftStructCodec3">HasThriftStructCodec3</span>[<a href="UpgradeReply.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.UpgradeReply">UpgradeReply</a>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Prefer the companion object's <a href="UpgradeReply$.html#apply():com.twitter.finagle.thrift.thriftscala.UpgradeReply" class="extmbr" name="com.twitter.finagle.thrift.thriftscala.UpgradeReply#apply">com.twitter.finagle.thrift.thriftscala.UpgradeReply.apply</a>
+for construction if you don't need to specify passthrough fields.</p>
     </li></ol>
             </div>
 

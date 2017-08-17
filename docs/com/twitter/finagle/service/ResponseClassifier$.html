@@ -151,7 +151,7 @@ HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Buildi
     printf(<span class="lit">"Got error %s\n"</span>, exc)
 }</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
 connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
-returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+returns a <span class="extype" name="com.twitter.util.Future">com.twitter.util.Future</span> representing the result of the operation. We listen to this
 future, printing an appropriate message when the response arrives.</p><p>The <a href="https://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
 resources for using Finagle.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.twitter">twitter</a></dd></dl></div>
@@ -550,6 +550,24 @@ as such this treats all <code>Return</code> responses as <a href="ResponseClass$
 all retryable <code>Throws</code> as <a href="ResponseClass$.html#RetryableFailure:com.twitter.finagle.service.ResponseClass.Failed" class="extmbr" name="com.twitter.finagle.service.ResponseClass#RetryableFailure">ResponseClass.RetryableFailure</a>
 and all <code>Throws</code> as <a href="ResponseClass$.html#NonRetryableFailure:com.twitter.finagle.service.ResponseClass.Failed" class="extmbr" name="com.twitter.finagle.service.ResponseClass#NonRetryableFailure">ResponseClass.NonRetryableFailure</a>.</p><p>It is a total function covering the entire input domain and as
 such it is recommended that it is used with user's classifiers:</p><pre>theirClassier.applyOrElse(theirReqRep, ResponseClassifier.Default)</pre></div></div>
+    </li><li name="com.twitter.finagle.service.ResponseClassifier#RetryOnThrows" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RetryOnThrows:com.twitter.finagle.service.ResponseClassifier"></a><a id="RetryOnThrows:ResponseClassifier"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/service/ResponseClassifier$.html#RetryOnThrows:com.twitter.finagle.service.ResponseClassifier" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RetryOnThrows</span><span class="result">: <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implementation for the <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> that retries requests on all throws.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation for the <a href="index.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a> that retries requests on all throws.</p><p>This would be useful for instances of idempotent requests, for example
+on database reads or similar.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
