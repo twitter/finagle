@@ -5,7 +5,7 @@ import com.twitter.finagle.{Address, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
+import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{
@@ -314,8 +314,17 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
       // deleteOnExit is handled by TempFile
 
+      val interFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
+      // deleteOnExit is handled by TempFile
+
       Thrift.server.withTransport
-        .tls(SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)))
+        .tls(
+          SslServerConfiguration(
+            clientAuth = ClientAuth.Needed,
+            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
+            trustCredentials = TrustCredentials.CertCollection(interFile)
+          )
+        )
         .configured(Stats(sr))
         .serve(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
@@ -323,13 +332,28 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         )
     }
 
-    def mkThriftTlsClient(server: ListeningServer) =
+    def mkThriftTlsClient(server: ListeningServer) = {
+      val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
+      // deleteOnExit is handled by TempFile
+
+      val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
+      // deleteOnExit is handled by TempFile
+
+      val interFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
+      // deleteOnExit is handled by TempFile
+
       Thrift.client.withTransport
-        .tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))
+        .tls(
+          SslClientConfiguration(
+            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
+            trustCredentials = TrustCredentials.CertCollection(interFile)
+          )
+        )
         .newIface[B.ServiceIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
+    }
 
     val sr = new InMemoryStatsReceiver()
 
