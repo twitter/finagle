@@ -18,6 +18,10 @@ import java.util.concurrent.Executor
  * reaching the session before the method call has returned. This avoids situations such as a
  * session performing a write and before the call returns a new inbound message arrives and
  * mutates session state in an unexpected way.
+ *
+ * All failures are fatal to the [[PushChannelHandle]] including write failures. Specifically,
+ * any failure results in the `onClose` promise being completed with the exception in the
+ * `Throw` pathway and the underlying socket will be closed.
  */
 trait PushChannelHandle[In, Out] extends Closable with ClientConnection {
 
@@ -30,6 +34,9 @@ trait PushChannelHandle[In, Out] extends Closable with ClientConnection {
 
   /**
    * Replaces the current `PushSession`, directing inbound events to the new session.
+   *
+   * @note It is unsafe to register a new session from outside of serial executor and to
+   *       do so will result in undefined behavior.
    *
    * @note other than no longer receiving inbound messages, the previous session is still
    *       active and it is the responsibility of the caller to release any resources held
