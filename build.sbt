@@ -165,6 +165,12 @@ val jmockSettings = Seq(
   )
 )
 
+lazy val noPublishSettings = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false
+)
+
 lazy val projectList = Seq[sbt.ProjectReference](
   // Core, support.
   finagleToggle,
@@ -199,6 +205,7 @@ lazy val finagle = Project(
   base = file(".")
 ).settings(
   sharedSettings ++
+  noPublishSettings ++
   unidocSettings ++ Seq(
     unidocProjectFilter in(ScalaUnidoc, unidoc) :=
       inAnyProject -- inProjects(
