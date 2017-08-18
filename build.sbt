@@ -333,7 +333,6 @@ lazy val finagleStats = Project(
   libraryDependencies ++= Seq(
     util("app"),
     util("core"),
-    util("events"),
     util("lint"),
     util("logging"),
     util("registry"),
@@ -357,7 +356,6 @@ lazy val finagleZipkinCore = Project(
   name := "finagle-zipkin-core",
   libraryDependencies ++= Seq(
     util("codec"),
-    util("events"),
     util("core"),
     util("stats")) ++ scroogeLibs ++ jacksonLibs
 ).dependsOn(finagleCore, finagleThrift)
