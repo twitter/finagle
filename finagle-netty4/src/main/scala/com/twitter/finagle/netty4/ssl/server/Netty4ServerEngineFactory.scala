@@ -29,8 +29,8 @@ class Netty4ServerEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         (for {
           key <- Netty4SslConfigurations.getPrivateKey(keyFile)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
-          chain <- new X509CertificateFile(chainFile).readX509Certificate()
-        } yield SslContextBuilder.forServer(key, cert, chain)) match {
+          chain <- new X509CertificateFile(chainFile).readX509Certificates()
+        } yield SslContextBuilder.forServer(key, (cert +: chain): _*)) match {
           case Return(builder) => builder
           case Throw(ex) => throw new SslConfigurationException(ex.getMessage, ex)
         }

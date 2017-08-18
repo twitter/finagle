@@ -45,8 +45,8 @@ class Netty4ClientEngineFactory(allocator: ByteBufAllocator, forceJdk: Boolean)
         for {
           key <- Netty4SslConfigurations.getPrivateKey(keyFile)
           cert <- new X509CertificateFile(certFile).readX509Certificate()
-          chain <- new X509CertificateFile(chainFile).readX509Certificate()
-        } yield builder.keyManager(key, cert, chain)
+          chain <- new X509CertificateFile(chainFile).readX509Certificates()
+        } yield builder.keyManager(key, (cert +: chain): _*)
     }
 
   /**

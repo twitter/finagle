@@ -25,10 +25,10 @@ class Netty4ClientSslHandlerTest extends FunSuite {
     new EmbeddedChannel(new Netty4ClientSslHandler(ps))
 
   def useKeyCredentials(): KeyCredentials = {
-    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
     // deleteOnExit is handled by TempFile
 
-    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
 
     KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)

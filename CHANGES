@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 7.x
 -----
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
+    properly load all chain certificates when the `SslClientConfiguration` or
+    `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
+    first one in the file. ``PHAB_ID=D82414``
+
 7.0.0
 ------
 
