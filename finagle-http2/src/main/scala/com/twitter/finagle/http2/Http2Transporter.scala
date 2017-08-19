@@ -23,7 +23,6 @@ import io.netty.channel.{
 import io.netty.handler.codec.http._
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import io.netty.handler.codec.http2._
-import io.netty.handler.logging.LogLevel
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicReference
@@ -109,7 +108,7 @@ private[finagle] object Http2Transporter {
 
       val connectionHandlerBuilder = new RichHttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
-        .frameLogger(new Http2FrameLogger(LogLevel.TRACE))
+        .frameLogger(new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix))
         .connection(connection)
         .initialSettings(Settings.fromParams(params))
         .encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize)

@@ -2,6 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http
+import com.twitter.finagle.http2.param.FrameLoggerNamePrefix
 import com.twitter.finagle.http2.transport.{
   Http2NackHandler,
   PriorKnowledgeHandler,
@@ -25,7 +26,6 @@ import io.netty.handler.codec.http.HttpServerUpgradeHandler.{
 }
 import io.netty.handler.codec.http.{FullHttpRequest, HttpServerUpgradeHandler}
 import io.netty.handler.codec.http2._
-import io.netty.handler.logging.LogLevel
 import io.netty.util.AsciiString
 
 /**
@@ -62,7 +62,7 @@ private[http2] class Http2CleartextServerInitializer(
     override def newUpgradeCodec(protocol: CharSequence): UpgradeCodec = {
       if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
         val initialSettings = Settings.fromParams(params)
-        val logger = new Http2FrameLogger(LogLevel.TRACE, classOf[Http2Codec])
+        val logger = new LoggerPerFrameTypeLogger(params[FrameLoggerNamePrefix].loggerNamePrefix)
         val bootstrap = new Http2StreamChannelBootstrap()
           .option(ChannelOption.ALLOCATOR, channel.alloc())
           .handler(initializer)
