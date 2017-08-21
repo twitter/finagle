@@ -15,6 +15,12 @@ Bug Fixes
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
     first one in the file. ``PHAB_ID=D82414``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
+    when determining status. ``PHAB_ID=D82670``
+
 7.0.0
 ------
 

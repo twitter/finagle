@@ -134,7 +134,6 @@ private[finagle] class ChannelTransport(
 
   def status: Status =
     if (failed.get || !ch.isOpen) Status.Closed
-    else if (!ch.isWritable) Status.Busy
     else Status.Open
 
   def close(deadline: Time): Future[Unit] = {
