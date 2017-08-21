@@ -3,14 +3,16 @@ package com.twitter.finagle.netty4.http
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
-import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
+import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Writer, Buf, Reader}
+import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.logging.Logger
 import com.twitter.util._
 import io.netty.handler.codec.{http => NettyHttp}
 import java.net.InetSocketAddress
 
 private[http] object StreamTransports {
+  val log = Logger.get()
 
   /**
    * Drain [[Transport]] messages into a [[Writer]] until `eos` indicates end
@@ -95,7 +97,10 @@ private[http] object StreamTransports {
       case Some(buf) =>
         trans.write(chunkOfBuf(buf)).transform {
           case Return(_) => streamChunks(trans, r, bufSize)
-          case _ => Future(r.discard())
+          case Throw(t) => {
+            log.debug(t, "Failure while writing chunk to stream")
+            Future(r.discard())
+          }
         }
     }
   }
