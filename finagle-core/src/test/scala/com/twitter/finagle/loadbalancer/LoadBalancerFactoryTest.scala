@@ -14,15 +14,13 @@ import org.scalatest.FunSuite
 
 class LoadBalancerFactoryTest
     extends FunSuite
-    with StringClient
-    with StringServer
     with Eventually
     with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
 
   trait PerHostFlagCtx extends App {
     val label = "myclient"
-    val client = stringClient.configured(param.Label(label))
+    val client = StringClient.client.configured(param.Label(label))
     val port = "localhost:8080"
     val perHostStatKey = Seq(label, port, "available")
   }
@@ -71,10 +69,10 @@ class LoadBalancerFactoryTest
 
   test("make service factory stack") {
     val addr1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server1 = stringServer.serve(addr1, echoService)
+    val server1 = StringServer.server.serve(addr1, echoService)
 
     val addr2 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server2 = stringServer.serve(addr2, echoService)
+    val server2 = StringServer.server.serve(addr2, echoService)
 
     val dest = Name.bound(
       Address(server1.boundAddress.asInstanceOf[InetSocketAddress]),
@@ -82,7 +80,7 @@ class LoadBalancerFactoryTest
     )
 
     val sr = new InMemoryStatsReceiver
-    val client = stringClient
+    val client = StringClient.client
       .configured(Stats(sr))
       .newService(dest, "client")
 

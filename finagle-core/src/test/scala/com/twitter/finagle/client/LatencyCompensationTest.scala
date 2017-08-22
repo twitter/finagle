@@ -5,17 +5,16 @@ import com.twitter.finagle.client.LatencyCompensation.Compensator
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
+import com.twitter.finagle.server.StringServer
 import com.twitter.util._
 import java.net.InetSocketAddress
-import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 /**
  * An end-to-end test for LatencyCompensation.
  */
-@RunWith(classOf[JUnitRunner])
 class LatencyCompensationTest
     extends FunSuite
     with AssertionsForJUnit
@@ -89,7 +88,7 @@ class LatencyCompensationTest
       }
     }
 
-    lazy val baseEchoClient = Echo.stringClient
+    lazy val baseEchoClient = StringClient.client
       .configured(TimeoutFilter.Param(baseTimeout))
       .configured(param.Timer(timer))
 
@@ -100,8 +99,8 @@ class LatencyCompensationTest
      * N.B. connection timeout compensation is not tested
      * end-to-end-because it's tricky to cause connection latency.
      */
-    def whileConnected(echoClient: Echo.Client)(f: Service[String, String] => Unit): Unit = {
-      val server = Echo.serve("127.1:0", service)
+    def whileConnected(echoClient: StringClient.Client)(f: Service[String, String] => Unit): Unit = {
+      val server = StringServer.server.serve("127.1:0", service)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
       val addr = Addr.Bound(Set[Address](Address(ia)), metadata)
       val client = echoClient.newService(Name.Bound(Var.value(addr), "id"), "label")
@@ -111,7 +110,7 @@ class LatencyCompensationTest
     }
   }
 
-  test("TimeoutFilter.module accomodates latency compensation") {
+  test("TimeoutFilter.module accommodates latency compensation") {
     new Ctx {
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
@@ -137,7 +136,7 @@ class LatencyCompensationTest
   }
 
   test(
-    "TimeoutFilter.module accomodates configured latency compensation even when default override is set"
+    "TimeoutFilter.module accommodates configured latency compensation even when default override is set"
   ) {
     new Ctx {
       // set a compensation to 0 which should cause a failure if the caller does not
@@ -168,7 +167,7 @@ class LatencyCompensationTest
     }
   }
 
-  test("TimeoutFilter.module accomodates configured latency compensation when set by override") {
+  test("TimeoutFilter.module accommodates configured latency compensation when set by override") {
     new Ctx {
       // Do not set the .configured param for LatencyCompensation. Instead override the default
       // compensation to 2 seconds which will make this succeed.

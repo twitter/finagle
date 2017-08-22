@@ -9,12 +9,9 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with StringClient with StringServer {
+class EndToEndTest extends FunSuite {
 
   test("IndividualRequestTimeoutException should include RemoteInfo") {
     val timer = new MockTimer
@@ -29,8 +26,8 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       }
 
       val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-      val server = stringServer.serve(address, svc)
-      val client = stringClient
+      val server = StringServer.server.serve(address, svc)
+      val client = StringClient.client
         .configured(param.Timer(timer))
         .withSession
         .acquisitionTimeout(1.seconds)
@@ -66,8 +63,8 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
 
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = stringServer.serve(address, hre)
-    val client = stringClient.newService(
+    val server = StringServer.server.serve(address, hre)
+    val client = StringClient.client.newService(
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
       "B"
     )
@@ -103,9 +100,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
 
     val addressC = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val serverC = stringServer.serve(addressC, serviceC)
+    val serverC = StringServer.server.serve(addressC, serviceC)
 
-    val clientB = stringClient.newService(
+    val clientB = StringClient.client.newService(
       Name.bound(Address(serverC.boundAddress.asInstanceOf[InetSocketAddress])),
       "C"
     )
@@ -139,9 +136,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
         Future.exception(e)
       }
     }
-    val serverB = stringServer.serve(addressB, serviceB)
+    val serverB = StringServer.server.serve(addressB, serviceB)
 
-    val clientA = stringClient.newService(
+    val clientA = StringClient.client.newService(
       Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])),
       "B"
     )
@@ -167,9 +164,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       def apply(request: String) = Future.exception(new HasRemoteInfo {})
     }
     val addressC = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val serverC = stringServer.serve(addressC, serviceC)
+    val serverC = StringServer.server.serve(addressC, serviceC)
 
-    val clientB = stringClient.newService(
+    val clientB = StringClient.client.newService(
       Name.bound(Address(serverC.boundAddress.asInstanceOf[InetSocketAddress])),
       "C"
     )
@@ -178,9 +175,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       def apply(request: String) =
         clientB(request)
     }
-    val serverB = stringServer.serveAndAnnounce("B", addressB, serviceB)
+    val serverB = StringServer.server.serveAndAnnounce("B", addressB, serviceB)
 
-    val clientA = stringClient.newService(
+    val clientA = StringClient.client.newService(
       Name.bound(Address(serverB.boundAddress.asInstanceOf[InetSocketAddress])),
       "B"
     )
@@ -205,7 +202,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(stringServer)
+      .stack(StringServer.server)
       .bindTo(address)
       .name("FinagleServer")
       .build(never)
@@ -215,7 +212,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("client")
         .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-        .stack(stringClient)
+        .stack(StringClient.client)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
         .hostConnectionLimit(1)
@@ -243,7 +240,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("client")
         .addrs(Address.failing)
-        .stack(stringClient)
+        .stack(StringClient.client)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
         .hostConnectionLimit(1)
@@ -279,7 +276,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
     val server = ServerBuilder()
-      .stack(stringServer)
+      .stack(StringServer.server)
       .bindTo(address)
       .name("FinagleServer")
       .build(always)
@@ -289,7 +286,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val cb = ClientBuilder()
         .name("testClient")
         .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-        .stack(stringClient)
+        .stack(StringClient.client)
         .hostConnectionLimit(1)
         .reportTo(mem)
         .retries(1)

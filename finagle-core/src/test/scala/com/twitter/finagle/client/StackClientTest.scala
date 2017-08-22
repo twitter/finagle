@@ -21,10 +21,8 @@ import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
-import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 
 private object StackClientTest {
   case class LocalCheckingStringClient(
@@ -42,7 +40,7 @@ private object StackClientTest {
     protected type Out = String
 
     protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
-      Netty4Transporter.raw(StringClientPipeline, addr, params)
+      Netty4Transporter.raw(StringClient.StringClientPipeline, addr, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
@@ -59,18 +57,15 @@ private object StackClientTest {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class StackClientTest
     extends FunSuite
-    with StringClient
-    with StringServer
     with BeforeAndAfter
     with Eventually
     with IntegrationPatience {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
-    val client = stringClient
+    val client = StringClient.client
       .configured(param.Stats(sr))
   }
 
@@ -283,7 +278,7 @@ class StackClientTest
     }
 
     val sr = new InMemoryStatsReceiver
-    val client = stringClient.configured(param.Stats(sr))
+    val client = StringClient.client.configured(param.Stats(sr))
 
     val stk = client.stack.replace(
       LoadBalancerFactory.role,
@@ -453,7 +448,7 @@ class StackClientTest
 
   test("StackBasedClient.configured is a StackClient") {
     // compilation test
-    val client: StackBasedClient[String, String] = stringClient
+    val client: StackBasedClient[String, String] = StringClient.client
     val client2: StackBasedClient[String, String] =
       client.configured(param.Label("foo"))
     val client3: StackBasedClient[String, String] =
@@ -462,7 +457,7 @@ class StackClientTest
 
   test("StackClient.configured is a StackClient") {
     // compilation test
-    val client: StackClient[String, String] = stringClient
+    val client: StackClient[String, String] = StringClient.client
     val client2: StackClient[String, String] =
       client.configured(param.Label("foo"))
     val client3: StackClient[String, String] =
@@ -476,7 +471,7 @@ class StackClientTest
     val sf = ServiceFactory(() => Future.value(reverser))
     val addr = exp.Address(sf)
     val name = Name.bound(addr)
-    val service = stringClient.newService(name, "sfsa-test")
+    val service = StringClient.client.newService(name, "sfsa-test")
     val forward = "a man a plan a canal: panama"
     val reversed = Await.result(service(forward), 1.second)
     assert(reversed == forward.reverse)
@@ -495,8 +490,8 @@ class StackClientTest
         svc(str.reverse)
     }
 
-    val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
-    assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
+    val svc = StringClient.client.filtered(reverseFilter).newService(name, "test_client")
+    assert(Await.result(svc("ping"), 1.second) == "ping".reverse)
   }
 
   test("endpointer clears Contexts") {
@@ -506,7 +501,7 @@ class StackClientTest
     Contexts.local.let(key, "SomeCoolContext") {
       val echoSvc = Service.mk[String, String] { Future.value }
       val server =
-        stringServer.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), echoSvc)
+        StringServer.server.serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), echoSvc)
       val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
 
       val client = new LocalCheckingStringClient(key)
@@ -619,12 +614,12 @@ class StackClientTest
   }
 
   test("exports transporter type to registry") {
-    val listeningServer = stringServer
+    val listeningServer = StringServer.server
       .serve(":*", Service.mk[String, String](Future.value(_)))
     val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
 
     val label = "stringClient"
-    val svc = stringClient.newService(Name.bound(Address(boundAddress)), label)
+    val svc = StringClient.client.newService(Name.bound(Address(boundAddress)), label)
 
     val registry = new SimpleRegistry
     Await.result(GlobalRegistry.withRegistry(registry) {

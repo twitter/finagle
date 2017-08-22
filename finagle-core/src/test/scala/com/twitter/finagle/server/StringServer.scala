@@ -10,20 +10,16 @@ import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.codec.{DelimiterBasedFrameDecoder, Delimiters}
 import java.nio.charset.StandardCharsets
 
-private[finagle] object StringServerPipeline extends (ChannelPipeline => Unit) {
-  def apply(pipeline: ChannelPipeline): Unit = {
-    pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-    pipeline.addLast("stringDecoder", new StringDecoder(StandardCharsets.UTF_8))
-    pipeline.addLast("stringEncoder", new StringEncoder(StandardCharsets.UTF_8))
-  }
-}
-
-private[finagle] object StringServer {
+object StringServer {
   val protocolLibrary = "string"
-}
 
-trait StringServer {
-  import StringServer._
+  private object StringServerPipeline extends (ChannelPipeline => Unit) {
+    def apply(pipeline: ChannelPipeline): Unit = {
+      pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
+      pipeline.addLast("stringDecoder", new StringDecoder(StandardCharsets.UTF_8))
+      pipeline.addLast("stringEncoder", new StringEncoder(StandardCharsets.UTF_8))
+    }
+  }
 
   case class Server(
     stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
@@ -44,5 +40,5 @@ trait StringServer {
     ) = new SerialServerDispatcher(transport, service)
   }
 
-  val stringServer = Server()
+  val server: Server = Server()
 }

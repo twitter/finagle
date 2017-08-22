@@ -406,14 +406,14 @@ class TrafficDistributorTest extends FunSuite {
     assert(dist.status == Status.Open)
   })
 
-  test("increment weights on a shard")(new StringClient with StringServer {
-    val server = stringServer.serve(":*", Service.mk { r: String =>
+  test("increment weights on a shard") {
+    val server = StringServer.server.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
     })
     val sr = new CumulativeGaugeInMemoryStatsReceiver()
     val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
     val va = Var[Addr](Addr.Bound(addr))
-    val client = stringClient
+    val client = StringClient.client
       .configured(param.Stats(sr))
       .newClient(Name.Bound.singleton(va), "test")
       .toService
@@ -451,16 +451,16 @@ class TrafficDistributorTest extends FunSuite {
       case None => // it was GC-ed, this is ok too
     }
     assert(sr.numGauges(Seq("test", "loadbalancer", "size")) <= 1)
-  })
+  }
 
-  test("close a client")(new StringClient with StringServer {
-    val server = stringServer.serve(":*", Service.mk { r: String =>
+  test("close a client") {
+    val server = StringServer.server.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
     })
     val sr = new InMemoryStatsReceiver
     val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
     val va = Var[Addr](Addr.Bound(addr))
-    val client = stringClient
+    val client = StringClient.client
       .configured(param.Stats(sr))
       .newClient(Name.Bound.singleton(va), "test")
       .toService
@@ -468,5 +468,5 @@ class TrafficDistributorTest extends FunSuite {
     assert(Await.result(client("hello")) == "hello".reverse)
     Await.ready(client.close())
     intercept[ServiceClosedException] { Await.result(client("x")) }
-  })
+  }
 }

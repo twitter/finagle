@@ -17,21 +17,17 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import javax.net.ssl.SSLSession
-import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ClientBuilderTest
     extends FunSuite
     with Eventually
     with IntegrationPatience
-    with MockitoSugar
-    with StringClient {
+    with MockitoSugar {
 
   private class MyException extends Exception
 
@@ -47,7 +43,7 @@ class ClientBuilderTest
 
     val inMemory = new InMemoryStatsReceiver
     val builder = ClientBuilder()
-      .stack(stringClient.withEndpoint(service))
+      .stack(StringClient.client.withEndpoint(service))
       .failFast(false)
       .name("test")
       .hostConnectionLimit(1)
@@ -74,7 +70,7 @@ class ClientBuilderTest
     val inMemory = new InMemoryStatsReceiver
     val numFailures = 21 // There will be 20 requeues by default
     val builder = ClientBuilder()
-      .stack(stringClient.withEndpoint(service))
+      .stack(StringClient.client.withEndpoint(service))
       .failFast(false)
       .name("test")
       .hostConnectionLimit(1)
@@ -116,7 +112,7 @@ class ClientBuilderTest
     }
 
     val builder = ClientBuilder()
-      .stack(stringClient.withEndpoint(service))
+      .stack(StringClient.client.withEndpoint(service))
       .failFast(false)
       .name("test")
       .hostConnectionLimit(1)
@@ -142,7 +138,7 @@ class ClientBuilderTest
   }
 
   test("ClientBuilder should close properly") {
-    val svc = ClientBuilder().stack(stringClient).hostConnectionCoresize(1).hosts("").build()
+    val svc = ClientBuilder().stack(StringClient.client).hostConnectionCoresize(1).hosts("").build()
     val f = svc.close()
     eventually { f.isDefined }
   }

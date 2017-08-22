@@ -11,7 +11,7 @@ import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.FunSuite
 
-class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with StringServer {
+class ConcurrentLoadBalancerFactoryTest extends FunSuite {
   val echoService = Service.mk[String, String](Future.value(_))
 
   test("Default num connections param is 4") {
@@ -22,13 +22,13 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
 
   test("makes service factory stack") {
     val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server = stringServer.serve(address, echoService)
+    val server = StringServer.server.serve(address, echoService)
 
     val sr = new InMemoryStatsReceiver
     val clientStack =
       StackClient.newStack
         .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
-    val client = stringClient
+    val client = StringClient.client
       .withStack(clientStack)
       .withStatsReceiver(sr)
       .newService(
@@ -42,10 +42,10 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
 
   test("creates fixed number of service factories based on params") {
     val addr1 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server1 = stringServer.serve(addr1, echoService)
+    val server1 = StringServer.server.serve(addr1, echoService)
 
     val addr2 = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
-    val server2 = stringServer.serve(addr2, echoService)
+    val server2 = StringServer.server.serve(addr2, echoService)
 
     val sr = new InMemoryStatsReceiver
     val clientStack =
@@ -57,7 +57,7 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
       Address(server2.boundAddress.asInstanceOf[InetSocketAddress])
     )
 
-    val client = stringClient
+    val client = StringClient.client
       .withStack(clientStack)
       .withStatsReceiver(sr)
       .configured(ConcurrentLoadBalancerFactory.Param(3))

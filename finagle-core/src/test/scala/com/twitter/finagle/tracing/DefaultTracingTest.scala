@@ -2,17 +2,14 @@ package com.twitter.finagle.tracing
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.client._
-import com.twitter.finagle.server._
+import com.twitter.finagle.client.StringClient
+import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.{param => fparam, _}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
-class DefaultTracingTest extends FunSuite with StringClient with StringServer {
+class DefaultTracingTest extends FunSuite {
   object Svc extends Service[String, String] {
     def apply(str: String): Future[String] = Future.value(str)
   }
@@ -65,12 +62,12 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
   test("core events are traced in the stack client/server") {
     testCoreTraces { (serverTracer, clientTracer) =>
-      val svc = stringServer
+      val svc = StringServer.server
         .configured(fparam.Tracer(serverTracer))
         .configured(fparam.Label("theServer"))
         .serve("localhost:*", Svc)
 
-      val client = stringClient
+      val client = StringClient.client
         .configured(fparam.Tracer(clientTracer))
         .newService(
           Name.bound(Address(svc.boundAddress.asInstanceOf[InetSocketAddress])),
@@ -91,14 +88,14 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       val svc = ServerBuilder()
         .name("theServer")
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .stack(stringServer)
+        .stack(StringServer.server)
         .tracer(serverTracer)
         .build(Svc)
 
       val client = ClientBuilder()
         .name("theClient")
         .hosts(svc.boundAddress.asInstanceOf[InetSocketAddress])
-        .stack(stringClient)
+        .stack(StringClient.client)
         .hostConnectionLimit(1)
         .tracer(clientTracer)
         .build()

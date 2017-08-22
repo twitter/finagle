@@ -14,26 +14,22 @@ import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}
 import java.net.{InetAddress, InetSocketAddress}
 import javax.net.ssl.SSLSession
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ServerBuilderTest
     extends FunSuite
     with Eventually
     with IntegrationPatience
-    with MockitoSugar
-    with StringServer {
+    with MockitoSugar {
 
   test(s"registers server with bound address") {
     val simple = new SimpleRegistry()
 
     GlobalRegistry.withRegistry(simple) {
       val server = ServerBuilder()
-        .stack(stringServer)
+        .stack(StringServer.server)
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("test")
         .build(Service.const(Future.value("hi")))
