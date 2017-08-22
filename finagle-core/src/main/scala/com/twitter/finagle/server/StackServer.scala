@@ -214,6 +214,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       ServerRegistry.register(underlying.boundAddress.toString, server.stack, server.params)
 
       protected def closeServer(deadline: Time) = closeAwaitably {
+        ServerRegistry.unregister(underlying.boundAddress.toString, server.stack, server.params)
         // Here be dragons
         // We want to do four things here in this order:
         // 1. close the listening socket

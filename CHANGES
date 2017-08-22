@@ -10,6 +10,11 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: Unregister `ServerRegistry` entry on `StackServer#close`. A
+    StackServer entry is registered in the `ServerRegistry` on serve of the
+    server but never unregistered. It is now unregistered on close of
+    the StackServer. ``PHAB_ID=D83200``
+
   * finagle-netty4: `Netty4ClientEngineFactory` and `Netty4ServerEngineFactory` now
     properly load all chain certificates when the `SslClientConfiguration` or
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the

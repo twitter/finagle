@@ -90,12 +90,19 @@ class StackServerTest extends FunSuite with StringServer {
     val s = Service.const[String](Future.value("foo"))
     val server = stringServer.withLabel(name).serve(new InetSocketAddress(0), s)
 
+    // assert registry entry added
     assert(ServerRegistry.registrants.count { e: StackRegistry.Entry =>
       val param.Label(actual) = e.params[param.Label]
       name == actual
     } == 1)
 
     Await.ready(server.close(), 10.seconds)
+
+    // assert registry entry removed
+    assert(ServerRegistry.registrants.count { e: StackRegistry.Entry =>
+      val param.Label(actual) = e.params[param.Label]
+      name == actual
+    } == 0)
   }
 
   test("ListeningStackServer closes ServiceFactories") {
