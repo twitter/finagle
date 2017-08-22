@@ -4,7 +4,7 @@ import com.twitter.finagle.ProxyConnectException
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.embedded.EmbeddedChannel
-import io.netty.handler.proxy.ProxyHandler
+import io.netty.handler.proxy.{ProxyHandler, ProxyConnectException => NettyProxyConnectException}
 import io.netty.util.concurrent.{Future, GenericFutureListener}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -46,6 +46,20 @@ class Netty4ProxyConnectHandlerTest extends FunSuite with OneInstancePerTest {
     val ch = new EmbeddedChannel(hd)
 
     (hd, fh, ch)
+  }
+
+  test("canceled before completed connection") {
+    val connectPromise = channel.connect(fakeAddress)
+
+    channel.writeOutbound("foo")
+    channel.readOutbound[ByteBuf]().release() // drops the proxy handshake message
+
+    assert(!connectPromise.isDone)
+
+    assert(connectPromise.cancel(true))
+    assert(!channel.isActive)
+
+    intercept[NettyProxyConnectException] { channel.finishAndReleaseAll() }
   }
 
   test("success") {
