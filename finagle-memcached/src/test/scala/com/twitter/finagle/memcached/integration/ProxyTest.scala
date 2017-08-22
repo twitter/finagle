@@ -84,7 +84,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     assert(foo.isDefined)
     val Buf.Utf8(res) = foo.get
     assert(res == "bar")
-    externalClient.release()
+    awaitResult(externalClient.close())
   }
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
@@ -100,7 +100,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
           assert(line.startsWith("STAT"))
         }
       }
-      externalClient.release()
+      awaitResult(externalClient.close())
     }
   }
 
@@ -122,7 +122,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       assert(stats.find { stat =>
         stat.contains("foo")
       }.isDefined)
-      externalClient.release()
+      awaitResult(externalClient.close())
     }
   }
 

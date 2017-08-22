@@ -1,19 +1,25 @@
 package com.twitter.finagle.memcached.unit
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.memcached._
-import org.junit.runner.RunWith
-import org.mockito.Mockito.{times, verify}
+import com.twitter.util.{Await, Future}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
 
   class Context {
-    val client1 = mock[Client]
-    val client2 = mock[Client]
-    val client3 = mock[Client]
+    private def newClient(): Client = {
+      val c = mock[Client]
+      when(c.close(any())).thenReturn(Future.Done)
+      c
+    }
+
+    val client1 = newClient()
+    val client2 = newClient()
+    val client3 = newClient()
     val rubyMemCacheClient = new RubyMemCacheClient(Seq(client1, client2, client3))
   }
 
@@ -32,9 +38,9 @@ class RubyMemCacheClientTest extends FunSuite with MockitoSugar {
     val context = new Context
     import context._
 
-    rubyMemCacheClient.release()
-    verify(client1, times(1)).release()
-    verify(client2, times(1)).release()
-    verify(client3, times(1)).release()
+    Await.result(rubyMemCacheClient.close(), 5.seconds)
+    verify(client1, times(1)).close(any())
+    verify(client2, times(1)).close(any())
+    verify(client3, times(1)).close(any())
   }
 }

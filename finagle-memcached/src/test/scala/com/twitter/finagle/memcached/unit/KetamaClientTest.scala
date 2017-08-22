@@ -73,7 +73,7 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
     }
 
     info("release")
-    ketamaClient.release()
+    awaitResult(ketamaClient.close())
     clients.values foreach { client =>
       verify(client, times(1)).close(any())
     }

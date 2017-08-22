@@ -26,6 +26,12 @@ Runtime Behavior Changes
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
+    `BaseClient.close()` instead. ``PHAB_ID=D83168``
+
 7.0.0
 ------
 
