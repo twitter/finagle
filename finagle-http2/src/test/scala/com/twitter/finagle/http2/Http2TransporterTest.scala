@@ -15,6 +15,7 @@ import io.netty.handler.codec.http.{
 }
 import java.net.{SocketAddress, InetSocketAddress}
 import java.security.cert.Certificate
+import java.util.concurrent.Executor
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -27,6 +28,7 @@ class Http2TransporterTest extends FunSuite {
     Await.result(f, wait)
 
   class TestTransport(addr: SocketAddress) extends Transport[Any, Any] {
+
     private[this] val _onClose = Promise[Throwable]()
     def write(req: Any): Future[Unit] = Future.Done
     def read(): Future[Any] = Future.never
@@ -39,6 +41,8 @@ class Http2TransporterTest extends FunSuite {
       _onClose.setValue(new Exception("boom!"))
       Future.Unit
     }
+
+    private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
   }
 
   class BackingTransporter(fn: SocketAddress => Transport[Any, Any]) extends Transporter[Any, Any] {

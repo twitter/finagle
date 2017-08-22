@@ -2,6 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.http2.SerialExecutor
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.MultiplexedTransporter._
 import com.twitter.finagle.liveness.FailureDetector
@@ -13,6 +14,7 @@ import io.netty.handler.codec.http._
 import io.netty.handler.codec.http2.Http2Error
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.Executor
 import org.scalatest.FunSuite
 
 class MultiplexedTransporterTest extends FunSuite {
@@ -20,6 +22,7 @@ class MultiplexedTransporterTest extends FunSuite {
   class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
       extends QueueTransport[StreamMessage, StreamMessage](left, right) {
     override val onClose: Future[Throwable] = Future.never
+    private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
   }
 
   val H1Req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
@@ -227,8 +230,8 @@ class MultiplexedTransporterTest extends FunSuite {
     val t1 = new Throwable("derp")
     val t2 = new Throwable("blam")
 
-    child.closeWith(t1)
-    child.closeWith(t2)
+    child.handleCloseWith(t1)
+    child.handleCloseWith(t2)
 
     val thrown = intercept[Throwable] {
       Await.result(child.read(), 5.seconds)

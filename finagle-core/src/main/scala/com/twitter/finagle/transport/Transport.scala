@@ -9,6 +9,7 @@ import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
+import java.util.concurrent.Executor
 import scala.runtime.NonLocalReturnControl
 import scala.util.control.NonFatal
 
@@ -61,6 +62,15 @@ trait Transport[In, Out] extends Closable { self =>
   def peerCertificate: Option[Certificate]
 
   /**
+   * An `Executor` associated with this transport. If set, the executor must:
+   *  1) Ensure serial execution ordering
+   *  2) Run one item at a time
+   *
+   * For netty-based transports, a channel's EventLoop meets these requirements.
+   */
+  private[finagle] def executor: Option[Executor] = None
+
+  /**
    * Maps this transport to `Transport[In1, Out2]`. Note, exceptions
    * in `f` and `g` are lifted to a [[com.twitter.util.Future]].
    *
@@ -84,6 +94,7 @@ trait Transport[In, Out] extends Closable { self =>
       def remoteAddress: SocketAddress = self.remoteAddress
       def peerCertificate: Option[Certificate] = self.peerCertificate
       def close(deadline: Time): Future[Unit] = self.close(deadline)
+      private[finagle] override def executor: Option[Executor] = self.executor
       override def toString: String = self.toString
     }
 }
@@ -316,6 +327,7 @@ object Transport {
         def peerCertificate: Option[Certificate] = trans.peerCertificate
         def close(deadline: Time): Future[Unit] = trans.close(deadline)
         override def toString: String = trans.toString
+        private[finagle] override def executor: Option[Executor] = trans.executor
 
         private val readFn: Any => Future[Out1] = {
           case out1 if cls.isAssignableFrom(out1.getClass) => Future.value(out1.asInstanceOf[Out1])
@@ -350,6 +362,7 @@ abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transp
   def remoteAddress: SocketAddress = self.remoteAddress
   def peerCertificate: Option[Certificate] = self.peerCertificate
   def close(deadline: Time): Future[Unit] = self.close(deadline)
+  private[finagle] override def executor: Option[Executor] = self.executor
   override def toString: String = self.toString
 }
 
@@ -383,4 +396,5 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   val localAddress: SocketAddress = new SocketAddress {}
   val remoteAddress: SocketAddress = new SocketAddress {}
   def peerCertificate: Option[Certificate] = None
+  private[finagle] override val executor: Option[Executor] = None
 }

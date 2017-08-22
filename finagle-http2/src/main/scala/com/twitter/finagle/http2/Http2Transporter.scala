@@ -7,11 +7,11 @@ import com.twitter.finagle.http2.transport._
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
-import com.twitter.finagle.netty4.http.{initClient, Netty4HttpTransporter, HttpCodecName}
+import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Stack, Status}
-import com.twitter.logging.{Logger, HasLogLevel, Level}
+import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
 import io.netty.channel.{
   ChannelHandlerContext,
