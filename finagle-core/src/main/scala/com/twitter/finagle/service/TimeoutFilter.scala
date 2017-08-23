@@ -81,6 +81,9 @@ object TimeoutFilter {
     def apply(timeout: Duration): TotalTimeout =
       new TotalTimeout(timeout)
 
+    def apply(tunableTimeout: Tunable[Duration]): TotalTimeout =
+      new TotalTimeout(tunableTimeout)
+
     private[finagle] val Default = Duration.Top
 
     implicit val param: Stack.Param[TotalTimeout] =

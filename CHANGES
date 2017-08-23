@@ -2,10 +2,17 @@
   (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
   as it is included in Finagle's user's guide.
 
-Note that ``RB_ID=#`` correspond to associated messages in commits.
+Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in commits.
 
 7.x
 -----
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: If a `c.t.u.tunable.Tunable` request or total timeout has been configured
+    on a client which uses a `c.t.f.client.DynamicTimeout` filter, the current value of tunable will
+    be used in the case of no dynamic timeout set for a request. ``PHAB_ID=D81886``
 
 Bug Fixes
 ~~~~~~~~~
