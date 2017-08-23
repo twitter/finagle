@@ -24,6 +24,8 @@ private[finagle] class HttpServerDispatcher(
 ) extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
   import HttpServerDispatcher._
 
+  private[this] val logger = Logger.get(this.getClass.getName)
+
   private[this] val failureReceiver =
     new RollupStatsReceiver(stats.scope("stream")).scope("failures")
 
@@ -53,9 +55,7 @@ private[finagle] class HttpServerDispatcher(
       // interrupted in the middle of a write, or when there otherwise isn’t
       // an outstanding read (e.g. read-write race).
       f.onFailure { t =>
-        Logger
-          .get(this.getClass.getName)
-          .debug(t, "Failed mid-stream. Terminating stream, closing connection")
+        logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
         failureReceiver.counter(Throwables.mkString(t): _*).incr()
         rep.reader.discard()
       }

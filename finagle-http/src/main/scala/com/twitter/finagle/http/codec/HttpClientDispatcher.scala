@@ -3,8 +3,9 @@ package com.twitter.finagle.http.codec
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, Request, Response}
 import com.twitter.finagle.http.exp.{Multi, StreamTransport}
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
+import com.twitter.logging.Logger
+import com.twitter.util.{Future, Promise, Return, Throwables}
 
 /**
  * Client dispatcher for HTTP.
@@ -18,6 +19,11 @@ private[finagle] class HttpClientDispatcher(
       trans,
       statsReceiver
     ) {
+
+  private[this] val logger = Logger.get(this.getClass.getName)
+
+  private[this] val failureReceiver =
+    new RollupStatsReceiver(statsReceiver.scope("stream")).scope("failures")
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
@@ -41,10 +47,12 @@ private[finagle] class HttpClientDispatcher(
           } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
         )
       )
-      .onFailure { _ =>
+      .onFailure { t =>
         // This Future represents the totality of the exchange;
         // thus failure represents *any* failure that can happen
         // during the exchange.
+        logger.debug(t, "Failed mid-stream. Terminating stream, closing connection")
+        failureReceiver.counter(Throwables.mkString(t): _*).incr()
         req.reader.discard()
         trans.close()
       }

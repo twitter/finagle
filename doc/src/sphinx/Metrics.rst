@@ -236,6 +236,12 @@ using `.withHttpStats` on `Http.Client` and `Http.Server`.
 **time/<statusCategory>**
   A histogram on duration in milliseconds per HTTP status code category.
 
+**stream/failures/<exception_name>**
+  A counter of the number of times a specific exception has been thrown in the middle of a stream.
+
+**stream/failures**
+  A counter of the number of times any failure has been observed in the middle of a stream.
+
 HTTP2
 -----
 These stats pertain to HTTP2 only.
