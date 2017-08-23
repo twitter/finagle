@@ -1,6 +1,6 @@
 package com.twitter.finagle.ssl
 
-import com.twitter.io.{TempDirectory, StreamIO}
+import com.twitter.io.{StreamIO, TempDirectory}
 import java.io._
 import java.security.{KeyStore, SecureRandom}
 import javax.net.ssl._
@@ -57,52 +57,61 @@ object PEMEncodedKeyManager {
   ): Array[KeyManager] = {
 
     // Create a secure directory for the conversion
-    val path = TempDirectory.create()
-    Shell.run(Array("chmod", "0700", path.getAbsolutePath()))
+    val path = TempDirectory.create(false)  //explicitly handle clean-up here, not at shutdown
 
-    // Guard the keystore with a randomly-generated password
-    val password = secret(24)
-    val passwordStr = new String(password)
+    try {
 
-    // Use non-deterministic file names
-    val fn = new String(secret(12))
-    val pemPath = path + File.separator + "%s.pem".format(fn)
-    val p12Path = path + File.separator + "%s.p12".format(fn)
+      Shell.run(Array("chmod", "0700", path.getAbsolutePath()))
 
-    // Write out the certificate and key
-    val f = new FileOutputStream(new File(pemPath))
-    StreamIO.copy(certificateStream, f)
-    StreamIO.copy(keyStream, f)
-    f.close()
+      // Guard the keystore with a randomly-generated password
+      val password = secret(24)
+      val passwordStr = new String(password)
 
-    // Import the PEM-encoded certificate and key to a PKCS12 file
-    Shell.run(
-      Array(
-        "openssl",
-        "pkcs12",
-        "-export",
-        "-password",
-        "pass:%s".format(passwordStr),
-        "-in",
-        pemPath,
-        "-out",
-        p12Path
+      // Use non-deterministic file names
+      val fn = new String(secret(12))
+      val pemPath = path + File.separator + "%s.pem".format(fn)
+      val p12Path = path + File.separator + "%s.p12".format(fn)
+
+      // Write out the certificate and key
+      val f = new FileOutputStream(new File(pemPath))
+      try {
+        StreamIO.copy(certificateStream, f)
+        StreamIO.copy(keyStream, f)
+      } finally {
+        f.close()
+      }
+
+      // Import the PEM-encoded certificate and key to a PKCS12 file
+      Shell.run(
+        Array(
+          "openssl",
+          "pkcs12",
+          "-export",
+          "-password",
+          "pass:%s".format(passwordStr),
+          "-in",
+          pemPath,
+          "-out",
+          p12Path
+        )
       )
-    )
 
-    // Read the resulting keystore
-    val keystore = asStream(p12Path) { stream =>
-      val ks = KeyStore.getInstance("pkcs12")
-      ks.load(stream, password)
-      ks
+      // Read the resulting keystore
+      val keystore = asStream(p12Path) { stream =>
+        val ks = KeyStore.getInstance("pkcs12")
+        ks.load(stream, password)
+        ks
+      }
+
+      // Clean up by deleting the files and directory
+      Seq(pemPath, p12Path).foreach(new File(_).delete())
+
+      val kmf = KeyManagerFactory.getInstance("SunX509")
+      kmf.init(keystore, password)
+      kmf.getKeyManagers
+    } finally {
+      path.delete()
     }
 
-    // Clean up by deleting the files and directory
-    Seq(pemPath, p12Path).foreach(new File(_).delete())
-    path.delete()
-
-    val kmf = KeyManagerFactory.getInstance("SunX509")
-    kmf.init(keystore, password)
-    kmf.getKeyManagers
   }
 }
