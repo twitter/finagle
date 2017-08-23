@@ -25,30 +25,28 @@ target(name='core',
 junit_tests(name='defaultloader',
   dependencies=[
     ':core',
-    '3rdparty/jvm/junit:junit',
-    '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/org/scalatest:scalatest',
+    '3rdparty/jvm/org/apache/zookeeper:zookeeper-client',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-serversets/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala'
   ],
+  sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala'),
+  strict_deps=True,
 
-  sources=globs('com/twitter/finagle/serverset2/client/apache/*.scala')
 )
 
 junit_tests(name='client',
   dependencies=[
     ':core',
-    '3rdparty/jvm/junit:junit',
-    '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/org/scalatest:scalatest',
     'finagle/finagle-serversets/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala'
   ],
   fatal_warnings=True,
-  sources=globs('com/twitter/finagle/serverset2/client/*.scala')
+  sources=globs('com/twitter/finagle/serverset2/client/*.scala'),
+  strict_deps=True,
+
 )
 
 junit_tests(name='serversets',
@@ -56,18 +54,11 @@ junit_tests(name='serversets',
     ':core',
     '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/com/google/inject:guice',
-    '3rdparty/jvm/junit:junit',
-    '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/org/scalatest:scalatest',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-serversets/src/main/scala:scala',
     'finagle/finagle-serversets/src/test/resources',
-    'src/java/com/twitter/common/io:io',
     'src/java/com/twitter/common/io:json',
     'src/java/com/twitter/common/net:dynamic-host-set',
-    'src/java/com/twitter/common/quantity:quantity',
-    'src/java/com/twitter/common/zookeeper:client',
-    'src/java/com/twitter/common/zookeeper:server-set',
     'src/thrift/com/twitter/thrift:thrift-java',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
@@ -79,5 +70,7 @@ junit_tests(name='serversets',
     'com/twitter/finagle/serverset2/addr/*.scala',
     'com/twitter/finagle/serverset2/naming/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
-  )
+  ),
+  strict_deps=True,
+
 )

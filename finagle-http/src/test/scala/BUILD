@@ -4,6 +4,7 @@ junit_tests(
     '3rdparty/jvm/com/google/guava',
     scoped('3rdparty/jvm/commons-lang', scope='forced'),
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-tcnative-boringssl-static',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
@@ -13,7 +14,10 @@ junit_tests(
     'finagle/finagle-core',
     'finagle/finagle-http',
     'finagle/finagle-http/src/test/resources',
+    'finagle/finagle-http2/src/main/scala:scala',
+    'finagle/finagle-netty3/src/main/scala:scala',
     'finagle/finagle-netty4-http',
+    'finagle/finagle-netty4/src/main/scala:scala',
     'finagle/finagle-toggle',
     scoped('util/util-app', scope='forced'),
     'util/util-collection',
@@ -21,5 +25,7 @@ junit_tests(
     'util/util-stats',
   ],
   fatal_warnings=True,
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  strict_deps=True,
+
 )

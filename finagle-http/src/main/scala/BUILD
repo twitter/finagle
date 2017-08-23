@@ -9,12 +9,12 @@ scala_library(
     '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/commons-lang',
     '3rdparty/jvm/io/netty',
+    'finagle/finagle-base-http',
     'finagle/finagle-core',
     'finagle/finagle-http/src/main/resources',
     'finagle/finagle-http2',
     'finagle/finagle-netty3',
     'finagle/finagle-netty4',
-    'finagle/finagle-base-http',
     'finagle/finagle-netty4-http',
     'finagle/finagle-toggle',
     scoped('util/util-app', scope='forced'),
@@ -28,6 +28,8 @@ scala_library(
   sources=rglobs('*.scala'),
   strict_deps=True,
   exports=[
+    '3rdparty/jvm/io/netty:netty',
     'finagle/finagle-base-http',
+    'util/util-core:util-core',
   ],
 )

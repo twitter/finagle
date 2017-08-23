@@ -20,6 +20,9 @@ scala_library(
   sources=rglobs('*.scala'),
   strict_deps=True,
   exports=[
+    '3rdparty/jvm/commons-lang',
     '3rdparty/jvm/io/netty',
+    'util/util-collection',
+    'util/util-core:util-core',
   ],
 )

@@ -10,6 +10,7 @@ junit_tests(
     'finagle/finagle-memcached/src/main/scala:scala',
     'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-mysql',
+    'finagle/finagle-netty3/src/main/scala:scala',
     'finagle/finagle-netty4-http',
     'finagle/finagle-thrift',
     'finagle/finagle-thriftmux',
@@ -18,5 +19,6 @@ junit_tests(
     'util/util-stats/src/main/scala:scala',
   ],
   fatal_warnings=True,
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  strict_deps=True,
 )

@@ -7,14 +7,19 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/io/netty:netty4',
-    '3rdparty/jvm/io/netty:netty4-http',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
+    '3rdparty/jvm/io/netty:netty4-http',
     'finagle/finagle-base-http',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
     'util/util-core/src/main/scala:scala',
+    'util/util-logging/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   strict_deps=True,
+  exports=[
+    '3rdparty/jvm/io/netty:netty4',
+  ]
+
 )

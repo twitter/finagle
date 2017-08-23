@@ -7,10 +7,10 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/com/github/ben-manes/caffeine',
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
+    'finagle-internal/init/src/main/scala',
     'finagle/finagle-core/src/main/resources',
     'finagle/finagle-init/src/main/scala:scala',
     'finagle/finagle-toggle',
-    'finagle-internal/init/src/main/scala',
     'util/util-app',
     'util/util-cache',
     'util/util-codec',
@@ -26,8 +26,10 @@ scala_library(
   ],
   strict_deps=True,
   exports=[
+    'util/util-core/src/main/scala:scala',
     'util/util-logging',
     'util/util-registry',
+    'util/util-stats:util-stats',
     'util/util-tunable/src/main/scala:scala',
   ],
   fatal_warnings=True,
