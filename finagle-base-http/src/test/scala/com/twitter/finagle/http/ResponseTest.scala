@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -17,32 +16,4 @@ class ResponseTest extends FunSuite {
       assert(response.status == Status.Ok)
     }
   }
-
-  test("encode") {
-    val response = Response()
-    response.headerMap.set("Server", "macaw")
-
-    val expected = "HTTP/1.1 200 OK\r\nServer: macaw\r\n\r\n"
-    val actual = response.encodeString()
-
-    assert(actual == expected)
-  }
-
-  test("decodeString") {
-    val response =
-      Response.decodeString("HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n")
-
-    assert(response.status == Status.Ok)
-    assert(response.headerMap(Fields.Server) == "macaw")
-  }
-
-  test("decodeBytes") {
-    val response = Response.decodeBytes(
-      "HTTP/1.1 200 OK\r\nServer: macaw\r\nContent-Length: 0\r\n\r\n".getBytes(UTF_8)
-    )
-
-    assert(response.status == Status.Ok)
-    assert(response.headerMap(Fields.Server) == "macaw")
-  }
-
 }

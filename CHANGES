@@ -26,6 +26,21 @@ Runtime Behavior Changes
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-base-http: Encoding/decoding methods on `c.t.f.http.Request` and `c.t.f.http.Response`
+    to/from Strings and arrays of bytes have been deprecated. Use the methods on
+    `c.t.f.http.codec.HttpCodec` instead:
+       - For `c.t.f.http.Request.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToString`
+       - For `c.t.f.http.Request.encodeBytes`, use `c.t.f.Http.codec.HttpCodec.encodeRequestToBytes`
+       - For `c.t.f.http.Request.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToRequest`
+       - For c.t.f.http.Request.decodeBytes`, use `c.t.f.Http.codec.HttpCodec.decodeBytesToRequest`
+       - For `c.t.f.http.Response.encodeString`, use `c.t.f.Http.codec.HttpCodec.encodeResponseToString`
+       - For `c.t.f.http.Response.decodeString`, use `c.t.f.Http.codec.HttpCodec.decodeStringToResponse`
+       - For `c.t.f.http.Response.decodeBytes`, use `c.t.f.Http.codec.HttpCodec.decodeBytesToResponse`
+    ``PHAB_ID=D81341``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

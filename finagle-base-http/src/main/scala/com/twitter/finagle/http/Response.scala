@@ -1,14 +1,9 @@
 package com.twitter.finagle.http
 
-import com.google.common.base.Charsets
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.codec.HttpCodec
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
-import org.jboss.netty.handler.codec.http._
-import Bijections._
 
 /**
  * Rich HttpResponse
@@ -76,12 +71,9 @@ abstract class Response private extends Message {
   final def setStatusCode(value: Int): Unit = { statusCode = value }
 
   /** Encode as an HTTP message */
-  def encodeString(): String = {
-    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpResponseEncoder)
-    encoder.offer(Bijections.responseToNetty(this))
-    val buffer = encoder.poll()
-    buffer.toString(Charsets.UTF_8)
-  }
+  @deprecated("Use HttpCodec.encodeResponseToString", "2017-08-15")
+  def encodeString(): String =
+    HttpCodec.encodeResponseToString(this)
 
   override def toString =
     "Response(\"" + version + " " + status + "\")"
@@ -105,20 +97,14 @@ object Response {
   val Schema: RecordSchema = new RecordSchema
 
   /** Decode a [[Response]] from a String */
-  def decodeString(s: String): Response = {
-    decodeBytes(s.getBytes(Charsets.UTF_8))
-  }
+  @deprecated("Use HttpCodec.decodeStringToResponse", "2017-08-15")
+  def decodeString(s: String): Response =
+    HttpCodec.decodeStringToResponse(s)
 
   /** Decode a [[Response]] from a byte array */
-  def decodeBytes(b: Array[Byte]): Response = {
-    val decoder = new DecoderEmbedder(
-      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue)
-    )
-    decoder.offer(ChannelBuffers.wrappedBuffer(b))
-    val res = decoder.poll().asInstanceOf[HttpResponse]
-    assert(res ne null)
-    responseFromNetty(res)
-  }
+  @deprecated("Use HttpCodec.decodeBytesToResponse", "2017-08-15")
+  def decodeBytes(b: Array[Byte]): Response =
+    HttpCodec.decodeBytesToResponse(b)
 
   /** Create Response. */
   def apply(): Response =

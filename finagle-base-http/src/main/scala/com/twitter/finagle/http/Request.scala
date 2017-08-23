@@ -1,15 +1,12 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
+import com.twitter.finagle.http.codec.HttpCodec
 import com.twitter.finagle.http.exp.Multipart
-import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.Closable
 import java.net.{InetAddress, InetSocketAddress}
-import java.nio.charset.{StandardCharsets => Charsets}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
 import scala.beans.BeanProperty
 import scala.annotation.varargs
@@ -219,19 +216,14 @@ abstract class Request private extends Message {
   def getResponse(): Response = response
 
   /** Encode an HTTP message to String. */
-  def encodeString(): String = {
-    new String(encodeBytes(), "UTF-8")
-  }
+  @deprecated("Use HttpCodec.encodeRequestToString", "2017-08-15")
+  def encodeString(): String =
+    HttpCodec.encodeRequestToString(this)
 
   /** Encode an HTTP message to Array[Byte] */
-  def encodeBytes(): Array[Byte] = {
-    val encoder = new EncoderEmbedder[ChannelBuffer](new HttpRequestEncoder)
-    encoder.offer(Bijections.requestToNetty(this))
-    val buffer = encoder.poll()
-    val bytes = new Array[Byte](buffer.readableBytes())
-    buffer.readBytes(bytes)
-    bytes
-  }
+  @deprecated("Use HttpCodec.encodeRequestToBytes", "2017-08-15")
+  def encodeBytes(): Array[Byte] =
+    HttpCodec.encodeRequestToBytes(this)
 
   override def toString: String =
     s"""Request("$method $uri", from $remoteSocketAddress)"""
@@ -247,21 +239,14 @@ object Request {
   val Schema: RecordSchema = new RecordSchema
 
   /** Decode a Request from a String */
-  def decodeString(s: String): Request = {
-    decodeBytes(s.getBytes(Charsets.UTF_8))
-  }
+  @deprecated("Use HttpCodec.decodeStringToRequest", "2017-08-15")
+  def decodeString(s: String): Request =
+    HttpCodec.decodeStringToRequest(s)
 
   /** Decode a Request from Array[Byte] */
-  def decodeBytes(b: Array[Byte]): Request = {
-    val decoder = new DecoderEmbedder(
-      new HttpRequestDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue)
-    )
-    decoder.offer(ChannelBuffers.wrappedBuffer(b))
-    val req = decoder.poll().asInstanceOf[HttpRequest]
-    assert(req ne null)
-
-    Bijections.requestFromNetty(req)
-  }
+  @deprecated("Use HttpCodec.decodeBytesToRequest", "2017-08-15")
+  def decodeBytes(b: Array[Byte]): Request =
+    HttpCodec.decodeBytesToRequest(b)
 
   /**
    * Create an HTTP/1.1 GET Request from query string parameters.
