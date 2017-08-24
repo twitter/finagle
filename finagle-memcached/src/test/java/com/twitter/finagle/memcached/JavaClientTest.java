@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.java;
+package com.twitter.finagle.memcached;
 
 import scala.Option;
 
@@ -13,9 +13,9 @@ import com.twitter.util.Await;
 /**
  * This is mainly for internal testing, not for external purpose
  */
-public final class ClientTest {
+public final class JavaClientTest {
 
-  private ClientTest() { }
+  private JavaClientTest() { }
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
@@ -23,11 +23,11 @@ public final class ClientTest {
           .configured(new ConcurrentLoadBalancerFactory.Param(1).mk())
           .newService("localhost:11211");
 
-    Client client = Client.newInstance(service);
+    JavaClient client = JavaClient.newInstance(service);
     testClient(client);
   }
 
-  public static void testClient(Client client) throws Exception {
+  public static void testClient(JavaClient client) throws Exception {
     Await.result(client.delete("foo"));
     Await.result(client.set("foo", "bar"));
     Option<String> res = Buf.Utf8$.MODULE$.unapply(Await.result(client.get("foo")));

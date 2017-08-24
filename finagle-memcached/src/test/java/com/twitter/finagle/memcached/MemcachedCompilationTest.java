@@ -1,8 +1,8 @@
-package com.twitter.finagle;
+package com.twitter.finagle.memcached;
 
 import org.junit.Test;
 
-import com.twitter.finagle.memcached.Client;
+import com.twitter.finagle.Memcached;
 import com.twitter.finagle.param.Label;
 import com.twitter.hashing.KeyHashers;
 

@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcached.java;
+package com.twitter.finagle.memcached;
 
 import java.util.List;
 import java.util.Map;
@@ -7,9 +7,6 @@ import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
-import com.twitter.finagle.memcached.CasResult;
-import com.twitter.finagle.memcached.GetResult;
-import com.twitter.finagle.memcached.GetsResult;
 import com.twitter.io.Buf;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
@@ -17,11 +14,11 @@ import com.twitter.util.Time;
 
 import static com.twitter.util.Function.func;
 
-public class ClientBase extends Client {
+public class JavaClientBase extends JavaClient {
 
   protected com.twitter.finagle.memcached.Client underlying;
 
-  public ClientBase(com.twitter.finagle.memcached.Client underlying) {
+  public JavaClientBase(com.twitter.finagle.memcached.Client underlying) {
     this.underlying = underlying;
   }
 

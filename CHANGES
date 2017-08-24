@@ -54,6 +54,10 @@ Breaking API Changes
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
 
+  * finagle-memcached: Move `c.t.f.memcached.java.Client` to `c.t.f.memcached.JavaClient`,
+    `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and
+    `c.t.f.memcached.java.ResultWithCAS` to `c.t.f.memcached.ResultWithCAS`. ``PHAB_ID=D83719``
+
 7.0.0
 ------
 
