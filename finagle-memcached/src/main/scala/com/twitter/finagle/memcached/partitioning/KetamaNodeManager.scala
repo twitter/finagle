@@ -157,8 +157,11 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
       ia
     }
     // Convert CacheNodeMetadata to ZkMetadata
-    (shardId, Addr.Bound(
-      Address.Inet(resolved, ZkMetadata.toAddrMetadata(ZkMetadata(shardId.map(_.toInt)))))
+    (
+      shardId,
+      Addr.Bound(
+        Address.Inet(resolved, ZkMetadata.toAddrMetadata(ZkMetadata(shardId.map(_.toInt))))
+      )
     )
   }
 

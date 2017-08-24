@@ -114,8 +114,8 @@ object DynamicTimeout {
           timeoutFn(
             PerRequestKey,
             defaultTimeout.tunableTimeout,
-            TimeoutFilter.Param.Default,  // tunableTimeout() should always produce a value,
-            compensation.howlong          // but we fall back on the default if not
+            TimeoutFilter.Param.Default, // tunableTimeout() should always produce a value,
+            compensation.howlong // but we fall back on the default if not
           ),
           duration => new IndividualRequestTimeoutException(duration),
           timer.timer
