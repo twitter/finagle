@@ -19,13 +19,9 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import java.net.{InetAddress, InetSocketAddress, ServerSocket, Socket, SocketAddress}
 import java.nio.channels.UnresolvedAddressException
-//import java.nio.channels.UnresolvedAddressException
-import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPatience {
   val timeout = 15.seconds
   val frameSize = 4
@@ -44,7 +40,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     var server: ServerSocket = null
     var acceptedSocket: Socket = null
 
-    def connect() = {
+    def connect(): Unit = {
       server = new ServerSocket(0, 50, InetAddress.getLoopbackAddress)
       val transporter = transporterFn(
         new InetSocketAddress(InetAddress.getLoopbackAddress, server.getLocalPort),
@@ -197,6 +193,10 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
       defaultEnc
     ) {
       connect()
+
+      intercept[ReadTimedOutException] {
+        Await.result(clientsideTransport.read(), timeout)
+      }
     }
 
     eventually {

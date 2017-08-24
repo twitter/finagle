@@ -10,6 +10,7 @@ import io.netty.channel.{
   ChannelHandler,
   ChannelHandlerContext,
   ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
   ChannelPromise
 }
 import io.netty.channel.embedded.EmbeddedChannel
@@ -29,18 +30,18 @@ class Netty4PushChannelHandleTest extends FunSuite {
   def await[T](t: Awaitable[T]): T = Await.result(t, 5.seconds)
 
   private def noopChannel(
-    handlers: (String, ChannelHandler)*
+    transportHandlers: (String, ChannelHandler)*
   ): (EmbeddedChannel, Netty4PushChannelHandle[Any, Any]) = {
-    nettyChannel[Any, Any](handlers: _*) { handle =>
+    nettyChannel[Any, Any](transportHandlers: _*) { handle =>
       Future.value(new NoopSession(handle))
     }
   }
 
-  private def nettyChannel[In, Out](handlers: (String, ChannelHandler)*)(
+  private def nettyChannel[In, Out](transportHandlers: (String, ChannelHandler)*)(
     f: PushChannelHandle[In, Out] => Future[PushSession[In, Out]]
   ): (EmbeddedChannel, Netty4PushChannelHandle[In, Out]) = {
     val ch = new EmbeddedChannel()
-    handlers.foreach { case (name, handler) => ch.pipeline.addLast(name, handler) }
+    transportHandlers.foreach { case (name, handler) => ch.pipeline.addLast(name, handler) }
     val (handle, _) = Netty4PushChannelHandle.install[In, Out, PushSession[In, Out]](ch, _ => (), f)
     ch -> handle
   }
@@ -277,6 +278,61 @@ class Netty4PushChannelHandleTest extends FunSuite {
       val sendResult = await(handle.onClose.liftToTry)
       assert(sendResult == Throw(ChannelException(ex, ch.remoteAddress)))
     }
+  }
+
+  test("write path is fully formed before session is resolved") {
+    val p = Promise[NoopSession]
+    val ch = new EmbeddedChannel()
+
+    object OutboundObserver extends ChannelOutboundHandlerAdapter {
+      var observedWrite: Any = null
+
+      override def write(
+        ctx: ChannelHandlerContext,
+        msg: scala.Any,
+        promise: ChannelPromise
+      ): Unit = {
+        observedWrite = msg
+        super.write(ctx, msg, promise)
+      }
+    }
+    val ObserverName = "observer"
+
+    val protocolInit: ChannelPipeline => Unit = _.addLast(ObserverName, OutboundObserver)
+    val (handle, _) =
+      Netty4PushChannelHandle.install[Any, Any, NoopSession](ch, protocolInit, _ => p)
+
+    assert(ch.pipeline.get(Netty4PushChannelHandle.SessionDriver) == null)
+    assert(ch.pipeline.get(Netty4PushChannelHandle.DelayedByteBufHandler) != null)
+
+    ch.pipeline.names.asScala.toList match {
+      case first :: second :: _ =>
+        assert(first == Netty4PushChannelHandle.DelayedByteBufHandler && second == ObserverName)
+
+      case other =>
+        fail("Unexpected pipeline configuration: " + other)
+    }
+
+    val write1 = new Object
+    handle.sendAndForget(write1)
+    ch.runPendingTasks()
+
+    assert(ch.readOutbound[Any]() == write1)
+    assert(OutboundObserver.observedWrite == write1)
+
+    val session1 = new NoopSession(handle)
+    p.setValue(session1)
+    ch.runPendingTasks()
+
+    assert(ch.pipeline.get(Netty4PushChannelHandle.SessionDriver) != null)
+    assert(ch.pipeline.get(Netty4PushChannelHandle.DelayedByteBufHandler) == null)
+
+    val write2 = new Object
+    handle.sendAndForget(write2)
+    ch.runPendingTasks()
+
+    assert(ch.readOutbound[Any]() == write2)
+    assert(OutboundObserver.observedWrite == write2)
   }
 
   test("`registerSession()` replaces the existing session") {

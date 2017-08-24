@@ -404,6 +404,20 @@ trait StackClient[Req, Rep]
     with Stack.Parameterized[StackClient[Req, Rep]]
     with Stack.Transformable[StackClient[Req, Rep]] {
 
+  /**
+   * Export info about the transporter type so that we can query info
+   * about its implementation at runtime.
+   */
+  final protected def registerTransporter(transporterName: String): Unit = {
+    val transporterImplKey = Seq(
+      ClientRegistry.registryName,
+      params[ProtocolLibrary].name,
+      params[Label].label,
+      "Transporter"
+    )
+    GlobalRegistry.get.put(transporterImplKey, transporterName)
+  }
+
   /** The current stack. */
   def stack: Stack[ServiceFactory[Req, Rep]]
 
@@ -595,16 +609,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
         (prms: Stack.Params, ia: InetSocketAddress) =>
           val endpointClient = self.copy1(params = prms)
           val transporter = endpointClient.newTransporter(ia)
-          // Export info about the transporter type so that we can query info
-          // about its implementation at runtime. This assumes that the `toString`
-          // of the implementation is sufficiently descriptive.
-          val transporterImplKey = Seq(
-            ClientRegistry.registryName,
-            endpointClient.params[ProtocolLibrary].name,
-            endpointClient.params[Label].label,
-            "Transporter"
-          )
-          GlobalRegistry.get.put(transporterImplKey, transporter.toString)
+          // This assumes that the `toString` of the implementation is sufficiently descriptive.
+          // Note: this should be kept in sync with the equivalent `PushStackClient` logic.
+          endpointClient.registerTransporter(transporter.toString)
           // Note, this ensures that session establishment is lazy (i.e.,
           // on the service acquisition path).
           ServiceFactory.apply[Req, Rep] { () =>
