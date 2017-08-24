@@ -183,6 +183,9 @@ object Command {
   val HSETNX = Buf.Utf8("HSETNX")
   val HVALS = Buf.Utf8("HVALS")
 
+  // Cluster commands
+  val ASKING = Buf.Utf8("ASKING")
+
   // Command Arguments
   val WITHSCORES = Buf.Utf8("WITHSCORES")
   val LIMIT = Buf.Utf8("LIMIT")

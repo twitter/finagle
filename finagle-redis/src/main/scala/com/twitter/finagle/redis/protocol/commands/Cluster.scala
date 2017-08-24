@@ -15,6 +15,9 @@ case class ClusterNode(
   flags: Seq[String]) {
   def isMyself(): Boolean =
     flags.contains("myself")
+
+  def hostPort: String =
+    s"${addr.getAddress.getHostAddress}:${addr.getPort}"
 }
 
 case class Slots(start: Int, end: Int, master: ClusterNode, replicas: Seq[ClusterNode])
@@ -48,6 +51,13 @@ case class GetKeysInSlot(slot: Int, count: Int)
   extends Cluster("GETKEYSINSLOT", Seq(slot.toString, count.toString))
 
 case class Nodes() extends Cluster("NODES")
+
+case class Asking() extends Command {
+  def name: Buf = Command.ASKING
+}
+
+case class KeySlot(key: String)
+  extends Cluster("KEYSLOT", Seq(key))
 
 abstract class Cluster(sub: String, args: Seq[String] = Seq()) extends Command {
   def name: Buf = Command.CLUSTER

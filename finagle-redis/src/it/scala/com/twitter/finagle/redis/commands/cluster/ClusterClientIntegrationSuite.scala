@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
-final class ClusterClientIntegrationSuite extends ClusterClientTest {
+final class ClusterManagementIntegrationSuite extends ClusterClientTest {
 
   // Generate hash keys/slots for testing:
   // while true; do r=`openssl rand -hex 4`;

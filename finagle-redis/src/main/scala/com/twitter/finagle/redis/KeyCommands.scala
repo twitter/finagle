@@ -87,7 +87,6 @@ private[redis] trait KeyCommands { self: BaseClient =>
   def migrate(destAddr: InetSocketAddress, keys: Seq[Buf], timeout: Duration = 5.seconds): Future[Unit] = {
     doRequest(Migrate(destAddr, keys, timeout)) {
       case StatusReply(_) => Future.Unit
-      case ErrorReply(msg) => Future.exception(new ServerError(msg))
     }
   }
 

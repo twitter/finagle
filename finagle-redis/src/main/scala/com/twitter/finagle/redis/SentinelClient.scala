@@ -69,6 +69,6 @@ object SentinelClient {
 }
 
 class SentinelClient(factory: ServiceFactory[Command, Reply])
-    extends BaseClient(factory)
+    extends BaseSingleClient(factory)
     with SentinelCommands
     with ServerCommands
