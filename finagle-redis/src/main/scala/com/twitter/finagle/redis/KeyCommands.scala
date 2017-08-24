@@ -1,12 +1,14 @@
 package com.twitter.finagle.redis
 
 import java.lang.{Boolean => JBoolean, Long => JLong}
+import java.net.InetSocketAddress
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.io.Buf
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Duration, Future, Time}
 
 private[redis] trait KeyCommands { self: BaseClient =>
+  import com.twitter.conversions.time._
 
   /**
    * Removes keys
@@ -74,6 +76,20 @@ private[redis] trait KeyCommands { self: BaseClient =>
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil
     }
+
+  /**
+   * Migrates all keys to the destination server
+   * @param destAddr target redis server
+   * @param keys list of keys to be migrated
+   * @param timeout timeout before failing, defaults to 5 seconds
+   * @return unit
+   */
+  def migrate(destAddr: InetSocketAddress, keys: Seq[Buf], timeout: Duration = 5.seconds): Future[Unit] = {
+    doRequest(Migrate(destAddr, keys, timeout)) {
+      case StatusReply(_) => Future.Unit
+      case ErrorReply(msg) => Future.exception(new ServerError(msg))
+    }
+  }
 
   /**
    * Move key from the currently selected database to the specified destination

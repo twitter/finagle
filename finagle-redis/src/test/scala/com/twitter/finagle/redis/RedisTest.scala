@@ -289,7 +289,7 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
   implicit def b2s(b: Buf): String = BufToString(b)
 
   override def beforeAll(): Unit = RedisCluster.start()
-  override def afterAll(): Unit = RedisCluster.stop()
+  override def afterAll(): Unit = RedisCluster.stopAll()
 
   protected def withRedisClient(testCode: Client => Any): Unit = {
     val client = Redis.newRichClient(RedisCluster.hostAddresses())
@@ -342,7 +342,7 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     RedisCluster.start(count = count, mode = RedisMode.Standalone)
     RedisCluster.start(count = sentinelCount, mode = RedisMode.Sentinel)
   }
-  override def afterAll(): Unit = RedisCluster.stop()
+  override def afterAll(): Unit = RedisCluster.stopAll()
 
   val sentinelCount: Int
 
@@ -384,3 +384,4 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     try { testCode(client) } finally { client.close() }
   }
 }
+
