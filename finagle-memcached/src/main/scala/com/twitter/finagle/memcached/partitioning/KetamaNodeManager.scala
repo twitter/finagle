@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle.memcached.{java => _, _}
+import com.twitter.finagle.memcached._
 import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.service.FailedService
 import com.twitter.hashing._
