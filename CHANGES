@@ -51,6 +51,9 @@ Deprecations
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Remove deprecated method `httpProxyTo(String, Option[Transporter.Credentials])`.
+    Use `httpProxyTo(String, Transporter.Credentials]` instead. ``PHAB_ID=D84077``
+
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
 
