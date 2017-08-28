@@ -996,8 +996,6 @@ abstract class AbstractEndToEndTest
   }
 
   test("codec should require a message size be less than 2Gb") {
-    intercept[IllegalArgumentException](Http().maxRequestSize(2.gigabytes))
-    intercept[IllegalArgumentException](Http(_maxResponseSize = 100.gigabytes))
     intercept[IllegalArgumentException] {
       serverImpl().withMaxRequestSize(2049.megabytes)
     }

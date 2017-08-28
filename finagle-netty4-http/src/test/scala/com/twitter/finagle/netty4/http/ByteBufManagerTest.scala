@@ -4,13 +4,10 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.finagle.http.codec.ChannelBufferUsageTracker
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelPromise, ChannelHandlerContext}
-import org.junit.runner.RunWith
+import io.netty.channel.{ChannelHandlerContext, ChannelPromise}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 
-@RunWith(classOf[JUnitRunner])
 class ByteBufManagerTest extends FunSuite with MockitoSugar {
 
   def usageTrackerFactory() = {

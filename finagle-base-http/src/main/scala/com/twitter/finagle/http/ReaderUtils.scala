@@ -6,7 +6,7 @@ import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Return}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
 
-private[http] object ReaderUtils {
+private[finagle] object ReaderUtils {
 
   /**
    * Serialize an HttpChunk into a Buf.

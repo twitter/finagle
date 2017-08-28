@@ -59,6 +59,10 @@ Breaking API Changes
   * finagle-core: Remove deprecated method `httpProxyTo(String, Option[Transporter.Credentials])`.
     Use `httpProxyTo(String, Transporter.Credentials]` instead. ``PHAB_ID=D84077``
 
+  * finagle-*-http: Netty 3 specific HTTP transport related code has been moved into its own
+    project, finagle-netty3-http, in preparation for removing it from Finagle.
+    ``PHAB_ID=D84101``
+
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
 

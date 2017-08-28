@@ -453,7 +453,7 @@ lazy val finagleHttp = Project(
     guavaLib,
     netty4StaticSsl
   )
-).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleHttp2, finagleToggle)
+).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
 
 lazy val finagleBaseHttp = Project(
   id = "finagle-base-http",
@@ -468,6 +468,19 @@ lazy val finagleBaseHttp = Project(
     "commons-lang" % "commons-lang" % "2.6"
   )
 ).dependsOn(finagleCore, finagleNetty3)
+
+lazy val finagleNetty3Http = Project(
+  id = "finagle-netty3-http",
+  base = file("finagle-netty3-http")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-netty3-http",
+  libraryDependencies ++= Seq(
+    util("app"), util("codec"), util("core"), util("jvm"), util("stats"),
+    "commons-lang" % "commons-lang" % "2.6"
+  )
+).dependsOn(finagleNetty3, finagleBaseHttp % "test->test;compile->compile")
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
