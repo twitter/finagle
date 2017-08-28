@@ -18,7 +18,12 @@ import java.util.concurrent.Executors
  * the I/O threads, consider scheduling that work on a separate thread pool
  * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
  */
-case class WorkerPool(eventLoopGroup: EventLoopGroup)
+case class WorkerPool(eventLoopGroup: EventLoopGroup) {
+  def mk() : (WorkerPool, Stack.Param[WorkerPool]) =
+    (this, WorkerPool.workerPoolParam)
+
+}
+
 object WorkerPool {
   implicit val workerPoolParam: Stack.Param[WorkerPool] = Stack.Param {
     val threadFactory = new BlockingTimeTrackingThreadFactory(
