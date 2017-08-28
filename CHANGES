@@ -32,6 +32,9 @@ Bug Fixes
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-stats: Verbosity levels are now respected: debug-metrics aren't exported
+    by default.  ``PHAB_ID=D85278``
+
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
 
