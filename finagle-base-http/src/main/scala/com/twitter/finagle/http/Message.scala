@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.Message.BufOutputStream
 import com.twitter.io.{Buf, BufInputStream, Reader => BufReader, Writer => BufWriter}
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.{Closable, Duration, Future}
 import java.io._
 import java.util.{Iterator => JIterator}
@@ -9,7 +9,6 @@ import java.nio.charset.Charset
 import java.util.{Date, Locale, TimeZone}
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.lang.time.FastDateFormat
-import org.jboss.netty.buffer.{ChannelBufferOutputStream, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.DefaultHttpHeaders
 import scala.collection.JavaConverters._
 
@@ -522,12 +521,11 @@ abstract class Message {
    */
   @throws(classOf[IllegalStateException])
   final def withOutputStream[T](f: OutputStream => T): T = {
-    // Use buffer size of 1024.  Netty default is 256, which seems too small.
-    // Netty doubles buffers on resize.
-    val outputStream = new ChannelBufferOutputStream(ChannelBuffers.dynamicBuffer(1024))
+    // Use buffer size of 1024 which is only a best guess as to the ideal initial size
+    val outputStream = new BufOutputStream(1024)
     try {
       val result = f(outputStream) // throws
-      write(ChannelBufferBuf.Owned(outputStream.buffer))
+      write(outputStream.contentsAsBuf)
       result
     } finally outputStream.close()
   }
@@ -574,6 +572,11 @@ abstract class Message {
 }
 
 object Message {
+
+  private final class BufOutputStream(initialSize: Int) extends ByteArrayOutputStream(initialSize) {
+    def contentsAsBuf: Buf = Buf.ByteArray.Owned(buf, 0, count)
+  }
+
   private[http] val Utf8 = Charset.forName("UTF-8")
   val CharsetUtf8 = "charset=utf-8"
   val ContentTypeJson = MediaType.Json + ";" + CharsetUtf8
