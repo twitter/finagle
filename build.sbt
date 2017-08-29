@@ -198,6 +198,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
+  finagleNetty3Http,
   finagleNetty4Http
 )
 
