@@ -381,6 +381,7 @@ object Request {
     def remoteSocketAddress: InetSocketAddress = request.remoteSocketAddress
     def reader: Reader = request.reader
     def writer: Writer with Closable = request.writer
+    override lazy val cookies: CookieMap = request.cookies
     override def headerMap: HeaderMap = request.headerMap
     override def params: ParamMap = request.params
     override lazy val response: Response = request.response

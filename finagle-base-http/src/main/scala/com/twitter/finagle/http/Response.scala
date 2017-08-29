@@ -17,7 +17,8 @@ abstract class Response private extends Message {
    * out-of-band mechanisms, to make the connection between the response and its
    * associated context explicit.
    */
-  val ctx: Response.Schema.Record = Response.Schema.newRecord()
+  def ctx: Response.Schema.Record = _ctx
+  private[this] val _ctx: Response.Schema.Record = Response.Schema.newRecord()
 
   final def isRequest = false
 
@@ -162,6 +163,8 @@ object Response {
 
     def reader: Reader = response.reader
     def writer: Writer with Closable = response.writer
+    override def ctx: Response.Schema.Record = response.ctx
+    override lazy val cookies: CookieMap = response.cookies
     override def headerMap: HeaderMap = response.headerMap
 
     // These things should never need to be modified
