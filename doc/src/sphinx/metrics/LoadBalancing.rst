@@ -67,7 +67,7 @@ Aperture Based Load Balancers
 
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives
-  updates from the `DeterministicOrdering` process global.
+  updates from the `ProcessCoordinate` process global.
 
 **expired**
   A counter of the number of endpoints which have been closed because they

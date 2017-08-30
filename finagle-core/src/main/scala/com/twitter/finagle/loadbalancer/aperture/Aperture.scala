@@ -1,7 +1,6 @@
 package com.twitter.finagle.loadbalancer.aperture
 
 import com.twitter.finagle._
-import com.twitter.finagle.loadbalancer.p2c.P2CPick
 import com.twitter.finagle.loadbalancer.{Balancer, NodeT, DistributorT}
 import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
@@ -29,7 +28,7 @@ private object Aperture {
  * are typically backed by pools, and will be warm on average.
  */
 private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self =>
-  import DeterministicOrdering._
+  import ProcessCoordinate._
   import Aperture._
 
   protected type Node <: ApertureNode
@@ -61,7 +60,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   protected def minAperture: Int
 
   /**
-   * Enables [[Aperture]] to read coordinate data from [[DeterministicOrdering]]
+   * Enables [[Aperture]] to read coordinate data from [[ProcessCoordinate]]
    * to derive an ordering for the endpoints used by this [[Balancer]] instance.
    */
   protected def useDeterministicOrdering: Boolean
@@ -104,6 +103,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   private[this] val gauges = Seq(
     statsReceiver.addGauge("aperture") { aperture },
+    statsReceiver.addGauge("physical_aperture") { dist.physicalAperture },
     statsReceiver.addGauge("use_deterministic_ordering") {
       if (useDeterministicOrdering) 1F else 0F
     }
@@ -111,7 +111,7 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
 
-  private[this] val coordObservation = DeterministicOrdering.changes.respond { _ =>
+  private[this] val coordObservation = ProcessCoordinate.changes.respond { _ =>
     // One nice side-effect of deferring to the balancers `updater` is
     // that we serialize and collapse concurrent updates. So if we have a volatile
     // source that is updating the coord, we are resilient to that. We could
@@ -122,134 +122,30 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
 
   private[this] val nodeToken: ApertureNode => Int = _.token
   private[this] val nodeOpen: ApertureNode => Boolean = _.status == Status.Open
+  private[this] val nodeBusy: ApertureNode => Boolean = _.status == Status.Busy
+
+  protected type Distributor = BaseDist
 
   /**
-   * A distributor that uses P2C to select nodes from within a window ("aperture").
+   * A distributor which implements the logic for controlling the size of an aperture
+   * but defers the implementation of pick to concrete implementations.
    *
-   * @param vector The ordered collection over which the aperture is applied
-   * and p2c selects over.
-   *
-   * @param original The original vector before any ordering is applied.
-   * This is necessary to keep intact since the updates we receive from the
-   * Balancer apply a specific ordering to the collection of nodes.
-   *
-   * @param busy The nodes which have been shuffled to the back of the collection
-   * because they are considered busy as per their `status`.
-   *
-   * @param coordinate The last sample read from [[DeterministicOrdering]] that
-   * the distributor used.
+   * @param vector The source vector received from a call to `rebuild`.
    *
    * @param initAperture The initial aperture to use.
    */
-  protected class Distributor(
+  protected abstract class BaseDist(
     vector: Vector[Node],
-    original: Vector[Node],
-    busy: Vector[Node],
-    coordinate: Option[Coord],
     initAperture: Int
-  ) extends DistributorT[Node](vector)
-      with P2CPick[Node] {
+  ) extends DistributorT[Node](vector) {
+    type This = BaseDist
 
-    type This = Distributor
-
-    val max: Int = vector.size
-
-    val min: Int = {
-      val default = math.min(minAperture, vector.size)
-      if (!useDeterministicOrdering) default
-      else {
-        coordinate match {
-          // We want to additionally ensure that we get full ring coverage
-          // when there are fewer clients than servers. For example, imagine the
-          // degenerate case where we have a min aperture of size 1 and fewer
-          // clients than servers – we know that we will at most cover `size` of
-          // of the `vector.size` server ring. Thus, we need an aperture size
-          // of `vector.size` / `size`.
-          case Some(FromInstanceId(_, _, size)) if size < vector.size =>
-            val minSize: Double = vector.size / size.toDouble
-            // Since `minSize` can be fractional we do our best to approximate
-            // the size of the min size needed to cover the entire server ring.
-            // Technically, we could make this "perfect" by taking the fractional
-            // bit and translating that to a percentage of the peer group ceiling
-            // the value and the remainder flooring it, but we avoid the added
-            // complexity by just ceiling for everyone.
-            math.max(default, math.ceil(minSize).toInt)
-
-          case _ => default
-        }
-      }
-    }
-
-    // We are guaranteed that writes to aperture are serialized since
-    // we only expose them via the narrow, widen, etc. methods above. Those
-    // defer to the balancers `updater` which is serial. Therefore, we only
-    // need to guarantee visibility across threads and don't need to
-    // provide other synchronization between threads.
-    @volatile private[this] var _aperture: Int = initAperture
-    // Make sure the aperture is within bounds [minAperture, maxAperture].
-    adjust(0)
-
-    if (useDeterministicOrdering && aperture > 0) {
-      // We log the contents of the aperture on each distributor rebuild when using
-      // deterministic ordering. Rebuilds are not frequent and usually concentrated around
-      // events where this information would be valuable (i.e. coordinate changes or
-      // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
-      val fmt: Vector[Node] => String = _.map(_.factory.address).mkString("[", ", ", "]")
-      val apertureSlice = fmt(vector.take(math.min(aperture, 100)))
-      val busySlice = fmt(busy)
-      val lbl = if (label.isEmpty) "<unlabelled>" else label
-      log.info(
-        s"Aperture updated for client $lbl: size=$aperture busy=$busySlice nodes=$apertureSlice"
-      )
-    }
-
-    /**
-     * Returns the current aperture.
-     */
-    def aperture: Int = _aperture
-
-    /**
-     * Adjusts the aperture by `n`.
-     */
-    def adjust(n: Int): Unit = {
-      _aperture = math.max(min, math.min(max, _aperture + n))
-    }
-
-    protected def rng: Rng = self.rng
-    protected def bound: Int = aperture
-    protected def emptyNode: Node = failingNode(emptyException)
-
-    def rebuild(): This = rebuild(original)
-
-    /**
-     * Returns a new vector with the nodes sorted by `token` which is
-     * deterministic across rebuilds but random globally, since `token`
-     * is assigned randomly per process when the node is created.
-     */
-    private[this] def tokenOrder(vec: Vector[Node]): Vector[Node] =
-      vec.sortBy(nodeToken)
-
-    /**
-     * Returns a new vector with the nodes ordered relative to the coordinate in
-     * `coord`. This gives the distributor a deterministic order across process
-     * boundaries.
-     */
-    private[this] def ringOrder(vec: Vector[Node], coord: Double): Vector[Node] = {
-      val order = new Ring(vec.size).alternatingIter(coord)
-      val builder = new VectorBuilder[Node]
-      while (order.hasNext) { builder += vec(order.next()) }
-      builder.result
-    }
-
-    /**
+    /*
      * Returns a new vector which is ordered by the node's status. Note, it is
-     * important that this is a stable sort since we care about the source
-     * order when using deterministic ordering.
+     * important that this is a stable sort since we care about the source order
+     * of `vec`.
      */
-    private[this] def statusOrder(
-      vec: Vector[Node],
-      busyBuilder: VectorBuilder[Node]
-    ): Vector[Node] = {
+    protected def statusOrder(vec: Vector[Node]): Vector[Node] = {
       val resultNodes = new VectorBuilder[Node]
       val busyNodes = new ListBuffer[Node]
       val closedNodes = new ListBuffer[Node]
@@ -264,48 +160,226 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
         }
       }
 
-      busyBuilder ++= busyNodes
       resultNodes ++= busyNodes ++= closedNodes
       resultNodes.result
     }
 
     /**
-     * Rebuilds the distributor and sorts the vector in two possible ways:
-     *
-     * 1. If `useDeterministicOrdering` is set to true and [[DeterministicOrdering]]
-     * has a coordinate set, then the coordinate is used which gives the
-     * distributor a well-defined, deterministic order across process boundaries.
-     *
-     * 2. Otherwise, the vector is sorted by a node's token field.
+     * Returns the maximum size of the aperture window.
      */
-    def rebuild(vec: Vector[Node]): This = {
-      if (vec.isEmpty) {
-        new Distributor(vec, vec, busy, coordinate, aperture)
+    def max: Int = vector.size
+
+    /**
+     * Returns the minimum size of the aperture window.
+     */
+    def min: Int = math.min(minAperture, vector.size)
+
+    // We are guaranteed that writes to aperture are serialized since
+    // we only expose them via the `narrow`, `widen`, etc. methods above. Those
+    // defer to the balancers `updater` which is serial. Therefore, we only
+    // need to guarantee visibility across threads and don't need to
+    // provide other synchronization between threads.
+    @volatile private[this] var _aperture: Int = initAperture
+    // Make sure the aperture is within bounds [minAperture, maxAperture].
+    adjust(0)
+
+    /**
+     * Returns the current aperture.
+     */
+    def aperture: Int = _aperture
+
+    /**
+     * Return the physical aperture, which may differ from `aperture` when
+     * using [[DeterministicAperture]].
+     */
+    def physicalAperture: Int = aperture
+
+    /**
+     * Adjusts the aperture by `n` while ensuring that it stays within
+     * the bounds [min, max].
+     */
+    def adjust(n: Int): Unit = {
+      _aperture = math.max(min, math.min(max, _aperture + n))
+    }
+
+    def rebuild(): This = rebuild(vector)
+    def rebuild(vec: Vector[Node]): This =
+      if (vec.isEmpty) new EmptyVector(initAperture)
+      else ProcessCoordinate() match {
+        case Some(coord) if useDeterministicOrdering =>
+          new DeterministicApeture(vec, initAperture, coord)
+        case _ => new RandomAperture(vec, initAperture)
+      }
+
+    /**
+     * Pick the least loaded (and healthiest) of the two nodes `a` and `b`
+     * taking into account their respective weights.
+     */
+    protected def pick(a: Node, aw: Double, b: Node, bw: Double): Node = {
+      if (a.status == b.status) {
+        if (a.load / aw <= b.load / bw) a else b
       } else {
-        DeterministicOrdering() match {
-          case someCoord @ Some(coord) if useDeterministicOrdering =>
-            val busyBuilder = new VectorBuilder[Node]
-            val newVec = statusOrder(ringOrder(vec, coord.value), busyBuilder)
-            new Distributor(newVec, vec, busyBuilder.result, someCoord, aperture)
-          case _ =>
-            val busyBuilder = new VectorBuilder[Node]
-            val newVec = statusOrder(tokenOrder(vec), busyBuilder)
-            new Distributor(newVec, vec, busyBuilder.result, None, aperture)
-        }
+        if (Status.best(a.status, b.status) == a.status) a else b
       }
     }
 
+    /**
+     * Returns the indices which are currently part of the aperture. That is,
+     * the indices over which `pick` selects.
+     */
+    def indices: Set[Int]
+
+    /**
+     * Returns the least loaded node within the aperture window.
+     */
+    def pick(): Node
+
     // To reduce the amount of rebuilds needed, we rely on the probabilistic
-    // nature of the p2c pick. That is, we know that only when a significant
+    // nature of p2c pick. That is, we know that only when a significant
     // portion of the underlying vector is unavailable will we return an
     // unavailable node to the layer above and trigger a rebuild. We do however
     // want to return to our "stable" ordering as soon as we notice that a
     // previously busy node is now available.
+    private[this] val busy = vector.filter(nodeBusy)
     def needsRebuild: Boolean = busy.exists(nodeOpen)
   }
 
-  protected def initDistributor(): Distributor =
-    new Distributor(Vector.empty, Vector.empty, Vector.empty, None, 1)
+  /**
+   * A distributor which has an aperture size but an empty vector to select
+   * from, so it always returns the `failingNode`.
+   */
+  private[this] class EmptyVector(initAperture: Int)
+    extends BaseDist(Vector.empty, initAperture) {
+      require(vector.isEmpty, s"vector must be empty: $vector")
+      def indices: Set[Int] = Set.empty
+      def pick(): Node = failingNode(emptyException)
+    }
+
+  /**
+   * A distributor which uses P2C to select nodes from within a window ("aperture").
+   * The `vector` is shuffled randomly to ensure that clients talking to the same
+   * set of nodes don't concentrate load on the same set of servers. However, there is
+   * a known limitation with the random shuffle since servers still have a well
+   * understood probability of being selected as part of an aperture (i.e. they
+   * follow a binomial distribution).
+   *
+   * @param vector The source vector received from a call to `rebuild`.
+   *
+   * @param initAperture The initial aperture to use.
+   */
+  private[this] class RandomAperture(
+    vector: Vector[Node],
+    initAperture: Int
+  ) extends BaseDist(vector, initAperture) {
+    require(vector.nonEmpty, "vector must be non empty")
+
+    // Since we don't have any process coordinate, we sort the node
+    // by `token` which is deterministic across rebuilds but random
+    // globally, since `token` is assigned randomly per process
+    // when the node is created.
+    private[this] val vec = statusOrder(vector.sortBy(nodeToken))
+
+    def indices: Set[Int] = (0 until aperture).toSet
+
+    def pick(): Node = {
+      if (aperture <= 1) vec.head
+      else {
+        val a = rng.nextInt(aperture)
+        var b = rng.nextInt(aperture - 1)
+        if (b >= a) { b += 1 }
+        pick(vec(a), 1.0, vec(b), 1.0)
+      }
+    }
+  }
+
+  /**
+   * [[DeterministicAperture]] addresses the shortcomings of [[RandomAperture]] by picking
+   * nodes within this process' [[ProcessCoordinate]]. Thus, when the group of peers
+   * converges on an aperture size, the servers are equally represented across the
+   * peers.
+   *
+   * @param vector The source vector received from a call to `rebuild`.
+   *
+   * @param initAperture The initial aperture to use.
+   *
+   * @param coord The [[ProcessCoordinate]] for this process which is used to narrow
+   * the range of `pick2`.
+   */
+  private[this] class DeterministicApeture(
+    vector: Vector[Node],
+    initAperture: Int,
+    coord: Coord
+  ) extends BaseDist(vector, initAperture) {
+    require(vector.nonEmpty, "vector must be non empty")
+
+    private[this] val ring = new Ring(vector.size, rng)
+
+    // We log the contents of the aperture on each distributor rebuild when using
+    // deterministic aperture. Rebuilds are not frequent and concentrated around
+    // events where this information would be valuable (i.e. coordinate changes or
+    // host add/removes). Thus, we choose to log this at `info` instead of `debug`.
+    {
+      val apertureSlice: String = {
+        val offset = coord.offset
+        val width = apertureWidth
+        val indices = ring.indices(offset, width)
+        indices.map { i =>
+          val addr = vector(i).factory.address
+          val weight = ring.weight(i, offset, width)
+          f"(index=$i, weight=$weight%1.3f, addr=$addr)"
+        }.mkString("[", ", ", "]")
+      }
+      val lbl = if (label.isEmpty) "<unlabelled>" else label
+      log.info(
+        s"Aperture updated for client $lbl: nodes=$apertureSlice"
+      )
+    }
+
+    override def min: Int = coord match {
+      // We want to additionally ensure that p2c can actually converge when there
+      // are weights present (i.e. servers aren't evenly divisible by clients).
+      // In order to do so, we need to pick over 4 or more servers. To see why, we can
+      // think about this in terms of picking one weighted node. If we only have one
+      // node to choose from, it's impossible to respect the weight since we will always
+      // return the single node – we need at least 2 servers in this case. The same
+      // holds true for pick2, except we need 4 so that the weight(s) hold.
+      case FromInstanceId(_, _, n) if vector.size % n != 0 =>
+        math.min(math.max(4, minAperture), vector.size)
+      case _ => super.min
+    }
+
+    // Translates the logical `aperture` into a physical one that
+    // maps to the ring.
+    private[this] def apertureWidth: Double = {
+      val range = ring.range(coord.offset, coord.width(1))
+      val units = math.ceil(aperture / range.toDouble).toInt
+      coord.width(units)
+    }
+
+    override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)
+
+    // We only need to order by status since the ring does the rest w.r.t
+    // to picking within the processes coordinate. Also, note, that the
+    // order of `vector` is stable across processes since it is sorted
+    // by [[LoadBalancerFactory]].
+    private[this] val vec = statusOrder(vector)
+
+    def indices: Set[Int] = ring.indices(coord.offset, apertureWidth).toSet
+
+    def pick(): Node = {
+      val offset = coord.offset
+      val width = apertureWidth
+      val a = ring.pick(offset, width)
+      val b = ring.tryPickSecond(a, offset, width)
+      val aw = ring.weight(a, offset, width)
+      val bw = ring.weight(b, offset, width)
+      // Note, `aw` or `bw` can't be zero since `pick2` would not
+      // have returned the indices in the first place.
+      pick(vec(a), aw, vec(b), bw)
+    }
+  }
+
+  protected def initDistributor(): Distributor = new EmptyVector(1)
 
   override def close(deadline: Time): Future[Unit] = {
     gauges.foreach(_.remove())

@@ -31,6 +31,7 @@ private[loadbalancer] trait ApertureSuite {
     // Expose some protected methods for testing
     def adjustx(n: Int): Unit = adjust(n)
     def aperturex: Int = aperture
+    def minUnitsx: Int = minUnits
     def maxUnitsx: Int = maxUnits
     def distx: Distributor = dist
     def rebuildx(): Unit = rebuild()
@@ -77,6 +78,7 @@ private[loadbalancer] trait ApertureSuite {
           _outstanding -= 1
           Future.Done
         }
+        override def toString = s"Service($i)"
       })
     }
 

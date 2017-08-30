@@ -144,16 +144,15 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     bal.adjustx(1)
     assert(bal.aperturex == 2)
 
-    val svcs = for (_ <- 0 until 101) yield { Await.result(bal()) }
+    val svcs = for (_ <- 0 until 100) yield { Await.result(bal()) }
     bal.adjustx(-1)
     assert(bal.aperturex == 1)
-    assert(eps.map(_.outstanding).sum == 101)
-    // Note, this assumes that `svcs.last` was acquired from
-    // the factory that sits outside the aperture. This is true
-    // with the current params since we fix the rng, but may
-    // not always be true if we change the number of svc
-    // acquisition requests.
-    for (svc <- svcs.init) {
+    assert(eps.map(_.outstanding).sum == 100)
+
+    val svcs0 = svcs.collect { case svc if svc.toString == "Service(0)" => svc }
+    val svcs1 = svcs.collect { case svc if svc.toString == "Service(1)" => svc }
+
+    for (svc <- svcs0 ++ svcs1.init) {
       Await.result(svc.close())
       f.tc.advance(bal.idleTime)
       bal.mockTimer.tick()
@@ -161,7 +160,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     }
 
     assert(eps.map(_.outstanding).sum == 1)
-    Await.result(svcs.last.close())
+    Await.result(svcs1.last.close())
     assert(eps.map(_.outstanding).sum == 0)
 
     f.tc.advance(bal.idleTime)

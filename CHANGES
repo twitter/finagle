@@ -29,6 +29,13 @@ Bug Fixes
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
     first one in the file. ``PHAB_ID=D82414``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `com.twitter.finagle.loadbalancer.DeterministicOrdering` was renamed
+    to `com.twitter.finagle.loadbalancer.ProcessCoordinate` and the internal `Coord` ADT
+    was changed as well. ``PHAB_ID=D84452``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -119,7 +126,7 @@ New Features
 
   * finagle-http: add `withNoAutomaticContinue` api to disable automatically sending 100 CONTINUE
     responses. ``PHAB_ID=D80017``
-    
+
   * finagle-http: The nack related logic in the `c.t.f.h.c.HttpClientDispatcher` has been
     moved into a filter, `c.t.f.h.f.ClientNackFilter` which has been added to the client
     stack and can now be removed based on its `Stack.Role`. ``PHAB_ID=D78902``

@@ -211,10 +211,9 @@ object Balancers {
    * deterministic tests.
    *
    * @param useDeterministicOrdering Enables the aperture instance to make use of
-   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] to calculate an order for the
-   * endpoints. In short, this allows coordination for apertures across process
-   * boundaries to avoid load concentration when deployed in a distributed system.
-   * See [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] for more details.
+   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate]] to
+   * calculate an order for the endpoints. In short, this allows coordination for apertures
+   * across process boundaries to avoid load concentration when deployed in a distributed system.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
    * for more details.
@@ -301,10 +300,9 @@ object Balancers {
    * deterministic tests.
    *
    * @param useDeterministicOrdering Enables the aperture instance to make use of
-   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] to calculate an order for the
-   * endpoints. In short, this allows coordination for apertures across process
-   * boundaries to avoid load concentration when deployed in a distributed system.
-   * See [[com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering]] for more details.
+   * the coordinate in [[com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate]] to
+   * calculate an order for the endpoints. In short, this allows coordination for apertures
+   * across process boundaries to avoid load concentration when deployed in a distributed system.
    *
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
    * for more details.
