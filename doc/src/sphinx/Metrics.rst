@@ -118,7 +118,7 @@ PendingRequestFilter
 These stats represent information about the behavior of PendingRequestFilter.
 
 **pending_requests/rejected**
-  a counter of the number of requests that have been rejected by this filter.
+  A counter of the number of requests that have been rejected by this filter.
 
 Retries
 -------
@@ -139,12 +139,46 @@ Depending on the underlying protocol, dispatchers may have different request
 queueing rules.
 
 **serial/queue_size**
-  a gauge used by serial dispatchers that can only have a single request
+  A gauge used by serial dispatchers that can only have a single request
   per connection at a time that represents the number of pending requests.
 
 **pipelining/pending**
-  a gauge used by pipelining dispatchers that represents how many
+  A gauge used by pipelining dispatchers that represents how many
   pipelined requests are currently outstanding.
+
+Thread Usage
+------------
+
+.. _threadusage:
+
+Metrics scoped under "thread_usage/requests" can be used as a signal for
+seeing if your connections or threads are imbalanced on a server.
+
+There are caveats which can make these metrics unreliable or not applicable:
+
+- Work is done on a ``FuturePool`` instead of the server's thread.
+- The amount of work done per request is highly inconsistent.
+- Low number of requests.
+
+**relative_stddev**
+  A gauge of the relative standard deviation, or coefficient of variation, for
+  the number of requests handled by each thread. Put another way, the closer this
+  is to 0.0 the less variance there is in the number of requests handled per thread.
+
+  If this value is large, before taking action, you may want to first verify the metric
+  by looking at the node's thread utilization. Examples include `mpstat -P ALL`
+  and `top -p $pid -H`. You may also want to look at the debug metrics for
+  "mean" and "stdev" to help quantify the amount of imbalance. One solution to
+  mitigate imbalance is to move work to a ``FuturePool``.
+
+**mean** `verbosity:debug`
+  A gauge of the arithemetic mean, or average, of the number of requests handled
+  by each thread.
+
+**stddev** `verbosity:debug`
+  A gauge of the standard of deviation of the number of requests handled
+  by each thread.
+
 
 Admission Control
 -----------------

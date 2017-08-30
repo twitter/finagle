@@ -65,6 +65,9 @@ object StackServer {
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](stack.nilStack[Req, Rep])
 
+    // this goes near the listener so it is close to where the handling happens.
+    stk.push(ThreadUsage.module)
+
     stk.push(new ExportSslUsageModule)
 
     // We want to start expiring services as close to their instantiation
@@ -73,7 +76,7 @@ object StackServer {
     stk.push(ExpiringService.server)
     stk.push(
       Role.serverDestTracing,
-      ((next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next))
+      (next: ServiceFactory[Req, Rep]) => new ServerDestTracingProxy[Req, Rep](next)
     )
     stk.push(TimeoutFilter.serverModule)
     stk.push(DtabStatsFilter.module)
@@ -169,40 +172,40 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
       // Ensure that we have performed global initialization.
       com.twitter.finagle.Init()
 
-      val Monitor(monitor) = params[Monitor]
-      val Reporter(reporter) = params[Reporter]
-      val Stats(stats) = params[Stats]
-      val Label(label) = params[Label]
-      val registry = ServerRegistry.connectionRegistry(addr)
+      private[this] val monitor = params[Monitor].monitor
+      private[this] val reporter = params[Reporter].reporter
+      private[this] val stats = params[Stats].statsReceiver
+      private[this] val label = params[Label].label
+      private[this] val registry = ServerRegistry.connectionRegistry(addr)
       // For historical reasons, we have to respect the ServerRegistry
       // for naming addresses (i.e. label=addr). Until we deprecate
       // its usage, it takes precedence for identifying a server as
       // it is the most recently set label.
-      val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
+      private[this] val serverLabel = ServerRegistry.nameOf(addr).getOrElse(label)
 
-      val statsReceiver =
+      private[this] val statsReceiver =
         if (serverLabel.isEmpty) stats
         else stats.scope(serverLabel)
 
-      val serverParams = params +
+      private[this] val serverParams = params +
         Label(serverLabel) +
         Stats(statsReceiver) +
         Monitor(reporter(label, None) andThen monitor)
 
-      val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
+      private[this] val serviceFactory = (stack ++ Stack.Leaf(Endpoint, factory))
         .make(serverParams)
 
       // We re-parameterize in case `newListeningServer` needs to access the
       // finalized parameters.
-      val server = withParams(serverParams)
+      private[this] val server = withParams(serverParams)
 
       // Session bookkeeping used to explicitly manage
       // session resources per ListeningServer. Note, draining
       // in-flight requests is expected to be managed by the session,
       // so we can simply `close` all sessions here.
-      val sessions = new Closables
+      private[this] val sessions = new Closables
 
-      val underlying = server.newListeningServer(serviceFactory, addr) { session =>
+      private[this] val underlying = server.newListeningServer(serviceFactory, addr) { session =>
         registry.register(session.remoteAddress)
         sessions.register(session)
         session.onClose.ensure {
@@ -213,7 +216,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
 
       ServerRegistry.register(underlying.boundAddress.toString, server.stack, server.params)
 
-      protected def closeServer(deadline: Time) = closeAwaitably {
+      protected def closeServer(deadline: Time): Future[Unit] = closeAwaitably {
         ServerRegistry.unregister(underlying.boundAddress.toString, server.stack, server.params)
         // Here be dragons
         // We want to do four things here in this order:
@@ -241,7 +244,7 @@ trait ListeningStackServer[Req, Rep, This <: ListeningStackServer[Req, Rep, This
         Future.join(Seq(closingSessions, closingFactory)).before(ulClosed)
       }
 
-      def boundAddress = underlying.boundAddress
+      def boundAddress: SocketAddress = underlying.boundAddress
     }
 
   /**
