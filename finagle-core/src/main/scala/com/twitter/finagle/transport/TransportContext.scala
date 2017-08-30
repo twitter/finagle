@@ -4,7 +4,6 @@ import com.twitter.finagle.Status
 import com.twitter.util.{Future, Closable, Time, Updatable}
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.Executor
 
 /**
  * Exposes a way to control the transport, and read off properties from the
@@ -40,15 +39,6 @@ abstract class TransportContext extends Closable {
    * The peer certificate if a TLS session is established.
    */
   def peerCertificate: Option[Certificate]
-
-  /**
-   * An `Executor` associated with this transport. If set, the executor must:
-   *  1) Ensure serial execution ordering
-   *  2) Run one item at a time
-   *
-   * For netty-based transports, a channel's EventLoop meets these requirements.
-   */
-  private[finagle] def executor: Option[Executor]
 }
 
 /**
@@ -64,7 +54,6 @@ private[finagle] class LegacyContext(underlying: Transport[_, _]) extends Transp
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate
-  private[finagle] def executor: Option[Executor] = None
 }
 
 private[finagle] class UpdatableContext(first: TransportContext)
@@ -82,5 +71,4 @@ private[finagle] class UpdatableContext(first: TransportContext)
   def localAddress: SocketAddress = underlying.localAddress
   def remoteAddress: SocketAddress = underlying.remoteAddress
   def peerCertificate: Option[Certificate] = underlying.peerCertificate
-  private[finagle] def executor: Option[Executor] = underlying.executor
 }

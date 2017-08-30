@@ -8,6 +8,7 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Timer => TimerParam}
 import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
 import com.twitter.finagle.{Stack, Status}
@@ -296,8 +297,15 @@ private[finagle] class Http2Transporter(
               case UpgradeEvent.UPGRADE_REJECTED =>
                 p.setValue(None)
               case UpgradeEvent.UPGRADE_SUCCESSFUL =>
-                val casted = Transport.cast[StreamMessage, StreamMessage](trans)
-                p.setValue(Some(new MultiplexedTransporter(casted, trans.remoteAddress, params)))
+                val inOutCasted = Transport.cast[StreamMessage, StreamMessage](trans)
+                val contextCasted = inOutCasted.asInstanceOf[
+                  Transport[StreamMessage, StreamMessage] {
+                    type Context = TransportContext with HasExecutor
+                  }
+                ]
+                p.setValue(
+                  Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params))
+                )
               case msg =>
                 log.error(s"Non-upgrade event detected $msg")
             }

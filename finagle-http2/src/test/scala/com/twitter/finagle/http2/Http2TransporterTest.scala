@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Stack}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
 import com.twitter.util.{Await, Duration, Future, Time, Promise, MockTimer}
 import io.netty.handler.codec.http.{
@@ -42,8 +43,8 @@ class Http2TransporterTest extends FunSuite {
       _onClose.setValue(new Exception("boom!"))
       Future.Unit
     }
-    def context: TransportContext = new LegacyContext(this) {
-      private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+    def context: TransportContext = new LegacyContext(this) with HasExecutor {
+      private[finagle] override val executor: Executor = new SerialExecutor
     }
   }
 

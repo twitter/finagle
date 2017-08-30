@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.liveness.FailureDetector
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.finagle.util.DefaultTimer
@@ -42,22 +43,16 @@ import scala.collection.JavaConverters._
  * Context.
  */
 private[http2] class MultiplexedTransporter(
-  underlying: Transport[StreamMessage, StreamMessage],
+  underlying: Transport[StreamMessage, StreamMessage] {
+    type Context = TransportContext with HasExecutor
+  },
   addr: SocketAddress,
   params: Stack.Params
 ) extends (() => Try[Transport[HttpObject, HttpObject]])
     with Closable { parent =>
   import MultiplexedTransporter._
 
-  // Unfortunately, we have no way of guaranteeing that the executor attached
-  // to this transport makes any promises about serial execution. We do, however
-  // control creation of Transports and thus can ensure this manually.
-  require(
-    underlying.context.executor.isDefined,
-    s"Underlying transport must supply an executor. Transport: $underlying"
-  )
-  private[this] val exec = underlying.context.executor.get
-
+  private[this] val exec = underlying.context.executor
   private[this] val log = Logger.get(getClass.getName)
 
   // A map of streamIds -> ChildTransport

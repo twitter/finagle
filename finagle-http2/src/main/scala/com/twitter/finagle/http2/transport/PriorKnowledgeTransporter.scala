@@ -3,6 +3,7 @@ package com.twitter.finagle.http2.transport
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.Http2Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
@@ -36,8 +37,14 @@ private[http2] class PriorKnowledgeTransporter(
 
   private[this] def createMultiplexedTransporter(): Future[MultiplexedTransporter] = {
     underlying().map { transport =>
+      val inOutCasted = Transport.cast[StreamMessage, StreamMessage](transport)
+      val contextCasted = inOutCasted.asInstanceOf[
+        Transport[StreamMessage, StreamMessage] {
+          type Context = TransportContext with HasExecutor
+        }
+      ]
       val multi = new MultiplexedTransporter(
-        Transport.cast[StreamMessage, StreamMessage](transport),
+        contextCasted,
         remoteAddress,
         params
       )
