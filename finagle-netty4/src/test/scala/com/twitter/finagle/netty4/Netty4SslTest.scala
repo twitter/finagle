@@ -10,7 +10,7 @@ import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.transport.Transport.ServerSsl
 import com.twitter.util.{Await, Future}
 import io.netty.channel.ChannelPipeline
@@ -32,10 +32,13 @@ object Netty4SslTest {
     stack: Stack[ServiceFactory[String, String]] = StackClient.newStack
   ) extends StdStackClient[String, String, Client] {
 
-    override protected type In = String
-    override protected type Out = String
+    protected type In = String
+    protected type Out = String
+    protected type Context = TransportContext
 
-    override protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+    override protected def newTransporter(
+      addr: SocketAddress
+    ): Transporter[String, String, TransportContext] =
       Netty4Transporter.raw[String, String](
         pipeline => {
           pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter(): _*))
@@ -47,7 +50,7 @@ object Netty4SslTest {
       )
 
     override protected def newDispatcher(
-      transport: Transport[String, String]
+      transport: Transport[String, String] { type Context <: Client.this.Context }
     ): Service[String, String] =
       new SerialClientDispatcher(transport)
 

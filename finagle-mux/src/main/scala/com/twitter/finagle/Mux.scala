@@ -15,7 +15,7 @@ import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.{StatsTransport, Transport}
+import com.twitter.finagle.transport.{StatsTransport, Transport, TransportContext}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
@@ -66,8 +66,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * servers and clients can use the same parameter).
      */
     case class MuxImpl(
-      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf],
-      listener: Stack.Params => Listener[Buf, Buf]
+      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf, TransportContext],
+      listener: Stack.Params => Listener[Buf, Buf, TransportContext]
     ) {
       def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
         (this, MuxImpl.param)
@@ -224,14 +224,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, TransportContext] =
       params[param.MuxImpl].transporter(params)(addr)
 
     protected def newDispatcher(
-      transport: Transport[In, Out]
+      transport: Transport[In, Out] { type Context <: Client.this.Context }
     ): Service[mux.Request, mux.Response] = {
       val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
       val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
@@ -309,14 +310,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newListener(): Listener[In, Out] =
+    protected def newListener(): Listener[In, Out, TransportContext] =
       params[param.MuxImpl].listener(params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val fparam.Tracer(tracer) = params[fparam.Tracer]

@@ -6,7 +6,7 @@ import com.twitter.finagle.http2.SerialExecutor
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.MultiplexedTransporter._
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.transport.{QueueTransport, LegacyContext, TransportContext}
 import com.twitter.finagle.{FailureFlags, Status, StreamClosedException, Stack}
 import com.twitter.util.{Await, Future, TimeoutException}
 import io.netty.buffer._
@@ -22,7 +22,9 @@ class MultiplexedTransporterTest extends FunSuite {
   class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
       extends QueueTransport[StreamMessage, StreamMessage](left, right) {
     override val onClose: Future[Throwable] = Future.never
-    private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+    override val context: TransportContext = new LegacyContext(this) {
+      private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+    }
   }
 
   val H1Req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")

@@ -26,7 +26,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
-import com.twitter.finagle.transport.{StatsTransport, Transport}
+import com.twitter.finagle.transport.{StatsTransport, Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -374,6 +374,7 @@ object ThriftMux
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
     private[this] val statsReceiver = params[Stats].statsReceiver
 
@@ -382,11 +383,11 @@ object ThriftMux
       params: Stack.Params = this.params
     ): ServerMuxer = copy(stack, params)
 
-    protected def newListener(): Listener[In, Out] =
+    protected def newListener(): Listener[In, Out, Context] =
       params[Mux.param.MuxImpl].listener(params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: ServerMuxer.this.Context },
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val Lessor.Param(lessor) = params[Lessor.Param]

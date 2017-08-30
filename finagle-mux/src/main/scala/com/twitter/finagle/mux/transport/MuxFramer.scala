@@ -2,7 +2,7 @@ package com.twitter.finagle.mux.transport
 
 import com.twitter.concurrent.{AsyncQueue, Broker, Offer}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.{Buf, BufByteWriter, ByteReader}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
@@ -83,6 +83,8 @@ private[finagle] object MuxFramer {
     writeWindowBytes: Option[Int],
     statsReceiver: StatsReceiver
   ): Transport[Message, Message] = new Transport[Message, Message] {
+    type Context = TransportContext
+
     require(
       writeWindowBytes.isEmpty || writeWindowBytes.exists(_ > 0),
       s"writeWindowBytes must be positive: $writeWindowBytes"
@@ -357,5 +359,6 @@ private[finagle] object MuxFramer {
     def remoteAddress: SocketAddress = trans.remoteAddress
     def peerCertificate: Option[Certificate] = trans.peerCertificate
     def close(deadline: Time): Future[Unit] = trans.close(deadline)
+    val context: TransportContext = new LegacyContext(this)
   }
 }

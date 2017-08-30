@@ -29,7 +29,7 @@ import com.twitter.finagle.ssl.ApplicationProtocols
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future, Monitor, StorageUnit, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 
@@ -74,8 +74,8 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
   case class HttpImpl(
     clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
     serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
-    transporter: Stack.Params => SocketAddress => Transporter[Any, Any],
-    listener: Stack.Params => Listener[Any, Any],
+    transporter: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext],
+    listener: Stack.Params => Listener[Any, Any, TransportContext],
     implName: String
   ) {
 
@@ -200,6 +200,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected type In = Any
     protected type Out = Any
+    protected type Context = TransportContext
 
     protected def endpointer: Stackable[ServiceFactory[Request, Response]] =
       new EndpointerModule[Request, Response](
@@ -394,8 +395,9 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
 
     protected type In = Any
     protected type Out = Any
+    protected type Context = TransportContext
 
-    protected def newListener(): Listener[Any, Any] = {
+    protected def newListener(): Listener[Any, Any, TransportContext] = {
       params[HttpImpl].listener(params)
     }
 
@@ -405,7 +407,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       new HttpTransport(params[HttpImpl].serverTransport(transport))
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Request, Response]
     ): HttpServerDispatcher = {
       val param.Stats(stats) = params[param.Stats]

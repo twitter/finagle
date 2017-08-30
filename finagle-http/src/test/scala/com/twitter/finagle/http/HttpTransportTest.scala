@@ -34,14 +34,14 @@ class HttpTransportTest extends FunSuite {
 
     val manager = new ConnectionManager
     val underlying = {
-      val self = new QueueTransport(repq, reqq)
-      new StreamTransportProxy[Response, Request](self) {
+      val qTrans = new QueueTransport[Response, Request](repq, reqq)
+      new StreamTransportProxy[Response, Request](qTrans) {
 
         def write(rep: Response): Future[Unit] =
-          self.write(rep).before(repDone)
+          qTrans.write(rep).before(repDone)
 
         def read(): Future[Multi[Request]] =
-          self.read().map(Multi(_, Future.Unit))
+          qTrans.read().map(Multi(_, Future.Unit))
 
         override def close(d: Time) = {
           closed = true

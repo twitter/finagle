@@ -70,6 +70,12 @@ Breaking API Changes
     `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and
     `c.t.f.memcached.java.ResultWithCAS` to `c.t.f.memcached.ResultWithCAS`. ``PHAB_ID=D83719``
 
+  * finagle-core: Added a new type member `Context` to `Transport`, and a method that
+    returns a context, which has most of the methods currently directly on `Transport`.
+    Also deprecates most of those methods--please start using the context instead of the
+    `Transport` directly.  Also added type parameters to `Transporter`, `Listener`, and
+    type members to `StackClient` and `StackServer`.  ``PHAB_ID=D83972``
+
 7.0.0
 ------
 

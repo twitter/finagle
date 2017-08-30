@@ -2,7 +2,7 @@ package com.twitter.finagle.netty4.transport
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.util._
 import io.netty.{channel => nettyChan}
 import io.netty.handler.ssl.SslHandler
@@ -27,6 +27,8 @@ private[finagle] class ChannelTransport(
   ch: nettyChan.Channel,
   readQueue: AsyncQueue[Any] = new AsyncQueue[Any]
 ) extends Transport[Any, Any] {
+
+  type Context = TransportContext
 
   import ChannelTransport._
 
@@ -156,8 +158,6 @@ private[finagle] class ChannelTransport(
 
   def remoteAddress: SocketAddress = ch.remoteAddress
 
-  private[finagle] override val executor: Option[Executor] = Some(ch.eventLoop())
-
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
   ch.pipeline.addLast(
@@ -194,6 +194,10 @@ private[finagle] class ChannelTransport(
       }
     }
   )
+
+  val context: TransportContext = new LegacyContext(this) {
+    private[finagle] override val executor: Option[Executor] = Some(ch.eventLoop())
+  }
 }
 
 private[finagle] object ChannelTransport {

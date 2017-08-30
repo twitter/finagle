@@ -13,7 +13,7 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{Name, param}
 import com.twitter.util._
@@ -38,12 +38,15 @@ private object StackClientTest {
 
     protected type In = String
     protected type Out = String
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+    protected def newTransporter(
+      addr: SocketAddress
+    ): Transporter[String, String, TransportContext] =
       Netty4Transporter.raw(StringClient.StringClientPipeline, addr, params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out]
+      transport: Transport[In, Out] { type Context <: LocalCheckingStringClient.this.Context }
     ): Service[String, String] = {
       Contexts.local.get(localKey) match {
         case Some(s) =>

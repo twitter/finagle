@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.param
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.codec.{DelimiterBasedFrameDecoder, Delimiters}
@@ -32,10 +32,11 @@ object StringServer {
 
     protected type In = String
     protected type Out = String
+    protected type Context = TransportContext
 
     protected def newListener() = Netty4Listener(StringServerPipeline, params)
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[String, String]
     ) = new SerialServerDispatcher(transport, service)
   }

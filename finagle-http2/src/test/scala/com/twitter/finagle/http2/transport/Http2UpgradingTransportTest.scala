@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack
 import com.twitter.finagle.http2.RefTransport
 import com.twitter.finagle.http2.SerialExecutor
-import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.transport.{QueueTransport, TransportContext, LegacyContext}
 import com.twitter.util.{Promise, Future, Await}
 import java.util.concurrent.Executor
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent
@@ -16,7 +16,9 @@ class Http2UpgradingTransportTest extends FunSuite {
   class Ctx {
     val (writeq, readq) = (new AsyncQueue[Any](), new AsyncQueue[Any]())
     val transport = new QueueTransport[Any, Any](writeq, readq) {
-      private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+      override val context: TransportContext = new LegacyContext(this) {
+        private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+      }
     }
     val ref = new RefTransport(transport)
     val p = Promise[Option[MultiplexedTransporter]]()

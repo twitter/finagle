@@ -17,7 +17,7 @@ import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.transport.ThriftClientPreparer
 import com.twitter.finagle.thrift.transport.netty4.Netty4Transport
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Closable, Duration, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
@@ -220,15 +220,16 @@ object Thrift
 
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
+    protected type Context = TransportContext
 
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transport.Client(params)(addr)
 
     protected def newDispatcher(
-      transport: Transport[ThriftClientRequest, Array[Byte]]
+      transport: Transport[ThriftClientRequest, Array[Byte]] { type Context <: Client.this.Context }
     ): Service[ThriftClientRequest, Array[Byte]] =
       new ThriftSerialClientDispatcher(
         transport,
@@ -404,16 +405,17 @@ object Thrift
 
     protected type In = Array[Byte]
     protected type Out = Array[Byte]
+    protected type Context = TransportContext
 
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
 
     override val Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
       params[Server.param.MaxReusableBufferSize]
 
-    protected def newListener(): Listener[In, Out] = Netty4Transport.Server(params)
+    protected def newListener(): Listener[In, Out, Context] = Netty4Transport.Server(params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Array[Byte], Array[Byte]]
     ): Closable = new ThriftSerialServerDispatcher(transport, service)
 

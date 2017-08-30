@@ -6,7 +6,7 @@ import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
 import com.twitter.finagle.netty3.http.Netty3ClientStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.finagle.transport.{QueueTransport, Transport, LegacyContext, TransportContext}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -29,6 +29,8 @@ object OpTransport {
 class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
   import OpTransport._
   import org.scalatest.Assertions._
+
+  type Context = TransportContext
 
   def read() = ops match {
     case Read(res) :: rest =>
@@ -68,6 +70,7 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
   def localAddress = new java.net.SocketAddress {}
   def remoteAddress = new java.net.SocketAddress {}
   val peerCertificate = None
+  val context = new LegacyContext(this)
 }
 
 // Note: This is shared between Netty3 and Netty4 implementations, but we need a concrete impl

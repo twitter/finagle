@@ -15,7 +15,7 @@ import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -856,7 +856,9 @@ class EndToEndTest
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), testService)
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack = StackClient.newStack) {
-      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) =
+      override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]] {
+        type Context <: TransportContext
+      }) =
         new PipeliningDispatcher(transport, NullStatsReceiver, 10.seconds, new MockTimer)
     }
 

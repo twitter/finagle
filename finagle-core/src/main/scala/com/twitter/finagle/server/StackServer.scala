@@ -10,7 +10,7 @@ import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.jvm.Jvm
 import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
@@ -310,10 +310,15 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   protected type Out
 
   /**
+   * The type of the transport's context.
+   */
+  protected type Context <: TransportContext
+
+  /**
    * Defines a typed [[com.twitter.finagle.server.Listener]] for this server.
    * Concrete StackServer implementations are expected to specify this.
    */
-  protected def newListener(): Listener[In, Out]
+  protected def newListener(): Listener[In, Out, Context]
 
   /**
    * Defines a dispatcher, a function which binds a transport to a
@@ -323,7 +328,9 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
+  protected def newDispatcher(transport: Transport[In, Out] {
+    type Context <: self.Context
+  }, service: Service[Req, Rep]): Closable
 
   final protected def newListeningServer(
     serviceFactory: ServiceFactory[Req, Rep],
@@ -383,7 +390,9 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
     }
   }
 
-  private class ClientConnectionImpl(t: Transport[In, Out]) extends ClientConnection {
+  private class ClientConnectionImpl(t: Transport[In, Out] {
+    type Context <: self.Context
+  }) extends ClientConnection {
     @volatile
     private var closable: Closable = t
 

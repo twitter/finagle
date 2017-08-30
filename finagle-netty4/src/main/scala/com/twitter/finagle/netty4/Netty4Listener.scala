@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.netty4.channel.ServerBridge
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import io.netty.channel._
 import java.lang.{Integer => JInt}
 import java.net.SocketAddress
@@ -26,6 +26,29 @@ private[finagle] object Netty4Listener {
     implicit val param: Stack.Param[BackPressure] =
       Stack.Param(BackPressure(enabled = true))
   }
+
+  def apply[In, Out](
+    pipelineInit: ChannelPipeline => Unit,
+    params: Stack.Params,
+    setupMarshalling: ChannelInitializer[Channel] => ChannelHandler
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out]) =
+    Netty4Listener[In, Out, TransportContext](
+      pipelineInit,
+      params,
+      setupMarshalling,
+      new ChannelTransport(_)
+    )
+
+  def apply[In, Out](
+    pipelineInit: ChannelPipeline => Unit,
+    params: Stack.Params
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out]) =
+    Netty4Listener[In, Out, TransportContext](
+      pipelineInit,
+      params,
+      identity,
+      new ChannelTransport(_)
+    )
 }
 
 /**
@@ -37,15 +60,15 @@ private[finagle] object Netty4Listener {
  * @see [[com.twitter.finagle.transport.Transport]]
  * @see [[com.twitter.finagle.param]]
  */
-private[finagle] case class Netty4Listener[In, Out](
+private[finagle] case class Netty4Listener[In, Out, Ctx <: TransportContext](
   pipelineInit: ChannelPipeline => Unit,
   params: Stack.Params,
-  transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
-    new ChannelTransport(ch)
-  },
-  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler = identity
+  setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
+  transportFactory: Channel => Transport[Any, Any] {
+    type Context <: Ctx
+  }
 )(implicit mIn: Manifest[In], mOut: Manifest[Out])
-    extends Listener[In, Out] {
+    extends Listener[In, Out, Ctx] {
 
   private[this] val listeningServerBuilder =
     new ListeningServerBuilder(pipelineInit, params, setupMarshalling)
@@ -60,8 +83,13 @@ private[finagle] case class Netty4Listener[In, Out](
    * @note the ``serveTransport`` implementation is responsible for calling
    *       [[Transport.close() close]] on  [[Transport transports]].
    */
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer = {
-    val bridge = new ServerBridge(transportFactory.andThen(Transport.cast[In, Out]), serveTransport)
+  def listen(
+    addr: SocketAddress
+  )(serveTransport: Transport[In, Out] { type Context <: Ctx } => Unit): ListeningServer = {
+    val mkTrans = transportFactory
+      .andThen(Transport.cast[In, Out])
+      .asInstanceOf[Channel => Transport[In, Out] { type Context <: Ctx }]
+    val bridge = new ServerBridge(mkTrans, serveTransport)
 
     listeningServerBuilder.bindWithBridge(bridge, addr)
   }

@@ -12,7 +12,7 @@ import com.twitter.finagle.{
 }
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.decoder.TestFramer
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration}
 import io.netty.buffer.{ByteBuf, Unpooled}
@@ -32,7 +32,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   val framer = () => new TestFramer(frameSize)
 
   private[this] class Ctx[A, B](
-    transporterFn: (SocketAddress, Params) => Transporter[Buf, Buf],
+    transporterFn: (SocketAddress, Params) => Transporter[Buf, Buf, TransportContext],
     dec: Buf => B,
     enc: A => Buf
   ) {

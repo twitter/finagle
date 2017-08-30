@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.finagle.{ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, Promise, Return, Time}
 import java.net.SocketAddress
@@ -14,6 +14,8 @@ import scala.util.control.NonFatal
 class ChannelTransport[In, Out](ch: Channel)
     extends Transport[In, Out]
     with ChannelUpstreamHandler {
+  type Context = TransportContext
+
   private[this] var nneed = 0
   private[this] def need(n: Int): Unit = synchronized {
     nneed += n
@@ -169,4 +171,6 @@ class ChannelTransport[In, Out](ch: Channel)
   val onClose: Future[Throwable] = closep
 
   override def toString = s"Transport<channel=$ch, onClose=$closep>"
+
+  val context: TransportContext = new LegacyContext(this)
 }

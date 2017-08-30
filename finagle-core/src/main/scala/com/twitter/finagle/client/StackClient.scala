@@ -13,7 +13,7 @@ import com.twitter.finagle.service._
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.Showable
 import com.twitter.util.registry.GlobalRegistry
 import java.net.{SocketAddress, InetSocketAddress}
@@ -575,10 +575,15 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   protected type Out
 
   /**
+   * The type of the transport's context.
+   */
+  protected type Context <: TransportContext
+
+  /**
    * Defines a typed [[com.twitter.finagle.client.Transporter]] for this client.
    * Concrete StackClient implementations are expected to specify this.
    */
-  protected def newTransporter(addr: SocketAddress): Transporter[In, Out]
+  protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context]
 
   /**
    * Defines a dispatcher, a function which reconciles the stream based
@@ -588,7 +593,9 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep]
+  protected def newDispatcher(transport: Transport[In, Out] {
+    type Context <: self.Context
+  }): Service[Req, Rep]
 
   /**
    * A copy constructor in lieu of defining StackClient as a

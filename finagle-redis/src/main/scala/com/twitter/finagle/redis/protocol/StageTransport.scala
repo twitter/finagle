@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
@@ -12,6 +12,8 @@ import java.security.cert.Certificate
  */
 private[finagle] final class StageTransport(underlying: Transport[Buf, Buf])
     extends Transport[Command, Reply] {
+
+  type Context = TransportContext
 
   // StageDecoder is thread-safe so we don't have to worry about synchronizing calls to it.
   private[this] val decoder = new StageDecoder(Reply.decode)
@@ -34,4 +36,5 @@ private[finagle] final class StageTransport(underlying: Transport[Buf, Buf])
   override def localAddress: SocketAddress = underlying.localAddress
   override def remoteAddress: SocketAddress = underlying.remoteAddress
   override def peerCertificate: Option[Certificate] = underlying.peerCertificate
+  val context: TransportContext = new LegacyContext(this)
 }
