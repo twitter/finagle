@@ -16,7 +16,7 @@ val netty4Version = "4.1.14.Final"
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
 
-val guavaLib = "com.google.guava" % "guava" % "23.0"
+val guavaLib = "com.google.guava" % "guava" % "19.0"
 val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.4"
 val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
 val netty3Lib = "io.netty" % "netty" % "3.10.1.Final"
