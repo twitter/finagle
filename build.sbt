@@ -241,6 +241,7 @@ lazy val finagleIntegration = Project(
   finagleMemcached,
   finagleMux,
   finagleNetty4Http,
+  finagleRedis % "test",
   finagleThrift,
   finagleThriftMux % "test->compile;test->test"
 )
