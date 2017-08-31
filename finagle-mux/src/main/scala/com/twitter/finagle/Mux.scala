@@ -9,17 +9,19 @@ import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport._
 import com.twitter.finagle.mux.{Handshake, Toggles}
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.{ProtocolLibrary, WithDefaultLoadBalancer}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.{StatsTransport, Transport, TransportContext}
+import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Closable, Future, StorageUnit}
+import io.netty.channel.Channel
 import java.net.SocketAddress
 
 /**
@@ -57,6 +59,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     /**
+     * A class eligible for configuring if a client's TLS mode is opportunistic.
+     * If it's set, then mux will negotiate with the supplied level whether to
+     * use TLS or not before setting up TLS.
+     *
+     * @note this is not mutually intelligible with simple mux over TLS
+     */
+    private[Mux] case class OppTls(level: Option[OpportunisticTls.Level])
+    private[Mux] object OppTls {
+      implicit val param = Stack.Param(OppTls(None))
+    }
+
+    /**
      * A param that controls the [[Transporter]] and [[Listener]] implementation
      * used by Mux. This allows us to easily swap the underlying I/O multiplexer
      * implementation.
@@ -66,15 +80,34 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * servers and clients can use the same parameter).
      */
     case class MuxImpl(
-      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf, TransportContext],
-      listener: Stack.Params => Listener[Buf, Buf, TransportContext]
+      transporter: Stack.Params => SocketAddress => Transporter[Buf, Buf, MuxContext],
+      listener: Stack.Params => Listener[Buf, Buf, MuxContext]
     ) {
       def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
         (this, MuxImpl.param)
     }
 
+    // tells the Netty4Transporter not to turn on TLS so we can turn it on later
+    private[this] def removeTlsIfOpportunisticClient(params: Stack.Params): Stack.Params = {
+      val param.OppTls(level) = params[param.OppTls]
+      level match {
+        case None => params
+        case _ => params + Transport.ClientSsl(None)
+      }
+    }
+
+    // tells the Netty4Listener not to turn on TLS so we can turn it on later
+    private[this] def removeTlsIfOpportunisticServer(params: Stack.Params): Stack.Params = {
+      val param.OppTls(level) = params[param.OppTls]
+      level match {
+        case None => params
+        case _ => params + Transport.ServerSsl(None)
+      }
+    }
+
     object MuxImpl {
-      private val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
+      // exposed for testing
+      private[finagle] val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
       private val tlsHeadersToggle: Toggle[Int] = Toggles(TlsHeadersToggleId)
       private[Mux] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
 
@@ -95,17 +128,34 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
             Netty4Transporter.raw(
               RefCountingFramer,
               _,
-              params,
-              transportFactory = new RefCountingTransport(_)
+              removeTlsIfOpportunisticClient(params),
+              transportFactory = { ch: Channel =>
+                OpportunisticTls.clientTransport(ch, params, new RefCountingTransport(ch))
+              }
             )
           else {
             log.info(
               "disabled Netty4RefCountingControl decoder due to non-sentinel MaxFrameSize value"
             )
-            Netty4Transporter.raw(CopyingFramer, _, params)
+            Netty4Transporter.raw(
+              CopyingFramer,
+              _,
+              removeTlsIfOpportunisticClient(params),
+              transportFactory = { ch: Channel =>
+                OpportunisticTls.clientTransport(ch, params, new ChannelTransport(ch))
+              }
+            )
           }
         },
-        params => Netty4Listener(CopyingFramer, params)
+        params =>
+          Netty4Listener(
+            CopyingFramer,
+            removeTlsIfOpportunisticServer(params),
+            identity,
+            transportFactory = { ch: Channel =>
+              OpportunisticTls.serverTransport(ch, params, new ChannelTransport(ch))
+            }
+        )
       )
 
       implicit val param = Stack.Param(Netty4RefCountingControl)
@@ -122,18 +172,36 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
    */
   private[finagle] def negotiate(
     maxFrameSize: StorageUnit,
-    statsReceiver: StatsReceiver
+    statsReceiver: StatsReceiver,
+    localEncryptLevel: OpportunisticTls.Level,
+    turnOnTlsFn: () => Unit
   ): Handshake.Negotiator = (peerHeaders, trans) => {
+    import OpportunisticTls._
+
     val remoteMaxFrameSize = Handshake
       .valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
       .map { cb =>
         MuxFramer.Header.decodeFrameSize(cb)
       }
 
-    // unused for now
-    val encryptLevel = Handshake.valueOf(OpportunisticTls.Header.KeyBuf, peerHeaders) match {
+    val remoteEncryptLevel = Handshake.valueOf(OpportunisticTls.Header.KeyBuf, peerHeaders) match {
       case Some(buf) => OpportunisticTls.Header.decodeLevel(buf)
-      case None => OpportunisticTls.Off
+      case None => Off
+    }
+
+    try {
+      if (OpportunisticTls.negotiate(localEncryptLevel, remoteEncryptLevel)) {
+        turnOnTlsFn()
+      }
+    } catch {
+      // TODO: handle IncompatibleNegotiationExceptions gracefully
+      case exn: IncompatibleNegotiationException =>
+        log.fatal(
+          exn,
+          s"The client wanted $localEncryptLevel and the server wanted" +
+            s" $remoteEncryptLevel which are incompatible."
+        )
+        throw exn
     }
 
     // Decorate the transport with the MuxFramer. We need to handle the
@@ -200,14 +268,16 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      * @param maxFrameSize the maximum mux fragment size the client is willing to
      * receive from a server.
      */
-    private def headers(maxFrameSize: StorageUnit): Handshake.Headers = {
+    private def headers(
+      maxFrameSize: StorageUnit,
+      tlsLevel: Option[OpportunisticTls.Level]
+    ): Handshake.Headers = {
       val muxFrameHeader =
         MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
-      if (param.MuxImpl.tlsHeaders) {
-        // this is off for now, but will be different in the future if opportunistic
-        // tls is configured.
-        Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> OpportunisticTls.Off.buf)
-      } else Seq(muxFrameHeader)
+      tlsLevel match {
+        case Some(level) => Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> level.buf)
+        case _ => Seq(muxFrameHeader)
+      }
     }
   }
 
@@ -224,12 +294,39 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = Buf
     protected type Out = Buf
-    protected type Context = TransportContext
+    protected type Context = MuxContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, TransportContext] =
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, MuxContext] =
       params[param.MuxImpl].transporter(params)(addr)
+
+    /**
+     * Configures the client to negotiate whether to speak TLS or not.
+     *
+     * By default, the client doesn't use opportunistic TLS, and will instead try
+     * to speak mux over TLS if TLS has been configured.
+     *
+     * The valid levels are Off, which indicates this client will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Clients that are configured to be Required cannot speak to servers that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
+      configured(param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the client is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Client = configured(param.OppTls(None))
 
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Client.this.Context }
@@ -238,12 +335,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
       val fparam.Label(name) = params[fparam.Label]
       val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
+      val param.OppTls(level) = params[param.OppTls]
 
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
         version = LatestVersion,
-        headers = Client.headers(maxFrameSize),
-        negotiate = negotiate(maxFrameSize, statsReceiver)
+        headers = Client.headers(maxFrameSize, if (param.MuxImpl.tlsHeaders) level else None),
+        negotiate = negotiate(
+          maxFrameSize,
+          statsReceiver,
+          level.getOrElse(OpportunisticTls.Off),
+          transport.context.turnOnTls _
+        )
       )
 
       val statsTrans =
@@ -286,15 +389,16 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      */
     private[finagle] def headers(
       clientHeaders: Handshake.Headers,
-      maxFrameSize: StorageUnit
+      maxFrameSize: StorageUnit,
+      tlsLevel: Option[OpportunisticTls.Level]
     ): Handshake.Headers = {
       val muxFrameHeader =
         MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(maxFrameSize.inBytes.toInt)
-      if (param.MuxImpl.tlsHeaders) {
-        // this is off for now, but will be different in the future if opportunistic
-        // tls is configured.
-        Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> OpportunisticTls.Off.buf)
-      } else Seq(muxFrameHeader)
+
+      tlsLevel match {
+        case Some(level) => Seq(muxFrameHeader, OpportunisticTls.Header.KeyBuf -> level.buf)
+        case _ => Seq(muxFrameHeader)
+      }
     }
   }
 
@@ -310,12 +414,42 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
     protected type In = Buf
     protected type Out = Buf
-    protected type Context = TransportContext
+    protected type Context = MuxContext
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
-    protected def newListener(): Listener[In, Out, TransportContext] =
+    /**
+     * Configures the server to negotiate whether to speak TLS or not.
+     *
+     * By default, the client doesn't use opportunistic TLS, and will instead try
+     * to speak mux over TLS if TLS has been configured.
+     *
+     * The valid levels are Off, which indicates this client will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Clients that are configured to be Required cannot speak to servers that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
+      configured(param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the server is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Server = configured(param.OppTls(None))
+
+    protected def newListener(): Listener[In, Out, MuxContext] =
       params[param.MuxImpl].listener(params)
+
+    // we cache tlsHeaders here because it's hard to do a let on servers
+    private[this] val cachedTlsHeaders = param.MuxImpl.tlsHeaders
 
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: Server.this.Context },
@@ -325,12 +459,18 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val Lessor.Param(lessor) = params[Lessor.Param]
       val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
       val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
+      val param.OppTls(level) = params[param.OppTls]
 
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = LatestVersion,
-        headers = Server.headers(_, maxFrameSize),
-        negotiate = negotiate(maxFrameSize, statsReceiver)
+        headers = Server.headers(_, maxFrameSize, if (cachedTlsHeaders) level else None),
+        negotiate = negotiate(
+          maxFrameSize,
+          statsReceiver,
+          level.getOrElse(OpportunisticTls.Off),
+          transport.context.turnOnTls _
+        )
       )
 
       val statsTrans =

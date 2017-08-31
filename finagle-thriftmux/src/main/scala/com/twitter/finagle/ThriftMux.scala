@@ -8,6 +8,7 @@ import com.twitter.finagle.client.{
 }
 import com.twitter.finagle.context.RemoteInfo.Upstream
 import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.transport.{OpportunisticTls, MuxContext}
 import com.twitter.finagle.param.{
   ExceptionStatsHandler => _,
   Monitor => _,
@@ -26,7 +27,7 @@ import com.twitter.finagle.stats.{
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.{Trace, Tracer}
-import com.twitter.finagle.transport.{StatsTransport, Transport, TransportContext}
+import com.twitter.finagle.transport.{StatsTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.SocketAddress
@@ -374,7 +375,7 @@ object ThriftMux
 
     protected type In = Buf
     protected type Out = Buf
-    protected type Context = TransportContext
+    protected type Context = MuxContext
 
     private[this] val statsReceiver = params[Stats].statsReceiver
 
@@ -402,8 +403,8 @@ object ThriftMux
       val negotiatedTrans = mux.Handshake.server(
         trans = thriftEmulator,
         version = Mux.LatestVersion,
-        headers = Mux.Server.headers(_, frameSize),
-        negotiate = Mux.negotiate(frameSize, muxStatsReceiver)
+        headers = Mux.Server.headers(_, frameSize, None),
+        negotiate = Mux.negotiate(frameSize, muxStatsReceiver, OpportunisticTls.Off, () => ())
       )
 
       val statsTrans =

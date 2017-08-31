@@ -19,7 +19,7 @@ import io.netty.handler.ssl.SslHandler
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[netty4] class Netty4ServerSslHandler(params: Stack.Params)
+private[finagle] class Netty4ServerSslHandler(params: Stack.Params, opportunistic: Boolean = false)
     extends ChannelInitializer[Channel] {
 
   /**
@@ -87,8 +87,13 @@ private[netty4] class Netty4ServerSslHandler(params: Stack.Params)
       val combined: SslServerConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      val sslConnectHandler: SslServerConnectHandler = createSslConnectHandler(sslHandler, combined)
-      addHandlersToPipeline(ch.pipeline(), sslHandler, sslConnectHandler)
+      if (opportunistic) {
+        ch.pipeline.addFirst("ssl", sslHandler)
+      } else {
+        val sslConnectHandler: SslServerConnectHandler =
+          createSslConnectHandler(sslHandler, combined)
+        addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
+      }
     }
   }
 
