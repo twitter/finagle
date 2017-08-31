@@ -324,7 +324,7 @@ object Thrift
       super.filtered(filter)
   }
 
-  val client: Thrift.Client = Client()
+  def client: Thrift.Client = Client()
 
   def newService(
     dest: Name,
@@ -458,7 +458,7 @@ object Thrift
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  val server: Thrift.Server = Server()
+  def server: Thrift.Server = Server()
 
   def serve(
     addr: SocketAddress,

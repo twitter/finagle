@@ -160,7 +160,6 @@ object ThriftMux
         .withLabel("thrift")
         .withStatsReceiver(ClientStatsReceiver)
 
-    // not a `val` in order to avoid initialization issues
     private def muxer: StackClient[mux.Request, mux.Response] =
       Mux.client
         .copy(stack = BaseClientStack)
@@ -335,7 +334,7 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
-  val client: ThriftMux.Client = Client()
+  def client: ThriftMux.Client = Client()
 
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]
@@ -572,7 +571,7 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  val server: Server = Server()
+  def server: ThriftMux.Server = Server()
     .configured(Label("thrift"))
     .configured(Stats(ServerStatsReceiver))
 

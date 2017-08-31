@@ -121,7 +121,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       super.filtered(filter)
   }
 
-  val client: Redis.Client = Client()
+  def client: Redis.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     client.newClient(dest, label)

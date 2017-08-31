@@ -266,7 +266,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def richClientStatsReceiver: StatsReceiver = params[Stats].statsReceiver
   }
 
-  val client = Client()
+  def client: Mysql.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
     client.newClient(dest, label)

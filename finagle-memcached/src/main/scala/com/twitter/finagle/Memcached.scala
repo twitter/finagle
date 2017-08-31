@@ -444,7 +444,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       super.filtered(filter)
   }
 
-  val client: Memcached.Client = Client()
+  def client: Memcached.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     client.newClient(dest, label)
@@ -509,7 +509,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  val server: Memcached.Server = Server()
+  def server: Memcached.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     server.serve(addr, service)

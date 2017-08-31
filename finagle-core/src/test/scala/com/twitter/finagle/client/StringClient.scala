@@ -79,5 +79,5 @@ object StringClient {
       )
   }
 
-  val client: Client = Client()
+  def client: Client = Client()
 }

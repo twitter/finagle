@@ -358,7 +358,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
   }
 
-  val client = Client()
+  def client: Mux.Client = Client()
 
   def newService(dest: Name, label: String): Service[mux.Request, mux.Response] =
     client.newService(dest, label)
@@ -480,7 +480,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
   }
 
-  val server = Server()
+  def server: Mux.Server = Server()
 
   def serve(
     addr: SocketAddress,

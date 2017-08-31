@@ -360,7 +360,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.filtered(filter)
   }
 
-  val client: Http.Client = Client()
+  def client: Http.Client = Client()
 
   def newService(dest: Name, label: String): Service[Request, Response] =
     client.newService(dest, label)
@@ -526,7 +526,7 @@ object Http extends Client[Request, Response] with HttpRichClient with Server[Re
       super.configuredParams(newParams)
   }
 
-  val server: Http.Server = Server()
+  def server: Http.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Request, Response]): ListeningServer =
     server.serve(addr, service)

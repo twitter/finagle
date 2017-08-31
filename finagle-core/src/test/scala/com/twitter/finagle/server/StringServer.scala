@@ -41,5 +41,5 @@ object StringServer {
     ) = new SerialServerDispatcher(transport, service)
   }
 
-  val server: Server = Server()
+  def server: Server = Server()
 }
