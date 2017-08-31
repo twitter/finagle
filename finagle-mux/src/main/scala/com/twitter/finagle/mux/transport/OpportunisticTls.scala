@@ -62,7 +62,7 @@ private[twitter] object OpportunisticTls {
     transport: Transport[Any, Any]
   ): Transport[Any, Any] { type Context = MuxContext } =
     new ContextBasedTransport[Any, Any, MuxContext](
-      new MuxContext(transport.context, ch.pipeline, () => new Netty4ClientSslHandler(params, true))
+      new MuxContext(transport.context, ch.pipeline, () => new Netty4ClientSslHandler(params))
     ) {
       def read(): Future[Any] = transport.read()
       def write(any: Any): Future[Unit] = transport.write(any)
@@ -77,7 +77,7 @@ private[twitter] object OpportunisticTls {
     transport: Transport[Any, Any]
   ): Transport[Any, Any] { type Context = MuxContext } =
     new ContextBasedTransport[Any, Any, MuxContext](
-      new MuxContext(transport.context, ch.pipeline, () => new Netty4ServerSslHandler(params, true))
+      new MuxContext(transport.context, ch.pipeline, () => new Netty4ServerSslHandler(params))
     ) {
       def read(): Future[Any] = transport.read()
       def write(any: Any): Future[Unit] = transport.write(any)

@@ -19,7 +19,7 @@ import io.netty.handler.ssl.SslHandler
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[finagle] class Netty4ServerSslHandler(params: Stack.Params, opportunistic: Boolean = false)
+private[finagle] class Netty4ServerSslHandler(params: Stack.Params)
     extends ChannelInitializer[Channel] {
 
   /**
@@ -60,15 +60,15 @@ private[finagle] class Netty4ServerSslHandler(params: Stack.Params, opportunisti
   private[this] def createSslConnectHandler(
     sslHandler: SslHandler,
     config: SslServerConfiguration
-  ): SslServerConnectHandler = {
+  ): SslServerVerificationHandler = {
     val SslServerSessionVerifier.Param(sessionVerifier) = params[SslServerSessionVerifier.Param]
-    new SslServerConnectHandler(sslHandler, config, sessionVerifier)
+    new SslServerVerificationHandler(sslHandler, config, sessionVerifier)
   }
 
   private[this] def addHandlersToPipeline(
     pipeline: ChannelPipeline,
     sslHandler: SslHandler,
-    sslConnectHandler: SslServerConnectHandler
+    sslConnectHandler: SslServerVerificationHandler
   ): Unit = {
     pipeline.addFirst("sslConnect", sslConnectHandler)
     pipeline.addFirst("ssl", sslHandler)
@@ -87,13 +87,9 @@ private[finagle] class Netty4ServerSslHandler(params: Stack.Params, opportunisti
       val combined: SslServerConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      if (opportunistic) {
-        ch.pipeline.addFirst("ssl", sslHandler)
-      } else {
-        val sslConnectHandler: SslServerConnectHandler =
-          createSslConnectHandler(sslHandler, combined)
-        addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
-      }
+      val sslConnectHandler: SslServerVerificationHandler =
+        createSslConnectHandler(sslHandler, combined)
+      addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
     }
   }
 

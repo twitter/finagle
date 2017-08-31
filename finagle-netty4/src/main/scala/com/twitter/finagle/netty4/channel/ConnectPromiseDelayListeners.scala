@@ -10,7 +10,7 @@ import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
  *
  * For example, this is used by:
  *
- * - [[com.twitter.finagle.netty4.ssl.client.SslClientConnectHandler]]
+ * - [[com.twitter.finagle.netty4.ssl.client.SslClientVerificationHandler]]
  * - [[com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler]]
  * - [[com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler]]
  */

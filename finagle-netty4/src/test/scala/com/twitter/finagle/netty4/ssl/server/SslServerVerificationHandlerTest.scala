@@ -6,12 +6,11 @@ import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.DefaultPromise
 import javax.net.ssl.{SSLEngine, SSLSession}
-// import org.mockito.Mockito.{never, spy, times, verify, when}
 import org.mockito.Mockito.when
 import org.scalatest.{FunSuite, OneInstancePerTest}
 import org.scalatest.mockito.MockitoSugar
 
-class SslServerConnectHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class SslServerVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   class TestVerifier(result: => Boolean) extends SslServerSessionVerifier {
     def apply(
@@ -31,15 +30,17 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
 
   test("handler removes itself on successful verification") {
     val pipeline = channel.pipeline
-    pipeline.addFirst(new SslServerConnectHandler(sslHandler, sslConfig, new TestVerifier(true)))
+    pipeline.addFirst(
+      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(true))
+    )
 
-    val before = pipeline.get(classOf[SslServerConnectHandler])
+    val before = pipeline.get(classOf[SslServerVerificationHandler])
     assert(before != null)
 
     pipeline.fireChannelActive()
     handshakePromise.setSuccess(channel)
 
-    val after = pipeline.get(classOf[SslServerConnectHandler])
+    val after = pipeline.get(classOf[SslServerVerificationHandler])
     assert(after == null)
 
     assert(channel.isOpen)
@@ -49,7 +50,9 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
 
   test("closes channel when verification fails") {
     val pipeline = channel.pipeline
-    pipeline.addFirst(new SslServerConnectHandler(sslHandler, sslConfig, new TestVerifier(false)))
+    pipeline.addFirst(
+      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(false))
+    )
 
     pipeline.fireChannelActive()
     handshakePromise.setSuccess(channel)
@@ -62,7 +65,7 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
   test("closes channel when verification throws") {
     val pipeline = channel.pipeline
     pipeline.addFirst(
-      new SslServerConnectHandler(
+      new SslServerVerificationHandler(
         sslHandler,
         sslConfig,
         new TestVerifier(throw new Exception("failed verification"))
@@ -70,6 +73,19 @@ class SslServerConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     )
 
     pipeline.fireChannelActive()
+    handshakePromise.setSuccess(channel)
+
+    assert(!channel.isOpen)
+
+    channel.finishAndReleaseAll()
+  }
+
+  test("closes channel when verification fails without channel active") {
+    val pipeline = channel.pipeline
+    pipeline.addFirst(
+      new SslServerVerificationHandler(sslHandler, sslConfig, new TestVerifier(false))
+    )
+
     handshakePromise.setSuccess(channel)
 
     assert(!channel.isOpen)

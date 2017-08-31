@@ -6,6 +6,7 @@ import com.twitter.finagle.netty4.channel.{
   BufferingChannelOutboundHandler,
   ConnectPromiseDelayListeners
 }
+import com.twitter.util.{Promise, Return, Throw}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
@@ -20,7 +21,7 @@ import scala.util.control.NonFatal
  * If an `SSLSession` fails verification, the SSL/TLS connection is considered invalid and the
  * connect promise failed with an exception and the channel is closed.
  */
-private[netty4] class SslClientConnectHandler(
+private[netty4] class SslClientVerificationHandler(
   sslHandler: SslHandler,
   address: Address,
   config: SslClientConfiguration,
@@ -29,31 +30,72 @@ private[netty4] class SslClientConnectHandler(
     with BufferingChannelOutboundHandler
     with ConnectPromiseDelayListeners { self =>
 
-  private[this] def fail(p: ChannelPromise, ctx: ChannelHandlerContext, t: Throwable): Unit = {
-    // We "try" because it might be already cancelled and we don't need to handle
-    // cancellations here - it's already done by `proxyCancellationsTo`.
-    p.tryFailure(t)
-    failPendingWrites(ctx, t)
+  private[this] val onHandshakeComplete = Promise[Unit]()
+  private[this] val inet: Option[SocketAddress] = address match {
+    case Address.Inet(addr, _) => Some(addr)
+    case _ => None
+  }
+
+  private[this] def fail(t: Throwable): Unit = {
+    onHandshakeComplete.setException(t)
+    failPendingWrites(t)
   }
 
   private[this] def verifySession(
-    ctx: ChannelHandlerContext,
-    remote: SocketAddress,
-    promise: ChannelPromise,
-    session: SSLSession
+    session: SSLSession,
+    ctx: ChannelHandlerContext
   ): Unit = {
     try {
       if (!sessionVerifier(address, config, session)) {
         fail(
-          promise,
-          ctx,
-          new SslVerificationFailedException(new Exception("Failed client verification"), remote)
+          new SslVerificationFailedException(
+            Some(new Exception("Failed client verification")),
+            inet
+          )
         )
+        ctx.close()
       } // if verification is successful, do nothing here
     } catch {
       case NonFatal(e) =>
-        fail(promise, ctx, new SslVerificationFailedException(e, remote))
+        fail(new SslVerificationFailedException(Some(e), inet))
     }
+  }
+
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
+    // React on satisfied handshake promise.
+    sslHandler
+      .handshakeFuture()
+      .addListener(new GenericFutureListener[NettyFuture[Channel]] {
+        def operationComplete(f: NettyFuture[Channel]): Unit =
+          if (f.isSuccess) {
+            if (sslHandler.engine.isInboundDone) {
+              // Likely that the server failed to verify the client or the handshake failed in an unexpected way.
+              fail(
+                new SslVerificationFailedException(
+                  Some(new Exception("Failed server verification")),
+                  inet
+                )
+              )
+            } else {
+              val session = sslHandler.engine().getSession
+              verifySession(session, ctx)
+
+              if (onHandshakeComplete.setDone()) {
+                // If the original promise has not yet been satisfied, it can now be marked as successful,
+                // and the `SslClientVerificationHandler` can be removed from the pipeline. If the promise is
+                // already satisfied, the connection was failed and the failure has already been
+                // propagated to the dispatcher so we don't need to worry about cleaning up the pipeline.
+                ctx.pipeline.remove(self) // drains pending writes when removed
+              }
+            }
+          } else {
+            // Handshake promise is failed so given `SslHandler` is going to close the channel we only
+            // need to fail pending writes and the connect promise.
+            fail(f.cause())
+          }
+      })
+
+    super.handlerAdded(ctx)
   }
 
   override def connect(
@@ -74,40 +116,12 @@ private[netty4] class SslClientConnectHandler(
     // writes are expected from the previous handler, no need to fail the pending writes.
     sslConnectPromise.addListener(proxyFailuresTo(promise))
 
-    // React on satisfied handshake promise.
-    sslHandler
-      .handshakeFuture()
-      .addListener(new GenericFutureListener[NettyFuture[Channel]] {
-        override def operationComplete(f: NettyFuture[Channel]): Unit =
-          if (f.isSuccess) {
-            if (sslHandler.engine.isInboundDone) {
-              // Likely that the server failed to verify the client or the handshake failed in an unexpected way.
-              fail(
-                promise,
-                ctx,
-                new SslVerificationFailedException(
-                  new Exception("Failed server verification"),
-                  remote
-                )
-              )
-            } else {
-              val session = sslHandler.engine().getSession
-              verifySession(ctx, remote, promise, session)
-
-              if (promise.trySuccess()) {
-                // If the original promise has not yet been satisfied, it can now be marked as successful,
-                // and the `SslClientConnectHandler` can be removed from the pipeline. If the promise is
-                // already satisfied, the connection was failed and the failure has already been
-                // propagated to the dispatcher so we don't need to worry about cleaning up the pipeline.
-                ctx.pipeline().remove(self) // drains pending writes when removed
-              }
-            }
-          } else {
-            // Handshake promise is failed so given `SslHandler` is going to close the channel we only
-            // need to fail pending writes and the connect promise.
-            fail(promise, ctx, f.cause())
-          }
-      })
+    onHandshakeComplete.respond {
+      case Return(_) => promise.setSuccess()
+      case Throw(exn) =>
+        // this is racy because we proxy failures
+        promise.tryFailure(exn)
+    }
 
     // Propagate the connect event down to the pipeline, but use the new (detached) promise.
     ctx.connect(remote, local, sslConnectPromise)

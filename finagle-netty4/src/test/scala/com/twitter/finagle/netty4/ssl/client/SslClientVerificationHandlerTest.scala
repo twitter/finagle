@@ -15,7 +15,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mockito.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
+class SslClientVerificationHandlerTest extends FunSuite with MockitoSugar with OneInstancePerTest {
 
   val fakeAddress = InetSocketAddress.createUnresolved("ssl", 8081)
   val address = Address.Inet(fakeAddress, Map.empty)
@@ -45,7 +45,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     channel
       .pipeline()
       .addFirst(
-        new SslClientConnectHandler(
+        new SslClientVerificationHandler(
           sslHandler,
           address,
           config,
@@ -68,7 +68,14 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
   test("session verification failed") {
     channel
       .pipeline()
-      .addFirst(new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(false)))
+      .addFirst(
+        new SslClientVerificationHandler(
+          sslHandler,
+          address,
+          config,
+          new TestVerifier(false)
+        )
+      )
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -88,7 +95,14 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     val e = new Exception("whoa")
     channel
       .pipeline()
-      .addFirst(new SslClientConnectHandler(sslHandler, address, config, new TestVerifier(throw e)))
+      .addFirst(
+        new SslClientVerificationHandler(
+          sslHandler,
+          address,
+          config,
+          new TestVerifier(throw e)
+        )
+      )
     val connectPromise = channel.connect(fakeAddress)
     assert(!connectPromise.isDone)
 
@@ -108,7 +122,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     channel
       .pipeline()
       .addFirst(
-        new SslClientConnectHandler(
+        new SslClientVerificationHandler(
           sslHandler,
           address,
           config,
@@ -128,7 +142,7 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     channel
       .pipeline()
       .addFirst(
-        new SslClientConnectHandler(
+        new SslClientVerificationHandler(
           sslHandler,
           address,
           config,
@@ -145,6 +159,31 @@ class SslClientConnectHandlerTest extends FunSuite with MockitoSugar with OneIns
     handshakePromise.setFailure(e)
     assert(!connectPromise.isSuccess)
     assert(intercept[Exception](channel.checkException()) == e)
+
+    channel.finishAndReleaseAll()
+  }
+
+  test("session verification failed without connect") {
+    channel
+      .pipeline()
+      .addFirst(
+        new SslClientVerificationHandler(
+          sslHandler,
+          address,
+          config,
+          new TestVerifier(false)
+        )
+      )
+
+    channel.writeOutbound("pending write")
+    assert(channel.outboundMessages().size() == 0)
+
+    assert(channel.isOpen)
+    handshakePromise.setSuccess(channel)
+
+    assert(
+      intercept[Exception](channel.checkException()).isInstanceOf[SslVerificationFailedException]
+    )
 
     channel.finishAndReleaseAll()
   }
