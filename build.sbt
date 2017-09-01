@@ -1,9 +1,6 @@
 import Tests._
-import sbt.Keys._
 import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
-
-concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 
 val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
 val suffix = if (branch == "master") "" else "-SNAPSHOT"
@@ -98,7 +95,6 @@ val sharedSettings = Seq(
   javacOptions ++= Seq("-Xlint:unchecked", "-source", "1.8", "-target", "1.8"),
   javacOptions in doc := Seq("-source", "1.8"),
 
-  fork in Test := true,
   javaOptions in Test := Seq("-DSKIP_FLAKY=true"),
 
   // This is bad news for things like com.twitter.util.Time
@@ -404,6 +400,7 @@ lazy val finagleServersets = Project(
   sharedSettings
 ).settings(
   name := "finagle-serversets",
+  fork in Test := true,
   libraryDependencies ++= Seq(
     caffeineLib,
     util("cache"),
