@@ -58,12 +58,19 @@ class RingTest extends FunSuite {
 
   test("range") {
     val r0 = new Ring(1, rng)
-    assert(r0.range(0.0, 1.0) == 1)
-    assert(r0.range(0.0, 0.5) == 1)
-    assert(r0.range(0.0, 0.0) == 1)
-    val r1 = new Ring(10, rng)
-    assert(r1.range(1/4D, 1/4D) == 3) // [2, 3, 4]
-    assert(r1.range(3/4D, 1/2D) == 6) // [7, 8, 9, 0, 1, 2]
+    assert(r0.range(rng.nextDouble, 0.0) == 1)
+    assert(r0.range(rng.nextDouble, 0.5) == 1)
+    assert(r0.range(rng.nextDouble, 1.0) == 1)
+
+    val size = 2 + (rng.nextDouble * 10000).toInt
+    val r1 = new Ring(size, rng)
+    assert(r1.range(rng.nextDouble, 0.0) == 1)
+    assert(r1.range(rng.nextDouble, 1.0) == size)
+
+    // wrap around
+    val r2 = new Ring(10, rng)
+    assert(r2.range(1/4D, 1/4D) == 3) // [2, 3, 4]
+    assert(r2.range(3/4D, 1/2D) == 6) // [7, 8, 9, 0, 1, 2]
   }
 
   test("pick2: full range") {

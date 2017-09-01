@@ -62,13 +62,16 @@ private class Ring(size: Int, rng: Rng) {
     if (width < 0 || width > 1.0)
       throw new IllegalArgumentException(s"width must be between [0, 1.0]: $width")
 
-    val ab = index(offset)
-    // We want to compute the range [offset, offset + width) exclusive of
-    // offset + width, so we discount a small portion of it.
-    val ae = index(((offset + width) * (1 - epsilon)) % 1.0)
-    // add 1 so the range is inclusive of the first element.
-    val diff = (ae - ab) + 1
-    if (diff < 0) diff + size else diff
+    if (1.0 - width <= epsilon) size else {
+      val ab = index(offset)
+      // We want to compute the range [offset, offset + width) exclusive of
+      // offset + width, so we discount a small portion of it. Note, this
+      // is important for cases where `ae` lands exactly on an index.
+      val ae = index(((offset + width) * (1 - epsilon)) % 1.0)
+      // Add 1 so the range is inclusive of the first element.
+      val diff = (ae - ab) + 1
+      if (diff < 0) diff + size else diff
+    }
   }
 
   /**
