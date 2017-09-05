@@ -38,6 +38,11 @@ private[twitter] object Message {
 
   object Types {
 
+    def isDiscard(typ: Byte): Boolean =
+      typ == Message.Types.BAD_Tdiscarded ||
+        typ == Message.Types.Rdiscarded ||
+        typ == Message.Types.Tdiscarded
+
     private[mux] def isRefCounted(typ: Byte): Boolean =
       (typ == Types.Tping || typ == Types.Rping
         || typ == Types.Tdiscarded || typ == Types.Rdiscarded
@@ -105,6 +110,9 @@ private[twitter] object Message {
   abstract class MarkerMessage extends Message {
     def tag = 0
   }
+
+  /** Marker trait for messages that can be fragmented */
+  sealed trait Fragmentable extends Message
 
   private object Init {
     def encode(
@@ -217,7 +225,7 @@ private[twitter] object Message {
   private[this] val noBytes = Array.empty[Byte]
 
   case class Tdispatch(tag: Int, contexts: Seq[(Buf, Buf)], dst: Path, dtab: Dtab, req: Buf)
-      extends Message {
+      extends Fragmentable {
     def typ = Types.Tdispatch
     lazy val buf: Buf = {
       // first, compute how large the message header is (in 'n')
@@ -288,7 +296,7 @@ private[twitter] object Message {
   }
 
   /** A reply to a `Tdispatch` message */
-  abstract class Rdispatch(status: Byte, contexts: Seq[(Buf, Buf)], body: Buf) extends Message {
+  abstract class Rdispatch(status: Byte, contexts: Seq[(Buf, Buf)], body: Buf) extends Fragmentable {
     def typ = Types.Rdispatch
     lazy val buf: Buf = {
       var n = 1 + 2
@@ -672,14 +680,54 @@ private[twitter] object Message {
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
         throwBadMessageException(s"invalid tag number ${m.tag}")
 
-      val head = Array[Byte](
-        m.typ,
-        (m.tag >> 16 & 0xff).toByte,
-        (m.tag >> 8 & 0xff).toByte,
-        (m.tag & 0xff).toByte
-      )
+      makeHeader(m.typ, m.tag).concat(m.buf)
+  }
 
-      Buf.ByteArray.Owned(head).concat(m.buf)
+  /**
+   * Returns an iterator over the fragments of `msg`. Each fragment is
+   * sized to be <= `maxSize`
+   * @note the returned iterator is not thread-safe.
+   */
+  private[transport] def encodeFragments(msg: Message, maxSize: Int): Iterator[Buf] = msg match {
+    case m: Fragmentable => new FragmentIterator(m, maxSize)
+    case _ => Iterator.single(Message.encode(msg))
+  }
+
+  private def makeHeader(typ: Byte, tag: Int): Buf = {
+    Buf.ByteArray.Owned(Array[Byte](
+      typ,
+      (tag >> 16 & 0xff).toByte,
+      (tag >> 8 & 0xff).toByte,
+      (tag & 0xff).toByte
+    ))
+  }
+
+  private class FragmentIterator(msg: Fragmentable, maxSize: Int) extends Iterator[Buf] {
+    private[this] var finished = false
+    private[this] var readIndex = 0
+
+    private[this] val fragmentHeader = makeHeader(msg.typ, Tags.setMsb(msg.tag))
+    private[this] val body = msg.buf
+
+    def hasNext: Boolean = !finished
+
+    def next(): Buf = {
+      if (!hasNext) Iterator.empty.next()
+      else {
+        val nextIndex = readIndex + maxSize
+        val chunk = body.slice(readIndex, nextIndex)
+        readIndex = nextIndex
+
+        if (nextIndex < body.length) fragmentHeader.concat(chunk)
+        else {
+          finished = true
+          // Prepend the non-fragmented header
+          makeHeader(msg.typ, msg.tag).concat(chunk)
+        }
+      }
+    }
+
+    override def toString = s"FragmentingIterator($msg, $maxSize) { hasNext = $hasNext }"
   }
 
   // Helper method to ensure conformity of BadMessageExceptions

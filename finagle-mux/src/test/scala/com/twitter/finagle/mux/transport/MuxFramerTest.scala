@@ -3,19 +3,17 @@ package com.twitter.finagle.mux.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.liveness.Latch
+import com.twitter.finagle.mux.transport.Message.Rdiscarded
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Dtab, Dentry, Failure, Path}
+import com.twitter.finagle.{Dentry, Dtab, Failure, Path}
 import com.twitter.io.{Buf, ByteReader}
 import com.twitter.util.{Await, Future, Promise, Return}
-import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import scala.collection.mutable.ArrayBuffer
 
-@RunWith(classOf[JUnitRunner])
 class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import MuxFramerTest._
 
@@ -178,7 +176,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(tagRLE.count(_ == 1) / tagRLE.length.toDouble >= .95)
   }
 
-  test("Tdiscarded") {
+  test("client Tdiscarded") {
     val msg = Message.Tdispatch(
       20,
       Seq.empty,
@@ -215,6 +213,63 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val typ = Message.Tags.extractType(br.readIntBE())
       typ == Message.Types.BAD_Tdiscarded
     })
+  }
+
+  test("server Tdiscarded mid stream") {
+    val msg = Message.Tdispatch(
+      20,
+      Seq.empty,
+      Path.read("/foo/bar/baz"),
+      Dtab.empty,
+      Buf.ByteArray.Owned(payload.getBytes)
+    )
+
+    val readq = new AsyncQueue[Buf]
+    val writeq = new AsyncQueue[Buf]
+    val transport = new QueueTransport(writeq, readq)
+
+    val sr = new InMemoryStatsReceiver
+    val flow = MuxFramer(transport, Some(window), sr)
+
+    // Offer only the first fragment
+    readq.offer(Message.encodeFragments(msg, window).next())
+    assert(sr.gauges(Seq("pending_read_streams"))() == 1)
+    readq.offer(Message.encode(Message.Tdiscarded(20, "timeout!")))
+
+    // still need to receive a response for this dispatch
+    assert(Message.decode(Await.result(writeq.poll(), 5.seconds)) == Rdiscarded(20))
+    assert(sr.gauges(Seq("pending_read_streams"))() == 0)
+
+    // Make sure another dispatch with that tag can go through (we don't care that its too large)
+    readq.offer(Message.encode(msg))
+    assert(msg == Await.result(flow.read(), 5.seconds))
+  }
+
+  test("client Rdiscarded mid stream") {
+    val msg = Message.RdispatchOk(
+      20,
+      Seq.empty,
+      Buf.ByteArray.Owned(payload.getBytes)
+    )
+
+    val readq = new AsyncQueue[Buf]
+    val transport = new QueueTransport(new AsyncQueue[Buf], readq)
+
+    val sr = new InMemoryStatsReceiver
+    val flow = MuxFramer(transport, Some(window), sr)
+
+    // Offer only the first fragment
+    readq.offer(Message.encodeFragments(msg, window).next())
+    assert(sr.gauges(Seq("pending_read_streams"))() == 1)
+    readq.offer(Message.encode(Message.Rdiscarded(20)))
+
+    // still need to receive a response for this dispatch
+    assert(Await.result(flow.read(), 5.seconds) == Rdiscarded(20))
+    assert(sr.gauges(Seq("pending_read_streams"))() == 0)
+
+    // Make sure another dispatch with that tag can go through (we don't care that its too large)
+    readq.offer(Message.encode(msg))
+    assert(msg == Await.result(flow.read(), 5.seconds))
   }
 
   test("Rdiscarded") {
