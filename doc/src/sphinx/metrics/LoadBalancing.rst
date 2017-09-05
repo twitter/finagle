@@ -57,17 +57,26 @@ Aperture Based Load Balancers
   A gauge of the width of the window over which endpoints are
   load-balanced.
 
+**physical_aperture**
+  When using deterministic aperture (i.e. `useDeterministicOrdering` is set),
+  the width of the window over which endpoints are load-balanced may be
+  wider than the `aperture` gauge. The `physical_aperture` represents this value.
+
 **coordinate**
   The process global coordinate for the process as sampled by
   the Aperture implementation.
 
 **use_deterministic_ordering**
-  1 if the Apeture implementation uses deterministic ordering
+  1 if the Aperture implementation uses deterministic ordering
   0, otherwise.
 
 **coordinate_updates**
   A counter of the number of times the Aperture implementation receives
   updates from the `ProcessCoordinate` process global.
+
+**rebuild_no_coordinate**
+  A counter which tracks the number of rebuilds without a `coordinate` set
+  when `use_deterministic_ordering` is 1.
 
 **expired**
   A counter of the number of endpoints which have been closed because they

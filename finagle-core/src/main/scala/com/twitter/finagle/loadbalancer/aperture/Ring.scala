@@ -9,6 +9,14 @@ private object Ring {
    * ranges at this granularity.
    */
   val epsilon: Double = 1e-6
+
+  /**
+   * Returns the length of the intersection between the two ranges.
+   */
+  def intersect(b0: Double, e0: Double, b1: Double, e1: Double): Double = {
+    val len = math.min(e0, e1) - math.max(b0, b1)
+    math.max(0.0, len)
+  }
 }
 
 /**
@@ -32,15 +40,7 @@ private class Ring(size: Int, rng: Rng) {
   /**
    * Computes the width of each index on the ring.
    */
-  private[this] val unit: Double = 1.0 / size
-
-  /**
-   * Returns the length of the intersection between the two ranges.
-   */
-  private[this] def intersect(b0: Double, e0: Double, b1: Double, e1: Double): Double = {
-    val len = math.min(e0, e1) - math.max(b0, b1)
-    math.max(0.0, len)
-  }
+  private[this] val unitWidth: Double = 1.0 / size
 
   /**
    * Returns the (zero-based) index between [0, `size`) which the
@@ -86,11 +86,11 @@ private class Ring(size: Int, rng: Rng) {
     // In cases where `offset + width` wraps around the ring, we need
     // to scale the range by 1.0 where it overlaps.
     val ab: Double = {
-      val ab0 = index * unit
+      val ab0 = index * unitWidth
       if (ab0 + 1 < offset + width) ab0 + 1 else ab0
     }
-    val ae: Double = ab + unit
-    intersect(ab, ae, offset, offset + width) / unit
+    val ae: Double = ab + unitWidth
+    intersect(ab, ae, offset, offset + width) / unitWidth
   }
 
   /**
@@ -134,10 +134,10 @@ private class Ring(size: Int, rng: Rng) {
     // In cases where `offset + width` wraps around the ring, we need
     // to scale the range by 1.0 where it overlaps.
     val ab: Double = {
-      val ab0 = (a * unit)
+      val ab0 = (a * unitWidth)
       if (ab0 + 1 < offset + width) ab0 + 1 else ab0
     }
-    val ae: Double = ab + unit
+    val ae: Double = ab + unitWidth
 
     val overlap = intersect(ab, ae, offset, offset + width)
     val width1 = width - overlap

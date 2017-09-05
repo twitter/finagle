@@ -110,6 +110,9 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
   )
 
   private[this] val coordinateUpdates = statsReceiver.counter("coordinate_updates")
+  // note, this can be lifted to a "verbose/debug" counter when we are sufficiently
+  // confident in d-aperture.
+  private[this] val noCoordinate = statsReceiver.counter("rebuild_no_coordinate")
 
   private[this] val coordObservation = ProcessCoordinate.changes.respond { _ =>
     // One nice side-effect of deferring to the balancers `updater` is
@@ -189,8 +192,8 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     def aperture: Int = _aperture
 
     /**
-     * Return the physical aperture, which may differ from `aperture` when
-     * using [[DeterministicAperture]].
+     * Represents how many servers `pick` will select over – which may
+     * differ from `aperture` when using [[DeterministicAperture]].
      */
     def physicalAperture: Int = aperture
 
@@ -208,7 +211,13 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
       else ProcessCoordinate() match {
         case Some(coord) if useDeterministicOrdering =>
           new DeterministicApeture(vec, initAperture, coord)
-        case _ => new RandomAperture(vec, initAperture)
+
+        case None if useDeterministicOrdering =>
+          noCoordinate.incr()
+          new RandomAperture(vec, initAperture)
+
+        case _ =>
+          new RandomAperture(vec, initAperture)
       }
 
     /**

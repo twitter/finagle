@@ -76,7 +76,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     assert(bal.aperturex == 2)
 
     (0 to 10).foreach { _ =>
-      Await.result(bal()).close()
+      Await.result(bal(), 5.seconds).close()
     }
     bal.adjustx(-1)
     assert(bal.aperturex == 1)
@@ -110,7 +110,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     // we rely on p2c to ensure that each endpoint gets
     // a request for service acquisition.
     def checkoutLoop(): Unit = (0 to 100).foreach { _ =>
-      Await.result(bal()).close()
+      Await.result(bal(), 5.seconds).close()
     }
 
     checkoutLoop()
@@ -144,7 +144,7 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     bal.adjustx(1)
     assert(bal.aperturex == 2)
 
-    val svcs = for (_ <- 0 until 100) yield { Await.result(bal()) }
+    val svcs = for (_ <- 0 until 100) yield { Await.result(bal(), 5.seconds) }
     bal.adjustx(-1)
     assert(bal.aperturex == 1)
     assert(eps.map(_.outstanding).sum == 100)
@@ -153,14 +153,14 @@ class ExpirationTest extends FunSuite with ApertureSuite {
     val svcs1 = svcs.collect { case svc if svc.toString == "Service(1)" => svc }
 
     for (svc <- svcs0 ++ svcs1.init) {
-      Await.result(svc.close())
+      Await.result(svc.close(), 5.seconds)
       f.tc.advance(bal.idleTime)
       bal.mockTimer.tick()
       assert(bal.noExpired)
     }
 
     assert(eps.map(_.outstanding).sum == 1)
-    Await.result(svcs1.last.close())
+    Await.result(svcs1.last.close(), 5.seconds)
     assert(eps.map(_.outstanding).sum == 0)
 
     f.tc.advance(bal.idleTime)

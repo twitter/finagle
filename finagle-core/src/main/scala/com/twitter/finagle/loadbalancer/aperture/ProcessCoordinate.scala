@@ -52,24 +52,24 @@ object ProcessCoordinate {
    * @param totalInstances The total number of instances in this process' peer
    * cluster.
    */
-  case class FromInstanceId(peerOffset: Int, instanceId: Int, totalInstances: Int) extends Coord {
+  private[aperture] case class FromInstanceId(peerOffset: Int, instanceId: Int, totalInstances: Int) extends Coord {
     require(totalInstances > 0, s"totalInstances expected to be > 0 but was $totalInstances")
 
-    private[this] val unit: Double = 1.0 / totalInstances
+    private[this] val unitWidth: Double = 1.0 / totalInstances
 
     val offset: Double = {
       // compute the offset for this process between [0.0, 1.0).
       val normalizedOffset: Double = peerOffset / Int.MaxValue.toDouble
-      val coord = (instanceId * unit + normalizedOffset) % 1.0
+      val coord = (instanceId * unitWidth + normalizedOffset) % 1.0
       if (coord < 0) coord + 1.0 else coord
     }
 
     def width(units: Int): Double = {
       if (units > totalInstances)
         throw new IllegalArgumentException(s"units must be <= $totalInstances: $units")
-      // If each peer gets a slice of size `unit`, then 2 slices
-      // is 2 * unit and so on.
-      (unit * units) % 1.0
+      // If each peer gets a slice of size `unitWidth`, then 2 slices
+      // is 2 * unitWidth and so on.
+      (unitWidth * units) % 1.0
     }
   }
 
@@ -84,7 +84,7 @@ object ProcessCoordinate {
    * An [[Event]] which triggers every time the process coordinate changes. This exposes
    * a push based API for the coordinate.
    */
-  val changes: Event[Option[Coord]] = coordinate.dedup
+  private[aperture] val changes: Event[Option[Coord]] = coordinate.dedup
 
   /**
    * Returns the current coordinate, if there is one set.
