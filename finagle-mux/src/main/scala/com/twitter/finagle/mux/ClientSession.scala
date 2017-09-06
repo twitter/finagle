@@ -51,7 +51,7 @@ import java.util.logging.{Level, Logger}
  *
  * @param sr The `StatsReceiver` which the session uses to export internal stats.
  */
-private[twitter] class ClientSession(
+private[finagle] class ClientSession(
   trans: Transport[Message, Message],
   detectorConfig: FailureDetector.Config,
   name: String,

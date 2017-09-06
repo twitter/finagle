@@ -17,7 +17,7 @@ case class BadMessageException(why: String) extends Exception(why)
 /**
  * Documentation details are in the [[com.twitter.finagle.mux]] package object.
  */
-private[twitter] sealed trait Message {
+private[finagle] sealed trait Message {
 
   /**
    * Values should correspond to the constants defined in
@@ -34,7 +34,7 @@ private[twitter] sealed trait Message {
   def buf: Buf
 }
 
-private[twitter] object Message {
+private[finagle] object Message {
 
   object Types {
 
