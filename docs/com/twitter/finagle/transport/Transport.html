@@ -198,6 +198,14 @@ read from and written to asynchronously.">
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="TransportContext.html" title="Exposes a way to control the transport, and read off properties from the
+transport."></a>
+                        <a href="TransportContext.html" title="Exposes a way to control the transport, and read off properties from the
+transport.">
+                          TransportContext
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="trait" href="TransportFactory.html" title="A factory for transports: they are specially encoded as to be
 polymorphic."></a>
                         <a href="TransportFactory.html" title="A factory for transports: they are specially encoded as to be
@@ -301,7 +309,26 @@ encoding and decoding.
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.transport.Transport.Context" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="Context&lt;:com.twitter.finagle.transport.TransportContext"></a><a id="Context:Context"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#Context&lt;:com.twitter.finagle.transport.TransportContext" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Context</span><span class="result"> &lt;: <a href="TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>
+      </span>
+      
+      
+    </li></ol>
+            </div>
 
         <div class="values members">
               <h3>Abstract Value Members</h3>
@@ -321,10 +348,10 @@ encoding and decoding.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
+    </li><li name="com.twitter.finagle.transport.Transport#context" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="context:Transport.this.Context"></a><a id="context:Context"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#localAddress:java.net.SocketAddress" title="Permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#context:Transport.this.Context" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -333,46 +360,10 @@ encoding and decoding.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+        <span class="name">context</span><span class="result">: <a href="#Context&lt;:com.twitter.finagle.transport.TransportContext" class="extmbr" name="com.twitter.finagle.transport.Transport.Context">Context</a></span>
       </span>
       
-      <p class="shortcomment cmt">The locally bound address of this transport.</p>
-    </li><li name="com.twitter.finagle.transport.Transport#onClose" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="onClose:com.twitter.util.Future[Throwable]"></a><a id="onClose:Future[Throwable]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#onClose:com.twitter.util.Future[Throwable]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">onClose</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
-same exception you would get if attempting to read or
-write on the Transport, but this allows clients to listen to
-close events.
-</p></div></div>
-    </li><li name="com.twitter.finagle.transport.Transport#peerCertificate" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#peerCertificate:Option[java.security.cert.Certificate]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p>
+      <p class="shortcomment cmt">The control panel for the Transport.</p>
     </li><li name="com.twitter.finagle.transport.Transport#read" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="read():com.twitter.util.Future[Out]"></a><a id="read():Future[Out]"></a>
       <span class="permalink">
@@ -389,39 +380,6 @@ close events.
       </span>
       
       <p class="shortcomment cmt">Read a message from the transport.</p>
-    </li><li name="com.twitter.finagle.transport.Transport#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The remote address to which the transport is connected.</p>
-    </li><li name="com.twitter.finagle.transport.Transport#status" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/transport/Transport.html#status:com.twitter.finagle.Status" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">The status of this transport; see <a href="../Status$.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status$</a> for
-status definitions.</p>
     </li><li name="com.twitter.finagle.transport.Transport#write" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="write(req:In):com.twitter.util.Future[Unit]"></a><a id="write(In):Future[Unit]"></a>
       <span class="permalink">
@@ -439,6 +397,111 @@ status definitions.</p>
       
       <p class="shortcomment cmt">Write <code>req</code> to this transport; the returned future
 acknowledges write completion.</p>
+    </li><li name="com.twitter.finagle.transport.Transport#localAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="localAddress:java.net.SocketAddress"></a><a id="localAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#localAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.localAddress instead">localAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.localAddress instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#onClose" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="onClose:com.twitter.util.Future[Throwable]"></a><a id="onClose:Future[Throwable]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#onClose:com.twitter.util.Future[Throwable]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.onClose instead">onClose</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The channel closed with the given exception.</p><div class="fullcomment"><div class="comment cmt"><p>The channel closed with the given exception. This is the
+same exception you would get if attempting to read or
+write on the Transport, but this allows clients to listen to
+close events.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.onClose instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#peerCertificate" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="peerCertificate:Option[java.security.cert.Certificate]"></a><a id="peerCertificate:Option[Certificate]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#peerCertificate:Option[java.security.cert.Certificate]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.peerCertificate instead">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p><div class="fullcomment"><div class="comment cmt"><p>The peer certificate if a TLS session is established.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.peerCertificate instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#remoteAddress:java.net.SocketAddress" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.remoteAddress instead">remoteAddress</span><span class="result">: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The remote address to which the transport is connected.</p><div class="fullcomment"><div class="comment cmt"><p>The remote address to which the transport is connected.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.remoteAddress instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#status" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="status:com.twitter.finagle.Status"></a><a id="status:Status"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/transport/Transport.html#status:com.twitter.finagle.Status" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-21) Please use Transport.context.status instead">status</span><span class="result">: <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The status of this transport; see <a href="../Status$.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status$</a> for
+status definitions.</p><div class="fullcomment"><div class="comment cmt"><p>The status of this transport; see <a href="../Status$.html" class="extype" name="com.twitter.finagle.Status">com.twitter.finagle.Status$</a> for
+status definitions.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-21)</i> Please use Transport.context.status instead</p></dd></dl></div>
     </li></ol>
             </div>
 

@@ -201,6 +201,24 @@ package netty3 can move into its own package, so that only the
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.http" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="http"></a><a id="http:http"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#http" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="http/index.html">
+              <span class="name">http</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.socks" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socks"></a><a id="socks:socks"></a>
       <span class="permalink">
@@ -326,7 +344,7 @@ In-typed downstream messages.">
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</span>
+        <span class="name">Netty3Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       </h4>
 
@@ -338,7 +356,7 @@ that yields <code><code>Out</code></code>-typed upstream messages and accepts
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>], <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -617,9 +635,9 @@ configure the listener.</p></dd></dl></div>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#listen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]=&gt;Unit):com.twitter.finagle.ListeningServer"></a><a id="listen(SocketAddress)((Transport[In,Out])⇒Unit):ListeningServer"></a>
+      <a id="listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:com.twitter.finagle.transport.TransportContext}=&gt;Unit):com.twitter.finagle.ListeningServer"></a><a id="listen(SocketAddress)((Transport[In,Out]{typeContext&lt;:com.twitter.finagle.transport.TransportContext})⇒Unit):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/Netty3Listener.html#listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]=&gt;Unit):com.twitter.finagle.ListeningServer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/Netty3Listener.html#listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:com.twitter.finagle.transport.TransportContext}=&gt;Unit):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -628,7 +646,7 @@ configure the listener.</p></dd></dl></div>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">listen</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="params">(<span name="serveTransport">serveTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">listen</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="params">(<span name="serveTransport">serveTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>] { type Context &lt;: com.twitter.finagle.transport.TransportContext }) ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.Netty3Listener">Netty3Listener</a> → <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a></dd></dl></div>
@@ -821,7 +839,7 @@ configure the listener.</p></dd></dl></div>
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.server.Listener">
-              <h3>Inherited from <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</h3>
+              <h3>Inherited from <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

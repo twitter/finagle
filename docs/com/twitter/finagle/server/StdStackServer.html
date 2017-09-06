@@ -224,6 +224,12 @@ that uses the transport + dispatcher pattern."></a>
 that uses the transport + dispatcher pattern.">
                           StdStackServer
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ThreadUsage$.html" title=""></a>
+                        <a href="ThreadUsage$.html" title="">
+                          ThreadUsage
+                        </a>
                       </li>
               </ul>
             </div>
@@ -313,7 +319,24 @@ that uses the transport + dispatcher pattern.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.server.StdStackServer.In" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.server.StdStackServer.Context" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Context&lt;:com.twitter.finagle.transport.TransportContext"></a><a id="Context:This.Context"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#Context&lt;:com.twitter.finagle.transport.TransportContext" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Context</span><span class="result"> &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The type of the transport's context.</p><div class="fullcomment"><div class="comment cmt"><p>The type of the transport's context.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.server.StdStackServer.In" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="In"></a><a id="In:This.In"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/server/StdStackServer.html#In" title="Permalink">
@@ -372,9 +395,9 @@ case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy const
 case class.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#newDispatcher" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackServer.this.In,StdStackServer.this.Out],service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Closable"></a><a id="newDispatcher(Transport[This.In,This.Out],Service[Req,Rep]):Closable"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackServer.this.In,StdStackServer.this.Out]{typeContext&lt;:StdStackServer.this.Context},service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Closable"></a><a id="newDispatcher(Transport[This.In,This.Out]{typeContext&lt;:StdStackServer.this.Context},Service[Req,Rep]):Closable"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackServer.this.In,StdStackServer.this.Out],service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Closable" title="Permalink">
+      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackServer.this.In,StdStackServer.this.Out]{typeContext&lt;:StdStackServer.this.Context},service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Closable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -383,7 +406,7 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.In">This.In</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Out">This.Out</span>]</span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.In">This.In</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Out">This.Out</span>] { type Context &lt;: StdStackServer.this.Context }</span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">Defines a dispatcher, a function which binds a transport to a
@@ -393,9 +416,9 @@ forms the foundation of a finagle server. Concrete implementations
 are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>See also</dt><dd><span class="cmt"><p><a href="../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#newListener" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newListener():com.twitter.finagle.server.Listener[StdStackServer.this.In,StdStackServer.this.Out]"></a><a id="newListener():Listener[This.In,This.Out]"></a>
+      <a id="newListener():com.twitter.finagle.server.Listener[StdStackServer.this.In,StdStackServer.this.Out,StdStackServer.this.Context]"></a><a id="newListener():Listener[This.In,This.Out,This.Context]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#newListener():com.twitter.finagle.server.Listener[StdStackServer.this.In,StdStackServer.this.Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#newListener():com.twitter.finagle.server.Listener[StdStackServer.this.In,StdStackServer.this.Out,StdStackServer.this.Context]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -404,7 +427,7 @@ are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newListener</span><span class="params">()</span><span class="result">: <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.In">This.In</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Out">This.Out</span>]</span>
+        <span class="name">newListener</span><span class="params">()</span><span class="result">: <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.In">This.In</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Out">This.Out</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Context">This.Context</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a typed <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.
@@ -1116,6 +1139,33 @@ from different clients/servers to a single stats receiver.
       
       <p class="shortcomment cmt">Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A"></a><a id="withRequestTimeout(Tunable[Duration]):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/server/StdStackServer.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a> and
+     <a href="https://twitter.github.io/finagle/guide/Configuration.html#tunables" target="_blank">https://twitter.github.io/finagle/guide/Configuration.html#tunables</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRequestTimeout(timeout:com.twitter.util.Duration):A"></a><a id="withRequestTimeout(Duration):This"></a>
       <span class="permalink">

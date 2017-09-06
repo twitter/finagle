@@ -288,8 +288,8 @@ per-endpoint basis.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]]."></a>
-                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]].">
+                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
+                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]].">
                           Transporter
                         </a>
                       </li><li name="com.twitter.finagle.context" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1019,6 +1019,24 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tunable" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tunable"></a><a id="tunable:tunable"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#tunable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../tunable/index.html">
+              <span class="name">tunable</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="util"></a><a id="util:util"></a>
       <span class="permalink">
@@ -1305,9 +1323,9 @@ Stack." href="StackClient.html">
       
       <p class="shortcomment cmt">Transform a service factory stack.</p>
     </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="Transporter[In,Out]extendsAnyRef"></a><a id="Transporter[In,Out]:Transporter[In,Out]"></a>
+      <a id="Transporter[In,Out,Ctx&lt;:com.twitter.finagle.transport.TransportContext]extendsAnyRef"></a><a id="Transporter[In,Out,Ctx&lt;:TransportContext]:Transporter[In,Out,Ctx]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out]extendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/index.html#Transporter[In,Out,Ctx&lt;:com.twitter.finagle.transport.TransportContext]extendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1316,12 +1334,12 @@ Stack." href="StackClient.html">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Transporters construct a Future[Transport[In, Out]]." href="Transporter.html">
+        <a title="Transporters construct a Future[Transport[In, Out, Context]]." href="Transporter.html">
               <span class="name">Transporter</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Ctx">Ctx &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
+      <p class="shortcomment cmt">Transporters construct a <code>Future[Transport[In, Out, Context]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out, Context]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
 symmetric to the server-side <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>, except
 that it isn't shared across remote peers..
 </p></div></div>

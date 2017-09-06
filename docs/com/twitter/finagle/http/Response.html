@@ -1302,7 +1302,7 @@ In a response, it uses the Set-Cookie headers.
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">ctx</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span></span>
@@ -1362,22 +1362,6 @@ associated context explicit.
       </span>
       
       <p class="shortcomment cmt">Set Date header</p><div class="fullcomment"><div class="comment cmt"><p>Set Date header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Response#encodeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="encodeString():String"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/Response.html#encodeString():String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encodeString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Encode as an HTTP message</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -2627,7 +2611,26 @@ using the <code>write(Buf)</code> method.</p><p>An <code>IllegalStateException</
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Response#getStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Response#encodeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="encodeString():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/Response.html#encodeString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-15) Use HttpCodec.encodeResponseToString">encodeString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encode as an HTTP message</p><div class="fullcomment"><div class="comment cmt"><p>Encode as an HTTP message</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-15)</i> Use HttpCodec.encodeResponseToString</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Response#getStatusCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getStatusCode():Int"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/Response.html#getStatusCode():Int" title="Permalink">

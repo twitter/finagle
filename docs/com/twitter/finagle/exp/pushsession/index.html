@@ -213,6 +213,14 @@ given SocketAddress.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="PushStackClient.html" title="Base type for building a com.twitter.finagle.client.StackClient using
+the push-based protocol tools."></a>
+                        <a href="PushStackClient.html" title="Base type for building a com.twitter.finagle.client.StackClient using
+the push-based protocol tools.">
+                          PushStackClient
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="PushTransporter.html" title="PushSessionTransporters attempt to construct a PushChannelHandle
 and provide it to the factory function, returning any errors as
 failed Futures."></a>
@@ -284,7 +292,9 @@ the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.push
 Specifically, if a session invokes a method on the handle it will not result in a new event
 reaching the session before the method call has returned. This avoids situations such as a
 session performing a write and before the call returns a new inbound message arrives and
-mutates session state in an unexpected way.
+mutates session state in an unexpected way.</p><p>All failures are fatal to the <a href="PushChannelHandle.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushChannelHandle">PushChannelHandle</a> including write failures. Specifically,
+any failure results in the <code>onClose</code> promise being completed with the exception in the
+<code>Throw</code> pathway and the underlying socket will be closed.
 </p></div></div>
     </li><li name="com.twitter.finagle.exp.pushsession.PushListener" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PushListener[In,Out]extendsAnyRef"></a><a id="PushListener[In,Out]:PushListener[In,Out]"></a>
@@ -343,6 +353,26 @@ protocol implementations:
   that works well with the <code>Promise</code> abstraction by avoiding explicit
   synchronization.
 </p></div></div>
+    </li><li name="com.twitter.finagle.exp.pushsession.PushStackClient" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PushStackClient[Req,Rep,This&lt;:com.twitter.finagle.exp.pushsession.PushStackClient[Req,Rep,This]]extendsEndpointerStackClient[Req,Rep,This]"></a><a id="PushStackClient[Req,Rep,This&lt;:PushStackClient[Req,Rep,This]]:PushStackClient[Req,Rep,This]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/exp/pushsession/index.html#PushStackClient[Req,Rep,This&lt;:com.twitter.finagle.exp.pushsession.PushStackClient[Req,Rep,This]]extendsEndpointerStackClient[Req,Rep,This]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Base type for building a com.twitter.finagle.client.StackClient using
+the push-based protocol tools." href="PushStackClient.html">
+              <span class="name">PushStackClient</span>
+            </a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="PushStackClient.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient">PushStackClient</a>[<span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="../../client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>[<span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient.This">This</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Base type for building a <a href="../../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a> using
+the push-based protocol tools.</p>
     </li><li name="com.twitter.finagle.exp.pushsession.PushTransporter" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PushTransporter[In,Out]extendsAnyRef"></a><a id="PushTransporter[In,Out]:PushTransporter[In,Out]"></a>
       <span class="permalink">

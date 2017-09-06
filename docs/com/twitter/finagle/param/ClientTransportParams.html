@@ -1169,34 +1169,7 @@ connection/transport may not have sent any data.
 
         
 
-        <div class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.param.ClientTransportParams#httpProxyTo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A"></a><a id="httpProxyTo(String,Option[Credentials]):A"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/param/ClientTransportParams.html#httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2017-7-11) Use httpProxyTo(String, Tansporter.Credentials) instead">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="credentials">credentials: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
-(default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunneling via <code>HTTP CONNECT</code> through an HTTP proxy [1] on this client
-(default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
-establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.</p><p>When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
-to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
-</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd><dt class="param">credentials</dt><dd class="cmt"><p>optional credentials for a proxy server</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-7-11)</i> Use httpProxyTo(String, Tansporter.Credentials) instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

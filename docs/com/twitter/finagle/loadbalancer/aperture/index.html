@@ -196,13 +196,11 @@ and Updating).
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
     </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="DeterministicOrdering$.html" title="DeterministicOrdering exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an Aperture
-implementation."></a>
-                        <a href="DeterministicOrdering$.html" title="DeterministicOrdering exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an Aperture
-implementation.">
-                          DeterministicOrdering
+                        <a class="object" href="ProcessCoordinate$.html" title="ProcessCoordinate exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0)."></a>
+                        <a href="ProcessCoordinate$.html" title="ProcessCoordinate exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0).">
+                          ProcessCoordinate
                         </a>
                       </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exp"></a><a id="exp:exp"></a>
@@ -290,10 +288,10 @@ implementation.">
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeterministicOrdering"></a><a id="DeterministicOrdering:DeterministicOrdering"></a>
+                <li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ProcessCoordinate"></a><a id="ProcessCoordinate:ProcessCoordinate"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/index.html#DeterministicOrdering" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/index.html#ProcessCoordinate" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -302,32 +300,19 @@ implementation.">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="DeterministicOrdering exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an Aperture
-implementation." href="DeterministicOrdering$.html">
-              <span class="name">DeterministicOrdering</span>
+        <a title="ProcessCoordinate exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0)." href="ProcessCoordinate$.html">
+              <span class="name">ProcessCoordinate</span>
             </a>
       </span>
       
-      <p class="shortcomment cmt"><a href="DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">DeterministicOrdering</a> exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an <span class="extype" name="Aperture">Aperture</span>
-implementation.</p><div class="fullcomment"><div class="comment cmt"><p><a href="DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">DeterministicOrdering</a> exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an <span class="extype" name="Aperture">Aperture</span>
-implementation. The coordinate is calculated relative to other nodes in the process'
-peer group such that each coordinate is uniformly spaced from another given a shared
-coordinate space (in our case, [-1.0, 1.0]). The result is that each process that is
-part of the respective group is now part of a topology with a sense of order and
-proximity.</p><p>A unique permutation for a group of servers (that <code>Apertures</code> expand over) can be
-then derived by mapping the servers to the same coordinate space and iterating through
-the space using a uniform traversal (see the <span class="extype" name="Iterator">Iterators</span> defined on <span class="extype" name="Ring">Ring</span>
-for more details). Thus, when the group of peers converges on an aperture size, the
-servers are equally represented across the peer's aperture.</p><p>This remedies a shortcoming with the default <span class="extype" name="Aperture">Aperture</span> implementation where peers
-randomly select the servers in their aperture and, consequently, create load imbalances
-since servers have a well understood probability of being non-uniformly represented
-across client apertures.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>To use this, the coordinate needs to be set via <code>setCoordinate</code> and the
-implementation used by the client must have the <code>useDeterministicOrdering</code> set
-to true.</p></span></dd></dl></div>
+      <p class="shortcomment cmt"><a href="ProcessCoordinate$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate">ProcessCoordinate</a> exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0).</p><div class="fullcomment"><div class="comment cmt"><p><a href="ProcessCoordinate$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate">ProcessCoordinate</a> exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0). The coordinate is calculated relative
+to other nodes in the process' peer group such that each coordinate is uniformly spaced
+from another. The result is that each process that is part of the respective group
+is now part of a topology with a sense of order and proximity.
+</p></div></div>
     </li>
               </ol>
             </div>

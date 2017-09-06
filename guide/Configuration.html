@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &#8212; Finagle 7.0.0 documentation</title>
+    <title>Configuration &#8212; Finagle 7.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '7.0.0',
+        VERSION:     '7.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.1.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -89,7 +89,7 @@ verbosity.</p>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>A higher-level client API, <span class="xref std std-ref">MethodBuilder</span>, builds on
+<p>A <a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">higher-level client API</span></a>, <cite>MethodBuilder</cite>, builds on
 the client, providing logical success rate metrics, application-level retry
 policies, per-attempt timeouts, and total timeouts.</p>
 <div class="admonition note">
@@ -253,7 +253,7 @@ parameters of clients and servers at runtime.</p>
 <h3>Concepts<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>A <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/Tunable.scala">Tunable</a> is like a Function0;
 it produces a value when applied. Dynamic configuration facilitates this value changing
-across invokations at runtime.</p>
+across invocations at runtime.</p>
 <p><cite>Tunables</cite> are accessed by means of a
 <a class="reference external" href="https://github.com/twitter/util/blob/master/util-tunable/src/main/scala/com/twitter/util/tunable/TunableMap.scala">TunableMap</a>, which contains all the
 <cite>Tunables</cite> for a given id (ids are keys for distinguishing <cite>TunableMaps</cite>; each client might
@@ -270,7 +270,6 @@ on an HTTP client with a <cite>Tunable</cite>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
 
 <span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.service.TimeoutFilter</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.tunable.StandardTunableMap</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.tunable.</span><span class="o">{</span><span class="nc">Tunable</span><span class="o">,</span> <span class="nc">TunableMap</span><span class="o">}</span>
@@ -284,7 +283,7 @@ on an HTTP client with a <cite>Tunable</cite>:</p>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="n">clientId</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">TimeoutFilter</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span><span class="n">timeoutTunable</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">withRequestTimeout</span><span class="o">(</span><span class="n">timeoutTunable</span><span class="o">)</span>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000&quot;</span><span class="o">)</span>
 </pre></div>
 </div>

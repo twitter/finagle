@@ -254,8 +254,8 @@ per-endpoint basis.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]]."></a>
-                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]].">
+                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
+                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]].">
                           Transporter
                         </a>
                       </li>
@@ -343,7 +343,24 @@ a com.twitter.finagle.client.Transporter."></a>
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.client.StdStackClient.In" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.client.StdStackClient.Context" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Context&lt;:com.twitter.finagle.transport.TransportContext"></a><a id="Context:Context"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#Context&lt;:com.twitter.finagle.transport.TransportContext" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Context</span><span class="result"> &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">The type of the transport's context.</p><div class="fullcomment"><div class="comment cmt"><p>The type of the transport's context.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StdStackClient.In" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="In"></a><a id="In:In"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/client/StdStackClient.html#In" title="Permalink">
@@ -402,9 +419,9 @@ case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy const
 case class.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#newDispatcher" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackClient.this.In,StdStackClient.this.Out]):com.twitter.finagle.Service[Req,Rep]"></a><a id="newDispatcher(Transport[In,Out]):Service[Req,Rep]"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackClient.this.In,StdStackClient.this.Out]{typeContext&lt;:StdStackClient.this.Context}):com.twitter.finagle.Service[Req,Rep]"></a><a id="newDispatcher(Transport[In,Out]{typeContext&lt;:StdStackClient.this.Context}):Service[Req,Rep]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackClient.this.In,StdStackClient.this.Out]):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[StdStackClient.this.In,StdStackClient.this.Out]{typeContext&lt;:StdStackClient.this.Context}):com.twitter.finagle.Service[Req,Rep]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -413,7 +430,7 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]</span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>] { type Context &lt;: StdStackClient.this.Context }</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a dispatcher, a function which reconciles the stream based
@@ -423,9 +440,9 @@ Together with a <code>Transporter</code>, it forms the foundation of a
 finagle client. Concrete implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>See also</dt><dd><span class="cmt"><p><a href="../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#newTransporter" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]"></a><a id="newTransporter(SocketAddress):Transporter[In,Out]"></a>
+      <a id="newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out,StdStackClient.this.Context]"></a><a id="newTransporter(SocketAddress):Transporter[In,Out,Context]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#newTransporter(addr:java.net.SocketAddress):com.twitter.finagle.client.Transporter[StdStackClient.this.In,StdStackClient.this.Out,StdStackClient.this.Context]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -434,7 +451,7 @@ finagle client. Concrete implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newTransporter</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>]</span>
+        <span class="name">newTransporter</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In" class="extmbr" name="com.twitter.finagle.client.StdStackClient.In">In</a>, <a href="#Out" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Out">Out</a>, <a href="#Context&lt;:com.twitter.finagle.transport.TransportContext" class="extmbr" name="com.twitter.finagle.client.StdStackClient.Context">Context</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a typed <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.
@@ -922,6 +939,25 @@ for details on destination names.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StackClient#registerTransporter" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registerTransporter(transporterName:String):Unit"></a><a id="registerTransporter(String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#registerTransporter(transporterName:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerTransporter</span><span class="params">(<span name="transporterName">transporterName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Export info about the transporter type so that we can query info
+about its implementation at runtime.</p><div class="fullcomment"><div class="comment cmt"><p>Export info about the transporter type so that we can query info
+about its implementation at runtime.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -1145,6 +1181,33 @@ from different clients/servers to a single stats receiver.
       
       <p class="shortcomment cmt">Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a> → <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A"></a><a id="withRequestTimeout(Tunable[Duration]):This"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/client/StdStackClient.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a> and
+     <a href="https://twitter.github.io/finagle/guide/Configuration.html#tunables" target="_blank">https://twitter.github.io/finagle/guide/Configuration.html#tunables</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRequestTimeout(timeout:com.twitter.util.Duration):A"></a><a id="withRequestTimeout(Duration):This"></a>
       <span class="permalink">

@@ -196,67 +196,25 @@ and Updating).
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering" visbl="pub" class="indented6 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeterministicOrdering"></a><a id="DeterministicOrdering:DeterministicOrdering"></a>
-      <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/index.html#DeterministicOrdering" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a title="DeterministicOrdering exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an Aperture
-implementation." href="DeterministicOrdering$.html">
-              <span class="name">DeterministicOrdering</span>
-            </a>
-      </span>
-      
-      <p class="shortcomment cmt"><a href="DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">DeterministicOrdering</a> exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an <span class="extype" name="Aperture">Aperture</span>
-implementation.</p><div class="fullcomment"><div class="comment cmt"><p><a href="DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">DeterministicOrdering</a> exposes a mechanism that allows a process to be
-furnished with a coordinate which is used to derive ordering in an <span class="extype" name="Aperture">Aperture</span>
-implementation. The coordinate is calculated relative to other nodes in the process'
-peer group such that each coordinate is uniformly spaced from another given a shared
-coordinate space (in our case, [-1.0, 1.0]). The result is that each process that is
-part of the respective group is now part of a topology with a sense of order and
-proximity.</p><p>A unique permutation for a group of servers (that <code>Apertures</code> expand over) can be
-then derived by mapping the servers to the same coordinate space and iterating through
-the space using a uniform traversal (see the <span class="extype" name="Iterator">Iterators</span> defined on <span class="extype" name="Ring">Ring</span>
-for more details). Thus, when the group of peers converges on an aperture size, the
-servers are equally represented across the peer's aperture.</p><p>This remedies a shortcoming with the default <span class="extype" name="Aperture">Aperture</span> implementation where peers
-randomly select the servers in their aperture and, consequently, create load imbalances
-since servers have a well understood probability of being non-uniformly represented
-across client apertures.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture">aperture</a></dd><dt>Note</dt><dd><span class="cmt"><p>To use this, the coordinate needs to be set via <code>setCoordinate</code> and the
-implementation used by the client must have the <code>useDeterministicOrdering</code> set
-to true.</p></span></dd></dl></div>
-    </li><li class="current-entities indented6">
+    </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="trait" href="" title="An ADT which represents the process coordinate."></a>
-                        <a href="" title="An ADT which represents the process coordinate.">
-                          Coord
-                        </a>
-                      </li><li class="current-entities indented6">
-                        <span class="separator"></span>
-                        <a class="class" href="DeterministicOrdering$$FromInstanceId.html" title="Defines a coordinate from a process' instance id."></a>
-                        <a href="DeterministicOrdering$$FromInstanceId.html" title="Defines a coordinate from a process' instance id.">
-                          FromInstanceId
+                        <a class="object" href="" title="ProcessCoordinate exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0)."></a>
+                        <a href="" title="ProcessCoordinate exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0).">
+                          ProcessCoordinate
                         </a>
                       </li>
               </ul>
             </div>
           </div>
           <div id="content">
-            <body class="trait type">
+            <body class="object value">
       <div id="definition">
-        <div class="big-circle trait">t</div>
-        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a>.<a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture">aperture</a>.<a href="DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">DeterministicOrdering</a></p>
-        <h1>Coord<span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html" title="Permalink">
+        <div class="big-circle object">o</div>
+        <p id="owner"><a href="../../../../index.html" class="extype" name="com">com</a>.<a href="../../../index.html" class="extype" name="com.twitter">twitter</a>.<a href="../../index.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../index.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a>.<a href="index.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture">aperture</a></p>
+        <h1>ProcessCoordinate<span class="permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -265,27 +223,26 @@ to true.</p></span></dd></dl></div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
+        <span class="modifier"></span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Coord</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">ProcessCoordinate</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An ADT which represents the process coordinate.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><a href="" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate">ProcessCoordinate</a> exposes a mechanism that allows a process to be
+furnished with a coordinate between [0.0, 1.0). The coordinate is calculated relative
+to other nodes in the process' peer group such that each coordinate is uniformly spaced
+from another. The result is that each process that is part of the respective group
+is now part of a topology with a sense of order and proximity.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="DeterministicOrdering$$FromInstanceId.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering.FromInstanceId">FromInstanceId</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -310,7 +267,7 @@ to true.</p></span></dd></dl></div>
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering.Coord"><span>Coord</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate"><span>ProcessCoordinate</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -330,37 +287,38 @@ to true.</p></span></dd></dl></div>
         <div id="allMembers">
         
 
-        
-
-        <div class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering.Coord#value" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="value:Double"></a>
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CoordextendsAnyRef"></a><a id="Coord:Coord"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#value:Double" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#CoordextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">value</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Double" class="extype" target="_top">Double</a></span>
+        <a title="An ADT which represents the process coordinate." href="ProcessCoordinate$$Coord.html">
+              <span class="name">Coord</span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
-      <p class="shortcomment cmt">Returns a double between the range [-1.0, 1.0] which represents this
-process' coordinate on the coordinate space shared with its peers.</p>
+      <p class="shortcomment cmt">An ADT which represents the process coordinate.</p>
     </li></ol>
             </div>
 
+        
+
         <div class="values members">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol>
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -376,7 +334,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html###():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -392,7 +350,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -405,10 +363,26 @@ process' coordinate on the coordinate space shared with its peers.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="apply():Option[com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord]"></a><a id="apply():Option[Coord]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#apply():Option[com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ProcessCoordinate$$Coord.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate.Coord">Coord</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Returns the current coordinate, if there is one set.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -424,7 +398,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#clone():Object" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -446,7 +420,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -462,7 +436,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -478,7 +452,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -500,7 +474,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -516,7 +490,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -532,7 +506,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -548,7 +522,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -564,7 +538,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#notify():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -580,7 +554,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -593,10 +567,29 @@ process' coordinate on the coordinate space shared with its peers.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate#setCoordinate" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setCoordinate(offset:Int,instanceId:Int,totalInstances:Int):Unit"></a><a id="setCoordinate(Int,Int,Int):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#setCoordinate(offset:Int,instanceId:Int,totalInstances:Int):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setCoordinate</span><span class="params">(<span name="offset">offset: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="instanceId">instanceId: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="totalInstances">totalInstances: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Globally set the coordinate for this process from the respective instance
+metadata.</p><div class="fullcomment"><div class="comment cmt"><p>Globally set the coordinate for this process from the respective instance
+metadata.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="FromInstanceId">FromInstanceId</span> for more details.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -612,7 +605,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#toString():String" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -625,10 +618,27 @@ process' coordinate on the coordinate space shared with its peers.</p>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate#unsetCoordinate" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unsetCoordinate():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#unsetCoordinate():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unsetCoordinate</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Disables the ordering for this process and forces each Finagle client that
+uses <span class="extype" name="Aperture">Aperture</span> to derive a random ordering.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#wait():Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -650,7 +660,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -672,7 +682,7 @@ process' coordinate on the coordinate space shared with its peers.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/DeterministicOrdering$$Coord.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../com/twitter/finagle/loadbalancer/aperture/ProcessCoordinate$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>

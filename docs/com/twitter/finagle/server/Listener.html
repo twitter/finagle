@@ -224,6 +224,12 @@ that uses the transport + dispatcher pattern."></a>
 that uses the transport + dispatcher pattern.">
                           StdStackServer
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ThreadUsage$.html" title=""></a>
+                        <a href="ThreadUsage$.html" title="">
+                          ThreadUsage
+                        </a>
                       </li>
               </ul>
             </div>
@@ -249,7 +255,7 @@ that uses the transport + dispatcher pattern.">
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">Listener</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Ctx">Ctx &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
 
@@ -319,9 +325,9 @@ is also used to shut it down.
         <div class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.twitter.finagle.server.Listener#listen" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]=&gt;Unit):com.twitter.finagle.ListeningServer"></a><a id="listen(SocketAddress)((Transport[In,Out])⇒Unit):ListeningServer"></a>
+      <a id="listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:Ctx}=&gt;Unit):com.twitter.finagle.ListeningServer"></a><a id="listen(SocketAddress)((Transport[In,Out]{typeContext&lt;:Ctx})⇒Unit):ListeningServer"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/server/Listener.html#listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]=&gt;Unit):com.twitter.finagle.ListeningServer" title="Permalink">
+      <a href="../../../../com/twitter/finagle/server/Listener.html#listen(addr:java.net.SocketAddress)(serveTransport:com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:Ctx}=&gt;Unit):com.twitter.finagle.ListeningServer" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -330,7 +336,7 @@ is also used to shut it down.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">listen</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="params">(<span name="serveTransport">serveTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.server.Listener.Out">Out</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+        <span class="name">listen</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="params">(<span name="serveTransport">serveTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.server.Listener.Out">Out</span>] { type Context &lt;: Ctx }) ⇒ <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
       
       

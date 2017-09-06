@@ -448,7 +448,7 @@ shared between Finagle clients and servers.
             <span class="toggle">
               Known Subclasses
             </span>
-            <div class="subClasses hiddenContent"><a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="../Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="../ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>, <a href="../client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>, <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>, <a href="../server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a>, <a href="../server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></div>
+            <div class="subClasses hiddenContent"><a href="../Http$$Client.html" class="extype" name="com.twitter.finagle.Http.Client">Client</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>, <a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../Mux$$Client.html" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Mysql$$Client.html" class="extype" name="com.twitter.finagle.Mysql.Client">Client</a>, <a href="../Redis$$Client.html" class="extype" name="com.twitter.finagle.Redis.Client">Client</a>, <a href="../Thrift$$Client.html" class="extype" name="com.twitter.finagle.Thrift.Client">Client</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../ThriftMux$$Client.html" class="extype" name="com.twitter.finagle.ThriftMux.Client">Client</a>, <a href="../ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>, <a href="../client/EndpointerStackClient.html" class="extype" name="com.twitter.finagle.client.EndpointerStackClient">EndpointerStackClient</a>, <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>, <a href="../exp/pushsession/PushStackClient.html" class="extype" name="com.twitter.finagle.exp.pushsession.PushStackClient">PushStackClient</a>, <a href="../server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a>, <a href="../server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></div>
           </div></div>
         
 
@@ -887,6 +887,33 @@ from different clients/servers to a single stats receiver.
       
       <p class="shortcomment cmt">Configures this server or client with given <span class="extype" name="util.Monitor">util.Monitor</span>
 (default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p>
+    </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A"></a><a id="withRequestTimeout(Tunable[Duration]):A"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.CommonParams.A">A</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a> and
+     <a href="https://twitter.github.io/finagle/guide/Configuration.html#tunables" target="_blank">https://twitter.github.io/finagle/guide/Configuration.html#tunables</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRequestTimeout(timeout:com.twitter.util.Duration):A"></a><a id="withRequestTimeout(Duration):A"></a>
       <span class="permalink">

@@ -254,8 +254,8 @@ per-endpoint basis.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="" title="Transporters construct a Future[Transport[In, Out]]."></a>
-                        <a href="" title="Transporters construct a Future[Transport[In, Out]].">
+                        <a class="trait" href="" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
+                        <a href="" title="Transporters construct a Future[Transport[In, Out, Context]].">
                           Transporter
                         </a>
                       </li>
@@ -283,12 +283,12 @@ a com.twitter.finagle.client.Transporter."></a>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Ctx">Ctx &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Transporters construct a <code>Future[Transport[In, Out, Context]]</code>.</p><p>There is one Transporter assigned per remote peer.  Transporters are
 symmetric to the server-side <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>, except
 that it isn't shared across remote peers..
 </p></div><div class="toggleContainer block">
@@ -346,9 +346,9 @@ that it isn't shared across remote peers..
         <div class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.twitter.finagle.client.Transporter#apply" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a><a id="apply():Future[Transport[In,Out]]"></a>
+      <a id="apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:Ctx}]"></a><a id="apply():Future[Transport[In,Out]{typeContext&lt;:Ctx}]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/client/Transporter.html#apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/client/Transporter.html#apply():com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]{typeContext&lt;:Ctx}]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -357,7 +357,7 @@ that it isn't shared across remote peers..
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.client.Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.client.Transporter.Out">Out</span>]]</span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.client.Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.client.Transporter.Out">Out</span>] { type Context &lt;: Ctx }]</span>
       </span>
       
       

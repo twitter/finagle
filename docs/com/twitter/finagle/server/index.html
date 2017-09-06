@@ -784,6 +784,12 @@ that uses the transport + dispatcher pattern."></a>
 that uses the transport + dispatcher pattern.">
                           StdStackServer
                         </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="ThreadUsage$.html" title=""></a>
+                        <a href="ThreadUsage$.html" title="">
+                          ThreadUsage
+                        </a>
                       </li><li name="com.twitter.finagle.serverset2" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serverset2"></a><a id="serverset2:serverset2"></a>
       <span class="permalink">
@@ -985,6 +991,24 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tunable" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tunable"></a><a id="tunable:tunable"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#tunable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../tunable/index.html">
+              <span class="name">tunable</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="util"></a><a id="util:util"></a>
       <span class="permalink">
@@ -1120,9 +1144,9 @@ generator.
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.server.Listener" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="Listener[In,Out]extendsAnyRef"></a><a id="Listener[In,Out]:Listener[In,Out]"></a>
+      <a id="Listener[In,Out,Ctx&lt;:com.twitter.finagle.transport.TransportContext]extendsAnyRef"></a><a id="Listener[In,Out,Ctx&lt;:TransportContext]:Listener[In,Out,Ctx]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/server/index.html#Listener[In,Out]extendsAnyRef" title="Permalink">
+      <a href="../../../../com/twitter/finagle/server/index.html#Listener[In,Out,Ctx&lt;:com.twitter.finagle.transport.TransportContext]extendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1134,7 +1158,7 @@ generator.
         <a title="Listeners provide a method, listen, to expose a server on the
 the given SocketAddress." href="Listener.html">
               <span class="name">Listener</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>, <span name="Ctx">Ctx &lt;: <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a></span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       
       <p class="shortcomment cmt">Listeners provide a method, <code>listen</code>, to expose a server on the
@@ -1306,7 +1330,7 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       <span class="symbol">
         <a title="An empty Listener that can be used as a placeholder." href="NullListener$.html">
               <span class="name">NullListener</span>
-            </a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
+            </a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       
       <p class="shortcomment cmt">An empty Listener that can be used as a placeholder.</p>
@@ -1342,6 +1366,24 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       <span class="symbol">
         <a title="" href="StackServer$.html">
               <span class="name">StackServer</span>
+            </a>
+      </span>
+      
+      
+    </li><li name="com.twitter.finagle.server.ThreadUsage" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ThreadUsage"></a><a id="ThreadUsage:ThreadUsage"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/server/index.html#ThreadUsage" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ThreadUsage$.html">
+              <span class="name">ThreadUsage</span>
             </a>
       </span>
       

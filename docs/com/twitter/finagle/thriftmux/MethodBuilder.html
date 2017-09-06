@@ -806,7 +806,7 @@ to this amount of time.</p><p>If a request does not complete within this time, t
 will be satisfied with a <a href="../IndividualRequestTimeoutException.html" class="extype" name="com.twitter.finagle.IndividualRequestTimeoutException">com.twitter.finagle.IndividualRequestTimeoutException</a>.</p><p>Defaults to using the client's configuration for
 <span class="extype" name="com.twitter.finagle.service.TimeoutFilter.Param(timeout)">com.twitter.finagle.service.TimeoutFilter.Param(timeout)</span>,
 which is typically set via
-<a href="../param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.Duration):A" class="extmbr" name="com.twitter.finagle.param.CommonParams#withRequestTimeout">com.twitter.finagle.param.CommonParams.withRequestTimeout</a>.
+<a href="../param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" class="extmbr" name="com.twitter.finagle.param.CommonParams#withRequestTimeout">com.twitter.finagle.param.CommonParams.withRequestTimeout</a>.
 </p></div><dl class="paramcmts block"><dt class="param">howLong</dt><dd class="cmt"><p>how long, from the initial request issuance,
                an individual attempt given to complete.
                If it is not finite (e.g. <code>Duration.Top</code>),

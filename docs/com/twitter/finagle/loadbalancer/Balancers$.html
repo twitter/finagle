@@ -501,10 +501,9 @@ ensure that it is not larger than the number of endpoints.</p></dd><dt class="pa
 if an unavailable node (Status != Open) is returned from the underlying pick.
 See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.</p></dd><dt class="param">useDeterministicOrdering</dt><dd class="cmt"><p>Enables the aperture instance to make use of
-the coordinate in <a href="aperture/DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering</a> to calculate an order for the
-endpoints. In short, this allows coordination for apertures across process
-boundaries to avoid load concentration when deployed in a distributed system.
-See <a href="aperture/DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering</a> for more details.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
+the coordinate in <a href="aperture/ProcessCoordinate$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate">com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate</a> to
+calculate an order for the endpoints. In short, this allows coordination for apertures
+across process boundaries to avoid load concentration when deployed in a distributed system.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperturePeakEwma" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="aperturePeakEwma(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,useDeterministicOrdering:Boolean):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a><a id="aperturePeakEwma(Duration,Double,Double,Int,Int,Rng,Boolean):LoadBalancerFactory"></a>
@@ -549,10 +548,9 @@ ensure that it is not larger than the number of endpoints.</p></dd><dt class="pa
 if an unavailable node (Status != Open) is returned from the underlying pick.
 See the constant <a href="#MaxEffort:Int" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort">MaxEffort</a> for more details on how we pick the default.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.</p></dd><dt class="param">useDeterministicOrdering</dt><dd class="cmt"><p>Enables the aperture instance to make use of
-the coordinate in <a href="aperture/DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering</a> to calculate an order for the
-endpoints. In short, this allows coordination for apertures across process
-boundaries to avoid load concentration when deployed in a distributed system.
-See <a href="aperture/DeterministicOrdering$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering">com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering</a> for more details.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
+the coordinate in <a href="aperture/ProcessCoordinate$.html" class="extype" name="com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate">com.twitter.finagle.loadbalancer.aperture.ProcessCoordinate</a> to
+calculate an order for the endpoints. In short, this allows coordination for apertures
+across process boundaries to avoid load concentration when deployed in a distributed system.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
 for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

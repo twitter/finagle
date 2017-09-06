@@ -648,6 +648,24 @@ package netty3 can move into its own package, so that only the
       </span>
       
       
+    </li><li name="com.twitter.finagle.netty3.http" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="http"></a><a id="http:http"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#http" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="http/index.html">
+              <span class="name">http</span>
+            </a>
+      </span>
+      
+      
     </li><li name="com.twitter.finagle.netty3.socks" visbl="pub" class="indented5 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="socks"></a><a id="socks:socks"></a>
       <span class="permalink">
@@ -1050,6 +1068,24 @@ generator.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.tunable" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tunable"></a><a id="tunable:tunable"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/index.html#tunable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../tunable/index.html">
+              <span class="name">tunable</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.twitter.finagle">finagle</a></dd></dl></div>
     </li><li name="com.twitter.finagle.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="util"></a><a id="util:util"></a>
       <span class="permalink">
@@ -1252,9 +1288,9 @@ reflected in slices.</p></span></dd></dl></div>
       
       <p class="shortcomment cmt">Log events on channels</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Listener" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Netty3Listener[In,Out]extendsListener[In,Out]"></a><a id="Netty3Listener[In,Out]:Netty3Listener[In,Out]"></a>
+      <a id="Netty3Listener[In,Out]extendsListener[In,Out,com.twitter.finagle.transport.TransportContext]"></a><a id="Netty3Listener[In,Out]:Netty3Listener[In,Out]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/index.html#Netty3Listener[In,Out]extendsListener[In,Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#Netty3Listener[In,Out]extendsListener[In,Out,com.twitter.finagle.transport.TransportContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1267,7 +1303,7 @@ reflected in slices.</p></span></dd></dl></div>
 that yields Out-typed upstream messages and accepts
 In-typed downstream messages." href="Netty3Listener.html">
               <span class="name">Netty3Listener</span>
-            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>]</span>
+            </a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.Out">Out</span>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       
       <p class="shortcomment cmt">A listener using Netty3 which is given a ChannelPipelineFactory

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &#8212; Finagle 7.0.0 documentation</title>
+    <title>Clients &#8212; Finagle 7.1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '7.0.0',
+        VERSION:     '7.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +26,7 @@
     <link rel="shortcut icon" href="_static/favicon.ico"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Finagle 7.0.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 7.1.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -207,9 +207,18 @@ output. To override this, use the following sample.</p>
 </div>
 <div class="section" id="retries">
 <span id="client-retries"></span><h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
-<p>Every Finagle client contains a <cite>Retries</cite> module in the top (above load balancers) of its
-stack so it can retry failures from the underlying modules: circuit breakers, timeouts,
-load balancers and connection pools.</p>
+<p>Every Finagle client contains a <cite>Retries</cite> module in the stack, above load balancers,
+so that it can retry failures from the underlying modules: circuit breakers, timeouts,
+load balancers and connection pools. Retries can help improve the client&#8217;s logical success
+rate when subsequent attempts succeed.</p>
+<p>For the most part, service owners will be interested in the logical success rate of a clients.
+Logical requests represent the result of the initial request, after any retries have occurred.
+Concretely, should a request result in a retryable failure on the first attempt, but succeed upon
+retry, this is considered a single successful logical request. By default, a Finagle client&#8217;s
+success rate metrics include the individual attempts and this can cause confusion.
+<a class="reference internal" href="MethodBuilder.html#methodbuilder"><span class="std std-ref">MethodBuilder</span></a> offers logical metrics scoped to &#8220;logical&#8221; for both
+success rate and latency. The deprecated <code class="docutils literal"><span class="pre">ClientBuilder</span></code> code also offers similar metrics
+scoped to &#8220;tries&#8221;.</p>
 <p>Failures that are known to be safe to retry (for example, exceptions that occurred before the
 bytes were written to the wire and protocol level NACKs) will be automatically retried by Finagle.
 These retries come out of a <code class="docutils literal"><span class="pre">RetryBudget</span></code> that allows for approximately 20% of the total requests
@@ -250,7 +259,7 @@ construct a new instance of <code class="docutils literal"><span class="pre">Ret
 
 <span class="k">val</span> <span class="n">budget</span><span class="k">:</span> <span class="kt">RetryBudget</span> <span class="o">=</span> <span class="nc">RetryBudget</span><span class="o">(</span>
   <span class="n">ttl</span> <span class="k">=</span> <span class="mf">10.</span><span class="n">seconds</span><span class="o">,</span>
-  <span class="n">minRetriesPerSec</span> <span class="k">=</span> <span class="mi">5</span>
+  <span class="n">minRetriesPerSec</span> <span class="k">=</span> <span class="mi">5</span><span class="o">,</span>
   <span class="n">percentCanRetry</span> <span class="k">=</span> <span class="mf">0.1</span>
 <span class="o">)</span>
 </pre></div>

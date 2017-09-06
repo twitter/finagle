@@ -215,6 +215,14 @@ given SocketAddress.">
                         </a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
+                        <a class="class" href="PushStackClient.html" title="Base type for building a com.twitter.finagle.client.StackClient using
+the push-based protocol tools."></a>
+                        <a href="PushStackClient.html" title="Base type for building a com.twitter.finagle.client.StackClient using
+the push-based protocol tools.">
+                          PushStackClient
+                        </a>
+                      </li><li class="current-entities indented5">
+                        <span class="separator"></span>
                         <a class="trait" href="PushTransporter.html" title="PushSessionTransporters attempt to construct a PushChannelHandle
 and provide it to the factory function, returning any errors as
 failed Futures."></a>
@@ -258,7 +266,9 @@ the <a href="PushSession.html" class="extype" name="com.twitter.finagle.exp.push
 Specifically, if a session invokes a method on the handle it will not result in a new event
 reaching the session before the method call has returned. This avoids situations such as a
 session performing a write and before the call returns a new inbound message arrives and
-mutates session state in an unexpected way.
+mutates session state in an unexpected way.</p><p>All failures are fatal to the <a href="" class="extype" name="com.twitter.finagle.exp.pushsession.PushChannelHandle">PushChannelHandle</a> including write failures. Specifically,
+any failure results in the <code>onClose</code> promise being completed with the exception in the
+<code>Throw</code> pathway and the underlying socket will be closed.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -402,7 +412,8 @@ Useful if you want to trigger action on connection closing
       <p class="shortcomment cmt">Replaces the current <code>PushSession</code>, directing inbound events to the new session.</p><div class="fullcomment"><div class="comment cmt"><p>Replaces the current <code>PushSession</code>, directing inbound events to the new session.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>other than no longer receiving inbound messages, the previous session is still
       active and it is the responsibility of the caller to release any resources held
-      by the previous session.</p></span></dd></dl></div>
+      by the previous session.</p></span>, <span class="cmt"><p>It is unsafe to register a new session from outside of serial executor and to
+      do so will result in undefined behavior.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ClientConnection#remoteAddress" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="remoteAddress:java.net.SocketAddress"></a><a id="remoteAddress:SocketAddress"></a>
       <span class="permalink">

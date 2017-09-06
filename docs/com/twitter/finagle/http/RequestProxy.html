@@ -1243,7 +1243,7 @@ Codec, but this method allows you to override that.
       <p class="shortcomment cmt">Set the content of this <code>Message</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Set the content of this <code>Message</code>.</p><p>Any existing content is discarded. If this <code>Message</code> is set to chunked,
 an <code>IllegalStateException</code> is thrown.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="content(Buf)">content(Buf)</span> for Java users</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Message#cookies" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request.Proxy#cookies" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="cookies:com.twitter.finagle.http.CookieMap"></a><a id="cookies:CookieMap"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#cookies:com.twitter.finagle.http.CookieMap" title="Permalink">
@@ -1260,7 +1260,7 @@ an <code>IllegalStateException</code> is thrown.
       
       <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
 In a response, it uses the Set-Cookie headers.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request$$Proxy.html" class="extype" name="com.twitter.finagle.http.Request.Proxy">Proxy</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request.Proxy#ctx" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ctx:com.twitter.finagle.http.Request.Schema.Record"></a><a id="ctx:Record"></a>
       <span class="permalink">
@@ -1330,38 +1330,6 @@ associated context explicit.
       </span>
       
       <p class="shortcomment cmt">Set Date header</p><div class="fullcomment"><div class="comment cmt"><p>Set Date header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#encodeBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="encodeBytes():Array[Byte]"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#encodeBytes():Array[Byte]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encodeBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Encode an HTTP message to Array[Byte]</p><div class="fullcomment"><div class="comment cmt"><p>Encode an HTTP message to Array[Byte]</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.Request#encodeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="encodeString():String"></a>
-      <span class="permalink">
-      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#encodeString():String" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encodeString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Encode an HTTP message to String.</p><div class="fullcomment"><div class="comment cmt"><p>Encode an HTTP message to String.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -3060,7 +3028,45 @@ message body. See <span class="extype" name="com.twitter.io.Writer">com.twitter.
 
         <div class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.Request#getResponse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Request#encodeBytes" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="encodeBytes():Array[Byte]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#encodeBytes():Array[Byte]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-15) Use HttpCodec.encodeRequestToBytes">encodeBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Encode an HTTP message to Array[Byte]</p><div class="fullcomment"><div class="comment cmt"><p>Encode an HTTP message to Array[Byte]</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-15)</i> Use HttpCodec.encodeRequestToBytes</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request#encodeString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="encodeString():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/http/RequestProxy.html#encodeString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2017-08-15) Use HttpCodec.encodeRequestToString">encodeString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Encode an HTTP message to String.</p><div class="fullcomment"><div class="comment cmt"><p>Encode an HTTP message to String.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2017-08-15)</i> Use HttpCodec.encodeRequestToString</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request#getResponse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getResponse():com.twitter.finagle.http.Response"></a><a id="getResponse():Response"></a>
       <span class="permalink">
       <a href="../../../../com/twitter/finagle/http/RequestProxy.html#getResponse():com.twitter.finagle.http.Response" title="Permalink">

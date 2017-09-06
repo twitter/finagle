@@ -201,6 +201,24 @@ package netty3 can move into its own package, so that only the
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.http" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="http"></a><a id="http:http"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/netty3/index.html#http" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="http/index.html">
+              <span class="name">http</span>
+            </a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="index.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.socks" visbl="pub" class="indented5 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socks"></a><a id="socks:socks"></a>
       <span class="permalink">
@@ -492,9 +510,9 @@ the ServerChannelFactory for a <code>Listener</code>.</p>
       
       
     </li><li name="com.twitter.finagle.netty3.Netty3Listener#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply[In,Out](pipeline:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.server.Listener[In,Out]"></a><a id="apply[In,Out](ChannelPipelineFactory,Params):Listener[In,Out]"></a>
+      <a id="apply[In,Out](pipeline:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.server.Listener[In,Out,com.twitter.finagle.transport.TransportContext]"></a><a id="apply[In,Out](ChannelPipelineFactory,Params):Listener[In,Out,TransportContext]"></a>
       <span class="permalink">
-      <a href="../../../../com/twitter/finagle/netty3/Netty3Listener$.html#apply[In,Out](pipeline:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.server.Listener[In,Out]" title="Permalink">
+      <a href="../../../../com/twitter/finagle/netty3/Netty3Listener$.html#apply[In,Out](pipeline:org.jboss.netty.channel.ChannelPipelineFactory,params:com.twitter.finagle.Stack.Params):com.twitter.finagle.server.Listener[In,Out,com.twitter.finagle.transport.TransportContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -503,13 +521,14 @@ the ServerChannelFactory for a <code>Listener</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipeline">pipeline: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.apply.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.apply.Out">Out</span>]</span>
+        <span class="name">apply</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="pipeline">pipeline: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.apply.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Listener.apply.Out">Out</span>, <a href="../transport/TransportContext.html" class="extype" name="com.twitter.finagle.transport.TransportContext">TransportContext</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Constructs a <code>Listener[In, Out]</code> given a netty3 <code>ChannelPipelineFactory</code>
-responsible for framing a <code>Transport</code> stream.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <code>Listener[In, Out]</code> given a netty3 <code>ChannelPipelineFactory</code>
-responsible for framing a <code>Transport</code> stream. The <code>Listener</code> is configured
-via the passed in <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s.
+      <p class="shortcomment cmt">Constructs a <code>Listener[In, Out, TransportContext]</code> given a netty3
+<code>ChannelPipelineFactory</code> responsible for framing a <code>Transport</code> stream.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a <code>Listener[In, Out, TransportContext]</code> given a netty3
+<code>ChannelPipelineFactory</code> responsible for framing a <code>Transport</code> stream. The
+<code>Listener</code> is configured via the passed in
+<a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="../param/index.html" class="extype" name="com.twitter.finagle.param">com.twitter.finagle.param</a></p></span><span class="cmt"><p><a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a></p></span><span class="cmt"><p><a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a></p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>

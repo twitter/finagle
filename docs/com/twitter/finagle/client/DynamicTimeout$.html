@@ -254,8 +254,8 @@ per-endpoint basis.">
                       </li><li class="current-entities indented4">
                         <a class="object" href="Transporter$.html" title="A collection of Stack.Params useful for configuring
 a com.twitter.finagle.client.Transporter."></a>
-                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]]."></a>
-                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out]].">
+                        <a class="trait" href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]]."></a>
+                        <a href="Transporter.html" title="Transporters construct a Future[Transport[In, Out, Context]].">
                           Transporter
                         </a>
                       </li>
@@ -641,7 +641,7 @@ with a client using <span class="extype" name="totalFilter">totalFilter</span>.<
       <p class="shortcomment cmt">A client module that produces a <span class="extype" name="TimeoutFilter">TimeoutFilter</span> for the stack,
 which allows for dynamic per-request timeouts (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>A client module that produces a <span class="extype" name="TimeoutFilter">TimeoutFilter</span> for the stack,
 which allows for dynamic per-request timeouts (e.g. retry requests).</p><p>This has a similar purpose to using
-<a href="../param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.Duration):A" class="extmbr" name="com.twitter.finagle.param.CommonParams#withRequestTimeout">com.twitter.finagle.param.CommonParams.withRequestTimeout</a>, while
+<a href="../param/CommonParams.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" class="extmbr" name="com.twitter.finagle.param.CommonParams#withRequestTimeout">com.twitter.finagle.param.CommonParams.withRequestTimeout</a>, while
 allowing the timeout to be dynamic.</p><p>Note that any <a href="LatencyCompensation$.html" class="extype" name="com.twitter.finagle.client.LatencyCompensation">LatencyCompensation</a> is added to timeouts.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="LatencyCompensation$.html" class="extype" name="com.twitter.finagle.client.LatencyCompensation">LatencyCompensation</a></p></span><span class="cmt"><p><span class="extype" name="TimeoutFilter">TimeoutFilter</span></p></span><span class="cmt"><p><span class="extype" name="totalFilter">totalFilter</span> for a total timeout including all retries.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">

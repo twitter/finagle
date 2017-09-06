@@ -767,6 +767,22 @@ from <code>startField</code> to <code>endField</code>.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.ServerCommands#dbSize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dbSize():com.twitter.util.Future[Long]"></a><a id="dbSize():Future[Long]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/TransactionalClient.html#dbSize():com.twitter.util.Future[Long]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dbSize</span><span class="params">()</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ServerCommands.html" class="extype" name="com.twitter.finagle.redis.ServerCommands">ServerCommands</a></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.StringCommands#decr" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="decr(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a><a id="decr(Buf):Future[Long]"></a>
       <span class="permalink">
@@ -1411,6 +1427,22 @@ Returns <code>1</code> if fields is new, <code>0</code> if field was updated.
 Returns <code>1</code> if fields is new, <code>0</code> no operation was performed.</p><div class="fullcomment"><div class="comment cmt"><p>Sets <code>field</code> stored at given hash <code>key</code> to a given <code>value</code> only if the field
 Returns <code>1</code> if fields is new, <code>0</code> no operation was performed.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>HashCommands</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.HashCommands#hStrlen" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hStrlen(key:com.twitter.io.Buf,field:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a><a id="hStrlen(Buf,Buf):Future[Long]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/TransactionalClient.html#hStrlen(key:com.twitter.io.Buf,field:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hStrlen</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>, <span name="field">field: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Long" class="extype" target="_top">Long</a>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>HashCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.HashCommands#hVals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hVals(key:com.twitter.io.Buf):com.twitter.util.Future[Seq[com.twitter.io.Buf]]"></a><a id="hVals(Buf):Future[Seq[Buf]]"></a>
       <span class="permalink">
@@ -1953,6 +1985,22 @@ time is specified in milliseconds instead of seconds.
       <p class="shortcomment cmt">Get the time to live for a key in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Get the time to live for a key in milliseconds.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Time to live in milliseconds or None when key does not exist or
         does not have a timeout.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>KeyCommands</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.KeyCommands#persist" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="persist(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a><a id="persist(Buf):Future[Long]"></a>
+      <span class="permalink">
+      <a href="../../../../com/twitter/finagle/redis/TransactionalClient.html#persist(key:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">persist</span><span class="params">(<span name="key">key: <span class="extype" name="com.twitter.io.Buf">Buf</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Future">Future</span>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Persist a key by removing it's expiration time</p><div class="fullcomment"><div class="comment cmt"><p>Persist a key by removing it's expiration time</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if ttl was removed, 0 if key doesn't exist or doesn't have a ttl</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd>KeyCommands</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.HyperLogLogCommands#pfAdd" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="pfAdd(key:com.twitter.io.Buf,elements:List[com.twitter.io.Buf]):com.twitter.util.Future[Boolean]"></a><a id="pfAdd(Buf,List[Buf]):Future[Boolean]"></a>
       <span class="permalink">

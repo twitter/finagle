@@ -232,7 +232,7 @@ used by Mux.">
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">MuxImpl</span><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">MuxImpl</span><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.12.1/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
 
@@ -293,9 +293,9 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.Mux.param.MuxImpl#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf]),listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.finagle.Mux.param.MuxImpl"></a><a id="&lt;init&gt;:MuxImpl"></a>
+      <a id="&lt;init&gt;(transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]),listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]):com.twitter.finagle.Mux.param.MuxImpl"></a><a id="&lt;init&gt;:MuxImpl"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#&lt;init&gt;(transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf]),listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.finagle.Mux.param.MuxImpl" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#&lt;init&gt;(transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]),listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]):com.twitter.finagle.Mux.param.MuxImpl" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -304,7 +304,7 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">MuxImpl</span><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>)</span>
+        <span class="name">MuxImpl</span><span class="params">(<span name="transporter">transporter: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>, <span name="listener">listener: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>)</span>
       </span>
       
       
@@ -475,9 +475,9 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.param.MuxImpl#listener" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf]"></a><a id="listener:(Params)⇒Listener[Buf,Buf]"></a>
+      <a id="listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]"></a><a id="listener:(Params)⇒Listener[Buf,Buf,MuxContext]"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf]" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#listener:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.server.Listener[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -486,7 +486,7 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">listener</span><span class="result">: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
+        <span class="name">listener</span><span class="result">: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>
       </span>
       
       
@@ -571,9 +571,9 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.param.MuxImpl#transporter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf])"></a><a id="transporter:(Params)⇒(SocketAddress)⇒Transporter[Buf,Buf]"></a>
+      <a id="transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext])"></a><a id="transporter:(Params)⇒(SocketAddress)⇒Transporter[Buf,Buf,MuxContext]"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf])" title="Permalink">
+      <a href="../../../com/twitter/finagle/Mux$$param$$MuxImpl.html#transporter:com.twitter.finagle.Stack.Params=&gt;(java.net.SocketAddress=&gt;com.twitter.finagle.client.Transporter[com.twitter.io.Buf,com.twitter.io.Buf,com.twitter.finagle.mux.transport.MuxContext])" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -582,7 +582,7 @@ servers and clients can use the same parameter).</p></span></dd></dl><div class=
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">transporter</span><span class="result">: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>]</span>
+        <span class="name">transporter</span><span class="result">: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.io.Buf">Buf</span>, <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span>]</span>
       </span>
       
       

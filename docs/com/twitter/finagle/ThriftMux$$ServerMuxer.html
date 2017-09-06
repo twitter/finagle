@@ -328,7 +328,24 @@ tracing support).
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.ThriftMux.ServerMuxer.In" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.ThriftMux.ServerMuxer.Context" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Context=com.twitter.finagle.mux.transport.MuxContext"></a><a id="Context:Context"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#Context=com.twitter.finagle.mux.transport.MuxContext" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Context</span><span class="result alias"> = <span class="extype" name="com.twitter.finagle.mux.transport.MuxContext">MuxContext</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">The type of the transport's context.</p><div class="fullcomment"><div class="comment cmt"><p>The type of the transport's context.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer.In" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="In=com.twitter.io.Buf"></a><a id="In:In"></a>
       <span class="permalink">
       <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#In=com.twitter.io.Buf" title="Permalink">
@@ -613,9 +630,9 @@ case class.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#newDispatcher" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable"></a><a id="newDispatcher(Transport[In,Out],Service[Request,Response]):Closable"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out]{typeContext&lt;:ServerMuxer.this.Context},service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable"></a><a id="newDispatcher(Transport[In,Out]{typeContext&lt;:ServerMuxer.this.Context},Service[Request,Response]):Closable"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable" title="Permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out]{typeContext&lt;:ServerMuxer.this.Context},service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -624,7 +641,7 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>] { type Context &lt;: ServerMuxer.this.Context }</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.util.Closable">Closable</span></span>
       </span>
       
       <p class="shortcomment cmt">Defines a dispatcher, a function which binds a transport to a
@@ -634,9 +651,9 @@ forms the foundation of a finagle server. Concrete implementations
 are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#newListener" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newListener():com.twitter.finagle.server.Listener[ServerMuxer.this.In,ServerMuxer.this.Out]"></a><a id="newListener():Listener[In,Out]"></a>
+      <a id="newListener():com.twitter.finagle.server.Listener[ServerMuxer.this.In,ServerMuxer.this.Out,ServerMuxer.this.Context]"></a><a id="newListener():Listener[In,Out,Context]"></a>
       <span class="permalink">
-      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#newListener():com.twitter.finagle.server.Listener[ServerMuxer.this.In,ServerMuxer.this.Out]" title="Permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#newListener():com.twitter.finagle.server.Listener[ServerMuxer.this.In,ServerMuxer.this.Out,ServerMuxer.this.Context]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -645,7 +662,7 @@ are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newListener</span><span class="params">()</span><span class="result">: <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>
+        <span class="name">newListener</span><span class="params">()</span><span class="result">: <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="#In=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=com.twitter.io.Buf" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>, <a href="#Context=com.twitter.finagle.mux.transport.MuxContext" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Context">Context</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Defines a typed <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.
@@ -1080,6 +1097,33 @@ from different clients/servers to a single stats receiver.
       
       <p class="shortcomment cmt">Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/ListeningStackServer.html" class="extype" name="com.twitter.finagle.server.ListeningStackServer">ListeningStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A"></a><a id="withRequestTimeout(Tunable[Duration]):ServerMuxer"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$ServerMuxer.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a> and
+     <a href="https://twitter.github.io/finagle/guide/Configuration.html#tunables" target="_blank">https://twitter.github.io/finagle/guide/Configuration.html#tunables</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRequestTimeout(timeout:com.twitter.util.Duration):A"></a><a id="withRequestTimeout(Duration):ServerMuxer"></a>
       <span class="permalink">

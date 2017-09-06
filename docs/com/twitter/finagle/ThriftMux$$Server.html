@@ -1246,6 +1246,33 @@ spend handling the incoming request. Using the Finagle terminology, this is an a
 of time after which a non-satisfied future returned from the user-defined service
 times out.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withRequestTimeout" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A"></a><a id="withRequestTimeout(Tunable[Duration]):Server"></a>
+      <span class="permalink">
+      <a href="../../../com/twitter/finagle/ThriftMux$$Server.html#withRequestTimeout(timeout:com.twitter.util.tunable.Tunable[com.twitter.util.Duration]):A" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="com.twitter.util.tunable.Tunable">Tunable</span>[<span class="extype" name="com.twitter.util.Duration">Duration</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="Tunable">Tunable</span> request <code>timeout</code> of this server or client (if applying the
+<span class="extype" name="Tunable">Tunable</span> produces a value of <code>None</code>, an unbounded timeout is used for the request).</p><p>If the request has not completed within the <span class="extype" name="Duration">Duration</span> resulting from <code>timeout.apply()</code>,
+ the pending work will be interrupted via <span class="extype" name="com.twitter.util.Future.raise">com.twitter.util.Future.raise</span>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a> and
+     <a href="https://twitter.github.io/finagle/guide/Configuration.html#tunables" target="_blank">https://twitter.github.io/finagle/guide/Configuration.html#tunables</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.CommonParams#withResponseClassifier" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):A"></a><a id="withResponseClassifier(ResponseClassifier):Server"></a>
       <span class="permalink">
