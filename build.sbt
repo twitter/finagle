@@ -5,9 +5,9 @@ import scoverage.ScoverageKeys
 val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
 val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-val libVersion = "7.0.0" + suffix
-val utilVersion = "7.0.0" + suffix
-val scroogeVersion = "4.19.0" + suffix
+val libVersion = "7.1.0" + suffix
+val utilVersion = "7.1.0" + suffix
+val scroogeVersion = "4.20.0" + suffix
 
 val libthriftVersion = "0.5.0-7"
 
