@@ -358,11 +358,22 @@ private[loadbalancer] trait Aperture[Req, Rep] extends Balancer[Req, Rep] { self
     }
 
     // Translates the logical `aperture` into a physical one that
-    // maps to the ring.
+    // maps to the ring. Note, we do this in terms of the peer
+    // unit width in order to ensure full ring coverage. As such,
+    // this width will be >= the aperture. Put differently, we may
+    // cover more servers than the `aperture` requested in service
+    // of global uniform load.
     private[this] def apertureWidth: Double = {
-      val range = ring.range(coord.offset, coord.width(1))
-      val units = math.ceil(aperture / range.toDouble).toInt
-      coord.width(units)
+      val unitWidth: Double = coord.unitWidth // (0, 1.0]
+      val unitAperture: Double  = aperture * ring.unitWidth // (0, 1.0]
+      val units: Int = math.ceil(unitAperture / unitWidth).toInt
+      val width: Double = units * unitWidth
+      // We know that `width` is bounded between (0, 1.0] since `units`
+      // at most will be the inverse of `unitWidth` (i.e. if `unitAperture`
+      // is 1, then units = 1/(1/x) = x, width = x*(1/x) = 1). However,
+      // practically, we take the min of 1.0 to account for any floating
+      // point stability issues.
+      math.min(1.0, width)
     }
 
     override def physicalAperture: Int = ring.range(coord.offset, apertureWidth)
