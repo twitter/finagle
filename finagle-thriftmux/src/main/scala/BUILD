@@ -16,6 +16,7 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   exports=[
+    'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-thrift',
   ],
   fatal_warnings=True,

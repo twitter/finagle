@@ -65,8 +65,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
      *
      * @note this is not mutually intelligible with simple mux over TLS
      */
-    private[Mux] case class OppTls(level: Option[OpportunisticTls.Level])
-    private[Mux] object OppTls {
+    case class OppTls(level: Option[OpportunisticTls.Level])
+    object OppTls {
       implicit val param = Stack.Param(OppTls(None))
     }
 
@@ -109,7 +109,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       // exposed for testing
       private[finagle] val TlsHeadersToggleId: String = "com.twitter.finagle.mux.TlsHeaders"
       private val tlsHeadersToggle: Toggle[Int] = Toggles(TlsHeadersToggleId)
-      private[Mux] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
+      private[finagle] def tlsHeaders: Boolean = tlsHeadersToggle(ServerInfo().id.hashCode)
 
       /**
        * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer and
@@ -421,14 +421,14 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     /**
      * Configures the server to negotiate whether to speak TLS or not.
      *
-     * By default, the client doesn't use opportunistic TLS, and will instead try
+     * By default, the server doesn't use opportunistic TLS, and will instead try
      * to speak mux over TLS if TLS has been configured.
      *
-     * The valid levels are Off, which indicates this client will never speak TLS,
+     * The valid levels are Off, which indicates this server will never speak TLS,
      * Desired, which indicates it may speak TLS, but may also not speak TLS,
      * and Required, which indicates it must speak TLS.
      *
-     * Clients that are configured to be Required cannot speak to servers that are
+     * Servers that are configured to be Required cannot speak to clients that are
      * configured Off, and vice versa.
      *
      * Note that opportunistic TLS is negotiated in a cleartext handshake, and is

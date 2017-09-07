@@ -351,6 +351,30 @@ object ThriftMux
     override def withRetryBackoff(backoff: Stream[Duration]): Client =
       super.withRetryBackoff(backoff)
 
+    /**
+     * Configures the client to negotiate whether to speak tls or not.
+     *
+     * The valid levels are Off, which indicates this client will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Clients that are configured to be Required cannot speak to servers that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Client =
+      configured(Mux.param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the client is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the client to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Client = configured(Mux.param.OppTls(None))
+
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
@@ -406,6 +430,10 @@ object ThriftMux
     protected def newListener(): Listener[In, Out, Context] =
       params[Mux.param.MuxImpl].listener(params)
 
+    // we cache tlsHeaders here because it's hard to propagate a `let` to the
+    // server's dispatcher in tests
+    private[this] val cachedTlsHeaders = Mux.param.MuxImpl.tlsHeaders
+
     protected def newDispatcher(
       transport: Transport[In, Out] { type Context <: ServerMuxer.this.Context },
       service: Service[mux.Request, mux.Response]
@@ -416,14 +444,20 @@ object ThriftMux
       val param.ExceptionStatsHandler(excRecorder) = params[param.ExceptionStatsHandler]
       val param.Tracer(tracer) = params[param.Tracer]
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
+      val Mux.param.OppTls(level) = params[Mux.param.OppTls]
 
       val thriftEmulator = thriftmux.ThriftEmulator(transport, pf, statsReceiver.scope("thriftmux"))
 
       val negotiatedTrans = mux.Handshake.server(
         trans = thriftEmulator,
         version = Mux.LatestVersion,
-        headers = Mux.Server.headers(_, frameSize, None),
-        negotiate = Mux.negotiate(frameSize, muxStatsReceiver, OpportunisticTls.Off, () => ())
+        headers = Mux.Server.headers(_, frameSize, if (cachedTlsHeaders) level else None),
+        negotiate = Mux.negotiate(
+          frameSize,
+          muxStatsReceiver,
+          level.getOrElse(OpportunisticTls.Off),
+          transport.context.turnOnTls _
+        )
       )
 
       val statsTrans =
@@ -529,6 +563,30 @@ object ThriftMux
      */
     def withProtocolFactory(pf: TProtocolFactory): Server =
       configured(Thrift.param.ProtocolFactory(pf))
+
+    /**
+     * Configures the server to negotiate whether to speak tls or not.
+     *
+     * The valid levels are Off, which indicates this server will never speak TLS,
+     * Desired, which indicates it may speak TLS, but may also not speak TLS,
+     * and Required, which indicates it must speak TLS.
+     *
+     * Servers that are configured to be Required cannot speak to clients that are
+     * configured Off, and vice versa.
+     *
+     * Note that opportunistic TLS is negotiated in a cleartext handshake, and is
+     * incompatible with mux over TLS.
+     */
+    def withOpportunisticTls(level: OpportunisticTls.Level): Server =
+      configured(Mux.param.OppTls(Some(level)))
+
+    /**
+     * Disables oportunistic TLS.
+     *
+     * If the server is still TLS configured, it will speak mux over TLS.  To instead
+     * configure the server to be `Off`, use `withOpportunisticTls(OpportunisticTls.Off)`.
+     */
+    def noOpportunisticTls: Server = configured(Mux.param.OppTls(None))
 
     /**
      * Produce a [[com.twitter.finagle.ThriftMux.Server]] using the provided stack.
