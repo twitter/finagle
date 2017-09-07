@@ -2,7 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.finagle._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Await, Closable, Future, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import java.security.cert.{Certificate, X509Certificate}
@@ -20,25 +20,29 @@ class StdStackServerTest extends FunSuite with MockitoSugar {
     params: Params = StackServer.defaultParams
   ) extends StdStackServer[Unit, Unit, Server] {
 
-    override protected type In = Unit
-    override protected type Out = Unit
+    protected type In = Unit
+    protected type Out = Unit
+    protected type Context = TransportContext
 
-    override protected def newListener(): Listener[In, Out] = new Listener[Unit, Unit] {
-      override def listen(
-        addr: SocketAddress
-      )(serveTransport: (Transport[Unit, Unit]) => Unit): ListeningServer = {
-        import org.mockito.Mockito.{when}
-        val trans = mock[Transport[Unit, Unit]]
-        when(trans.remoteAddress).thenReturn(mock[SocketAddress])
-        when(trans.peerCertificate).thenReturn(Some(mockCert))
-        when(trans.onClose).thenReturn(Future.never)
-        serveTransport(trans)
-        NullServer
+    override protected def newListener(): Listener[In, Out, TransportContext] =
+      new Listener[Unit, Unit, TransportContext] {
+        override def listen(
+          addr: SocketAddress
+        )(
+          serveTransport: (Transport[Unit, Unit] { type Context <: Server.this.Context }) => Unit
+        ): ListeningServer = {
+          import org.mockito.Mockito.{when}
+          val trans = mock[Transport[Unit, Unit]]
+          when(trans.remoteAddress).thenReturn(mock[SocketAddress])
+          when(trans.peerCertificate).thenReturn(Some(mockCert))
+          when(trans.onClose).thenReturn(Future.never)
+          serveTransport(trans)
+          NullServer
+        }
       }
-    }
 
     override protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Unit, Unit]
     ): Closable = Closable.nop
 

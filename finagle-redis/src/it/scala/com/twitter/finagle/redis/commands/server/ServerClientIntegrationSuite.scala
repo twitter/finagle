@@ -33,6 +33,25 @@ final class ServerClientIntegrationSuite extends RedisClientTest {
     }
   }
 
+  test("Correctly perform the DBSIZE command", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      //add 1 key
+      Await.result(client.set(bufFoo, bufBar))
+      var size = Await.result(client.dbSize())
+      assert(size == 1)
+      //second key
+      Await.result(client.set(bufBaz, bufBar))
+      size = Await.result(client.dbSize())
+      assert(size == 2)
+
+      //clear all
+      Await.result(client.flushDB())
+      size = Await.result(client.dbSize())
+      assert(size == 0)
+
+    }
+  }
+
   test("Correctly perform the INFO command", RedisTest, ClientTest) {
     withRedisClient { client =>
       val info = BufToString(Await.result(client.info()).get)

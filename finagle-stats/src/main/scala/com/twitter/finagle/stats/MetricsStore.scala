@@ -19,7 +19,7 @@ private[stats] object MetricsStore {
   trait StoreGauge {
     def name: String
 
-    def read: Float
+    def read: Number
   }
 
   /**

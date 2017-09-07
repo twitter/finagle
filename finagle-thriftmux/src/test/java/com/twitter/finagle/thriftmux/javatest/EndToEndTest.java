@@ -16,6 +16,7 @@ import com.twitter.finagle.FailedFastException;
 import com.twitter.finagle.Filter;
 import com.twitter.finagle.ListeningServer;
 import com.twitter.finagle.Name$;
+import com.twitter.finagle.RichServerParam;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.SimpleFilter;
 import com.twitter.finagle.Stack;
@@ -70,10 +71,9 @@ public class EndToEndTest {
       }
     };
 
-    Service<byte[], byte[]> service = new TestService$FinagleService(
-      iface,
-      new TBinaryProtocol.Factory()
-    );
+    RichServerParam serverParam = new RichServerParam(new TBinaryProtocol.Factory());
+
+    Service<byte[], byte[]> service = new TestService$FinagleService(iface, serverParam);
 
     ServerBuilder.safeBuild(
       service,

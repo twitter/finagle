@@ -11,5 +11,7 @@ junit_tests(
     'util/util-stats/src/main/scala:scala'
   ],
   sources=rglobs('*.scala'),
-  fatal_warnings=True
+  fatal_warnings=True,
+  strict_deps=True,
+
 )

@@ -3,6 +3,8 @@ package com.twitter.finagle.param
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.{service, stats, tracing, Stack}
 import com.twitter.util
+import com.twitter.util.Duration
+import com.twitter.util.tunable.Tunable
 
 /**
  * A collection of methods for configuring common parameters (labels, stats receivers, etc)
@@ -103,6 +105,33 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */
-  def withRequestTimeout(timeout: util.Duration): A =
+  def withRequestTimeout(timeout: Duration): A =
+    self.configured(TimeoutFilter.Param(timeout))
+
+  /**
+   * Configures the [[Tunable]] request `timeout` of this server or client (if applying the
+   * [[Tunable]] produces a value of `None`, an unbounded timeout is used for the request).
+   *
+   * If the request has not completed within the [[Duration]] resulting from `timeout.apply()`,
+   *  the pending work will be interrupted via [[com.twitter.util.Future.raise]].
+   *
+   * == Client's Request Timeout ==
+   *
+   * The client request timeout is the maximum amount of time given to a single request
+   * (if there are retries, they each get a fresh request timeout). The timeout is applied
+   * only after a connection has been acquired. That is: it is applied to the interval
+   * between the dispatch of the request and the receipt of the response.
+   *
+   * == Server's Request Timeout ==
+   *
+   * The server request timeout is the maximum amount of time, a server is allowed to
+   * spend handling the incoming request. Using the Finagle terminology, this is an amount
+   * of time after which a non-satisfied future returned from the user-defined service
+   * times out.
+   *
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]] and
+   *      [[https://twitter.github.io/finagle/guide/Configuration.html#tunables]]
+   */
+  def withRequestTimeout(timeout: Tunable[Duration]): A =
     self.configured(TimeoutFilter.Param(timeout))
 }

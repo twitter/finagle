@@ -2,9 +2,10 @@ package com.twitter.finagle
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
-import com.twitter.finagle.loadbalancer.aperture.DeterministicOrdering
-import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.finagle.loadbalancer.aperture
+import com.twitter.finagle.stats.{DefaultStatsReceiver, FinagleStatsReceiver}
 import com.twitter.finagle.util.{DefaultLogger, LoadService}
+import com.twitter.jvm.JvmStats
 import com.twitter.util.FuturePool
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
@@ -32,15 +33,17 @@ private[twitter] object Init {
       fpoolStats.addGauge("active_tasks") { pool.numActiveTasks },
       fpoolStats.addGauge("completed_tasks") { pool.numCompletedTasks },
       FinagleStatsReceiver.addGauge("aperture_coordinate") {
-        DeterministicOrdering() match {
-          case Some(coord) => coord.value.toFloat
-          // We know the coordinate's range is [-1.0, 1.0], so anything outside
+        aperture.ProcessCoordinate() match {
+          case Some(coord) => coord.offset.toFloat
+          // We know the coordinate's range is [0, 1.0), so anything outside
           // of this can be used to signify empty.
-          case None => -2f
+          case None => -1f
         }
       }
     )
   }
+
+  JvmStats.register(DefaultStatsReceiver)
 
   def finagleVersion: String = _finagleVersion.get
 

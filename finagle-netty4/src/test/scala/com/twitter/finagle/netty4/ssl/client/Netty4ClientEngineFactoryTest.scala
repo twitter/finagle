@@ -41,10 +41,10 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   }
 
   test("config with good cert and key credentials succeeds") {
-    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
     // deleteOnExit is handled by TempFile
 
-    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
 
     val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
@@ -59,7 +59,7 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
     val tempCertFile = File.createTempFile("test", "crt")
     tempCertFile.deleteOnExit()
 
-    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
 
     val keyCredentials = KeyCredentials.CertAndKey(tempCertFile, tempKeyFile)
@@ -71,13 +71,17 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   }
 
   test("config with cert, key, and chain succeeds") {
-    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
     // deleteOnExit is handled by TempFile
 
-    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/test-pkcs8.key")
+    val tempKeyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
     // deleteOnExit is handled by TempFile
 
-    val keyCredentials = KeyCredentials.CertKeyAndChain(tempCertFile, tempKeyFile, tempCertFile)
+    // This file contains multiple certificates
+    val tempChainFile = TempFile.fromResourcePath("/ssl/certs/svc-test-chain.cert.pem")
+    // deleteOnExit is handled by TempFile
+
+    val keyCredentials = KeyCredentials.CertKeyAndChain(tempCertFile, tempKeyFile, tempChainFile)
     val config = SslClientConfiguration(keyCredentials = keyCredentials)
 
     val engine = factory(address, config)
@@ -95,7 +99,7 @@ class Netty4ClientEngineFactoryTest extends FunSuite {
   }
 
   test("config with good trusted cert collection succeeds") {
-    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/test-rsa.crt")
+    val tempCertFile = TempFile.fromResourcePath("/ssl/certs/svc-test-chain.cert.pem")
     // deleteOnExit is handled by TempFile
 
     val trustCredentials = TrustCredentials.CertCollection(tempCertFile)

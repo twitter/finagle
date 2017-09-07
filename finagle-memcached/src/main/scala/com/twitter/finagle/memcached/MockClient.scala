@@ -181,7 +181,6 @@ class MockClient(val map: mutable.Map[String, Buf]) extends Client {
   def stats(args: Option[String]): Future[Seq[String]] = Future.Nil
 
   def close(deadline: Time): Future[Unit] = Future.Done
-  def release(): Unit = ()
 
   override def toString: String = {
     "MockClient(" + map.toString + ")"

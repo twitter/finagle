@@ -110,4 +110,10 @@ case class HSetNx(key: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
 
 case class HVals(key: Buf) extends StrictKeyCommand {
   def name: Buf = Command.HVALS
+  override def body: Seq[Buf] = Seq(key)
+}
+
+case class HStrlen(key: Buf, field: Buf) extends StrictKeyCommand {
+  def name: Buf = Command.HSTRLEN
+  override def body: Seq[Buf] = Seq(key, field)
 }

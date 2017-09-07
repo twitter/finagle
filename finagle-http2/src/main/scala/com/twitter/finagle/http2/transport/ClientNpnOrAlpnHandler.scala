@@ -2,7 +2,7 @@ package com.twitter.finagle.http2.transport
 
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.Stack
-import com.twitter.finagle.netty4.http.exp.{HttpCodecName, initClient}
+import com.twitter.finagle.netty4.http.{HttpCodecName, initClient}
 import io.netty.channel.ChannelHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.HttpClientUpgradeHandler.UpgradeEvent

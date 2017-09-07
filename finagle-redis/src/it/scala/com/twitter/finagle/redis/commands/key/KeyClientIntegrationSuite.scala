@@ -151,4 +151,27 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       assert(result <= horizon)
     }
   }
+
+  test("Correctly perform the PERSIST command", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      val horizon = 20000L
+      val ttl = System.currentTimeMillis() + horizon
+      await(client.set(bufFoo, bufBar))
+      assert(await(client.pExpireAt(bufFoo, ttl)) == true)
+
+      val result = await(client.pTtl(bufFoo)) match {
+        case Some(num) => num
+        case None => fail("Could not retrieve pTtl for key")
+      }
+      assert(result <= horizon)
+
+      val persistResult = await(client.persist(bufFoo))
+      assert(persistResult == 1)
+      val pttlResult  = await(client.pTtl(bufFoo))
+      assert(pttlResult != None && pttlResult.get == -1) // indicates key exists, but no ttl set.
+
+      val persistResultNoKey = await(client.persist(bufBar))
+      assert(persistResultNoKey == 0)
+    }
+  }
 }

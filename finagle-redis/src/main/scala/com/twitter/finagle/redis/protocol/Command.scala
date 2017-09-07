@@ -111,6 +111,7 @@ object Command {
   val SLAVEOF = Buf.Utf8("SLAVEOF")
   val CONFIG = Buf.Utf8("CONFIG")
   val SENTINEL = Buf.Utf8("SENTINEL")
+  val DBSIZE = Buf.Utf8("DBSIZE")
 
   // Scripts
   val EVAL = Buf.Utf8("EVAL")
@@ -180,6 +181,7 @@ object Command {
   val HSET = Buf.Utf8("HSET")
   val HSETNX = Buf.Utf8("HSETNX")
   val HVALS = Buf.Utf8("HVALS")
+  val HSTRLEN = Buf.Utf8("HSTRLEN")
 
   // Command Arguments
   val WITHSCORES = Buf.Utf8("WITHSCORES")

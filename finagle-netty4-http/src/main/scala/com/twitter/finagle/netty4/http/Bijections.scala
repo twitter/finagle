@@ -32,7 +32,7 @@ private[finagle] object Bijections {
     ): FinagleHttp.Request = {
 
       val result =
-        FinagleHttp.Request(
+        FinagleHttp.Request.chunked(
           version = Bijections.netty.versionToFinagle(in.protocolVersion),
           method = Bijections.netty.methodToFinagle(in.method),
           uri = in.uri,
@@ -52,7 +52,7 @@ private[finagle] object Bijections {
 
       val payload = ByteBufAsBuf(r.content)
 
-      val result = FinagleHttp.Request(
+      val result = FinagleHttp.Request.chunked(
         method = methodToFinagle(r.method),
         uri = r.uri,
         version = versionToFinagle(r.protocolVersion),
@@ -97,7 +97,8 @@ private[finagle] object Bijections {
         statusToFinagle(rep.status),
         BufReader(payload)
       )
-
+      // The construct that takes a reader marks the message chunked by default so
+      // we switch it back to non-chunked.
       resp.setChunked(false)
       writeNettyHeadersToFinagle(rep.headers, resp.headerMap)
       resp.content = payload

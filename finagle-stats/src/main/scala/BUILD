@@ -13,12 +13,14 @@ scala_library(
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-http/src/main/scala:scala',
     'finagle/finagle-stats/src/main/resources',
+    'finagle/finagle-tunable/src/main/scala:scala',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-lint/src/main/scala:scala',
     'util/util-logging',
     'util/util-registry',
     'util/util-stats',
+    'util/util-tunable/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
@@ -27,4 +29,8 @@ scala_library(
   # need it at compiletime that it is non-trivial to split the target at this juncture.
   scope='forced',
   strict_deps=True,
+  exports=[
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-stats:util-stats',
+  ]
 )

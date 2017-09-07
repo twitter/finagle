@@ -29,7 +29,7 @@ case class ServerApplicationError(what: String) extends Exception(what) with NoS
  * and transactions for outstanding messages and as such exposes an interface where
  * tag assignment can be deferred (i.e. Int => Message).
  */
-private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
+private[finagle] class ClientDispatcher(trans: Transport[Message, Message])
     extends Service[Int => Message, Message] {
   import ClientDispatcher._
 
@@ -105,7 +105,7 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
   override def close(when: Time): Future[Unit] = trans.close(when)
 }
 
-private[twitter] object ClientDispatcher {
+private[finagle] object ClientDispatcher {
 
   val TagRange: Range = Message.Tags.MinTag to Message.Tags.MaxTag
 

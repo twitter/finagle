@@ -21,7 +21,7 @@ import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[netty4] class Netty4ClientSslHandler(params: Stack.Params)
+private[finagle] class Netty4ClientSslHandler(params: Stack.Params)
     extends ChannelInitializer[Channel] {
 
   // The reason we can't close the channel immediately is because we're in process of decoding an
@@ -93,15 +93,15 @@ private[netty4] class Netty4ClientSslHandler(params: Stack.Params)
     sslHandler: SslHandler,
     address: Address,
     config: SslClientConfiguration
-  ): SslClientConnectHandler = {
+  ): SslClientVerificationHandler = {
     val SslClientSessionVerifier.Param(sessionVerifier) = params[SslClientSessionVerifier.Param]
-    new SslClientConnectHandler(sslHandler, address, config, sessionVerifier)
+    new SslClientVerificationHandler(sslHandler, address, config, sessionVerifier)
   }
 
   private[this] def addHandlersToPipeline(
     pipeline: ChannelPipeline,
     sslHandler: SslHandler,
-    sslConnectHandler: SslClientConnectHandler
+    sslConnectHandler: SslClientVerificationHandler
   ): Unit = {
     pipeline.addFirst("sslConnect", sslConnectHandler)
     pipeline.addFirst("ssl", sslHandler)
@@ -122,9 +122,9 @@ private[netty4] class Netty4ClientSslHandler(params: Stack.Params)
       val combined: SslClientConfiguration = combineApplicationProtocols(config)
       val engine: Engine = factory(address, combined)
       val sslHandler: SslHandler = createSslHandler(engine)
-      val sslConnectHandler: SslClientConnectHandler =
+      val sslConnectHandler: SslClientVerificationHandler =
         createSslConnectHandler(sslHandler, address, combined)
-      addHandlersToPipeline(ch.pipeline(), sslHandler, sslConnectHandler)
+      addHandlersToPipeline(ch.pipeline, sslHandler, sslConnectHandler)
     }
   }
 

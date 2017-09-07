@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4.http.handler
 
+import com.twitter.finagle.netty4.http.FinagleHttpObjectAggregator
 import com.twitter.util.StorageUnit
 import io.netty.handler.codec.http._
 
@@ -9,8 +10,10 @@ import io.netty.handler.codec.http._
  * contents via `content` and `contentString`. Chunked transfer encoded messages
  * still require accessing `reader`.
  */
-private[http] class FixedLengthMessageAggregator(maxContentLength: StorageUnit)
-    extends HttpObjectAggregator(maxContentLength.inBytes.toInt) {
+private[http] class FixedLengthMessageAggregator(
+  maxContentLength: StorageUnit,
+  handleExpectContinue: Boolean = true
+) extends FinagleHttpObjectAggregator(maxContentLength.inBytes.toInt, handleExpectContinue) {
   require(maxContentLength.bytes >= 0)
 
   private[this] var decoding = false

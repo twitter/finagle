@@ -10,6 +10,7 @@ junit_tests(
     'finagle/finagle-http2',
     'finagle/finagle-base-http',
     'finagle/finagle-netty4-http',
+    'finagle/finagle-netty4',
     'finagle/finagle-core',
     'util/util-core',
     'util/util-logging',

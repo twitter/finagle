@@ -67,34 +67,6 @@ class RequestTest extends FunSuite {
     assert(req.uri == "/foo3")
   }
 
-  test("toHttpString") {
-    val request = Request("/search.json", "q" -> "twitter")
-    request.headerMap.set("Host", "search.twitter.com")
-
-    val expected = "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
-
-    val actual = request.encodeString()
-    assert(actual == expected)
-  }
-
-  test("decode") {
-    val request = Request.decodeString(
-      "GET /search.json?q=twitter HTTP/1.1\r\nHost: search.twitter.com\r\n\r\n"
-    )
-    assert(request.path == "/search.json")
-    assert(request.params("q") == "twitter")
-    assert(request.headerMap.get("Host") == Some("search.twitter.com"))
-  }
-
-  test("decodeBytes") {
-    val originalRequest = Request("/", "foo" -> "bar")
-    val bytes = originalRequest.encodeBytes()
-    val decodedRequest = Request.decodeBytes(bytes)
-
-    assert(decodedRequest.path == "/")
-    assert(decodedRequest.params("foo") == "bar")
-  }
-
   test("queryString") {
     assert(Request.queryString() == "")
     assert(Request.queryString(Map.empty[String, String]) == "")

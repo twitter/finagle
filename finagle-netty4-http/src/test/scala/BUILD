@@ -1,17 +1,21 @@
 junit_tests(
   dependencies=[
-    '3rdparty/jvm/junit',
-    '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/org/scalacheck',
-    '3rdparty/jvm/org/scalatest',
     '3rdparty/jvm/io/netty:netty',
     '3rdparty/jvm/io/netty:netty4',
     '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/io/netty:netty4-http',
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/mockito:mockito-all',
+    '3rdparty/jvm/org/scalacheck',
+    '3rdparty/jvm/org/scalatest',
+    'finagle/finagle-base-http/src/main/scala:scala',
     'finagle/finagle-base-http:tests',
-    'finagle/finagle-netty4-http',
+    'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
+    'finagle/finagle-netty4-http',
+    'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
-  sources=rglobs('*.scala')
+  sources=rglobs('*.scala'),
+  strict_deps=True,
 )

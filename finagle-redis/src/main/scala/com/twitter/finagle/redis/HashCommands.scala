@@ -144,4 +144,9 @@ private[redis] trait HashCommands { self: BaseClient =>
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
       case EmptyMBulkReply => Future.Nil
     }
+
+  def hStrlen(key: Buf, field: Buf): Future[Long] =
+    doRequest(HStrlen(key, field)) {
+      case IntegerReply(n) => Future.value(n)
+    }
 }

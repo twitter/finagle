@@ -1,18 +1,17 @@
 import Tests._
-import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import sbtunidoc.Plugin.UnidocKeys._
 import scoverage.ScoverageKeys
 
 val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
 val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-val libVersion = "6.45.0" + suffix
-val utilVersion = "6.45.0" + suffix
-val scroogeVersion = "4.18.0" + suffix
+val libVersion = "7.1.0" + suffix
+val utilVersion = "7.1.0" + suffix
+val scroogeVersion = "4.20.0" + suffix
 
 val libthriftVersion = "0.5.0-7"
 
-val netty4Version = "4.1.12.Final"
+val netty4Version = "4.1.14.Final"
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -29,9 +28,17 @@ val netty4Libs = Seq(
   "io.netty" % "netty-transport-native-unix-common" % netty4Version,
   "io.netty" % "netty-handler-proxy" % netty4Version
 )
+val netty4LibsTest = Seq(
+  "io.netty" % "netty-handler" % netty4Version % "test",
+  "io.netty" % "netty-transport" % netty4Version % "test",
+  "io.netty" % "netty-transport-native-epoll" % netty4Version % "test" classifier "linux-x86_64",
+  // this package is a dep of native-epoll above, explicitly add this for coursier plugin
+  "io.netty" % "netty-transport-native-unix-common" % netty4Version % "test",
+  "io.netty" % "netty-handler-proxy" % netty4Version % "test"
+)
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.1.Final" % "test"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.5.Final" % "test"
 val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -60,14 +67,13 @@ val sharedSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     "org.scalatest" %% "scalatest" % "3.0.0" % "test",
-    "junit" % "junit" % "4.10" % "test",
+    // See http://www.scala-sbt.org/0.13/docs/Testing.html#JUnit
+    "com.novocode" % "junit-interface" % "0.11" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test"
   ),
 
   ScoverageKeys.coverageHighlighting := true,
   ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
-
-  javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
   ivyXML :=
     <dependencies>
@@ -89,8 +95,13 @@ val sharedSettings = Seq(
   javacOptions ++= Seq("-Xlint:unchecked", "-source", "1.8", "-target", "1.8"),
   javacOptions in doc := Seq("-source", "1.8"),
 
+  javaOptions in Test := Seq("-DSKIP_FLAKY=true"),
+
   // This is bad news for things like com.twitter.util.Time
   parallelExecution in Test := false,
+
+  // -a: print stack traces for failing asserts
+  testOptions += Tests.Argument(TestFrameworks.JUnit, "-a"),
 
   // This effectively disables packageDoc, which craps out
   // on generating docs for generated thrift due to the use
@@ -158,6 +169,12 @@ val jmockSettings = Seq(
   )
 )
 
+lazy val noPublishSettings = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false
+)
+
 lazy val projectList = Seq[sbt.ProjectReference](
   // Core, support.
   finagleToggle,
@@ -184,6 +201,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
+  finagleNetty3Http,
   finagleNetty4Http
 )
 
@@ -192,6 +210,7 @@ lazy val finagle = Project(
   base = file(".")
 ).settings(
   sharedSettings ++
+  noPublishSettings ++
   unidocSettings ++ Seq(
     unidocProjectFilter in(ScalaUnidoc, unidoc) :=
       inAnyProject -- inProjects(
@@ -225,6 +244,7 @@ lazy val finagleIntegration = Project(
   finagleMemcached,
   finagleMux,
   finagleNetty4Http,
+  finagleRedis % "test",
   finagleThrift,
   finagleThriftMux % "test->compile;test->test"
 )
@@ -274,10 +294,9 @@ lazy val finagleCore = Project(
     util("stats"),
     util("tunable"),
     caffeineLib,
-    jsr305Lib,
-    netty3Lib % "test"
-  ),
-  unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty3"), Compile)).value
+    jsr305Lib
+  ) ++ netty4LibsTest,
+  unmanagedClasspath in Test ++= (fullClasspath in (LocalProject("finagle-netty4"), Compile)).value
 ).dependsOn(finagleToggle, finagleInit)
 
 lazy val finagleNetty4 = Project(
@@ -327,17 +346,18 @@ lazy val finagleStats = Project(
   libraryDependencies ++= Seq(
     util("app"),
     util("core"),
-    util("events"),
     util("lint"),
     util("logging"),
     util("registry"),
-    util("stats")
+    util("stats"),
+    util("tunable")
   ),
   libraryDependencies ++= jacksonLibs
 ).dependsOn(
   finagleCore,
   finagleHttp,
-  finagleToggle
+  finagleToggle,
+  finagleTunable
 )
 
 lazy val finagleZipkinCore = Project(
@@ -349,7 +369,6 @@ lazy val finagleZipkinCore = Project(
   name := "finagle-zipkin-core",
   libraryDependencies ++= Seq(
     util("codec"),
-    util("events"),
     util("core"),
     util("stats")) ++ scroogeLibs ++ jacksonLibs
 ).dependsOn(finagleCore, finagleThrift)
@@ -439,7 +458,7 @@ lazy val finagleHttp = Project(
     guavaLib,
     netty4StaticSsl
   )
-).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleHttp2, finagleToggle)
+).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
 
 lazy val finagleBaseHttp = Project(
   id = "finagle-base-http",
@@ -454,6 +473,19 @@ lazy val finagleBaseHttp = Project(
     "commons-lang" % "commons-lang" % "2.6"
   )
 ).dependsOn(finagleCore, finagleNetty3)
+
+lazy val finagleNetty3Http = Project(
+  id = "finagle-netty3-http",
+  base = file("finagle-netty3-http")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-netty3-http",
+  libraryDependencies ++= Seq(
+    util("app"), util("codec"), util("core"), util("jvm"), util("stats"),
+    "commons-lang" % "commons-lang" % "2.6"
+  )
+).dependsOn(finagleNetty3, finagleBaseHttp % "test->test;compile->compile")
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
@@ -514,12 +546,11 @@ lazy val finagleMemcached = Project(
   libraryDependencies ++= jacksonLibs
 ).dependsOn(
   // NOTE: Order is important here.
-  // finagleNetty3 must come before finagleCore here, otherwise
+  // finagleNetty4 must come before finagleCore here, otherwise
   // tests will fail with NoClassDefFound errors due to
   // StringClient and StringServer.
-  finagleNetty3 % "test->compile",
-  finagleCore % "compile->compile;test->test",
   finagleNetty4,
+  finagleCore % "compile->compile;test->test",
   finagleServersets,
   finagleStats,
   finagleToggle
@@ -653,8 +684,10 @@ lazy val finagleBenchmark = Project(
 lazy val finagleDoc = Project(
   id = "finagle-doc",
   base = file("doc")
+).enablePlugins(
+  SphinxPlugin
 ).settings(
-  site.settings ++ site.sphinxSupport() ++ sharedSettings
+  sharedSettings
 ).settings(
   scalacOptions in doc ++= Seq("-doc-title", "Finagle", "-doc-version", version.value),
   includeFilter in Sphinx := ("*.html" | "*.png" | "*.svg" | "*.js" | "*.css" | "*.gif" | "*.txt"),

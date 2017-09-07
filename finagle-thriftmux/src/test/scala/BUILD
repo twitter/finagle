@@ -11,10 +11,13 @@ junit_tests(
     'finagle/finagle-thriftmux/src/test/resources',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-java',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
+    'finagle/finagle-toggle',
     'util/util-app/src/main/scala:scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
+  strict_deps=True,
+
 )

@@ -2,9 +2,9 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.{http, Stack, ListeningServer, Announcement}
 import com.twitter.finagle.netty4.Netty4Listener
-import com.twitter.finagle.netty4.http.exp.{Http2ChannelTransportFactory, HttpCodecName, initServer}
+import com.twitter.finagle.netty4.http.{Http2ChannelTransportFactory, HttpCodecName, initServer}
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.Awaitable.CanAwait
 import com.twitter.util.{Future, Time, Duration}
 import io.netty.channel.{ChannelInitializer, Channel, ChannelPipeline, ChannelHandler}
@@ -22,7 +22,7 @@ private[finagle] object Http2Listener {
 
   def apply[In, Out](
     params: Stack.Params
-  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out] = {
+  )(implicit mIn: Manifest[In], mOut: Manifest[Out]): Listener[In, Out, TransportContext] = {
     val Transport.ServerSsl(configuration) = params[Transport.ServerSsl]
 
     val initializer =
@@ -42,7 +42,7 @@ private[http2] class Http2Listener[In, Out](
   setupMarshalling: ChannelInitializer[Channel] => ChannelHandler,
   implicit val mIn: Manifest[In],
   implicit val mOut: Manifest[Out]
-) extends Listener[In, Out] {
+) extends Listener[In, Out, TransportContext] {
 
   private[this] val channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)
 
@@ -58,7 +58,7 @@ private[http2] class Http2Listener[In, Out](
     )
   }
 
-  private[this] val underlyingListener = Netty4Listener[In, Out](
+  private[this] val underlyingListener = Netty4Listener[In, Out, TransportContext](
     pipelineInit = { pipeline: ChannelPipeline =>
       channels.add(pipeline.channel)
       pipeline.addLast(HttpCodecName, sourceCodec(params))
@@ -84,7 +84,9 @@ private[http2] class Http2Listener[In, Out](
     }
   }
 
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer = {
+  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] {
+    type Context <: TransportContext
+  } => Unit): ListeningServer = {
     val underlying = underlyingListener.listen(addr)(serveTransport)
     new Http2ListeningServer(underlying, propagateDeadline)
   }

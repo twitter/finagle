@@ -79,7 +79,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
   test("Correctly merge lkeys with destination and set expiry", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
-      Await.result(client.pExpireAt(bufFoo, 10000), TIMEOUT)
+      Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)
       var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
       var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
       assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar"))
@@ -110,14 +110,14 @@ final class HashClientIntegrationSuite extends RedisClientTest {
   test("TTL updated on merge only if a field was added.", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar)), TIMEOUT)
-      Await.result(client.pExpireAt(bufFoo, 10000), TIMEOUT)
+      Await.result(client.pExpire(bufFoo, 10000), TIMEOUT)
       var result = Await.result(client.hMGet(bufFoo, Seq(bufBaz)), TIMEOUT).toList
       var ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
 
       assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar"))
       assert(ttl > 0 && ttl < 10000)
 
-      Await.result(client.hMergeEx(bufFoo, Map(bufBaz -> bufMoo, bufMoo -> bufMoo), 90000), TIMEOUT)
+      Await.result(client.hMergeEx(bufFoo, Map(bufBaz -> bufMoo, bufMoo -> bufBoo), 90000), TIMEOUT)
       result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
       ttl = Await.result(client.pTtl(bufFoo), TIMEOUT).get
       assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", "boo")) // only boo is added
@@ -214,6 +214,23 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       val withPattern = Await.result(client.hScan(bufFoo, 0L, None, Some(pattern)), TIMEOUT)
       val withMatchList = withPattern.flatMap(Buf.Utf8.unapply)
       assert(withMatchList == Seq("0", "boo", "moo"))
+    }
+  }
+
+  test("Correctly get the length of values of a field", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      Await.result(client.hSet(bufFoo, bufBar, bufBaz), TIMEOUT)
+      Await.result(client.hSet(bufFoo, bufBoo, Buf.U32LE(12)), TIMEOUT)
+      Await.result(client.hSet(bufFoo, bufMoo, Buf.Empty), TIMEOUT)
+
+      val res1 = Await.result(client.hStrlen(bufFoo, bufBar), TIMEOUT)
+      assert(res1 == 3)
+
+      val res2 = Await.result(client.hStrlen(bufFoo, bufBoo), TIMEOUT)
+      assert(res2 == 4)
+
+      val res3 = Await.result(client.hStrlen(bufFoo, bufMoo), TIMEOUT)
+      assert(res3 == 0)
     }
   }
 }

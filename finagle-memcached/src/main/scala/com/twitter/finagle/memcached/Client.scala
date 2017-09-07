@@ -538,11 +538,6 @@ trait BaseClient[T] extends Closable {
    */
   def close(deadline: Time): Future[Unit]
 
-  /**
-   * release the underlying service(s)
-   */
-  @deprecated("Prefer `close` instead", "2017-06-20")
-  def release(): Unit
 }
 
 trait Client extends BaseClient[Buf] {
@@ -608,7 +603,6 @@ trait ProxyClient extends Client {
   def stats(args: Option[String]): Future[Seq[String]] = proxyClient.stats(args)
 
   def close(deadline: Time): Future[Unit] = proxyClient.close(deadline)
-  def release(): Unit = proxyClient.release()
 }
 
 private[memcached] object ClientConstants {
@@ -838,8 +832,6 @@ protected class ConnectedClient(protected val service: Service[Command, Response
   def close(deadline: Time): Future[Unit] =
     service.close()
 
-  def release(): Unit =
-    service.close()
 }
 
 /**
@@ -1139,7 +1131,7 @@ private[finagle] class KetamaPartitionedClient(
     // `map` is called on updates to `addrs`.
     // Cache nodes must only be created for new additions to the set of addresses; therefore
     // we must keep track of addresses in the current set that already have associated nodes
-    val nodes: Var[immutable.Set[(KetamaClientKey, KetamaNode[Client])]] = addrs.map {
+    val nodes: Var[Option[immutable.Set[(KetamaClientKey, KetamaNode[Client])]]] = addrs.map {
       case Addr.Bound(currAddrs, _) =>
         self.synchronized {
 
@@ -1161,11 +1153,17 @@ private[finagle] class KetamaPartitionedClient(
           mapped --= prevAddrs &~ currAddrs
           prevAddrs = currAddrs
         }
-        mapped.values.toSet
+        Some(mapped.values.toSet)
 
-      case _ => immutable.Set.empty
+      case Addr.Pending =>
+        // listener can filter these out
+        None
+      case _ =>
+        Some(immutable.Set.empty)
     }
-    nodes.changes.filter(_.nonEmpty)
+    nodes.changes
+      .filter(_.isDefined) // Do not notify clients about Addr.Pending changes
+      .map(_.get)
   }
 
   private[this] val ejectionCount = statsReceiver.counter("ejections")
@@ -1191,7 +1189,7 @@ private[finagle] class KetamaPartitionedClient(
   }
 
   // We listen for changes to the set of nodes to update the cache ring.
-  private[this] val listener: Closable = ketamaNodesChanges.respond(updateNodes)
+  private[this] val listener: Closable = ketamaNodesChanges.filter(_.nonEmpty).respond(updateNodes)
 
   override def clientOf(key: String): Client = {
     // use `getBytes(String)` as it is faster
@@ -1218,7 +1216,7 @@ private[finagle] class KetamaPartitionedClient(
       // remove old nodes and release clients
       nodes --= (old &~ current).collect {
         case (key, node) =>
-          node.handle.release()
+          node.handle.close()
           nodeLeaveCount.incr()
           key
       }
@@ -1255,11 +1253,10 @@ private[finagle] class KetamaPartitionedClient(
   }
 
   // await for the readiness of initial loading of ketamaNodeGrp prior to first request
-  // this readiness here will be fulfilled the first time the ketamaNodeGrp is updated
-  // with non-empty content, after that group can still be updated with empty endpoints
-  // which will throw NoShardAvailableException to users indicating the lost of cache access
-
-  val ready = ketamaNodesChanges.toFuture().unit
+  // this readiness here will be fulfilled the first time the ketamaNodeGrp is updated.
+  // If the group is empty, requests will throw NoShardAvailableException to users
+  // indicating a loss of cache access.
+  val ready: Future[Unit] = ketamaNodesChanges.toFuture().unit
 
   override def getsResult(keys: Iterable[String]) =
     ready.interruptible().before(super.getsResult(keys))
@@ -1300,15 +1297,6 @@ private[finagle] class KetamaPartitionedClient(
     closables += listener
     Closables.all(closables.result(): _*).close(deadline)
   }
-
-  def release(): Unit = synchronized {
-    nodes.foreach {
-      case (_, n) =>
-        n.node.handle.release()
-    }
-
-    listener.close()
-  }
 }
 
 object KetamaClient {
@@ -1329,9 +1317,6 @@ class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
   def close(deadline: Time): Future[Unit] =
     Closables.all(clients: _*).close(deadline)
 
-  def release(): Unit = {
-    clients.foreach { _.release() }
-  }
 }
 
 /**
@@ -1385,9 +1370,6 @@ class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher) extends Pa
   def close(deadline: Time): Future[Unit] =
     Closable.all(clients: _*).close(deadline)
 
-  def release(): Unit = {
-    clients.foreach { _.release() }
-  }
 }
 
 /**

@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.protocol.text.client
 
 import com.twitter.finagle.Status
 import com.twitter.finagle.memcached.protocol.text._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
@@ -15,6 +15,8 @@ private[finagle] class ClientTransport[Command, Response](
   commandToBuf: AbstractCommandToBuf[Command],
   underlying: Transport[Buf, Response]
 ) extends Transport[Command, Response] {
+
+  type Context = TransportContext
 
   def read(): Future[Response] = underlying.read()
 
@@ -34,4 +36,6 @@ private[finagle] class ClientTransport[Command, Response](
   def status: Status = underlying.status
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
+
+  val context: TransportContext = new LegacyContext(this)
 }

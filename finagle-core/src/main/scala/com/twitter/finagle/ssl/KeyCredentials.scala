@@ -35,8 +35,7 @@ object KeyCredentials {
 
   /**
    * Indicates that this certificate, key, and certificate chain
-   * should be used by the engine factory. This option should
-   * only be used with legacy engine factories.
+   * should be used by the engine factory.
    *
    * @param certificateFile A file containing an X.509 certificate in
    * PEM format.

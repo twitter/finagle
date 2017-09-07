@@ -156,26 +156,4 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    */
   def httpProxyTo(host: String, credentials: Transporter.Credentials): A =
     self.configured(Transporter.HttpProxyTo(Some(host -> Some(credentials))))
-
-  /**
-   * Enables TCP tunneling via `HTTP CONNECT` through an HTTP proxy [1] on this client
-   * (default: disabled).
-   *
-   * TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
-   * establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.
-   *
-   * When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
-   * to proxy the traffic to a given ultimate destination, specified as `host`.
-   *
-   * [1]: https://tools.ietf.org/html/draft-luotonen-web-proxy-tunneling-01
-   *
-   * @param host the ultimate host a proxy server connects to
-   *
-   * @param credentials optional credentials for a proxy server
-   */
-  @deprecated("Use httpProxyTo(String, Tansporter.Credentials) instead", "2017-7-11")
-  def httpProxyTo(
-    host: String,
-    credentials: Option[Transporter.Credentials]
-  ): A = self.configured(Transporter.HttpProxyTo(Some(host -> credentials)))
 }

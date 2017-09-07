@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.netty4.ByteBufAsBuf
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.transport.{Transport, QueueTransport}
+import com.twitter.finagle.transport.{Transport, QueueTransport, TransportContext, LegacyContext}
 import com.twitter.io.Reader.ReaderDiscarded
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util._
@@ -133,6 +133,8 @@ class StreamTransportsTest extends FunSuite {
   }
 
   val failingT = new Transport[Any, Any] {
+    type Context = TransportContext
+
     def write(req: Any): Future[Unit] = Future.exception(new Exception("nop"))
 
     def remoteAddress: SocketAddress = ???
@@ -148,6 +150,8 @@ class StreamTransportsTest extends FunSuite {
     val onClose: Future[Throwable] = Future.exception(new Exception)
 
     def close(deadline: Time): Future[Unit] = ???
+
+    def context: TransportContext = new LegacyContext(this)
   }
 
   test("streamChunks: discard reader on transport write failure") {
@@ -211,6 +215,8 @@ class StreamTransportsTest extends FunSuite {
 
   test("collate: discard while reading")(new Collate {
     val trans1 = new Transport[String, String] {
+      type Context = TransportContext
+
       val p = new Promise[String]
       var theIntr: Throwable = null
       p.setInterruptHandler {
@@ -225,6 +231,7 @@ class StreamTransportsTest extends FunSuite {
       def remoteAddress = ???
       def peerCertificate = ???
       def close(deadline: Time) = ???
+      val context: TransportContext = new LegacyContext(this)
     }
 
     val coll1 = collate[String](trans1, read)(_ == "eof")

@@ -27,10 +27,13 @@ private[loadbalancer] trait Expiration[Req, Rep] extends BalancerNode[Req, Rep] 
   protected def newExpiryTask(timer: Timer): TimerTask =
     timer.schedule(endpointIdleTime / 2) {
       val vec = self.dist.vector
-      var i = self.aperture
-      while (i < vec.size) {
-        vec(i).tryExpire()
-        i += 1
+      val vecIndices = vec.indices.iterator
+      val apertureIndices = self.dist.indices
+      while (vecIndices.hasNext) {
+        val i = vecIndices.next
+        if (!apertureIndices.contains(i)) {
+          vec(i).tryExpire()
+        }
       }
     }
 

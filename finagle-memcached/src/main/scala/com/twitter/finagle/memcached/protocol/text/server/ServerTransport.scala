@@ -3,7 +3,7 @@ package com.twitter.finagle.memcached.protocol.text.server
 import com.twitter.finagle.Status
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import java.net.SocketAddress
@@ -15,6 +15,8 @@ import java.security.cert.Certificate
 private[finagle] class ServerTransport(
   underlying: Transport[Buf, Buf]
 ) extends Transport[Response, Command] {
+
+  type Context = TransportContext
 
   private[this] val decoder = new MemcachedServerDecoder(StorageCommands)
 
@@ -50,4 +52,6 @@ private[finagle] class ServerTransport(
   def status: Status = underlying.status
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline)
+
+  val context: TransportContext = new LegacyContext(this)
 }

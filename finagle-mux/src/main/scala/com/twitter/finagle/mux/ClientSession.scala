@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.liveness.FailureDetector
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.util.{Duration, Future, Promise, Time}
 import java.net.SocketAddress
@@ -51,13 +51,15 @@ import java.util.logging.{Level, Logger}
  *
  * @param sr The `StatsReceiver` which the session uses to export internal stats.
  */
-private[twitter] class ClientSession(
+private[finagle] class ClientSession(
   trans: Transport[Message, Message],
   detectorConfig: FailureDetector.Config,
   name: String,
   sr: StatsReceiver
 ) extends Transport[Message, Message] {
   import ClientSession._
+
+  type Context = TransportContext
 
   // Maintain the sessions's state, whose access is mediated by `lock`
   @volatile private[this] var state: State = Dispatching
@@ -231,6 +233,7 @@ private[twitter] class ClientSession(
     leaseGauge.remove()
     trans.close(deadline)
   }
+  val context: TransportContext = new LegacyContext(this)
 }
 
 private object ClientSession {

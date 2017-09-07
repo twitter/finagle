@@ -5,7 +5,7 @@ import com.twitter.finagle.{Address, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-import com.twitter.finagle.ssl.{KeyCredentials, TrustCredentials}
+import com.twitter.finagle.ssl.{ClientAuth, KeyCredentials, TrustCredentials}
 import com.twitter.finagle.ssl.client.SslClientConfiguration
 import com.twitter.finagle.ssl.server.SslServerConfiguration
 import com.twitter.finagle.stats.{
@@ -25,12 +25,9 @@ import java.io.{PrintWriter, StringWriter}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TCompactProtocol, TProtocolFactory}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import scala.reflect.ClassTag
 
-@RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty
   before {
@@ -68,7 +65,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   val processor = new BServiceImpl()
 
-  val ifaceToService = new B.Service(_, _)
+  val ifaceToService = new B.Service(_: Iface, _: RichServerParam)
   val serviceToIface = new B.ServiceToClient(
     _: Service[ThriftClientRequest, Array[Byte]],
     _: TProtocolFactory,
@@ -78,7 +75,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   val missingClientIdEx = new IllegalStateException("uh no client id")
   val presentClientIdEx = new IllegalStateException("unexpected client id")
 
-  def servers(pf: TProtocolFactory): Seq[(String, Closable, Int)] = {
+  def servers(serverParam: RichServerParam): Seq[(String, Closable, Int)] = {
     val iface = new BServiceImpl {
       override def show_me_your_dtab(): Future[String] = {
         ClientId.current.map(_.name) match {
@@ -91,10 +88,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val builder = ServerBuilder()
       .name("server")
       .bindTo(new InetSocketAddress(0))
-      .stack(Thrift.server.withProtocolFactory(pf))
-      .build(ifaceToService(iface, pf))
+      .stack(Thrift.server.withProtocolFactory(serverParam.protocolFactory))
+      .build(ifaceToService(iface, serverParam))
     val proto = Thrift.server
-      .withProtocolFactory(pf)
+      .withProtocolFactory(serverParam.protocolFactory)
       .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
 
     def port(socketAddr: SocketAddress): Int =
@@ -138,7 +135,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     for {
       clientId <- Seq(Some(ClientId("anClient")), None)
       pf <- Seq(Protocols.binaryFactory(), new TCompactProtocol.Factory())
-      (serverWhich, serverClosable, port) <- servers(pf)
+      (serverWhich, serverClosable, port) <- servers(RichServerParam(pf))
     } {
       for {
         (clientWhich, clientIface, clientClosable) <- clients(pf, clientId, port)
@@ -160,7 +157,6 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   test("Exceptions are treated as failures") {
-    val protocolFactory = Protocols.binaryFactory()
 
     val impl = new BServiceImpl {
       override def add(a: Int, b: Int) =
@@ -172,7 +168,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .configured(Stats(sr))
       .serve(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-        ifaceToService(impl, protocolFactory)
+        ifaceToService(impl, RichServerParam())
       )
     val client = Thrift.client.newIface[B.ServiceIface](
       Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
@@ -314,22 +310,46 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-server-pkcs8.key.pem")
       // deleteOnExit is handled by TempFile
 
+      val interFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
+      // deleteOnExit is handled by TempFile
+
       Thrift.server.withTransport
-        .tls(SslServerConfiguration(keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile)))
+        .tls(
+          SslServerConfiguration(
+            clientAuth = ClientAuth.Needed,
+            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
+            trustCredentials = TrustCredentials.CertCollection(interFile)
+          )
+        )
         .configured(Stats(sr))
         .serve(
           new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
-          ifaceToService(processor, Protocols.binaryFactory())
+          ifaceToService(processor, RichServerParam())
         )
     }
 
-    def mkThriftTlsClient(server: ListeningServer) =
+    def mkThriftTlsClient(server: ListeningServer) = {
+      val certFile = TempFile.fromResourcePath("/ssl/certs/svc-test-client.cert.pem")
+      // deleteOnExit is handled by TempFile
+
+      val keyFile = TempFile.fromResourcePath("/ssl/keys/svc-test-client-pkcs8.key.pem")
+      // deleteOnExit is handled by TempFile
+
+      val interFile = TempFile.fromResourcePath("/ssl/certs/intermediate.cert.pem")
+      // deleteOnExit is handled by TempFile
+
       Thrift.client.withTransport
-        .tls(SslClientConfiguration(trustCredentials = TrustCredentials.Insecure))
+        .tls(
+          SslClientConfiguration(
+            keyCredentials = KeyCredentials.CertAndKey(certFile, keyFile),
+            trustCredentials = TrustCredentials.CertCollection(interFile)
+          )
+        )
         .newIface[B.ServiceIface](
           Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
           "client"
         )
+    }
 
     val sr = new InMemoryStatsReceiver()
 
@@ -614,6 +634,54 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     // Restore previously loaded StatsReceiver
     LoadedStatsReceiver.self = preSr
+  }
+
+  test("RichServerParam and RichClientParam are correctly composed") {
+
+    val serverStats = new InMemoryStatsReceiver
+
+    val iface = new Echo.FutureIface {
+      def echo(x: String) =
+        if (x == "safe")
+          Future.value("safe")
+        else if (x == "slow")
+          Future.sleep(1.second)(DefaultTimer).before(Future.value("slow"))
+        else
+          Future.exception(new InvalidQueryException(x.length))
+    }
+    val server = Thrift.server
+      .withMaxReusableBufferSize(15)
+      .withStatsReceiver(serverStats)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val clientStats = new InMemoryStatsReceiver
+
+    val client = Thrift.client
+      .withMaxReusableBufferSize(15)
+      .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
+      .withStatsReceiver(clientStats)
+      .newIface[Echo.FutureIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])),
+      "client"
+    )
+
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.echo("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(clientStats.counters(Seq("client", "requests")) == 1)
+    assert(clientStats.counters.get(Seq("client", "success")) == None)
+    assert(serverStats.counters(Seq("thrift", "echo", "requests")) == 1)
+    assert(serverStats.counters.get(Seq("thrift", "echo", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.echo("safe"), 10.seconds))
+    assert(clientStats.counters(Seq("client", "requests")) == 2)
+    assert(clientStats.counters(Seq("client", "success")) == 1)
+    assert(serverStats.counters(Seq("thrift", "echo", "requests")) == 2)
+    assert(serverStats.counters(Seq("thrift", "echo", "success")) == 1)
+    server.close()
+
   }
 
   private[this] val servers: Seq[(String, (StatsReceiver, Echo.FutureIface) => ListeningServer)] =

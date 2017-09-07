@@ -95,6 +95,16 @@ class ApertureTest extends FunSuite with ApertureSuite {
   test("Empty vectors") {
     val bal = new Bal
     intercept[Empty] { Await.result(bal.apply()) }
+
+    // transient update
+    val counts = new Counts
+    bal.update(counts.range(5))
+    bal.applyn(100)
+    assert(counts.nonzero.size > 0)
+
+    // go back to zero
+    bal.update(Vector.empty)
+    intercept[Empty] { Await.result(bal.apply()) }
   }
 
   test("Balance only within the aperture") {
@@ -115,7 +125,7 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(counts.nonzero.size == 1)
   }
 
-  test("Enforce min aperture size is not > the number of active nodes") {
+  test("min aperture size is not > the number of active nodes") {
     val counts = new Counts
     val bal = new Bal {
       override protected val minAperture = 4
@@ -208,29 +218,35 @@ class ApertureTest extends FunSuite with ApertureSuite {
     assert(counts.nonzero == Set(goodkey))
   }
 
-  test("useDeterministicOrdering") {
+  test("useDeterministicOrdering, clients evenly divide servers") {
+    val counts = new Counts
     val bal = new Bal {
       override protected val useDeterministicOrdering = true
     }
 
-    DeterministicOrdering.unsetCoordinate()
+    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
+    bal.update(counts.range(10))
+    bal.applyn(1000)
+    assert(counts.nonzero == Set(1))
+  }
 
-    val servers = Vector.tabulate(10) { i =>
-      Factory(i)
+  test("useDeterministicOrdering, clients unevenly divide servers") {
+    val counts = new Counts
+    val bal = new Bal {
+      override protected val useDeterministicOrdering = true
     }
 
-    val distSnap = bal.distx
-    bal.update(servers)
-    assert(distSnap ne bal.distx)
-    assert(servers.indices.forall { i =>
-      bal.distx.vector(i) == servers(i)
-    })
-
-    DeterministicOrdering.setCoordinate(offset = 0, instanceId = 1, totalInstances = 10)
-    bal.update(servers)
-    assert(servers.indices.exists { i =>
-      bal.distx.vector(i) != servers(i)
-    })
+    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 1, totalInstances = 4)
+    bal.update(counts.range(10))
+    assert(bal.minUnitsx == 4)
+    bal.applyn(1000)
+    // The range is 2.5, so we need a physical aperture of at least 2 to satisfy
+    // the `minUnits` of 4. In this case, a physical aperture of 2 maps to 6 servers
+    // on the ring, where 2 and 7 get ~1/2 the traffic relative to the rest of
+    // the nodes.
+    assert(counts.nonzero == Set(2, 3, 4, 5, 6, 7))
+    assert(counts(2).total.toDouble / counts(3).total - 0.5 <= 0.1)
+    assert(counts(7).total.toDouble / counts(6).total - 0.5 <= 0.1)
   }
 
   test("no-arg rebuilds are idempotent") {
@@ -238,57 +254,17 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = true
     }
 
-    DeterministicOrdering.setCoordinate(0, 5, 10)
+    ProcessCoordinate.setCoordinate(0, 5, 10)
 
-    val servers = Vector.tabulate(10) { i =>
-      Factory(i)
-    }
+    val servers = Vector.tabulate(10)(Factory)
     bal.update(servers)
 
     val order = bal.distx.vector
     for (_ <- 0 to 100) {
-      // This shouldn't affect order since we don't have a new
-      // coordinate. Thus, the rebuild should be a no-op for
-      // the ordering.
       bal.rebuildx()
       assert(order.indices.forall { i =>
         order(i) == bal.distx.vector(i)
       })
-    }
-  }
-
-  test("min aperture when using DeterministicOrdering") {
-    var min: Int = 1
-    val bal = new Bal {
-      override protected def minAperture = min
-      override protected val useDeterministicOrdering = true
-    }
-
-    val numServers = 20
-    val numClients = 6
-    val offset = 0
-
-    bal.update(Vector.tabulate(numServers) { i =>
-      Factory(i)
-    })
-
-    for (i <- 0 until numClients) {
-      DeterministicOrdering.setCoordinate(offset, i, numClients)
-      // force a rebuild here since we don't want to be at the mercy
-      // of the balancer's updater.
-      bal.rebuildx()
-      assert(bal.aperturex == math.ceil(numServers / numClients.toDouble))
-    }
-
-    // still respect the min passed in by the user so long as it's greater
-    // than the min required to cover the ring.
-    min = numClients
-    for (i <- 0 until numClients) {
-      DeterministicOrdering.setCoordinate(offset, i, numClients)
-      // force a rebuild here since we don't want to be at the mercy
-      // of the balancer's updater.
-      bal.rebuildx()
-      assert(bal.aperturex == numClients)
     }
   }
 
@@ -297,24 +273,16 @@ class ApertureTest extends FunSuite with ApertureSuite {
       override protected val useDeterministicOrdering = true
     }
 
-    DeterministicOrdering.unsetCoordinate()
+    ProcessCoordinate.unsetCoordinate()
 
-    val servers = Vector.tabulate(5) { i =>
-      Factory(i)
-    }
+    val servers = Vector.tabulate(5)(Factory)
     bal.update(servers)
 
     // 3 of 5 servers are in the aperture
     bal.adjustx(2)
     assert(bal.aperturex == 3)
 
-    // set a coordinate so that we get a new order
-    DeterministicOrdering.setCoordinate(offset = 0, instanceId = 3, totalInstances = 5)
-
-    // force rebuild, ensure the order has changed
-    bal.rebuildx()
-    val dorder = bal.distx.vector
-    assert(servers != dorder)
+    ProcessCoordinate.setCoordinate(offset = 0, instanceId = 3, totalInstances = 5)
 
     // We just happen to know that based on our ordering, instance 2 is in the aperture.
     // Note, we have an aperture of 3 and 1 down, so the probability of picking the down
@@ -322,12 +290,15 @@ class ApertureTest extends FunSuite with ApertureSuite {
     // force a rebuild artificially.
     servers(2).status = Status.Busy
     bal.rebuildx()
-    assert(dorder != bal.distx.vector)
-    assert(servers(2) == bal.distx.vector.last.factory)
+    for (i <- servers.indices) {
+      assert(servers(i) == bal.distx.vector(i).factory)
+    }
 
-    // flip back status, order is returned to dorder
+    // flip back status
     servers(2).status = Status.Open
     bal.rebuildx()
-    assert(dorder == bal.distx.vector)
+    for (i <- servers.indices) {
+      assert(servers(i) == bal.distx.vector(i).factory)
+    }
   }
 }

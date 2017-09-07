@@ -43,13 +43,13 @@ ChannelStatsHandler
   "connection_duration", "connection_received_bytes", or "connection_sent_bytes"
   histograms.
 
-**connection_duration**
+**connection_duration** `verbosity:debug`
   A histogram of the duration of the lifetime of a connection.
 
-**connection_received_bytes**
+**connection_received_bytes** `verbosity:debug`
   A histogram of the number of bytes received over the lifetime of a connection.
 
-**connection_sent_bytes**
+**connection_sent_bytes** `verbosity:debug`
   A histogram of the number of bytes sent over the lifetime of a connection.
 
 **received_bytes**
@@ -58,10 +58,10 @@ ChannelStatsHandler
 **sent_bytes**
   A counter of the total number of sent bytes.
 
-**writableDuration**
+**writableDuration** `verbosity:debug`
   A gauge of the length of time the socket has been writable in the channel.
 
-**unwritableDuration**
+**unwritableDuration** `verbosity:debug`
   A gauge of the length of time the socket has been unwritable in the channel.
 
 **connections**

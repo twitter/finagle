@@ -1,15 +1,16 @@
 package com.twitter.finagle.memcached.partitioning
 
 import com.twitter.concurrent.Broker
+import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.liveness.FailureAccrualFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
-import com.twitter.finagle._
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.service.FailedService
 import com.twitter.hashing._
 import com.twitter.util._
+import java.net.InetSocketAddress
 import scala.collection.{breakOut, mutable}
 
 /**
@@ -103,13 +104,23 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
             // Add new nodes for new addresses by finding the difference between the two sets
             mapped ++= (currAddrs &~ prevAddrs).collect {
               case WeightedAddress(addr @ Address.Inet(ia, metadata), w) =>
-                val shardIdOpt = ZkMetadata.fromAddrMetadata(metadata) match {
-                  case Some(ZkMetadata(Some(shardId))) => Some(shardId.toString)
-                  case _ => None
-                }
+                val (shardIdOpt: Option[String], boundAddress: Addr) =
+                  metadata match {
+                    case CacheNodeMetadata(_, shardId) =>
+                      // This means the destination was resolved by TwitterCacheResolver.
+                      twcacheConversion(shardId, ia)
+                    case _ =>
+                      ZkMetadata.fromAddrMetadata(metadata) match {
+                        case Some(ZkMetadata(Some(shardId))) =>
+                          (Some(shardId.toString), Addr.Bound(addr))
+                        case _ =>
+                          (None, Addr.Bound(addr))
+                      }
+                  }
                 val node = CacheNode(ia.getHostName, ia.getPort, w.asInstanceOf[Int], shardIdOpt)
                 val key = KetamaClientKey.fromCacheNode(node)
-                val service = mkService(addr, key)
+                val service = mkService(boundAddress, key)
+
                 addr -> (
                   key -> KetamaNode[Future[Service[Req, Rep]]](
                     key.identifier,
@@ -131,14 +142,34 @@ private[partitioning] class KetamaNodeManager[Req, Rep, Key](
     nodes.changes.filter(_.nonEmpty)
   }
 
+  /**
+   * This code is needed to support the old "twcache" scheme. The TwitterCacheResolver uses
+   * CacheNodeMetadata instead of ZkMetadata for shardId. Also address is unresolved. Therefore
+   * doing the necessary conversions here.
+   */
+  private[this] def twcacheConversion(
+    shardId: Option[String],
+    ia: InetSocketAddress
+  ): (Option[String], Addr) = {
+    val resolved = if (ia.isUnresolved) {
+      new InetSocketAddress(ia.getHostName, ia.getPort)
+    } else {
+      ia
+    }
+    // Convert CacheNodeMetadata to ZkMetadata
+    (
+      shardId,
+      Addr.Bound(
+        Address.Inet(resolved, ZkMetadata.toAddrMetadata(ZkMetadata(shardId.map(_.toInt))))
+      )
+    )
+  }
+
   // We listen for changes to the set of nodes to update the cache ring.
   private[this] val nodeWatcher: Closable = ketamaNodesChanges.respond(updateNodes)
 
-  private[this] def mkService(
-    addr: Address.Inet,
-    key: KetamaClientKey
-  ): Future[Service[Req, Rep]] = {
-    val modifiedParams = params + LoadBalancerFactory.Dest(Var.value(Addr.Bound(addr)))
+  private[this] def mkService(addr: Addr, key: KetamaClientKey): Future[Service[Req, Rep]] = {
+    val modifiedParams = params + LoadBalancerFactory.Dest(Var.value(addr))
 
     val next = underlying
       .replace(

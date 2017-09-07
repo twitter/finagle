@@ -14,8 +14,13 @@ scala_library(
     'finagle/finagle-toggle',
     'util/util-cache',
     'util/util-core/src/main/scala:scala',
+    'util/util-logging/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
   strict_deps=True,
+  exports=[
+    'util/util-core/src/main/scala:scala',
+  ]
+
 )

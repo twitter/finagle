@@ -1,16 +1,22 @@
 package com.twitter.finagle.mux.transport
 
+import com.twitter.finagle.{Stack, FailureFlags}
+import com.twitter.finagle.netty4.ssl.server.Netty4ServerSslHandler
+import com.twitter.finagle.netty4.ssl.client.Netty4ClientSslHandler
+import com.twitter.finagle.transport.{Transport, ContextBasedTransport}
 import com.twitter.io.Buf
-import com.twitter.logging.Logger
+import com.twitter.logging.{Logger, HasLogLevel, Level}
+import com.twitter.util.Future
+import io.netty.channel.Channel
 
-private[finagle] object OpportunisticTls {
+private[twitter] object OpportunisticTls {
   private[this] val log = Logger.get()
 
   /**
    * Defines encrypter keys and values exchanged as part of a
    * mux session header during initialization.
    */
-  object Header {
+  private[finagle] object Header {
     val KeyBuf: Buf = Buf.Utf8("tls")
 
     /**
@@ -26,6 +32,56 @@ private[finagle] object OpportunisticTls {
         Off // don't want to fail in case we decide to change levels in the future.
       }
   }
+
+  /**
+   * Negotiates what the negotiated agreement is.
+   *
+   * Returns true if the client and server agreed to use tls, false if they
+   * agreed not to.
+   *
+   * Throws an IncompatibleNegotiationException if the negotiation failed.
+   */
+  private[finagle] def negotiate(left: Level, right: Level): Boolean = (left, right) match {
+    case (Off, Off) => false
+    case (Off, Desired) => false
+    case (Off, Required) => throw new IncompatibleNegotiationException
+    case (Desired, Off) => false
+    case (Desired, Desired) => true
+    case (Desired, Required) => true
+    case (Required, Off) => throw new IncompatibleNegotiationException
+    case (Required, Desired) => true
+    case (Required, Required) => true
+  }
+
+  /**
+   * Wraps the underlying transport, adding a way to turn on tls for clients.
+   */
+  private[finagle] def clientTransport(
+    ch: Channel,
+    params: Stack.Params,
+    transport: Transport[Any, Any]
+  ): Transport[Any, Any] { type Context = MuxContext } =
+    new ContextBasedTransport[Any, Any, MuxContext](
+      new MuxContext(transport.context, ch.pipeline, () => new Netty4ClientSslHandler(params))
+    ) {
+      def read(): Future[Any] = transport.read()
+      def write(any: Any): Future[Unit] = transport.write(any)
+    }
+
+  /**
+   * Wraps the underlying transport, adding a way to turn on tls for servers.
+   */
+  private[finagle] def serverTransport(
+    ch: Channel,
+    params: Stack.Params,
+    transport: Transport[Any, Any]
+  ): Transport[Any, Any] { type Context = MuxContext } =
+    new ContextBasedTransport[Any, Any, MuxContext](
+      new MuxContext(transport.context, ch.pipeline, () => new Netty4ServerSslHandler(params))
+    ) {
+      def read(): Future[Any] = transport.read()
+      def write(any: Any): Future[Unit] = transport.write(any)
+    }
 
   /**
    * Configures the level of TLS that the client or server can support or must
@@ -57,4 +113,14 @@ private[finagle] object OpportunisticTls {
    * Compatible with "desired", or "required".
    */
   case object Required extends Level("required")
+}
+
+class IncompatibleNegotiationException(
+  private[finagle] val flags: Long = FailureFlags.Empty
+) extends Exception("Could not negotiate whether to use TLS or not.")
+    with FailureFlags[IncompatibleNegotiationException]
+    with HasLogLevel {
+  def logLevel: Level = Level.ERROR
+  protected def copyWithFlags(flags: Long): IncompatibleNegotiationException =
+    new IncompatibleNegotiationException(flags)
 }

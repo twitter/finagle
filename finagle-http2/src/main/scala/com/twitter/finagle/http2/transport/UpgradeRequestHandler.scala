@@ -1,6 +1,6 @@
 package com.twitter.finagle.http2.transport
 
-import com.twitter.finagle.netty4.http.exp.initClient
+import com.twitter.finagle.netty4.http.initClient
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.{Stack, FailureFlags}

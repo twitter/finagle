@@ -19,12 +19,14 @@ env:
     - PROJECT=finagle-netty4
     - PROJECT=finagle-netty4-http
     - PROJECT=finagle-netty3
+    - PROJECT=finagle-netty3-http
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-stats
     - PROJECT=finagle-thrift
     - PROJECT=finagle-thriftmux
     - PROJECT=finagle-toggle
+    - PROJECT=finagle-tunable
     - PROJECT=finagle-zipkin-core
     - PROJECT=finagle-zipkin
 

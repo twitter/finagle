@@ -16,7 +16,7 @@ import com.twitter.finagle.redis.protocol.{Command, Reply, StageTransport}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing.Tracer
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
@@ -73,11 +73,14 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transporter.framedBuf(None /* no Framer */, addr, params)
 
-    protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
+    protected def newDispatcher(transport: Transport[In, Out] {
+      type Context <: Client.this.Context
+    }): Service[Command, Reply] =
       RedisPool.newDispatcher(
         new StageTransport(transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
@@ -118,7 +121,7 @@ object Redis extends Client[Command, Reply] with RedisRichClient {
       super.filtered(filter)
   }
 
-  val client: Redis.Client = Client()
+  def client: Redis.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     client.newClient(dest, label)

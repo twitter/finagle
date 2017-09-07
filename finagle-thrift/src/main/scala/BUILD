@@ -7,6 +7,7 @@ scala_library(
   dependencies=[
     '3rdparty/jvm/com/google/guava:guava',
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/io/netty:netty4-handler-proxy',
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-netty4',
@@ -22,6 +23,14 @@ scala_library(
   strict_deps=True,
   sources=rglobs('*.scala'),
   fatal_warnings=True,
+  exports=[
+    '3rdparty/jvm/io/netty:netty4-handler-proxy',
+    '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
+    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-thrift/src/main/java:java',
+    'util/util-stats/src/main/scala:scala',
+  ]
+
 )
 
 # For usecases (like scrooge codegen) where this dependency is used, but not detected as

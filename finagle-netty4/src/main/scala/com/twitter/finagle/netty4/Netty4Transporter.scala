@@ -4,7 +4,7 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.decoder.Framer
 import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.netty4.transport.ChannelTransport
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.Stack
 import com.twitter.io.Buf
 import com.twitter.util.Future
@@ -28,21 +28,25 @@ private[finagle] object Netty4Transporter {
       Stack.Param(Backpressure(backpressure = true))
   }
 
-  private[this] def build[In, Out](
+  private[this] def build[In, Out, Ctx <: TransportContext](
     init: ChannelInitializer[Channel],
     addr: SocketAddress,
     params: Stack.Params,
-    transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
-      new ChannelTransport(ch)
+    transportFactory: Channel => Transport[Any, Any] {
+      type Context <: Ctx
     }
-  )(implicit mOut: Manifest[Out]): Transporter[In, Out] = new Transporter[In, Out] {
+  )(implicit mOut: Manifest[Out]): Transporter[In, Out, Ctx] = new Transporter[In, Out, Ctx] {
 
     private[this] val factory = new ConnectionBuilder(init, addr, params)
 
     def remoteAddress: SocketAddress = addr
 
-    def apply(): Future[Transport[In, Out]] = factory.build { ch =>
-      Future(Transport.cast[In, Out](transportFactory(ch)))
+    def apply(): Future[Transport[In, Out] { type Context <: Ctx }] = factory.build { ch =>
+      Future {
+        Transport
+          .cast[In, Out](transportFactory(ch))
+          .asInstanceOf[Transport[In, Out] { type Context <: Ctx }]
+      }
     }
 
     override def toString: String = "Netty4Transporter"
@@ -55,17 +59,34 @@ private[finagle] object Netty4Transporter {
    * @note this factory method makes no assumptions about reference counting
    *       of `ByteBuf` instances.
    */
-  def raw[In, Out](
+  def raw[In, Out, Ctx <: TransportContext](
     pipelineInit: ChannelPipeline => Unit,
     addr: SocketAddress,
     params: Stack.Params,
-    transportFactory: Channel => Transport[Any, Any] = { ch: Channel =>
-      new ChannelTransport(ch)
+    transportFactory: Channel => Transport[Any, Any] {
+      type Context <: Ctx
     }
-  )(implicit mOut: Manifest[Out]): Transporter[In, Out] = {
+  )(implicit mOut: Manifest[Out]): Transporter[In, Out, Ctx] = {
     val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
-    build[In, Out](init, addr, params, transportFactory)
+    build[In, Out, Ctx](init, addr, params, transportFactory)
+  }
+
+  /**
+   * `Transporter` constructor for protocols that need direct access to the netty pipeline
+   * (ie; finagle-http)
+   *
+   * @note this factory method makes no assumptions about reference counting
+   *       of `ByteBuf` instances.
+   */
+  def raw[In, Out](
+    pipelineInit: ChannelPipeline => Unit,
+    addr: SocketAddress,
+    params: Stack.Params
+  )(implicit mOut: Manifest[Out]): Transporter[In, Out, TransportContext] = {
+    val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
+
+    build[In, Out, TransportContext](init, addr, params, new ChannelTransport(_))
   }
 
   /**
@@ -80,9 +101,9 @@ private[finagle] object Netty4Transporter {
     framerFactory: Option[() => Framer],
     addr: SocketAddress,
     params: Stack.Params
-  ): Transporter[Buf, Buf] = {
+  ): Transporter[Buf, Buf, TransportContext] = {
     val init = new Netty4ClientChannelInitializer(params, framerFactory)
 
-    build[Buf, Buf](init, addr, params)
+    build[Buf, Buf, TransportContext](init, addr, params, new ChannelTransport(_))
   }
 }

@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
 import com.twitter.finagle.{Failure, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Return, Throw, Time}
@@ -234,6 +234,8 @@ private class DeferredTransport(
   underlying: Future[Transport[Message, Message]]
 ) extends Transport[Message, Message] {
 
+  type Context = TransportContext
+
   // we create a derivative promise while `underlying` is not defined
   // because the transport is multiplexed and interrupting on one
   // stream shouldn't affect the result of the handshake.
@@ -257,4 +259,5 @@ private class DeferredTransport(
   def peerCertificate: Option[Certificate] = init.peerCertificate
 
   def close(deadline: Time): Future[Unit] = gate().flatMap(_.close(deadline))
+  val context: TransportContext = new LegacyContext(this)
 }

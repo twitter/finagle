@@ -23,7 +23,8 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val q = new AsyncQueue[Any]
     val writeQueue = new AsyncQueue[Any]
     val t0 = new QueueTransport[Any, Any](writeQueue, q)
-    val trans: Transport[Int, String] = Transport.cast[Int, String](t0)
+    val trans: Transport[Int, String] =
+      Transport.cast[Int, String](t0)
 
     val s = "a string"
     q.offer(s)
@@ -54,7 +55,8 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val q = new AsyncQueue[Any]
     val unused = new AsyncQueue[Any]
     val t0 = new QueueTransport[Any, Any](unused, q)
-    val trans: Transport[Any, Foo] = Transport.cast[Any, Foo](t0)
+    val trans: Transport[Any, Foo] =
+      Transport.cast[Any, Foo](t0)
 
     q.offer(Bar(1))
 
@@ -92,6 +94,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
   }
 
   def fromList[A](seq: => List[A]) = new Transport[Any, Option[A]] {
+    type Context = TransportContext
     private[this] var next = seq
     def write(in: Any) = Future.exception(new Exception)
     def read() = synchronized {
@@ -108,9 +111,11 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val remoteAddress = new SocketAddress {}
     val peerCertificate = None
     def close(deadline: Time) = Future.exception(new Exception)
+    def context: TransportContext = new LegacyContext(this)
   }
 
   class Failed extends Transport[Any, Any] {
+    type Context = TransportContext
     def write(in: Any) = Future.exception(new Exception)
     def read(): Future[Any] = Future.exception(new Exception)
     val onClose = new Promise[Throwable]
@@ -119,6 +124,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val remoteAddress = new SocketAddress {}
     val peerCertificate = None
     def close(deadline: Time) = Future.exception(new Exception)
+    def context: TransportContext = new LegacyContext(this)
   }
 
   test("Transport.copyToWriter - discard while writing") {
@@ -245,6 +251,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("Transport.collate: discard while reading")(new Collate {
     val trans1 = new Transport[String, String] {
+      type Context = TransportContext
       val p = new Promise[String]
       var theIntr: Throwable = null
       p.setInterruptHandler {
@@ -259,6 +266,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       def remoteAddress = ???
       def peerCertificate = ???
       def close(deadline: Time) = ???
+      def context: TransportContext = new LegacyContext(this)
     }
 
     val coll1 = Transport.collate(trans1, read)
