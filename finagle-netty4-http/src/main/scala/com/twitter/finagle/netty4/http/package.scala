@@ -14,6 +14,7 @@ import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.param.Logger
 import com.twitter.finagle.http.param._
 import com.twitter.finagle.server.Listener
+import com.twitter.finagle.transport.TransportContext
 import com.twitter.util.{Future, Promise}
 import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener, ChannelPipeline}
 import io.netty.handler.codec.http.{
@@ -118,7 +119,7 @@ package object http {
   }
 
   private[finagle] val Netty4HttpTransporter
-    : Stack.Params => SocketAddress => Transporter[Any, Any] =
+    : Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext] =
     (params: Stack.Params) =>
       (addr: SocketAddress) =>
         Netty4Transporter.raw(
@@ -202,10 +203,10 @@ package object http {
       }
   }
 
-  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any] =
+  private[finagle] val Netty4HttpListener: Stack.Params => Listener[Any, Any, TransportContext] =
     (params: Stack.Params) =>
       Netty4Listener[Any, Any](
-        params = params,
-        pipelineInit = ServerPipelineInit(params)
+        pipelineInit = ServerPipelineInit(params),
+        params = params
     )
 }

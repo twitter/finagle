@@ -15,7 +15,7 @@ import com.twitter.finagle.param.{Label, Logger}
 import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.finagle.ssl.client.{SslClientEngineFactory, SslClientSessionVerifier}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.finagle.{CancelledConnectionException, ConnectionFailedException, Failure, Stack}
 import com.twitter.logging.Level
@@ -139,7 +139,7 @@ object Netty3Transporter {
   }
 
   /**
-   * Constructs a `Transporter[In, Out]` given a netty3 `ChannelPipelineFactory`
+   * Constructs a `Transporter[In, Out, TransportContext]` given a netty3 `ChannelPipelineFactory`
    * responsible for framing a `Transport` stream. The `Transporter` is configured
    * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
    *
@@ -151,12 +151,12 @@ object Netty3Transporter {
     pipelineFactory: ChannelPipelineFactory,
     addr: SocketAddress,
     params: Stack.Params
-  ): Transporter[In, Out] = {
+  ): Transporter[In, Out, TransportContext] = {
     val Stats(stats) = params[Stats]
 
     val transporter = new Netty3Transporter[In, Out](pipelineFactory, addr, params)
 
-    new Transporter[In, Out] {
+    new Transporter[In, Out, TransportContext] {
       def apply(): Future[Transport[In, Out]] =
         transporter(stats)
 
@@ -405,7 +405,9 @@ private[netty3] class Netty3Transporter[In, Out](
     ch
   }
 
-  def apply(statsReceiver: StatsReceiver): Future[Transport[In, Out]] = {
+  def apply(
+    statsReceiver: StatsReceiver
+  ): Future[Transport[In, Out] { type Context <: TransportContext }] = {
     val conn = new ChannelConnector[In, Out](
       () => newConfiguredChannel(statsReceiver),
       newTransport,

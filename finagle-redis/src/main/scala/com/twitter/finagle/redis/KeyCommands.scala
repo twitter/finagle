@@ -170,4 +170,14 @@ private[redis] trait KeyCommands { self: BaseClient =>
         if (n != -1) Future.value(Some(n))
         else Future.None
     }
+
+  /**
+   * Persist a key by removing it's expiration time
+   * @param key
+   * @return 1 if ttl was removed, 0 if key doesn't exist or doesn't have a ttl
+   */
+  def persist(key: Buf): Future[JLong] =
+    doRequest(Persist(key)) {
+      case IntegerReply(n) =>  Future.value(n)
+    }
 }

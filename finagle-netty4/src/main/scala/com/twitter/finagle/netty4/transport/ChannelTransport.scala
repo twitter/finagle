@@ -7,7 +7,6 @@ import com.twitter.util._
 import io.netty.{channel => nettyChan}
 import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
-import java.util.concurrent.Executor
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import scala.util.control.NonFatal
@@ -27,6 +26,8 @@ private[finagle] class ChannelTransport(
   ch: nettyChan.Channel,
   readQueue: AsyncQueue[Any] = new AsyncQueue[Any]
 ) extends Transport[Any, Any] {
+
+  type Context = Netty4Context
 
   import ChannelTransport._
 
@@ -156,8 +157,6 @@ private[finagle] class ChannelTransport(
 
   def remoteAddress: SocketAddress = ch.remoteAddress
 
-  private[finagle] override val executor: Option[Executor] = Some(ch.eventLoop())
-
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
   ch.pipeline.addLast(
@@ -194,6 +193,8 @@ private[finagle] class ChannelTransport(
       }
     }
   )
+
+  val context: Netty4Context = new Netty4Context(this, ch.eventLoop)
 }
 
 private[finagle] object ChannelTransport {

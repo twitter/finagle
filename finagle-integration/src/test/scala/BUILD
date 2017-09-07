@@ -14,6 +14,7 @@ junit_tests(
     'finagle/finagle-netty4-http',
     'finagle/finagle-thrift',
     'finagle/finagle-thriftmux',
+    'finagle/finagle-redis',
     'finagle/finagle-thriftmux/src/test/thrift:thrift-scala',
     'util/util-core/src/main/scala:scala',
     'util/util-stats/src/main/scala:scala',

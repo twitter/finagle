@@ -15,10 +15,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import scala.collection.mutable
 
-trait PartitioningServiceTestBase
-    extends FunSuite
-    with BeforeAndAfterEach
-    with Eventually {
+trait PartitioningServiceTestBase extends FunSuite with BeforeAndAfterEach with Eventually {
   import PartitioningServiceTestBase._
 
   protected[this] val failingHosts = new mutable.HashSet[String]()

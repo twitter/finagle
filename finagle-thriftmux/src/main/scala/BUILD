@@ -6,6 +6,7 @@ scala_library(
   ),
   dependencies=[
     '3rdparty/jvm/org/apache/thrift:libthrift-0.5.0',
+    '3rdparty/jvm/io/netty:netty4',
     'finagle/finagle-core/src/main/scala:scala',
     'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-thrift',
@@ -15,6 +16,7 @@ scala_library(
     'util/util-stats/src/main/scala:scala',
   ],
   exports=[
+    'finagle/finagle-mux/src/main/scala:scala',
     'finagle/finagle-thrift',
   ],
   fatal_warnings=True,

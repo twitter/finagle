@@ -13,7 +13,7 @@ import java.util.logging.Logger
  * usually by sending ping messages and evaluating response
  * times.
  */
-private[liveness] trait FailureDetector {
+private[finagle] trait FailureDetector {
   def status: Status
 }
 

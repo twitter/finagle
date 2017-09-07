@@ -5,7 +5,7 @@ import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.service.ConstantService
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
 import java.net.{InetSocketAddress, SocketAddress}
@@ -460,30 +460,31 @@ object StreamingTest {
 
   def modifiedTransporterFn(
     mod: Modifier,
-    fn: Stack.Params => SocketAddress => Transporter[Any, Any]
-  ): Stack.Params => SocketAddress => Transporter[Any, Any] = { params: Stack.Params =>
-    { addr =>
-      val underlying = fn(params)(addr)
-      new Transporter[Any, Any] {
-        def apply(): Future[Transport[Any, Any]] = {
-          underlying().map(mod)
-        }
+    fn: Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext]
+  ): Stack.Params => SocketAddress => Transporter[Any, Any, TransportContext] = {
+    params: Stack.Params =>
+      { addr =>
+        val underlying = fn(params)(addr)
+        new Transporter[Any, Any, TransportContext] {
+          def apply(): Future[Transport[Any, Any]] = {
+            underlying().map(mod)
+          }
 
-        def remoteAddress: SocketAddress = underlying.remoteAddress
+          def remoteAddress: SocketAddress = underlying.remoteAddress
+        }
       }
-    }
   }
 
   def modifiedListenerFn(
     mod: Modifier,
-    fn: Stack.Params => Listener[Any, Any]
-  ): Stack.Params => Listener[Any, Any] = { params: Stack.Params =>
+    fn: Stack.Params => Listener[Any, Any, TransportContext]
+  ): Stack.Params => Listener[Any, Any, TransportContext] = { params: Stack.Params =>
     val underlying = fn(params)
-    new Listener[Any, Any] {
+    new Listener[Any, Any, TransportContext] {
       def listen(
         addr: SocketAddress
       )(
-        serveTransport: Transport[Any, Any] => Unit
+        serveTransport: Transport[Any, Any] { type Context <: TransportContext } => Unit
       ): ListeningServer = underlying.listen(addr)(mod.andThen(serveTransport))
     }
   }

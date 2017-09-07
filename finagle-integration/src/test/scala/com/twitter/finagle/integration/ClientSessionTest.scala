@@ -11,16 +11,13 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
-import org.junit.runner.RunWith
 import org.mockito.Mockito.when
 import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 /**
  * We want client session statuses to reflect the status of their underlying transports.
  */
-@RunWith(classOf[JUnitRunner])
 class ClientSessionTest extends FunSuite with MockitoSugar {
 
   def testSessionStatus[Req, Rep](

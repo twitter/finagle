@@ -8,8 +8,9 @@ import com.twitter.finagle.http2.transport.Http2ClientDowngrader.StreamMessage
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.{HttpCodecName, Netty4HttpTransporter, initClient}
+import com.twitter.finagle.netty4.transport.HasExecutor
 import com.twitter.finagle.param.{Timer => TimerParam}
-import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.logging.{HasLogLevel, Level, Logger}
 import com.twitter.util._
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 private[finagle] object Http2Transporter {
 
-  def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any] = {
+  def apply(params: Stack.Params)(addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
     // current http2 client implementation doesn't support
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
@@ -187,15 +188,16 @@ private[finagle] object Http2Transporter {
  * doesn't attempt to upgrade.
  */
 private[finagle] class Http2Transporter(
-  underlying: Transporter[Any, Any],
-  underlyingHttp11: Transporter[Any, Any],
+  underlying: Transporter[Any, Any, TransportContext],
+  underlyingHttp11: Transporter[Any, Any, TransportContext],
   alpnUpgrade: Boolean,
   params: Stack.Params,
   implicit val timer: Timer
-) extends Transporter[Any, Any]
+) extends Transporter[Any, Any, TransportContext]
     with Closable { self =>
 
   private[this] def deadTransport(exn: Throwable) = new Transport[Any, Any] {
+    type Context = TransportContext
     def read(): Future[Any] = Future.never
     def write(msg: Any): Future[Unit] = Future.never
     val status: Status = Status.Closed
@@ -204,6 +206,7 @@ private[finagle] class Http2Transporter(
     def localAddress: SocketAddress = new SocketAddress {}
     def peerCertificate: Option[Certificate] = None
     def close(deadline: Time): Future[Unit] = Future.Done
+    val context: TransportContext = new LegacyContext(this)
   }
 
   def remoteAddress: SocketAddress = underlying.remoteAddress
@@ -294,8 +297,15 @@ private[finagle] class Http2Transporter(
               case UpgradeEvent.UPGRADE_REJECTED =>
                 p.setValue(None)
               case UpgradeEvent.UPGRADE_SUCCESSFUL =>
-                val casted = Transport.cast[StreamMessage, StreamMessage](trans)
-                p.setValue(Some(new MultiplexedTransporter(casted, trans.remoteAddress, params)))
+                val inOutCasted = Transport.cast[StreamMessage, StreamMessage](trans)
+                val contextCasted = inOutCasted.asInstanceOf[
+                  Transport[StreamMessage, StreamMessage] {
+                    type Context = TransportContext with HasExecutor
+                  }
+                ]
+                p.setValue(
+                  Some(new MultiplexedTransporter(contextCasted, trans.remoteAddress, params))
+                )
               case msg =>
                 log.error(s"Non-upgrade event detected $msg")
             }

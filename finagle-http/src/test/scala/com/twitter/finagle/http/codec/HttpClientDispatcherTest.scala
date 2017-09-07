@@ -2,19 +2,19 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.Status
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.finagle.http.{Request, Response, Version, Status => HttpStatus}
-import com.twitter.finagle.http.netty.{Bijections, Netty3ClientStreamTransport}
+import com.twitter.finagle.netty3.http.Netty3ClientStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.finagle.transport.{QueueTransport, Transport, LegacyContext, TransportContext}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus.OK
 import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, DefaultHttpResponse, HttpChunk}
-import org.scalatest.FunSuite
 import org.mockito.Mockito.{spy, times, verify}
+import org.scalatest.FunSuite
 
 object OpTransport {
   sealed trait Op[In, Out]
@@ -27,8 +27,10 @@ object OpTransport {
 }
 
 class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Transport[In, Out] {
-  import org.scalatest.Assertions._
   import OpTransport._
+  import org.scalatest.Assertions._
+
+  type Context = TransportContext
 
   def read() = ops match {
     case Read(res) :: rest =>
@@ -68,8 +70,12 @@ class OpTransport[In, Out](var ops: List[OpTransport.Op[In, Out]]) extends Trans
   def localAddress = new java.net.SocketAddress {}
   def remoteAddress = new java.net.SocketAddress {}
   val peerCertificate = None
+  val context = new LegacyContext(this)
 }
 
+// Note: This is shared between Netty3 and Netty4 implementations, but we need a concrete impl
+// to test it so the finagle-http package is most appropriate even though the implementation
+// is in finagle-base-http.
 class HttpClientDispatcherTest extends FunSuite {
   def mkPair() = {
     val inQ = new AsyncQueue[Any]

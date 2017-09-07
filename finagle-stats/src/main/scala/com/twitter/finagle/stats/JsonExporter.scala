@@ -133,7 +133,7 @@ class JsonExporter(metrics: MetricsView, verbose: Tunable[String], timer: Timer)
 
   def this(registry: MetricsView, timer: Timer) = this(
     registry,
-    Verbose.orElse(Tunable.const(Verbose.id, "*")),
+    Verbose,
     timer
   )
 

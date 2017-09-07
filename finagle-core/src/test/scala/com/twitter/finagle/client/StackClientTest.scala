@@ -13,7 +13,7 @@ import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{Name, param}
 import com.twitter.util._
@@ -38,12 +38,15 @@ private object StackClientTest {
 
     protected type In = String
     protected type Out = String
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+    protected def newTransporter(
+      addr: SocketAddress
+    ): Transporter[String, String, TransportContext] =
       Netty4Transporter.raw(StringClient.StringClientPipeline, addr, params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out]
+      transport: Transport[In, Out] { type Context <: LocalCheckingStringClient.this.Context }
     ): Service[String, String] = {
       Contexts.local.get(localKey) match {
         case Some(s) =>
@@ -57,16 +60,32 @@ private object StackClientTest {
   }
 }
 
-class StackClientTest
+class StdStackClientTest extends AbstractStackClientTest {
+  type ClientType = StringClient.Client
+  def baseClient: ClientType = StringClient.client
+  def transporterName: String = "Netty4Transporter"
+}
+
+class PushStackClientTest extends AbstractStackClientTest {
+  type ClientType = PushStringClient.Client
+  def baseClient: ClientType = PushStringClient.client
+  def transporterName: String = "Netty4PushTransporter"
+}
+
+abstract class AbstractStackClientTest
     extends FunSuite
     with BeforeAndAfter
     with Eventually
     with IntegrationPatience {
 
+  type ClientType <: EndpointerStackClient[String, String, ClientType]
+
+  def baseClient: ClientType
+  def transporterName: String
+
   trait Ctx {
     val sr = new InMemoryStatsReceiver
-    val client = StringClient.client
-      .configured(param.Stats(sr))
+    val client = baseClient.configured(param.Stats(sr))
   }
 
   after {
@@ -278,7 +297,7 @@ class StackClientTest
     }
 
     val sr = new InMemoryStatsReceiver
-    val client = StringClient.client.configured(param.Stats(sr))
+    val client = baseClient.configured(param.Stats(sr))
 
     val stk = client.stack.replace(
       LoadBalancerFactory.role,
@@ -448,7 +467,7 @@ class StackClientTest
 
   test("StackBasedClient.configured is a StackClient") {
     // compilation test
-    val client: StackBasedClient[String, String] = StringClient.client
+    val client: StackBasedClient[String, String] = baseClient
     val client2: StackBasedClient[String, String] =
       client.configured(param.Label("foo"))
     val client3: StackBasedClient[String, String] =
@@ -457,7 +476,7 @@ class StackClientTest
 
   test("StackClient.configured is a StackClient") {
     // compilation test
-    val client: StackClient[String, String] = StringClient.client
+    val client: StackClient[String, String] = baseClient
     val client2: StackClient[String, String] =
       client.configured(param.Label("foo"))
     val client3: StackClient[String, String] =
@@ -471,7 +490,7 @@ class StackClientTest
     val sf = ServiceFactory(() => Future.value(reverser))
     val addr = exp.Address(sf)
     val name = Name.bound(addr)
-    val service = StringClient.client.newService(name, "sfsa-test")
+    val service = baseClient.newService(name, "sfsa-test")
     val forward = "a man a plan a canal: panama"
     val reversed = Await.result(service(forward), 1.second)
     assert(reversed == forward.reverse)
@@ -490,7 +509,7 @@ class StackClientTest
         svc(str.reverse)
     }
 
-    val svc = StringClient.client.filtered(reverseFilter).newService(name, "test_client")
+    val svc = baseClient.filtered(reverseFilter).newService(name, "test_client")
     assert(Await.result(svc("ping"), 1.second) == "ping".reverse)
   }
 
@@ -619,7 +638,7 @@ class StackClientTest
     val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
 
     val label = "stringClient"
-    val svc = StringClient.client.newService(Name.bound(Address(boundAddress)), label)
+    val svc = baseClient.newService(Name.bound(Address(boundAddress)), label)
 
     val registry = new SimpleRegistry
     Await.result(GlobalRegistry.withRegistry(registry) {
@@ -628,7 +647,7 @@ class StackClientTest
 
     val expectedEntry = Entry(
       key = Seq("client", StringClient.protocolLibrary, label, "Transporter"),
-      value = "Netty4Transporter"
+      value = transporterName
     )
 
     assert(registry.iterator.contains(expectedEntry))

@@ -2,19 +2,23 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle.socks._
 import com.twitter.finagle.{Address, Stack}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Duration, Future}
 import java.net.{InetSocketAddress, SocketAddress}
 
 /**
- * Transporters construct a `Future[Transport[In, Out]]`.
+ * Transporters construct a `Future[Transport[In, Out, Context]]`.
  *
  * There is one Transporter assigned per remote peer.  Transporters are
  * symmetric to the server-side [[com.twitter.finagle.server.Listener]], except
  * that it isn't shared across remote peers..
  */
-trait Transporter[In, Out] {
-  def apply(): Future[Transport[In, Out]]
+trait Transporter[In, Out, Ctx <: TransportContext] {
+  def apply(): Future[
+    Transport[In, Out] {
+      type Context <: Ctx
+    }
+  ]
 
   /**
    * The address of the remote peer that this `Transporter` connects to.

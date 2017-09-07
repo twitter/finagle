@@ -112,6 +112,7 @@ object Command {
   val CONFIG = Buf.Utf8("CONFIG")
   val SENTINEL = Buf.Utf8("SENTINEL")
   val CLUSTER = Buf.Utf8("CLUSTER")
+  val DBSIZE = Buf.Utf8("DBSIZE")
 
   // Scripts
   val EVAL = Buf.Utf8("EVAL")
@@ -182,6 +183,7 @@ object Command {
   val HSET = Buf.Utf8("HSET")
   val HSETNX = Buf.Utf8("HSETNX")
   val HVALS = Buf.Utf8("HVALS")
+  val HSTRLEN = Buf.Utf8("HSTRLEN")
 
   // Cluster commands
   val ASKING = Buf.Utf8("ASKING")

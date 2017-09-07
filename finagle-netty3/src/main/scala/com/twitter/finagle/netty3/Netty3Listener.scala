@@ -14,7 +14,7 @@ import com.twitter.finagle.ssl.server.{
   SslServerSessionVerifier
 }
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.logging.HasLogLevel
 import com.twitter.util.{CloseAwaitably, Duration, Future, Promise, Time}
 import java.net.SocketAddress
@@ -155,9 +155,10 @@ object Netty3Listener {
   }
 
   /**
-   * Constructs a `Listener[In, Out]` given a netty3 `ChannelPipelineFactory`
-   * responsible for framing a `Transport` stream. The `Listener` is configured
-   * via the passed in [[com.twitter.finagle.Stack.Param]]'s.
+   * Constructs a `Listener[In, Out, TransportContext]` given a netty3
+   * `ChannelPipelineFactory` responsible for framing a `Transport` stream. The
+   * `Listener` is configured via the passed in
+   * [[com.twitter.finagle.Stack.Param]]'s.
    *
    * @see [[com.twitter.finagle.server.Listener]]
    * @see [[com.twitter.finagle.transport.Transport]]
@@ -166,7 +167,7 @@ object Netty3Listener {
   def apply[In, Out](
     pipeline: ChannelPipelineFactory,
     params: Stack.Params
-  ): Listener[In, Out] = new Netty3Listener[In, Out](pipeline, params)
+  ): Listener[In, Out, TransportContext] = new Netty3Listener[In, Out](pipeline, params)
 }
 
 /**
@@ -185,7 +186,7 @@ object Netty3Listener {
  * configure the listener.
  */
 class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: Stack.Params)
-    extends Listener[In, Out] {
+    extends Listener[In, Out, TransportContext] {
   import Netty3Listener._
 
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
@@ -325,7 +326,9 @@ class Netty3Listener[In, Out](pipelineFactory: ChannelPipelineFactory, params: S
       }
     }
 
-  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit): ListeningServer =
+  def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] {
+    type Context <: TransportContext
+  } => Unit): ListeningServer =
     new ListeningServer with CloseAwaitably {
       val serverLabel = ServerRegistry.nameOf(addr) getOrElse name
       val scopedStatsReceiver = paramStatsReceiver match {

@@ -60,7 +60,7 @@ class Netty4ClientSslHandlerTest extends FunSuite {
     val sslHandler = pipeline.get(classOf[SslHandler])
     assert(sslHandler == null)
 
-    val sslConnectHandler = pipeline.get(classOf[SslClientConnectHandler])
+    val sslConnectHandler = pipeline.get(classOf[SslClientVerificationHandler])
     assert(sslConnectHandler == null)
 
     ch.finishAndReleaseAll()
@@ -87,7 +87,7 @@ class Netty4ClientSslHandlerTest extends FunSuite {
       val sslHandler = pipeline.get(classOf[SslHandler])
       assert(sslHandler != null)
 
-      val sslConnectHandler = pipeline.get(classOf[SslClientConnectHandler])
+      val sslConnectHandler = pipeline.get(classOf[SslClientVerificationHandler])
       assert(sslConnectHandler != null)
 
       val sslEngine = sslHandler.engine()

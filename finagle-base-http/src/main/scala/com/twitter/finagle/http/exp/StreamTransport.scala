@@ -35,8 +35,9 @@ private[finagle] trait StreamTransport[In, Out] extends Transport[In, Multi[Out]
   def read(): Future[Multi[Out]]
 }
 
-private[finagle] abstract class StreamTransportProxy[In, Out](self: Transport[_, _])
+private[finagle] abstract class StreamTransportProxy[In, Out](val self: Transport[_, _])
     extends StreamTransport[In, Out] {
+  type Context = self.Context
 
   def status: Status = self.status
   val onClose: Future[Throwable] = self.onClose
@@ -44,4 +45,5 @@ private[finagle] abstract class StreamTransportProxy[In, Out](self: Transport[_,
   def remoteAddress: SocketAddress = self.remoteAddress
   def close(deadline: Time): Future[Unit] = self.close(deadline)
   def peerCertificate: Option[Certificate] = self.peerCertificate
+  def context: Context = self.context
 }

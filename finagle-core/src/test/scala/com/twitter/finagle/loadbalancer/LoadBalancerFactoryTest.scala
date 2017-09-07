@@ -12,10 +12,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 
-class LoadBalancerFactoryTest
-    extends FunSuite
-    with Eventually
-    with IntegrationPatience {
+class LoadBalancerFactoryTest extends FunSuite with Eventually with IntegrationPatience {
   val echoService = Service.mk[String, String](Future.value(_))
 
   trait PerHostFlagCtx extends App {

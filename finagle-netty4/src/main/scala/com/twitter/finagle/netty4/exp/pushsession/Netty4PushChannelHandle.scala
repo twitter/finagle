@@ -1,6 +1,6 @@
 package com.twitter.finagle.netty4.exp.pushsession
 
-import com.twitter.finagle.{ChannelClosedException, ChannelException, Status}
+import com.twitter.finagle.{ChannelException, Status}
 import com.twitter.finagle.exp.pushsession.{PushChannelHandle, PushSession}
 import com.twitter.util._
 import io.netty.buffer.ByteBuf
@@ -12,7 +12,7 @@ import io.netty.channel.{
 }
 import io.netty.handler.ssl.SslHandler
 import io.netty.util
-import io.netty.util.concurrent.{GenericFutureListener, Future => NettyFuture}
+import io.netty.util.concurrent.GenericFutureListener
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.Executor
@@ -37,19 +37,7 @@ private final class Netty4PushChannelHandle[In, Out] private (ch: Channel)
 
   @volatile
   private[this] var failed: Boolean = false
-  private[this] val closePromise = {
-    val p = Promise[Unit]
-    // Register with channel close events
-    ch.closeFuture.addListener(new GenericFutureListener[NettyFuture[Void]] {
-      override def operationComplete(future: NettyFuture[Void]): Unit = {
-        if (future.isSuccess) p.updateIfEmpty(Return.Unit)
-        else if (future.isCancelled)
-          p.updateIfEmpty(Throw(new ChannelClosedException(remoteAddress)))
-        else p.updateIfEmpty(Throw(ChannelException(future.cause, remoteAddress)))
-      }
-    })
-    p
-  }
+  private[this] val closePromise = Promise[Unit]()
 
   val serialExecutor: Executor = ch.eventLoop
 
@@ -295,6 +283,10 @@ private object Netty4PushChannelHandle {
    * Protocol related netty pipeline initialization is deferred until the session has
    * resolved. The resultant `Future[T]` will resolve once the session has been installed
    * and the pipeline is receiving events from the socket.
+   *
+   * @note this should be called from the thread associated with the Channel and with
+   *       an active channel or else shutdown logic will become racy since adding handlers
+   *       to a closed channel won't receive `channelInactive` events.
    */
   def install[In, Out, T <: PushSession[In, Out]](
     ch: Channel,
@@ -308,6 +300,10 @@ private object Netty4PushChannelHandle {
     val channelHandle = new Netty4PushChannelHandle[In, Out](ch)
     val delayStage = new channelHandle.DelayedByteBufHandler
     ch.pipeline.addLast(DelayedByteBufHandler, delayStage)
+    // We initialize the protocol level stuff after adding the delay stage
+    // so that the write path is fully formed but the delay stage is in
+    // a position that we know will be dealing in ByteBuf's.
+    protocolInit(ch.pipeline)
 
     // Link resolution of the PushSession to installing the rest of the pipeline
     sessionFactory(channelHandle).respond { result =>
@@ -315,7 +311,6 @@ private object Netty4PushChannelHandle {
         def run(): Unit = {
           result match {
             case Return(session) =>
-              protocolInit(ch.pipeline)
               delayStage.installSessionDriver(session)
 
             case Throw(exc) =>

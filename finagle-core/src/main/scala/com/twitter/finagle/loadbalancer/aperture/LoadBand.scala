@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * 1. Distributed clients should be able to converge on a uniform aperture size if
  * they are offered the same amount of load. The tighter the high and low bands, the
  * less "wiggle" room distributed clients have to diverge aperture sizes. This is an
- * important property to maintain, especially when using [[DeterministicOrdering]], in
+ * important property to maintain, especially when using [[DeterministicAperture]], in
  * order to have a more uniform load distribution.
  *
  * 2. Large changes or oscillations in the aperture window size are minimized in order to

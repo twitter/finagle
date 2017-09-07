@@ -6,7 +6,7 @@ import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.param.{Stats, Label}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext, LegacyContext}
 import com.twitter.finagle.{Service, Status}
 import com.twitter.util._
 import io.netty.buffer.{Unpooled, ByteBuf}
@@ -35,6 +35,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
 
   // a Transport whose reads and writes never complete
   private[netty4] class NullTransport[In, Out] extends Transport[In, Out] {
+    type Context = TransportContext
     val closeP = new Promise[Throwable]
     val readP = Future.never
     val writeP = Future.never
@@ -53,6 +54,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
       closeP.setValue(new Exception("closed channelExn"))
       Future.Done
     }
+    val context: TransportContext = new LegacyContext(this)
   }
 
   // the /dev/null of dispatchers
@@ -74,9 +76,10 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     def backpressure: Boolean = true
 
     val p = Params.empty + Label("test") + Stats(sr) + BackPressure(backpressure)
-    val listener = Netty4Listener[ByteBuf, ByteBuf](
+    val listener = Netty4Listener[ByteBuf, ByteBuf, TransportContext](
       pipelineInit = _ => (),
       params = p,
+      identity,
       transportFactory = { _: Channel =>
         new NullTransport
       }
@@ -124,7 +127,9 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     import ctx._
 
     val p = Params.empty + Label("test") + Stats(sr)
-    val listener = Netty4Listener[ByteBuf, ByteBuf](pipelineInit = _ => (), params = p)
+    val listener = Netty4Listener[ByteBuf, ByteBuf](pipelineInit = { _: ChannelPipeline =>
+      ()
+    }, params = p)
 
     val requestBB = new Promise[ByteBuf]
     val service = new Service[ByteBuf, ByteBuf] {
@@ -163,9 +168,10 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
 
     // need to turn off backpressure since we don't read off the transport
     val p = Params.empty + Label("srv") + Stats(sr) + BackPressure(false)
-    val listener = Netty4Listener[ByteBuf, ByteBuf](
+    val listener = Netty4Listener[ByteBuf, ByteBuf, TransportContext](
       pipelineInit = _ => (),
       params = p,
+      identity,
       transportFactory = { _: Channel =>
         new NullTransport
       }

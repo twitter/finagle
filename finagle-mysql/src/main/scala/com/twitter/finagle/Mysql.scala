@@ -15,7 +15,7 @@ import com.twitter.finagle.param.{
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
@@ -176,8 +176,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] = {
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] = {
       val framerFactory = () => {
         new LengthFieldFramer(
           lengthFieldBegin = 0,
@@ -190,7 +191,9 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       Netty4Transporter.framedBuf(Some(framerFactory), addr, params)
     }
 
-    protected def newDispatcher(transport: Transport[Buf, Buf]): Service[Request, Result] = {
+    protected def newDispatcher(transport: Transport[Buf, Buf] {
+      type Context <: Client.this.Context
+    }): Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
       mysql.ClientDispatcher(
         transport.map(_.toBuf, Packet.fromBuf),
@@ -263,7 +266,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     override def richClientStatsReceiver: StatsReceiver = params[Stats].statsReceiver
   }
 
-  val client = Client()
+  def client: Mysql.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Request, Result] =
     client.newClient(dest, label)

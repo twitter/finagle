@@ -3,13 +3,17 @@ package com.twitter.finagle.client
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.param.ProtocolLibrary
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.{Service, ServiceFactory, Stack}
-import io.netty.channel.{ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPipeline, ChannelPromise}
+import io.netty.channel.{
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
+  ChannelPromise
+}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import java.net.SocketAddress
 import java.nio.charset.StandardCharsets.UTF_8
-
 
 object StringClient {
 
@@ -53,13 +57,16 @@ object StringClient {
 
     protected type In = String
     protected type Out = String
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[String, String] =
+    protected def newTransporter(
+      addr: SocketAddress
+    ): Transporter[String, String, TransportContext] =
       if (appendDelimeter) Netty4Transporter.raw(StringClientPipeline, addr, params)
       else Netty4Transporter.raw(NoDelimStringPipeline, addr, params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out]
+      transport: Transport[In, Out] { type Context <: Client.this.Context }
     ): Service[String, String] =
       new SerialClientDispatcher(transport)
 
@@ -72,5 +79,5 @@ object StringClient {
       )
   }
 
-  val client: Client = Client()
+  def client: Client = Client()
 }

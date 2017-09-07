@@ -6,7 +6,8 @@ import com.twitter.finagle.http2.SerialExecutor
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader._
 import com.twitter.finagle.http2.transport.MultiplexedTransporter._
 import com.twitter.finagle.liveness.FailureDetector
-import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.netty4.transport.HasExecutor
+import com.twitter.finagle.transport.{QueueTransport, LegacyContext, TransportContext, Transport}
 import com.twitter.finagle.{FailureFlags, Status, StreamClosedException, Stack}
 import com.twitter.util.{Await, Future, TimeoutException}
 import io.netty.buffer._
@@ -22,14 +23,18 @@ class MultiplexedTransporterTest extends FunSuite {
   class SlowClosingQueue(left: AsyncQueue[StreamMessage], right: AsyncQueue[StreamMessage])
       extends QueueTransport[StreamMessage, StreamMessage](left, right) {
     override val onClose: Future[Throwable] = Future.never
-    private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+    override val context: TransportContext = new LegacyContext(this) with HasExecutor {
+      private[finagle] override val executor: Executor = new SerialExecutor
+    }
   }
 
   val H1Req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "twitter.com")
 
   test("MultiplexedTransporter children should kill themselves when given a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(Int.MaxValue)
@@ -51,7 +56,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children should kill themselves when they grow to a bad stream id") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(Int.MaxValue)
@@ -75,7 +82,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children should disappear when they die") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -92,7 +101,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children can't even") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     multi.setStreamId(2)
@@ -111,7 +122,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter forbids new child streams on GOAWAY") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -126,7 +139,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter respects last stream ID on GOAWAY & closes children") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -164,7 +179,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter reflects detector status") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -180,7 +197,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter call to first() provides child with streamId == 1") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
     assert(multi.first().asInstanceOf[multi.ChildTransport].curId == 1)
@@ -188,7 +207,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("MultiplexedTransporter children increment stream ID only on write") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -204,7 +225,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("Idle children kill themselves when read") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -221,7 +244,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("Children can be closed multiple times, but keep the first reason") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     val multi = new MultiplexedTransporter(transport, addr, Stack.Params.empty)
 
@@ -243,7 +268,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("RST is sent when a message is received for a closed stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -262,7 +289,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("GOAWAY w/ PROTOCOL_ERROR is sent when a message is received for an idle stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(
@@ -283,7 +312,9 @@ class MultiplexedTransporterTest extends FunSuite {
 
   test("RST is not sent when RST is received for a nonexistent stream") {
     val (writeq, readq) = (new AsyncQueue[StreamMessage](), new AsyncQueue[StreamMessage]())
-    val transport = new SlowClosingQueue(writeq, readq)
+    val transport = new SlowClosingQueue(writeq, readq).asInstanceOf[Transport[StreamMessage, StreamMessage] {
+      type Context = TransportContext with HasExecutor
+    }]
     val addr = new SocketAddress {}
     var cur: Status = Status.Open
     val params = Stack.Params.empty + FailureDetector.Param(

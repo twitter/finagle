@@ -38,7 +38,7 @@ case class FileElement(
 ) extends FormElement
 
 /**
- * Provides a class for building [[org.jboss.netty.handler.codec.http.HttpRequest]]s.
+ * Provides a class for building [[Request]]s.
  * The main class to use is [[com.twitter.finagle.http.RequestBuilder]], as so
  *
  * {{{
@@ -60,7 +60,7 @@ case class FileElement(
  * above is
  *
  * {{{
- * HttpRequest getRequest =
+ * Request getRequest =
  *   RequestBuilder.safeBuildGet(
  *     RequestBuilder.create()
  *       .setHeader(HttpHeaders.Names.USER_AGENT, "MyBot")

@@ -11,6 +11,7 @@ scala_library(
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'finagle/finagle-netty3',
+    'util/util-app',
     'util/util-codec',
     'util/util-collection',
     'util/util-core',

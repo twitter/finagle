@@ -15,6 +15,7 @@ junit_tests(
     'finagle/finagle-http',
     'finagle/finagle-http/src/test/resources',
     'finagle/finagle-http2/src/main/scala:scala',
+    'finagle/finagle-netty3-http',
     'finagle/finagle-netty3/src/main/scala:scala',
     'finagle/finagle-netty4-http',
     'finagle/finagle-netty4/src/main/scala:scala',
@@ -27,5 +28,4 @@ junit_tests(
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   strict_deps=True,
-
 )

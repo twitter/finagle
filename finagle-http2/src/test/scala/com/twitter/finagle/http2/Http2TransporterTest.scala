@@ -4,7 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Stack}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.Http2ClientDowngrader
-import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.finagle.netty4.transport.HasExecutor
+import com.twitter.finagle.transport.{Transport, TransportProxy, TransportContext, LegacyContext}
 import com.twitter.util.{Await, Duration, Future, Time, Promise, MockTimer}
 import io.netty.handler.codec.http.{
   DefaultFullHttpResponse,
@@ -28,6 +29,7 @@ class Http2TransporterTest extends FunSuite {
     Await.result(f, wait)
 
   class TestTransport(addr: SocketAddress) extends Transport[Any, Any] {
+    type Context = TransportContext
 
     private[this] val _onClose = Promise[Throwable]()
     def write(req: Any): Future[Unit] = Future.Done
@@ -41,11 +43,13 @@ class Http2TransporterTest extends FunSuite {
       _onClose.setValue(new Exception("boom!"))
       Future.Unit
     }
-
-    private[finagle] override val executor: Option[Executor] = Some(new SerialExecutor)
+    def context: TransportContext = new LegacyContext(this) with HasExecutor {
+      private[finagle] override val executor: Executor = new SerialExecutor
+    }
   }
 
-  class BackingTransporter(fn: SocketAddress => Transport[Any, Any]) extends Transporter[Any, Any] {
+  class BackingTransporter(fn: SocketAddress => Transport[Any, Any])
+      extends Transporter[Any, Any, TransportContext] {
 
     var count = 0
 
@@ -204,7 +208,7 @@ class Http2TransporterTest extends FunSuite {
     assert(http11Trans.status == Status.Open)
   }
 
-  class FirstFail(f: Future[Transport[Any, Any]]) extends Transporter[Any, Any] {
+  class FirstFail(f: Future[Transport[Any, Any]]) extends Transporter[Any, Any, TransportContext] {
     var first = true
     var count = 0
 

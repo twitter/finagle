@@ -24,7 +24,6 @@ class ServerBuilderTest
     with IntegrationPatience
     with MockitoSugar {
 
-  if (!sys.props.contains("SKIP_FLAKY"))
     test(s"registers server with bound address") {
       val simple = new SimpleRegistry()
 
@@ -36,7 +35,10 @@ class ServerBuilderTest
           .build(Service.const(Future.value("hi")))
 
         val entries = simple.toSet
-        val specified = entries.filter(_.key.startsWith(Seq("server", "string", "test")))
+        val specified = entries.filter { entry =>
+          entry.key.startsWith(Seq("server", "string", "test")) &&
+          entry.key.exists(_.contains("127.0.0.1"))
+        }
         // Entries are in the form: Entry(List(server, fancy, test, /127.0.0.1:58904, RequestStats, unit),MILLISECONDS)
         val entry = specified.head // data is repeated as entry.key, just take the first
         val hostAndPort = entry.key.filter(_.contains("127.0.0.1")).head

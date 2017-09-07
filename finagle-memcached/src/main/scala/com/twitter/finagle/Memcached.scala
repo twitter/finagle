@@ -39,7 +39,7 @@ import com.twitter.finagle.server.{Listener, ServerInfo, StackServer, StdStackSe
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.{finagle, hashing}
 import com.twitter.io.Buf
@@ -298,11 +298,14 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
 
     protected type In = Buf
     protected type Out = Response
+    protected type Context = TransportContext
 
-    protected def newTransporter(addr: SocketAddress): Transporter[In, Out] =
+    protected def newTransporter(addr: SocketAddress): Transporter[In, Out, Context] =
       Netty4Transporter.raw(MemcachedNetty4ClientFramer, addr, params)
 
-    protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
+    protected def newDispatcher(transport: Transport[In, Out] {
+      type Context <: Client.this.Context
+    }): Service[Command, Response] =
       new PipeliningDispatcher(
         new ClientTransport[Command, Response](new CommandToBuf, transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
@@ -441,7 +444,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
       super.filtered(filter)
   }
 
-  val client: Memcached.Client = Client()
+  def client: Memcached.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     client.newClient(dest, label)
@@ -473,12 +476,13 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
 
     protected type In = Buf
     protected type Out = Buf
+    protected type Context = TransportContext
 
-    protected def newListener(): Listener[In, Out] =
+    protected def newListener(): Listener[In, Out, TransportContext] =
       Netty4Listener[Buf, Buf](Netty4ServerFramer, params)
 
     protected def newDispatcher(
-      transport: Transport[In, Out],
+      transport: Transport[In, Out] { type Context <: Server.this.Context },
       service: Service[Command, Response]
     ): Closable = new SerialServerDispatcher(new ServerTransport(transport), service)
 
@@ -505,7 +509,7 @@ object Memcached extends finagle.Client[Command, Response] with finagle.Server[C
     override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
-  val server: Memcached.Server = Server()
+  def server: Memcached.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     server.serve(addr, service)

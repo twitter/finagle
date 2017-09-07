@@ -57,7 +57,7 @@ object PEMEncodedKeyManager {
   ): Array[KeyManager] = {
 
     // Create a secure directory for the conversion
-    val path = TempDirectory.create(false)  //explicitly handle clean-up here, not at shutdown
+    val path = TempDirectory.create(false) //explicitly handle clean-up here, not at shutdown
 
     try {
 

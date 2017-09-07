@@ -14,7 +14,7 @@ import com.twitter.finagle.service.FailFastFactory
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportContext}
 import com.twitter.util.{Closable, Future, Time}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
@@ -246,8 +246,9 @@ private case class CodecClient[Req, Rep](
 
       protected type In = Any
       protected type Out = Any
+      protected type Context = TransportContext
 
-      protected def newTransporter(addr: SocketAddress): Transporter[Any, Any] = {
+      protected def newTransporter(addr: SocketAddress): Transporter[Any, Any, TransportContext] = {
         val Stats(stats) = params[Stats]
         val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
         Netty3Transporter[Any, Any](
@@ -257,7 +258,8 @@ private case class CodecClient[Req, Rep](
         )
       }
 
-      protected def newDispatcher(transport: Transport[In, Out]): Service[Req, Rep] =
+      protected def newDispatcher(transport: Transport[In, Out] { type Context <: TransportContext })
+        : Service[Req, Rep] =
         codec.newClientDispatcher(transport, params)
     }
 
@@ -312,17 +314,18 @@ private case class CodecServer[Req, Rep](
 
       protected type In = Any
       protected type Out = Any
+      protected type Context = TransportContext
 
       protected def copy1(
         stack: Stack[ServiceFactory[Req, Rep]] = this.stack,
         params: Stack.Params = this.params
       ): Underlying = copy(stack, params)
 
-      protected def newListener(): Listener[Any, Any] =
+      protected def newListener(): Listener[Any, Any, TransportContext] =
         Netty3Listener(codec.pipelineFactory, params)
 
       protected def newDispatcher(
-        transport: Transport[In, Out],
+        transport: Transport[In, Out] { type Context <: TransportContext },
         service: Service[Req, Rep]
       ): Closable = codec.newServerDispatcher(transport, service)
     }

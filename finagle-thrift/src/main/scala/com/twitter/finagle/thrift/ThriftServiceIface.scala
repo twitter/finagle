@@ -2,7 +2,7 @@ package com.twitter.finagle.thrift
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage._
-import com.twitter.finagle.stats.{ClientStatsReceiver, Counter, StatsReceiver}
+import com.twitter.finagle.stats.{Counter, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
@@ -29,21 +29,34 @@ trait ServiceIfaceBuilder[ServiceIface <: ThriftServiceIface.Filterable[ServiceI
    * Build a client ServiceIface wrapping a binary thrift service.
    *
    * @param thriftService An underlying thrift service that works on byte arrays.
-   * @param pf The protocol factory used to encode/decode thrift structures.
+   * @param clientParam RichClientParam wraps client params [[com.twitter.finagle.RichClientParam]].
    */
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
-    pf: TProtocolFactory,
-    stats: StatsReceiver,
-    responseClassifier: ResponseClassifier
+    clientParam: RichClientParam
   ): ServiceIface
 
+  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
+  def newServiceIface(
+    thriftService: Service[ThriftClientRequest, Array[Byte]],
+    pf: TProtocolFactory = Protocols.binaryFactory(),
+    stats: StatsReceiver = NullStatsReceiver,
+    responseClassifier: ResponseClassifier = ResponseClassifier.Default
+  ): ServiceIface = {
+    val clientParam =
+      RichClientParam(pf, clientStats = stats, responseClassifier = responseClassifier)
+    newServiceIface(thriftService, clientParam)
+  }
+
+  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
   def newServiceIface(
     thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
     stats: StatsReceiver
-  ): ServiceIface =
-    newServiceIface(thriftService, pf, stats, ResponseClassifier.Default)
+  ): ServiceIface = {
+    val clientParam = RichClientParam(pf, clientStats = stats)
+    newServiceIface(thriftService, clientParam)
+  }
 }
 
 /**
@@ -114,8 +127,6 @@ case class ThriftMethodStats(
  * Service interfaces can be modified and composed with Finagle `Filters`.
  */
 object ThriftServiceIface {
-  private val resetCounter =
-    ClientStatsReceiver.scope("thrift_service_iface").counter("reusable_buffer_resets")
 
   /**
    * Build a Service from a given Thrift method.
@@ -123,13 +134,22 @@ object ThriftServiceIface {
   def apply(
     method: ThriftMethod,
     thriftService: Service[ThriftClientRequest, Array[Byte]],
+    clientParam: RichClientParam
+  ): Service[method.Args, method.SuccessType] =
+    statsFilter(method, clientParam.clientStats, clientParam.responseClassifier)
+      .andThen(thriftCodecFilter(method, clientParam.protocolFactory))
+      .andThen(thriftService)
+
+  @deprecated("Use com.twitter.finagle.RichClientParam", "2017-08-16")
+  def apply(
+    method: ThriftMethod,
+    thriftService: Service[ThriftClientRequest, Array[Byte]],
     pf: TProtocolFactory,
     stats: StatsReceiver,
     responseClassifier: ResponseClassifier
-  ): Service[method.Args, method.SuccessType] =
-    statsFilter(method, stats, responseClassifier)
-      .andThen(thriftCodecFilter(method, pf))
-      .andThen(thriftService)
+  ): Service[method.Args, method.SuccessType] = {
+    apply(method, thriftService, RichClientParam(pf, clientStats = stats, responseClassifier = responseClassifier))
+  }
 
   def apply(
     method: ThriftMethod,
@@ -137,7 +157,7 @@ object ThriftServiceIface {
     pf: TProtocolFactory,
     stats: StatsReceiver
   ): Service[method.Args, method.SuccessType] =
-    apply(method, thriftService, pf, stats, ResponseClassifier.Default)
+    apply(method, thriftService, RichClientParam(pf, clientStats = stats))
 
   /**
    * Used in conjunction with [[ServiceIfaceBuilder]] to allow for filtering
@@ -258,7 +278,9 @@ object ThriftServiceIface {
         service(args).flatMap(responseFn)
     }
 
-  private[this] val tlReusableBuffer = TReusableBuffer()
+  private[this] val tlReusableBuffer = TReusableBuffer(
+    maxThriftBufferSize = maxReusableBufferSize().inBytes.toInt
+  )
 
   private def encodeRequest(
     methodName: String,

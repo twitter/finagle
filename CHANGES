@@ -7,12 +7,19 @@ Note that ``PHAB_ID=#`` and ``RB_ID=#`` correspond to associated messages in com
 7.x
 -----
 
+7.1.0
+------
+
 New Features
 ~~~~~~~~~~~~
 
   * finagle-core: If a `c.t.u.tunable.Tunable` request or total timeout has been configured
     on a client which uses a `c.t.f.client.DynamicTimeout` filter, the current value of tunable will
     be used in the case of no dynamic timeout set for a request. ``PHAB_ID=D81886``
+
+  * finagle-core: `FailFastException` now captures the throwable that caused it. ``PHAB_ID=D86396``
+
+  * finagle-redis: finagle interface for redis DBSIZE command. ``PHAB_ID=D85305``
 
 Bug Fixes
 ~~~~~~~~~
@@ -27,8 +34,15 @@ Bug Fixes
     `SslServerConfiguration` uses `KeyCredentials.CertKeyAndChain` instead of just the
     first one in the file. ``PHAB_ID=D82414``
 
+  * finagle-thrift/thriftmux: Thrift/ThriftMux servers and clients now can be configured
+    with `withMaxReusableBufferSize` to specify the max size of the reusable buffer for
+    Thrift responses. ``PHAB_ID=D83190``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-stats: Verbosity levels are now respected: debug-metrics aren't exported
+    by default.  ``PHAB_ID=D85278``
 
   * finagle-netty4: `ChannelTransport` no longer considers the `Channel.isWritable` result
     when determining status. ``PHAB_ID=D82670``
@@ -51,8 +65,32 @@ Deprecations
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: Remove deprecated method `httpProxyTo(String, Option[Transporter.Credentials])`.
+    Use `httpProxyTo(String, Transporter.Credentials]` instead. ``PHAB_ID=D84077``
+
+  * finagle-*-http: Netty 3 specific HTTP transport related code has been moved into its own
+    project, finagle-netty3-http, in preparation for removing it from Finagle.
+    ``PHAB_ID=D84101``
+
   * finagle-memcached: Remove deprecated method `BaseClient.release()`. Use
     `BaseClient.close()` instead. ``PHAB_ID=D83168``
+
+  * finagle-memcached: Move `c.t.f.memcached.java.Client` to `c.t.f.memcached.JavaClient`,
+    `c.t.f.memcached.java.ClientBase` to `c.t.f.memcached.JavaClientBase`, and
+    `c.t.f.memcached.java.ResultWithCAS` to `c.t.f.memcached.ResultWithCAS`. ``PHAB_ID=D83719``
+
+  * finagle-core: Added a new type member `Context` to `Transport`, and a method that
+    returns a context, which has most of the methods currently directly on `Transport`.
+    Also deprecates most of those methods--please start using the context instead of the
+    `Transport` directly.  Also added type parameters to `Transporter`, `Listener`, and
+    type members to `StackClient` and `StackServer`.  ``PHAB_ID=D83972``
+
+  * finagle-core: `com.twitter.finagle.loadbalancer.DeterministicOrdering` was renamed
+    to `com.twitter.finagle.loadbalancer.ProcessCoordinate` and the internal `Coord` ADT
+    was changed as well. ``PHAB_ID=D84452``
+
+  * finagle-thrift: Move `Thrift.Server.param.MaxReusableBufferSize` to
+    `Thrift.param.MaxReusableBufferSize` for both server and client use. ``PHAB_ID=D83190``
 
 7.0.0
 ------
@@ -97,7 +135,7 @@ New Features
 
   * finagle-http: add `withNoAutomaticContinue` api to disable automatically sending 100 CONTINUE
     responses. ``PHAB_ID=D80017``
-    
+
   * finagle-http: The nack related logic in the `c.t.f.h.c.HttpClientDispatcher` has been
     moved into a filter, `c.t.f.h.f.ClientNackFilter` which has been added to the client
     stack and can now be removed based on its `Stack.Role`. ``PHAB_ID=D78902``

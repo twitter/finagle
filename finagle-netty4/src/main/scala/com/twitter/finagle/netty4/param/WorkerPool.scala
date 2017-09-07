@@ -7,7 +7,7 @@ import com.twitter.finagle.util.BlockingTimeTrackingThreadFactory
 import io.netty.channel.EventLoopGroup
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
-import java.util.concurrent.Executors
+import java.util.concurrent.{Executor, Executors}
 
 /**
  * A class eligible for configuring the [[io.netty.channel.EventLoopGroup]] used
@@ -18,21 +18,23 @@ import java.util.concurrent.Executors
  * the I/O threads, consider scheduling that work on a separate thread pool
  * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
  */
-case class WorkerPool(eventLoopGroup: EventLoopGroup)
-object WorkerPool {
-  implicit val workerPoolParam: Stack.Param[WorkerPool] = Stack.Param {
-    val threadFactory = new BlockingTimeTrackingThreadFactory(
-      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true)
-    )
+case class WorkerPool(eventLoopGroup: EventLoopGroup) {
+  def this(executor: Executor, numWorkers: Int) = this(
+    if (nativeEpoll.enabled) new EpollEventLoopGroup(numWorkers, executor)
+    else new NioEventLoopGroup(numWorkers, executor))
 
-    // Netty will create `numWorkers` children in the `EventLoopGroup`. Each `EventLoop` will
-    // pin itself to a thread acquired from the `executor` and will multiplex over channels.
-    // Thus, with this configuration, we should not acquire more than `numWorkers`
-    // threads from the `executor`.
-    val executor = Executors.newCachedThreadPool(threadFactory)
-    val eventLoopGroup =
-      if (nativeEpoll.enabled) new EpollEventLoopGroup(numWorkers(), executor)
-      else new NioEventLoopGroup(numWorkers(), executor)
-    WorkerPool(eventLoopGroup)
-  }
+  def mk(): (WorkerPool, Stack.Param[WorkerPool]) =
+    (this, WorkerPool.workerPoolParam)
+}
+
+object WorkerPool {
+
+  // Netty will create `numWorkers` children in the `EventLoopGroup`. Each `EventLoop` will
+  // pin itself to a thread acquired from the `executor` and will multiplex over channels.
+  // Thus, with this configuration, we should not acquire more than `numWorkers`
+  // threads from the `executor`.
+  implicit val workerPoolParam: Stack.Param[WorkerPool] = Stack.Param(
+    new WorkerPool(Executors.newCachedThreadPool(new BlockingTimeTrackingThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true)
+    )), numWorkers()))
 }

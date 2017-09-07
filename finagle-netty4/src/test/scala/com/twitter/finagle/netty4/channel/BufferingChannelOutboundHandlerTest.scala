@@ -25,7 +25,7 @@ class BufferingChannelOutboundHandlerTest
     }
 
     def failAll(cause: Throwable): Unit = {
-      failPendingWrites(ctx, cause)
+      failPendingWrites(cause)
     }
   }
 

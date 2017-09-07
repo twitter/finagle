@@ -10,10 +10,7 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import scala.util.control.NonFatal
 
-class StringServerTest
-    extends FunSuite
-    with Eventually
-    with IntegrationPatience {
+class StringServerTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("StringServer notices when the client cuts the connection") {
     val p = Promise[String]()

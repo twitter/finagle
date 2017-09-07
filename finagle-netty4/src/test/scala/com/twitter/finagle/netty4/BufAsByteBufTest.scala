@@ -7,11 +7,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.{ByteBuffer, ReadOnlyBufferException}
 import java.util._
 import org.junit.Assert._
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
 class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
   private[this] val Capacity = 4096 // Must be even
   private[this] val BlockSize = 128
@@ -1175,7 +1172,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
   }
 
   test("write zero") {
-    intercept[IllegalArgumentException] {
+    intercept[ReadOnlyBufferException] {
       buffer.writeZero(-1)
     }
 

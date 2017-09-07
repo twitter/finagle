@@ -5,13 +5,13 @@ import scoverage.ScoverageKeys
 val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
 val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-val libVersion = "7.0.0" + suffix
-val utilVersion = "7.0.0" + suffix
-val scroogeVersion = "4.19.0" + suffix
+val libVersion = "7.1.0" + suffix
+val utilVersion = "7.1.0" + suffix
+val scroogeVersion = "4.20.0" + suffix
 
 val libthriftVersion = "0.5.0-7"
 
-val netty4Version = "4.1.12.Final"
+val netty4Version = "4.1.14.Final"
 
 // zkVersion should be kept in sync with the 'util-zk' dependency version
 val zkVersion = "3.5.0-alpha"
@@ -38,7 +38,7 @@ val netty4LibsTest = Seq(
 )
 val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
 val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
-val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.1.Final" % "test"
+val netty4StaticSsl = "io.netty" % "netty-tcnative-boringssl-static" % "2.0.5.Final" % "test"
 val jacksonVersion = "2.8.4"
 val jacksonLibs = Seq(
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -75,8 +75,6 @@ val sharedSettings = Seq(
   ScoverageKeys.coverageHighlighting := true,
   ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
-  javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
-
   ivyXML :=
     <dependencies>
       <exclude org="com.sun.jmx" module="jmxri" />
@@ -97,8 +95,13 @@ val sharedSettings = Seq(
   javacOptions ++= Seq("-Xlint:unchecked", "-source", "1.8", "-target", "1.8"),
   javacOptions in doc := Seq("-source", "1.8"),
 
+  javaOptions in Test := Seq("-DSKIP_FLAKY=true"),
+
   // This is bad news for things like com.twitter.util.Time
   parallelExecution in Test := false,
+
+  // -a: print stack traces for failing asserts
+  testOptions += Tests.Argument(TestFrameworks.JUnit, "-a"),
 
   // This effectively disables packageDoc, which craps out
   // on generating docs for generated thrift due to the use
@@ -198,6 +201,7 @@ lazy val projectList = Seq[sbt.ProjectReference](
   finagleThriftMux,
   finagleMySQL,
   finagleRedis,
+  finagleNetty3Http,
   finagleNetty4Http
 )
 
@@ -240,6 +244,7 @@ lazy val finagleIntegration = Project(
   finagleMemcached,
   finagleMux,
   finagleNetty4Http,
+  finagleRedis % "test",
   finagleThrift,
   finagleThriftMux % "test->compile;test->test"
 )
@@ -453,7 +458,7 @@ lazy val finagleHttp = Project(
     guavaLib,
     netty4StaticSsl
   )
-).dependsOn(finagleBaseHttp, finagleNetty4Http, finagleHttp2, finagleToggle)
+).dependsOn(finagleBaseHttp, finagleNetty3Http, finagleNetty4Http, finagleHttp2, finagleToggle)
 
 lazy val finagleBaseHttp = Project(
   id = "finagle-base-http",
@@ -468,6 +473,19 @@ lazy val finagleBaseHttp = Project(
     "commons-lang" % "commons-lang" % "2.6"
   )
 ).dependsOn(finagleCore, finagleNetty3)
+
+lazy val finagleNetty3Http = Project(
+  id = "finagle-netty3-http",
+  base = file("finagle-netty3-http")
+).settings(
+  sharedSettings
+).settings(
+  name := "finagle-netty3-http",
+  libraryDependencies ++= Seq(
+    util("app"), util("codec"), util("core"), util("jvm"), util("stats"),
+    "commons-lang" % "commons-lang" % "2.6"
+  )
+).dependsOn(finagleNetty3, finagleBaseHttp % "test->test;compile->compile")
 
 lazy val finagleNetty4Http = Project(
   id = "finagle-netty4-http",
